@@ -1,7 +1,10 @@
-﻿public static class Extension
+﻿namespace LocalResumableFunction.Helpers
 {
-    public static void SetValue(this object o, object value)
+    public static class Extensions
     {
+        public static void SetValue(this object o, object value)
+        {
 
+        }
     }
 }

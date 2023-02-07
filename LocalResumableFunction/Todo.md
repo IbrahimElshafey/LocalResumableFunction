@@ -7,3 +7,9 @@
 * Database
 	* Function runtime data 
 	* Waits
+
+
+# To copy from ServerResumableFunction
+* IWaitsRepository _waitsRepository;
+* EngineDataContext _context;
+* WhenProviderPushEvent(PushedEvent pushedEvent)

@@ -7,14 +7,13 @@ internal class Program
         var example = new Example();
         var runner = example.Start().GetAsyncEnumerator();
         await runner.MoveNextAsync();
-        var wait = runner.Current;
+        await  ResumableFunctionLocal.WaitRequested(runner.Current);
         example.ProjectSubmitted(new Project
         {
             Id = 1,
             Name = "Project One",
             Description = "Description"
         });
-        example.AskManagerToApprove(10);
     }
 
 
