@@ -13,3 +13,7 @@
 * IWaitsRepository _waitsRepository;
 * EngineDataContext _context;
 * WhenProviderPushEvent(PushedEvent pushedEvent)
+
+# Find 
+* Best local DB
+* Run some code after build
