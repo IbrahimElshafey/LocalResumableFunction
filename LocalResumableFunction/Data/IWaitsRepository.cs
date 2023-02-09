@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LocalResumableFunction.Data
 {
-    public interface IWaitsRepository
+    internal interface IWaitsRepository
     {
         Task AddWait(Wait eventWait);
         Task<Wait> GetParentFunctionWait(int? functionWaitId);

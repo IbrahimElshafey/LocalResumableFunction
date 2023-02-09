@@ -59,4 +59,9 @@ public abstract class ResumableFunctionLocal
     {
         _activeWaits.Add(wait);
     }
+
+    internal static async Task RegisterFirstWaits(string[]? assemblyNames)
+    {
+
+    }
 }

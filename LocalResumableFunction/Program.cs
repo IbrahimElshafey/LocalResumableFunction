@@ -1,13 +1,11 @@
-﻿using LocalResumableFunction;
+﻿namespace LocalResumableFunction;
 
 internal class Program
 {
-    private static async Task Main(string[] args)
+    private static async Task Main(string[] assemblyNames)
     {
+        await ResumableFunctionLocal.RegisterFirstWaits(assemblyNames);
         var example = new Example();
-        var runner = example.Start().GetAsyncEnumerator();
-        await runner.MoveNextAsync();
-        await  ResumableFunctionLocal.WaitRequested(runner.Current);
         example.ProjectSubmitted(new Project
         {
             Id = 1,
@@ -15,6 +13,4 @@ internal class Program
             Description = "Description"
         });
     }
-
-
 }

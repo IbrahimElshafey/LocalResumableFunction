@@ -13,17 +13,28 @@ using System.Threading.Tasks;
 
 namespace LocalResumableFunction.Data
 {
-    public class EngineDataContext : DbContext
+    internal class EngineDataContext : DbContext
     {
-        public EngineDataContext(DbContextOptions<EngineDataContext> options)
-       : base(options)
+        private readonly string _dbConnection = "Data Source=DataTemplate.db";
+
+        public EngineDataContext()
         {
+            
+        }
+        public EngineDataContext(string assemblyName)
+        {
+            _dbConnection = $"{assemblyName}.db";
         }
 
         public DbSet<FunctionRuntimeInfo> FunctionRuntimeInfos { get; set; }
         public DbSet<Wait> Waits { get; set; }
         public DbSet<MethodWait> EventWaits { get; set; }
         public DbSet<ManyMethodsWait> ManyEventsWaits { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlite(_dbConnection);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

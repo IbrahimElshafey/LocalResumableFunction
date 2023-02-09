@@ -2,17 +2,18 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
+using Newtonsoft.Json;
 
 namespace LocalResumableFunction.InOuts
 {
     public abstract class Wait
     {
-        private MethodBase callerMethodInfo;
+        private MethodBase _callerMethodInfo;
 
-        public int Id { get; private set; }
+        public int Id { get; internal set; }
         public string Name { get; internal set; }
         public WaitStatus Status { get; internal set; }
-        public bool IsFirst { get; internal set; } = false;
+        public bool IsFirst { get; internal set; }
         public bool IsSingle { get; internal set; } = true;
         public int StateAfterWait { get; internal set; }
         public bool IsNode { get; internal set; }
@@ -21,12 +22,12 @@ namespace LocalResumableFunction.InOuts
 
 
         [NotMapped]
-        public MethodBase? CallerMethodInfo
+        public MethodBase CallerMethodInfo
         {
             get
             {
-                if (callerMethodInfo != null)
-                    return callerMethodInfo;
+                if (_callerMethodInfo != null)
+                    return _callerMethodInfo;
                 else if (AssemblyName != null && ClassName != null && MethodName != null)
                 {
                     return Assembly.Load(AssemblyName)
@@ -38,7 +39,7 @@ namespace LocalResumableFunction.InOuts
 
             internal set
             {
-                callerMethodInfo = value;
+                _callerMethodInfo = value;
                 if (value != null)
                 {
                     MethodName = value.Name;
@@ -47,9 +48,9 @@ namespace LocalResumableFunction.InOuts
                 }
             }
         }
-        internal string? MethodName { get; set; }
-        internal string? ClassName { get; set; }
-        internal string? AssemblyName { get; set; }
+        internal string MethodName { get; set; }
+        internal string ClassName { get; set; }
+        internal string AssemblyName { get; set; }
         private ResumableFunctionLocal _currntFunction;
         [NotMapped]
         public ResumableFunctionLocal CurrntFunction
@@ -68,14 +69,13 @@ namespace LocalResumableFunction.InOuts
                         return _currntFunction;
                 return _currntFunction;
             }
-            set
-            {
-                _currntFunction = value;
-            }
+            set => _currntFunction = value;
         }
+
+        [JsonIgnore]
         public FunctionRuntimeInfo FunctionRuntimeInfo { get; internal set; }
 
         [ForeignKey(nameof(FunctionRuntimeInfo))]
-        public int FunctionId { get; internal set; }
+        public int FunctionRuntimeInfoId { get; internal set; }
     }
 }
