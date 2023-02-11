@@ -3,13 +3,13 @@ using MethodBoundaryAspect.Fody.Attributes;
 
 namespace LocalResumableFunction.Helpers
 {
-    public sealed class EventMethodAttribute : OnMethodBoundaryAspect
+    public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
     {
-        private PushCalledMethod? _event;
+        private PushedMethod? _event;
         public override void OnEntry(MethodExecutionArgs args)
         {
             args.MethodExecutionTag = false;
-            _event = new PushCalledMethod
+            _event = new PushedMethod
             {
                 CallerMethodInfo = args.Method,
                 Input = args.Arguments
@@ -21,7 +21,7 @@ namespace LocalResumableFunction.Helpers
             _event.Output = args.ReturnValue;
             _event.Instance = (ResumableFunctionLocal)args.Instance;
             //todo: main method must wait untill this completes
-            _ = ResumableFunctionLocal.EventReceived(_event);
+            _ = new ResumableFunctionHandler().MethodCalled(_event);
             args.MethodExecutionTag = true;
         }
 

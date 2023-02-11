@@ -17,3 +17,6 @@
 # Find 
 * Best local DB
 * Run some code after build
+
+
+https://weblog.west-wind.com/posts/2022/Jun/07/Runtime-CSharp-Code-Compilation-Revisited-for-Roslyn#compiling-code-with-raw-roslyn

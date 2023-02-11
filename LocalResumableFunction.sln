@@ -5,6 +5,8 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalResumableFunction", "LocalResumableFunction\LocalResumableFunction.csproj", "{609E4BA9-C976-4662-8F09-A6F7F1493808}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{8F40B5D2-02DA-4A8E-ACD0-2CACCB1278D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{609E4BA9-C976-4662-8F09-A6F7F1493808}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{609E4BA9-C976-4662-8F09-A6F7F1493808}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{609E4BA9-C976-4662-8F09-A6F7F1493808}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F40B5D2-02DA-4A8E-ACD0-2CACCB1278D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F40B5D2-02DA-4A8E-ACD0-2CACCB1278D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F40B5D2-02DA-4A8E-ACD0-2CACCB1278D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F40B5D2-02DA-4A8E-ACD0-2CACCB1278D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

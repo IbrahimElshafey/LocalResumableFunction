@@ -1,12 +1,11 @@
-﻿using System.Drawing;
-using System.Transactions;
-using System.Linq;
-using System.Reflection;
-using LocalResumableFunction.Helpers;
-using LocalResumableFunction.InOuts;
+﻿using LocalResumableFunction.InOuts;
+using Newtonsoft.Json;
+using LocalResumableFunction;
+using System.Xml.XPath;
 
 public abstract class ResumableFunctionLocal
 {
+    [JsonExtensionData]
     public Dictionary<string, object> State { get; set; }
 
     public MethodWait<Input, Output> When<Input, Output>(string name, Func<Input, Output> method)
@@ -14,9 +13,9 @@ public abstract class ResumableFunctionLocal
         var result = new MethodWait<Input, Output>(method)
         {
             Name = name,
-            CurrntFunction = this,
+            //CurrntFunction = this,
             IsSingle = true,
-            IsNode = true
+            IsNode = true,
         };
         return result;
     }
@@ -32,36 +31,85 @@ public abstract class ResumableFunctionLocal
         };
         foreach (var item in result.WaitingMethods)
         {
-            item.ParentGroupId = result.Id;
+            item.ParentWaitsGroupId = result.Id;
             item.IsNode = false;
         }
         return result;
     }
 
-    private static List<Wait> _activeWaits = new List<Wait>();
-    /// <summary>
-    /// When method called and finished
-    /// </summary>
-    internal static async Task EventReceived(PushCalledMethod pushedEvent)
+    internal async Task<NextWaitResult> GetNextWait(Wait currentWait)
     {
-        var waits = _activeWaits.Where(x => x.CallerMethodInfo == pushedEvent.CallerMethodInfo).ToList();
-        foreach (var currentWait in waits)
+        var functionRunner = new MethodRunner(currentWait);
+        if (functionRunner is null)
+            throw new Exception(
+                $"Can't initiate runner");
+        try
         {
-            //check if pushed event is matched against waits
-            //currentWait.UpdateFunctionData();
-            //get next wait if (IsSingleEvent(currentWait) || await IsGroupLastWait(currentWait))
-            //load state and status from database
+            var waitExist = await functionRunner.MoveNextAsync();
+            if (waitExist)
+            {
+                functionRunner.Current.StateAfterWait = functionRunner.GetState();
+                return new NextWaitResult(functionRunner.Current, false, false);
+            }
+            else
+            {
+                //if current Function runner name is the main function start
+                if (currentWait.ParentFunctionWaitId == null)
+                {
+                    return new NextWaitResult(null, true, false);
+                }
+                return new NextWaitResult(null, false, true);
+            }
+        }
+        catch (Exception)
+        {
 
+            throw new Exception("Error when try to get next wait");
         }
     }
 
-    internal static async Task WaitRequested(Wait wait)
+
+
+
+    protected async Task<FunctionWait> Function(string name, Func<IAsyncEnumerable<Wait>> function)
     {
-        _activeWaits.Add(wait);
+        var result = new FunctionWait(name, function)
+        {
+            InitiatedByMethod = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall(),
+            IsNode = true,
+            WaitType = WaitType.FunctionWait
+        };
+        var asyncEnumerator = function().GetAsyncEnumerator();
+        await asyncEnumerator.MoveNextAsync();
+        var firstWait = asyncEnumerator.Current;
+        firstWait.ParentFunctionWaitId = result.Id;
+        result.CurrentWait = firstWait;
+        //result.InitiatedByFunctionName = result.FunctionName;
+        return result;
     }
 
-    internal static async Task RegisterFirstWaits(string[]? assemblyNames)
+    protected async Task<ManyFunctionsWait> Functions
+           (string name, Func<IAsyncEnumerable<Wait>>[] subFunctions)
     {
-
+        var result = new ManyFunctionsWait
+        {
+            WaitingFunctions = new List<FunctionWait>(subFunctions.Length),
+            Name = name,
+            InitiatedByMethod = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall(),
+            IsNode = true,
+        };
+        for (int i = 0; i < subFunctions.Length; i++)
+        {
+            var currentFunction = subFunctions[i];
+            var currentFuncResult = await Function("", currentFunction);
+            currentFuncResult.InitiatedByMethod = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall();
+            currentFuncResult.IsNode = false;
+            currentFuncResult.CurrentWait.ParentFunctionWaitId = result.Id;
+            currentFuncResult.ParentFunctionGroupId = result.Id;
+            result.WaitingFunctions[i] = currentFuncResult;
+        }
+        return result;
     }
+
+
 }

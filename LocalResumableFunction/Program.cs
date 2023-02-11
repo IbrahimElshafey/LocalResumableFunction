@@ -4,7 +4,7 @@ internal class Program
 {
     private static async Task Main(string[] assemblyNames)
     {
-        await ResumableFunctionLocal.RegisterFirstWaits(assemblyNames);
+        await ResumableFunctionHandler.RegisterFirstWaits(assemblyNames);
         var example = new Example();
         example.ProjectSubmitted(new Project
         {

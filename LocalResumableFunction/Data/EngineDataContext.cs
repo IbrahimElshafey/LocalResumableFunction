@@ -26,10 +26,11 @@ namespace LocalResumableFunction.Data
             _dbConnection = $"{assemblyName}.db";
         }
 
-        public DbSet<FunctionRuntimeInfo> FunctionRuntimeInfos { get; set; }
+        public DbSet<ResumableFunctionState> FunctionStates { get; set; }
+        public DbSet<MethodIdentifier> MethodIdentifiers { get; set; }
         public DbSet<Wait> Waits { get; set; }
-        public DbSet<MethodWait> EventWaits { get; set; }
-        public DbSet<ManyMethodsWait> ManyEventsWaits { get; set; }
+        public DbSet<MethodWait> MethodWaits { get; set; }
+        public DbSet<ManyMethodsWait> ManyMethodsWaits { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -38,9 +39,26 @@ namespace LocalResumableFunction.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ResumableFunctionState>()
+            .HasMany(x => x.Waits)
+            .WithOne(wait => wait.FunctionState)
+            .HasForeignKey(x => x.FunctionStateId)
+            .HasConstraintName("FK_Waits_For_FunctionRuntimeInfo");
 
-            modelBuilder.Entity<FunctionRuntimeInfo>()
-              .Property(x => x.FunctionState)
+            modelBuilder.Entity<MethodIdentifier>()
+            .HasMany(x => x.Waits)
+            .WithOne(wait => wait.WaitMethodIdentifier)
+            .HasForeignKey(x => x.WaitMethodIdentifierId)
+            .HasConstraintName("FK_Waits_For_MethodIdentifier");
+
+            modelBuilder.Entity<ManyMethodsWait>()
+            .HasMany(x => x.WaitingMethods)
+            .WithOne(wait => wait.ParentWaitsGroup)
+            .HasForeignKey(x => x.ParentWaitsGroupId)
+            .HasConstraintName("FK_WMethodsWaits_For_WaitsGroup");
+
+            modelBuilder.Entity<ResumableFunctionState>()
+              .Property(x => x.StateObject)
               .HasConversion<ObjectToJsonConverter>();
 
             base.OnModelCreating(modelBuilder);

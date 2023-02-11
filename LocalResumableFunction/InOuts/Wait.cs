@@ -18,64 +18,65 @@ namespace LocalResumableFunction.InOuts
         public int StateAfterWait { get; internal set; }
         public bool IsNode { get; internal set; }
         public ReplayType? ReplayType { get; internal set; }
+        public WaitType WaitType { get; internal set; }
+
+       
+        [JsonIgnore]
+        internal ResumableFunctionState FunctionState { get;  set; }
+
+        internal int FunctionStateId { get; set; }
+
+        internal MethodIdentifier WaitMethodIdentifier { get; set; }
+
+        internal int WaitMethodIdentifierId { get; set; }
+
+        internal MethodIdentifier InitiatedByMethod { get; set; }
+
+        internal int InitiatedByMethodId { get; set; }
+
+        internal Wait ParentFunctionWait { get; set; }
+
+        internal int? ParentFunctionWaitId { get; set; }
 
 
+        //[NotMapped]
+        //public MethodBase CallerMethodInfo
+        //{
+        //    get
+        //    {
+        //        if (_callerMethodInfo != null)
+        //            return _callerMethodInfo;
+        //        else return WaitMethodIdentifier?.GetMethodBase();
+        //    }
 
-        [NotMapped]
-        public MethodBase CallerMethodInfo
-        {
-            get
-            {
-                if (_callerMethodInfo != null)
-                    return _callerMethodInfo;
-                else if (AssemblyName != null && ClassName != null && MethodName != null)
-                {
-                    return Assembly.Load(AssemblyName)
-                        ?.GetType(ClassName)
-                        ?.GetMethod(MethodName);
-                }
-                return null;
-            }
+        //    internal set
+        //    {
+        //        _callerMethodInfo = value;
+        //        WaitMethodIdentifier?.SetMethodBase(_callerMethodInfo);
+        //    }
+        //}
 
-            internal set
-            {
-                _callerMethodInfo = value;
-                if (value != null)
-                {
-                    MethodName = value.Name;
-                    ClassName = value.DeclaringType?.FullName;
-                    AssemblyName = value.DeclaringType?.Assembly.FullName;
-                }
-            }
-        }
-        internal string MethodName { get; set; }
-        internal string ClassName { get; set; }
-        internal string AssemblyName { get; set; }
         private ResumableFunctionLocal _currntFunction;
+
         [NotMapped]
-        public ResumableFunctionLocal CurrntFunction
+        internal ResumableFunctionLocal CurrntFunction
         {
             get
             {
-                if (FunctionRuntimeInfo is not null)
-                    if (FunctionRuntimeInfo.FunctionState is JObject stateAsJson)
+                if (FunctionState is not null)
+                    if (FunctionState.StateObject is JObject stateAsJson)
                     {
-                        var result = stateAsJson.ToObject(FunctionRuntimeInfo.InitiatedByClassType);
-                        FunctionRuntimeInfo.FunctionState = result;
+                        var result = stateAsJson.ToObject(FunctionState.ResumableFunctionMethodInfo.DeclaringType);
+                        FunctionState.StateObject = result;
                         _currntFunction = (ResumableFunctionLocal)result;
                         return _currntFunction;
                     }
-                    else if (FunctionRuntimeInfo.FunctionState is ResumableFunctionLocal)
+                    else if (FunctionState.StateObject is ResumableFunctionLocal)
                         return _currntFunction;
                 return _currntFunction;
             }
             set => _currntFunction = value;
         }
 
-        [JsonIgnore]
-        public FunctionRuntimeInfo FunctionRuntimeInfo { get; internal set; }
-
-        [ForeignKey(nameof(FunctionRuntimeInfo))]
-        public int FunctionRuntimeInfoId { get; internal set; }
     }
 }

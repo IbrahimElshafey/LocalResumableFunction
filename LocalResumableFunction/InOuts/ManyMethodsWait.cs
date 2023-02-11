@@ -6,6 +6,8 @@ namespace LocalResumableFunction.InOuts
     {
         public List<MethodWait> WaitingMethods { get; internal set; } = new List<MethodWait>();
         public LambdaExpression? WhenCountExpression { get; internal set; }
+
+
         public MethodWait? MatchedMethod => WaitingMethods?.Single(x => x.Status == WaitStatus.Completed);
 
         public List<MethodWait>? MatchedMethods =>

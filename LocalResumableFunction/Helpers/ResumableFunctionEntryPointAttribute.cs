@@ -2,7 +2,7 @@
 
 namespace LocalResumableFunction.Helpers
 {
-    public sealed class ResumableFunctionEntryPointAttribute : OnMethodBoundaryAspect
+    public sealed class ResumableFunctionEntryPointAttribute : Attribute
     {
         //todo:props to determine scan routine
     }

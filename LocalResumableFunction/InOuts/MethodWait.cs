@@ -8,26 +8,25 @@ namespace LocalResumableFunction.InOuts
 {
     public class MethodWait : Wait
     {
-        public Wait ParentWaitsGroup { get; internal set; }
+        public ManyMethodsWait ParentWaitsGroup { get; internal set; }
 
-        [ForeignKey(nameof(ParentWaitsGroup))]
-        public int? ParentGroupId { get; internal set; }
+        public int? ParentWaitsGroupId { get; internal set; }
 
         public bool IsOptional { get; internal set; } = false;
 
         public LambdaExpression SetDataExpression { get; internal set; }
         public LambdaExpression MatchIfExpression { get; internal set; }
-        public bool NeedFunctionDataForMatch { get; internal set; } = false;
+        public bool NeedFunctionStateForMatch { get; internal set; } = false;
 
     }
     public class MethodWait<Input, Output> : MethodWait
     {
         public MethodWait(Func<Input, Output> method)
         {
-            var eventMethodAttributeExist = method.Method.GetCustomAttribute(typeof(EventMethodAttribute));
+            var eventMethodAttributeExist = method.Method.GetCustomAttribute(typeof(WaitMethodAttribute));
             if (eventMethodAttributeExist == null)
-                throw new Exception($"You must add attribute [{nameof(EventMethodAttribute)}] to method {method.Method.Name}");
-            CallerMethodInfo = method.Method;
+                throw new Exception($"You must add attribute [{nameof(WaitMethodAttribute)}] to method {method.Method.Name}");
+            WaitMethodIdentifier = ResumableFunctionHandler.GetMethodIdentifier(method.Method);
         }
         public MethodWait<Input, Output> SetData(Expression<Action<Input, Output>> value)
         {

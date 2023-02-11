@@ -25,7 +25,7 @@ namespace LocalResumableFunction.Helpers
         private static string TypeToString(Type type)
         {
             if (type == null) return null;
-            var typeObject = new SystemTypeClone { Name = type.FullName, AssemblyPath = type.Assembly.Location };
+            var typeObject = new SystemTypeClone { Name = type.Name, AssemblyPath = type.Assembly.Location };
             return JsonConvert.SerializeObject(typeObject, Formatting.Indented);
         }
 
