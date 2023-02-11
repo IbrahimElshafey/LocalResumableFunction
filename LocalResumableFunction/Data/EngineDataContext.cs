@@ -15,15 +15,13 @@ namespace LocalResumableFunction.Data
 {
     internal class EngineDataContext : DbContext
     {
-        private readonly string _dbConnection = "Data Source=DataTemplate.db";
-
-        public EngineDataContext()
-        {
-            
-        }
+        private readonly string _dbConnection;
         public EngineDataContext(string assemblyName)
         {
-            _dbConnection = $"{assemblyName}.db";
+            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            UriBuilder uri = new UriBuilder(codeBase);
+            string path = Uri.UnescapeDataString(uri.Path);
+            _dbConnection= $"Data Source={Path.GetDirectoryName(path)}.sqlite";
         }
 
         public DbSet<ResumableFunctionState> FunctionStates { get; set; }

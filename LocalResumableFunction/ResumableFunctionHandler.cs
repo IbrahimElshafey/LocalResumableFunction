@@ -169,10 +169,10 @@ namespace LocalResumableFunction
         {
             switch (oldCompletedWait.ReplayType)
             {
-                case ReplayType.ExecuteDontWait:
+                case ReplayType.ExecuteNoWait:
                     await Replay(oldCompletedWait);
                     break;
-                case ReplayType.WaitSameMethodAgain:
+                case ReplayType.WaitAgain:
                     //oldCompletedWait.ReplayType = null;
                     await GenericWaitRequested(oldCompletedWait);
                     break;

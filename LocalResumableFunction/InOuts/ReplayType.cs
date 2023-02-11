@@ -2,7 +2,7 @@
 {
     public enum ReplayType
     {
-        ExecuteDontWait,
-        WaitSameMethodAgain,
+        ExecuteNoWait,
+        WaitAgain,
     }
 }

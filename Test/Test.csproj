@@ -8,9 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="LocalResumableFunction">
-      <HintPath>..\LocalResumableFunction\bin\Debug\net7.0\LocalResumableFunction.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\LocalResumableFunction\LocalResumableFunction.csproj" />
   </ItemGroup>
 
 </Project>
