@@ -16,7 +16,7 @@ namespace LocalResumableFunction.Data
     internal class EngineDataContext : DbContext
     {
         private readonly string _dbConnection;
-        public EngineDataContext(string assemblyName)
+        public EngineDataContext()
         {
             string codeBase = Assembly.GetExecutingAssembly().CodeBase;
             UriBuilder uri = new UriBuilder(codeBase);
