@@ -55,15 +55,13 @@ public abstract partial class ResumableFunctionLocal
                 functionRunner.Current.StateAfterWait = functionRunner.GetState();
                 return new NextWaitResult(functionRunner.Current, false, false);
             }
-            else
+
+            //if current Function runner name is the main function start
+            if (currentWait.ParentWaitId == null)
             {
-                //if current Function runner name is the main function start
-                if (currentWait.ParentFunctionWaitId == null)
-                {
-                    return new NextWaitResult(null, true, false);
-                }
-                return new NextWaitResult(null, false, true);
+                return new NextWaitResult(null, true, false);
             }
+            return new NextWaitResult(null, false, true);
         }
         catch (Exception)
         {

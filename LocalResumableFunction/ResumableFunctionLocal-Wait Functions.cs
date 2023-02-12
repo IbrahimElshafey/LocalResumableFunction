@@ -7,8 +7,9 @@ public abstract partial class ResumableFunctionLocal
 {
     protected async Task<FunctionWait> Function(string name, Func<IAsyncEnumerable<Wait>> function)
     {
-        var result = new FunctionWait(name, function)
+        var result = new FunctionWait
         {
+            Name = name,
             RequestedByFunction = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall(),
             IsNode = true,
             WaitType = WaitType.FunctionWait
@@ -16,8 +17,8 @@ public abstract partial class ResumableFunctionLocal
         var asyncEnumerator = function().GetAsyncEnumerator();
         await asyncEnumerator.MoveNextAsync();
         var firstWait = asyncEnumerator.Current;
-        firstWait.ParentFunctionWaitId = result.Id;
-        result.CurrentWait = firstWait;
+        //firstWait.ParentFunctionWaitId = result.Id;
+        result.FirstWait = firstWait;
         //result.InitiatedByFunctionName = result.FunctionName;
         return result;
     }
@@ -38,7 +39,7 @@ public abstract partial class ResumableFunctionLocal
             var currentFuncResult = await Function("", currentFunction);
             currentFuncResult.RequestedByFunction = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall();
             currentFuncResult.IsNode = false;
-            currentFuncResult.CurrentWait.ParentFunctionWaitId = result.Id;
+            currentFuncResult.FirstWait.ParentWaitId = result.Id;
             currentFuncResult.ParentFunctionGroupId = result.Id;
             result.WaitingFunctions[i] = currentFuncResult;
         }

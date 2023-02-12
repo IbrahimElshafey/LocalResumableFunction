@@ -11,8 +11,9 @@ namespace LocalResumableFunction.InOuts
         public string AssemblyName { get; internal set; }
         public string ClassName { get; internal set; }
         public string MethodName { get; internal set; }
-
-        public List<Wait> Waits { get; internal set; }
+        public string MethodSignature { get; set; }
+        public List<Wait> WaitsCreatedByFunction { get; internal set; }
+        public List<MethodWait> WaitsRequestsForMethod { get; internal set; }
         public List<ResumableFunctionState> ActiveFunctionsStates { get; internal set; }
 
         internal MethodBase GetMethodBase()

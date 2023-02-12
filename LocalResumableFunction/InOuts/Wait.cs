@@ -40,6 +40,7 @@ namespace LocalResumableFunction.InOuts
         /// not 
         /// </summary>
         internal Wait ParentWait { get; set; }
+        internal List<Wait> ChildWaits { get; set; }
 
         internal int? ParentWaitId { get; set; }
 

@@ -12,12 +12,11 @@ namespace LocalResumableFunction.InOuts
         [NotMapped]
         public MethodInfo ResumableFunctionMethodInfo { get; set; }
 
-        public MethodIdentifier ResumableFunctionIdentifier { get; set; }
-        public int ResumableFunctionIdentifierId { get; set; }
-
         //class instance that contain the resumable function
         public object? StateObject { get; internal set; }
 
         public List<Wait> Waits { get; internal set; } = new();
+        public MethodIdentifier ResumableFunctionIdentifier { get; set; }
+        public int ResumableFunctionIdentifierId { get; set; }
     }
 }

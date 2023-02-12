@@ -20,8 +20,7 @@ namespace LocalResumableFunction
         /// </summary>
         internal async Task MethodCalled(PushedMethod pushedMethod)
         {
-            string? callerAssemblyName = pushedMethod.CallerMethodInfo.DeclaringType.Assembly.FullName;
-             _context = new EngineDataContext(callerAssemblyName);
+             _context = new EngineDataContext();
              _waitsRepository = new WaitsRepository(_context);
             var matchedWaits = await _waitsRepository.GetMatchedWaits(pushedMethod);
             foreach (var currentWait in matchedWaits)
@@ -99,7 +98,7 @@ namespace LocalResumableFunction
             else if (nextWaitResult.Result is not null)
             {
                 //this may cause and error in case of 
-                nextWaitResult.Result.ParentFunctionWaitId = currentWait.ParentFunctionWaitId;
+                nextWaitResult.Result.ParentWaitId = currentWait.ParentWaitId;
                 if (nextWaitResult.Result.ReplayType != null)
                     return await ReplayWait(nextWaitResult.Result);
                 else
@@ -132,7 +131,7 @@ namespace LocalResumableFunction
         private async Task<bool> SubFunctionExit(Wait lastFunctionWait)
         {
             //lastFunctionWait =  last function wait before exsit
-            var parentFunctionWait = await _waitsRepository.GetParentFunctionWait(lastFunctionWait.ParentFunctionWaitId);
+            var parentFunctionWait = await _waitsRepository.GetParentFunctionWait(lastFunctionWait.ParentWaitId);
             var backToCaller = false;
             switch (parentFunctionWait)
             {
@@ -143,13 +142,13 @@ namespace LocalResumableFunction
                 //many sub functions -> wait function group to complete and return to caller
                 case ManyFunctionsWait allFunctionsWait
                     when parentFunctionWait.WaitType == WaitType.AllFunctionsWait:
-                    allFunctionsWait.MoveToMatched(lastFunctionWait.ParentFunctionWaitId);
+                    allFunctionsWait.MoveToMatched(lastFunctionWait.ParentWaitId);
                     if (allFunctionsWait.Status == WaitStatus.Completed)
                         backToCaller = true;
                     break;
                 case ManyFunctionsWait anyFunctionWait
                     when parentFunctionWait.WaitType == WaitType.AnyFunctionWait:
-                    anyFunctionWait.SetMatchedFunction(lastFunctionWait.ParentFunctionWaitId);
+                    anyFunctionWait.SetMatchedFunction(lastFunctionWait.ParentWaitId);
                     if (anyFunctionWait.Status == WaitStatus.Completed)
                         backToCaller = true;
                     break;
@@ -228,10 +227,10 @@ namespace LocalResumableFunction
         }
         private async Task FunctionWaitRequested(FunctionWait functionWait)
         {
-            if (functionWait.CurrentWait.ReplayType != null)
-                await ReplayWait(functionWait.CurrentWait);
+            if (functionWait.FirstWait.ReplayType != null)
+                await ReplayWait(functionWait.FirstWait);
             else
-                await GenericWaitRequested(functionWait.CurrentWait);
+                await GenericWaitRequested(functionWait.FirstWait);
             await _waitsRepository.AddWait(functionWait);
         }
         private async Task ManyFunctionsWaitRequested(ManyFunctionsWait functionsWait)
