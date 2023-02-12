@@ -3,6 +3,9 @@ using MethodBoundaryAspect.Fody.Attributes;
 
 namespace LocalResumableFunction.Helpers
 {
+    /// <summary>
+    /// Add this to the method you want to wait to.
+    /// </summary>
     public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
     {
         private PushedMethod? _event;

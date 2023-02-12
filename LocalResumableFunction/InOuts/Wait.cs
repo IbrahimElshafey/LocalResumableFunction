@@ -26,17 +26,22 @@ namespace LocalResumableFunction.InOuts
 
         internal int FunctionStateId { get; set; }
 
-        internal MethodIdentifier WaitMethodIdentifier { get; set; }
 
-        internal int WaitMethodIdentifierId { get; set; }
+        /// <summary>
+        /// The resumable function that initiated requested that wait
+        /// </summary>
 
-        internal MethodIdentifier InitiatedByMethod { get; set; }
+        internal MethodIdentifier RequestedByFunction { get; set; }
 
-        internal int InitiatedByMethodId { get; set; }
+        internal int RequestedByFunctionId { get; set; }
 
-        internal Wait ParentFunctionWait { get; set; }
+        /// <summary>
+        /// If not null this means that wait requested by a sub function
+        /// not 
+        /// </summary>
+        internal Wait ParentWait { get; set; }
 
-        internal int? ParentFunctionWaitId { get; set; }
+        internal int? ParentWaitId { get; set; }
 
 
         //[NotMapped]

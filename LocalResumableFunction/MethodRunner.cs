@@ -16,7 +16,7 @@ namespace LocalResumableFunction
         {
             var functionRunnerType = currentWait.CurrntFunction.GetType()
                 .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
-                .FirstOrDefault(x => x.Name.StartsWith($"<{currentWait.InitiatedByMethod.MethodName}>"));
+                .FirstOrDefault(x => x.Name.StartsWith($"<{currentWait.RequestedByFunction.MethodName}>"));
 
             if (functionRunnerType == null) { _this = null; return; }
             ConstructorInfo? ctor = functionRunnerType.GetConstructor(

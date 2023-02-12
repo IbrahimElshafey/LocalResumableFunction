@@ -29,6 +29,8 @@ namespace LocalResumableFunction.Data
         public DbSet<Wait> Waits { get; set; }
         public DbSet<MethodWait> MethodWaits { get; set; }
         public DbSet<ManyMethodsWait> ManyMethodsWaits { get; set; }
+        public DbSet<FunctionWait> FunctionWaits { get; set; }
+        public DbSet<ManyFunctionsWait> ManyFunctionsWaits { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -44,9 +46,15 @@ namespace LocalResumableFunction.Data
             .HasConstraintName("FK_Waits_For_FunctionRuntimeInfo");
 
             modelBuilder.Entity<MethodIdentifier>()
+            .HasMany(x => x.ActiveFunctionsStates)
+            .WithOne(wait => wait.ResumableFunctionIdentifier)
+            .HasForeignKey(x => x.ResumableFunctionIdentifierId)
+            .HasConstraintName("FK_FunctionsStates_For_Function");
+
+            modelBuilder.Entity<MethodIdentifier>()
             .HasMany(x => x.Waits)
-            .WithOne(wait => wait.WaitMethodIdentifier)
-            .HasForeignKey(x => x.WaitMethodIdentifierId)
+            .WithOne(wait => wait.RequestedByFunction)
+            .HasForeignKey(x => x.RequestedByFunctionId)
             .HasConstraintName("FK_Waits_For_MethodIdentifier");
 
             modelBuilder.Entity<ManyMethodsWait>()

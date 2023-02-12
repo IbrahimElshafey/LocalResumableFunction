@@ -18,6 +18,13 @@ namespace LocalResumableFunction.InOuts
         public LambdaExpression MatchIfExpression { get; internal set; }
         public bool NeedFunctionStateForMatch { get; internal set; } = false;
 
+        /// <summary>
+        /// The method that we wait to resume resumable function
+        /// </summary>
+        internal MethodIdentifier WaitMethodIdentifier { get; set; }
+
+        internal int WaitMethodIdentifierId { get; set; }
+
     }
     public class MethodWait<Input, Output> : MethodWait
     {
@@ -26,7 +33,9 @@ namespace LocalResumableFunction.InOuts
             var eventMethodAttributeExist = method.Method.GetCustomAttribute(typeof(WaitMethodAttribute));
             if (eventMethodAttributeExist == null)
                 throw new Exception($"You must add attribute [{nameof(WaitMethodAttribute)}] to method {method.Method.Name}");
-            WaitMethodIdentifier = ResumableFunctionHandler.GetMethodIdentifier(method.Method);
+            var waitMethodIdentifier = ResumableFunctionHandler.GetMethodIdentifier(method.Method);
+            WaitMethodIdentifier = waitMethodIdentifier;
+            WaitMethodIdentifierId = waitMethodIdentifier.Id;
         }
         public MethodWait<Input, Output> SetData(Expression<Action<Input, Output>> value)
         {

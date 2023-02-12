@@ -9,7 +9,7 @@ public abstract partial class ResumableFunctionLocal
     {
         var result = new FunctionWait(name, function)
         {
-            InitiatedByMethod = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall(),
+            RequestedByFunction = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall(),
             IsNode = true,
             WaitType = WaitType.FunctionWait
         };
@@ -29,14 +29,14 @@ public abstract partial class ResumableFunctionLocal
         {
             WaitingFunctions = new List<FunctionWait>(subFunctions.Length),
             Name = name,
-            InitiatedByMethod = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall(),
+            RequestedByFunction = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall(),
             IsNode = true,
         };
         for (int i = 0; i < subFunctions.Length; i++)
         {
             var currentFunction = subFunctions[i];
             var currentFuncResult = await Function("", currentFunction);
-            currentFuncResult.InitiatedByMethod = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall();
+            currentFuncResult.RequestedByFunction = LocalResumableFunction.Helpers.Extensions.CurrentResumableFunctionCall();
             currentFuncResult.IsNode = false;
             currentFuncResult.CurrentWait.ParentFunctionWaitId = result.Id;
             currentFuncResult.ParentFunctionGroupId = result.Id;

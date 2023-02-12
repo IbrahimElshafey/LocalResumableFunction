@@ -13,6 +13,7 @@ namespace LocalResumableFunction.InOuts
         public string MethodName { get; internal set; }
 
         public List<Wait> Waits { get; internal set; }
+        public List<ResumableFunctionState> ActiveFunctionsStates { get; internal set; }
 
         internal MethodBase GetMethodBase()
         {
