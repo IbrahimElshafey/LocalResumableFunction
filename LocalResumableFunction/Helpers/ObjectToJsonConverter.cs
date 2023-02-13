@@ -1,25 +1,24 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Newtonsoft.Json;
 
-namespace LocalResumableFunction.Helpers
+namespace LocalResumableFunction.Helpers;
+
+public class ObjectToJsonConverter : ValueConverter<object, string>
 {
-    public class ObjectToJsonConverter : ValueConverter<object, string>
+    public ObjectToJsonConverter() : base(o => ObjectToJson(o), json => JsonToObject(json))
     {
-        public ObjectToJsonConverter() : base(o => ObjectToJson(o), json => JsonToObject(json))
-        {
-        }
+    }
 
-        private static object JsonToObject(string json)
-        {
-            return JsonConvert.DeserializeObject(json);
-        }
+    private static object JsonToObject(string json)
+    {
+        return JsonConvert.DeserializeObject(json);
+    }
 
-        private static string ObjectToJson(object obj)
+    private static string ObjectToJson(object obj)
+    {
+        return JsonConvert.SerializeObject(obj, new JsonSerializerSettings
         {
-            return JsonConvert.SerializeObject(obj, new JsonSerializerSettings()
-            {
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            });
-        }
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        });
     }
 }

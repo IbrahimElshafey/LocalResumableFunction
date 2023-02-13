@@ -5,5 +5,5 @@ public enum MethodType
     None,
     ResumableFunctionEntryPoint,
     SubResumableFunction,
-    MethodWait,
+    MethodWait
 }

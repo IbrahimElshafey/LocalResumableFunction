@@ -1,15 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace LocalResumableFunction.Helpers
+namespace LocalResumableFunction.Helpers;
+
+public class LambdaExpressionToJsonConverter : ValueConverter<LambdaExpression, string>
 {
-    public class LambdaExpressionToJsonConverter : ValueConverter<LambdaExpression, string>
+    public LambdaExpressionToJsonConverter()
+        : base(
+            expression => ExpressionToJsonConverter.ExpressionToJson(expression),
+            json => (LambdaExpression)ExpressionToJsonConverter.JsonToExpression(json))
     {
-        public LambdaExpressionToJsonConverter()
-           : base(
-               expression => ExpressionToJsonConverter.ExpressionToJson(expression),
-               Json => (LambdaExpression)ExpressionToJsonConverter.JsonToExpression(Json))
-        {
-        }
     }
 }

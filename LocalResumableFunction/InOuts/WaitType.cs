@@ -1,12 +1,11 @@
-﻿namespace LocalResumableFunction.InOuts
+﻿namespace LocalResumableFunction.InOuts;
+
+public enum WaitType
 {
-    public enum WaitType
-    {
-        MethodWait,
-        AllMethodsWait,
-        AnyMethodWait,
-        FunctionWait,
-        AllFunctionsWait,
-        AnyFunctionWait,
-    }
+    MethodWait,
+    AllMethodsWait,
+    AnyMethodWait,
+    FunctionWait,
+    AllFunctionsWait,
+    AnyFunctionWait
 }

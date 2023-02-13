@@ -1,52 +1,54 @@
-﻿using LocalResumableFunction.InOuts;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
+using LocalResumableFunction.InOuts;
 using static System.Linq.Expressions.Expression;
-namespace LocalResumableFunction.Helpers
+
+namespace LocalResumableFunction.Helpers;
+
+public static class Extensions
 {
-    public static class Extensions
+    public static void SetValue(this object o, object value)
     {
-        public static void SetValue(this object o, object value)
-        {
+    }
 
-        }
-
-        public static (bool IsFunctionData, MemberExpression? NewExpression) GetDataParamterAccess(
-            this MemberExpression node,
-            ParameterExpression functionInstanceArg)
+    public static (bool IsFunctionData, MemberExpression? NewExpression) GetDataParamterAccess(
+        this MemberExpression node,
+        ParameterExpression functionInstanceArg)
+    {
+        var propAccessStack = new Stack<MemberInfo>();
+        var isFunctionData = IsDataAccess(node);
+        if (isFunctionData)
         {
-            var propAccessStack = new Stack<MemberInfo>();
-            var isFunctionData = IsDataAccess(node);
-            if (isFunctionData)
+            var newAccess = MakeMemberAccess(functionInstanceArg, propAccessStack.Pop());
+            while (propAccessStack.Count > 0)
             {
-                var newAccess = MakeMemberAccess(functionInstanceArg, propAccessStack.Pop());
-                while (propAccessStack.Count > 0)
-                {
-                    var currentProp = propAccessStack.Pop();
-                    newAccess = MakeMemberAccess(newAccess, currentProp);
-                }
-                return (true, newAccess);
+                var currentProp = propAccessStack.Pop();
+                newAccess = MakeMemberAccess(newAccess, currentProp);
             }
-            return (false, null);
 
-            bool IsDataAccess(MemberExpression currentNode)
-            {
-                propAccessStack.Push(currentNode.Member);
-                var subNode = currentNode.Expression;
-                if (subNode == null) return false;
-                //is function data access 
-                var isFunctionDataAccess = subNode.NodeType == ExpressionType.Constant && subNode.Type == functionInstanceArg.Type;
-                if (isFunctionDataAccess)
-                    return true;
-                else if (subNode.NodeType == ExpressionType.MemberAccess)
-                    return IsDataAccess((MemberExpression)subNode);
-                return false;
-            }
+            return (true, newAccess);
         }
 
-        internal static MethodIdentifier CurrentResumableFunctionCall()
+        return (false, null);
+
+        bool IsDataAccess(MemberExpression currentNode)
         {
-            throw new NotImplementedException();
+            propAccessStack.Push(currentNode.Member);
+            var subNode = currentNode.Expression;
+            if (subNode == null) return false;
+            //is function data access 
+            var isFunctionDataAccess =
+                subNode.NodeType == ExpressionType.Constant && subNode.Type == functionInstanceArg.Type;
+            if (isFunctionDataAccess)
+                return true;
+            if (subNode.NodeType == ExpressionType.MemberAccess)
+                return IsDataAccess((MemberExpression)subNode);
+            return false;
         }
+    }
+
+    internal static MethodIdentifier CurrentResumableFunctionCall()
+    {
+        throw new NotImplementedException();
     }
 }

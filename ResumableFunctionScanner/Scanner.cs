@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using LocalResumableFunction;
 using LocalResumableFunction.Data;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
@@ -7,15 +8,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ResumableFunctionScanner;
 
-internal class Scanner
+internal partial class Scanner
 {
-    private const string scannerAppName = "##SCANNER: ";
+    private const string ScannerAppName = "##SCANNER: ";
     private EngineDataContext _context;
     private string _currentFolder;
 
     public async Task Start()
     {
-        Debugger.Launch();
+        //Debugger.Launch();
         Console.WriteLine("##SCANNER APP RUNNING##");
         WriteMessage("Initiate DB context.");
         _context = new EngineDataContext();
@@ -89,37 +90,21 @@ internal class Scanner
         }
     }
 
-    private async Task RegisterResumableFunctionFirstWait(MethodInfo resumableFunction)
-    {
-        WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
-    }
-
     private async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
     {
         WriteMessage($"Register resumable function [{resumableFunction.Name}]");
-        var methodId = new MethodIdentifier { Type = type };
-        methodId.SetMethodBase(resumableFunction);
-        if (await ExistInDb(methodId))
+        var repo = new MethodIdentifierRepository(_context);
+        var methodId = await repo.GetMethodIdentifier(resumableFunction);
+        if (methodId.ExistInDb)
         {
             WriteMessage($"Resumable function [{resumableFunction.Name}] already exist in DB.");
             return;
         }
 
-        _context.MethodIdentifiers.Add(methodId);
+        _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
     }
 
-    private async Task<bool> ExistInDb(MethodIdentifier methodId)
-    {
-        var inDb = await _context
-            .MethodIdentifiers
-            .Where(x => x.MethodHash == methodId.MethodHash).ToListAsync();
-        var existInDb = inDb.Any(x =>
-            x.MethodSignature == methodId.MethodSignature &&
-            x.AssemblyName == methodId.AssemblyName &&
-            x.ClassName == methodId.ClassName &&
-            x.MethodName == methodId.MethodName);
-        return existInDb;
-    }
+
 
     private bool IsEntryPoint(MethodInfo resumableFunction)
     {
@@ -140,14 +125,14 @@ internal class Scanner
             method.GetCustomAttributes().Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
         foreach (var method in methodWaits)
         {
-            var methodId = new MethodIdentifier { Type = MethodType.MethodWait };
-            methodId.SetMethodBase(method);
-            if (await ExistInDb(methodId))
+            var repo = new MethodIdentifierRepository(_context);
+            var methodId = await repo.GetMethodIdentifier(method);
+            if (methodId.ExistInDb)
             {
                 WriteMessage($"Method [{method.Name}] already exist in DB.");
                 return;
             }
-            _context.MethodIdentifiers.Add(methodId);
+            _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
         }
     }
 
@@ -185,7 +170,7 @@ internal class Scanner
 
     private void WriteMessage(string message)
     {
-        Console.Write(scannerAppName);
+        Console.Write(ScannerAppName);
         Console.WriteLine(message);
     }
 }

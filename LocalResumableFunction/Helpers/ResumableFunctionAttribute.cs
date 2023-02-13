@@ -1,7 +1,5 @@
-﻿namespace LocalResumableFunction.Helpers
-{
-    public sealed class ResumableFunctionAttribute : Attribute
-    {
+﻿namespace LocalResumableFunction.Helpers;
 
-    }
+public sealed class ResumableFunctionAttribute : Attribute
+{
 }

@@ -1,8 +1,7 @@
-﻿namespace LocalResumableFunction.InOuts
+﻿namespace LocalResumableFunction.InOuts;
+
+public enum ReplayType
 {
-    public enum ReplayType
-    {
-        ExecuteNoWait,
-        WaitAgain,
-    }
+    ExecuteNoWait,
+    WaitAgain
 }

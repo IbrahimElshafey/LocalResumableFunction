@@ -1,73 +1,69 @@
 ﻿using LocalResumableFunction.InOuts;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace LocalResumableFunction.Data
+namespace LocalResumableFunction.Data;
+
+internal class WaitsRepository : RepositoryBase
 {
-    internal class WaitsRepository
+    public WaitsRepository(EngineDataContext ctx) : base(ctx)
     {
-        private readonly EngineDataContext _context;
+    }
 
-        public WaitsRepository(EngineDataContext ctx) => _context = ctx;
+    public Task AddWait(Wait wait)
+    {
+        Context.Waits.Add(wait);
+        return Task.CompletedTask;
+    }
 
-        public Task AddWait(Wait eventWait)
-        {
-            throw new NotImplementedException();
-        }
+    public Task DuplicateWaitIfFirst(MethodWait currentWait)
+    {
+        throw new NotImplementedException();
+    }
 
-        public Task DuplicateWaitIfFirst(MethodWait currentWait)
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<List<MethodWait>> GetMatchedWaits(PushedMethod pushedEvent)
-        {
-            var matchedWaits = new List<MethodWait>();
-            var databaseWaits =
-                await _context.MethodWaits
+    public async Task<List<MethodWait>> GetMatchedWaits(PushedMethod pushedEvent)
+    {
+        var matchedWaits = new List<MethodWait>();
+        var databaseWaits =
+            await Context.MethodWaits
                 .Where(x =>
                     x.WaitMethodIdentifierId == pushedEvent.MethodIdentifierId &&
                     x.Status == WaitStatus.Waiting)
                 .ToListAsync();
-            foreach (var methodWait in databaseWaits)
+        foreach (var methodWait in databaseWaits)
+            // .If((input, output) => input.ProjectId == CurrentProject.Id)
+            if (!methodWait.NeedFunctionStateForMatch && CheckMatch(methodWait, pushedEvent))
             {
-                // .If((input, output) => input.ProjectId == CurrentProject.Id)
-                if (!methodWait.NeedFunctionStateForMatch && CheckMatch(methodWait,pushedEvent))
-                {
-                    await LoadWaitFunctionState(methodWait);
-                    matchedWaits.Add(methodWait);
-                }
-                else if (methodWait.NeedFunctionStateForMatch)
-                {
-                    await LoadWaitFunctionState(methodWait);
-                    if (CheckMatch(methodWait, pushedEvent))
-                        matchedWaits.Add(methodWait);
-                }
+                await LoadWaitFunctionState(methodWait);
+                matchedWaits.Add(methodWait);
             }
-            return matchedWaits;
+            else if (methodWait.NeedFunctionStateForMatch)
+            {
+                await LoadWaitFunctionState(methodWait);
+                if (CheckMatch(methodWait, pushedEvent))
+                    matchedWaits.Add(methodWait);
+            }
 
-            async Task LoadWaitFunctionState(MethodWait wait) 
-                => wait.FunctionState = await _context.FunctionStates.FindAsync(wait.FunctionStateId);
-        }
+        return matchedWaits;
 
-        private bool CheckMatch(MethodWait methodWait,PushedMethod pushedMethod)
+        async Task LoadWaitFunctionState(MethodWait wait)
         {
-            var check = methodWait.MatchIfExpression.Compile();
-            return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrntFunction);
+            wait.FunctionState = await Context.FunctionStates.FindAsync(wait.FunctionStateId);
         }
+    }
 
-        public Task<Wait> GetParentFunctionWait(int? functionWaitId)
-        {
-            throw new NotImplementedException();
-        }
+    private bool CheckMatch(MethodWait methodWait, PushedMethod pushedMethod)
+    {
+        var check = methodWait.MatchIfExpression.Compile();
+        return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrntFunction);
+    }
 
-        public Task<ManyMethodsWait> GetWaitGroup(int? parentGroupId)
-        {
-            throw new NotImplementedException();
-        }
+    public Task<Wait> GetParentFunctionWait(int? functionWaitId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<ManyMethodsWait> GetWaitGroup(int? parentGroupId)
+    {
+        throw new NotImplementedException();
     }
 }

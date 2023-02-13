@@ -1,15 +1,15 @@
-﻿namespace LocalResumableFunction.InOuts
+﻿namespace LocalResumableFunction.InOuts;
+
+public class NextWaitResult
 {
-    public class NextWaitResult
+    public NextWaitResult(Wait result, bool isFinalEnd, bool isSubFunctionEnd)
     {
-        public NextWaitResult(Wait result, bool isFinalEnd, bool isSubFunctionEnd)
-        {
-            Result = result;
-            IsFinalExit = isFinalEnd;
-            IsSubFunctionExit = isSubFunctionEnd;
-        }
-        public Wait Result { get; private set; }
-        public bool IsFinalExit { get; private set; }
-        public bool IsSubFunctionExit { get; private set; }
+        Result = result;
+        IsFinalExit = isFinalEnd;
+        IsSubFunctionExit = isSubFunctionEnd;
     }
+
+    public Wait Result { get; }
+    public bool IsFinalExit { get; }
+    public bool IsSubFunctionExit { get; }
 }

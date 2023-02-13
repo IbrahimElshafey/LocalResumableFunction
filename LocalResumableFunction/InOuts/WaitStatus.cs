@@ -1,9 +1,8 @@
-﻿namespace LocalResumableFunction.InOuts
+﻿namespace LocalResumableFunction.InOuts;
+
+public enum WaitStatus
 {
-    public enum WaitStatus
-    {
-        Waiting,
-        Canceled,
-        Completed
-    }
+    Waiting,
+    Canceled,
+    Completed
 }

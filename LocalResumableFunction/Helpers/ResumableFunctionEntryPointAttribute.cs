@@ -1,19 +1,15 @@
-﻿using MethodBoundaryAspect.Fody.Attributes;
+﻿namespace LocalResumableFunction.Helpers;
 
-namespace LocalResumableFunction.Helpers
+/// <summary>
+///     Start point for a resumable function
+/// </summary>
+public sealed class ResumableFunctionEntryPointAttribute : Attribute
 {
-    /// <summary>
-    /// Start point for a resumable function
-    /// </summary>
+    public override object TypeId => "ResumableFunctionEntryPointAttribute";
+    //todo:props to determine scan routine
+}
 
-    public sealed class ResumableFunctionEntryPointAttribute : Attribute
-    {
-        public override object TypeId => "ResumableFunctionEntryPointAttribute";
-        //todo:props to determine scan routine
-    }
-
-    public sealed class SubResumableFunctionAttribute : Attribute
-    {
-        public override object TypeId => "SubResumableFunctionAttribute";
-    }
+public sealed class SubResumableFunctionAttribute : Attribute
+{
+    public override object TypeId => "SubResumableFunctionAttribute";
 }
