@@ -76,8 +76,9 @@ public abstract class Wait
                     _currntFunction = (ResumableFunctionLocal)result;
                     return _currntFunction;
                 }
-                else if (FunctionState.StateObject is ResumableFunctionLocal)
+                else if (FunctionState.StateObject is ResumableFunctionLocal result)
                 {
+                    _currntFunction = result;
                     return _currntFunction;
                 }
 

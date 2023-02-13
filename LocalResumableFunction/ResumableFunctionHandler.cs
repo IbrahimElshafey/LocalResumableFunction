@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using LocalResumableFunction.Data;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
@@ -20,6 +21,14 @@ internal class ResumableFunctionHandler
     /// </summary>
     internal async Task MethodCalled(PushedMethod pushedMethod)
     {
+        var repo = new MethodIdentifierRepository(_context);
+        var methodId = await repo.GetMethodIdentifier(pushedMethod.MethodInfo);
+        if (methodId.ExistInDb is false)
+        {
+            //_context.MethodIdentifiers.Add(methodId.MethodIdentifier);
+            throw new Exception($"Method [{pushedMethod.MethodInfo.Name}] is not registred in current database as [WaitMethod].");
+        }
+        pushedMethod.MethodIdentifier = methodId.MethodIdentifier;
         var matchedWaits = await _waitsRepository.GetMatchedWaits(pushedMethod);
         foreach (var currentWait in matchedWaits)
         {
@@ -28,17 +37,9 @@ internal class ResumableFunctionHandler
             //await _functionRepository.SaveFunctionState(currentWait.FunctionRuntimeInfo);
             await _context.SaveChangesAsync();
         }
-
-        foreach (var currentWait in matchedWaits)
-        {
-            //check if pushed Method is matched against waits
-            //currentWait.UpdateFunctionData();
-            //get next wait if (IsSingleMethod(currentWait) || await IsGroupLastWait(currentWait))
-            //load state and status from database
-        }
     }
 
-    
+
 
     private async Task HandlePushedMethod(MethodWait currentWait)
     {
@@ -77,7 +78,6 @@ internal class ResumableFunctionHandler
             case ManyMethodsWait anyMethodWait
                 when group.WaitType == WaitType.AnyMethodWait:
                 anyMethodWait.SetMatchedMethod(currentWait);
-                ;
                 return true;
         }
 
@@ -214,10 +214,13 @@ internal class ResumableFunctionHandler
 
     private async Task SingleWaitRequested(MethodWait methodWait)
     {
+        Debugger.Launch();
         var repo = new MethodIdentifierRepository(_context);
         var waitMethodIdentifier = await repo.GetMethodIdentifier(methodWait.WaitMethodIdentifier);
         methodWait.WaitMethodIdentifier = waitMethodIdentifier;
         methodWait.WaitMethodIdentifierId = waitMethodIdentifier.Id;
+        methodWait.MatchIfExpression = new RewriteMatchExpression(methodWait).Result;
+        methodWait.SetDataExpression = new RewriteSetDataExpression(methodWait).Result;
         await _waitsRepository.AddWait(methodWait);
     }
 
@@ -255,15 +258,5 @@ internal class ResumableFunctionHandler
     private bool Validate(Wait nextWait)
     {
         return true;
-    }
-
-    internal static async Task RegisterFirstWaits(string[]? assemblyNames)
-    {
-    }
-
-
-    internal static MethodInfo GetMethodInfo(MethodIdentifier methodIdentifier)
-    {
-        throw new NotImplementedException();
     }
 }

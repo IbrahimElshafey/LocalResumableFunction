@@ -13,30 +13,22 @@ internal class MethodIdentifierRepository : RepositoryBase
     public async Task<(MethodIdentifier MethodIdentifier, bool ExistInDb)> GetMethodIdentifier(MethodBase methodInfo)
     {
         var methodId = new MethodIdentifier();
-        methodId.SetMethodBase(methodInfo);
+        methodId.SetMethodInfo(methodInfo);
+        MethodIdentifier? existInDb = await GetMethodIdentifier(methodId);
+        return existInDb != null ? (existInDb, true) : (methodId, false);
+    }
+    
+    public async Task<MethodIdentifier> GetMethodIdentifier(MethodIdentifier methodId)
+    {
         var inDb = await Context
             .MethodIdentifiers
             .Where(x => x.MethodHash == methodId.MethodHash).ToListAsync();
         var existInDb =
-            inDb.FirstOrDefault(x =>
+            inDb.FirstOrDefault(x =>    
             x.MethodSignature == methodId.MethodSignature &&
             x.AssemblyName == methodId.AssemblyName &&
             x.ClassName == methodId.ClassName &&
             x.MethodName == methodId.MethodName);
-        return existInDb != null ? (existInDb, true) : (methodId, false);
-    }
-
-    public async Task<MethodIdentifier> GetMethodIdentifier(MethodIdentifier inMemoryIdentifier)
-    {
-        var inDb = await Context
-            .MethodIdentifiers
-            .Where(x => x.MethodHash == inMemoryIdentifier.MethodHash).ToListAsync();
-        var existInDb =
-            inDb.FirstOrDefault(x =>
-                x.MethodSignature == inMemoryIdentifier.MethodSignature &&
-                x.AssemblyName == inMemoryIdentifier.AssemblyName &&
-                x.ClassName == inMemoryIdentifier.ClassName &&
-                x.MethodName == inMemoryIdentifier.MethodName);
         return existInDb;
     }
 

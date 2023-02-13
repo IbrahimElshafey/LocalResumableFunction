@@ -7,10 +7,6 @@ namespace LocalResumableFunction.Helpers;
 
 public static class Extensions
 {
-    public static void SetValue(this object o, object value)
-    {
-    }
-
     public static (bool IsFunctionData, MemberExpression? NewExpression) GetDataParamterAccess(
         this MemberExpression node,
         ParameterExpression functionInstanceArg)

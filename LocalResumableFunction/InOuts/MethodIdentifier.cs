@@ -23,28 +23,40 @@ public class MethodIdentifier
     public List<MethodWait> WaitsRequestsForMethod { get; internal set; }
     public List<ResumableFunctionState> ActiveFunctionsStates { get; internal set; }
 
-    internal MethodBase GetMethodBase()
+    private MethodInfo? _methodInfo;
+    internal MethodInfo? MethodInfo
     {
-        if (AssemblyName != null && ClassName != null && MethodName != null)
-            return Assembly.Load(AssemblyName)
-                ?.GetType(ClassName)
-                ?.GetMethod(MethodName);
-        return null;
+        get
+        {
+            if (AssemblyName != null && ClassName != null && MethodName != null && _methodInfo == null)
+            {
+                _methodInfo = Assembly.Load(AssemblyName)
+                     ?.GetType(ClassName)
+                     ?.GetMethods()
+                     .FirstOrDefault(x => x.Name == MethodName && CalcSignature(x) == MethodSignature);
+                return _methodInfo;
+            }
+            return _methodInfo;
+        }
     }
 
-    internal void SetMethodBase(MethodBase value)
+    internal void SetMethodInfo(MethodBase value)
     {
         MethodName = value.Name;
         ClassName = value.DeclaringType?.FullName;
         AssemblyName = value.DeclaringType?.Assembly.FullName;
-        var parameterInfos = value
-            .GetParameters();
-        MethodSignature = parameterInfos.Length != 0
+        MethodSignature = CalcSignature(value);
+        MethodHash = CreateMd5();
+    }
+
+    private string CalcSignature(MethodBase value)
+    {
+        var parameterInfos = value.GetParameters();
+        return parameterInfos.Length != 0
             ? parameterInfos
                 .Select(x => x.ParameterType.Name)
                 .Aggregate((x, y) => $"{x}#{y}")
             : string.Empty;
-        MethodHash = CreateMd5();
     }
 
     private byte[] CreateMd5()

@@ -21,16 +21,16 @@ namespace LocalResumableFunction
         public async IAsyncEnumerable<Wait> Start()
         {
             yield return
-                When<Project, bool>("Project Sumbitted",ProjectSubmitted)
+                When<Project, bool>("Project Sumbitted", ProjectSubmitted)
                 .If((input, output) => output == true)
-                .SetData((input, output) => CurrentProject.SetValue(input));
+                .SetData((input, output) => CurrentProject == input);
 
             AskManagerToApprove(CurrentProject.Id);
 
             yield return
-                When<(int ProjectId,bool Decision), bool>("Manager Approve Project",ManagerApproveProject)
+                When<(int ProjectId, bool Decision), bool>("Manager Approve Project", ManagerApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerApproval.SetValue(output));
+                .SetData((input, output) => ManagerApproval == output);
 
             if (ManagerApproval)
                 Console.WriteLine("Project Approved");
@@ -45,7 +45,7 @@ namespace LocalResumableFunction
         }
 
         [WaitMethod]
-        public bool ManagerApproveProject((int projectId,bool decision)args)
+        public bool ManagerApproveProject((int projectId, bool decision) args)
         {
             Console.WriteLine("Manager Approve Project");
             return true;

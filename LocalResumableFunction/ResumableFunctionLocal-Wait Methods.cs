@@ -24,7 +24,8 @@ public abstract partial class ResumableFunctionLocal
         {
             Name = name,
             WaitingMethods = manyMethodsWait.ToList(),
-            IsNode = true
+            IsNode = true,
+            WaitType = WaitType.AllMethodsWait
         };
         foreach (var item in result.WaitingMethods)
         {

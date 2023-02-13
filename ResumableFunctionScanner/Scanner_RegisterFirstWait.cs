@@ -11,7 +11,7 @@ internal partial class Scanner
     private async Task RegisterResumableFunctionFirstWait(MethodInfo resumableFunction)
     {
         WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
-        return;
+        //return;
         var classInstance = (ResumableFunctionLocal)Activator.CreateInstance(resumableFunction.DeclaringType);
         if (classInstance != null)
         {

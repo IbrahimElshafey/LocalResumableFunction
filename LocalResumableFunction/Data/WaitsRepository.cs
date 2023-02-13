@@ -73,7 +73,7 @@ internal class WaitsRepository : RepositoryBase
         var databaseWaits =
             await Context.MethodWaits
                 .Where(x =>
-                    x.WaitMethodIdentifierId == pushedMethod.MethodIdentifierId &&
+                    x.WaitMethodIdentifierId == pushedMethod.MethodIdentifier.Id &&
                     x.Status == WaitStatus.Waiting)
                 .ToListAsync();
         foreach (var methodWait in databaseWaits)
@@ -104,13 +104,24 @@ internal class WaitsRepository : RepositoryBase
         return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrntFunction);
     }
 
-    public Task<Wait> GetParentFunctionWait(int? functionWaitId)
+    public async Task<Wait> GetParentFunctionWait(int? functionWaitId)
     {
-        throw new NotImplementedException();
+        var result = await Context.FunctionWaits.FindAsync(functionWaitId);
+        if (result == null)
+        {
+            var manyFunc = await Context.ManyFunctionsWaits
+                    .Include(x => x.WaitingFunctions)
+                    .FirstOrDefaultAsync(x => x.Id == functionWaitId);
+            return manyFunc!;
+        }
+        return result;
     }
 
-    public Task<ManyMethodsWait> GetWaitGroup(int? parentGroupId)
+    public async Task<ManyMethodsWait> GetWaitGroup(int? parentGroupId)
     {
-        throw new NotImplementedException();
+        var result = await Context.ManyMethodsWaits
+                      .Include(x => x.WaitingMethods)
+                      .FirstOrDefaultAsync(x => x.Id == parentGroupId);
+        return result!;
     }
 }

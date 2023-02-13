@@ -29,7 +29,8 @@ public abstract partial class ResumableFunctionLocal
             WaitingFunctions = new List<FunctionWait>(subFunctions.Length),
             Name = name,
             RequestedByFunction = Extensions.CurrentResumableFunctionCall(),
-            IsNode = true
+            IsNode = true,
+            WaitType = WaitType.AllFunctionsWait
         };
         for (var i = 0; i < subFunctions.Length; i++)
         {

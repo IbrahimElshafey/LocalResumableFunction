@@ -17,7 +17,7 @@ internal partial class Scanner
     public async Task Start()
     {
         //Debugger.Launch();
-        Console.WriteLine("##SCANNER APP RUNNING##");
+        WriteMessage("Start Scan Resumable Functions##");
         WriteMessage("Initiate DB context.");
         _context = new EngineDataContext();
         _currentFolder = AppContext.BaseDirectory;
@@ -27,7 +27,7 @@ internal partial class Scanner
             try
             {
                 if (ExcludeFromScan(assemblyPath)) continue;
-                WriteMessage($"Scan assembly [{assemblyPath}]");
+                WriteMessage($"Start scan assembly [{assemblyPath}]");
                 await ScanAssembly(assemblyPath);
             }
             catch (Exception e)
@@ -79,7 +79,7 @@ internal partial class Scanner
             if (MatchResumableFunctionSignature(resumableFunction) is false)
             {
                 WriteMessage(
-                    $"ERROR: the resumable function [{resumableFunction.Name}] must match the signature `IAsyncEnumerable<Wait> {resumableFunction.Name}()`");
+                    $"Error the resumable function [{resumableFunction.Name}] must match the signature `IAsyncEnumerable<Wait> {resumableFunction.Name}()`");
                 continue;
             }
             var isEntryPoint = IsEntryPoint(resumableFunction);

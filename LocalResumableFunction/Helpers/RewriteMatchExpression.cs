@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection;
 using LocalResumableFunction.InOuts;
 using static System.Linq.Expressions.Expression;
 
@@ -11,17 +12,30 @@ public class RewriteMatchExpression : ExpressionVisitor
 
     public RewriteMatchExpression(MethodWait wait)
     {
+        if (wait is null)
+            return;
+        //  .If((input, output) => output == true)
+        //   return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrntFunction);
         _wait = wait;
         _functionInstanceArg = Parameter(wait.CurrntFunction.GetType(), "functionInstance");
 
         var updatedBoy = (LambdaExpression)Visit(wait.MatchIfExpression);
-        var functionType = typeof(Func<,,>)
-            .MakeGenericType(wait.CurrntFunction.GetType(), updatedBoy.Parameters[0].Type, typeof(bool));
-        Result = Lambda(functionType, updatedBoy.Body, _functionInstanceArg, updatedBoy.Parameters[0]);
+        var functionType = typeof(Func<,,,>)
+            .MakeGenericType(
+            updatedBoy.Parameters[0].Type,
+            updatedBoy.Parameters[1].Type,
+            wait.CurrntFunction.GetType(),
+            typeof(bool));
+        Result = Lambda(
+            functionType,
+            updatedBoy.Body,
+            updatedBoy.Parameters[0],
+            updatedBoy.Parameters[1],
+            _functionInstanceArg);
         //Result = (LambdaExpression)Visit(Result);
     }
 
-    public LambdaExpression Result { get; }
+    public LambdaExpression Result { get; protected set; }
 
 
     //protected override Expression VisitConstant(ConstantExpression node)
@@ -38,7 +52,12 @@ public class RewriteMatchExpression : ExpressionVisitor
         if (x.IsFunctionData)
         {
             if (IsBasicType(node.Type))
-                return Constant(GetValue(x.NewExpression), node.Type);
+            {
+                object value = GetValue(x.NewExpression);
+                if (value != null)
+                    return Constant(value, node.Type);
+            }
+
             _wait.NeedFunctionStateForMatch = true;
             return x.NewExpression;
         }
@@ -47,16 +66,24 @@ public class RewriteMatchExpression : ExpressionVisitor
     }
 
 
-    private bool IsBasicType(Type type)
+    protected bool IsBasicType(Type type)
     {
         return type.IsPrimitive || type == typeof(string);
     }
 
 
-    private object GetValue(MemberExpression node)
+    protected object GetValue(MemberExpression node)
     {
-        var getterLambda = Lambda(node, _functionInstanceArg);
-        var getter = getterLambda.Compile();
-        return getter?.DynamicInvoke(_wait.CurrntFunction);
+        try
+        {
+            var getterLambda = Lambda(node, _functionInstanceArg);
+            var getter = getterLambda.Compile();
+            return getter?.DynamicInvoke(_wait.CurrntFunction);
+        }
+        catch (Exception)
+        {
+            //expected to be not null
+            return null;
+        }
     }
 }

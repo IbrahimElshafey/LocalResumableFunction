@@ -9,14 +9,14 @@ namespace LocalResumableFunction.Helpers;
 public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
 {
     private PushedMethod? _event;
-    public override object TypeId => "WaitMethodAttribute";
+    public override object TypeId => nameof(WaitMethodAttribute);
 
     public override void OnEntry(MethodExecutionArgs args)
     {
         args.MethodExecutionTag = false;
         _event = new PushedMethod
         {
-            CallerMethodInfo = args.Method,
+            MethodInfo = args.Method,
             Input = args.Arguments
         };
     }
@@ -24,7 +24,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
     public override void OnExit(MethodExecutionArgs args)
     {
         _event.Output = args.ReturnValue;
-        _event.Instance = (ResumableFunctionLocal)args.Instance;
+        _event.Instance = args.Instance;
         //todo: main method must wait untill this completes
         _ = new ResumableFunctionHandler().MethodCalled(_event);
         args.MethodExecutionTag = true;

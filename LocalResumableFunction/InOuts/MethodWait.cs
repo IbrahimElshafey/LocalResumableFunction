@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 using System.Reflection;
 using LocalResumableFunction.Data;
 using LocalResumableFunction.Helpers;
@@ -20,6 +21,7 @@ public class MethodWait : Wait
     public LambdaExpression SetDataExpression { get; internal set; }
     public LambdaExpression MatchIfExpression { get; internal set; }
     public bool NeedFunctionStateForMatch { get; internal set; } = false;
+    
 
     /// <summary>
     /// The method that we wait to resume resumable function
@@ -39,20 +41,20 @@ public class MethodWait<TInput, TOutput> : MethodWait
                 $"You must add attribute [{nameof(WaitMethodAttribute)}] to method {method.Method.Name}");
 
         WaitMethodIdentifier = new MethodIdentifier();
-        WaitMethodIdentifier.SetMethodBase(method.Method);
+        WaitMethodIdentifier.SetMethodInfo(method.Method);
     }
 
-    public MethodWait<TInput, TOutput> SetData(Expression<Action<TInput, TOutput>> value)
+    public MethodWait<TInput, TOutput> SetData(Expression<Func<TInput, TOutput,bool>> value)
     {
         SetDataExpression = value;
-        SetDataExpression = new RewriteSetDataExpression(this).Result;
+        //SetDataExpression = new RewriteSetDataExpression(this).Result;
         return this;
     }
 
     public MethodWait<TInput, TOutput> If(Expression<Func<TInput, TOutput, bool>> value)
     {
         MatchIfExpression = value;
-        MatchIfExpression = new RewriteMatchExpression(this).Result;
+        //MatchIfExpression = new RewriteMatchExpression(this).Result;
         return this;
     }
 

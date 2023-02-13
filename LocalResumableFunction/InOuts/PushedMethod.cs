@@ -4,9 +4,9 @@ namespace LocalResumableFunction.InOuts;
 
 public class PushedMethod
 {
-    public int MethodIdentifierId { get; internal set; }
-    public MethodBase CallerMethodInfo { get; internal set; }
-    public ResumableFunctionLocal Instance { get; internal set; }
+    public MethodIdentifier MethodIdentifier { get; internal set; }
+    public MethodBase MethodInfo { get; internal set; }
+    public object Instance { get; internal set; }
     public object[] Input { get; internal set; }
     public object Output { get; internal set; }
 }
