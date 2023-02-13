@@ -1,2 +1,4 @@
 ﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
+using LocalResumableFunction.Data;
+
+Console.WriteLine("Test App RUNNING.");

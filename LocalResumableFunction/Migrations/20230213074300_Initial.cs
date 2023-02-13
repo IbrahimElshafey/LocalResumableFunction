@@ -19,7 +19,9 @@ namespace LocalResumableFunction.Migrations
                     AssemblyName = table.Column<string>(type: "TEXT", nullable: false),
                     ClassName = table.Column<string>(type: "TEXT", nullable: false),
                     MethodName = table.Column<string>(type: "TEXT", nullable: false),
-                    MethodSignature = table.Column<string>(type: "TEXT", nullable: false)
+                    MethodSignature = table.Column<string>(type: "TEXT", nullable: false),
+                    MethodHash = table.Column<byte[]>(type: "BLOB", maxLength: 16, nullable: false),
+                    Type = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LocalResumableFunction.Migrations
 {
     [DbContext(typeof(EngineDataContext))]
-    [Migration("20230212140246_Initial")]
+    [Migration("20230213074300_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -34,6 +34,11 @@ namespace LocalResumableFunction.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<byte[]>("MethodHash")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("BLOB");
+
                     b.Property<string>("MethodName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -41,6 +46,9 @@ namespace LocalResumableFunction.Migrations
                     b.Property<string>("MethodSignature")
                         .IsRequired()
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 

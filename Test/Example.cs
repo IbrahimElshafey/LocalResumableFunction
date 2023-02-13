@@ -44,6 +44,7 @@ namespace LocalResumableFunction
             return true;
         }
 
+        [WaitMethod]
         public bool ManagerApproveProject((int projectId,bool decision)args)
         {
             Console.WriteLine("Manager Approve Project");

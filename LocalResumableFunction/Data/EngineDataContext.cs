@@ -9,6 +9,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,11 +20,8 @@ namespace LocalResumableFunction.Data
         private readonly string _dbConnection;
         public EngineDataContext()
         {
-            Debugger.Break();
-            string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            UriBuilder uri = new UriBuilder(codeBase);
-            string path = Uri.UnescapeDataString(uri.Path);
-            _dbConnection = $"Data Source={Path.GetDirectoryName(path)}.sqlite";
+            _dbConnection = $"Data Source={AppContext.BaseDirectory}LocalResumableFunctionsData.db";
+            Database.EnsureCreated();
         }
 
         public DbSet<ResumableFunctionState> FunctionStates { get; set; }
