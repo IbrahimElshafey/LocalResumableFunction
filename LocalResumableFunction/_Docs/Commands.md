@@ -1,5 +1,5 @@
 ﻿# Migration Commands
-Add-Migration -Name "Initial"
+Add-Migration -Name "Initial" -verbose
 
 Add-Migration -Context "EngineDataContext" -Name "Initial" -Project ResumableFunction.Engine.Data.Sqlite -Verbose -StartupProject ResumableFunction.Engine.Service
 
@@ -7,7 +7,7 @@ Add-Migration -Context "EngineDataContext" -Name "Initial" -Project ResumableFun
 # Force Migration
 
 # Update DataBase
-Update-Database
+Update-Database -verbose
 Update-Database -Context "EngineDataContext" -StartupProject ResumableFunction.Engine.Service
 
 # Remove-Migration 

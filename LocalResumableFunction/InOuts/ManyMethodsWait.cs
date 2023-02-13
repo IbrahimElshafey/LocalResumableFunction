@@ -14,9 +14,20 @@ public class ManyMethodsWait : Wait
         WaitingMethods?.Where(x => x.Status == WaitStatus.Completed).ToList();
 
 
-    public Wait WhenMatchedCount(Expression<Func<int, bool>> matchCountFilter)
+    public ManyMethodsWait WhenMatchedCount(Expression<Func<int, bool>> matchCountFilter)
     {
         WhenCountExpression = matchCountFilter;
+        return this;
+    } 
+    
+    public Wait WaitAll()
+    {
+        WaitType = WaitType.AllMethodsWait;
+        return this;
+    }
+    public Wait WaitFirst()
+    {
+        WaitType = WaitType.AnyMethodWait;
         return this;
     }
 

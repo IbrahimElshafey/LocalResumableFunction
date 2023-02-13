@@ -93,17 +93,11 @@ namespace LocalResumableFunction.Migrations
                     b.Property<bool>("IsNode")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsSingle")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("ParentWaitId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ReplayType")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("RequestedByFunctionId")

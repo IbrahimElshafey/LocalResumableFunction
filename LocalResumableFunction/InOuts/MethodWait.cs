@@ -37,7 +37,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
         if (eventMethodAttributeExist == null)
             throw new Exception(
                 $"You must add attribute [{nameof(WaitMethodAttribute)}] to method {method.Method.Name}");
-    
+
         WaitMethodIdentifier = new MethodIdentifier();
         WaitMethodIdentifier.SetMethodBase(method.Method);
     }
@@ -45,14 +45,14 @@ public class MethodWait<TInput, TOutput> : MethodWait
     public MethodWait<TInput, TOutput> SetData(Expression<Action<TInput, TOutput>> value)
     {
         SetDataExpression = value;
-        //todo:rewrite set data expression
+        SetDataExpression = new RewriteSetDataExpression(this).Result;
         return this;
     }
 
     public MethodWait<TInput, TOutput> If(Expression<Func<TInput, TOutput, bool>> value)
     {
         MatchIfExpression = value;
-        //todo:rewrite MatchIfExpression
+        MatchIfExpression = new RewriteMatchExpression(this).Result;
         return this;
     }
 

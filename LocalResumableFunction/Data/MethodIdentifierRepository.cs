@@ -12,7 +12,7 @@ internal class MethodIdentifierRepository : RepositoryBase
 
     public async Task<(MethodIdentifier MethodIdentifier, bool ExistInDb)> GetMethodIdentifier(MethodBase methodInfo)
     {
-        var methodId = new MethodIdentifier { Id = -1 };
+        var methodId = new MethodIdentifier();
         methodId.SetMethodBase(methodInfo);
         var inDb = await Context
             .MethodIdentifiers

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LocalResumableFunction.Migrations
 {
     [DbContext(typeof(EngineDataContext))]
-    [Migration("20230213074300_Initial")]
+    [Migration("20230213123420_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -51,6 +51,9 @@ namespace LocalResumableFunction.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex(new[] { "MethodHash" }, "Index_MethodHash")
+                        .IsUnique();
 
                     b.ToTable("MethodIdentifiers");
                 });
@@ -93,17 +96,11 @@ namespace LocalResumableFunction.Migrations
                     b.Property<bool>("IsNode")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsSingle")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("ParentWaitId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ReplayType")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("RequestedByFunctionId")

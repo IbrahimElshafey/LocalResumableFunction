@@ -57,10 +57,8 @@ namespace LocalResumableFunction.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     IsFirst = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsSingle = table.Column<bool>(type: "INTEGER", nullable: false),
                     StateAfterWait = table.Column<int>(type: "INTEGER", nullable: false),
                     IsNode = table.Column<bool>(type: "INTEGER", nullable: false),
-                    ReplayType = table.Column<int>(type: "INTEGER", nullable: true),
                     WaitType = table.Column<int>(type: "INTEGER", nullable: false),
                     FunctionStateId = table.Column<int>(type: "INTEGER", nullable: false),
                     RequestedByFunctionId = table.Column<int>(type: "INTEGER", nullable: false),
@@ -136,6 +134,12 @@ namespace LocalResumableFunction.Migrations
                 name: "IX_FunctionStates_ResumableFunctionIdentifierId",
                 table: "FunctionStates",
                 column: "ResumableFunctionIdentifierId");
+
+            migrationBuilder.CreateIndex(
+                name: "Index_MethodHash",
+                table: "MethodIdentifiers",
+                column: "MethodHash",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Waits_FirstWaitId",

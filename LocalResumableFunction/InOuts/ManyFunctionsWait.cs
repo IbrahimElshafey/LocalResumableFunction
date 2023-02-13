@@ -8,7 +8,16 @@ public class ManyFunctionsWait : Wait
         => WaitingFunctions?.Where(x => x.Status == WaitStatus.Completed).ToList();
 
     public FunctionWait MatchedFunction => WaitingFunctions?.Single(x => x.Status == WaitStatus.Completed);
-
+    public Wait WaitAll()
+    {
+        WaitType = WaitType.AllFunctionsWait;
+        return this;
+    }
+    public Wait WaitFirst()
+    {
+        WaitType = WaitType.AnyFunctionWait;
+        return this;
+    }
     internal void SetMatchedFunction(int? functionId)
     {
         WaitingFunctions.ForEach(wait => wait.Status = WaitStatus.Canceled);

@@ -218,10 +218,6 @@ internal class ResumableFunctionHandler
         var waitMethodIdentifier = await repo.GetMethodIdentifier(methodWait.WaitMethodIdentifier);
         methodWait.WaitMethodIdentifier = waitMethodIdentifier;
         methodWait.WaitMethodIdentifierId = waitMethodIdentifier.Id;
-        // * Rerwite match expression and set prop expresssion
-        methodWait.MatchIfExpression = new RewriteMatchExpression(methodWait).Result;
-        methodWait.SetDataExpression = new RewriteSetDataExpression(methodWait).Result;
-        // * Save Method to IActiveMethodsRepository 
         await _waitsRepository.AddWait(methodWait);
     }
 

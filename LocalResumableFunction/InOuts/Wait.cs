@@ -33,7 +33,6 @@ public abstract class Wait
     public string Name { get; internal set; }
     public WaitStatus Status { get; internal set; }
     public bool IsFirst { get; internal set; }
-    public bool IsSingle { get; internal set; } = true;
     public int StateAfterWait { get; internal set; }
     public bool IsNode { get; internal set; }
 

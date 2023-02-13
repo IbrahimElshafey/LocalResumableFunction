@@ -12,7 +12,7 @@ public abstract partial class ResumableFunctionLocal
         var result = new MethodWait<TInput, TOutput>(method)
         {
             Name = name,
-            IsSingle = true,
+            WaitType = WaitType.MethodWait,
             IsNode = true
         };
         return result;
@@ -24,7 +24,6 @@ public abstract partial class ResumableFunctionLocal
         {
             Name = name,
             WaitingMethods = manyMethodsWait.ToList(),
-            IsSingle = false,
             IsNode = true
         };
         foreach (var item in result.WaitingMethods)
