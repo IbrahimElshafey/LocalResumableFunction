@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LocalResumableFunction.Migrations
 {
     [DbContext(typeof(FunctionDataContext))]
-    [Migration("20230215081642_Initial")]
+    [Migration("20230215172501_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -179,11 +179,21 @@ namespace LocalResumableFunction.Migrations
                     b.Property<int?>("ManyMethodsWaitId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<byte[]>("MatchIfExpressionValue")
+                        .IsRequired()
+                        .HasColumnType("BLOB")
+                        .HasColumnName("MatchIfExpressionValue");
+
                     b.Property<bool>("NeedFunctionStateForMatch")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ParentWaitsGroupId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<byte[]>("SetDataExpressionValue")
+                        .IsRequired()
+                        .HasColumnType("BLOB")
+                        .HasColumnName("SetDataExpressionValue");
 
                     b.Property<int>("WaitMethodIdentifierId")
                         .HasColumnType("INTEGER");

@@ -14,7 +14,6 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
 
     public override void OnEntry(MethodExecutionArgs args)
     {
-        Debugger.Launch();
         args.MethodExecutionTag = false;
         _pushedMethod = new PushedMethod
         {
@@ -25,7 +24,6 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
 
     public override void OnExit(MethodExecutionArgs args)
     {
-        Debugger.Launch();
         _pushedMethod.Output = args.ReturnValue;
         _pushedMethod.Instance = args.Instance;
         //todo: main method must wait untill this completes

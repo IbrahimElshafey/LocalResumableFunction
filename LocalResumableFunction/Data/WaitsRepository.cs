@@ -34,26 +34,26 @@ internal class WaitsRepository : RepositoryBase
 
         void DuplicateMethodWait(MethodWait methodWait)
         {
+            var functionState = new ResumableFunctionState
+            {
+                ResumableFunctionIdentifierId = methodWait.RequestedByFunction.Id,
+                StateObject = new object(),
+            };
+            Context.FunctionStates.Add(functionState);
             var result = new MethodWait
             {
                 Status = WaitStatus.Waiting,
                 Name = methodWait.Name,
                 MatchIfExpressionValue = methodWait.MatchIfExpressionValue,
                 SetDataExpressionValue = methodWait.SetDataExpressionValue,
-                FunctionState = new ResumableFunctionState
-                {
-                    ResumableFunctionIdentifier = methodWait.RequestedByFunction,
-                    StateObject = "{}",
-                },
+                FunctionState = functionState,
                 IsFirst = true,
                 IsNode = methodWait.IsNode,
                 IsOptional = methodWait.IsOptional,
                 NeedFunctionStateForMatch = methodWait.NeedFunctionStateForMatch,
                 StateAfterWait = methodWait.StateAfterWait,
                 WaitType = methodWait.WaitType,
-                RequestedByFunction = methodWait.RequestedByFunction,
                 RequestedByFunctionId = methodWait.RequestedByFunctionId,
-                WaitMethodIdentifier = methodWait.WaitMethodIdentifier,
                 WaitMethodIdentifierId = methodWait.WaitMethodIdentifierId
             };
             Context.MethodWaits.Add(result);
@@ -71,7 +71,9 @@ internal class WaitsRepository : RepositoryBase
     {
         var matchedWaits = new List<MethodWait>();
         var databaseWaits =
-            await Context.MethodWaits
+            await Context
+                .MethodWaits
+                .Include(x=>x.RequestedByFunction)
                 .Where(x =>
                     x.WaitMethodIdentifierId == pushedMethod.MethodIdentifier.Id &&
                     x.Status == WaitStatus.Waiting)
@@ -103,7 +105,7 @@ internal class WaitsRepository : RepositoryBase
     private bool CheckMatch(MethodWait methodWait, PushedMethod pushedMethod)
     {
         var check = methodWait.MatchIfExpression.Compile();
-        return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrntFunction);
+        return (bool)check.DynamicInvoke(pushedMethod.Input[0], pushedMethod.Output, methodWait.CurrntFunction);
     }
 
     public async Task<Wait> GetParentFunctionWait(int? functionWaitId)

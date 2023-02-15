@@ -36,7 +36,14 @@ internal class ResumableFunctionHandler
             UpdateFunctionData(currentWait, pushedMethod);
             await HandlePushedMethod(currentWait);
             //await _functionRepository.SaveFunctionState(currentWait.FunctionRuntimeInfo);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Debug.Write(ex);
+            }
         }
     }
 
@@ -58,7 +65,7 @@ internal class ResumableFunctionHandler
     private void UpdateFunctionData(MethodWait currentWait, PushedMethod pushedMethod)
     {
         var setDataExpression = currentWait.SetDataExpression.Compile();
-        setDataExpression.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, currentWait.CurrntFunction);
+        setDataExpression.DynamicInvoke(pushedMethod.Input[0], pushedMethod.Output, currentWait.CurrntFunction);
     }
 
     private bool IsSingleMethod(MethodWait currentWait)
@@ -106,6 +113,7 @@ internal class ResumableFunctionHandler
 
             //nextWaitResult.Result.FunctionId = currentWait.FunctionId;
             nextWaitResult.Result.FunctionState = currentWait.FunctionState;
+            nextWaitResult.Result.RequestedByFunctionId = currentWait.RequestedByFunctionId;
             var result = await GenericWaitRequested(nextWaitResult.Result);
             currentWait.Status = WaitStatus.Completed;
             return result;

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection.Metadata;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
 using Microsoft.EntityFrameworkCore;
@@ -76,6 +77,14 @@ internal class FunctionDataContext : DbContext
         modelBuilder.Entity<ResumableFunctionState>()
             .Property(x => x.StateObject)
             .HasConversion<ObjectToJsonConverter>();
+
+        modelBuilder.Entity<MethodWait>()
+        .Property(mw => mw.MatchIfExpressionValue)
+        .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
+        
+        modelBuilder.Entity<MethodWait>()
+        .Property(mw => mw.SetDataExpressionValue)
+        .HasColumnName(nameof(MethodWait.SetDataExpressionValue));
 
         base.OnModelCreating(modelBuilder);
     }
