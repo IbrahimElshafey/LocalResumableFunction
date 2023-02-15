@@ -70,8 +70,6 @@ namespace LocalResumableFunction.Migrations
                     WhenCountExpression = table.Column<string>(type: "TEXT", nullable: true),
                     ParentWaitsGroupId = table.Column<int>(type: "INTEGER", nullable: true),
                     IsOptional = table.Column<bool>(type: "INTEGER", nullable: true),
-                    SetDataExpression = table.Column<string>(type: "TEXT", nullable: true),
-                    MatchIfExpression = table.Column<string>(type: "TEXT", nullable: true),
                     NeedFunctionStateForMatch = table.Column<bool>(type: "INTEGER", nullable: true),
                     WaitMethodIdentifierId = table.Column<int>(type: "INTEGER", nullable: true),
                     ManyMethodsWaitId = table.Column<int>(type: "INTEGER", nullable: true)

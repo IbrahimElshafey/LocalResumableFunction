@@ -1,5 +1,6 @@
 ﻿using LocalResumableFunction.InOuts;
 using MethodBoundaryAspect.Fody.Attributes;
+using System.Diagnostics;
 
 namespace LocalResumableFunction.Helpers;
 
@@ -8,13 +9,14 @@ namespace LocalResumableFunction.Helpers;
 /// </summary>
 public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
 {
-    private PushedMethod? _event;
+    private PushedMethod? _pushedMethod;
     public override object TypeId => nameof(WaitMethodAttribute);
 
     public override void OnEntry(MethodExecutionArgs args)
     {
+        Debugger.Launch();
         args.MethodExecutionTag = false;
-        _event = new PushedMethod
+        _pushedMethod = new PushedMethod
         {
             MethodInfo = args.Method,
             Input = args.Arguments
@@ -23,10 +25,11 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
 
     public override void OnExit(MethodExecutionArgs args)
     {
-        _event.Output = args.ReturnValue;
-        _event.Instance = args.Instance;
+        Debugger.Launch();
+        _pushedMethod.Output = args.ReturnValue;
+        _pushedMethod.Instance = args.Instance;
         //todo: main method must wait untill this completes
-        _ = new ResumableFunctionHandler().MethodCalled(_event);
+        _ = new ResumableFunctionHandler().MethodCalled(_pushedMethod);
         args.MethodExecutionTag = true;
     }
 

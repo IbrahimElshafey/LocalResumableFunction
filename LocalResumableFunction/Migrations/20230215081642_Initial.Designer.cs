@@ -3,16 +3,19 @@ using System;
 using LocalResumableFunction.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace LocalResumableFunction.Migrations
 {
-    [DbContext(typeof(EngineDataContext))]
-    partial class EngineDataContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(FunctionDataContext))]
+    [Migration("20230215081642_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "7.0.2");
@@ -176,19 +179,11 @@ namespace LocalResumableFunction.Migrations
                     b.Property<int?>("ManyMethodsWaitId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("MatchIfExpression")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("NeedFunctionStateForMatch")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ParentWaitsGroupId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("SetDataExpression")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("WaitMethodIdentifierId")
                         .HasColumnType("INTEGER");

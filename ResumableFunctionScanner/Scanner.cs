@@ -11,58 +11,67 @@ namespace ResumableFunctionScanner;
 internal partial class Scanner
 {
     private const string ScannerAppName = "##SCANNER: ";
-    private EngineDataContext _context;
+    private FunctionDataContext _context;
     private string _currentFolder;
 
     public async Task Start()
     {
-        //Debugger.Launch();
         WriteMessage("Start Scan Resumable Functions##");
         WriteMessage("Initiate DB context.");
-        _context = new EngineDataContext();
+        _context = new FunctionDataContext();
         _currentFolder = AppContext.BaseDirectory;
         WriteMessage("Load assemblies in current directory.");
-        var assemblies = Directory.EnumerateFiles(_currentFolder, "*.dll");
-        foreach (var assemblyPath in assemblies)
+        var assemblyPaths = Directory.EnumerateFiles(_currentFolder, "*.dll").Where(IsIncludedInScan).ToList();
+        WriteMessage($"Start register method waits.");
+        var resumableFunctions = await RegisterMethodWaits(assemblyPaths);
+        foreach (var resumableFunctionClass in resumableFunctions)
+        {
+            await RegisterResumableFunctionsInClass(resumableFunctionClass);
+        }
+        _context.Dispose();
+        WriteMessage("Close with no errors.");
+        Console.ReadLine();
+    }
+
+    private async Task<List<Type>> RegisterMethodWaits(List<string>? assemblyPaths)
+    {
+        var resumableFunctionClasses = new List<Type>();
+        foreach (var assemblyPath in assemblyPaths)
+        {
             try
             {
-                if (ExcludeFromScan(assemblyPath)) continue;
                 WriteMessage($"Start scan assembly [{assemblyPath}]");
-                await ScanAssembly(assemblyPath);
+
+                var assembly = Assembly.LoadFile(assemblyPath);
+                var isReferenceLocalResumableFunction =
+                    assembly.GetReferencedAssemblies().Any(x => x.Name == "LocalResumableFunction");
+                if (isReferenceLocalResumableFunction is false)
+                {
+                    WriteMessage($"Not reference LocalResumableFunction.dll,Scan canceled for [{assemblyPath}].");
+                }
+                else
+                {
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        await RegisterMethodWaitsIfExist(type);
+                        if (type.IsSubclassOf(typeof(ResumableFunctionLocal)))
+                            resumableFunctionClasses.Add(type);
+                    }
+                    WriteMessage($"Save discovered method waits for assembly [{assemblyPath}].");
+                    _context.SaveChanges();
+                }
             }
             catch (Exception e)
             {
                 WriteMessage($"Error when scan assembly [{assemblyPath}]");
                 WriteMessage(e.Message);
-                throw;
             }
-
-        Console.ReadLine();
+        }
+        return resumableFunctionClasses;
     }
 
-    private async Task ScanAssembly(string assemblyPath)
-    {
-        var assembly = Assembly.LoadFile(assemblyPath);
-        var isReferenceLocalResumableFunction =
-            assembly.GetReferencedAssemblies().Any(x => x.Name == "LocalResumableFunction");
-        if (isReferenceLocalResumableFunction is false)
-        {
-            WriteMessage($"Not reference LocalResumableFunction.dll,Scan canceled for [{assemblyPath}].");
-        }
-        else
-        {
-            foreach (var type in assembly.GetTypes())
-            {
-                if (type.IsSubclassOf(typeof(ResumableFunctionLocal)))
-                    await RegisterResumableFunctions(type);
-                await RegisterMethodWaitsIfExist(type);
-            }
-            WriteMessage($"Save scan result for assembly [{assemblyPath}].");
-            await _context.SaveChangesAsync();
-        }
-    }
 
-    private async Task RegisterResumableFunctions(Type type)
+    private async Task RegisterResumableFunctionsInClass(Type type)
     {
         WriteMessage($"Try to find resumable functions in type [{type.FullName}]");
         var resumableFunctions = type
@@ -86,7 +95,9 @@ internal partial class Scanner
             var methodType = isEntryPoint ? MethodType.ResumableFunctionEntryPoint : MethodType.SubResumableFunction;
             await RegisterResumableFunction(resumableFunction, methodType);
             if (isEntryPoint)
+            {
                 await RegisterResumableFunctionFirstWait(resumableFunction);
+            }
         }
     }
 
@@ -95,13 +106,16 @@ internal partial class Scanner
         WriteMessage($"Register resumable function [{resumableFunction.Name}]");
         var repo = new MethodIdentifierRepository(_context);
         var methodId = await repo.GetMethodIdentifier(resumableFunction);
+        methodId.MethodIdentifier.Type = type;
         if (methodId.ExistInDb)
         {
             WriteMessage($"Resumable function [{resumableFunction.Name}] already exist in DB.");
             return;
         }
-
+        methodId.MethodIdentifier.CreateMethodHash();
         _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
+        WriteMessage($"Save discovered resumable function [{resumableFunction.Name}].");
+        _context.SaveChanges();
     }
 
 
@@ -127,16 +141,18 @@ internal partial class Scanner
         {
             var repo = new MethodIdentifierRepository(_context);
             var methodId = await repo.GetMethodIdentifier(method);
+            methodId.MethodIdentifier.Type = MethodType.MethodWait;
             if (methodId.ExistInDb)
             {
                 WriteMessage($"Method [{method.Name}] already exist in DB.");
-                return;
+                continue;
             }
+            methodId.MethodIdentifier.CreateMethodHash();
             _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
         }
     }
 
-    private bool ExcludeFromScan(string assemblyPath)
+    private bool IsIncludedInScan(string assemblyPath)
     {
         var fileName = Path.GetFileName(assemblyPath);
         var paths = new[]
@@ -165,7 +181,7 @@ internal partial class Scanner
             "SQLitePCLRaw.core.dll",
             "SQLitePCLRaw.provider.e_sqlite3.dll"
         };
-        return paths.Contains(fileName);
+        return paths.Contains(fileName) is false;
     }
 
     private void WriteMessage(string message)

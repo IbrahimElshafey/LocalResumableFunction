@@ -1,15 +1,16 @@
-﻿using System.Linq.Expressions;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 using LocalResumableFunction.InOuts;
 using static System.Linq.Expressions.Expression;
 
 namespace LocalResumableFunction.Helpers;
 
-public class RewriteSetDataExpression : RewriteMatchExpression
+public class RewriteSetDataExpression : ExpressionVisitor
 {
     private readonly ParameterExpression _functionInstanceArg;
     private readonly MethodWait _wait;
-
-    public RewriteSetDataExpression(MethodWait wait):base(null)
+    private List<Expression> setValuesExpressions = new List<Expression>();
+    public RewriteSetDataExpression(MethodWait wait)
     {
         //  .SetData((input, output) => Result == output);
         //   setDataExpression.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, currentWait.CurrntFunction);
@@ -17,12 +18,18 @@ public class RewriteSetDataExpression : RewriteMatchExpression
         _functionInstanceArg = Parameter(wait.CurrntFunction.GetType(), "functionInstance");
 
         var updatedBoy = (LambdaExpression)Visit(wait.SetDataExpression);
+        for (int i = 0; i < setValuesExpressions.Count; i++)
+        {
+            var setValue = setValuesExpressions[i];
+            setValuesExpressions[i] = ChangeDataAccess(setValue);
+        }
         var functionType = typeof(Action<,,>)
             .MakeGenericType(
             updatedBoy.Parameters[0].Type,
             updatedBoy.Parameters[1].Type,
             wait.CurrntFunction.GetType());
-        var block = Block(new[] { updatedBoy.Body, Empty() });
+        setValuesExpressions.Add(Empty());
+        var block = Block(setValuesExpressions);
         Result = Lambda(
             functionType,
             block,
@@ -30,62 +37,35 @@ public class RewriteSetDataExpression : RewriteMatchExpression
             updatedBoy.Parameters[1],
             _functionInstanceArg);
     }
-
+    public LambdaExpression Result { get; protected set; }
     protected override Expression VisitBinary(BinaryExpression node)
     {
-        return base.VisitBinary(node);
-    }
-    protected override Expression VisitMember(MemberExpression node)
-    {
-        //replace [FunctionClass].Data.Prop with [_dataParamter.Prop] or constant value
-        var x = node.GetDataParamterAccess(_functionInstanceArg);
-        if (x.IsFunctionData)
+        if (node.NodeType == ExpressionType.Equal)
         {
-            if (IsBasicType(node.Type))
-            {
-                object value = GetValue(x.NewExpression);
-                if (value != null)
-                    return Constant(value, node.Type);
-            }
-
-            _wait.NeedFunctionStateForMatch = true;
-            return x.NewExpression;
+            var assignVariable = Assign(node.Left, node.Right);
+            setValuesExpressions.Add(assignVariable);
         }
 
-        return base.VisitMember(node);
+        return base.VisitBinary(node);
     }
-    //public RewriteSetDataExpression(MethodWait wait)
-    //{
-    //    var contextProp = wait.SetDataExpression;
-    //    if (contextProp.Body is not MemberExpression me)
-    //        throw new Exception("When you call `MethodWait.SetProp` the body must be `MemberExpression`");
+    protected Expression ChangeDataAccess(Expression node)
+    {
+        if (node is BinaryExpression binaryExpression)
+        {
+            if (binaryExpression.Left is MemberExpression dataMemeber)
+            {
+                var dataAccess = dataMemeber.GetDataParamterAccess(_functionInstanceArg);
+                if (dataAccess.IsFunctionData)
+                    return Assign(dataAccess.NewExpression, binaryExpression.Right);
+            }
+            if (binaryExpression.Right is MemberExpression rightDataMemeber)
+            {
+                var dataAccess = rightDataMemeber.GetDataParamterAccess(_functionInstanceArg);
+                if (dataAccess.IsFunctionData)
+                    return Assign(dataAccess.NewExpression, binaryExpression.Left);
+            }
+        }
 
-
-    //    var functionDataParam = Parameter(wait.CurrntFunction.GetType(), "functionData");
-    //    var dataPramterAccess = me.GetDataParamterAccess(functionDataParam);
-    //    if (dataPramterAccess.IsFunctionData && dataPramterAccess.NewExpression != null)
-    //    {
-    //        var methodDataParam = Parameter(wait.GetType(), "MethodData");
-    //        var isGenericList = dataPramterAccess.NewExpression.Type.IsGenericType &&
-    //                            dataPramterAccess.NewExpression.Type.GetGenericTypeDefinition() == typeof(List<>);
-    //        if (isGenericList)
-    //        {
-    //            var body = Call(dataPramterAccess.NewExpression, dataPramterAccess.NewExpression.Type.GetMethod("Add"),
-    //                methodDataParam);
-    //            Result = Lambda(body, functionDataParam, methodDataParam);
-    //        }
-    //        else
-    //        {
-    //            Expression body = Assign(dataPramterAccess.NewExpression, methodDataParam);
-    //            var block = Block(new[] { body, Empty() });
-    //            Result = Lambda(block, functionDataParam, methodDataParam);
-    //        }
-    //    }
-    //    else
-    //    {
-    //        throw new Exception(
-    //            "When you call `MethodWait.SetProp` the body must be `MemberExpression` that use the `Data` property.");
-    //    }
-    //}
-
+        return node;
+    }
 }

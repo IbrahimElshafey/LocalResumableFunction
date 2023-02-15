@@ -6,7 +6,7 @@ namespace LocalResumableFunction.Data;
 
 internal class MethodIdentifierRepository : RepositoryBase
 {
-    public MethodIdentifierRepository(EngineDataContext ctx) : base(ctx)
+    public MethodIdentifierRepository(FunctionDataContext ctx) : base(ctx)
     {
     }
 
@@ -15,21 +15,28 @@ internal class MethodIdentifierRepository : RepositoryBase
         var methodId = new MethodIdentifier();
         methodId.SetMethodInfo(methodInfo);
         MethodIdentifier? existInDb = await GetMethodIdentifier(methodId);
-        return existInDb != null ? (existInDb, true) : (methodId, false);
+        return (existInDb, existInDb.Id > 0);
     }
-    
+
     public async Task<MethodIdentifier> GetMethodIdentifier(MethodIdentifier methodId)
     {
         var inDb = await Context
             .MethodIdentifiers
             .Where(x => x.MethodHash == methodId.MethodHash).ToListAsync();
+        if (inDb == null)
+        {
+            inDb = Context
+            .MethodIdentifiers
+            .Local
+            .Where(x => x.MethodHash == methodId.MethodHash).ToList();
+        }
         var existInDb =
-            inDb.FirstOrDefault(x =>    
+            inDb.FirstOrDefault(x =>
             x.MethodSignature == methodId.MethodSignature &&
             x.AssemblyName == methodId.AssemblyName &&
             x.ClassName == methodId.ClassName &&
             x.MethodName == methodId.MethodName);
-        return existInDb;
+        return existInDb ?? methodId;
     }
 
 

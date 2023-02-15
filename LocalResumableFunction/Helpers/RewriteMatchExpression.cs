@@ -37,14 +37,6 @@ public class RewriteMatchExpression : ExpressionVisitor
 
     public LambdaExpression Result { get; protected set; }
 
-
-    //protected override Expression VisitConstant(ConstantExpression node)
-    //{
-    //    if (node.Type == _wait.CurrntFunction.GetType())
-    //        return _functionInstanceArg;
-    //    return base.VisitConstant(node);
-    //}
-
     protected override Expression VisitMember(MemberExpression node)
     {
         //replace [FunctionClass].Data.Prop with [_dataParamter.Prop] or constant value

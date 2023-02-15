@@ -2,7 +2,7 @@
 
 internal class RepositoryBase
 {
-    protected readonly EngineDataContext Context;
+    protected readonly FunctionDataContext Context;
 
-    public RepositoryBase(EngineDataContext ctx) => Context = ctx;
+    public RepositoryBase(FunctionDataContext ctx) => Context = ctx;
 }

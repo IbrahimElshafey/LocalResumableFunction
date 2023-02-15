@@ -18,10 +18,18 @@ public class MethodWait : Wait
 
     public bool IsOptional { get; internal set; }
 
-    public LambdaExpression SetDataExpression { get; internal set; }
-    public LambdaExpression MatchIfExpression { get; internal set; }
+    [NotMapped]
+    public LambdaExpression SetDataExpression { get; protected set; }
+
+    internal byte[] SetDataExpressionValue { get; set; }
+
+    [NotMapped]
+    public LambdaExpression MatchIfExpression { get; protected set; }
+
+    internal byte[] MatchIfExpressionValue { get; set; }
+
     public bool NeedFunctionStateForMatch { get; internal set; } = false;
-    
+
 
     /// <summary>
     /// The method that we wait to resume resumable function
@@ -29,6 +37,26 @@ public class MethodWait : Wait
     internal MethodIdentifier WaitMethodIdentifier { get; set; }
 
     internal int WaitMethodIdentifierId { get; set; }
+
+    internal void SetExpressions()
+    {
+        var assembly = WaitMethodIdentifier.MethodInfo.DeclaringType.Assembly;
+        MatchIfExpression = new RewriteMatchExpression(this).Result;
+        MatchIfExpressionValue = TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, assembly));
+        SetDataExpression = new RewriteSetDataExpression(this).Result;
+        SetDataExpressionValue = TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(SetDataExpression, assembly));
+    }
+
+    internal void GetExpressions()
+    {
+        var assembly = WaitMethodIdentifier.MethodInfo.DeclaringType.Assembly;
+        MatchIfExpression = (LambdaExpression)
+            ExpressionToJsonConverter.JsonToExpression(
+                TextCompressor.DecompressString(MatchIfExpressionValue), assembly);
+        SetDataExpression = (LambdaExpression)
+            ExpressionToJsonConverter.JsonToExpression(
+                TextCompressor.DecompressString(SetDataExpressionValue), assembly);
+    }
 }
 
 public class MethodWait<TInput, TOutput> : MethodWait
@@ -44,17 +72,15 @@ public class MethodWait<TInput, TOutput> : MethodWait
         WaitMethodIdentifier.SetMethodInfo(method.Method);
     }
 
-    public MethodWait<TInput, TOutput> SetData(Expression<Func<TInput, TOutput,bool>> value)
+    public MethodWait<TInput, TOutput> SetData(Expression<Func<TInput, TOutput, bool>> value)
     {
         SetDataExpression = value;
-        //SetDataExpression = new RewriteSetDataExpression(this).Result;
         return this;
     }
 
     public MethodWait<TInput, TOutput> If(Expression<Func<TInput, TOutput, bool>> value)
     {
         MatchIfExpression = value;
-        //MatchIfExpression = new RewriteMatchExpression(this).Result;
         return this;
     }
 

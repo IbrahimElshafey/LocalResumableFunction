@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LocalResumableFunction.Data;
 
-internal class EngineDataContext : DbContext
+internal class FunctionDataContext : DbContext
 {
     private readonly string _dbConnection;
 
-    public EngineDataContext()
+    public FunctionDataContext()
     {
         _dbConnection = $"Data Source={AppContext.BaseDirectory}LocalResumableFunctionsData.db";
         Database.EnsureCreated();

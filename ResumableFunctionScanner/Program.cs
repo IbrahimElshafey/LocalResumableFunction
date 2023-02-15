@@ -1,5 +1,6 @@
 ﻿using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
+using System.Linq.Expressions;
 
 namespace ResumableFunctionScanner;
 
@@ -7,26 +8,31 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-        RerwiteSetDataTest();
-        //await new Scanner().Start();
+        await new Scanner().Start();
+        //RerwiteSetDataTest();
     }
 
     private static void RerwiteSetDataTest()
     {
-        var test = new Test();
-        var wait = test.GetWait();
-        wait.SetDataExpression = new RewriteSetDataExpression(wait).Result;
+        //var test = new Test();
+        //var wait = test.GetWait();
+        //wait.SetDataExpression = new RewriteSetDataExpression(wait).Result;
+        //Test test1 = new Test();
+        //wait.SetDataExpression.Compile().DynamicInvoke(10,11, test1);
+
     }
 }
 internal class Test : ResumableFunctionLocal
 {
-    public int Result { get; set; }
+    public int Decision { get; set; }
+    public int ProjectId { get; set; }
 
     [ResumableFunctionEntryPoint]
     internal MethodWait GetWait()
     {
-        var methodWait = new MethodWait<int, int>(Method)
-                     .SetData((input, output) => Result == output);
+        var methodWait =
+            new MethodWait<int, int>(Method)
+            .SetData((projectId, decision) => Decision == decision && projectId == ProjectId);
         methodWait.CurrntFunction = this;
         return methodWait;
     }

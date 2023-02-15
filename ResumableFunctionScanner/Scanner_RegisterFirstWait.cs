@@ -3,6 +3,7 @@ using System.Reflection;
 using LocalResumableFunction;
 using LocalResumableFunction.Data;
 using LocalResumableFunction.InOuts;
+using Microsoft.EntityFrameworkCore;
 
 namespace ResumableFunctionScanner;
 
@@ -11,7 +12,6 @@ internal partial class Scanner
     private async Task RegisterResumableFunctionFirstWait(MethodInfo resumableFunction)
     {
         WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
-        //return;
         var classInstance = (ResumableFunctionLocal)Activator.CreateInstance(resumableFunction.DeclaringType);
         if (classInstance != null)
         {
@@ -22,8 +22,11 @@ internal partial class Scanner
                 var firstWait = functionRunner.Current;
                 var repo = new MethodIdentifierRepository(_context);
                 var methodId = await repo.GetMethodIdentifier(resumableFunction);
-                if (methodId.ExistInDb is false && methodId.MethodIdentifier.Id <= 0)
-                    _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
+                if (await FirstWaitExist(firstWait, methodId.MethodIdentifier))
+                {
+                    WriteMessage("First wait alerady exist.");
+                    return;
+                }
                 firstWait.RequestedByFunction = methodId.MethodIdentifier;
                 firstWait.RequestedByFunctionId = methodId.MethodIdentifier.Id;
                 firstWait.IsFirst = true;
@@ -35,6 +38,8 @@ internal partial class Scanner
                 };
                 var handler = new ResumableFunctionHandler(_context);
                 await handler.GenericWaitRequested(firstWait);
+                WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.Name}].");
+                _context.SaveChanges();
             }
             catch (Exception e)
             {
@@ -42,5 +47,13 @@ internal partial class Scanner
                 WriteMessage($"Error {e.Message}");
             }
         }
+    }
+
+    private Task<bool> FirstWaitExist(Wait firstWait, MethodIdentifier methodIdentifier)
+    {
+        return _context.Waits.AnyAsync(x =>
+            x.IsFirst &&
+            x.RequestedByFunctionId == methodIdentifier.Id &&
+            x.Status == WaitStatus.Waiting);
     }
 }

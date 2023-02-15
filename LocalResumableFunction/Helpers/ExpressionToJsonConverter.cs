@@ -15,26 +15,27 @@ public class ExpressionToJsonConverter : ValueConverter<Expression, string>
     {
     }
 
-    internal static string ExpressionToJson(Expression expression)
+    internal static string ExpressionToJson(Expression expression) => ExpressionToJson(expression, null);
+
+    internal static string ExpressionToJson(Expression expression, Assembly? assembly = null)
     {
         if (expression != null)
-            return JsonConvert.SerializeObject(expression, JsonSettings());
+            return JsonConvert.SerializeObject(expression, JsonSettings(assembly));
         return null!;
     }
 
-    internal static Expression JsonToExpression(string json)
+    internal static Expression JsonToExpression(string json) => JsonToExpression(json, null);
+    internal static Expression JsonToExpression(string json, Assembly? assembly = null)
     {
         if (!string.IsNullOrWhiteSpace(json))
-            return JsonConvert.DeserializeObject<LambdaExpression>(json, JsonSettings())!;
+            return JsonConvert.DeserializeObject<LambdaExpression>(json, JsonSettings(assembly))!;
         return null!;
     }
-
-    private static JsonSerializerSettings JsonSettings()
+    private static JsonSerializerSettings JsonSettings(Assembly? assembly = null)
     {
         var settings = new JsonSerializerSettings();
         //Todo:Replace Assembly.GetExecutingAssembly() with "GetCurrentFunctionAssembly()"
-        settings.Converters.Add(
-            new ExpressionJsonConverter(Assembly.GetEntryAssembly()));
+        settings.Converters.Add(new ExpressionJsonConverter(assembly ?? Assembly.GetEntryAssembly()));
         return settings;
     }
 }

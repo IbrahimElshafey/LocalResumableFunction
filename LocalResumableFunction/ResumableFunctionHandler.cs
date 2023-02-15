@@ -8,12 +8,12 @@ namespace LocalResumableFunction;
 
 internal class ResumableFunctionHandler
 {
-    private EngineDataContext _context;
+    private FunctionDataContext _context;
     private WaitsRepository _waitsRepository;
 
-    internal ResumableFunctionHandler(EngineDataContext? context = null)
+    internal ResumableFunctionHandler(FunctionDataContext? context = null)
     {
-        _context = context ?? new EngineDataContext();
+        _context = context ?? new FunctionDataContext();
         _waitsRepository = new WaitsRepository(_context);
     }
     /// <summary>
@@ -21,6 +21,7 @@ internal class ResumableFunctionHandler
     /// </summary>
     internal async Task MethodCalled(PushedMethod pushedMethod)
     {
+        Debugger.Launch();
         var repo = new MethodIdentifierRepository(_context);
         var methodId = await repo.GetMethodIdentifier(pushedMethod.MethodInfo);
         if (methodId.ExistInDb is false)
@@ -214,15 +215,14 @@ internal class ResumableFunctionHandler
 
     private async Task SingleWaitRequested(MethodWait methodWait)
     {
-        Debugger.Launch();
         var repo = new MethodIdentifierRepository(_context);
         var waitMethodIdentifier = await repo.GetMethodIdentifier(methodWait.WaitMethodIdentifier);
         methodWait.WaitMethodIdentifier = waitMethodIdentifier;
         methodWait.WaitMethodIdentifierId = waitMethodIdentifier.Id;
-        methodWait.MatchIfExpression = new RewriteMatchExpression(methodWait).Result;
-        methodWait.SetDataExpression = new RewriteSetDataExpression(methodWait).Result;
+        methodWait.SetExpressions();
         await _waitsRepository.AddWait(methodWait);
     }
+
 
     private async Task ManyWaitsRequested(ManyMethodsWait manyWaits)
     {

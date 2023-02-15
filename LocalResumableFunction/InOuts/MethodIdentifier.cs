@@ -30,7 +30,7 @@ public class MethodIdentifier
         {
             if (AssemblyName != null && ClassName != null && MethodName != null && _methodInfo == null)
             {
-                _methodInfo = Assembly.Load(AssemblyName)
+                _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
                      ?.GetType(ClassName)
                      ?.GetMethods()
                      .FirstOrDefault(x => x.Name == MethodName && CalcSignature(x) == MethodSignature);
@@ -44,9 +44,9 @@ public class MethodIdentifier
     {
         MethodName = value.Name;
         ClassName = value.DeclaringType?.FullName;
-        AssemblyName = value.DeclaringType?.Assembly.FullName;
+        AssemblyName = Path.GetFileName(value.DeclaringType?.Assembly.Location);
         MethodSignature = CalcSignature(value);
-        MethodHash = CreateMd5();
+        CreateMethodHash();
     }
 
     private string CalcSignature(MethodBase value)
@@ -59,12 +59,12 @@ public class MethodIdentifier
             : string.Empty;
     }
 
-    private byte[] CreateMd5()
+    internal void CreateMethodHash()
     {
         // Use input string to calculate MD5 hash
         var input = string.Concat(MethodName, ClassName, AssemblyName, MethodSignature);
         using var md5 = MD5.Create();
         var inputBytes = Encoding.ASCII.GetBytes(input);
-        return md5.ComputeHash(inputBytes);
+        MethodHash =  md5.ComputeHash(inputBytes);
     }
 }

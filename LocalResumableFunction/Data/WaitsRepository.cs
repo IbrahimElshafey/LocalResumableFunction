@@ -5,7 +5,7 @@ namespace LocalResumableFunction.Data;
 
 internal class WaitsRepository : RepositoryBase
 {
-    public WaitsRepository(EngineDataContext ctx) : base(ctx)
+    public WaitsRepository(FunctionDataContext ctx) : base(ctx)
     {
     }
 
@@ -38,8 +38,8 @@ internal class WaitsRepository : RepositoryBase
             {
                 Status = WaitStatus.Waiting,
                 Name = methodWait.Name,
-                MatchIfExpression = methodWait.MatchIfExpression,
-                SetDataExpression = methodWait.SetDataExpression,
+                MatchIfExpressionValue = methodWait.MatchIfExpressionValue,
+                SetDataExpressionValue = methodWait.SetDataExpressionValue,
                 FunctionState = new ResumableFunctionState
                 {
                     ResumableFunctionIdentifier = methodWait.RequestedByFunction,
@@ -76,8 +76,9 @@ internal class WaitsRepository : RepositoryBase
                     x.WaitMethodIdentifierId == pushedMethod.MethodIdentifier.Id &&
                     x.Status == WaitStatus.Waiting)
                 .ToListAsync();
+        databaseWaits.ForEach(wait => wait.GetExpressions());
         foreach (var methodWait in databaseWaits)
-            // .If((input, output) => input.ProjectId == CurrentProject.Id)
+        {
             if (!methodWait.NeedFunctionStateForMatch && CheckMatch(methodWait, pushedMethod))
             {
                 await LoadWaitFunctionState(methodWait);
@@ -89,6 +90,7 @@ internal class WaitsRepository : RepositoryBase
                 if (CheckMatch(methodWait, pushedMethod))
                     matchedWaits.Add(methodWait);
             }
+        }
 
         return matchedWaits;
 
