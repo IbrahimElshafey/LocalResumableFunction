@@ -1,6 +1,7 @@
 ﻿using LocalResumableFunction;
 using LocalResumableFunction.InOuts;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 public abstract partial class ResumableFunctionLocal
 {
@@ -39,9 +40,13 @@ public abstract partial class ResumableFunctionLocal
     internal async Task<NextWaitResult> GetNextWait(Wait currentWait)
     {
         var functionRunner = new FunctionRunner(currentWait);
-        if (functionRunner is null)
-            throw new Exception(
-                "Can't initiate runner");
+        if (functionRunner.ResumableFunctionExist is false)
+        {
+            Debug.WriteLine($"Resumable function ({currentWait.RequestedByFunction.MethodName}) not exist in code");
+            //todo:delete it and all related waits
+            //throw new Exception("Can't initiate runner");
+            return null;
+        }
         try
         {
             var waitExist = await functionRunner.MoveNextAsync();

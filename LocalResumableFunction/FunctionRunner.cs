@@ -6,7 +6,7 @@ namespace LocalResumableFunction;
 internal class FunctionRunner : IAsyncEnumerator<Wait>
 {
     private IAsyncEnumerator<Wait> _this;
-
+    public bool ResumableFunctionExist => _this != null;    
     public FunctionRunner(Wait currentWait)
     {
         var functionRunnerType = currentWait.CurrntFunction.GetType()

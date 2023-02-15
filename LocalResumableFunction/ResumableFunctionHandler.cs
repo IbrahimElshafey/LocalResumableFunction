@@ -21,7 +21,6 @@ internal class ResumableFunctionHandler
     /// </summary>
     internal async Task MethodCalled(PushedMethod pushedMethod)
     {
-        Debugger.Launch();
         var repo = new MethodIdentifierRepository(_context);
         var methodId = await repo.GetMethodIdentifier(pushedMethod.MethodInfo);
         if (methodId.ExistInDb is false)
@@ -51,15 +50,16 @@ internal class ResumableFunctionHandler
 
     private async Task HandlePushedMethod(MethodWait currentWait)
     {
+        Debugger.Launch();
         if (IsSingleMethod(currentWait) || await IsGroupLastWait(currentWait))
         {
             //get next Method wait
             var nextWaitResult = await currentWait.CurrntFunction.GetNextWait(currentWait);
+            if (nextWaitResult is null) return;
             await HandleNextWait(nextWaitResult, currentWait);
             await _waitsRepository.DuplicateWaitIfFirst(currentWait);
+            currentWait.FunctionState.StateObject = currentWait.CurrntFunction;
         }
-
-        currentWait.FunctionState.StateObject = currentWait.CurrntFunction;
     }
 
     private void UpdateFunctionData(MethodWait currentWait, PushedMethod pushedMethod)
@@ -237,6 +237,9 @@ internal class ResumableFunctionHandler
         foreach (var methodWait in manyWaits.WaitingMethods)
         {
             methodWait.Status = WaitStatus.Waiting;
+            methodWait.FunctionState = manyWaits.FunctionState;
+            methodWait.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
+            methodWait.StateAfterWait = manyWaits.StateAfterWait;
             await SingleWaitRequested(methodWait);
         }
 

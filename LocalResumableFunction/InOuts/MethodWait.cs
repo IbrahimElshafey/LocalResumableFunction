@@ -71,6 +71,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
 
         WaitMethodIdentifier = new MethodIdentifier();
         WaitMethodIdentifier.SetMethodInfo(method.Method);
+        Name = "#NoName#";
     }
 
     public MethodWait<TInput, TOutput> SetData(Expression<Func<TInput, TOutput, bool>> value)

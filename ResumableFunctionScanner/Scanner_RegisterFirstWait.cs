@@ -9,6 +9,7 @@ namespace ResumableFunctionScanner;
 
 internal partial class Scanner
 {
+    //todo:move to handler
     private async Task RegisterResumableFunctionFirstWait(MethodInfo resumableFunction)
     {
         WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
@@ -18,6 +19,11 @@ internal partial class Scanner
             try
             {
                 var functionRunner = new FunctionRunner(classInstance, resumableFunction);
+                if (functionRunner == null)
+                {
+                    WriteMessage($"Resumable function {resumableFunction.Name} not exist in code");
+                    return;
+                }
                 await functionRunner.MoveNextAsync();
                 var firstWait = functionRunner.Current;
                 var repo = new MethodIdentifierRepository(_context);
@@ -54,6 +60,7 @@ internal partial class Scanner
         return _context.Waits.AnyAsync(x =>
             x.IsFirst &&
             x.RequestedByFunctionId == methodIdentifier.Id &&
+            x.Name == firstWait.Name &&
             x.Status == WaitStatus.Waiting);
     }
 }
