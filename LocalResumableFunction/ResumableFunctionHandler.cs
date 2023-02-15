@@ -6,7 +6,7 @@ using LocalResumableFunction.InOuts;
 
 namespace LocalResumableFunction;
 
-internal class ResumableFunctionHandler
+internal partial class ResumableFunctionHandler
 {
     private FunctionDataContext _context;
     private WaitsRepository _waitsRepository;
@@ -57,9 +57,22 @@ internal class ResumableFunctionHandler
             var nextWaitResult = await currentWait.CurrntFunction.GetNextWait(currentWait);
             if (nextWaitResult is null) return;
             await HandleNextWait(nextWaitResult, currentWait);
-            await _waitsRepository.DuplicateWaitIfFirst(currentWait);
             currentWait.FunctionState.StateObject = currentWait.CurrntFunction;
+            await _context.SaveChangesAsync();
+
+            await DuplicateIfFirst(currentWait);
         }
+    }
+
+    private async Task DuplicateIfFirst(MethodWait currentWait)
+    {
+        Wait? wait = null;
+        if (currentWait.IsFirst)
+            wait = currentWait;
+        else if (currentWait?.ParentWaitsGroup.IsFirst == true)
+            wait = currentWait.ParentWaitsGroup;
+        if (wait != null)
+            await RegisterFirstWait(wait.RequestedByFunction.MethodInfo);
     }
 
     private void UpdateFunctionData(MethodWait currentWait, PushedMethod pushedMethod)
@@ -76,6 +89,7 @@ internal class ResumableFunctionHandler
     private async Task<bool> IsGroupLastWait(MethodWait currentWait)
     {
         var group = await _waitsRepository.GetWaitGroup(currentWait.ParentWaitsGroupId);
+        currentWait.ParentWaitsGroup = group;
         switch (group)
         {
             case ManyMethodsWait allMethodsWait
@@ -167,6 +181,11 @@ internal class ResumableFunctionHandler
         if (backToCaller)
         {
             var nextWaitAftreBacktoCaller = await parentFunctionWait.CurrntFunction.GetNextWait(parentFunctionWait);
+            if (parentFunctionWait.IsFirst)
+            {
+                await _context.SaveChangesAsync();
+                await RegisterFirstWait(parentFunctionWait.RequestedByFunction.MethodInfo);
+            }
             //HandleNextWait after back to caller
             return await HandleNextWait(nextWaitAftreBacktoCaller, lastFunctionWait);
         }
