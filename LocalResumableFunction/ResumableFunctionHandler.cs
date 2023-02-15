@@ -50,7 +50,7 @@ internal partial class ResumableFunctionHandler
 
     private async Task HandlePushedMethod(MethodWait currentWait)
     {
-        Debugger.Launch();
+        //Debugger.Launch();
         if (IsSingleMethod(currentWait) || await IsGroupLastWait(currentWait))
         {
             //get next Method wait
@@ -69,7 +69,7 @@ internal partial class ResumableFunctionHandler
         Wait? wait = null;
         if (currentWait.IsFirst)
             wait = currentWait;
-        else if (currentWait?.ParentWaitsGroup.IsFirst == true)
+        else if (currentWait?.ParentWaitsGroup?.IsFirst == true)
             wait = currentWait.ParentWaitsGroup;
         if (wait != null)
             await RegisterFirstWait(wait.RequestedByFunction.MethodInfo);

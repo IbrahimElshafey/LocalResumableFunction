@@ -15,28 +15,28 @@ namespace LocalResumableFunction
         public bool ManagerApproval { get; set; }
 
 
-        ////any method with attribute [ResumableFunctionEntryPoint] that takes no argument
-        ////and return IAsyncEnumerable<Wait> is a resumbale function
-        //[ResumableFunctionEntryPoint]
-        //public async IAsyncEnumerable<Wait> Start()
-        //{
-        //    yield return
-        //        When<Project, bool>("Project Sumbitted", ProjectSubmitted)
-        //        .If((input, output) => output == true)
-        //        .SetData((input, output) => CurrentProject == input);
+        //any method with attribute [ResumableFunctionEntryPoint] that takes no argument
+        //and return IAsyncEnumerable<Wait> is a resumbale function
+        [ResumableFunctionEntryPoint]
+        public async IAsyncEnumerable<Wait> Start()
+        {
+            yield return
+                When<Project, bool>("Project Sumbitted", ProjectSubmitted)
+                .If((input, output) => output == true)
+                .SetData((input, output) => CurrentProject == input);
 
-        //    AskManagerToApprove(CurrentProject.Id);
+            AskManagerToApprove(CurrentProject.Id);
 
-        //    yield return
-        //        When<(int ProjectId, bool Decision), bool>("Manager Approve Project", ManagerApproveProject)
-        //        .If((input, output) => input.ProjectId == CurrentProject.Id)
-        //        .SetData((input, output) => ManagerApproval == output);
+            yield return
+                When<(int ProjectId, bool Decision), bool>("Manager Approve Project", ManagerApproveProject)
+                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerApproval == output);
 
-        //    if (ManagerApproval)
-        //        Console.WriteLine("Project Approved");
-        //    else
-        //        Console.WriteLine("Project Rejected");
-        //}
+            if (ManagerApproval)
+                Console.WriteLine("Project Approved");
+            else
+                Console.WriteLine("Project Rejected");
+        }
 
         [ResumableFunctionEntryPoint]
         public async IAsyncEnumerable<Wait> WaitTwo()
