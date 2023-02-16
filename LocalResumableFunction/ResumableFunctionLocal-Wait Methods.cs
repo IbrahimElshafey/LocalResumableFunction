@@ -56,7 +56,7 @@ public abstract partial class ResumableFunctionLocal
                 return new NextWaitResult(functionRunner.Current, false, false);
             }
 
-            //if current Function runner name is the main function start
+            //if current WaitFunction runner name is the main function start
             if (currentWait.ParentWaitId == null) return new NextWaitResult(null, true, false);
             return new NextWaitResult(null, false, true);
         }

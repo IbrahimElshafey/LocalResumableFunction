@@ -1,26 +1,23 @@
-﻿using LocalResumableFunction.Helpers;
+﻿using LocalResumableFunction;
+using LocalResumableFunction.Data;
+using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
 
 public abstract partial class ResumableFunctionLocal
 {
-    protected async Task<FunctionWait> Function(string name, Func<IAsyncEnumerable<Wait>> function)
+    protected FunctionWait WaitFunction(string name, Func<IAsyncEnumerable<Wait>> function)
     {
         var result = new FunctionWait
         {
             Name = name,
             IsNode = true,
-            WaitType = WaitType.FunctionWait
+            WaitType = WaitType.FunctionWait,
+            FunctionInfo = function.Method,
         };
-        var asyncEnumerator = function().GetAsyncEnumerator();
-        await asyncEnumerator.MoveNextAsync();
-        var firstWait = asyncEnumerator.Current;
-        //firstWait.ParentFunctionWaitId = result.Id;
-        result.FirstWait = firstWait;
-        //result.InitiatedByFunctionName = result.FunctionName;
         return result;
     }
 
-    protected async Task<ManyFunctionsWait> Functions
+    protected ManyFunctionsWait WaitFunctions
         (string name, Func<IAsyncEnumerable<Wait>>[] subFunctions)
     {
         var result = new ManyFunctionsWait
@@ -33,9 +30,8 @@ public abstract partial class ResumableFunctionLocal
         for (var i = 0; i < subFunctions.Length; i++)
         {
             var currentFunction = subFunctions[i];
-            var currentFuncResult = await Function("", currentFunction);
+            var currentFuncResult =  WaitFunction("#NoName#", currentFunction);
             currentFuncResult.IsNode = false;
-            currentFuncResult.FirstWait.ParentWaitId = result.Id;
             currentFuncResult.ParentFunctionGroupId = result.Id;
             result.WaitingFunctions[i] = currentFuncResult;
         }

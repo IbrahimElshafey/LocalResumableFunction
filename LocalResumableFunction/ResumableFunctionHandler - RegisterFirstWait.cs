@@ -41,7 +41,6 @@ internal partial class ResumableFunctionHandler
                     ResumableFunctionIdentifier = methodId.MethodIdentifier,
                     StateObject = classInstance,
                 };
-                var handler = new ResumableFunctionHandler(_context);
                 await GenericWaitRequested(firstWait);
                 WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.Name}].");
                 _context.SaveChanges();

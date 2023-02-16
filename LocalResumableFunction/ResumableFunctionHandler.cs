@@ -1,8 +1,10 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using LocalResumableFunction.Data;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LocalResumableFunction;
 
@@ -50,7 +52,6 @@ internal partial class ResumableFunctionHandler
 
     private async Task HandlePushedMethod(MethodWait currentWait)
     {
-        //Debugger.Launch();
         if (IsSingleMethod(currentWait) || await IsGroupLastWait(currentWait))
         {
             //get next Method wait
@@ -267,6 +268,24 @@ internal partial class ResumableFunctionHandler
 
     private async Task FunctionWaitRequested(FunctionWait functionWait)
     {
+        Debugger.Launch();
+
+        var functionRunner = new FunctionRunner(functionWait.CurrntFunction, functionWait.FunctionInfo);
+        await functionRunner.MoveNextAsync();
+        functionWait.FirstWait = functionRunner.Current;
+        if (functionWait?.FirstWait is null)
+        {
+            WriteMessage($"No waits exist in sub function ({functionWait.FunctionInfo.Name})");
+            return;
+        }
+        functionWait.FirstWait = functionRunner.Current;
+        functionWait.StateAfterWait = functionRunner.GetState();
+        functionWait.FirstWait.FunctionState = functionWait.FunctionState;
+        functionWait.FirstWait.ParentWaitId = functionWait.RequestedByFunctionId;
+        var repo = new MethodIdentifierRepository(_context);
+        var methodIdentifier = await repo.GetMethodIdentifier(functionWait.FunctionInfo);
+        functionWait.FirstWait.RequestedByFunction = methodIdentifier.MethodIdentifier;
+
         if (functionWait.FirstWait is ReplayWait replayWait)
             await ReplayWait(replayWait);
         else
