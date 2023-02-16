@@ -116,8 +116,7 @@ namespace LocalResumableFunction.Migrations
                         name: "FK_Waits_Waits_FirstWaitId",
                         column: x => x.FirstWaitId,
                         principalTable: "Waits",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Waits_Waits_ManyFunctionsWaitId",
                         column: x => x.ManyFunctionsWaitId,

@@ -75,7 +75,7 @@ internal class WaitsRepository : RepositoryBase
         var databaseWaits =
             await Context
                 .MethodWaits
-                .Include(x=>x.RequestedByFunction)
+                .Include(x => x.RequestedByFunction)
                 .Where(x =>
                     x.WaitMethodIdentifierId == pushedMethod.MethodIdentifier.Id &&
                     x.Status == WaitStatus.Waiting)
@@ -119,11 +119,14 @@ internal class WaitsRepository : RepositoryBase
 
     public async Task<Wait> GetParentFunctionWait(int? functionWaitId)
     {
-        var result = await Context.FunctionWaits.FindAsync(functionWaitId);
+        var result = await Context.FunctionWaits
+            .Include(x => x.RequestedByFunction)
+            .FirstAsync(x => x.Id == functionWaitId);
         if (result == null)
         {
             var manyFunc = await Context.ManyFunctionsWaits
                     .Include(x => x.WaitingFunctions)
+                    .Include(x => x.RequestedByFunction)
                     .FirstOrDefaultAsync(x => x.Id == functionWaitId);
             return manyFunc!;
         }

@@ -131,7 +131,7 @@ namespace LocalResumableFunction.Migrations
                 {
                     b.HasBaseType("LocalResumableFunction.InOuts.Wait");
 
-                    b.Property<int>("FirstWaitId")
+                    b.Property<int?>("FirstWaitId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ManyFunctionsWaitId")
@@ -248,9 +248,7 @@ namespace LocalResumableFunction.Migrations
                 {
                     b.HasOne("LocalResumableFunction.InOuts.Wait", "FirstWait")
                         .WithMany()
-                        .HasForeignKey("FirstWaitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FirstWaitId");
 
                     b.HasOne("LocalResumableFunction.InOuts.ManyFunctionsWait", null)
                         .WithMany("CompletedFunctions")

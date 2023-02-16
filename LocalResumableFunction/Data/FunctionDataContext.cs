@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection.Metadata;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
@@ -26,6 +27,7 @@ internal class FunctionDataContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        optionsBuilder.LogTo(s => Debug.WriteLine(s));
         optionsBuilder.UseSqlite(_dbConnection);
     }
 
@@ -81,7 +83,7 @@ internal class FunctionDataContext : DbContext
         modelBuilder.Entity<MethodWait>()
         .Property(mw => mw.MatchIfExpressionValue)
         .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
-        
+
         modelBuilder.Entity<MethodWait>()
         .Property(mw => mw.SetDataExpressionValue)
         .HasColumnName(nameof(MethodWait.SetDataExpressionValue));

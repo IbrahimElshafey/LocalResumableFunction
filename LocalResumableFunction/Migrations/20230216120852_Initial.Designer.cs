@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LocalResumableFunction.Migrations
 {
     [DbContext(typeof(FunctionDataContext))]
-    [Migration("20230215172501_Initial")]
+    [Migration("20230216120852_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -134,7 +134,7 @@ namespace LocalResumableFunction.Migrations
                 {
                     b.HasBaseType("LocalResumableFunction.InOuts.Wait");
 
-                    b.Property<int>("FirstWaitId")
+                    b.Property<int?>("FirstWaitId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("ManyFunctionsWaitId")
@@ -251,9 +251,7 @@ namespace LocalResumableFunction.Migrations
                 {
                     b.HasOne("LocalResumableFunction.InOuts.Wait", "FirstWait")
                         .WithMany()
-                        .HasForeignKey("FirstWaitId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("FirstWaitId");
 
                     b.HasOne("LocalResumableFunction.InOuts.ManyFunctionsWait", null)
                         .WithMany("CompletedFunctions")
