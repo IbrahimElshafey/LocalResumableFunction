@@ -1,7 +1,6 @@
 ﻿# Todo
 * Test
 	* Replay
-	* Wait function
 	* Wait many functions
 * Logging and handle exception
 * run in another process
@@ -9,4 +8,6 @@
 * save expression to seprate table for duplication kill
 * Handle Replay
 * Validate waits on request receive
+* Create nuget package
+* Test with web API
 

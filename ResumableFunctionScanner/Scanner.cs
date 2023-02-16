@@ -24,6 +24,7 @@ internal partial class Scanner
         var assemblyPaths = Directory.EnumerateFiles(_currentFolder, "*.dll").Where(IsIncludedInScan).ToList();
         WriteMessage($"Start register method waits.");
         var resumableFunctions = await RegisterMethodWaits(assemblyPaths);
+
         foreach (var resumableFunctionClass in resumableFunctions)
         {
             await RegisterResumableFunctionsInClass(resumableFunctionClass);
@@ -75,7 +76,7 @@ internal partial class Scanner
     {
         WriteMessage($"Try to find resumable functions in type [{type.FullName}]");
         var resumableFunctions = type
-            .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            .GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
             .Where(method => method
                 .GetCustomAttributes()
                 .Any(attribute =>
@@ -112,7 +113,7 @@ internal partial class Scanner
             WriteMessage($"Resumable function [{resumableFunction.Name}] already exist in DB.");
             return;
         }
-        methodId.MethodIdentifier.CreateMethodHash();
+        //methodId.MethodIdentifier.CreateMethodHash();
         _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
         WriteMessage($"Save discovered resumable function [{resumableFunction.Name}].");
         _context.SaveChanges();
@@ -135,8 +136,11 @@ internal partial class Scanner
 
     private async Task RegisterMethodWaitsIfExist(Type type)
     {
-        var methodWaits = type.GetMethods().Where(method =>
-            method.GetCustomAttributes().Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
+        var methodWaits = type
+            .GetMethods(BindingFlags.DeclaredOnly)
+            .Where(method => 
+                method.GetCustomAttributes()
+                .Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
         foreach (var method in methodWaits)
         {
             var repo = new MethodIdentifierRepository(_context);
@@ -147,7 +151,7 @@ internal partial class Scanner
                 WriteMessage($"Method [{method.Name}] already exist in DB.");
                 continue;
             }
-            methodId.MethodIdentifier.CreateMethodHash();
+            //methodId.MethodIdentifier.CreateMethodHash();
             _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
         }
     }

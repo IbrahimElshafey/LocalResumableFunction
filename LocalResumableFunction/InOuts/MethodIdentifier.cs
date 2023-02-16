@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -59,9 +60,8 @@ public class MethodIdentifier
             : string.Empty;
     }
 
-    internal void CreateMethodHash()
+    private void CreateMethodHash()
     {
-        // Use input string to calculate MD5 hash
         var input = string.Concat(MethodName, ClassName, AssemblyName, MethodSignature);
         using var md5 = MD5.Create();
         var inputBytes = Encoding.ASCII.GetBytes(input);
