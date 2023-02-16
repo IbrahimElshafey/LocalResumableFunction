@@ -42,9 +42,4 @@ public static class Extensions
             return false;
         }
     }
-
-    internal static MethodIdentifier CurrentResumableFunctionCall()
-    {
-        throw new NotImplementedException();
-    }
 }

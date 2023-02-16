@@ -8,7 +8,6 @@ public abstract partial class ResumableFunctionLocal
         var result = new FunctionWait
         {
             Name = name,
-            RequestedByFunction = Extensions.CurrentResumableFunctionCall(),
             IsNode = true,
             WaitType = WaitType.FunctionWait
         };
@@ -28,7 +27,6 @@ public abstract partial class ResumableFunctionLocal
         {
             WaitingFunctions = new List<FunctionWait>(subFunctions.Length),
             Name = name,
-            RequestedByFunction = Extensions.CurrentResumableFunctionCall(),
             IsNode = true,
             WaitType = WaitType.AllFunctionsWait
         };
@@ -36,7 +34,6 @@ public abstract partial class ResumableFunctionLocal
         {
             var currentFunction = subFunctions[i];
             var currentFuncResult = await Function("", currentFunction);
-            currentFuncResult.RequestedByFunction = Extensions.CurrentResumableFunctionCall();
             currentFuncResult.IsNode = false;
             currentFuncResult.FirstWait.ParentWaitId = result.Id;
             currentFuncResult.ParentFunctionGroupId = result.Id;

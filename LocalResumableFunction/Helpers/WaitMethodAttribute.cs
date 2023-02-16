@@ -17,9 +17,10 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
         args.MethodExecutionTag = false;
         _pushedMethod = new PushedMethod
         {
-            MethodInfo = args.Method,
-            Input = args.Arguments
+            MethodInfo = args.Method
         };
+        if (args.Arguments.Length > 0) 
+            _pushedMethod.Input = args.Arguments[0];
     }
 
     public override void OnExit(MethodExecutionArgs args)

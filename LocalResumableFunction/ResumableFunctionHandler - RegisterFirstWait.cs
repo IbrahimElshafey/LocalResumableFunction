@@ -59,6 +59,7 @@ internal partial class ResumableFunctionHandler
             x.IsFirst &&
             x.RequestedByFunctionId == methodIdentifier.Id &&
             x.Name == firstWait.Name &&
+            x.WaitType == firstWait.WaitType &&
             x.Status == WaitStatus.Waiting);
     }
     private void WriteMessage(string message)

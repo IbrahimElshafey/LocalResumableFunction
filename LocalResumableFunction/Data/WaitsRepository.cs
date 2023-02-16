@@ -1,4 +1,5 @@
-﻿using LocalResumableFunction.InOuts;
+﻿using System.Diagnostics;
+using LocalResumableFunction.InOuts;
 using Microsoft.EntityFrameworkCore;
 
 namespace LocalResumableFunction.Data;
@@ -69,6 +70,7 @@ internal class WaitsRepository : RepositoryBase
 
     public async Task<List<MethodWait>> GetMatchedWaits(PushedMethod pushedMethod)
     {
+        //Debugger.Launch();
         var matchedWaits = new List<MethodWait>();
         var databaseWaits =
             await Context
@@ -104,8 +106,15 @@ internal class WaitsRepository : RepositoryBase
 
     private bool CheckMatch(MethodWait methodWait, PushedMethod pushedMethod)
     {
-        var check = methodWait.MatchIfExpression.Compile();
-        return (bool)check.DynamicInvoke(pushedMethod.Input[0], pushedMethod.Output, methodWait.CurrntFunction);
+        try
+        {
+            var check = methodWait.MatchIfExpression.Compile();
+            return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrntFunction);
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
     public async Task<Wait> GetParentFunctionWait(int? functionWaitId)

@@ -48,8 +48,24 @@ namespace LocalResumableFunction
                   .SetData((input, output) => CurrentProject == input),
                 new MethodWait<(int ProjectId, bool Decision), bool>(ManagerApproveProject)
                     .If((input, output) => input.ProjectId == CurrentProject.Id)
-                    .SetData((input, output) => ManagerApproval == output));
+                    .SetData((input, output) => ManagerApproval == output)
+                ).WaitAll();
             Console.WriteLine("Two waits matched");
+        }
+
+        [ResumableFunctionEntryPoint]
+        public async IAsyncEnumerable<Wait> WaitFirst()
+        {
+            yield return When(
+                "Wait first in two",
+                new MethodWait<Project, bool>(ProjectSubmitted)
+                    .If((input, output) => output == true)
+                    .SetData((input, output) => CurrentProject == input),
+                new MethodWait<(int ProjectId, bool Decision), bool>(ManagerApproveProject)
+                    .If((input, output) => input.ProjectId == CurrentProject.Id)
+                    .SetData((input, output) => ManagerApproval == output)
+            ).WaitFirst();
+            Console.WriteLine("One of two waits matched");
         }
 
         [WaitMethod]

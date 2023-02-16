@@ -21,29 +21,29 @@ internal partial class ResumableFunctionHandler
     /// </summary>
     internal async Task MethodCalled(PushedMethod pushedMethod)
     {
-        var repo = new MethodIdentifierRepository(_context);
-        var methodId = await repo.GetMethodIdentifier(pushedMethod.MethodInfo);
-        if (methodId.ExistInDb is false)
+        try
         {
-            //_context.MethodIdentifiers.Add(methodId.MethodIdentifier);
-            throw new Exception($"Method [{pushedMethod.MethodInfo.Name}] is not registred in current database as [WaitMethod].");
-        }
-        pushedMethod.MethodIdentifier = methodId.MethodIdentifier;
-        var matchedWaits = await _waitsRepository.GetMatchedWaits(pushedMethod);
-        foreach (var currentWait in matchedWaits)
-        {
-            UpdateFunctionData(currentWait, pushedMethod);
-            await HandlePushedMethod(currentWait);
-            //await _functionRepository.SaveFunctionState(currentWait.FunctionRuntimeInfo);
-            try
+            var repo = new MethodIdentifierRepository(_context);
+            var methodId = await repo.GetMethodIdentifier(pushedMethod.MethodInfo);
+            if (methodId.ExistInDb is false)
             {
+                //_context.MethodIdentifiers.Add(methodId.MethodIdentifier);
+                throw new Exception($"Method [{pushedMethod.MethodInfo.Name}] is not registred in current database as [WaitMethod].");
+            }
+            pushedMethod.MethodIdentifier = methodId.MethodIdentifier;
+            var matchedWaits = await _waitsRepository.GetMatchedWaits(pushedMethod);
+            foreach (var currentWait in matchedWaits)
+            {
+                UpdateFunctionData(currentWait, pushedMethod);
+                await HandlePushedMethod(currentWait);
                 await _context.SaveChangesAsync();
             }
-            catch (Exception ex)
-            {
-                Debug.Write(ex);
-            }
         }
+        catch (Exception ex)
+        {
+            Debug.Write(ex);
+        }
+
     }
 
 
@@ -78,7 +78,7 @@ internal partial class ResumableFunctionHandler
     private void UpdateFunctionData(MethodWait currentWait, PushedMethod pushedMethod)
     {
         var setDataExpression = currentWait.SetDataExpression.Compile();
-        setDataExpression.DynamicInvoke(pushedMethod.Input[0], pushedMethod.Output, currentWait.CurrntFunction);
+        setDataExpression.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, currentWait.CurrntFunction);
     }
 
     private bool IsSingleMethod(MethodWait currentWait)
@@ -279,6 +279,9 @@ internal partial class ResumableFunctionHandler
         foreach (var functionWait in functionsWait.WaitingFunctions)
         {
             functionsWait.Status = WaitStatus.Waiting;
+            functionsWait.FunctionState = functionsWait.FunctionState;
+            functionsWait.RequestedByFunctionId = functionsWait.RequestedByFunctionId;
+            functionsWait.StateAfterWait = functionsWait.StateAfterWait;
             await FunctionWaitRequested(functionWait);
         }
 
