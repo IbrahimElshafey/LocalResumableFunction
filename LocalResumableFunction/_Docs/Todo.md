@@ -10,4 +10,5 @@
 * Validate waits on request receive
 * Create nuget package
 * Test with web API
+* Wait name can't duplicate in same method
 

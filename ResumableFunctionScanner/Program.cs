@@ -8,9 +8,7 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-#if DEBUG
-        File.Delete($"{AppContext.BaseDirectory}LocalResumableFunctionsData.db");
-#endif
+
         await new Scanner().Start();
         //RerwiteSetDataTest();
     }

@@ -18,7 +18,7 @@ namespace LocalResumableFunction
 
         //any method with attribute [ResumableFunctionEntryPoint] that takes no argument
         //and return IAsyncEnumerable<Wait> is a resumbale function
-        [ResumableFunctionEntryPoint]
+        //[ResumableFunctionEntryPoint]
         public async IAsyncEnumerable<Wait> Start()
         {
             yield return
@@ -65,7 +65,7 @@ namespace LocalResumableFunction
 
 
 
-        [ResumableFunctionEntryPoint]
+        //[ResumableFunctionEntryPoint]
         public async IAsyncEnumerable<Wait> WaitFirst()
         {
             Console.WriteLine("WaitFirst started");

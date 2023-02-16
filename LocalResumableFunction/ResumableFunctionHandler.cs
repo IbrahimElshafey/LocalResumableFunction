@@ -124,13 +124,13 @@ internal partial class ResumableFunctionHandler
         {
             //this may cause and error in case of 
             nextWaitResult.Result.ParentWaitId = currentWait.ParentWaitId;
+            nextWaitResult.Result.FunctionState = currentWait.FunctionState;
+            nextWaitResult.Result.RequestedByFunctionId = currentWait.RequestedByFunctionId;
             if (nextWaitResult.Result is ReplayWait replayWait)
                 return await ReplayWait(replayWait);
 
-            //nextWaitResult.Result.FunctionId = currentWait.FunctionId;
-            nextWaitResult.Result.FunctionState = currentWait.FunctionState;
-            nextWaitResult.Result.RequestedByFunctionId = currentWait.RequestedByFunctionId;
-            var result = await GenericWaitRequested(nextWaitResult.Result);
+
+            var result = await SaveGenericWaitRequest(nextWaitResult.Result);
             currentWait.Status = WaitStatus.Completed;
             return result;
         }
@@ -197,14 +197,30 @@ internal partial class ResumableFunctionHandler
 
     private async Task<bool> ReplayWait(ReplayWait replayWait)
     {
+        Debugger.Launch();
+        //todo:get old wait
+        var functionOldWaits = await _waitsRepository.GetOldWaits(replayWait);
+        var waitToReplay =
+            functionOldWaits
+            .FirstOrDefault(x => x.Status == WaitStatus.Completed && x.Name == replayWait.Name);
+        if (waitToReplay == null)
+        {
+            WriteMessage($"Can't replay not exit wait [{replayWait.Name}] in function [{replayWait.RequestedByFunction.MethodName}].");
+            return false;
+        }
+        //skip active waits after replay
+        functionOldWaits
+            .Where(x => x.Id > waitToReplay.Id && x.Status == WaitStatus.Waiting)
+            .ToList()
+            .ForEach(x => x.Status = WaitStatus.Canceled);
         switch (replayWait.ReplayType)
         {
             case ReplayType.ExecuteNoWait:
-                await Replay(replayWait);
+                await Replay(waitToReplay);
                 break;
             case ReplayType.WaitAgain:
                 //oldCompletedWait.ReplayType = null;
-                await GenericWaitRequested(replayWait);
+                await SaveGenericWaitRequest(waitToReplay);
                 break;
             default:
                 throw new Exception("ReplayWait exception.");
@@ -219,7 +235,7 @@ internal partial class ResumableFunctionHandler
         await HandleNextWait(nextWaitResult, oldCompletedWait);
     }
 
-    internal async Task<bool> GenericWaitRequested(Wait newWait)
+    internal async Task<bool> SaveGenericWaitRequest(Wait newWait)
     {
         newWait.Status = WaitStatus.Waiting;
         if (Validate(newWait) is false) return false;
@@ -296,7 +312,7 @@ internal partial class ResumableFunctionHandler
         if (functionWait.FirstWait is ReplayWait replayWait)
             await ReplayWait(replayWait);
         else
-            await GenericWaitRequested(functionWait.FirstWait);
+            await SaveGenericWaitRequest(functionWait.FirstWait);
     }
 
     private async Task ManyFunctionsWaitRequested(ManyFunctionsWait manyFunctionsWaits)
