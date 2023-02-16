@@ -6,11 +6,6 @@ using LocalResumableFunction.Data;
 using LocalResumableFunction.Helpers;
 
 namespace LocalResumableFunction.InOuts;
-
-public class ReplayWait : Wait
-{
-    public ReplayType? ReplayType { get; internal set; }
-}
 public class MethodWait : Wait
 {
     public ManyMethodsWait ParentWaitsGroup { get; internal set; }

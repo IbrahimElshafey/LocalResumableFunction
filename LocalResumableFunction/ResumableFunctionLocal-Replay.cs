@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using LocalResumableFunction.InOuts;
 
 public abstract partial class ResumableFunctionLocal
@@ -13,4 +14,8 @@ public abstract partial class ResumableFunctionLocal
         return new ReplayWait { Name = name, ReplayType = ReplayType.WaitAgain };
     }
 
+    protected ReplayWait GoBackTo<TInput, TOutput>(string name, Expression<Func<TInput, TOutput, bool>> value)
+    {
+        return new ReplayWait { Name = name, ReplayType = ReplayType.WaitAgainWithNewMatch };
+    }
 }

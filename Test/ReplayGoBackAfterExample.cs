@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Test
 {
-    internal class ReplayExample : Example
+    internal class ReplayGoBackAfterExample : Example
     {
         private const string ProjectSumbitted = "Project Sumbitted";
 
-        [ResumableFunctionEntryPoint]
+        //[ResumableFunctionEntryPoint]
         public async IAsyncEnumerable<Wait> TestReplay()
         {
             yield return
@@ -28,11 +28,11 @@ namespace Test
 
             if (ManagerOneApproval is false)
             {
-                Console.WriteLine("ReplayExample: Manager one rejected project and repaly will request.");
+                Console.WriteLine("Manager one rejected project and repaly will go after ProjectSumbitted.");
                 yield return GoBackAfter(ProjectSumbitted);
             }
             else
-                Console.WriteLine("ReplayExample: Manager one approved project");
+                Console.WriteLine("Manager one approved project");
         }
     }
 }

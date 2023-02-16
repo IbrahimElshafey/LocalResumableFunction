@@ -2,6 +2,7 @@
 
 public enum ReplayType
 {
-    ExecuteNoWait,
-    WaitAgain
+    ExecuteNoWait = 1,
+    WaitAgain = 2,
+    WaitAgainWithNewMatch = 3
 }

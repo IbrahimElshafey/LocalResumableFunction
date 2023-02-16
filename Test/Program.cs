@@ -6,7 +6,8 @@ using Test;
 Console.WriteLine("Test App RUNNING.");
 
 //TestSubFunctionCall();
-TestReplay();
+//TestReplayGoBackAfter();
+TestReplayGoBackTo();
 Console.ReadLine();
 
 static void TestSubFunctionCall()
@@ -18,9 +19,16 @@ static void TestSubFunctionCall()
     example.ManagerThreeApproveProject(new(900, true));
 }
 
-static void TestReplay()
+static void TestReplayGoBackAfter()
 {
-    var example = new ReplayExample();
+    var example = new ReplayGoBackAfterExample();
+    example.ProjectSubmitted(new Project { Id = 1000, Name = "Project Name", Description = "Description" });
+    example.ManagerOneApproveProject(new(1000, false));
+    example.ManagerOneApproveProject(new(1000, true));
+}
+static void TestReplayGoBackTo()
+{
+    var example = new ReplayGoBackToExample();
     example.ProjectSubmitted(new Project { Id = 1000, Name = "Project Name", Description = "Description" });
     example.ManagerOneApproveProject(new(1000, false));
     example.ManagerOneApproveProject(new(1000, true));
