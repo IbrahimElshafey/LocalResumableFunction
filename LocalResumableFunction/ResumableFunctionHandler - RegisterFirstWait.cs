@@ -27,7 +27,7 @@ internal partial class ResumableFunctionHandler
                 var firstWait = functionRunner.Current;
                 var repo = new MethodIdentifierRepository(_context);
                 var methodId = await repo.GetMethodIdentifier(resumableFunction);
-                if (await FirstWaitExist(firstWait, methodId.MethodIdentifier))
+                if (await _waitsRepository.FirstWaitExistInDb(firstWait, methodId.MethodIdentifier))
                 {
                     WriteMessage("First wait alerady exist.");
                     return;
@@ -41,10 +41,9 @@ internal partial class ResumableFunctionHandler
                     ResumableFunctionIdentifier = methodId.MethodIdentifier,
                     StateObject = classInstance,
                 };
-                var handler = new ResumableFunctionHandler(_context);
-                await SaveGenericWaitRequest(firstWait);
+                await GenericWaitRequested(firstWait);
                 WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.Name}].");
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
             catch (Exception e)
             {
@@ -53,14 +52,7 @@ internal partial class ResumableFunctionHandler
             }
         }
     }
-    private Task<bool> FirstWaitExist(Wait firstWait, MethodIdentifier methodIdentifier)
-    {
-        return _context.Waits.AnyAsync(x =>
-            x.IsFirst &&
-            x.RequestedByFunctionId == methodIdentifier.Id &&
-            x.Name == firstWait.Name &&
-            x.Status == WaitStatus.Waiting);
-    }
+    
     private void WriteMessage(string message)
     {
         Console.Write(ScannerAppName);

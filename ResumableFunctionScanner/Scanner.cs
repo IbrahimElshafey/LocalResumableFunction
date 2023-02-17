@@ -26,7 +26,7 @@ internal partial class Scanner
         _currentFolder = AppContext.BaseDirectory;
         WriteMessage("Load assemblies in current directory.");
         var assemblyPaths = Directory.EnumerateFiles(_currentFolder, "*.dll").Where(IsIncludedInScan).ToList();
-        WriteMessage($"Start register method waits.");
+        WriteMessage("Start register method waits.");
         var resumableFunctions = await RegisterMethodWaits(assemblyPaths);
 
         foreach (var resumableFunctionClass in resumableFunctions)

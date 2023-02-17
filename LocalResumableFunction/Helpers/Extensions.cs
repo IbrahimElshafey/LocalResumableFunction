@@ -42,4 +42,17 @@ public static class Extensions
             return false;
         }
     }
+
+    public static bool CompareReplaymatchWithOldMatch(LambdaExpression? replayMatch, LambdaExpression? oldMatch)
+    {
+        var isEqual = replayMatch != null && oldMatch != null;
+        if (isEqual is false) return false;
+        if (replayMatch.ReturnType != oldMatch.ReturnType) return false;
+        for (int i = 0; i < replayMatch.Parameters.Count; i++)
+        {
+            if (replayMatch.Parameters[i].Type != oldMatch.Parameters[i].Type)
+                return false;
+        }
+        return true;
+    }
 }

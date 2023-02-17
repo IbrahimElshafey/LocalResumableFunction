@@ -37,13 +37,21 @@ public class MethodWait : Wait
     internal void SetExpressions()
     {
         var assembly = WaitMethodIdentifier.MethodInfo.DeclaringType.Assembly;
-        MatchIfExpression = new RewriteMatchExpression(this).Result;
-        MatchIfExpressionValue = TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, assembly));
+        SetMatchExpression(MatchIfExpression);
         SetDataExpression = new RewriteSetDataExpression(this).Result;
         SetDataExpressionValue = TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(SetDataExpression, assembly));
     }
 
-    internal void GetExpressions()
+    internal void SetMatchExpression(LambdaExpression matchExpression)
+    {
+        var assembly = WaitMethodIdentifier.MethodInfo.DeclaringType.Assembly;
+        MatchIfExpression = matchExpression;
+        MatchIfExpression = new RewriteMatchExpression(this).Result;
+        MatchIfExpressionValue =
+            TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, assembly));
+    }
+
+    internal void LoadExpressions()
     {
         var assembly = WaitMethodIdentifier.MethodInfo.DeclaringType.Assembly;
         MatchIfExpression = (LambdaExpression)

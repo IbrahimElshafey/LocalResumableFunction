@@ -13,7 +13,7 @@ namespace Test
         {
             yield return
                 When<Project, bool>(ProjectSumbitted, ProjectSubmitted)
-                .If((input, output) => output == true)
+                .If((input, output) => output == true && input.IsResubmit == false)
                 .SetData((input, output) => CurrentProject == input);
 
             AskManagerToApprove(CurrentProject.Id);
@@ -23,11 +23,11 @@ namespace Test
 
             if (ManagerOneApproval is false)
             {
-                Console.WriteLine("ReplayExample: Manager one rejected project and repaly will go to ProjectSumbitted.");
+                Console.WriteLine("ReplayExample: Manager one rejected project and replay will wait ProjectSumbitted again.");
                 yield return
                     GoBackTo<Project, bool>(
                         ProjectSumbitted,
-                        (input, output) => input.Id == CurrentProject.Id);
+                        (input, output) => input.Id == CurrentProject.Id && input.IsResubmit == true);
             }
             else
                 Console.WriteLine("ReplayExample: Manager one approved project");

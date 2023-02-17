@@ -12,7 +12,9 @@ internal class WaitsRepository : RepositoryBase
 
     public Task AddWait(Wait wait)
     {
-        Context.Waits.Add(wait);
+        var isExistLocal = Context.Waits.Local.Contains(wait);
+        if (isExistLocal is false) 
+            Context.Waits.Add(wait);
         return Task.CompletedTask;
     }
 
@@ -80,7 +82,7 @@ internal class WaitsRepository : RepositoryBase
                     x.WaitMethodIdentifierId == pushedMethod.MethodIdentifier.Id &&
                     x.Status == WaitStatus.Waiting)
                 .ToListAsync();
-        databaseWaits.ForEach(wait => wait.GetExpressions());
+        databaseWaits.ForEach(wait => wait.LoadExpressions());
         foreach (var methodWait in databaseWaits)
         {
             if (!methodWait.NeedFunctionStateForMatch && CheckMatch(methodWait, pushedMethod))
@@ -151,5 +153,14 @@ internal class WaitsRepository : RepositoryBase
             .ToListAsync();
         //&& x.ParentWaitId == replayWait.ParentWaitId
         return result!;
+    }
+
+    internal Task<bool> FirstWaitExistInDb(Wait firstWait, MethodIdentifier methodIdentifier)
+    {
+        return Context.Waits.AnyAsync(x =>
+            x.IsFirst &&
+            x.RequestedByFunctionId == methodIdentifier.Id &&
+            x.Name == firstWait.Name &&
+            x.Status == WaitStatus.Waiting);
     }
 }

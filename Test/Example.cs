@@ -91,21 +91,21 @@ namespace LocalResumableFunction
         [WaitMethod]
         public bool ManagerOneApproveProject(ApprovalDecision args)
         {
-            Console.WriteLine("Manager One Approve Project");
+            Console.WriteLine($"Manager One Approve Project with decision ({args.Decision})");
             return true;
         }
 
         [WaitMethod]
         public bool ManagerTwoApproveProject(ApprovalDecision args)
         {
-            Console.WriteLine("Manager Two Approve Project");
+            Console.WriteLine($"Manager Two Approve Project with decision ({args.Decision})");
             return true;
         }
         
         [WaitMethod]
         public bool ManagerThreeApproveProject(ApprovalDecision args)
         {
-            Console.WriteLine("Manager Three Approve Project");
+            Console.WriteLine($"Manager Three Approve Project with decision ({args.Decision})");
             return true;
         }
 
@@ -121,6 +121,7 @@ namespace LocalResumableFunction
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
+        public bool IsResubmit { get; set; }
     }
 
     public record ApprovalDecision(int ProjectId, bool Decision);

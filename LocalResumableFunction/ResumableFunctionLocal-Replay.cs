@@ -14,8 +14,13 @@ public abstract partial class ResumableFunctionLocal
         return new ReplayWait { Name = name, ReplayType = ReplayType.WaitAgain };
     }
 
-    protected ReplayWait GoBackTo<TInput, TOutput>(string name, Expression<Func<TInput, TOutput, bool>> value)
+    protected ReplayWait GoBackTo<TInput, TOutput>(string name, Expression<Func<TInput, TOutput, bool>> newMatchExpression)
     {
-        return new ReplayWait { Name = name, ReplayType = ReplayType.WaitAgainWithNewMatch };
+        return new ReplayWait
+        {
+            Name = name,
+            ReplayType = ReplayType.WaitAgainWithNewMatch,
+            MatchExpression = newMatchExpression
+        };
     }
 }
