@@ -1,4 +1,5 @@
 ﻿# Todo
+* Remove uniqe for method hash
 * Async method waits
 * Run in another process
 	* Save pushed waits to database
@@ -26,9 +27,9 @@
 * Wait all [DONE]
 * Wait any [DONE]
 * Wait function [DONE]
-* Wait many functions
+* Wait many functions [DONE]
 * Wait any function
-* Replay Go back [to] and go back [after] for types:
+* Replay [to,after,before] for types:
 	* One Method Node [DONE]
 	* Many Methods Wait
 	* Any Method Wait

@@ -15,22 +15,22 @@ public abstract partial class ResumableFunctionLocal
     }
 
     protected ManyFunctionsWait WaitFunctions
-        (string name, Func<IAsyncEnumerable<Wait>>[] subFunctions)
+        (string name, params Func<IAsyncEnumerable<Wait>>[] subFunctions)
     {
         var result = new ManyFunctionsWait
         {
-            WaitingFunctions = new List<FunctionWait>(subFunctions.Length),
+            WaitingFunctions = new List<FunctionWait>(new FunctionWait[subFunctions.Length]),
             Name = name,
             IsNode = true,
             WaitType = WaitType.AllFunctionsWait
         };
-        for (var i = 0; i < subFunctions.Length; i++)
+        for (var index = 0; index < subFunctions.Length; index++)
         {
-            var currentFunction = subFunctions[i];
+            var currentFunction = subFunctions[index];
             var currentFuncResult = WaitFunction($"#{currentFunction.Method.Name}#", currentFunction);
             currentFuncResult.IsNode = false;
-            currentFuncResult.ParentFunctionGroupId = result.Id;
-            result.WaitingFunctions[i] = currentFuncResult;
+            currentFuncResult.ParentFunctionGroup = result;
+            result.WaitingFunctions[index] = currentFuncResult;
         }
 
         return result;

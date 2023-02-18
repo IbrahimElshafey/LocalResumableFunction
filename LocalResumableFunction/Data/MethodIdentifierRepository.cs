@@ -15,7 +15,10 @@ internal class MethodIdentifierRepository : RepositoryBase
         var methodId = new MethodIdentifier();
         methodId.SetMethodInfo(methodInfo);
         var existInDb = await GetMethodIdentifier(methodId);
-        return (existInDb, existInDb.Id > 0);
+
+        var inDb = existInDb.Id > 0;
+
+        return (existInDb, inDb);
     }
 
     public async Task<MethodIdentifier> GetMethodIdentifier(MethodIdentifier methodId)
@@ -34,6 +37,9 @@ internal class MethodIdentifierRepository : RepositoryBase
                 x.AssemblyName == methodId.AssemblyName &&
                 x.ClassName == methodId.ClassName &&
                 x.MethodName == methodId.MethodName);
+
+        if (existInDb is not null)
+            Context.Entry(methodId).State = EntityState.Detached;
         return existInDb ?? methodId;
     }
 }

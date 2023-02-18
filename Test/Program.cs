@@ -3,6 +3,7 @@
 using LocalResumableFunction;
 using LocalResumableFunction.Data;
 using LocalResumableFunction.InOuts;
+using System.Reflection;
 using Test;
 
 public class Program
@@ -23,8 +24,21 @@ public class Program
         //TestReplayGoBackAfter();
         //TestReplayGoBackBeforeNewMatch();
        
-        await TestWaitMany();
+        //await TestWaitMany();
+        await TestWaitManyFunctions();
         Console.ReadLine();
+    }
+
+    private static async Task TestWaitManyFunctions()
+    {
+        await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitManyFunctions));
+        var example = new WaitManyFunctionsExample();
+        example.ProjectSubmitted(Example.GetCurrentProject());
+        await Task.Delay(10000);
+        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
+        example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
+        await Task.Delay(10000);
+        example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
     }
 
     private static async Task TestWaitMany()
@@ -39,7 +53,7 @@ public class Program
     private static async Task RegisterResumableFunction(Type classType, string methodName)
     {
         var method =
-            classType.GetMethod(nameof(methodName));
+            classType.GetMethod(methodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
         if (method == null)
         {
             Console.WriteLine($"No method with name `{methodName}` in class `{classType.FullName}`.");

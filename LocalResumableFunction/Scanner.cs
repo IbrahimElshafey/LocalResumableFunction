@@ -14,10 +14,10 @@ internal class Scanner
 
     public async Task Start()
     {
-#if DEBUG
-        WriteMessage("DELETE [LocalResumableFunctionsData.db] DATABASE IF EXIST");
-        File.Delete($"{AppContext.BaseDirectory}LocalResumableFunctionsData.db");
-#endif
+//#if DEBUG
+//        WriteMessage("DELETE [LocalResumableFunctionsData.db] DATABASE IF EXIST");
+//        File.Delete($"{AppContext.BaseDirectory}LocalResumableFunctionsData.db");
+//#endif
         WriteMessage("Start Scan Resumable Functions##");
         WriteMessage("Initiate DB context.");
         _context = new FunctionDataContext();

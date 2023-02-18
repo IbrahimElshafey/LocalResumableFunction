@@ -13,62 +13,14 @@ internal class WaitsRepository : RepositoryBase
     public Task AddWait(Wait wait)
     {
         var isExistLocal = Context.Waits.Local.Contains(wait);
-        if (isExistLocal is false)
+        var notAddStatus = Context.Entry(wait).State != EntityState.Added;
+        if (isExistLocal is false && notAddStatus)
+        {
+            Console.WriteLine($"==> Add Wait [{wait.Name}] with type [{wait.WaitType}]");
             Context.Waits.Add(wait);
+        }
         return Task.CompletedTask;
     }
-
-    //public async Task DuplicateWaitIfFirst(MethodWait currentWait)
-    //{
-    //    if (currentWait.IsFirst)
-    //        DuplicateMethodWait(currentWait);
-    //    else if (currentWait.ParentWaitsGroupId is not null)
-    //    {
-    //        var waitGroup = await GetWaitGroup(currentWait.ParentWaitsGroupId);
-    //        if (waitGroup.IsFirst)
-    //            DuplicateWaitGroup(waitGroup);
-    //    }
-    //    else if (currentWait.ParentWaitId is not null)
-    //    {
-    //        var functionWait = await GetParentFunctionWait(currentWait.ParentWaitId);
-    //        if (functionWait.IsFirst)
-    //            DuplicateFunctionWait(functionWait);
-    //    }
-
-    //    void DuplicateMethodWait(MethodWait methodWait)
-    //    {
-    //        var functionState = new ResumableFunctionState
-    //        {
-    //            ResumableFunctionIdentifierId = methodWait.RequestedByFunction.Id,
-    //            StateObject = new object(),
-    //        };
-    //        Context.FunctionStates.Add(functionState);
-    //        var result = new MethodWait
-    //        {
-    //            Status = WaitStatus.Waiting,
-    //            Name = methodWait.Name,
-    //            MatchIfExpressionValue = methodWait.MatchIfExpressionValue,
-    //            SetDataExpressionValue = methodWait.SetDataExpressionValue,
-    //            FunctionState = functionState,
-    //            IsFirst = true,
-    //            IsNode = methodWait.IsNode,
-    //            IsOptional = methodWait.IsOptional,
-    //            NeedFunctionStateForMatch = methodWait.NeedFunctionStateForMatch,
-    //            StateAfterWait = methodWait.StateAfterWait,
-    //            WaitType = methodWait.WaitType,
-    //            RequestedByFunctionId = methodWait.RequestedByFunctionId,
-    //            WaitMethodIdentifierId = methodWait.WaitMethodIdentifierId
-    //        };
-    //        Context.MethodWaits.Add(result);
-    //    }
-    //    void DuplicateWaitGroup(ManyMethodsWait waitGroup)
-    //    {
-
-    //    }
-    //    void DuplicateFunctionWait(Wait functionWait)
-    //    {
-    //    }
-    //}
 
     public async Task<List<MethodWait>> GetMatchedWaits(PushedMethod pushedMethod)
     {
@@ -106,15 +58,16 @@ internal class WaitsRepository : RepositoryBase
 
     public async Task<Wait> GetParentFunctionWait(int? functionWaitId)
     {
+        Debugger.Launch();
         var result = await Context.FunctionWaits
             .Include(x => x.RequestedByFunction)
             .FirstAsync(x => x.Id == functionWaitId);
-        if (result == null)
+        if (result != null && result.ParentFunctionGroupId != null)
         {
             var manyFunc = await Context.ManyFunctionsWaits
                 .Include(x => x.WaitingFunctions)
                 .Include(x => x.RequestedByFunction)
-                .FirstOrDefaultAsync(x => x.Id == functionWaitId);
+                .FirstOrDefaultAsync(x => x.Id == result.ParentFunctionGroupId);
             return manyFunc!;
         }
 

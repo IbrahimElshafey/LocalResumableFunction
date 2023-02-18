@@ -24,6 +24,7 @@ public class ManyFunctionsWait : Wait
     internal void SetMatchedFunction(int? functionId)
     {
         WaitingFunctions.ForEach(wait => wait.Status = WaitStatus.Canceled);
+        //todo:cancel functions waits that still open
         var functionWait = WaitingFunctions.First(x => x.Id == functionId);
         functionWait.Status = WaitStatus.Completed;
         Status = WaitStatus.Completed;

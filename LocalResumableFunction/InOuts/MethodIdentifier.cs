@@ -32,7 +32,7 @@ public class MethodIdentifier
             {
                 _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
                     ?.GetType(ClassName)
-                    ?.GetMethods()
+                    ?.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                     .FirstOrDefault(x => x.Name == MethodName && CalcSignature(x) == MethodSignature);
                 return _methodInfo;
             }

@@ -23,8 +23,7 @@ internal partial class ResumableFunctionHandler
 
                 await functionRunner.MoveNextAsync();
                 var firstWait = functionRunner.Current;
-                var repo = new MethodIdentifierRepository(_context);
-                var methodId = await repo.GetMethodIdentifier(resumableFunction);
+                var methodId = await _metodIdsRepo.GetMethodIdentifier(resumableFunction);
                 if (await _waitsRepository.FirstWaitExistInDb(firstWait, methodId.MethodIdentifier))
                 {
                     WriteMessage("First wait alerady exist.");
