@@ -30,7 +30,7 @@ public abstract partial class ResumableFunctionLocal
         for (var i = 0; i < subFunctions.Length; i++)
         {
             var currentFunction = subFunctions[i];
-            var currentFuncResult =  WaitFunction("#NoName#", currentFunction);
+            var currentFuncResult =  WaitFunction($"#{currentFunction.Method.Name}#", currentFunction);
             currentFuncResult.IsNode = false;
             currentFuncResult.ParentFunctionGroupId = result.Id;
             result.WaitingFunctions[i] = currentFuncResult;

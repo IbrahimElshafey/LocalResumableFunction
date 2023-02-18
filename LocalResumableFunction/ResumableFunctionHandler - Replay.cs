@@ -46,7 +46,12 @@ internal partial class ResumableFunctionHandler
 
     private async Task ReplayGoBefore(Wait oldCompletedWait)
     {
-        oldCompletedWait.Status = WaitStatus.Canceled;
+        if (oldCompletedWait.IsFirst)
+        {
+            WriteMessage("Go back to first wait with same match will create new separate function instance.");
+            return;
+        }
+        //oldCompletedWait.Status = WaitStatus.Canceled;
         var goBefore = await GoBefore(oldCompletedWait);
         if (goBefore.HasWait)
             await GenericWaitRequested(goBefore.Runner.Current);

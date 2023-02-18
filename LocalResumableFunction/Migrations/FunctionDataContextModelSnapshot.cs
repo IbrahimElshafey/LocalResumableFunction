@@ -163,8 +163,10 @@ namespace LocalResumableFunction.Migrations
                 {
                     b.HasBaseType("LocalResumableFunction.InOuts.Wait");
 
-                    b.Property<string>("WhenCountExpression")
-                        .HasColumnType("TEXT");
+                    b.Property<byte[]>("CountExpressionValue")
+                        .IsRequired()
+                        .HasColumnType("BLOB")
+                        .HasColumnName("CountExpressionValue");
 
                     b.HasDiscriminator().HasValue("ManyMethodsWait");
                 });

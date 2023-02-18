@@ -68,7 +68,7 @@ namespace LocalResumableFunction.Migrations
                     ParentFunctionGroupId = table.Column<int>(type: "INTEGER", nullable: true),
                     FirstWaitId = table.Column<int>(type: "INTEGER", nullable: true),
                     ManyFunctionsWaitId = table.Column<int>(type: "INTEGER", nullable: true),
-                    WhenCountExpression = table.Column<string>(type: "TEXT", nullable: true),
+                    CountExpressionValue = table.Column<byte[]>(type: "BLOB", nullable: true),
                     ParentWaitsGroupId = table.Column<int>(type: "INTEGER", nullable: true),
                     IsOptional = table.Column<bool>(type: "INTEGER", nullable: true),
                     SetDataExpressionValue = table.Column<byte[]>(type: "BLOB", nullable: true),

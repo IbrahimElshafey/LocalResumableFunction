@@ -114,6 +114,11 @@ namespace LocalResumableFunction
             Console.WriteLine("Ask Manager to Approve Project");
             return true;
         }
+
+        public static Project GetCurrentProject()
+        {
+           return new Project { Id = 2000, Name = "Project Name", Description = "Description" };
+        }
     }
 
     public class Project

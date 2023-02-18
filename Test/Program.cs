@@ -3,35 +3,53 @@ using LocalResumableFunction;
 using LocalResumableFunction.Data;
 using Test;
 
-Console.WriteLine("Test App RUNNING.");
-
-//TestSubFunctionCall();
-TestReplayGoBackAfter();
-//TestReplayGoBackBeforeNewMatch();
-Console.ReadLine();
-
-static void TestSubFunctionCall()
+public class Program
 {
-    var example = new Example();
-    example.ProjectSubmitted(new Project { Id = 900, Name = "Project Name", Description = "Description" });
-    example.ManagerOneApproveProject(new(900, true));
-    example.ManagerTwoApproveProject(new(900, true));
-    example.ManagerThreeApproveProject(new(900, true));
-}
+    static void Main()
+    {
+        Console.WriteLine("Test App RUNNING.");
 
-static void TestReplayGoBackAfter()
-{
-    var example = new ReplayGoBackAfterExample();
-    example.ProjectSubmitted(new Project { Id = 2000, Name = "Project Name", Description = "Description" });
-    example.ManagerOneApproveProject(new(2000, false));
-    example.ManagerOneApproveProject(new(2000, true));
-}
-static void TestReplayGoBackBeforeNewMatch()
-{
-    var example = new ReplayGoBackBeforeExample();
-    example.ProjectSubmitted(new Project { Id = 1000, Name = "Project Name", Description = "Description" });
-    example.ManagerOneApproveProject(new(1000, false));
-    example.ProjectSubmitted(new Project { Id = 1000, Name = "New Project", Description = "New Description" ,IsResubmit = true});
-    example.ManagerOneApproveProject(new(1000, true));
-}
 
+        //TestSubFunctionCall();
+        //TestReplayGoBackAfter();
+        //TestReplayGoBackBeforeNewMatch();
+        TestWaitMany();
+        Console.ReadLine();
+    }
+
+    static Project project = Example.GetCurrentProject();
+
+    static void TestWaitMany()
+    {
+        var example = new TestWaitManyExample();
+        example.ManagerOneApproveProject(new(project.Id, true));
+        example.ManagerTwoApproveProject(new(project.Id, true));
+        example.ManagerThreeApproveProject(new(project.Id, true));
+    }
+
+    static void TestSubFunctionCall()
+    {
+        var example = new Example();
+        example.ProjectSubmitted(project);
+        example.ManagerOneApproveProject(new(project.Id, true));
+        example.ManagerTwoApproveProject(new(project.Id, true));
+        example.ManagerThreeApproveProject(new(project.Id, true));
+    }
+
+    static void TestReplayGoBackAfter()
+    {
+        var example = new ReplayGoBackAfterExample();
+        example.ProjectSubmitted(Example.GetCurrentProject());
+        example.ManagerOneApproveProject(new(project.Id, false));
+        example.ManagerOneApproveProject(new(project.Id, true));
+    }
+    static void TestReplayGoBackBeforeNewMatch()
+    {
+        var example = new ReplayGoBackBeforeNewMatchExample();
+        example.ProjectSubmitted(Example.GetCurrentProject());
+        example.ManagerOneApproveProject(new(project.Id, false));
+        project.Name += "-Updated";
+        example.ProjectSubmitted(project);
+        example.ManagerOneApproveProject(new(project.Id, true));
+    }
+}

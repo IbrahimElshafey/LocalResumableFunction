@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LocalResumableFunction.Migrations
 {
     [DbContext(typeof(FunctionDataContext))]
-    [Migration("20230218071539_Initial")]
+    [Migration("20230218101237_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -166,8 +166,10 @@ namespace LocalResumableFunction.Migrations
                 {
                     b.HasBaseType("LocalResumableFunction.InOuts.Wait");
 
-                    b.Property<string>("WhenCountExpression")
-                        .HasColumnType("TEXT");
+                    b.Property<byte[]>("CountExpressionValue")
+                        .IsRequired()
+                        .HasColumnType("BLOB")
+                        .HasColumnName("CountExpressionValue");
 
                     b.HasDiscriminator().HasValue("ManyMethodsWait");
                 });

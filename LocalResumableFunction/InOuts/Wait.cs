@@ -9,24 +9,6 @@ public abstract class Wait
 {
     private MethodBase _callerMethodInfo;
 
-
-    //[NotMapped]
-    //public MethodBase CallerMethodInfo
-    //{
-    //    get
-    //    {
-    //        if (_callerMethodInfo != null)
-    //            return _callerMethodInfo;
-    //        else return WaitMethodIdentifier?.GetMethodBase();
-    //    }
-
-    //    internal set
-    //    {
-    //        _callerMethodInfo = value;
-    //        WaitMethodIdentifier?.SetMethodBase(_callerMethodInfo);
-    //    }
-    //}
-
     private ResumableFunctionLocal _currntFunction;
 
     public int Id { get; internal set; }

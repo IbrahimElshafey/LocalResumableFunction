@@ -84,6 +84,10 @@ internal class FunctionDataContext : DbContext
         .Property(mw => mw.MatchIfExpressionValue)
         .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
 
+        modelBuilder.Entity<ManyMethodsWait>()
+            .Property(mw => mw.CountExpressionValue)
+            .HasColumnName(nameof(ManyMethodsWait.CountExpressionValue));
+
         modelBuilder.Entity<MethodWait>()
         .Property(mw => mw.SetDataExpressionValue)
         .HasColumnName(nameof(MethodWait.SetDataExpressionValue));

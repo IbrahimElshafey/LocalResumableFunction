@@ -3,7 +3,6 @@
 public enum WaitStatus
 {
     Waiting = 0,
-    Started = 1,
-    Canceled = 2,
-    Completed = 3
+    Canceled = 1,
+    Completed = 2
 }

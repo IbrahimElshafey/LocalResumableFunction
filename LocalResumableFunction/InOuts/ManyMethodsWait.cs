@@ -1,11 +1,32 @@
-﻿using System.Linq.Expressions;
+﻿using LocalResumableFunction.Helpers;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace LocalResumableFunction.InOuts;
 
 public class ManyMethodsWait : Wait
 {
+    private LambdaExpression? _countExpression;
     public List<MethodWait> WaitingMethods { get; internal set; } = new();
-    public LambdaExpression? WhenCountExpression { get; internal set; }
+
+    [NotMapped]
+    public LambdaExpression? CountExpression
+    {
+        get => _countExpression ?? GetCountExpression();
+        internal set => _countExpression = value;
+    }
+
+    private LambdaExpression GetCountExpression()
+    {
+        var assembly = RequestedByFunction.MethodInfo.DeclaringType.Assembly;
+        return (LambdaExpression)
+            ExpressionToJsonConverter.JsonToExpression(
+                TextCompressor.DecompressString(CountExpressionValue), assembly);
+    }
+
+    internal byte[] CountExpressionValue { get; set; }
 
 
     public MethodWait? MatchedMethod => WaitingMethods?.Single(x => x.Status == WaitStatus.Completed);
@@ -16,10 +37,24 @@ public class ManyMethodsWait : Wait
 
     public ManyMethodsWait WhenMatchedCount(Expression<Func<int, bool>> matchCountFilter)
     {
-        WhenCountExpression = matchCountFilter;
+        //Debugger.Launch();
+        var assembly = WaitingMethods
+            .FirstOrDefault()?
+            .WaitMethodIdentifier
+            .MethodInfo?
+            .DeclaringType?
+            .Assembly;
+        if (assembly != null)
+        {
+            CountExpression = matchCountFilter;
+            CountExpressionValue =
+                TextCompressor.CompressString(
+                    ExpressionToJsonConverter.ExpressionToJson(CountExpression, assembly));
+        }
+
         return this;
-    } 
-    
+    }
+
     public Wait WaitAll()
     {
         WaitType = WaitType.AllMethodsWait;
@@ -38,9 +73,9 @@ public class ManyMethodsWait : Wait
         CheckIsDone();
     }
 
-    private bool CheckIsDone()
+    private void CheckIsDone()
     {
-        if (WhenCountExpression is null)
+        if (CountExpression is null)
         {
             var required = WaitingMethods.Count(x => x.IsOptional == false);
             //MatchedMethods.Count include optional
@@ -49,11 +84,18 @@ public class ManyMethodsWait : Wait
         else
         {
             var matchedCount = MatchedMethods?.Count ?? 0;
-            var matchCompiled = (Func<int, bool>)WhenCountExpression.Compile();
+            var matchCompiled = (Func<int, bool>)CountExpression.Compile();
             Status = matchCompiled(matchedCount) ? WaitStatus.Completed : Status;
         }
 
-        return Status == WaitStatus.Completed;
+        if (Status == WaitStatus.Completed)
+        {
+            WaitingMethods.ForEach(x =>
+            {
+                if (x.Status == WaitStatus.Waiting)
+                    x.Status = WaitStatus.Canceled;
+            });
+        }
     }
 
     internal void SetMatchedMethod(Wait currentWait)

@@ -2,7 +2,11 @@
 
 public enum ReplayType
 {
-    GoAfter = 1,
-    GoBefore = 2,
-    GoBeforeWithNewMatch = 3,
+    GoAfter,
+    GoBefore,
+    GoBeforeWithNewMatch,
+    GoBeforeWithNewMatches,
+    GoTo,
+    GoToWithNewMatch,
+    GoToWithNewMatches,
 }
