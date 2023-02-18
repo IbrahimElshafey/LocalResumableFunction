@@ -143,13 +143,13 @@ internal class WaitsRepository : RepositoryBase
         return result!;
     }
 
-    internal async Task<List<Wait>> GetOldWaits(ReplayWait replayWait)
+    internal async Task<List<Wait>> GetFunctionInstanceWaits(int requestedByFunctionId,int functionStateId)
     {
         var result = await Context.Waits
             .OrderByDescending(x => x.Id)
             .Where(x =>
-            x.RequestedByFunctionId == replayWait.RequestedByFunctionId &&
-            x.FunctionStateId == replayWait.FunctionState.Id)
+            x.RequestedByFunctionId == requestedByFunctionId &&
+            x.FunctionStateId == functionStateId)
             .ToListAsync();
         //&& x.ParentWaitId == replayWait.ParentWaitId
         return result!;

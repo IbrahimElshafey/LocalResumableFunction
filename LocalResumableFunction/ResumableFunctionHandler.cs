@@ -196,68 +196,7 @@ internal partial class ResumableFunctionHandler
         return true;
     }
 
-    private async Task<bool> ReplayWait(ReplayWait replayWait)
-    {
-        Debugger.Launch();
-        //todo:get old wait
-        var functionOldWaits = await _waitsRepository.GetOldWaits(replayWait);
-        var waitToReplay =
-            functionOldWaits
-            .FirstOrDefault(x => x.Status == WaitStatus.Completed && x.Name == replayWait.Name);
-        if (waitToReplay == null)
-        {
-            WriteMessage($"Can't replay not exit wait [{replayWait.Name}] in function [{replayWait.RequestedByFunction.MethodName}].");
-            return false;
-        }
-        //skip active waits after replay
-        functionOldWaits
-            .Where(x => x.Id > waitToReplay.Id && x.Status == WaitStatus.Waiting)
-            .ToList()
-            .ForEach(x => x.Status = WaitStatus.Canceled);
-        switch (replayWait.ReplayType)
-        {
-            case ReplayType.ExecuteNoWait:
-                await Replay(waitToReplay);
-                break;
-            case ReplayType.WaitAgain:
-                await GenericWaitRequested(waitToReplay);
-                break;
-            case ReplayType.WaitAgainWithNewMatch:
-                if (waitToReplay is MethodWait methodWait)
-                {
-                    methodWait.WaitMethodIdentifier =
-                        await _context.MethodIdentifiers.FindAsync(methodWait.WaitMethodIdentifierId);
-                    methodWait.LoadExpressions();
-                    var isSameSignature =
-                        Extensions.CompareReplaymatchWithOldMatch(replayWait.MatchExpression, methodWait.MatchIfExpression);
-                    if (isSameSignature is false)
-                        throw new Exception("Replay match expression method must have same signature as " +
-                                            "the wait that will replayed.");
-
-                    methodWait.SetMatchExpression(replayWait.MatchExpression);
-                    methodWait.Name += "-Replay";
-                    methodWait.IsFirst = false;
-                    //todo:duplicate wait to replay to keep history
-                    //change status to canceled
-                    await GenericWaitRequested(methodWait);
-                }
-                else
-                    throw new Exception($"When the replay type is [{ReplayType.WaitAgainWithNewMatch}]" +
-                                        $"the wait to replay  must be of type [{nameof(MethodWait)}]");
-                break;
-            default:
-                throw new Exception("ReplayWait exception.");
-        }
-
-        return true;
-    }
-
-    private async Task Replay(Wait oldCompletedWait)
-    {
-        var nextWaitResult = await oldCompletedWait.CurrntFunction.GetNextWait(oldCompletedWait);
-        await HandleNextWait(nextWaitResult, oldCompletedWait);
-    }
-
+    
     internal async Task<bool> GenericWaitRequested(Wait newWait)
     {
         newWait.Status = WaitStatus.Waiting;
@@ -322,7 +261,7 @@ internal partial class ResumableFunctionHandler
             return;
         }
         functionWait.FirstWait = functionRunner.Current;
-        functionWait.FirstWait.StateAfterWait = functionRunner.GetState();
+        //functionWait.FirstWait.StateAfterWait = functionRunner.GetState();
         functionWait.FirstWait.FunctionState = functionWait.FunctionState;
         functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
         functionWait.FirstWait.ParentWait = functionWait;

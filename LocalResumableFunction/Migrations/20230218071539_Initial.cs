@@ -57,6 +57,7 @@ namespace LocalResumableFunction.Migrations
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     IsFirst = table.Column<bool>(type: "INTEGER", nullable: false),
+                    StateBeforeWait = table.Column<int>(type: "INTEGER", nullable: false),
                     StateAfterWait = table.Column<int>(type: "INTEGER", nullable: false),
                     IsNode = table.Column<bool>(type: "INTEGER", nullable: false),
                     WaitType = table.Column<int>(type: "INTEGER", nullable: false),

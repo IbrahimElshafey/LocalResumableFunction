@@ -43,14 +43,18 @@ public static class Extensions
         }
     }
 
-    public static bool CompareReplaymatchWithOldMatch(LambdaExpression? replayMatch, LambdaExpression? oldMatch)
+    public static bool SameLambadaSignatures(LambdaExpression? expressionOne, LambdaExpression? expressionTwo)
     {
-        var isEqual = replayMatch != null && oldMatch != null;
+        var isEqual = expressionOne != null && expressionTwo != null;
         if (isEqual is false) return false;
-        if (replayMatch.ReturnType != oldMatch.ReturnType) return false;
-        for (int i = 0; i < replayMatch.Parameters.Count; i++)
+        if (expressionOne.ReturnType != expressionTwo.ReturnType) 
+            return false;
+        if (expressionOne.Parameters.Count != expressionTwo.Parameters.Count)
+            return false;
+
+        for (int i = 0; i < expressionOne.Parameters.Count; i++)
         {
-            if (replayMatch.Parameters[i].Type != oldMatch.Parameters[i].Type)
+            if (expressionOne.Parameters[i].Type != expressionTwo.Parameters[i].Type)
                 return false;
         }
         return true;

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Net.WebSockets;
+using System.Reflection;
 using LocalResumableFunction.InOuts;
 
 namespace LocalResumableFunction;
@@ -6,25 +7,25 @@ namespace LocalResumableFunction;
 internal class FunctionRunner : IAsyncEnumerator<Wait>
 {
     private IAsyncEnumerator<Wait> _this;
-    public bool ResumableFunctionExist => _this != null;    
+    public bool ResumableFunctionExist => _this != null;
     public FunctionRunner(Wait currentWait)
     {
         var functionRunnerType = currentWait.CurrntFunction.GetType()
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
             .FirstOrDefault(x => x.Name.StartsWith($"<{currentWait.RequestedByFunction.MethodName}>"));
 
-        CreateRunner(functionRunnerType,currentWait.CurrntFunction);
+        CreateRunner(functionRunnerType, currentWait.CurrntFunction);
         SetState(currentWait.StateAfterWait);
     }
 
 
-    public FunctionRunner(ResumableFunctionLocal classInstance, MethodInfo resumableFunction)
+    public FunctionRunner(ResumableFunctionLocal classInstance, MethodInfo resumableFunction, int? state = null)
     {
         var functionRunnerType = classInstance.GetType()
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
             .FirstOrDefault(x => x.Name.StartsWith($"<{resumableFunction.Name}>"));
-        CreateRunner(functionRunnerType,classInstance);
-        SetState(int.MinValue);
+        CreateRunner(functionRunnerType, classInstance);
+        SetState(state ?? int.MinValue);
     }
 
     public Wait Current => _this.Current;
@@ -34,9 +35,16 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
         return _this.DisposeAsync();
     }
 
-    public ValueTask<bool> MoveNextAsync()
+    public async ValueTask<bool> MoveNextAsync()
     {
-        return _this.MoveNextAsync();
+        var stateBeforeWait = GetState();
+        var hasNext = await _this.MoveNextAsync();
+        if (hasNext)
+        {
+            _this.Current.StateBeforeWait = stateBeforeWait;
+            _this.Current.StateAfterWait = GetState();
+        }
+        return hasNext;
     }
 
     private void CreateRunner(Type? functionRunnerType, ResumableFunctionLocal resumableFunctionLocal)
@@ -74,7 +82,7 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
         //set in start state
     }
 
-    internal int GetState()
+    private int GetState()
     {
         if (_this == null) return int.MinValue;
         var stateField = _this?.GetType().GetField("<>1__state");
@@ -83,7 +91,7 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
         return int.MinValue;
     }
 
-    internal void SetState(int state)
+    private void SetState(int state)
     {
         if (_this != null)
         {

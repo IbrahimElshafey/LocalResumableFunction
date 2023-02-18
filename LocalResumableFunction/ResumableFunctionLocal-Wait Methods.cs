@@ -37,7 +37,7 @@ public abstract partial class ResumableFunctionLocal
         return result;
     }
 
-    internal async Task<NextWaitResult> GetNextWait(Wait currentWait)
+    internal async Task<NextWaitResult?> GetNextWait(Wait currentWait)
     {
         var functionRunner = new FunctionRunner(currentWait);
         if (functionRunner.ResumableFunctionExist is false)
@@ -52,12 +52,14 @@ public abstract partial class ResumableFunctionLocal
             var waitExist = await functionRunner.MoveNextAsync();
             if (waitExist)
             {
-                functionRunner.Current.StateAfterWait = functionRunner.GetState();
                 return new NextWaitResult(functionRunner.Current, false, false);
             }
 
-            //if current WaitFunction runner name is the main function start
-            if (currentWait.ParentWaitId == null) return new NextWaitResult(null, true, false);
+            var isEntryFunctionEnd = currentWait.ParentWaitId == null;
+            if (isEntryFunctionEnd) 
+                return new NextWaitResult(null, true, false);
+
+            //sub function end
             return new NextWaitResult(null, false, true);
         }
         catch (Exception)

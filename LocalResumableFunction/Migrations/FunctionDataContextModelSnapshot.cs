@@ -106,6 +106,9 @@ namespace LocalResumableFunction.Migrations
                     b.Property<int>("StateAfterWait")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("StateBeforeWait")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 

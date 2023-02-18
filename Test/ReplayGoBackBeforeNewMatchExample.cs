@@ -4,13 +4,14 @@ using LocalResumableFunction.InOuts;
 
 namespace Test
 {
-    internal class ReplayGoBackToExample : Example
+    internal class ReplayGoBackBeforeNewMatchExample : Example
     {
         private const string ProjectSumbitted = "Project Sumbitted";
 
-        [ResumableFunctionEntryPoint]
+        //[ResumableFunctionEntryPoint]
         public async IAsyncEnumerable<Wait> TestReplay()
         {
+            Console.WriteLine("Before project submitted.");
             yield return
                 When<Project, bool>(ProjectSumbitted, ProjectSubmitted)
                 .If((input, output) => output == true && input.IsResubmit == false)
@@ -25,7 +26,7 @@ namespace Test
             {
                 Console.WriteLine("ReplayExample: Manager one rejected project and replay will wait ProjectSumbitted again.");
                 yield return
-                    GoBackTo<Project, bool>(
+                    GoBackBefore<Project, bool>(
                         ProjectSumbitted,
                         (input, output) => input.Id == CurrentProject.Id && input.IsResubmit == true);
             }

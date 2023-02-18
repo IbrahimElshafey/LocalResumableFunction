@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LocalResumableFunction.Migrations
 {
     [DbContext(typeof(FunctionDataContext))]
-    [Migration("20230216120852_Initial")]
+    [Migration("20230218071539_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -107,6 +107,9 @@ namespace LocalResumableFunction.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("StateAfterWait")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("StateBeforeWait")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("Status")

@@ -35,7 +35,7 @@ internal partial class ResumableFunctionHandler
                 firstWait.RequestedByFunction = methodId.MethodIdentifier;
                 firstWait.RequestedByFunctionId = methodId.MethodIdentifier.Id;
                 firstWait.IsFirst = true;
-                firstWait.StateAfterWait = functionRunner.GetState();
+                //firstWait.StateAfterWait = functionRunner.GetState();
                 firstWait.FunctionState = new ResumableFunctionState
                 {
                     ResumableFunctionIdentifier = methodId.MethodIdentifier,

@@ -2,7 +2,7 @@
 
 public enum ReplayType
 {
-    ExecuteNoWait = 1,
-    WaitAgain = 2,
-    WaitAgainWithNewMatch = 3
+    GoAfter = 1,
+    GoBefore = 2,
+    GoBeforeWithNewMatch = 3,
 }
