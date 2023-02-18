@@ -15,7 +15,10 @@ public class ExpressionToJsonConverter : ValueConverter<Expression, string>
     {
     }
 
-    internal static string ExpressionToJson(Expression expression) => ExpressionToJson(expression, null);
+    internal static string ExpressionToJson(Expression expression)
+    {
+        return ExpressionToJson(expression, null);
+    }
 
     internal static string ExpressionToJson(Expression expression, Assembly? assembly = null)
     {
@@ -24,13 +27,18 @@ public class ExpressionToJsonConverter : ValueConverter<Expression, string>
         return null!;
     }
 
-    internal static Expression JsonToExpression(string json) => JsonToExpression(json, null);
+    internal static Expression JsonToExpression(string json)
+    {
+        return JsonToExpression(json, null);
+    }
+
     internal static Expression JsonToExpression(string json, Assembly? assembly = null)
     {
         if (!string.IsNullOrWhiteSpace(json))
             return JsonConvert.DeserializeObject<LambdaExpression>(json, JsonSettings(assembly))!;
         return null!;
     }
+
     private static JsonSerializerSettings JsonSettings(Assembly? assembly = null)
     {
         var settings = new JsonSerializerSettings();

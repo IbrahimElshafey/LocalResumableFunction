@@ -1,9 +1,6 @@
 ﻿using System.Diagnostics;
-using System.Reflection;
-using LocalResumableFunction.Data;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
-using Microsoft.EntityFrameworkCore;
 
 namespace LocalResumableFunction;
 
@@ -38,6 +35,7 @@ internal partial class ResumableFunctionHandler
 
         return true;
     }
+
     private async Task ReplayGoAfter(Wait oldCompletedWait)
     {
         var nextWaitResult = await oldCompletedWait.CurrntFunction.GetNextWait(oldCompletedWait);
@@ -51,6 +49,7 @@ internal partial class ResumableFunctionHandler
             WriteMessage("Go back to first wait with same match will create new separate function instance.");
             return;
         }
+
         //oldCompletedWait.Status = WaitStatus.Canceled;
         var goBefore = await GoBefore(oldCompletedWait);
         if (goBefore.HasWait)
@@ -81,13 +80,14 @@ internal partial class ResumableFunctionHandler
             }
         }
         else
+        {
             throw new Exception($"When the replay type is [{ReplayType.GoBeforeWithNewMatch}]" +
                                 $"the wait to replay  must be of type [{nameof(MethodWait)}]");
+        }
     }
 
     private static async Task<(FunctionRunner Runner, bool HasWait)> GoBefore(Wait oldCompletedWait)
     {
-
         var runner = new FunctionRunner(oldCompletedWait.CurrntFunction,
             oldCompletedWait.RequestedByFunction.MethodInfo, oldCompletedWait.StateBeforeWait);
         var hasWait = await runner.MoveNextAsync();
@@ -96,13 +96,15 @@ internal partial class ResumableFunctionHandler
             runner.Current.Name += "-Replay";
             runner.Current.IsFirst = false;
         }
+
         return (runner, hasWait);
     }
 
     private async Task<(bool IsFail, Wait? WaitToReplay)> GetOldWait(ReplayWait replayWait)
     {
         var functionOldWaits =
-            await _waitsRepository.GetFunctionInstanceWaits(replayWait.RequestedByFunctionId, replayWait.FunctionState.Id);
+            await _waitsRepository.GetFunctionInstanceWaits(replayWait.RequestedByFunctionId,
+                replayWait.FunctionState.Id);
         var waitToReplay = functionOldWaits
             .FirstOrDefault(x => x.Status == WaitStatus.Completed && x.Name == replayWait.Name);
         if (waitToReplay == null)
@@ -119,5 +121,4 @@ internal partial class ResumableFunctionHandler
             .ForEach(x => x.Status = WaitStatus.Canceled);
         return (false, waitToReplay);
     }
-
 }

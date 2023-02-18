@@ -8,5 +8,5 @@ public enum ReplayType
     GoBeforeWithNewMatches,
     GoTo,
     GoToWithNewMatch,
-    GoToWithNewMatches,
+    GoToWithNewMatches
 }

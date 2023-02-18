@@ -1,11 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
-using LocalResumableFunction.Data;
 using LocalResumableFunction.Helpers;
 
 namespace LocalResumableFunction.InOuts;
+
 public class MethodWait : Wait
 {
     public ManyMethodsWait ParentWaitsGroup { get; internal set; }
@@ -14,13 +13,11 @@ public class MethodWait : Wait
 
     public bool IsOptional { get; internal set; }
 
-    [NotMapped]
-    public LambdaExpression SetDataExpression { get; protected set; }
+    [NotMapped] public LambdaExpression SetDataExpression { get; protected set; }
 
     internal byte[] SetDataExpressionValue { get; set; }
 
-    [NotMapped]
-    public LambdaExpression MatchIfExpression { get; internal set; }
+    [NotMapped] public LambdaExpression MatchIfExpression { get; internal set; }
 
     internal byte[] MatchIfExpressionValue { get; set; }
 
@@ -28,7 +25,7 @@ public class MethodWait : Wait
 
 
     /// <summary>
-    /// The method that we wait to resume resumable function
+    ///     The method that we wait to resume resumable function
     /// </summary>
     internal MethodIdentifier WaitMethodIdentifier { get; set; }
 
@@ -39,7 +36,8 @@ public class MethodWait : Wait
         var assembly = WaitMethodIdentifier.MethodInfo.DeclaringType.Assembly;
         SetMatchExpression(MatchIfExpression);
         SetDataExpression = new RewriteSetDataExpression(this).Result;
-        SetDataExpressionValue = TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(SetDataExpression, assembly));
+        SetDataExpressionValue =
+            TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(SetDataExpression, assembly));
     }
 
     internal void SetMatchExpression(LambdaExpression matchExpression)

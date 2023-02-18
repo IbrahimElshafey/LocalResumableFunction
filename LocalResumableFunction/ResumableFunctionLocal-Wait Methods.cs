@@ -1,7 +1,7 @@
-﻿using LocalResumableFunction;
+﻿using System.Diagnostics;
+using LocalResumableFunction;
 using LocalResumableFunction.InOuts;
 using Newtonsoft.Json;
-using System.Diagnostics;
 
 public abstract partial class ResumableFunctionLocal
 {
@@ -47,16 +47,14 @@ public abstract partial class ResumableFunctionLocal
             //throw new Exception("Can't initiate runner");
             return null;
         }
+
         try
         {
             var waitExist = await functionRunner.MoveNextAsync();
-            if (waitExist)
-            {
-                return new NextWaitResult(functionRunner.Current, false, false);
-            }
+            if (waitExist) return new NextWaitResult(functionRunner.Current, false, false);
 
             var isEntryFunctionEnd = currentWait.ParentWaitId == null;
-            if (isEntryFunctionEnd) 
+            if (isEntryFunctionEnd)
                 return new NextWaitResult(null, true, false);
 
             //sub function end

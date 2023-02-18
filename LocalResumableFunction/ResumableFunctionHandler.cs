@@ -1,25 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.InteropServices.ComTypes;
+﻿using System.Diagnostics;
 using LocalResumableFunction.Data;
-using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
-using Microsoft.EntityFrameworkCore;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LocalResumableFunction;
 
 internal partial class ResumableFunctionHandler
 {
-    private FunctionDataContext _context;
-    private WaitsRepository _waitsRepository;
+    private readonly FunctionDataContext _context;
+    private readonly WaitsRepository _waitsRepository;
 
     internal ResumableFunctionHandler(FunctionDataContext? context = null)
     {
         _context = context ?? new FunctionDataContext();
         _waitsRepository = new WaitsRepository(_context);
     }
+
     /// <summary>
     ///     When method called and finished
     /// </summary>
@@ -30,10 +25,9 @@ internal partial class ResumableFunctionHandler
             var repo = new MethodIdentifierRepository(_context);
             var methodId = await repo.GetMethodIdentifier(pushedMethod.MethodInfo);
             if (methodId.ExistInDb is false)
-            {
                 //_context.MethodIdentifiers.Add(methodId.MethodIdentifier);
-                throw new Exception($"Method [{pushedMethod.MethodInfo.Name}] is not registered in current database as [WaitMethod].");
-            }
+                throw new Exception(
+                    $"Method [{pushedMethod.MethodInfo.Name}] is not registered in current database as [WaitMethod].");
             pushedMethod.MethodIdentifier = methodId.MethodIdentifier;
             var matchedWaits = await _waitsRepository.GetMatchedWaits(pushedMethod);
             foreach (var currentWait in matchedWaits)
@@ -47,9 +41,31 @@ internal partial class ResumableFunctionHandler
         {
             Debug.Write(ex);
         }
-
     }
 
+
+    internal async Task<bool> GenericWaitRequested(Wait newWait)
+    {
+        newWait.Status = WaitStatus.Waiting;
+        if (Validate(newWait) is false) return false;
+        switch (newWait)
+        {
+            case MethodWait methodWait:
+                await SingleWaitRequested(methodWait);
+                break;
+            case ManyMethodsWait manyWaits:
+                await ManyWaitsRequested(manyWaits);
+                break;
+            case FunctionWait functionWait:
+                await FunctionWaitRequested(functionWait);
+                break;
+            case ManyFunctionsWait manyFunctionsWait:
+                await ManyFunctionsWaitRequested(manyFunctionsWait);
+                break;
+        }
+
+        return false;
+    }
 
 
     private async Task HandlePushedMethod(MethodWait currentWait)
@@ -189,35 +205,12 @@ internal partial class ResumableFunctionHandler
                 await _context.SaveChangesAsync();
                 await RegisterFirstWait(parentFunctionWait.RequestedByFunction.MethodInfo);
             }
+
             //HandleNextWait after back to caller
             return await HandleNextWait(nextWaitAftreBacktoCaller, parentFunctionWait);
         }
 
         return true;
-    }
-
-    
-    internal async Task<bool> GenericWaitRequested(Wait newWait)
-    {
-        newWait.Status = WaitStatus.Waiting;
-        if (Validate(newWait) is false) return false;
-        switch (newWait)
-        {
-            case MethodWait methodWait:
-                await SingleWaitRequested(methodWait);
-                break;
-            case ManyMethodsWait manyWaits:
-                await ManyWaitsRequested(manyWaits);
-                break;
-            case FunctionWait functionWait:
-                await FunctionWaitRequested(functionWait);
-                break;
-            case ManyFunctionsWait manyFunctionsWait:
-                await ManyFunctionsWaitRequested(manyFunctionsWait);
-                break;
-        }
-
-        return false;
     }
 
     private async Task SingleWaitRequested(MethodWait methodWait)
@@ -260,6 +253,7 @@ internal partial class ResumableFunctionHandler
             WriteMessage($"No waits exist in sub function ({functionWait.FunctionInfo.Name})");
             return;
         }
+
         functionWait.FirstWait = functionRunner.Current;
         //functionWait.FirstWait.StateAfterWait = functionRunner.GetState();
         functionWait.FirstWait.FunctionState = functionWait.FunctionState;

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,6 +9,7 @@ namespace LocalResumableFunction.InOuts;
 [Index(nameof(MethodHash), IsUnique = true, Name = "Index_MethodHash")]
 public class MethodIdentifier
 {
+    private MethodInfo? _methodInfo;
     [Key] public int Id { get; internal set; }
 
     public string AssemblyName { get; internal set; }
@@ -24,7 +24,6 @@ public class MethodIdentifier
     public List<MethodWait> WaitsRequestsForMethod { get; internal set; }
     public List<ResumableFunctionState> ActiveFunctionsStates { get; internal set; }
 
-    private MethodInfo? _methodInfo;
     internal MethodInfo? MethodInfo
     {
         get
@@ -32,11 +31,12 @@ public class MethodIdentifier
             if (AssemblyName != null && ClassName != null && MethodName != null && _methodInfo == null)
             {
                 _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
-                     ?.GetType(ClassName)
-                     ?.GetMethods()
-                     .FirstOrDefault(x => x.Name == MethodName && CalcSignature(x) == MethodSignature);
+                    ?.GetType(ClassName)
+                    ?.GetMethods()
+                    .FirstOrDefault(x => x.Name == MethodName && CalcSignature(x) == MethodSignature);
                 return _methodInfo;
             }
+
             return _methodInfo;
         }
     }
@@ -65,6 +65,6 @@ public class MethodIdentifier
         var input = string.Concat(MethodName, ClassName, AssemblyName, MethodSignature);
         using var md5 = MD5.Create();
         var inputBytes = Encoding.ASCII.GetBytes(input);
-        MethodHash =  md5.ComputeHash(inputBytes);
+        MethodHash = md5.ComputeHash(inputBytes);
     }
 }

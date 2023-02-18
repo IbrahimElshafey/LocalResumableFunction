@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using LocalResumableFunction.InOuts;
 using static System.Linq.Expressions.Expression;
 
@@ -9,7 +8,8 @@ public class RewriteSetDataExpression : ExpressionVisitor
 {
     private readonly ParameterExpression _functionInstanceArg;
     private readonly MethodWait _wait;
-    private List<Expression> setValuesExpressions = new List<Expression>();
+    private readonly List<Expression> setValuesExpressions = new();
+
     public RewriteSetDataExpression(MethodWait wait)
     {
         //  .SetData((input, output) => Result == output);
@@ -18,16 +18,17 @@ public class RewriteSetDataExpression : ExpressionVisitor
         _functionInstanceArg = Parameter(wait.CurrntFunction.GetType(), "functionInstance");
 
         var updatedBoy = (LambdaExpression)Visit(wait.SetDataExpression);
-        for (int i = 0; i < setValuesExpressions.Count; i++)
+        for (var i = 0; i < setValuesExpressions.Count; i++)
         {
             var setValue = setValuesExpressions[i];
             setValuesExpressions[i] = ChangeDataAccess(setValue);
         }
+
         var functionType = typeof(Action<,,>)
             .MakeGenericType(
-            updatedBoy.Parameters[0].Type,
-            updatedBoy.Parameters[1].Type,
-            wait.CurrntFunction.GetType());
+                updatedBoy.Parameters[0].Type,
+                updatedBoy.Parameters[1].Type,
+                wait.CurrntFunction.GetType());
         setValuesExpressions.Add(Empty());
         var block = Block(setValuesExpressions);
         Result = Lambda(
@@ -37,7 +38,9 @@ public class RewriteSetDataExpression : ExpressionVisitor
             updatedBoy.Parameters[1],
             _functionInstanceArg);
     }
+
     public LambdaExpression Result { get; protected set; }
+
     protected override Expression VisitBinary(BinaryExpression node)
     {
         if (node.NodeType == ExpressionType.Equal)
@@ -48,6 +51,7 @@ public class RewriteSetDataExpression : ExpressionVisitor
 
         return base.VisitBinary(node);
     }
+
     protected Expression ChangeDataAccess(Expression node)
     {
         if (node is BinaryExpression binaryExpression)
@@ -58,6 +62,7 @@ public class RewriteSetDataExpression : ExpressionVisitor
                 if (dataAccess.IsFunctionData)
                     return Assign(dataAccess.NewExpression, binaryExpression.Right);
             }
+
             if (binaryExpression.Right is MemberExpression rightDataMemeber)
             {
                 var dataAccess = rightDataMemeber.GetDataParamterAccess(_functionInstanceArg);

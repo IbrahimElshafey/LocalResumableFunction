@@ -13,6 +13,12 @@ public class TypeToStringConverter : ValueConverter<Type, string>
     {
     }
 
+    public class SystemTypeClone
+    {
+        public string Name { get; set; }
+        public string AssemblyPath { get; set; }
+    }
+
     private static Type StringToType(string text)
     {
         if (string.IsNullOrEmpty(text)) return null;
@@ -27,11 +33,5 @@ public class TypeToStringConverter : ValueConverter<Type, string>
         if (type == null) return null;
         var typeObject = new SystemTypeClone { Name = type.Name, AssemblyPath = type.Assembly.Location };
         return JsonConvert.SerializeObject(typeObject, Formatting.Indented);
-    }
-
-    public class SystemTypeClone
-    {
-        public string Name { get; set; }
-        public string AssemblyPath { get; set; }
     }
 }

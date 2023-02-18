@@ -1,38 +1,33 @@
 ﻿using LocalResumableFunction;
-using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Test
+namespace Test;
+
+internal class ReplayGoBackAfterExample : Example
 {
-    internal class ReplayGoBackAfterExample : Example
-    {
-        private const string ProjectSumbitted = "Project Sumbitted";
+    private const string ProjectSumbitted = "Project Sumbitted";
 
-        //[ResumableFunctionEntryPoint]
-        public async IAsyncEnumerable<Wait> TestReplay()
-        {
-            yield return
-                When<Project, bool>(ProjectSumbitted, ProjectSubmitted)
+    //[ResumableFunctionEntryPoint]
+    public async IAsyncEnumerable<Wait> TestReplay()
+    {
+        yield return
+            When<Project, bool>(ProjectSumbitted, ProjectSubmitted)
                 .If((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
-            AskManagerToApprove(CurrentProject.Id);
-            yield return When<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
-                    .If((input, output) => output == true)
-                    .SetData((input, output) => ManagerOneApproval == input.Decision);
+        AskManagerToApprove(CurrentProject.Id);
+        yield return When<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
+            .If((input, output) => output == true)
+            .SetData((input, output) => ManagerOneApproval == input.Decision);
 
-            if (ManagerOneApproval is false)
-            {
-                Console.WriteLine("Manager one rejected project and repaly will go after ProjectSumbitted.");
-                yield return GoBackAfter(ProjectSumbitted);
-            }
-            else
-                Console.WriteLine("Manager one approved project");
+        if (ManagerOneApproval is false)
+        {
+            Console.WriteLine("Manager one rejected project and repaly will go after ProjectSumbitted.");
+            yield return GoBackAfter(ProjectSumbitted);
+        }
+        else
+        {
+            Console.WriteLine("Manager one approved project");
         }
     }
 }

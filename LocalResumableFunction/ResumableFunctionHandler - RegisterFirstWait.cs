@@ -1,20 +1,17 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
 using LocalResumableFunction.Data;
-using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
-using Microsoft.EntityFrameworkCore;
 
 namespace LocalResumableFunction;
 
 internal partial class ResumableFunctionHandler
 {
     private const string ScannerAppName = "##SCANNER: ";
+
     internal async Task RegisterFirstWait(MethodInfo resumableFunction)
     {
         var classInstance = (ResumableFunctionLocal)Activator.CreateInstance(resumableFunction.DeclaringType);
         if (classInstance != null)
-        {
             try
             {
                 var functionRunner = new FunctionRunner(classInstance, resumableFunction);
@@ -23,6 +20,7 @@ internal partial class ResumableFunctionHandler
                     WriteMessage($"Resumable function {resumableFunction.Name} not exist in code");
                     return;
                 }
+
                 await functionRunner.MoveNextAsync();
                 var firstWait = functionRunner.Current;
                 var repo = new MethodIdentifierRepository(_context);
@@ -32,6 +30,7 @@ internal partial class ResumableFunctionHandler
                     WriteMessage("First wait alerady exist.");
                     return;
                 }
+
                 firstWait.RequestedByFunction = methodId.MethodIdentifier;
                 firstWait.RequestedByFunctionId = methodId.MethodIdentifier.Id;
                 firstWait.IsFirst = true;
@@ -39,7 +38,7 @@ internal partial class ResumableFunctionHandler
                 firstWait.FunctionState = new ResumableFunctionState
                 {
                     ResumableFunctionIdentifier = methodId.MethodIdentifier,
-                    StateObject = classInstance,
+                    StateObject = classInstance
                 };
                 await GenericWaitRequested(firstWait);
                 WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.Name}].");
@@ -50,9 +49,8 @@ internal partial class ResumableFunctionHandler
                 WriteMessage($"Error when try to register first wait for function [{resumableFunction.Name}]");
                 WriteMessage($"Error {e.Message}");
             }
-        }
     }
-    
+
     private void WriteMessage(string message)
     {
         Console.Write(ScannerAppName);

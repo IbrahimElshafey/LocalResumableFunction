@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace LocalResumableFunction.InOuts;
@@ -53,7 +52,8 @@ public abstract class Wait
             if (FunctionState is not null)
                 if (FunctionState.StateObject is JObject stateAsJson)
                 {
-                    var type = Assembly.LoadFrom(AppContext.BaseDirectory + RequestedByFunction.AssemblyName).GetType(RequestedByFunction.ClassName);
+                    var type = Assembly.LoadFrom(AppContext.BaseDirectory + RequestedByFunction.AssemblyName)
+                        .GetType(RequestedByFunction.ClassName);
                     var result = stateAsJson.ToObject(type);
                     FunctionState.StateObject = result;
                     _currntFunction = (ResumableFunctionLocal)result;

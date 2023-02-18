@@ -1,17 +1,15 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
-using LocalResumableFunction;
 using LocalResumableFunction.Data;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
-using Microsoft.EntityFrameworkCore;
 
-namespace ResumableFunctionScanner;
+namespace LocalResumableFunction;
 
-internal partial class Scanner
+internal class Scanner
 {
     private const string ScannerAppName = "##SCANNER: ";
-    private FunctionDataContext _context;
+    internal FunctionDataContext _context;
     private string _currentFolder;
 
     public async Task Start()
@@ -30,19 +28,34 @@ internal partial class Scanner
         var resumableFunctions = await RegisterMethodWaits(assemblyPaths);
 
         foreach (var resumableFunctionClass in resumableFunctions)
-        {
             await RegisterResumableFunctionsInClass(resumableFunctionClass);
-        }
         _context.Dispose();
         WriteMessage("Close with no errors.");
         Console.ReadLine();
+    }
+
+    internal async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
+    {
+        WriteMessage($"Register resumable function [{resumableFunction.Name}] of type [{type}]");
+        var repo = new MethodIdentifierRepository(_context);
+        var methodId = await repo.GetMethodIdentifier(resumableFunction);
+        methodId.MethodIdentifier.Type = type;
+        if (methodId.ExistInDb)
+        {
+            WriteMessage($"Resumable function [{resumableFunction.Name}] already exist in DB.");
+            return;
+        }
+
+        //methodId.MethodIdentifier.CreateMethodHash();
+        _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
+        WriteMessage($"Save discovered resumable function [{resumableFunction.Name}].");
+        await _context.SaveChangesAsync();
     }
 
     private async Task<List<Type>> RegisterMethodWaits(List<string>? assemblyPaths)
     {
         var resumableFunctionClasses = new List<Type>();
         foreach (var assemblyPath in assemblyPaths)
-        {
             try
             {
                 WriteMessage($"Start scan assembly [{assemblyPath}]");
@@ -62,6 +75,7 @@ internal partial class Scanner
                         if (type.IsSubclassOf(typeof(ResumableFunctionLocal)))
                             resumableFunctionClasses.Add(type);
                     }
+
                     WriteMessage($"Save discovered method waits for assembly [{assemblyPath}].");
                     _context.SaveChanges();
                 }
@@ -71,7 +85,7 @@ internal partial class Scanner
                 WriteMessage($"Error when scan assembly [{assemblyPath}]");
                 WriteMessage(e.Message);
             }
-        }
+
         return resumableFunctionClasses;
     }
 
@@ -80,7 +94,8 @@ internal partial class Scanner
     {
         WriteMessage($"Try to find resumable functions in type [{type.FullName}]");
         var resumableFunctions = type
-            .GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+            .GetMethods(
+                BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
             .Where(method => method
                 .GetCustomAttributes()
                 .Any(attribute =>
@@ -96,33 +111,14 @@ internal partial class Scanner
                     $"Error the resumable function [{resumableFunction.Name}] must match the signature `IAsyncEnumerable<Wait> {resumableFunction.Name}()`");
                 continue;
             }
+
             var isEntryPoint = IsEntryPoint(resumableFunction);
             var methodType = isEntryPoint ? MethodType.ResumableFunctionEntryPoint : MethodType.SubResumableFunction;
             await RegisterResumableFunction(resumableFunction, methodType);
             if (isEntryPoint)
-            {
                 await RegisterResumableFunctionFirstWait(resumableFunction);
-            }
         }
     }
-
-    private async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
-    {
-        WriteMessage($"Register resumable function [{resumableFunction.Name}]");
-        var repo = new MethodIdentifierRepository(_context);
-        var methodId = await repo.GetMethodIdentifier(resumableFunction);
-        methodId.MethodIdentifier.Type = type;
-        if (methodId.ExistInDb)
-        {
-            WriteMessage($"Resumable function [{resumableFunction.Name}] already exist in DB.");
-            return;
-        }
-        //methodId.MethodIdentifier.CreateMethodHash();
-        _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
-        WriteMessage($"Save discovered resumable function [{resumableFunction.Name}].");
-        _context.SaveChanges();
-    }
-
 
 
     private bool IsEntryPoint(MethodInfo resumableFunction)
@@ -140,11 +136,11 @@ internal partial class Scanner
 
     private async Task RegisterMethodWaitsIfExist(Type type)
     {
+        //Debugger.Launch();
         var methodWaits = type
-            .GetMethods(BindingFlags.DeclaredOnly)
-            .Where(method => 
-                method.GetCustomAttributes()
-                .Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
+            .GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .Where(method =>
+                    method.GetCustomAttributes().Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
         foreach (var method in methodWaits)
         {
             var repo = new MethodIdentifierRepository(_context);
@@ -155,7 +151,8 @@ internal partial class Scanner
                 WriteMessage($"Method [{method.Name}] already exist in DB.");
                 continue;
             }
-            //methodId.MethodIdentifier.CreateMethodHash();
+
+            WriteMessage($"Add method [{method.Name}] to DB.");
             _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
         }
     }
@@ -190,6 +187,13 @@ internal partial class Scanner
             "SQLitePCLRaw.provider.e_sqlite3.dll"
         };
         return paths.Contains(fileName) is false;
+    }
+
+    internal async Task RegisterResumableFunctionFirstWait(MethodInfo resumableFunction)
+    {
+        WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
+        var handler = new ResumableFunctionHandler(_context);
+        await handler.RegisterFirstWait(resumableFunction);
     }
 
     private void WriteMessage(string message)

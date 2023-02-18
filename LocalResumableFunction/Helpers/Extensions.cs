@@ -1,6 +1,5 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
-using LocalResumableFunction.InOuts;
 using static System.Linq.Expressions.Expression;
 
 namespace LocalResumableFunction.Helpers;
@@ -47,16 +46,14 @@ public static class Extensions
     {
         var isEqual = expressionOne != null && expressionTwo != null;
         if (isEqual is false) return false;
-        if (expressionOne.ReturnType != expressionTwo.ReturnType) 
+        if (expressionOne.ReturnType != expressionTwo.ReturnType)
             return false;
         if (expressionOne.Parameters.Count != expressionTwo.Parameters.Count)
             return false;
 
-        for (int i = 0; i < expressionOne.Parameters.Count; i++)
-        {
+        for (var i = 0; i < expressionOne.Parameters.Count; i++)
             if (expressionOne.Parameters[i].Type != expressionTwo.Parameters[i].Type)
                 return false;
-        }
         return true;
     }
 }

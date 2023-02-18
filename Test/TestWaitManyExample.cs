@@ -4,7 +4,7 @@ using LocalResumableFunction.InOuts;
 
 internal class TestWaitManyExample : Example
 {
-    //[ResumableFunctionEntryPoint]
+    [ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> WaitThreeMethod()
     {
         Console.WriteLine("Wait three managers to approve");
@@ -25,7 +25,7 @@ internal class TestWaitManyExample : Example
         Console.WriteLine("TestWaitMany ended.");
     }
 
-    [ResumableFunctionEntryPoint]
+    //[ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> WaitManyAndMatchExpressionDefined()
     {
         Console.WriteLine("Wait two of three managers to approve");

@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Linq.Expressions;
-using System.Reflection.Metadata;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +32,6 @@ internal class FunctionDataContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-
         modelBuilder.Entity<ResumableFunctionState>()
             .HasMany(x => x.Waits)
             .WithOne(wait => wait.FunctionState)
@@ -81,16 +79,16 @@ internal class FunctionDataContext : DbContext
             .HasConversion<ObjectToJsonConverter>();
 
         modelBuilder.Entity<MethodWait>()
-        .Property(mw => mw.MatchIfExpressionValue)
-        .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
+            .Property(mw => mw.MatchIfExpressionValue)
+            .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
 
         modelBuilder.Entity<ManyMethodsWait>()
             .Property(mw => mw.CountExpressionValue)
             .HasColumnName(nameof(ManyMethodsWait.CountExpressionValue));
 
         modelBuilder.Entity<MethodWait>()
-        .Property(mw => mw.SetDataExpressionValue)
-        .HasColumnName(nameof(MethodWait.SetDataExpressionValue));
+            .Property(mw => mw.SetDataExpressionValue)
+            .HasColumnName(nameof(MethodWait.SetDataExpressionValue));
 
         base.OnModelCreating(modelBuilder);
     }

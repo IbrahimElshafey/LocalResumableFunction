@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection;
 using LocalResumableFunction.InOuts;
 using static System.Linq.Expressions.Expression;
 
@@ -22,10 +21,10 @@ public class RewriteMatchExpression : ExpressionVisitor
         var updatedBoy = (LambdaExpression)Visit(wait.MatchIfExpression);
         var functionType = typeof(Func<,,,>)
             .MakeGenericType(
-            updatedBoy.Parameters[0].Type,
-            updatedBoy.Parameters[1].Type,
-            wait.CurrntFunction.GetType(),
-            typeof(bool));
+                updatedBoy.Parameters[0].Type,
+                updatedBoy.Parameters[1].Type,
+                wait.CurrntFunction.GetType(),
+                typeof(bool));
         Result = Lambda(
             functionType,
             updatedBoy.Body,
@@ -45,7 +44,7 @@ public class RewriteMatchExpression : ExpressionVisitor
         {
             if (IsBasicType(node.Type))
             {
-                object value = GetValue(x.NewExpression);
+                var value = GetValue(x.NewExpression);
                 if (value != null)
                     return Constant(value, node.Type);
             }

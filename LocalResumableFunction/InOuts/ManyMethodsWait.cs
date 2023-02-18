@@ -1,8 +1,6 @@
-﻿using LocalResumableFunction.Helpers;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
-using System.Reflection;
+using LocalResumableFunction.Helpers;
 
 namespace LocalResumableFunction.InOuts;
 
@@ -16,14 +14,6 @@ public class ManyMethodsWait : Wait
     {
         get => _countExpression ?? GetCountExpression();
         internal set => _countExpression = value;
-    }
-
-    private LambdaExpression GetCountExpression()
-    {
-        var assembly = RequestedByFunction.MethodInfo.DeclaringType.Assembly;
-        return (LambdaExpression)
-            ExpressionToJsonConverter.JsonToExpression(
-                TextCompressor.DecompressString(CountExpressionValue), assembly);
     }
 
     internal byte[] CountExpressionValue { get; set; }
@@ -60,6 +50,7 @@ public class ManyMethodsWait : Wait
         WaitType = WaitType.AllMethodsWait;
         return this;
     }
+
     public Wait WaitFirst()
     {
         WaitType = WaitType.AnyMethodWait;
@@ -71,6 +62,24 @@ public class ManyMethodsWait : Wait
         var matchedMethod = WaitingMethods.First(x => x.Id == currentWait.Id);
         matchedMethod.Status = WaitStatus.Completed;
         CheckIsDone();
+    }
+
+    internal void SetMatchedMethod(Wait currentWait)
+    {
+        WaitingMethods.ForEach(wait => wait.Status = WaitStatus.Canceled);
+        var matchedMethod = WaitingMethods.First(x => x.Id == currentWait.Id);
+        matchedMethod.Status = WaitStatus.Completed;
+        Status = WaitStatus.Completed;
+    }
+
+    private LambdaExpression? GetCountExpression()
+    {
+        var assembly = RequestedByFunction.MethodInfo.DeclaringType.Assembly;
+        if (CountExpressionValue != null)
+            return (LambdaExpression)
+                ExpressionToJsonConverter.JsonToExpression(
+                    TextCompressor.DecompressString(CountExpressionValue), assembly);
+        return null;
     }
 
     private void CheckIsDone()
@@ -89,20 +98,10 @@ public class ManyMethodsWait : Wait
         }
 
         if (Status == WaitStatus.Completed)
-        {
             WaitingMethods.ForEach(x =>
             {
                 if (x.Status == WaitStatus.Waiting)
                     x.Status = WaitStatus.Canceled;
             });
-        }
-    }
-
-    internal void SetMatchedMethod(Wait currentWait)
-    {
-        WaitingMethods.ForEach(wait => wait.Status = WaitStatus.Canceled);
-        var matchedMethod = WaitingMethods.First(x => x.Id == currentWait.Id);
-        matchedMethod.Status = WaitStatus.Completed;
-        Status = WaitStatus.Completed;
     }
 }

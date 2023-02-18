@@ -10,6 +10,5 @@ public sealed class FunctionWait : Wait
     public Wait FirstWait { get; internal set; }
     public int? FirstWaitId { get; internal set; }
 
-    [NotMapped]
-    public MethodInfo FunctionInfo { get; internal set; }
+    [NotMapped] public MethodInfo FunctionInfo { get; internal set; }
 }

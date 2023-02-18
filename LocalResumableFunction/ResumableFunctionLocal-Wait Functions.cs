@@ -1,7 +1,4 @@
-﻿using LocalResumableFunction;
-using LocalResumableFunction.Data;
-using LocalResumableFunction.Helpers;
-using LocalResumableFunction.InOuts;
+﻿using LocalResumableFunction.InOuts;
 
 public abstract partial class ResumableFunctionLocal
 {
@@ -12,7 +9,7 @@ public abstract partial class ResumableFunctionLocal
             Name = name,
             IsNode = true,
             WaitType = WaitType.FunctionWait,
-            FunctionInfo = function.Method,
+            FunctionInfo = function.Method
         };
         return result;
     }
@@ -30,7 +27,7 @@ public abstract partial class ResumableFunctionLocal
         for (var i = 0; i < subFunctions.Length; i++)
         {
             var currentFunction = subFunctions[i];
-            var currentFuncResult =  WaitFunction($"#{currentFunction.Method.Name}#", currentFunction);
+            var currentFuncResult = WaitFunction($"#{currentFunction.Method.Name}#", currentFunction);
             currentFuncResult.IsNode = false;
             currentFuncResult.ParentFunctionGroupId = result.Id;
             result.WaitingFunctions[i] = currentFuncResult;

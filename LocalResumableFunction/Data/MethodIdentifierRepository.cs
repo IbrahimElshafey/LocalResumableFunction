@@ -1,5 +1,5 @@
-﻿using LocalResumableFunction.InOuts;
-using System.Reflection;
+﻿using System.Reflection;
+using LocalResumableFunction.InOuts;
 using Microsoft.EntityFrameworkCore;
 
 namespace LocalResumableFunction.Data;
@@ -14,7 +14,7 @@ internal class MethodIdentifierRepository : RepositoryBase
     {
         var methodId = new MethodIdentifier();
         methodId.SetMethodInfo(methodInfo);
-        MethodIdentifier? existInDb = await GetMethodIdentifier(methodId);
+        var existInDb = await GetMethodIdentifier(methodId);
         return (existInDb, existInDb.Id > 0);
     }
 
@@ -24,20 +24,16 @@ internal class MethodIdentifierRepository : RepositoryBase
             .MethodIdentifiers
             .Where(x => x.MethodHash == methodId.MethodHash).ToListAsync();
         if (inDb == null)
-        {
             inDb = Context
-            .MethodIdentifiers
-            .Local
-            .Where(x => x.MethodHash == methodId.MethodHash).ToList();
-        }
+                .MethodIdentifiers
+                .Local
+                .Where(x => x.MethodHash == methodId.MethodHash).ToList();
         var existInDb =
             inDb.FirstOrDefault(x =>
-            x.MethodSignature == methodId.MethodSignature &&
-            x.AssemblyName == methodId.AssemblyName &&
-            x.ClassName == methodId.ClassName &&
-            x.MethodName == methodId.MethodName);
+                x.MethodSignature == methodId.MethodSignature &&
+                x.AssemblyName == methodId.AssemblyName &&
+                x.ClassName == methodId.ClassName &&
+                x.MethodName == methodId.MethodName);
         return existInDb ?? methodId;
     }
-
-
 }

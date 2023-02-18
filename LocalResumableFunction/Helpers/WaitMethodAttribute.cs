@@ -1,6 +1,5 @@
 ﻿using LocalResumableFunction.InOuts;
 using MethodBoundaryAspect.Fody.Attributes;
-using System.Diagnostics;
 
 namespace LocalResumableFunction.Helpers;
 
@@ -19,7 +18,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
         {
             MethodInfo = args.Method
         };
-        if (args.Arguments.Length > 0) 
+        if (args.Arguments.Length > 0)
             _pushedMethod.Input = args.Arguments[0];
     }
 
