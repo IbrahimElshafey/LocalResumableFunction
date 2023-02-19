@@ -12,6 +12,7 @@ public class TextCompressor
 
     public static byte[] Compress(byte[] bytes)
     {
+        if (bytes == null) return null;
         using (var memoryStream = new MemoryStream())
         {
             using (var gzipStream = new GZipStream(memoryStream, CompressionLevel.Optimal))
@@ -25,6 +26,7 @@ public class TextCompressor
 
     public static string DecompressString(byte[] bytes)
     {
+        if (bytes == null) return null;
         return Encoding.ASCII.GetString(Decompress(bytes));
     }
 

@@ -7,10 +7,6 @@ namespace LocalResumableFunction.InOuts;
 
 public class MethodWait : Wait
 {
-    public ManyMethodsWait ParentWaitsGroup { get; internal set; }
-
-    public int? ParentWaitsGroupId { get; internal set; }
-
     public bool IsOptional { get; internal set; }
 
     [NotMapped] public LambdaExpression SetDataExpression { get; protected set; }

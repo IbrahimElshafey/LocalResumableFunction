@@ -19,7 +19,7 @@ public abstract partial class ResumableFunctionLocal
     {
         var result = new ManyFunctionsWait
         {
-            WaitingFunctions = new List<FunctionWait>(new FunctionWait[subFunctions.Length]),
+            ChildWaits = new List<Wait>(new Wait[subFunctions.Length]),
             Name = name,
             IsNode = true,
             WaitType = WaitType.AllFunctionsWait
@@ -29,8 +29,8 @@ public abstract partial class ResumableFunctionLocal
             var currentFunction = subFunctions[index];
             var currentFuncResult = WaitFunction($"#{currentFunction.Method.Name}#", currentFunction);
             currentFuncResult.IsNode = false;
-            currentFuncResult.ParentFunctionGroup = result;
-            result.WaitingFunctions[index] = currentFuncResult;
+            currentFuncResult.ParentWait = result;
+            result.ChildWaits[index] = currentFuncResult;
         }
 
         return result;

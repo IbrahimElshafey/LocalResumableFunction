@@ -32,13 +32,13 @@ public abstract partial class ResumableFunctionLocal
         var result = new ManyMethodsWait
         {
             Name = name,
-            WaitingMethods = manyMethodsWait.ToList(),
+            ChildWaits = manyMethodsWait.Select(x => (Wait)x).ToList(),
             IsNode = true,
             WaitType = WaitType.AllMethodsWait
         };
-        foreach (var item in result.WaitingMethods)
+        foreach (var item in result.ChildWaits)
         {
-            item.ParentWaitsGroupId = result.Id;
+            item.ParentWaitId = result.Id;
             item.IsNode = false;
         }
 

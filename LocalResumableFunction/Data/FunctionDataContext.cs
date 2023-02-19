@@ -62,17 +62,17 @@ internal class FunctionDataContext : DbContext
             .HasForeignKey(x => x.ParentWaitId)
             .HasConstraintName("FK_ChildWaits_For_Wait");
 
-        modelBuilder.Entity<ManyMethodsWait>()
-            .HasMany(x => x.WaitingMethods)
-            .WithOne(wait => wait.ParentWaitsGroup)
-            .HasForeignKey(x => x.ParentWaitsGroupId)
-            .HasConstraintName("FK_MethodsWaits_For_WaitsGroup");
+        //modelBuilder.Entity<ManyMethodsWait>()
+        //    .HasMany(x => x.WaitingMethods)
+        //    .WithOne(wait => wait.ParentWaitsGroup)
+        //    .HasForeignKey(x => x.ParentWaitsGroupId)
+        //    .HasConstraintName("FK_MethodsWaits_For_WaitsGroup");
 
-        modelBuilder.Entity<ManyFunctionsWait>()
-            .HasMany(x => x.WaitingFunctions)
-            .WithOne(wait => wait.ParentFunctionGroup)
-            .HasForeignKey(x => x.ParentFunctionGroupId)
-            .HasConstraintName("FK_FunctionsWaits_For_FunctionGroup");
+        //modelBuilder.Entity<ManyFunctionsWait>()
+        //    .HasMany(x => x.WaitingFunctions)
+        //    .WithOne(wait => wait.ParentFunctionGroup)
+        //    .HasForeignKey(x => x.ParentFunctionGroupId)
+        //    .HasConstraintName("FK_FunctionsWaits_For_FunctionGroup");
 
         modelBuilder.Entity<ResumableFunctionState>()
             .Property(x => x.StateObject)

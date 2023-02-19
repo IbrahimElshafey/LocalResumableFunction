@@ -57,28 +57,38 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-    public async Task<Wait> GetParentFunctionWait(int? functionWaitId)
+    public async Task<(Wait? RootWait, int? MethodGroupId, int? FunctionWaitId, int? FunctionGroupId)> GetRootFunctionWait(int? parentId)
     {
+        var result = (RootWait: default(Wait), MethodGroupId: default(int?), FunctionWaitId: default(int?), FunctionGroupId: default(int?));
         Debugger.Launch();
-        var result = await _context.FunctionWaits
-            .Include(x => x.RequestedByFunction)
-            .FirstAsync(x => x.Id == functionWaitId);
-        if (result != null && result.ParentFunctionGroupId != null)
+        var rootWait = await _context.Waits.FirstOrDefaultAsync(x => x.Id == parentId);
+
+        if (rootWait is ManyMethodsWait && rootWait.ParentWaitId != null)
         {
-            var manyFunc = await _context.ManyFunctionsWaits
-                .Include(x => x.WaitingFunctions)
-                .Include(x => x.RequestedByFunction)
-                .FirstOrDefaultAsync(x => x.Id == result.ParentFunctionGroupId);
-            return manyFunc!;
+            result.MethodGroupId = rootWait.Id;
+            rootWait = await _context.Waits.FirstOrDefaultAsync(x => x.Id == rootWait.ParentWaitId);
         }
 
+        if (rootWait is FunctionWait && rootWait.ParentWaitId != null)
+        {
+            result.FunctionWaitId = rootWait.Id;
+            result.FunctionGroupId = rootWait.ParentWaitId;
+            rootWait = await _context.Waits.FirstOrDefaultAsync(x => x.Id == rootWait.ParentWaitId);
+        }
+
+        if (rootWait is not null)
+        {
+            await _context.Entry(rootWait).Reference(x => x.RequestedByFunction).LoadAsync();
+            await _context.Entry(rootWait).Collection(x => x.ChildWaits).LoadAsync();
+        }
+        result.RootWait = rootWait;
         return result;
     }
 
-    public async Task<ManyMethodsWait> GetWaitGroup(int? parentGroupId)
+    public async Task<Wait?> GetWaitGroup(int? parentGroupId)
     {
-        var result = await _context.ManyMethodsWaits
-            .Include(x => x.WaitingMethods)
+        var result = await _context.Waits
+            .Include(x => x.ChildWaits)
             .FirstOrDefaultAsync(x => x.Id == parentGroupId);
         return result!;
     }
@@ -108,6 +118,8 @@ internal class WaitsRepository : RepositoryBase
     {
         try
         {
+            if (methodWait.IsFirst && methodWait.MatchIfExpressionValue == null)
+                return true;
             var check = methodWait.MatchIfExpression.Compile();
             return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrntFunction);
         }
@@ -121,7 +133,7 @@ internal class WaitsRepository : RepositoryBase
     {
         var functionIds = anyFunctionWait
             .WaitingFunctions
-            .Where(x => x.ParentFunctionGroupId != null)
+            .Where(x => x.ParentWaitId != null)
             .Select(x => x.Id)
             .ToList();
         var waitsToCancel = await _context

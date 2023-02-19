@@ -26,7 +26,7 @@ internal class TestWaitManyExample : Example
     }
 
     //[ResumableFunctionEntryPoint]
-    public async IAsyncEnumerable<Wait> WaitManyAndMatchExpressionDefined()
+    public async IAsyncEnumerable<Wait> WaitManyAndCountExpressionDefined()
     {
         Console.WriteLine("Wait two of three managers to approve");
         CurrentProject = GetCurrentProject();
@@ -43,6 +43,6 @@ internal class TestWaitManyExample : Example
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).WhenMatchedCount(x => x == 2);
         Console.WriteLine("Two waits of three waits matched.");
-        Console.WriteLine("WaitManyAndMatchExpressionDefined ended.");
+        Console.WriteLine("WaitManyAndCountExpressionDefined ended.");
     }
 }

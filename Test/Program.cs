@@ -24,21 +24,22 @@ public class Program
         //TestReplayGoBackAfter();
         //TestReplayGoBackBeforeNewMatch();
        
-        //await TestWaitMany();
-        await TestWaitManyFunctions();
+        await TestWaitMany();
+        //await TestWaitManyFunctions();
         Console.ReadLine();
     }
 
     private static async Task TestWaitManyFunctions()
     {
-        await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitFirstFunction));
-        //await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitManyFunctions));
+        //await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitFirstFunction));
+        await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitManyFunctions));
         var example = new WaitManyFunctionsExample();
         await example.ProjectSubmitted(Example.GetCurrentProject());
-        await Task.Delay(10000);
+        await Task.Delay(5000);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
-        await Task.Delay(10000);
+        await Task.Delay(5000);
+        example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
     }
 

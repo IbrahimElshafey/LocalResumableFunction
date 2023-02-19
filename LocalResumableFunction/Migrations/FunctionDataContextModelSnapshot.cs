@@ -134,21 +134,6 @@ namespace LocalResumableFunction.Migrations
                 {
                     b.HasBaseType("LocalResumableFunction.InOuts.Wait");
 
-                    b.Property<int?>("FirstWaitId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ManyFunctionsWaitId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ParentFunctionGroupId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasIndex("FirstWaitId");
-
-                    b.HasIndex("ManyFunctionsWaitId");
-
-                    b.HasIndex("ParentFunctionGroupId");
-
                     b.HasDiscriminator().HasValue("FunctionWait");
                 });
 
@@ -178,18 +163,12 @@ namespace LocalResumableFunction.Migrations
                     b.Property<bool>("IsOptional")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("ManyMethodsWaitId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<byte[]>("MatchIfExpressionValue")
                         .IsRequired()
                         .HasColumnType("BLOB")
                         .HasColumnName("MatchIfExpressionValue");
 
                     b.Property<bool>("NeedFunctionStateForMatch")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("ParentWaitsGroupId")
                         .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("SetDataExpressionValue")
@@ -199,10 +178,6 @@ namespace LocalResumableFunction.Migrations
 
                     b.Property<int>("WaitMethodIdentifierId")
                         .HasColumnType("INTEGER");
-
-                    b.HasIndex("ManyMethodsWaitId");
-
-                    b.HasIndex("ParentWaitsGroupId");
 
                     b.HasIndex("WaitMethodIdentifierId");
 
@@ -249,45 +224,14 @@ namespace LocalResumableFunction.Migrations
                     b.Navigation("RequestedByFunction");
                 });
 
-            modelBuilder.Entity("LocalResumableFunction.InOuts.FunctionWait", b =>
-                {
-                    b.HasOne("LocalResumableFunction.InOuts.Wait", "FirstWait")
-                        .WithMany()
-                        .HasForeignKey("FirstWaitId");
-
-                    b.HasOne("LocalResumableFunction.InOuts.ManyFunctionsWait", null)
-                        .WithMany("CompletedFunctions")
-                        .HasForeignKey("ManyFunctionsWaitId");
-
-                    b.HasOne("LocalResumableFunction.InOuts.ManyFunctionsWait", "ParentFunctionGroup")
-                        .WithMany("WaitingFunctions")
-                        .HasForeignKey("ParentFunctionGroupId")
-                        .HasConstraintName("FK_FunctionsWaits_For_FunctionGroup");
-
-                    b.Navigation("FirstWait");
-
-                    b.Navigation("ParentFunctionGroup");
-                });
-
             modelBuilder.Entity("LocalResumableFunction.InOuts.MethodWait", b =>
                 {
-                    b.HasOne("LocalResumableFunction.InOuts.ManyMethodsWait", null)
-                        .WithMany("MatchedMethods")
-                        .HasForeignKey("ManyMethodsWaitId");
-
-                    b.HasOne("LocalResumableFunction.InOuts.ManyMethodsWait", "ParentWaitsGroup")
-                        .WithMany("WaitingMethods")
-                        .HasForeignKey("ParentWaitsGroupId")
-                        .HasConstraintName("FK_MethodsWaits_For_WaitsGroup");
-
                     b.HasOne("LocalResumableFunction.InOuts.MethodIdentifier", "WaitMethodIdentifier")
                         .WithMany("WaitsRequestsForMethod")
                         .HasForeignKey("WaitMethodIdentifierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Waits_RequestedForMethod");
-
-                    b.Navigation("ParentWaitsGroup");
 
                     b.Navigation("WaitMethodIdentifier");
                 });
@@ -309,20 +253,6 @@ namespace LocalResumableFunction.Migrations
             modelBuilder.Entity("LocalResumableFunction.InOuts.Wait", b =>
                 {
                     b.Navigation("ChildWaits");
-                });
-
-            modelBuilder.Entity("LocalResumableFunction.InOuts.ManyFunctionsWait", b =>
-                {
-                    b.Navigation("CompletedFunctions");
-
-                    b.Navigation("WaitingFunctions");
-                });
-
-            modelBuilder.Entity("LocalResumableFunction.InOuts.ManyMethodsWait", b =>
-                {
-                    b.Navigation("MatchedMethods");
-
-                    b.Navigation("WaitingMethods");
                 });
 #pragma warning restore 612, 618
         }

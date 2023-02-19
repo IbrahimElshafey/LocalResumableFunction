@@ -1,6 +1,5 @@
 ﻿# Todo
 * Remove uniqe for method hash
-* Async method waits
 * Run in another process
 	* Save pushed waits to database
 * Logging and handle exception
@@ -20,8 +19,8 @@
 	* Implement provider for time based events
 * Parameter check lib use
 * Add UI Project
-* Forigen keys slow insert new
 * Mixed waits group
+* WhenMatchedCount for function group
 
 # Test Engine Scenarios
 * Seqeunce [DONE]

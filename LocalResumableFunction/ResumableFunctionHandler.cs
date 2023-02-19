@@ -90,8 +90,8 @@ internal partial class ResumableFunctionHandler
         Wait? wait = null;
         if (currentWait.IsFirst)
             wait = currentWait;
-        else if (currentWait?.ParentWaitsGroup?.IsFirst == true)
-            wait = currentWait.ParentWaitsGroup;
+        else if (currentWait?.ParentWait?.IsFirst == true)
+            wait = currentWait.ParentWait;
         if (wait != null)
             await RegisterFirstWait(wait.RequestedByFunction.MethodInfo);
     }
@@ -104,13 +104,13 @@ internal partial class ResumableFunctionHandler
 
     private bool IsSingleMethod(MethodWait currentWait)
     {
-        return currentWait.ParentWaitsGroupId is null;
+        return currentWait.ParentWaitId is null;
     }
 
     private async Task<bool> IsGroupLastWait(MethodWait currentWait)
     {
-        var group = await _waitsRepository.GetWaitGroup(currentWait.ParentWaitsGroupId);
-        currentWait.ParentWaitsGroup = group;
+        var group = await _waitsRepository.GetWaitGroup(currentWait.ParentWaitId);
+        currentWait.ParentWait = group;
         switch (group)
         {
             case ManyMethodsWait allMethodsWait
@@ -121,6 +121,8 @@ internal partial class ResumableFunctionHandler
             case ManyMethodsWait anyMethodWait
                 when group.WaitType == WaitType.AnyMethodWait:
                 anyMethodWait.SetMatchedMethod(currentWait);
+                return true;
+            case FunctionWait:
                 return true;
         }
 
@@ -176,21 +178,23 @@ internal partial class ResumableFunctionHandler
     private async Task<bool> SubFunctionExit(Wait lastFunctionWait)
     {
         //lastFunctionWait =  last function wait before exsit
-        var parentFunctionWait = await _waitsRepository.GetParentFunctionWait(lastFunctionWait.ParentWaitId);
-        if (parentFunctionWait == null)
+        var rootFunctionResult = await _waitsRepository.GetRootFunctionWait(lastFunctionWait.ParentWaitId);
+        var rootFunctionWait = rootFunctionResult.RootWait;
+        if (rootFunctionWait == null)
         {
-            WriteMessage($"Parent function wait not exist for wait ({lastFunctionWait.Name}) with type ({lastFunctionWait.WaitType}).");
+            WriteMessage($"Root function wait not exist for wait ({lastFunctionWait.Name}) with type ({lastFunctionWait.WaitType}).");
             return false;
         }
 
-        if (parentFunctionWait.Status != WaitStatus.Waiting)
+        if (rootFunctionWait.Status != WaitStatus.Waiting)
         {
-            WriteMessage($"The status for parent function wait ({parentFunctionWait.Name}) must be ({WaitStatus.Waiting}).");
+            WriteMessage($"The status for parent function wait ({rootFunctionWait.Name}) must be ({WaitStatus.Waiting}).");
             return false;
         }
         var backToCaller = false;
         lastFunctionWait.Status = WaitStatus.Completed;
-        switch (parentFunctionWait)
+        Debugger.Launch();
+        switch (rootFunctionWait)
         {
             //one sub function -> return to caller after function end
             case FunctionWait:
@@ -198,30 +202,33 @@ internal partial class ResumableFunctionHandler
                 break;
             //many sub functions -> wait function group to complete and return to caller
             case ManyFunctionsWait allFunctionsWait
-                when parentFunctionWait.WaitType == WaitType.AllFunctionsWait:
-                allFunctionsWait.MoveToMatched(lastFunctionWait.ParentWaitId);
+                when rootFunctionWait.WaitType == WaitType.AllFunctionsWait:
+                allFunctionsWait.MoveToMatched(rootFunctionResult.FunctionWaitId);
                 if (allFunctionsWait.Status == WaitStatus.Completed)
                     backToCaller = true;
                 break;
             case ManyFunctionsWait anyFunctionWait
-                when parentFunctionWait.WaitType == WaitType.AnyFunctionWait:
-                anyFunctionWait.SetMatchedFunction(lastFunctionWait.ParentWaitId);
+                when rootFunctionWait.WaitType == WaitType.AnyFunctionWait:
+                anyFunctionWait.SetMatchedFunction(rootFunctionResult.FunctionWaitId);
                 await  _waitsRepository.CancelAllWaits(anyFunctionWait);
                 if (anyFunctionWait.Status == WaitStatus.Completed)
                     backToCaller = true;
+                break;
+            default:
+                WriteMessage($"Root function wait ({rootFunctionWait.Name}) with type ({rootFunctionWait.WaitType}) is not valid function wait.");
                 break;
         }
 
         if (backToCaller)
         {
-            parentFunctionWait.Status = WaitStatus.Completed;
-            var nextWaitAftreBacktoCaller = await parentFunctionWait.CurrntFunction.GetNextWait(parentFunctionWait);
-            if (parentFunctionWait.IsFirst)
+            rootFunctionWait.Status = WaitStatus.Completed;
+            var nextWaitAfterBackToCaller = await rootFunctionWait.CurrntFunction.GetNextWait(rootFunctionWait);
+            if (rootFunctionWait.IsFirst)
             {
                 await _context.SaveChangesAsync();
-                await RegisterFirstWait(parentFunctionWait.RequestedByFunction.MethodInfo);
+                await RegisterFirstWait(rootFunctionWait.RequestedByFunction.MethodInfo);
             }
-            return await HandleNextWait(nextWaitAftreBacktoCaller, parentFunctionWait);
+            return await HandleNextWait(nextWaitAfterBackToCaller, rootFunctionWait);
         }
 
         return true;
@@ -240,9 +247,9 @@ internal partial class ResumableFunctionHandler
 
     private async Task ManyWaitsRequested(ManyMethodsWait manyWaits)
     {
-        for (var index = 0; index < manyWaits.WaitingMethods.Count; index++)
+        for (var index = 0; index < manyWaits.ChildWaits.Count; index++)
         {
-            var methodWait = manyWaits.WaitingMethods[index];
+            var methodWait = (MethodWait)manyWaits.ChildWaits[index];
             methodWait.Status = WaitStatus.Waiting;
             methodWait.FunctionState = manyWaits.FunctionState;
             methodWait.RequestedByFunctionId = manyWaits.RequestedByFunctionId;

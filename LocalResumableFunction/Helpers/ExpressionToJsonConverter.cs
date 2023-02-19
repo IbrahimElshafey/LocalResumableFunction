@@ -17,6 +17,7 @@ public class ExpressionToJsonConverter : ValueConverter<Expression, string>
 
     internal static string ExpressionToJson(Expression expression)
     {
+        if (expression == null) return null;
         return ExpressionToJson(expression, null);
     }
 

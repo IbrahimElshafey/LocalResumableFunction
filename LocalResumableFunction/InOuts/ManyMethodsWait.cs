@@ -7,7 +7,9 @@ namespace LocalResumableFunction.InOuts;
 public class ManyMethodsWait : Wait
 {
     private LambdaExpression? _countExpression;
-    public List<MethodWait> WaitingMethods { get; internal set; } = new();
+
+    [NotMapped]
+    private List<MethodWait> WaitingMethods => ChildWaits.ConvertAll(x => (MethodWait)x);
 
     [NotMapped]
     public LambdaExpression? CountExpression
@@ -18,9 +20,10 @@ public class ManyMethodsWait : Wait
 
     internal byte[] CountExpressionValue { get; set; }
 
-
+    [NotMapped]
     public MethodWait? MatchedMethod => WaitingMethods?.Single(x => x.Status == WaitStatus.Completed);
 
+    [NotMapped]
     public List<MethodWait>? MatchedMethods =>
         WaitingMethods?.Where(x => x.Status == WaitStatus.Completed).ToList();
 

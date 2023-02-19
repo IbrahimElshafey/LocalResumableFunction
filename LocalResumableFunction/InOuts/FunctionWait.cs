@@ -5,10 +5,8 @@ namespace LocalResumableFunction.InOuts;
 
 public sealed class FunctionWait : Wait
 {
-    public ManyFunctionsWait ParentFunctionGroup { get; internal set; }
-    public int? ParentFunctionGroupId { get; internal set; }
+    [NotMapped]
     public Wait FirstWait { get; internal set; }
-    public int? FirstWaitId { get; internal set; }
 
     [NotMapped] public MethodInfo FunctionInfo { get; internal set; }
 }

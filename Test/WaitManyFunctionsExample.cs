@@ -57,5 +57,9 @@ internal class WaitManyFunctionsExample:Example
             When<ApprovalDecision, bool>("Manager Three Approve Project", ManagerThreeApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output);
+        yield return
+            When<ApprovalDecision, bool>("Manager Three Approve Project Second Approval", ManagerThreeApproveProject)
+                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerThreeApproval == output);
     }
 }
