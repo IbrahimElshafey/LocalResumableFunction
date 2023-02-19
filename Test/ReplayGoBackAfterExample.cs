@@ -8,7 +8,7 @@ internal class ReplayGoBackAfterExample : Example
     private const string ProjectSumbitted = "Project Sumbitted";
 
     //[ResumableFunctionEntryPoint]
-    public async IAsyncEnumerable<Wait> TestReplay()
+    public async IAsyncEnumerable<Wait> TestReplay_GoBackAfter()
     {
         yield return
             When<Project, bool>(ProjectSumbitted, ProjectSubmitted)
@@ -29,5 +29,6 @@ internal class ReplayGoBackAfterExample : Example
         {
             Console.WriteLine("Manager one approved project");
         }
+        Success(nameof(TestReplay_GoBackAfter));
     }
 }

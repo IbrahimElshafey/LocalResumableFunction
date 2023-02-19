@@ -20,13 +20,31 @@ public class Program
         Console.WriteLine("Test App RUNNING.");
 
 
-        //TestSubFunctionCall();
-        //TestReplayGoBackAfter();
-        //TestReplayGoBackBeforeNewMatch();
+        //await TestSubFunctionCall();
+        //await TestReplayGoBackAfter();
+        //await TestReplayGoBackBeforeNewMatch();
        
-        await TestWaitMany();
+        //await TestWaitMany();
         //await TestWaitManyFunctions();
+
+        await TestParallelScenarios();
         Console.ReadLine();
+    }
+
+    private static async Task TestParallelScenarios()
+    {
+        await Task.WhenAll(
+            TestSubFunctionCall(), 
+            TestReplayGoBackAfter(), 
+            TestReplayGoBackBeforeNewMatch(),
+            TestWaitMany(), 
+            TestWaitManyFunctions());
+        //await TestSubFunctionCall();
+        //await TestReplayGoBackAfter();
+        //await TestReplayGoBackBeforeNewMatch();
+
+        //await TestWaitMany();
+        //await TestWaitManyFunctions();
     }
 
     private static async Task TestWaitManyFunctions()
@@ -52,6 +70,38 @@ public class Program
         example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
     }
 
+    
+
+    private static async Task TestSubFunctionCall()
+    {
+        await RegisterResumableFunction(typeof(Example), nameof(Example.SubFunctionTest));
+        var example = new Example();
+        example.ProjectSubmitted(project);
+        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
+        example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
+        example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
+    }
+
+    private static async Task TestReplayGoBackAfter()
+    {
+        await RegisterResumableFunction(typeof(ReplayGoBackAfterExample), nameof(ReplayGoBackAfterExample.TestReplay_GoBackAfter));
+        var example = new ReplayGoBackAfterExample();
+        example.ProjectSubmitted(Example.GetCurrentProject());
+        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
+        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
+    }
+
+    private static async Task TestReplayGoBackBeforeNewMatch()
+    {
+        await RegisterResumableFunction(typeof(ReplayGoBackBeforeNewMatchExample), nameof(ReplayGoBackBeforeNewMatchExample.TestReplay_GoBackBefore));
+        var example = new ReplayGoBackBeforeNewMatchExample();
+        example.ProjectSubmitted(Example.GetCurrentProject());
+        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
+        project.Name += "-Updated";
+        example.ProjectSubmitted(project);
+        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
+    }
+
     private static async Task RegisterResumableFunction(Type classType, string methodName)
     {
         var method =
@@ -64,32 +114,5 @@ public class Program
         await _scanner.RegisterResumableFunction(method, MethodType.ResumableFunctionEntryPoint);
         await _scanner.RegisterResumableFunctionFirstWait(method);
         await _scanner._context.SaveChangesAsync();
-    }
-
-    private static void TestSubFunctionCall()
-    {
-        var example = new Example();
-        example.ProjectSubmitted(project);
-        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
-        example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
-        example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
-    }
-
-    private static void TestReplayGoBackAfter()
-    {
-        var example = new ReplayGoBackAfterExample();
-        example.ProjectSubmitted(Example.GetCurrentProject());
-        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
-        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
-    }
-
-    private static void TestReplayGoBackBeforeNewMatch()
-    {
-        var example = new ReplayGoBackBeforeNewMatchExample();
-        example.ProjectSubmitted(Example.GetCurrentProject());
-        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
-        project.Name += "-Updated";
-        example.ProjectSubmitted(project);
-        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
     }
 }

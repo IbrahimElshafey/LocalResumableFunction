@@ -13,7 +13,7 @@ internal class Example : ResumableFunctionLocal
     //any method with attribute [ResumableFunctionEntryPoint] that takes no argument
     //and return IAsyncEnumerable<Wait> is a resumbale function
     //[ResumableFunctionEntryPoint]
-    public async IAsyncEnumerable<Wait> Start()
+    public async IAsyncEnumerable<Wait> SubFunctionTest()
     {
         yield return
             When<Project, bool>("Project Sumbitted", ProjectSubmitted)
@@ -41,6 +41,7 @@ internal class Example : ResumableFunctionLocal
         {
             Console.WriteLine("Project rejected by one of managers 1 & 2");
         }
+        Success(nameof(SubFunctionTest));
     }
 
     [SubResumableFunction]
@@ -121,5 +122,11 @@ internal class Example : ResumableFunctionLocal
     public static Project GetCurrentProject()
     {
         return new Project { Id = 2000, Name = "Project Name", Description = "Description" };
+    }
+    protected void Success(string msg)
+    {
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"^^^Success for [{msg}]^^^^");
+        Console.ForegroundColor = ConsoleColor.White;
     }
 }

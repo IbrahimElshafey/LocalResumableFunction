@@ -2,31 +2,33 @@
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
 
-internal class WaitManyFunctionsExample:Example
+internal class WaitManyFunctionsExample : Example
 {
     public async IAsyncEnumerable<Wait> WaitManyFunctions()
     {
         await Task.Delay(10);
-        Console.WriteLine("Start WaitManyFunctions");
+        Console.WriteLine("SubFunctionTest WaitManyFunctions");
         yield return
             When<Project, bool>("Project Submitted", ProjectSubmitted)
                 .If((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
         Console.WriteLine("After project submitted.");
         yield return WaitFunctions("Wait multiple resumable functions", FunctionOne, FunctionTwo);
-        Console.WriteLine("After wait two functions.");
+        Success(nameof(WaitManyFunctions));
     }
+
+    
 
     public async IAsyncEnumerable<Wait> WaitFirstFunction()
     {
         await Task.Delay(10);
-        Console.WriteLine("Start WaitManyFunctions");
+        Console.WriteLine("SubFunctionTest WaitManyFunctions");
         yield return
             When<Project, bool>("Project Submitted", ProjectSubmitted)
                 .If((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
         Console.WriteLine("After project submitted.");
-        yield return 
+        yield return
             WaitFunctions("Wait multiple resumable functions", FunctionOne, FunctionTwo)
                 .WaitFirst();
         Console.WriteLine("After wait two functions.");

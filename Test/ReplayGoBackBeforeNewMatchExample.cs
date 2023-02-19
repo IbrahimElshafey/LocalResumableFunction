@@ -8,7 +8,7 @@ internal class ReplayGoBackBeforeNewMatchExample : Example
     private const string ProjectSumbitted = "Project Sumbitted";
 
     //[ResumableFunctionEntryPoint]
-    public async IAsyncEnumerable<Wait> TestReplay()
+    public async IAsyncEnumerable<Wait> TestReplay_GoBackBefore()
     {
         Console.WriteLine("Before project submitted.");
         yield return
@@ -34,5 +34,6 @@ internal class ReplayGoBackBeforeNewMatchExample : Example
         {
             Console.WriteLine("ReplayExample: Manager one approved project");
         }
+        Success(nameof(ReplayGoBackBeforeNewMatchExample));
     }
 }

@@ -22,7 +22,7 @@ internal class TestWaitManyExample : Example
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).WaitAll();
         Console.WriteLine("Three waits matched.");
-        Console.WriteLine("TestWaitMany ended.");
+        Success(nameof(WaitThreeMethod));
     }
 
     //[ResumableFunctionEntryPoint]

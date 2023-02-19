@@ -5,7 +5,8 @@ namespace LocalResumableFunction.InOuts;
 
 public class ResumableFunctionState
 {
-    [Key] [JsonIgnore] public int Id { get; internal set; }
+    [Key] public int Id { get; internal set; }
+    public bool IsCompleted { get; set; } = false;
 
     //class instance that contain the resumable function
     public object? StateObject { get; internal set; }

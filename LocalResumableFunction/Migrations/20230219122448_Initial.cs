@@ -16,11 +16,11 @@ namespace LocalResumableFunction.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    AssemblyName = table.Column<string>(type: "TEXT", nullable: false),
-                    ClassName = table.Column<string>(type: "TEXT", nullable: false),
-                    MethodName = table.Column<string>(type: "TEXT", nullable: false),
-                    MethodSignature = table.Column<string>(type: "TEXT", nullable: false),
-                    MethodHash = table.Column<byte[]>(type: "BLOB", maxLength: 16, nullable: false),
+                    AssemblyName = table.Column<string>(type: "TEXT", nullable: true),
+                    ClassName = table.Column<string>(type: "TEXT", nullable: true),
+                    MethodName = table.Column<string>(type: "TEXT", nullable: true),
+                    MethodSignature = table.Column<string>(type: "TEXT", nullable: true),
+                    MethodHash = table.Column<byte[]>(type: "BLOB", maxLength: 16, nullable: true),
                     Type = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
@@ -34,6 +34,7 @@ namespace LocalResumableFunction.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false),
                     StateObject = table.Column<string>(type: "TEXT", nullable: true),
                     ResumableFunctionIdentifierId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -54,7 +55,7 @@ namespace LocalResumableFunction.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
                     Status = table.Column<int>(type: "INTEGER", nullable: false),
                     IsFirst = table.Column<bool>(type: "INTEGER", nullable: false),
                     StateBeforeWait = table.Column<int>(type: "INTEGER", nullable: false),

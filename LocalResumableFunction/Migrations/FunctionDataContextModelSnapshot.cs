@@ -24,24 +24,19 @@ namespace LocalResumableFunction.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("AssemblyName")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ClassName")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<byte[]>("MethodHash")
-                        .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("BLOB");
 
                     b.Property<string>("MethodName")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("MethodSignature")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Type")
@@ -59,6 +54,9 @@ namespace LocalResumableFunction.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ResumableFunctionIdentifierId")
@@ -94,7 +92,6 @@ namespace LocalResumableFunction.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("ParentWaitId")
@@ -149,7 +146,6 @@ namespace LocalResumableFunction.Migrations
                     b.HasBaseType("LocalResumableFunction.InOuts.Wait");
 
                     b.Property<byte[]>("CountExpressionValue")
-                        .IsRequired()
                         .HasColumnType("BLOB")
                         .HasColumnName("CountExpressionValue");
 
@@ -164,7 +160,6 @@ namespace LocalResumableFunction.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("MatchIfExpressionValue")
-                        .IsRequired()
                         .HasColumnType("BLOB")
                         .HasColumnName("MatchIfExpressionValue");
 
@@ -172,7 +167,6 @@ namespace LocalResumableFunction.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("SetDataExpressionValue")
-                        .IsRequired()
                         .HasColumnType("BLOB")
                         .HasColumnName("SetDataExpressionValue");
 

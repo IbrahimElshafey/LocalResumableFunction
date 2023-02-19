@@ -136,6 +136,7 @@ internal partial class ResumableFunctionHandler
         {
             currentWait.Status = WaitStatus.Completed;
             currentWait.FunctionState.StateObject = currentWait.CurrntFunction;
+            currentWait.FunctionState.IsCompleted = true;
             return await MoveFunctionToRecycleBin(currentWait);
         }
 
