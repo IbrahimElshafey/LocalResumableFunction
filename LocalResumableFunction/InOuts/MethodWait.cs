@@ -63,16 +63,25 @@ public class MethodWait : Wait
 
 public class MethodWait<TInput, TOutput> : MethodWait
 {
+    public MethodWait(Func<TInput, Task<TOutput>> method)
+    {
+        Create(method.Method);
+    }
     public MethodWait(Func<TInput, TOutput> method)
     {
-        var eventMethodAttributeExist = method.Method.GetCustomAttribute(typeof(WaitMethodAttribute));
+        Create(method.Method);
+    }
+
+    private void Create(MethodInfo method)
+    {
+        var eventMethodAttributeExist = method.GetCustomAttribute(typeof(WaitMethodAttribute));
         if (eventMethodAttributeExist == null)
             throw new Exception(
-                $"You must add attribute [{nameof(WaitMethodAttribute)}] to method {method.Method.Name}");
+                $"You must add attribute [{nameof(WaitMethodAttribute)}] to method {method.Name}");
 
         WaitMethodIdentifier = new MethodIdentifier();
-        WaitMethodIdentifier.SetMethodInfo(method.Method);
-        Name = $"#{method.Method.Name}#";
+        WaitMethodIdentifier.SetMethodInfo(method);
+        Name = $"#{method.Name}#";
     }
 
     public MethodWait<TInput, TOutput> SetData(Expression<Func<TInput, TOutput, bool>> value)

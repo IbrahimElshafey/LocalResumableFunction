@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using static System.Linq.Expressions.Expression;
 
 namespace LocalResumableFunction.Helpers;
@@ -55,5 +56,17 @@ public static class Extensions
             if (expressionOne.Parameters[i].Type != expressionTwo.Parameters[i].Type)
                 return false;
         return true;
+    }
+
+    public static bool IsAsyncMethod(MethodBase method)
+    {
+        var attType = typeof(AsyncStateMachineAttribute);
+
+        // Obtain the custom attribute for the method. 
+        // The value returned contains the StateMachineType property. 
+        // Null is returned if the attribute isn't present for the method. 
+        var attrib = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
+
+        return attrib != null;
     }
 }

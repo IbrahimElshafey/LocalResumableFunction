@@ -7,16 +7,24 @@ public abstract partial class ResumableFunctionLocal
 {
     [JsonExtensionData] public Dictionary<string, object> FunctionData { get; set; }
 
-
-    public MethodWait<TInput, TOutput> When<TInput, TOutput>(string name, Func<TInput, TOutput> method)
+    public MethodWait<TInput, TOutput> When<TInput, TOutput>(string name, Func<TInput, Task<TOutput>> method)
     {
-        var result = new MethodWait<TInput, TOutput>(method)
+        return new MethodWait<TInput, TOutput>(method)
         {
             Name = name,
             WaitType = WaitType.MethodWait,
             IsNode = true
         };
-        return result;
+    }
+
+    public MethodWait<TInput, TOutput> When<TInput, TOutput>(string name, Func<TInput, TOutput> method)
+    {
+        return new MethodWait<TInput, TOutput>(method)
+        {
+            Name = name,
+            WaitType = WaitType.MethodWait,
+            IsNode = true
+        };
     }
 
     public ManyMethodsWait When(string name, params MethodWait[] manyMethodsWait)

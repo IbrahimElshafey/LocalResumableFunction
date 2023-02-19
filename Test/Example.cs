@@ -84,9 +84,10 @@ internal class Example : ResumableFunctionLocal
     }
 
     [WaitMethod]
-    internal bool ProjectSubmitted(Project project)
+    internal async Task<bool> ProjectSubmitted(Project project)
     {
-        Console.WriteLine("Project Submitted");
+        await Task.Delay(100);
+        Console.WriteLine($"Project {project} Submitted ");
         return true;
     }
 

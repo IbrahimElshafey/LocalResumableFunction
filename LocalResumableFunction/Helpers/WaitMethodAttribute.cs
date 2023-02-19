@@ -25,6 +25,12 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
     public override void OnExit(MethodExecutionArgs args)
     {
         _pushedMethod.Output = args.ReturnValue;
+        //var isTaskResult = args.ReturnValue.GetType().GetGenericTypeDefinition() == typeof(Task<>);
+        if (Extensions.IsAsyncMethod(args.Method))
+        {
+            dynamic output = args.ReturnValue;
+            _pushedMethod.Output = output.Result;
+        }
         _pushedMethod.Instance = args.Instance;
         //todo: main method must wait untill this completes
         _ = new ResumableFunctionHandler().MethodCalled(_pushedMethod);

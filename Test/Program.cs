@@ -34,7 +34,7 @@ public class Program
         await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitFirstFunction));
         //await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitManyFunctions));
         var example = new WaitManyFunctionsExample();
-        example.ProjectSubmitted(Example.GetCurrentProject());
+        await example.ProjectSubmitted(Example.GetCurrentProject());
         await Task.Delay(10000);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));

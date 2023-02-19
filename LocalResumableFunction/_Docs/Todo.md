@@ -21,15 +21,15 @@
 * Parameter check lib use
 * Add UI Project
 * Forigen keys slow insert new
-* one group and mixed waits types
+* Mixed waits group
 
 # Test Engine Scenarios
 * Seqeunce [DONE]
 * Wait all [DONE]
-* Wait any [DONE]
+* Wait first [DONE]
 * Wait function [DONE]
 * Wait many functions [DONE]
-* Wait any function
+* Wait first function [DONE]
 * Replay [to,after,before] for types:
 	* One Method Node [DONE]
 	* Many Methods Wait

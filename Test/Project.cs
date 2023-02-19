@@ -6,4 +6,9 @@ public class Project
     public string Name { get; set; }
     public string Description { get; set; }
     public bool IsResubmit { get; set; }
+
+    public override string ToString()
+    {
+        return $"[Name:{Name}, Description:{Description}, IsResubmit:{IsResubmit}]";
+    }
 }
