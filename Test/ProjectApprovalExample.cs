@@ -3,7 +3,7 @@ using LocalResumableFunction.InOuts;
 
 namespace LocalResumableFunction;
 
-internal class Example : ResumableFunctionLocal
+internal class ProjectApprovalExample : ResumableFunctionLocal
 {
     public Project CurrentProject { get; set; }
     public bool ManagerOneApproval { get; set; }
@@ -16,19 +16,19 @@ internal class Example : ResumableFunctionLocal
     public async IAsyncEnumerable<Wait> SubFunctionTest()
     {
         yield return
-            When<Project, bool>("Project Sumbitted", ProjectSubmitted)
+            Wait<Project, bool>("Project Submitted", ProjectSubmitted)
                 .If((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         AskManagerToApprove(CurrentProject.Id);
         Console.WriteLine("Wait sub function");
-        yield return WaitFunction("Wait sub function that waits two manager approval.", WaitTwoManagers);
+        yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers);
         Console.WriteLine("After sub function ended");
         if (ManagerOneApproval && ManagerTwoApproval)
         {
             Console.WriteLine("Manager 1 & 2 approved the project");
             yield return
-                When<ApprovalDecision, bool>("Manager Three Approve Project", ManagerThreeApproveProject)
+                Wait<ApprovalDecision, bool>("Manager Three Approve Project", ManagerThreeApproveProject)
                     .If((input, output) => input.ProjectId == CurrentProject.Id)
                     .SetData((input, output) => ManagerThreeApproval == output);
 
@@ -48,7 +48,7 @@ internal class Example : ResumableFunctionLocal
     public async IAsyncEnumerable<Wait> WaitTwoManagers()
     {
         Console.WriteLine("WaitTwoManagers started");
-        yield return When(
+        yield return Wait(
             "Wait two methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
@@ -56,7 +56,7 @@ internal class Example : ResumableFunctionLocal
             new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerTwoApproval == output)
-        ).WaitAll();
+        ).All();
         Console.WriteLine("Two waits matched");
     }
 
@@ -64,8 +64,8 @@ internal class Example : ResumableFunctionLocal
     //[ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> WaitFirst()
     {
-        Console.WriteLine("WaitFirst started");
-        yield return When(
+        Console.WriteLine("First started");
+        yield return Wait(
             "Wait first in two",
             new MethodWait<Project, bool>(ProjectSubmitted)
                 .If((input, output) => output == true)
@@ -73,7 +73,7 @@ internal class Example : ResumableFunctionLocal
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerOneApproval == output)
-        ).WaitFirst();
+        ).First();
         Console.WriteLine("One of two waits matched");
     }
 

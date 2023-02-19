@@ -8,7 +8,7 @@ namespace LocalResumableFunction.Helpers;
 /// </summary>
 public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
 {
-    private PushedMethod? _pushedMethod;
+    private PushedMethod _pushedMethod;
     public override object TypeId => nameof(WaitMethodAttribute);
 
     public override void OnEntry(MethodExecutionArgs args)

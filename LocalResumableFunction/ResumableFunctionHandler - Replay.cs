@@ -100,7 +100,7 @@ internal partial class ResumableFunctionHandler
         return (runner, hasWait);
     }
 
-    private async Task<(bool IsFail, Wait? WaitToReplay)> GetOldWait(ReplayWait replayWait)
+    private async Task<(bool IsFail, Wait WaitToReplay)> GetOldWait(ReplayWait replayWait)
     {
         var functionOldWaits =
             await _waitsRepository.GetFunctionInstanceWaits(replayWait.RequestedByFunctionId,

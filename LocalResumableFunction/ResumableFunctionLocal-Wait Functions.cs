@@ -2,7 +2,7 @@
 
 public abstract partial class ResumableFunctionLocal
 {
-    protected FunctionWait WaitFunction(string name, Func<IAsyncEnumerable<Wait>> function)
+    protected FunctionWait Wait(string name, Func<IAsyncEnumerable<Wait>> function)
     {
         var result = new FunctionWait
         {
@@ -14,7 +14,7 @@ public abstract partial class ResumableFunctionLocal
         return result;
     }
 
-    protected ManyFunctionsWait WaitFunctions
+    protected ManyFunctionsWait Wait
         (string name, params Func<IAsyncEnumerable<Wait>>[] subFunctions)
     {
         var result = new ManyFunctionsWait
@@ -27,7 +27,7 @@ public abstract partial class ResumableFunctionLocal
         for (var index = 0; index < subFunctions.Length; index++)
         {
             var currentFunction = subFunctions[index];
-            var currentFuncResult = WaitFunction($"#{currentFunction.Method.Name}#", currentFunction);
+            var currentFuncResult = Wait($"#{currentFunction.Method.Name}#", currentFunction);
             currentFuncResult.IsNode = false;
             currentFuncResult.ParentWait = result;
             result.ChildWaits[index] = currentFuncResult;

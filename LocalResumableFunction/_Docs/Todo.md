@@ -1,4 +1,6 @@
 ﻿# Todo
+* Test loops
+* Subfunctions Two level
 * Remove uniqe for method hash
 * Run in another process
 	* Save pushed waits to database
@@ -21,7 +23,7 @@
 * Add UI Project
 * Mixed waits group
 * WhenMatchedCount for function group
-
+* Speed Analysis
 # Test Engine Scenarios
 * Seqeunce [DONE]
 * Wait all [DONE]

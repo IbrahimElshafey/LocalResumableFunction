@@ -6,13 +6,13 @@ namespace LocalResumableFunction.InOuts;
 
 public class ManyMethodsWait : Wait
 {
-    private LambdaExpression? _countExpression;
+    private LambdaExpression _countExpression;
 
     [NotMapped]
     private List<MethodWait> WaitingMethods => ChildWaits.ConvertAll(x => (MethodWait)x);
 
     [NotMapped]
-    public LambdaExpression? CountExpression
+    public LambdaExpression CountExpression
     {
         get => _countExpression ?? GetCountExpression();
         internal set => _countExpression = value;
@@ -21,10 +21,10 @@ public class ManyMethodsWait : Wait
     internal byte[] CountExpressionValue { get; set; }
 
     [NotMapped]
-    public MethodWait? MatchedMethod => WaitingMethods?.Single(x => x.Status == WaitStatus.Completed);
+    public MethodWait MatchedMethod => WaitingMethods?.Single(x => x.Status == WaitStatus.Completed);
 
     [NotMapped]
-    public List<MethodWait>? MatchedMethods =>
+    public List<MethodWait> MatchedMethods =>
         WaitingMethods?.Where(x => x.Status == WaitStatus.Completed).ToList();
 
 
@@ -48,13 +48,13 @@ public class ManyMethodsWait : Wait
         return this;
     }
 
-    public Wait WaitAll()
+    public Wait All()
     {
         WaitType = WaitType.AllMethodsWait;
         return this;
     }
 
-    public Wait WaitFirst()
+    public Wait First()
     {
         WaitType = WaitType.AnyMethodWait;
         return this;
@@ -75,7 +75,7 @@ public class ManyMethodsWait : Wait
         Status = WaitStatus.Completed;
     }
 
-    private LambdaExpression? GetCountExpression()
+    private LambdaExpression GetCountExpression()
     {
         var assembly = RequestedByFunction.MethodInfo.DeclaringType.Assembly;
         if (CountExpressionValue != null)

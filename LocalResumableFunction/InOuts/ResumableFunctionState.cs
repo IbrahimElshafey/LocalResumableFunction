@@ -9,7 +9,7 @@ public class ResumableFunctionState
     public bool IsCompleted { get; set; } = false;
 
     //class instance that contain the resumable function
-    public object? StateObject { get; internal set; }
+    public object StateObject { get; internal set; }
 
     public List<Wait> Waits { get; internal set; } = new();
     public MethodIdentifier ResumableFunctionIdentifier { get; set; }

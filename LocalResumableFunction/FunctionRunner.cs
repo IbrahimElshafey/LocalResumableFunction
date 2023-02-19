@@ -49,7 +49,7 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
         return hasNext;
     }
 
-    private void CreateRunner(Type? functionRunnerType, ResumableFunctionLocal resumableFunctionLocal)
+    private void CreateRunner(Type functionRunnerType, ResumableFunctionLocal resumableFunctionLocal)
     {
         if (functionRunnerType == null)
         {

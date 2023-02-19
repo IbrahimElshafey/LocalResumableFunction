@@ -7,7 +7,7 @@ namespace LocalResumableFunction.Helpers;
 
 public static class Extensions
 {
-    public static (bool IsFunctionData, MemberExpression? NewExpression) GetDataParamterAccess(
+    public static (bool IsFunctionData, MemberExpression NewExpression) GetDataParamterAccess(
         this MemberExpression node,
         ParameterExpression functionInstanceArg)
     {
@@ -43,7 +43,7 @@ public static class Extensions
         }
     }
 
-    public static bool SameLambadaSignatures(LambdaExpression? expressionOne, LambdaExpression? expressionTwo)
+    public static bool SameLambadaSignatures(LambdaExpression expressionOne, LambdaExpression expressionTwo)
     {
         var isEqual = expressionOne != null && expressionTwo != null;
         if (isEqual is false) return false;

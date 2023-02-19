@@ -7,7 +7,7 @@ public abstract partial class ResumableFunctionLocal
 {
     [JsonExtensionData] public Dictionary<string, object> FunctionData { get; set; }
 
-    public MethodWait<TInput, TOutput> When<TInput, TOutput>(string name, Func<TInput, Task<TOutput>> method)
+    protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(string name, Func<TInput, Task<TOutput>> method)
     {
         return new MethodWait<TInput, TOutput>(method)
         {
@@ -17,7 +17,7 @@ public abstract partial class ResumableFunctionLocal
         };
     }
 
-    public MethodWait<TInput, TOutput> When<TInput, TOutput>(string name, Func<TInput, TOutput> method)
+    protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(string name, Func<TInput, TOutput> method)
     {
         return new MethodWait<TInput, TOutput>(method)
         {
@@ -27,7 +27,7 @@ public abstract partial class ResumableFunctionLocal
         };
     }
 
-    public ManyMethodsWait When(string name, params MethodWait[] manyMethodsWait)
+    protected ManyMethodsWait Wait(string name, params MethodWait[] manyMethodsWait)
     {
         var result = new ManyMethodsWait
         {
@@ -45,7 +45,7 @@ public abstract partial class ResumableFunctionLocal
         return result;
     }
 
-    internal async Task<NextWaitResult?> GetNextWait(Wait currentWait)
+    internal async Task<NextWaitResult> GetNextWait(Wait currentWait)
     {
         var functionRunner = new FunctionRunner(currentWait);
         if (functionRunner.ResumableFunctionExist is false)

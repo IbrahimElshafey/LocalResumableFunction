@@ -3,7 +3,7 @@ using LocalResumableFunction.InOuts;
 
 namespace Test;
 
-internal class ReplayGoBackBeforeNewMatchExample : Example
+internal class ReplayGoBackBeforeNewMatchExample : ProjectApprovalExample
 {
     private const string ProjectSumbitted = "Project Sumbitted";
 
@@ -12,12 +12,12 @@ internal class ReplayGoBackBeforeNewMatchExample : Example
     {
         Console.WriteLine("Before project submitted.");
         yield return
-            When<Project, bool>(ProjectSumbitted, ProjectSubmitted)
+            Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
                 .If((input, output) => output == true && input.IsResubmit == false)
                 .SetData((input, output) => CurrentProject == input);
 
         AskManagerToApprove(CurrentProject.Id);
-        yield return When<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
+        yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
             .If((input, output) => output == true)
             .SetData((input, output) => ManagerOneApproval == input.Decision);
 

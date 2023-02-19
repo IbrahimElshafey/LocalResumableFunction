@@ -2,14 +2,14 @@
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
 
-internal class TestWaitManyExample : Example
+internal class TestWaitManyExample : ProjectApprovalExample
 {
     //[ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> WaitThreeMethod()
     {
         Console.WriteLine("Wait three managers to approve");
         CurrentProject = GetCurrentProject();
-        yield return When(
+        yield return Wait(
             "Wait three methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
@@ -20,7 +20,7 @@ internal class TestWaitManyExample : Example
             new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output)
-        ).WaitAll();
+        ).All();
         Console.WriteLine("Three waits matched.");
         Success(nameof(WaitThreeMethod));
     }
@@ -30,7 +30,7 @@ internal class TestWaitManyExample : Example
     {
         Console.WriteLine("Wait two of three managers to approve");
         CurrentProject = GetCurrentProject();
-        yield return When(
+        yield return Wait(
             "Wait three methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)

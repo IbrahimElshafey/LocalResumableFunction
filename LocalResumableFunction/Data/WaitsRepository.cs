@@ -57,7 +57,7 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-    public async Task<(Wait? RootWait, int? MethodGroupId, int? FunctionWaitId, int? FunctionGroupId)> GetRootFunctionWait(int? parentId)
+    public async Task<(Wait RootWait, int? MethodGroupId, int? FunctionWaitId, int? FunctionGroupId)> GetRootFunctionWait(int? parentId)
     {
         var result = (RootWait: default(Wait), MethodGroupId: default(int?), FunctionWaitId: default(int?), FunctionGroupId: default(int?));
         Debugger.Launch();
@@ -85,7 +85,7 @@ internal class WaitsRepository : RepositoryBase
         return result;
     }
 
-    public async Task<Wait?> GetWaitGroup(int? parentGroupId)
+    public async Task<Wait> GetWaitGroup(int? parentGroupId)
     {
         var result = await _context.Waits
             .Include(x => x.ChildWaits)

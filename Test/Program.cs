@@ -8,7 +8,7 @@ using Test;
 
 public class Program
 {
-    private static readonly Project project = Example.GetCurrentProject();
+    private static readonly Project project = ProjectApprovalExample.GetCurrentProject();
     private static Scanner _scanner;
 
     private static async Task Main()
@@ -25,9 +25,9 @@ public class Program
         //await TestReplayGoBackBeforeNewMatch();
        
         //await TestWaitMany();
-        //await TestWaitManyFunctions();
+        await TestWaitManyFunctions();
 
-        await TestParallelScenarios();
+        //await TestParallelScenarios();
         Console.ReadLine();
     }
 
@@ -50,9 +50,10 @@ public class Program
     private static async Task TestWaitManyFunctions()
     {
         //await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitFirstFunction));
-        await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitManyFunctions));
+        //await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitManyFunctions));
+        await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitSubFunctionTwoLevels));
         var example = new WaitManyFunctionsExample();
-        await example.ProjectSubmitted(Example.GetCurrentProject());
+        await example.ProjectSubmitted(ProjectApprovalExample.GetCurrentProject());
         await Task.Delay(5000);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
@@ -74,8 +75,8 @@ public class Program
 
     private static async Task TestSubFunctionCall()
     {
-        await RegisterResumableFunction(typeof(Example), nameof(Example.SubFunctionTest));
-        var example = new Example();
+        await RegisterResumableFunction(typeof(ProjectApprovalExample), nameof(ProjectApprovalExample.SubFunctionTest));
+        var example = new ProjectApprovalExample();
         example.ProjectSubmitted(project);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
@@ -86,7 +87,7 @@ public class Program
     {
         await RegisterResumableFunction(typeof(ReplayGoBackAfterExample), nameof(ReplayGoBackAfterExample.TestReplay_GoBackAfter));
         var example = new ReplayGoBackAfterExample();
-        example.ProjectSubmitted(Example.GetCurrentProject());
+        example.ProjectSubmitted(ProjectApprovalExample.GetCurrentProject());
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
     }
@@ -95,7 +96,7 @@ public class Program
     {
         await RegisterResumableFunction(typeof(ReplayGoBackBeforeNewMatchExample), nameof(ReplayGoBackBeforeNewMatchExample.TestReplay_GoBackBefore));
         var example = new ReplayGoBackBeforeNewMatchExample();
-        example.ProjectSubmitted(Example.GetCurrentProject());
+        example.ProjectSubmitted(ProjectApprovalExample.GetCurrentProject());
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
         project.Name += "-Updated";
         example.ProjectSubmitted(project);

@@ -9,7 +9,7 @@ namespace LocalResumableFunction.InOuts;
 [Index(nameof(MethodHash), IsUnique = true, Name = "Index_MethodHash")]
 public class MethodIdentifier
 {
-    private MethodInfo? _methodInfo;
+    private MethodInfo _methodInfo;
     [Key] public int Id { get; internal set; }
 
     public string AssemblyName { get; internal set; }
@@ -24,7 +24,7 @@ public class MethodIdentifier
     public List<MethodWait> WaitsRequestsForMethod { get; internal set; }
     public List<ResumableFunctionState> ActiveFunctionsStates { get; internal set; }
 
-    internal MethodInfo? MethodInfo
+    internal MethodInfo MethodInfo
     {
         get
         {

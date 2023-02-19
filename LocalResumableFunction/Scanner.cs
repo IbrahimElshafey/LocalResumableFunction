@@ -52,7 +52,7 @@ internal class Scanner
         await _context.SaveChangesAsync();
     }
 
-    private async Task<List<Type>> RegisterMethodWaits(List<string>? assemblyPaths)
+    private async Task<List<Type>> RegisterMethodWaits(List<string> assemblyPaths)
     {
         var resumableFunctionClasses = new List<Type>();
         foreach (var assemblyPath in assemblyPaths)

@@ -11,7 +11,7 @@ internal partial class ResumableFunctionHandler
     private readonly WaitsRepository _waitsRepository;
     private readonly MethodIdentifierRepository _metodIdsRepo;
 
-    internal ResumableFunctionHandler(FunctionDataContext? context = null)
+    internal ResumableFunctionHandler(FunctionDataContext context = null)
     {
         _context = context ?? new FunctionDataContext();
         _waitsRepository = new WaitsRepository(_context);
@@ -87,7 +87,7 @@ internal partial class ResumableFunctionHandler
 
     private async Task DuplicateIfFirst(MethodWait currentWait)
     {
-        Wait? wait = null;
+        Wait wait = null;
         if (currentWait.IsFirst)
             wait = currentWait;
         else if (currentWait?.ParentWait?.IsFirst == true)
@@ -178,6 +178,7 @@ internal partial class ResumableFunctionHandler
 
     private async Task<bool> SubFunctionExit(Wait lastFunctionWait)
     {
+        Debugger.Launch();
         //lastFunctionWait =  last function wait before exsit
         var rootFunctionResult = await _waitsRepository.GetRootFunctionWait(lastFunctionWait.ParentWaitId);
         var rootFunctionWait = rootFunctionResult.RootWait;
