@@ -57,6 +57,7 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
+    //Todo change to IEnumrubale<Waits> GetRoots()
     public async Task<(Wait RootWait, int? MethodGroupId, int? FunctionWaitId, int? FunctionGroupId)> GetRootFunctionWait(int? parentId)
     {
         var result = (RootWait: default(Wait), MethodGroupId: default(int?), FunctionWaitId: default(int?), FunctionGroupId: default(int?));
@@ -144,6 +145,17 @@ internal class WaitsRepository : RepositoryBase
         {
             if (wait.Status == WaitStatus.Waiting)
                 wait.Status = WaitStatus.Canceled;
+        }
+    }
+
+    public async IAsyncEnumerable<Wait> GetWaitHierarchy(MethodWait methodWait)
+    {
+        yield return methodWait;
+        Wait parentWait = methodWait;
+        while (parentWait?.ParentWaitId != null)
+        {
+            parentWait = await _context.Waits.FirstOrDefaultAsync(x => x.Id == methodWait.ParentWaitId);
+            yield return  parentWait;
         }
     }
 }

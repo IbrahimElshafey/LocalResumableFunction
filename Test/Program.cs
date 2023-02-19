@@ -56,6 +56,7 @@ public class Program
         await example.ProjectSubmitted(ProjectApprovalExample.GetCurrentProject());
         await Task.Delay(5000);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
+        await Task.Delay(5000);
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
         await Task.Delay(5000);
         example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
