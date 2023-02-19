@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Linq;
 using LocalResumableFunction.InOuts;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,12 +13,12 @@ internal class WaitsRepository : RepositoryBase
 
     public Task AddWait(Wait wait)
     {
-        var isExistLocal = Context.Waits.Local.Contains(wait);
-        var notAddStatus = Context.Entry(wait).State != EntityState.Added;
+        var isExistLocal = _context.Waits.Local.Contains(wait);
+        var notAddStatus = _context.Entry(wait).State != EntityState.Added;
         if (isExistLocal is false && notAddStatus)
         {
             Console.WriteLine($"==> Add Wait [{wait.Name}] with type [{wait.WaitType}]");
-            Context.Waits.Add(wait);
+            _context.Waits.Add(wait);
         }
         return Task.CompletedTask;
     }
@@ -27,7 +28,7 @@ internal class WaitsRepository : RepositoryBase
         Debugger.Launch();
         var matchedWaits = new List<MethodWait>();
         var databaseWaits =
-            await Context
+            await _context
                 .MethodWaits
                 .Include(x => x.RequestedByFunction)
                 .Where(x =>
@@ -52,19 +53,19 @@ internal class WaitsRepository : RepositoryBase
 
         async Task LoadWaitFunctionState(MethodWait wait)
         {
-            wait.FunctionState = await Context.FunctionStates.FindAsync(wait.FunctionStateId);
+            wait.FunctionState = await _context.FunctionStates.FindAsync(wait.FunctionStateId);
         }
     }
 
     public async Task<Wait> GetParentFunctionWait(int? functionWaitId)
     {
         Debugger.Launch();
-        var result = await Context.FunctionWaits
+        var result = await _context.FunctionWaits
             .Include(x => x.RequestedByFunction)
             .FirstAsync(x => x.Id == functionWaitId);
         if (result != null && result.ParentFunctionGroupId != null)
         {
-            var manyFunc = await Context.ManyFunctionsWaits
+            var manyFunc = await _context.ManyFunctionsWaits
                 .Include(x => x.WaitingFunctions)
                 .Include(x => x.RequestedByFunction)
                 .FirstOrDefaultAsync(x => x.Id == result.ParentFunctionGroupId);
@@ -76,7 +77,7 @@ internal class WaitsRepository : RepositoryBase
 
     public async Task<ManyMethodsWait> GetWaitGroup(int? parentGroupId)
     {
-        var result = await Context.ManyMethodsWaits
+        var result = await _context.ManyMethodsWaits
             .Include(x => x.WaitingMethods)
             .FirstOrDefaultAsync(x => x.Id == parentGroupId);
         return result!;
@@ -84,7 +85,7 @@ internal class WaitsRepository : RepositoryBase
 
     internal async Task<List<Wait>> GetFunctionInstanceWaits(int requestedByFunctionId, int functionStateId)
     {
-        var result = await Context.Waits
+        var result = await _context.Waits
             .OrderByDescending(x => x.Id)
             .Where(x =>
                 x.RequestedByFunctionId == requestedByFunctionId &&
@@ -96,7 +97,7 @@ internal class WaitsRepository : RepositoryBase
 
     internal Task<bool> FirstWaitExistInDb(Wait firstWait, MethodIdentifier methodIdentifier)
     {
-        return Context.Waits.AnyAsync(x =>
+        return _context.Waits.AnyAsync(x =>
             x.IsFirst &&
             x.RequestedByFunctionId == methodIdentifier.Id &&
             x.Name == firstWait.Name &&
@@ -113,6 +114,24 @@ internal class WaitsRepository : RepositoryBase
         catch (Exception e)
         {
             return false;
+        }
+    }
+
+    public async Task CancelAllWaits(ManyFunctionsWait anyFunctionWait)
+    {
+        var functionIds = anyFunctionWait
+            .WaitingFunctions
+            .Where(x => x.ParentFunctionGroupId != null)
+            .Select(x => x.Id)
+            .ToList();
+        var waitsToCancel = await _context
+            .Waits
+            .Where(x => functionIds.Contains((int)x.ParentWaitId!))
+            .ToListAsync();
+        foreach (var wait in waitsToCancel)
+        {
+            if (wait.Status == WaitStatus.Waiting)
+                wait.Status = WaitStatus.Canceled;
         }
     }
 }

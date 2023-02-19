@@ -37,4 +37,6 @@ public class ManyFunctionsWait : Wait
         Status =
             WaitingFunctions.Count == CompletedFunctions.Count ? WaitStatus.Completed : Status;
     }
+
+    
 }

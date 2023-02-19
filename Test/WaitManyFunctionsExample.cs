@@ -17,6 +17,21 @@ internal class WaitManyFunctionsExample:Example
         Console.WriteLine("After wait two functions.");
     }
 
+    public async IAsyncEnumerable<Wait> WaitFirstFunction()
+    {
+        await Task.Delay(10);
+        Console.WriteLine("Start WaitManyFunctions");
+        yield return
+            When<Project, bool>("Project Submitted", ProjectSubmitted)
+                .If((input, output) => output == true)
+                .SetData((input, output) => CurrentProject == input);
+        Console.WriteLine("After project submitted.");
+        yield return 
+            WaitFunctions("Wait multiple resumable functions", FunctionOne, FunctionTwo)
+                .WaitFirst();
+        Console.WriteLine("After wait two functions.");
+    }
+
     [SubResumableFunction]
     internal async IAsyncEnumerable<Wait> FunctionOne()
     {

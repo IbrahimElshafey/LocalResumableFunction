@@ -177,6 +177,17 @@ internal partial class ResumableFunctionHandler
     {
         //lastFunctionWait =  last function wait before exsit
         var parentFunctionWait = await _waitsRepository.GetParentFunctionWait(lastFunctionWait.ParentWaitId);
+        if (parentFunctionWait == null)
+        {
+            WriteMessage($"Parent function wait not exist for wait ({lastFunctionWait.Name}) with type ({lastFunctionWait.WaitType}).");
+            return false;
+        }
+
+        if (parentFunctionWait.Status != WaitStatus.Waiting)
+        {
+            WriteMessage($"The status for parent function wait ({parentFunctionWait.Name}) must be ({WaitStatus.Waiting}).");
+            return false;
+        }
         var backToCaller = false;
         lastFunctionWait.Status = WaitStatus.Completed;
         switch (parentFunctionWait)
@@ -195,6 +206,7 @@ internal partial class ResumableFunctionHandler
             case ManyFunctionsWait anyFunctionWait
                 when parentFunctionWait.WaitType == WaitType.AnyFunctionWait:
                 anyFunctionWait.SetMatchedFunction(lastFunctionWait.ParentWaitId);
+                await  _waitsRepository.CancelAllWaits(anyFunctionWait);
                 if (anyFunctionWait.Status == WaitStatus.Completed)
                     backToCaller = true;
                 break;

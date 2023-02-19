@@ -23,11 +23,11 @@ internal class MethodIdentifierRepository : RepositoryBase
 
     public async Task<MethodIdentifier> GetMethodIdentifier(MethodIdentifier methodId)
     {
-        var inDb = await Context
+        var inDb = await _context
             .MethodIdentifiers
             .Where(x => x.MethodHash == methodId.MethodHash).ToListAsync();
         if (inDb == null)
-            inDb = Context
+            inDb = _context
                 .MethodIdentifiers
                 .Local
                 .Where(x => x.MethodHash == methodId.MethodHash).ToList();
@@ -39,7 +39,7 @@ internal class MethodIdentifierRepository : RepositoryBase
                 x.MethodName == methodId.MethodName);
 
         if (existInDb is not null)
-            Context.Entry(methodId).State = EntityState.Detached;
+            _context.Entry(methodId).State = EntityState.Detached;
         return existInDb ?? methodId;
     }
 }

@@ -21,6 +21,7 @@
 * Parameter check lib use
 * Add UI Project
 * Forigen keys slow insert new
+* one group and mixed waits types
 
 # Test Engine Scenarios
 * Seqeunce [DONE]

@@ -31,7 +31,8 @@ public class Program
 
     private static async Task TestWaitManyFunctions()
     {
-        await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitManyFunctions));
+        await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitFirstFunction));
+        //await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitManyFunctions));
         var example = new WaitManyFunctionsExample();
         example.ProjectSubmitted(Example.GetCurrentProject());
         await Task.Delay(10000);

@@ -2,10 +2,10 @@
 
 internal class RepositoryBase
 {
-    protected readonly FunctionDataContext Context;
+    protected readonly FunctionDataContext _context;
 
     public RepositoryBase(FunctionDataContext ctx)
     {
-        Context = ctx;
+        _context = ctx;
     }
 }
