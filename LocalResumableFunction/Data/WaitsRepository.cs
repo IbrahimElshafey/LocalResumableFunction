@@ -148,14 +148,21 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-    public async IAsyncEnumerable<Wait> GetWaitHierarchy(MethodWait methodWait)
+    public async Task<Wait> GetWaitParent(Wait wait)
     {
-        yield return methodWait;
-        Wait parentWait = methodWait;
-        while (parentWait?.ParentWaitId != null)
+        if (wait?.ParentWaitId != null)
         {
-            parentWait = await _context.Waits.FirstOrDefaultAsync(x => x.Id == methodWait.ParentWaitId);
-            yield return  parentWait;
+            return await _context
+                .Waits
+                //.Include(x=>x.ChildWaits)
+                .FirstOrDefaultAsync(x => x.Id == wait.ParentWaitId);
         }
+        return null;
+    }
+
+    public async Task<T> ReloadChildWaits<T>(T wait) where T : Wait
+    {
+        wait.ChildWaits = await _context.Waits.Where(x => x.ParentWaitId == wait.Id).ToListAsync();
+        return wait;
     }
 }

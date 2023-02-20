@@ -39,7 +39,7 @@ internal partial class ResumableFunctionHandler
     private async Task ReplayGoAfter(Wait oldCompletedWait)
     {
         var nextWaitResult = await oldCompletedWait.CurrntFunction.GetNextWait(oldCompletedWait);
-        await HandleNextWait(nextWaitResult, oldCompletedWait);
+        await HandleNextWaitResult(nextWaitResult, oldCompletedWait);
     }
 
     private async Task ReplayGoBefore(Wait oldCompletedWait)

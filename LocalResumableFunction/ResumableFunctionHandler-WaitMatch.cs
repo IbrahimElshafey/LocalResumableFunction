@@ -22,6 +22,7 @@ internal partial class ResumableFunctionHandler
             foreach (var matchedWait in matchedWaits)
             {
                 UpdateFunctionData(matchedWait, pushedMethod);
+                //await HandleMatchedWaitNew(matchedWait);
                 await HandleMatchedWait(matchedWait);
                 await _context.SaveChangesAsync();
             }
@@ -35,31 +36,60 @@ internal partial class ResumableFunctionHandler
 
     private async Task HandleMatchedWaitNew(MethodWait matchedWait)
     {
-        var rootWaits = _waitsRepository.GetWaitHierarchy(matchedWait);
 
-        MethodWait currentMethodWait = null;
-        await foreach (var wait in rootWaits)
+        bool getNextWait = false;
+        Wait previousChild = null;
+        Wait wait = matchedWait;
+        do
         {
             switch (wait)
             {
                 case MethodWait methodWait:
-                    currentMethodWait = methodWait;
                     methodWait.Status = WaitStatus.Completed;
+                    getNextWait = true;
                     break;
+
                 case ManyMethodsWait { WaitType: WaitType.AllMethodsWait } allMethodsWait:
-                    allMethodsWait.MoveToMatched(currentMethodWait);
-                    if (allMethodsWait.Status != WaitStatus.Completed)
-                        return;
+                    allMethodsWait = await _waitsRepository.ReloadChildWaits(allMethodsWait);
+                    allMethodsWait.MoveToMatched(previousChild);
+                    getNextWait = allMethodsWait.Status == WaitStatus.Completed;
                     break;
 
                 case ManyMethodsWait { WaitType: WaitType.AnyMethodWait } anyMethodWait:
-                    anyMethodWait.SetMatchedMethod(currentMethodWait);
+                    anyMethodWait = await _waitsRepository.ReloadChildWaits(anyMethodWait);
+                    anyMethodWait.SetMatchedMethod(previousChild);
+                    getNextWait = true;
                     break;
-                case FunctionWait functionWait:
+
+                case FunctionWait:
+                    getNextWait = true;
                     break;
-                case ManyFunctionsWait manyFunctionsWait:
+
+                case ManyFunctionsWait { WaitType: WaitType.AllFunctionsWait } allFunctionsWait:
+                    allFunctionsWait.MoveToMatched(previousChild.Id);
+                    getNextWait = allFunctionsWait.Status == WaitStatus.Completed;
+                    break;
+
+                case ManyFunctionsWait { WaitType: WaitType.AnyFunctionWait } anyFunctionWait:
+                    anyFunctionWait.SetMatchedFunction(previousChild.Id);
+                    await _waitsRepository.CancelAllWaits(anyFunctionWait);
+                    getNextWait = true;
                     break;
             }
+
+            previousChild = wait;
+            wait = await _waitsRepository.GetWaitParent(wait);
+        } while (wait != null);
+
+        if (getNextWait && previousChild != null)
+        {
+            var nextWaitResult = await previousChild.CurrntFunction.GetNextWait(previousChild);
+            if (nextWaitResult is null) return;
+            await HandleNextWaitResult(nextWaitResult, previousChild);
+            matchedWait.FunctionState.StateObject = matchedWait.CurrntFunction;
+            await _context.SaveChangesAsync();
+
+            await DuplicateIfFirst(matchedWait);
         }
     }
     private async Task HandleMatchedWait(MethodWait matchedWait)
@@ -69,7 +99,7 @@ internal partial class ResumableFunctionHandler
             //get next Method wait
             var nextWaitResult = await matchedWait.CurrntFunction.GetNextWait(matchedWait);
             if (nextWaitResult is null) return;
-            await HandleNextWait(nextWaitResult, matchedWait);
+            await HandleNextWaitResult(nextWaitResult, matchedWait);
             matchedWait.FunctionState.StateObject = matchedWait.CurrntFunction;
             await _context.SaveChangesAsync();
 
@@ -104,7 +134,7 @@ internal partial class ResumableFunctionHandler
         return false;
     }
 
-    private async Task<bool> HandleNextWait(NextWaitResult nextWaitResult, Wait currentWait)
+    private async Task<bool> HandleNextWaitResult(NextWaitResult nextWaitResult, Wait currentWait)
     {
         // return await HandleNextWait(nextWaitAftreBacktoCaller, lastFunctionWait, functionClass);
         if (IsFinalExit(nextWaitResult))
@@ -117,22 +147,22 @@ internal partial class ResumableFunctionHandler
 
         if (IsSubFunctionExit(nextWaitResult)) return await SubFunctionExit(currentWait);
 
-        if (nextWaitResult.Result is not null)
-        {
-            //this may cause and error in case of 
-            nextWaitResult.Result.ParentWaitId = currentWait.ParentWaitId;
-            nextWaitResult.Result.FunctionState = currentWait.FunctionState;
-            nextWaitResult.Result.RequestedByFunctionId = currentWait.RequestedByFunctionId;
-            if (nextWaitResult.Result is ReplayWait replayWait)
-                return await ReplayWait(replayWait);
+        return await HandleNextWait(nextWaitResult.Result, currentWait);
+    }
 
+    private async Task<bool> HandleNextWait(Wait nextWaitResult, Wait currentWait)
+    {
+        if (nextWaitResult is null) return false;
 
-            var result = await GenericWaitRequested(nextWaitResult.Result);
-            currentWait.Status = WaitStatus.Completed;
-            return result;
-        }
+        //this may cause and error in case of 
+        nextWaitResult.ParentWaitId = currentWait.ParentWaitId;
+        nextWaitResult.FunctionState = currentWait.FunctionState;
+        nextWaitResult.RequestedByFunctionId = currentWait.RequestedByFunctionId;
+        if (nextWaitResult is ReplayWait replayWait)
+            return await ReplayWait(replayWait);
 
-        return false;
+        currentWait.Status = WaitStatus.Completed;
+        return await GenericWaitRequested(nextWaitResult);
     }
 
     private bool IsFinalExit(NextWaitResult nextWait)
@@ -204,7 +234,7 @@ internal partial class ResumableFunctionHandler
                 await RegisterFirstWait(rootFunctionWait.RequestedByFunction.MethodInfo);
             }
 
-            return await HandleNextWait(nextWaitAfterBackToCaller, rootFunctionWait);
+            return await HandleNextWaitResult(nextWaitAfterBackToCaller, rootFunctionWait);
         }
 
         return true;
