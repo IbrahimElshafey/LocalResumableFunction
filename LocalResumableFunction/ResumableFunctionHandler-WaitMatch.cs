@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using LocalResumableFunction.InOuts;
 
 namespace LocalResumableFunction;
@@ -8,96 +9,60 @@ internal partial class ResumableFunctionHandler
     /// <summary>
     ///     When method called and finished
     /// </summary>
-    internal async Task MethodCalled(PushedMethod pushedMethod)
+
+    private static ConcurrentQueue<PushedMethod> _pushedMethods = new();
+    private bool _isProcessingRunning = false;
+
+    internal void MethodCalled(PushedMethod pushedMethod)
     {
-        try
+        _pushedMethods.Enqueue(pushedMethod);
+        if (_isProcessingRunning is false)
+            Processing();
+    }
+    internal async Task Processing()
+    {
+        _isProcessingRunning = true;
+        for (var i = 0; i < _pushedMethods.Count; i++)
         {
-            var methodId = await _metodIdsRepo.GetMethodIdentifier(pushedMethod.MethodInfo);
-            if (methodId.ExistInDb is false)
-                //_context.MethodIdentifiers.Add(methodId.MethodIdentifier);
-                throw new Exception(
-                    $"Method [{pushedMethod.MethodInfo.Name}] is not registered in current database as [WaitMethod].");
-            pushedMethod.MethodIdentifier = methodId.MethodIdentifier;
-            var matchedWaits = await _waitsRepository.GetMatchedWaits(pushedMethod);
-            foreach (var matchedWait in matchedWaits)
-            {
-                UpdateFunctionData(matchedWait, pushedMethod);
-                //await HandleMatchedWaitNew(matchedWait);
-                await HandleMatchedWait(matchedWait);
-                await _context.SaveChangesAsync();
-            }
+             _pushedMethods.TryDequeue(out PushedMethod current);
+            await Process(current);
         }
-        catch (Exception ex)
+        _isProcessingRunning = false;
+
+        async Task Process(PushedMethod pushedMethod)
         {
-            Debug.Write(ex);
+            try
+            {
+
+                var methodId = await _metodIdsRepo.GetMethodIdentifier(pushedMethod.MethodInfo);
+                if (methodId.ExistInDb is false)
+                    //_context.MethodIdentifiers.Add(methodId.MethodIdentifier);
+                    throw new Exception(
+                        $"Method [{pushedMethod.MethodInfo.Name}] is not registered in current database as [WaitMethod].");
+                pushedMethod.MethodIdentifier = methodId.MethodIdentifier;
+                var matchedWaits = await _waitsRepository.GetMatchedWaits(pushedMethod);
+                foreach (var matchedWait in matchedWaits)
+                {
+                    UpdateFunctionData(matchedWait, pushedMethod);
+                    await HandleMatchedWaitNew(matchedWait);
+                    //await HandleMatchedWait(matchedWait);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Write(ex);
+            }
         }
     }
 
 
-    private async Task HandleMatchedWaitNew(MethodWait matchedWait)
-    {
-
-        bool getNextWait = false;
-        Wait previousChild = null;
-        Wait wait = matchedWait;
-        do
-        {
-            switch (wait)
-            {
-                case MethodWait methodWait:
-                    methodWait.Status = WaitStatus.Completed;
-                    getNextWait = true;
-                    break;
-
-                case ManyMethodsWait { WaitType: WaitType.AllMethodsWait } allMethodsWait:
-                    allMethodsWait = await _waitsRepository.ReloadChildWaits(allMethodsWait);
-                    allMethodsWait.MoveToMatched(previousChild);
-                    getNextWait = allMethodsWait.Status == WaitStatus.Completed;
-                    break;
-
-                case ManyMethodsWait { WaitType: WaitType.AnyMethodWait } anyMethodWait:
-                    anyMethodWait = await _waitsRepository.ReloadChildWaits(anyMethodWait);
-                    anyMethodWait.SetMatchedMethod(previousChild);
-                    getNextWait = true;
-                    break;
-
-                case FunctionWait:
-                    getNextWait = true;
-                    break;
-
-                case ManyFunctionsWait { WaitType: WaitType.AllFunctionsWait } allFunctionsWait:
-                    allFunctionsWait.MoveToMatched(previousChild.Id);
-                    getNextWait = allFunctionsWait.Status == WaitStatus.Completed;
-                    break;
-
-                case ManyFunctionsWait { WaitType: WaitType.AnyFunctionWait } anyFunctionWait:
-                    anyFunctionWait.SetMatchedFunction(previousChild.Id);
-                    await _waitsRepository.CancelAllWaits(anyFunctionWait);
-                    getNextWait = true;
-                    break;
-            }
-
-            previousChild = wait;
-            wait = await _waitsRepository.GetWaitParent(wait);
-        } while (wait != null);
-
-        if (getNextWait && previousChild != null)
-        {
-            var nextWaitResult = await previousChild.CurrntFunction.GetNextWait(previousChild);
-            if (nextWaitResult is null) return;
-            await HandleNextWaitResult(nextWaitResult, previousChild);
-            matchedWait.FunctionState.StateObject = matchedWait.CurrntFunction;
-            await _context.SaveChangesAsync();
-
-            await DuplicateIfFirst(matchedWait);
-        }
-    }
     private async Task HandleMatchedWait(MethodWait matchedWait)
     {
         if (IsSingleMethod(matchedWait) || await IsGroupLastWait(matchedWait))
         {
             //get next Method wait
-            var nextWaitResult = await matchedWait.CurrntFunction.GetNextWait(matchedWait);
+            var nextWaitResult = await matchedWait.GetNextWait();
             if (nextWaitResult is null) return;
             await HandleNextWaitResult(nextWaitResult, matchedWait);
             matchedWait.FunctionState.StateObject = matchedWait.CurrntFunction;
@@ -137,7 +102,7 @@ internal partial class ResumableFunctionHandler
     private async Task<bool> HandleNextWaitResult(NextWaitResult nextWaitResult, Wait currentWait)
     {
         // return await HandleNextWait(nextWaitAftreBacktoCaller, lastFunctionWait, functionClass);
-        if (IsFinalExit(nextWaitResult))
+        if (nextWaitResult.IsFinalExit())
         {
             currentWait.Status = WaitStatus.Completed;
             currentWait.FunctionState.StateObject = currentWait.CurrntFunction;
@@ -145,7 +110,7 @@ internal partial class ResumableFunctionHandler
             return await MoveFunctionToRecycleBin(currentWait);
         }
 
-        if (IsSubFunctionExit(nextWaitResult)) return await SubFunctionExit(currentWait);
+        if (nextWaitResult.IsSubFunctionExit()) return await SubFunctionExit(currentWait);
 
         return await HandleNextWait(nextWaitResult.Result, currentWait);
     }
@@ -163,16 +128,6 @@ internal partial class ResumableFunctionHandler
 
         currentWait.Status = WaitStatus.Completed;
         return await GenericWaitRequested(nextWaitResult);
-    }
-
-    private bool IsFinalExit(NextWaitResult nextWait)
-    {
-        return nextWait.Result is null && nextWait.IsFinalExit;
-    }
-
-    private bool IsSubFunctionExit(NextWaitResult nextWait)
-    {
-        return nextWait.Result is null && nextWait.IsSubFunctionExit;
     }
 
     private async Task<bool> SubFunctionExit(Wait lastFunctionWait)
@@ -214,7 +169,7 @@ internal partial class ResumableFunctionHandler
             case ManyFunctionsWait anyFunctionWait
                 when rootFunctionWait.WaitType == WaitType.AnyFunctionWait:
                 anyFunctionWait.SetMatchedFunction(rootFunctionResult.FunctionWaitId);
-                await _waitsRepository.CancelAllWaits(anyFunctionWait);
+                await _waitsRepository.CancelFunctionGroupWaits(anyFunctionWait);
                 if (anyFunctionWait.Status == WaitStatus.Completed)
                     backToCaller = true;
                 break;
@@ -227,7 +182,7 @@ internal partial class ResumableFunctionHandler
         if (backToCaller)
         {
             rootFunctionWait.Status = WaitStatus.Completed;
-            var nextWaitAfterBackToCaller = await rootFunctionWait.CurrntFunction.GetNextWait(rootFunctionWait);
+            var nextWaitAfterBackToCaller = await rootFunctionWait.GetNextWait();
             if (rootFunctionWait.IsFirst)
             {
                 await _context.SaveChangesAsync();

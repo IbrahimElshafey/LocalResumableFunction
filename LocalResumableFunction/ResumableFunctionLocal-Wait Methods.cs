@@ -44,33 +44,4 @@ public abstract partial class ResumableFunctionLocal
 
         return result;
     }
-
-    internal async Task<NextWaitResult> GetNextWait(Wait currentWait)
-    {
-        var functionRunner = new FunctionRunner(currentWait);
-        if (functionRunner.ResumableFunctionExist is false)
-        {
-            Debug.WriteLine($"Resumable function ({currentWait.RequestedByFunction.MethodName}) not exist in code");
-            //todo:delete it and all related waits
-            //throw new Exception("Can't initiate runner");
-            return null;
-        }
-
-        try
-        {
-            var waitExist = await functionRunner.MoveNextAsync();
-            if (waitExist) return new NextWaitResult(functionRunner.Current, false, false);
-
-            var isEntryFunctionEnd = currentWait.ParentWaitId == null;
-            if (isEntryFunctionEnd)
-                return new NextWaitResult(null, true, false);
-
-            //sub function end
-            return new NextWaitResult(null, false, true);
-        }
-        catch (Exception)
-        {
-            throw new Exception("Error when try to get next wait");
-        }
-    }
 }

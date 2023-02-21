@@ -19,11 +19,10 @@ public class Program
         };
         Console.WriteLine("Test App RUNNING.");
 
-
         //await TestSubFunctionCall();
         //await TestReplayGoBackAfter();
         //await TestReplayGoBackBeforeNewMatch();
-       
+
         //await TestWaitMany();
         await TestWaitManyFunctions();
 
@@ -54,18 +53,19 @@ public class Program
         await RegisterResumableFunction(typeof(WaitManyFunctionsExample), nameof(WaitManyFunctionsExample.WaitSubFunctionTwoLevels));
         var example = new WaitManyFunctionsExample();
         await example.ProjectSubmitted(ProjectApprovalExample.GetCurrentProject());
-        await Task.Delay(5000);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
-        await Task.Delay(5000);
+        await Task.Delay(3000);
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
-        await Task.Delay(5000);
+        await Task.Delay(3000);
         example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
+        await Task.Delay(3000);
         example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
     }
 
     private static async Task TestWaitMany()
     {
-        await RegisterResumableFunction(typeof(TestWaitManyExample), nameof(TestWaitManyExample.WaitThreeMethod));
+        //await RegisterResumableFunction(typeof(TestWaitManyExample), nameof(TestWaitManyExample.WaitThreeMethod));
+        await RegisterResumableFunction(typeof(TestWaitManyExample), nameof(TestWaitManyExample.WaitManyAndCountExpressionDefined));
         var example = new TestWaitManyExample();
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));

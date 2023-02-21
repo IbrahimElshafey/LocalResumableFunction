@@ -18,21 +18,17 @@ internal partial class ResumableFunctionHandler
         _metodIdsRepo = new MethodIdentifierRepository(_context);
     }
 
-    private async Task DuplicateIfFirst(MethodWait currentWait)
+    private async Task DuplicateIfFirst(Wait currentWait)
     {
-        Wait wait = null;
         if (currentWait.IsFirst)
-            wait = currentWait;
-        else if (currentWait?.ParentWait?.IsFirst == true)
-            wait = currentWait.ParentWait;
-        if (wait != null)
-            await RegisterFirstWait(wait.RequestedByFunction.MethodInfo);
+            await RegisterFirstWait(currentWait.RequestedByFunction.MethodInfo);
     }
 
     private void UpdateFunctionData(MethodWait currentWait, PushedMethod pushedMethod)
     {
         var setDataExpression = currentWait.SetDataExpression.Compile();
         setDataExpression.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, currentWait.CurrntFunction);
+        currentWait.FunctionState.StateObject = currentWait.CurrntFunction;
     }
 
     private async Task<bool> MoveFunctionToRecycleBin(Wait currentWait)

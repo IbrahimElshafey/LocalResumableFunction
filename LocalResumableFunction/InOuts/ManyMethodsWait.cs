@@ -64,7 +64,7 @@ public class ManyMethodsWait : Wait
     {
         var matchedMethod = WaitingMethods.First(x => x.Id == currentWait.Id);
         matchedMethod.Status = WaitStatus.Completed;
-        CheckIsDone();
+        CheckIsCompleted();
     }
 
     internal void SetMatchedMethod(Wait currentWait)
@@ -85,7 +85,7 @@ public class ManyMethodsWait : Wait
         return null;
     }
 
-    private void CheckIsDone()
+    private void CheckIsCompleted()
     {
         if (CountExpression is null)
         {
@@ -107,6 +107,7 @@ public class ManyMethodsWait : Wait
                     x.Status = WaitStatus.Canceled;
             });
     }
+
 
     
 }

@@ -44,5 +44,6 @@ internal class TestWaitManyExample : ProjectApprovalExample
         ).WhenMatchedCount(x => x == 2);
         Console.WriteLine("Two waits of three waits matched.");
         Console.WriteLine("WaitManyAndCountExpressionDefined ended.");
+        Success(nameof(WaitManyAndCountExpressionDefined));
     }
 }

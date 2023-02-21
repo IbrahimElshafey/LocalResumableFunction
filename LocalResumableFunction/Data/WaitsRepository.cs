@@ -130,7 +130,7 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-    public async Task CancelAllWaits(ManyFunctionsWait anyFunctionWait)
+    public async Task CancelFunctionGroupWaits(ManyFunctionsWait anyFunctionWait)
     {
         var functionIds = anyFunctionWait
             .WaitingFunctions
@@ -154,7 +154,8 @@ internal class WaitsRepository : RepositoryBase
         {
             return await _context
                 .Waits
-                //.Include(x=>x.ChildWaits)
+                .Include(x=>x.ChildWaits)
+                .Include(x=>x.RequestedByFunction)
                 .FirstOrDefaultAsync(x => x.Id == wait.ParentWaitId);
         }
         return null;

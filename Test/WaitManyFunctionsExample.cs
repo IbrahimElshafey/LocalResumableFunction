@@ -85,7 +85,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
             Wait<ApprovalDecision, bool>("Manager One Approve Project", ManagerOneApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerOneApproval == output);
-        yield return Wait("Wait Function Four", ManagerTwoSub);
+        yield return Wait("Wait Sub Function ManagerTwoSub", ManagerTwoSub);
     }
 
     [SubResumableFunction]

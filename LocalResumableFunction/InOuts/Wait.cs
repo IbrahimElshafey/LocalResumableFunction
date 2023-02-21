@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Newtonsoft.Json.Linq;
 
 namespace LocalResumableFunction.InOuts;
@@ -69,4 +71,47 @@ public abstract class Wait
         }
         set => _currntFunction = value;
     }
+
+    public bool IsCompleted => Status == WaitStatus.Completed;
+    internal async Task<NextWaitResult> GetNextWait()
+    {
+        if (IsNode)
+        {
+            Console.WriteLine($"Get next wait IsNode:{IsNode},Name:{Name}");
+        }
+        var functionRunner = new FunctionRunner(this);
+        if (functionRunner.ResumableFunctionExist is false)
+        {
+            Debug.WriteLine($"Resumable function ({RequestedByFunction.MethodName}) not exist in code");
+            //todo:delete it and all related waits
+            //throw new Exception("Can't initiate runner");
+            return null;
+        }
+
+        try
+        {
+            var waitExist = await functionRunner.MoveNextAsync();
+            if (waitExist)
+            {
+                Console.WriteLine($"Get next wait [{functionRunner.Current.Name}] after [{Name}]");
+                return new NextWaitResult(functionRunner.Current, false, false);
+            }
+
+            var isEntryPointEnd = ParentWaitId == null;
+            if (isEntryPointEnd)
+            {
+                Console.WriteLine($"Final exist for function [{RequestedByFunction.MethodName}] detected.");
+                return new NextWaitResult(null, true, false);
+            }
+
+            //sub function end
+            Console.WriteLine($"Sub function exit [{RequestedByFunction.MethodName}] detected.");
+            return new NextWaitResult(null, false, true);
+        }
+        catch (Exception)
+        {
+            throw new Exception("Error when try to get next wait");
+        }
+    }
+    
 }
