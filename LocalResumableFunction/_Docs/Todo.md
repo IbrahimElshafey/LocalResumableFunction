@@ -1,12 +1,11 @@
 ﻿# Todo
 * Test loops
-* Subfunctions Two level
 * Remove uniqe for method hash
 * Run in another process
-	* Save pushed waits to database
+	* Save pushed waits to database or queue
 * Logging and handle exception
 * save expression to seprate table for duplication kill
-* Handle Replay
+* Test Replay
 * Validate waits on request received
 * Create nuget package
 * Test with web API
@@ -24,6 +23,12 @@
 * Mixed waits group
 * WhenMatchedCount for function group
 * Speed Analysis
+* Use many database providers [Postgres,Sql Server,Sqlite]
+* Use Database as a service with OData implementation
+* Wait for external method
+	* Add interface with methods
+	* Mark intefaces with [WaitExternalMethod] attribute
+	* External method will be pushed in custom way
 # Test Engine Scenarios
 * Seqeunce [DONE]
 * Wait all [DONE]
@@ -32,10 +37,7 @@
 * Wait many functions [DONE]
 * Wait first function [DONE]
 * Replay [to,after,before] for types:
-	* One Method Node [DONE]
-	* Many Methods Wait
-	* Any Method Wait
-	* Function
-	* Many Functions
-	* Any function 
+	* To
+	* After [DONE]
+	* Before [DONE]
 

@@ -23,11 +23,14 @@ public class Program
         //await TestReplayGoBackBeforeNewMatch();
 
         //await TestWaitMany();
-        await TestWaitManyFunctions();
+        //await TestWaitManyFunctions();
+        await TestLoops();
 
         //await TestParallelScenarios();
         Console.ReadLine();
     }
+
+    
 
     private static async Task TestParallelScenarios()
     {
@@ -62,7 +65,16 @@ public class Program
         //await Task.Delay(3000);
         example.ManagerThreeApproveProject(new ApprovalDecision(currentProject.Id, true));
     }
-
+    private static async Task TestLoops()
+    {
+        await RegisterResumableFunction(typeof(TestLoopsExample), nameof(TestLoopsExample.WaitManagerOneThreeTimeApprovals));
+        var example = new TestLoopsExample();
+        var currentProject = ProjectApprovalExample.GetCurrentProject();
+        await example.ProjectSubmitted(currentProject);
+        example.ManagerOneApproveProject(new ApprovalDecision(currentProject.Id, true));
+        example.ManagerOneApproveProject(new ApprovalDecision(currentProject.Id, true));
+        example.ManagerOneApproveProject(new ApprovalDecision(currentProject.Id, true));
+    }
     private static async Task TestWaitMany()
     {
         //await RegisterResumableFunction(typeof(TestWaitManyExample), nameof(TestWaitManyExample.WaitThreeMethod));
