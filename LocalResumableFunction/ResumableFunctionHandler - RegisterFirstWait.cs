@@ -15,9 +15,9 @@ internal partial class ResumableFunctionHandler
             try
             {
                 var functionRunner = new FunctionRunner(classInstance, resumableFunction);
-                if (functionRunner == null)
+                if (functionRunner.ResumableFunctionExist is false)
                 {
-                    WriteMessage($"Resumable function {resumableFunction.Name} not exist in code");
+                    WriteMessage($"Resumable function ({resumableFunction.Name}) not exist in code.");
                     return;
                 }
 
@@ -26,7 +26,7 @@ internal partial class ResumableFunctionHandler
                 var methodId = await _metodIdsRepo.GetMethodIdentifier(resumableFunction);
                 if (await _waitsRepository.FirstWaitExistInDb(firstWait, methodId.MethodIdentifier))
                 {
-                    WriteMessage("First wait alerady exist.");
+                    WriteMessage("First wait already exist.");
                     return;
                 }
 

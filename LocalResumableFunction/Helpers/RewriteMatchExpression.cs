@@ -11,7 +11,7 @@ public class RewriteMatchExpression : ExpressionVisitor
 
     public RewriteMatchExpression(MethodWait wait)
     {
-        if (wait is null)
+        if (wait?.MatchIfExpression == null)
             return;
         //  .If((input, output) => output == true)
         //   return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrntFunction);

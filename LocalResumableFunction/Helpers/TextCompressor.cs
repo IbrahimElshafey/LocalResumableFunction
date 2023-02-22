@@ -7,7 +7,8 @@ public class TextCompressor
 {
     public static byte[] CompressString(string text)
     {
-        return Compress(Encoding.ASCII.GetBytes(text));
+        if (text != null) return Compress(Encoding.ASCII.GetBytes(text));
+        return null;
     }
 
     public static byte[] Compress(byte[] bytes)

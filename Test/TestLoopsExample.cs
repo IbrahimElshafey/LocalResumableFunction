@@ -11,7 +11,6 @@ internal class TestLoopsExample:ProjectApprovalExample
         await Task.Delay(10);
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-                .If((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         for (; Counter < 3; Counter++)

@@ -13,7 +13,8 @@ public class MethodWait : Wait
 
     internal byte[] SetDataExpressionValue { get; set; }
 
-    [NotMapped] public LambdaExpression MatchIfExpression { get; internal set; }
+    [NotMapped]
+    public LambdaExpression MatchIfExpression { get; internal set; }
 
     internal byte[] MatchIfExpressionValue { get; set; }
 
