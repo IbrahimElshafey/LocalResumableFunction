@@ -47,7 +47,7 @@ public abstract class Wait
     internal int? ParentWaitId { get; set; }
 
     [NotMapped]
-    internal ResumableFunctionLocal CurrntFunction
+    internal ResumableFunctionLocal CurrentFunction
     {
         get
         {

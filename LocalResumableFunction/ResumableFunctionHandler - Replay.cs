@@ -20,7 +20,7 @@ internal partial class ResumableFunctionHandler
         switch (replayWait.ReplayType)
         {
             case ReplayType.GoAfter:
-                await ReplayGoAfter(waitToReplay);
+                await ProceedToNextWait(waitToReplay);
                 break;
             case ReplayType.GoBefore:
                 await ReplayGoBefore(waitToReplay);
@@ -36,11 +36,7 @@ internal partial class ResumableFunctionHandler
         return true;
     }
 
-    private async Task ReplayGoAfter(Wait oldCompletedWait)
-    {
-        var nextWaitResult = await oldCompletedWait.GetNextWait();
-        await HandleNextWaitResult(nextWaitResult, oldCompletedWait);
-    }
+
 
     private async Task ReplayGoBefore(Wait oldCompletedWait)
     {
@@ -88,7 +84,7 @@ internal partial class ResumableFunctionHandler
 
     private static async Task<(FunctionRunner Runner, bool HasWait)> GoBefore(Wait oldCompletedWait)
     {
-        var runner = new FunctionRunner(oldCompletedWait.CurrntFunction,
+        var runner = new FunctionRunner(oldCompletedWait.CurrentFunction,
             oldCompletedWait.RequestedByFunction.MethodInfo, oldCompletedWait.StateBeforeWait);
         var hasWait = await runner.MoveNextAsync();
         if (hasWait)
@@ -106,7 +102,7 @@ internal partial class ResumableFunctionHandler
             await _waitsRepository.GetFunctionInstanceWaits(replayWait.RequestedByFunctionId,
                 replayWait.FunctionState.Id);
         var waitToReplay = functionOldWaits
-            .FirstOrDefault(x => x.Status == WaitStatus.Completed && x.Name == replayWait.Name);
+            .FirstOrDefault(x => x.Status == WaitStatus.Completed && x.Name == replayWait.Name && x.IsNode);
         if (waitToReplay == null)
         {
             WriteMessage(
@@ -115,6 +111,8 @@ internal partial class ResumableFunctionHandler
         }
 
         //skip active waits after replay
+        //todo:[Critical] this may cause a problem 
+        //wait may be a group and code will cancel children
         functionOldWaits
             .Where(x => x.Id > waitToReplay.Id && x.Status == WaitStatus.Waiting)
             .ToList()

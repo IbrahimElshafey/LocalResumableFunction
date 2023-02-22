@@ -13,9 +13,9 @@ public class RewriteSetDataExpression : ExpressionVisitor
     public RewriteSetDataExpression(MethodWait wait)
     {
         //  .SetData((input, output) => Result == output);
-        //   setDataExpression.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, currentWait.CurrntFunction);
+        //   setDataExpression.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, currentWait.CurrentFunction);
         _wait = wait;
-        _functionInstanceArg = Parameter(wait.CurrntFunction.GetType(), "functionInstance");
+        _functionInstanceArg = Parameter(wait.CurrentFunction.GetType(), "functionInstance");
 
         var updatedBoy = (LambdaExpression)Visit(wait.SetDataExpression);
         for (var i = 0; i < setValuesExpressions.Count; i++)
@@ -28,7 +28,7 @@ public class RewriteSetDataExpression : ExpressionVisitor
             .MakeGenericType(
                 updatedBoy.Parameters[0].Type,
                 updatedBoy.Parameters[1].Type,
-                wait.CurrntFunction.GetType());
+                wait.CurrentFunction.GetType());
         setValuesExpressions.Add(Empty());
         var block = Block(setValuesExpressions);
         Result = Lambda(

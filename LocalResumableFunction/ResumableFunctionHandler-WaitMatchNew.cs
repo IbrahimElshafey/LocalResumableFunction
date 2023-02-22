@@ -6,7 +6,7 @@ namespace LocalResumableFunction;
 
 internal partial class ResumableFunctionHandler
 {
-    private async Task HandleMatchedWaitNew(Wait matchedWait)
+    private async Task HandleMatchedWait(Wait matchedWait)
     {
         Wait previousChild = null;
         Wait currentWait = matchedWait;
@@ -129,7 +129,7 @@ internal partial class ResumableFunctionHandler
             await ReplayWait(replayWait);
         currentWait.Status = WaitStatus.Completed;
         await GenericWaitRequested(nextWait);
-        currentWait.FunctionState.StateObject = currentWait.CurrntFunction;
+        currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
         await _context.SaveChangesAsync();
         await DuplicateIfFirst(currentWait);
 
@@ -142,74 +142,8 @@ internal partial class ResumableFunctionHandler
     {
         WriteMessage("Final Exit");
         currentWait.Status = WaitStatus.Completed;
-        currentWait.FunctionState.StateObject = currentWait.CurrntFunction;
+        currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
         currentWait.FunctionState.IsCompleted = true;
         await MoveFunctionToRecycleBin(currentWait);
     }
-
-    //private async Task SubFunctionEnded(Wait functionWait)
-    //{
-    //    if (functionWait.IsCompleted)
-    //    {
-    //        WriteMessage("Can't proceed with completed function.");
-    //        return;
-    //    }
-
-    //    WriteMessage($"Sub Function Ended {functionWait.Name}");
-    //    var functionParentWait = await _waitsRepository.GetWaitParent(functionWait);
-    //    if (functionParentWait == null)
-    //    {
-    //        WriteMessage(
-    //            $"Root function wait not exist for wait ({functionWait.Name}) with type ({functionWait.WaitType}).");
-    //        return;
-    //    }
-
-    //    if (functionParentWait.Status != WaitStatus.Waiting)
-    //    {
-    //        WriteMessage(
-    //            $"The status for parent function wait ({functionParentWait.Name}) must be ({WaitStatus.Waiting}).");
-    //        return;
-    //    }
-
-    //    var backToCaller = false;
-    //    functionWait.Status = WaitStatus.Completed;
-    //    Debugger.Launch();
-    //    switch (functionParentWait)
-    //    {
-    //        //one sub function -> return to caller after function end
-    //        case FunctionWait:
-    //            backToCaller = true;
-    //            break;
-    //        //many sub functions -> wait function group to complete and return to caller
-    //        case ManyFunctionsWait allFunctionsWait
-    //            when functionParentWait.WaitType == WaitType.AllFunctionsWait:
-    //            allFunctionsWait.MoveToMatched(functionWait.Id);
-    //            if (allFunctionsWait.Status == WaitStatus.Completed)
-    //                backToCaller = true;
-    //            break;
-    //        case ManyFunctionsWait anyFunctionWait
-    //            when functionParentWait.WaitType == WaitType.AnyFunctionWait:
-    //            anyFunctionWait.SetMatchedFunction(functionWait.Id);
-    //            await _waitsRepository.CancelFunctionGroupWaits(anyFunctionWait);
-    //            if (anyFunctionWait.Status == WaitStatus.Completed)
-    //                backToCaller = true;
-    //            break;
-    //        default:
-    //            WriteMessage(
-    //                $"Root function wait ({functionParentWait.Name}) with type ({functionParentWait.WaitType}) is not valid function wait.");
-    //            break;
-    //    }
-
-    //    if (backToCaller)
-    //    {
-    //        //functionParentWait.Status = WaitStatus.Completed;
-    //        functionParentWait.FunctionState = functionWait.FunctionState;
-    //        if (functionParentWait.IsFirst)
-    //        {
-    //            await _context.SaveChangesAsync();
-    //            await RegisterFirstWait(functionParentWait.RequestedByFunction.MethodInfo);
-    //        }
-    //        await ProceedToNextWait(functionParentWait);
-    //    }
-    //}
 }

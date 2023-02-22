@@ -19,12 +19,12 @@ public class Program
         Console.WriteLine("Test App RUNNING.");
 
         //await TestSubFunctionCall();
-        //await TestReplayGoBackAfter();
-        //await TestReplayGoBackBeforeNewMatch();
+        await TestReplayGoBackAfter();
+        await TestReplayGoBackBeforeNewMatch();
 
         //await TestWaitMany();
         //await TestWaitManyFunctions();
-        await TestLoops();
+        //await TestLoops();
 
         //await TestParallelScenarios();
         Console.ReadLine();

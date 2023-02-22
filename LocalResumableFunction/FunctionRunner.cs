@@ -9,11 +9,11 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
 
     public FunctionRunner(Wait currentWait)
     {
-        var functionRunnerType = currentWait.CurrntFunction.GetType()
+        var functionRunnerType = currentWait.CurrentFunction.GetType()
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
             .FirstOrDefault(x => x.Name.StartsWith($"<{currentWait.RequestedByFunction.MethodName}>"));
 
-        CreateRunner(functionRunnerType, currentWait.CurrntFunction);
+        CreateRunner(functionRunnerType, currentWait.CurrentFunction);
         SetState(currentWait.StateAfterWait);
     }
 

@@ -58,7 +58,7 @@ internal partial class ResumableFunctionHandler
         await _waitsRepository.AddWait(functionWait);
         await _context.SaveChangesAsync();
 
-        var functionRunner = new FunctionRunner(functionWait.CurrntFunction, functionWait.FunctionInfo);
+        var functionRunner = new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
         var hasNext = await functionRunner.MoveNextAsync();
         functionWait.FirstWait = functionRunner.Current;
         if (hasNext is false)

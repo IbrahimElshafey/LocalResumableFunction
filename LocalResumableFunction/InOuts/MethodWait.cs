@@ -30,6 +30,7 @@ public class MethodWait : Wait
     
     [NotMapped]
     public object Input { get; set; }
+
     [NotMapped]
     public object Output { get; set; }
 
@@ -65,8 +66,23 @@ public class MethodWait : Wait
     public void UpdateFunctionData()
     {
         var setDataExpression = SetDataExpression.Compile();
-        setDataExpression.DynamicInvoke(Input, Output, CurrntFunction);
-        FunctionState.StateObject = CurrntFunction;
+        setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
+        FunctionState.StateObject = CurrentFunction;
+    }
+
+    public bool CheckMatch()
+    {
+        try
+        {
+            if (IsFirst && MatchIfExpressionValue == null)
+                return true;
+            var check = MatchIfExpression.Compile();
+            return (bool)check.DynamicInvoke(Input, Output, CurrentFunction);
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 }
 

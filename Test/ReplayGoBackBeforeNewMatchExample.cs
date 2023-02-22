@@ -18,7 +18,7 @@ internal class ReplayGoBackBeforeNewMatchExample : ProjectApprovalExample
 
         AskManagerToApprove(CurrentProject.Id);
         yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
-            .If((input, output) => output == true)
+            .If((input, output) => input.ProjectId == CurrentProject.Id)
             .SetData((input, output) => ManagerOneApproval == input.Decision);
 
         if (ManagerOneApproval is false)

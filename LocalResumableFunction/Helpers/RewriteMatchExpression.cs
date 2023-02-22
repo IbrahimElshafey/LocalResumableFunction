@@ -14,16 +14,16 @@ public class RewriteMatchExpression : ExpressionVisitor
         if (wait?.MatchIfExpression == null)
             return;
         //  .If((input, output) => output == true)
-        //   return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrntFunction);
+        //   return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrentFunction);
         _wait = wait;
-        _functionInstanceArg = Parameter(wait.CurrntFunction.GetType(), "functionInstance");
+        _functionInstanceArg = Parameter(wait.CurrentFunction.GetType(), "functionInstance");
 
         var updatedBoy = (LambdaExpression)Visit(wait.MatchIfExpression);
         var functionType = typeof(Func<,,,>)
             .MakeGenericType(
                 updatedBoy.Parameters[0].Type,
                 updatedBoy.Parameters[1].Type,
-                wait.CurrntFunction.GetType(),
+                wait.CurrentFunction.GetType(),
                 typeof(bool));
         Result = Lambda(
             functionType,
@@ -69,7 +69,7 @@ public class RewriteMatchExpression : ExpressionVisitor
         {
             var getterLambda = Lambda(node, _functionInstanceArg);
             var getter = getterLambda.Compile();
-            return getter?.DynamicInvoke(_wait.CurrntFunction);
+            return getter?.DynamicInvoke(_wait.CurrentFunction);
         }
         catch (Exception)
         {

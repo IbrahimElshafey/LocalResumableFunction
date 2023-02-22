@@ -38,6 +38,8 @@ internal class WaitsRepository : RepositoryBase
         databaseWaits.ForEach(wait => wait.LoadExpressions());
         foreach (var methodWait in databaseWaits)
         {
+            methodWait.Input = pushedMethod.Input;
+            methodWait.Output = pushedMethod.Output;
             switch (methodWait.NeedFunctionStateForMatch)
             {
                 case false when methodWait.CheckMatch():
@@ -45,16 +47,13 @@ internal class WaitsRepository : RepositoryBase
                     matchedWaits.Add(methodWait);
                     break;
                 case true:
-                {
-                    await LoadWaitFunctionState(methodWait);
-                    if (CheckMatch(methodWait, pushedMethod))
-                        matchedWaits.Add(methodWait);
-                    break;
-                }
+                    {
+                        await LoadWaitFunctionState(methodWait);
+                        if (methodWait.CheckMatch())
+                            matchedWaits.Add(methodWait);
+                        break;
+                    }
             }
-
-            methodWait.Input = pushedMethod.Input;
-            methodWait.Output = pushedMethod.Output;
         }
 
         return matchedWaits;
@@ -123,21 +122,6 @@ internal class WaitsRepository : RepositoryBase
             x.Status == WaitStatus.Waiting);
     }
 
-    private bool CheckMatch(MethodWait methodWait, PushedMethod pushedMethod)
-    {
-        try
-        {
-            if (methodWait.IsFirst && methodWait.MatchIfExpressionValue == null)
-                return true;
-            var check = methodWait.MatchIfExpression.Compile();
-            return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrntFunction);
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-    }
-
     public async Task CancelFunctionGroupWaits(ManyFunctionsWait anyFunctionWait)
     {
         var functionIds = anyFunctionWait
@@ -162,8 +146,8 @@ internal class WaitsRepository : RepositoryBase
         {
             return await _context
                 .Waits
-                .Include(x=>x.ChildWaits)
-                .Include(x=>x.RequestedByFunction)
+                .Include(x => x.ChildWaits)
+                .Include(x => x.RequestedByFunction)
                 .FirstOrDefaultAsync(x => x.Id == wait.ParentWaitId);
         }
         return null;
