@@ -1,15 +1,14 @@
 ﻿# Todo
-* Test loops
+* Validate waits
+* Wait name can't duplicate in same method
+
 * Remove uniqe for method hash
 * Run in another process
 	* Save pushed waits to database or queue
 * Logging and handle exception
 * save expression to seprate table for duplication kill
-* Test Replay
-* Validate waits on request received
 * Create nuget package
 * Test with web API
-* Wait name can't duplicate in same method
 * Save function state all fields
 * Find fast and best object serializer
 * Match expression null handle
@@ -41,3 +40,6 @@
 	* After [DONE]
 	* Before [DONE]
 
+# Retest
+* Test loops
+* Test Replay
