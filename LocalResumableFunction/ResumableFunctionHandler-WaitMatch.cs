@@ -10,24 +10,28 @@ internal partial class ResumableFunctionHandler
     ///     When method called and finished
     /// </summary>
 
-    private static ConcurrentQueue<PushedMethod> _pushedMethods = new();
-    private bool _isProcessingRunning = false;
+    private static readonly ConcurrentQueue<PushedMethod> PushedMethods = new();
+    private static readonly ConcurrentBag<MethodWait> PendingWaits = new();
 
-    internal void MethodCalled(PushedMethod pushedMethod)
+    internal async Task MethodCalled(PushedMethod pushedMethod)
     {
-        _pushedMethods.Enqueue(pushedMethod);
-        if (_isProcessingRunning is false)
-            Processing();
+        PushedMethods.Enqueue(pushedMethod);
+        await Processing();
     }
+
     internal async Task Processing()
     {
-        _isProcessingRunning = true;
-        for (var i = 0; i < _pushedMethods.Count; i++)
+       
+        for (var i = 0; i < PushedMethods.Count; i++)
         {
-             _pushedMethods.TryDequeue(out PushedMethod current);
-            await Process(current);
+            if (PushedMethods.TryDequeue(out PushedMethod current))
+                await Process(current);
         }
-        _isProcessingRunning = false;
+        for (int i = 0; i < PendingWaits.Count; i++)
+        {
+            if (PendingWaits.TryTake(out var pendingWait))
+                await ProcessWait(pendingWait);
+        }
 
         async Task Process(PushedMethod pushedMethod)
         {
@@ -43,10 +47,7 @@ internal partial class ResumableFunctionHandler
                 var matchedWaits = await _waitsRepository.GetMatchedWaits(pushedMethod);
                 foreach (var matchedWait in matchedWaits)
                 {
-                    UpdateFunctionData(matchedWait, pushedMethod);
-                    await HandleMatchedWaitNew(matchedWait);
-                    //await HandleMatchedWait(matchedWait);
-                    await _context.SaveChangesAsync();
+                    await ProcessWait(matchedWait);
                 }
             }
             catch (Exception ex)
@@ -54,6 +55,37 @@ internal partial class ResumableFunctionHandler
                 Debug.Write(ex);
             }
         }
+    }
+
+    private async Task ProcessWait(MethodWait matchedWait)
+    {
+        if (await CanProcessNow(matchedWait) is false) return;
+        matchedWait.UpdateFunctionData();
+        await HandleMatchedWaitNew(matchedWait);
+        await ProcessingFinished(matchedWait);
+    }
+
+
+    private async Task<bool> CanProcessNow(MethodWait matchedWait)
+    {
+        if (matchedWait.FunctionState.IsInProcessing)
+        {
+            PendingWaits.Add(matchedWait);
+            return false;
+        }
+        matchedWait.FunctionState.IsInProcessing = true;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    private async Task ProcessingFinished(MethodWait matchedWait)
+    {
+        if (PendingWaits.Contains(matchedWait))
+        {
+            PendingWaits.TryTake(out matchedWait);
+        }
+        matchedWait.FunctionState.IsInProcessing = false;
+        await _context.SaveChangesAsync();
     }
 
 

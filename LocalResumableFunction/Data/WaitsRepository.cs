@@ -37,17 +37,25 @@ internal class WaitsRepository : RepositoryBase
                 .ToListAsync();
         databaseWaits.ForEach(wait => wait.LoadExpressions());
         foreach (var methodWait in databaseWaits)
-            if (!methodWait.NeedFunctionStateForMatch && CheckMatch(methodWait, pushedMethod))
+        {
+            switch (methodWait.NeedFunctionStateForMatch)
             {
-                await LoadWaitFunctionState(methodWait);
-                matchedWaits.Add(methodWait);
-            }
-            else if (methodWait.NeedFunctionStateForMatch)
-            {
-                await LoadWaitFunctionState(methodWait);
-                if (CheckMatch(methodWait, pushedMethod))
+                case false when CheckMatch(methodWait, pushedMethod):
+                    await LoadWaitFunctionState(methodWait);
                     matchedWaits.Add(methodWait);
+                    break;
+                case true:
+                {
+                    await LoadWaitFunctionState(methodWait);
+                    if (CheckMatch(methodWait, pushedMethod))
+                        matchedWaits.Add(methodWait);
+                    break;
+                }
             }
+
+            methodWait.Input = pushedMethod.Input;
+            methodWait.Output = pushedMethod.Output;
+        }
 
         return matchedWaits;
 

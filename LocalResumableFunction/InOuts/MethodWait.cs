@@ -26,6 +26,11 @@ public class MethodWait : Wait
     internal MethodIdentifier WaitMethodIdentifier { get; set; }
 
     internal int WaitMethodIdentifierId { get; set; }
+    
+    [NotMapped]
+    public object Input { get; set; }
+    [NotMapped]
+    public object Output { get; set; }
 
     internal void SetExpressions()
     {
@@ -54,6 +59,13 @@ public class MethodWait : Wait
         SetDataExpression = (LambdaExpression)
             ExpressionToJsonConverter.JsonToExpression(
                 TextCompressor.DecompressString(SetDataExpressionValue), assembly);
+    }
+
+    public void UpdateFunctionData()
+    {
+        var setDataExpression = SetDataExpression.Compile();
+        setDataExpression.DynamicInvoke(Input, Output, CurrntFunction);
+        FunctionState.StateObject = CurrntFunction;
     }
 }
 

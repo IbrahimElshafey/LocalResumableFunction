@@ -28,7 +28,7 @@ internal class TestWaitManyExample : ProjectApprovalExample
     //[ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> WaitManyAndCountExpressionDefined()
     {
-        Console.WriteLine("Wait two of three managers to approve");
+        WriteMessage("Wait two of three managers to approve");
         CurrentProject = GetCurrentProject();
         yield return Wait(
             "Wait three methods",
@@ -42,8 +42,8 @@ internal class TestWaitManyExample : ProjectApprovalExample
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).WhenMatchedCount(x => x == 2);
-        Console.WriteLine("Two waits of three waits matched.");
-        Console.WriteLine("WaitManyAndCountExpressionDefined ended.");
+        WriteMessage("Two waits of three waits matched.");
+        WriteMessage("WaitManyAndCountExpressionDefined ended.");
         Success(nameof(WaitManyAndCountExpressionDefined));
     }
 }

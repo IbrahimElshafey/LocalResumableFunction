@@ -34,7 +34,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
         _pushedMethod.Instance = args.Instance;
         //todo: main method must wait untill this completes
         //_ = new ResumableFunctionHandler().MethodCalled(_pushedMethod);
-        new ResumableFunctionHandler().MethodCalled(_pushedMethod);
+        new ResumableFunctionHandler().MethodCalled(_pushedMethod).Wait();
         args.MethodExecutionTag = true;
     }
 

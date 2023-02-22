@@ -59,6 +59,9 @@ namespace LocalResumableFunction.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsInProcessing")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("ResumableFunctionIdentifierId")
                         .HasColumnType("INTEGER");
 

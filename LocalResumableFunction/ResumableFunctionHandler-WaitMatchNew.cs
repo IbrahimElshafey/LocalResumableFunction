@@ -13,11 +13,21 @@ internal partial class ResumableFunctionHandler
 
         do
         {
+            var parent = await _waitsRepository.GetWaitParent(currentWait);
             switch (currentWait)
             {
                 case MethodWait methodWait:
                     methodWait.Status = WaitStatus.Completed;
-                    await ProceedToNextWait(methodWait);
+                    switch (parent)
+                    {
+                        case null:
+                        case FunctionWait:
+                            await ProceedToNextWait(methodWait);
+                            break;
+                        case ManyMethodsWait:
+                            WriteMessage($"Wait method group ({parent.Name}) to complete.");
+                            break;
+                    }
                     break;
 
                 case ManyMethodsWait { WaitType: WaitType.AllMethodsWait } allMethodsWait:
@@ -26,6 +36,7 @@ internal partial class ResumableFunctionHandler
                     {
                         await ProceedToNextWait(allMethodsWait);
                     }
+                    else return;//no backtrace
                     break;
 
                 case ManyMethodsWait { WaitType: WaitType.AnyMethodWait } anyMethodWait:
@@ -34,28 +45,44 @@ internal partial class ResumableFunctionHandler
                     {
                         await ProceedToNextWait(anyMethodWait);
                     }
+                    else return;//no backtrace
                     break;
 
                 case FunctionWait functionWait:
-                    var next = await ProceedToNextWait(previousChild);
-                    if (next == null)
+                    var functionCompleted = functionWait.ChildWaits.All(x => x.IsCompleted);
+                    if (functionCompleted)
                     {
+                        WriteMessage($"Exist function ({functionWait.Name})");
                         functionWait.Status = WaitStatus.Completed;
-                        WriteMessage($"Exist function {functionWait.Name}");
+                        switch (parent)
+                        {
+                            case null:
+                            case FunctionWait:
+                                await ProceedToNextWait(functionWait);
+                                break;
+                            case ManyFunctionsWait:
+                                WriteMessage($"Wait function group ({parent.Name}) to complete.");
+                                break;
+
+                        }
                     }
+                    else return;//no backtrace
                     break;
 
                 case ManyFunctionsWait { WaitType: WaitType.AllFunctionsWait } allFunctionsWait:
                     if (previousChild.IsCompleted)
                     {
-                        allFunctionsWait.Status=
-                            allFunctionsWait.WaitingFunctions.Count == allFunctionsWait.CompletedFunctions.Count ? WaitStatus.Completed : allFunctionsWait.Status;
+                        allFunctionsWait.Status =
+                            allFunctionsWait.WaitingFunctions.Count == allFunctionsWait.CompletedFunctions.Count
+                                ? WaitStatus.Completed
+                                : allFunctionsWait.Status;
+                        if (allFunctionsWait.IsCompleted)
+                        {
+                            WriteMessage($"Exist many functions wait ({allFunctionsWait.Name})");
+                            await ProceedToNextWait(allFunctionsWait);
+                        }
                     }
-                    if (allFunctionsWait.IsCompleted)
-                    {
-                        await ProceedToNextWait(allFunctionsWait);
-                        WriteMessage($"Exist many functions wait {allFunctionsWait.Name}");
-                    }
+                    else return;//no backtrace
                     break;
 
                 case ManyFunctionsWait { WaitType: WaitType.AnyFunctionWait } anyFunctionWait:
@@ -63,23 +90,24 @@ internal partial class ResumableFunctionHandler
                     {
                         anyFunctionWait.Status = WaitStatus.Completed;
                         await _waitsRepository.CancelFunctionGroupWaits(anyFunctionWait);
+                        if (anyFunctionWait.IsCompleted)
+                        {
+                            WriteMessage($"Exist many functions wait ({anyFunctionWait.Name})");
+                            await ProceedToNextWait(anyFunctionWait);
+                        }
                     }
-                    if (anyFunctionWait.IsCompleted)
-                    {
-                        await ProceedToNextWait(anyFunctionWait);
-                    }
+                    else return;//no backtrace
                     break;
             }
 
-            var parent = await _waitsRepository.GetWaitParent(currentWait);
             previousChild = currentWait;
             currentWait = parent;
-            if(currentWait!=null)
+            if (currentWait != null)
                 currentWait.FunctionState = previousChild.FunctionState;
         } while (currentWait != null);
     }
 
-    private async Task<Wait> ProceedToNextWait(Wait currentWait)
+    private async Task ProceedToNextWait(Wait currentWait)
     {
         var functionRunner = new FunctionRunner(currentWait);
         if (functionRunner.ResumableFunctionExist is false)
@@ -87,10 +115,10 @@ internal partial class ResumableFunctionHandler
             Debug.WriteLine($"Resumable function ({currentWait.RequestedByFunction.MethodName}) not exist in code");
             //todo:delete it and all related waits
             //throw new Exception("Can't initiate runner");
-            return null;
+            return;
         }
         var waitExist = await functionRunner.MoveNextAsync();
-        if (!waitExist) return null;
+        if (!waitExist) return;
 
         Console.WriteLine($"Get next wait [{functionRunner.Current.Name}] after [{currentWait.Name}]");
         var nextWait = functionRunner.Current;
@@ -108,7 +136,6 @@ internal partial class ResumableFunctionHandler
         var isFinalEnd = nextWait == null && currentWait.ParentWaitId == null;
         if (isFinalEnd)
             await FinalExit(currentWait);
-        return nextWait;
     }
 
     private async Task FinalExit(Wait currentWait)

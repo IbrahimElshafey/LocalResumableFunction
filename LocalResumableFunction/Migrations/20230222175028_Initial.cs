@@ -36,7 +36,8 @@ namespace LocalResumableFunction.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false),
                     StateObject = table.Column<string>(type: "TEXT", nullable: true),
-                    ResumableFunctionIdentifierId = table.Column<int>(type: "INTEGER", nullable: false)
+                    ResumableFunctionIdentifierId = table.Column<int>(type: "INTEGER", nullable: false),
+                    IsInProcessing = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {

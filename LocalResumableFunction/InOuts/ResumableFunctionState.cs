@@ -14,4 +14,5 @@ public class ResumableFunctionState
     public List<Wait> Waits { get; internal set; } = new();
     public MethodIdentifier ResumableFunctionIdentifier { get; set; }
     public int ResumableFunctionIdentifierId { get; set; }
+    public bool IsInProcessing { get; set; }
 }

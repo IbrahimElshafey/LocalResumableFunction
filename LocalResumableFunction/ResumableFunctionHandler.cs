@@ -24,13 +24,6 @@ internal partial class ResumableFunctionHandler
             await RegisterFirstWait(currentWait.RequestedByFunction.MethodInfo);
     }
 
-    private void UpdateFunctionData(MethodWait currentWait, PushedMethod pushedMethod)
-    {
-        var setDataExpression = currentWait.SetDataExpression.Compile();
-        setDataExpression.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, currentWait.CurrntFunction);
-        currentWait.FunctionState.StateObject = currentWait.CurrntFunction;
-    }
-
     private async Task<bool> MoveFunctionToRecycleBin(Wait currentWait)
     {
         //throw new NotImplementedException();

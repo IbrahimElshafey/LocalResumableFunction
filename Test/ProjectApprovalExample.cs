@@ -88,28 +88,28 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
     internal async Task<bool> ProjectSubmitted(Project project)
     {
         await Task.Delay(100);
-        Console.WriteLine($"Project {project} Submitted ");
+        WriteAction($"Project {project} Submitted ");
         return true;
     }
 
     [WaitMethod]
     public bool ManagerOneApproveProject(ApprovalDecision args)
     {
-        Console.WriteLine($"Manager One Approve Project with decision ({args.Decision})");
+        WriteAction($"Manager One Approve Project with decision ({args.Decision})");
         return true;
     }
 
     [WaitMethod]
     public bool ManagerTwoApproveProject(ApprovalDecision args)
     {
-        Console.WriteLine($"Manager Two Approve Project with decision ({args.Decision})");
+        WriteAction($"Manager Two Approve Project with decision ({args.Decision})");
         return true;
     }
 
     [WaitMethod]
     public bool ManagerThreeApproveProject(ApprovalDecision args)
     {
-        Console.WriteLine($"Manager Three Approve Project with decision ({args.Decision})");
+        WriteAction($"Manager Three Approve Project with decision ({args.Decision})");
         return true;
     }
 
@@ -121,12 +121,25 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
 
     public static Project GetCurrentProject()
     {
-        return new Project { Id = 2000, Name = "Project Name", Description = "Description" };
+        return new Project { Id = Random.Shared.Next(1,int.MaxValue), Name = "Project Name", Description = "Description" };
     }
     protected void Success(string msg)
     {
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine($"^^^Success for [{msg}]^^^^");
+        Console.ForegroundColor = ConsoleColor.White;
+    }
+    protected void WriteMessage(string msg)
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"{msg} -{CurrentProject?.Id}");
+        Console.ForegroundColor = ConsoleColor.White;
+    }
+
+    protected void WriteAction(string msg)
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine($"{msg} -{CurrentProject?.Id}");
         Console.ForegroundColor = ConsoleColor.White;
     }
 }
