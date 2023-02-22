@@ -40,7 +40,7 @@ internal class WaitsRepository : RepositoryBase
         {
             switch (methodWait.NeedFunctionStateForMatch)
             {
-                case false when CheckMatch(methodWait, pushedMethod):
+                case false when methodWait.CheckMatch():
                     await LoadWaitFunctionState(methodWait);
                     matchedWaits.Add(methodWait);
                     break;
