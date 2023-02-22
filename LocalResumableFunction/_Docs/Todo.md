@@ -11,8 +11,6 @@
 * Test with web API
 * Save function state all fields
 * Find fast and best object serializer
-* Match expression null handle
-* Duplicate wait when replay to keep history
 * MoveFunctionToRecycleBin
 * Use hangfire to 
 	* Queue pushed events requests [Fire and forget]
