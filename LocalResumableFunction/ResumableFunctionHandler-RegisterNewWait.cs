@@ -13,15 +13,15 @@ internal partial class ResumableFunctionHandler
             case MethodWait methodWait:
                 await SingleWaitRequested(methodWait);
                 break;
-            case ManyMethodsWait manyWaits:
+            case WaitsGroup manyWaits:
                 await ManyWaitsRequested(manyWaits);
                 break;
             case FunctionWait functionWait:
                 await FunctionWaitRequested(functionWait);
                 break;
-            case ManyFunctionsWait manyFunctionsWait:
-                await ManyFunctionsWaitRequested(manyFunctionsWait);
-                break;
+            //case ManyFunctionsWait manyFunctionsWait:
+            //    await ManyFunctionsWaitRequested(manyFunctionsWait);
+            //    break;
         }
 
         return false;
@@ -37,26 +37,55 @@ internal partial class ResumableFunctionHandler
         await _waitsRepository.AddWait(methodWait);
     }
 
-    private async Task ManyWaitsRequested(ManyMethodsWait manyWaits)
+    private async Task ManyWaitsRequested(WaitsGroup manyWaits)
     {
         for (var index = 0; index < manyWaits.ChildWaits.Count; index++)
         {
-            var methodWait = (MethodWait)manyWaits.ChildWaits[index];
-            methodWait.Status = WaitStatus.Waiting;
-            methodWait.FunctionState = manyWaits.FunctionState;
-            methodWait.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
-            methodWait.StateAfterWait = manyWaits.StateAfterWait;
-            methodWait.ParentWaitId = manyWaits.ParentWaitId;
-            await SingleWaitRequested(methodWait);
+            var wait = manyWaits.ChildWaits[index];
+            wait.Status = WaitStatus.Waiting;
+            wait.FunctionState = manyWaits.FunctionState;
+            wait.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
+            wait.StateAfterWait = manyWaits.StateAfterWait;
+            wait.ParentWaitId = manyWaits.ParentWaitId;
+            await GenericWaitRequested(wait);
         }
 
         await _waitsRepository.AddWait(manyWaits);
     }
 
+    //private async Task ManyFunctionsWaitRequested(ManyFunctionsWait manyFunctionsWaits)
+    //{
+    //    foreach (var functionWait in manyFunctionsWaits.WaitingFunctions)
+    //    {
+    //        functionWait.Status = WaitStatus.Waiting;
+    //        functionWait.FunctionState = manyFunctionsWaits.FunctionState;
+    //        functionWait.RequestedByFunctionId = manyFunctionsWaits.RequestedByFunctionId;
+    //        functionWait.StateAfterWait = manyFunctionsWaits.StateAfterWait;
+    //        functionWait.ParentWaitId = manyFunctionsWaits.ParentWaitId;
+    //    }
+
+    //    await _waitsRepository.AddWait(manyFunctionsWaits);
+    //    await _context.SaveChangesAsync();
+
+    //    foreach (var functionWait in manyFunctionsWaits.WaitingFunctions)
+    //    {
+    //        try
+    //        {
+    //            await FunctionWaitRequested(functionWait);
+    //            await _context.SaveChangesAsync();
+    //        }
+    //        catch (Exception e)
+    //        {
+    //            Console.WriteLine(e);
+    //            throw;
+    //        }
+    //    }
+    //}
+
     private async Task FunctionWaitRequested(FunctionWait functionWait)
     {
         await _waitsRepository.AddWait(functionWait);
-        await _context.SaveChangesAsync();
+        //await _context.SaveChangesAsync();
 
         var functionRunner = new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
         var hasNext = await functionRunner.MoveNextAsync();
@@ -78,39 +107,12 @@ internal partial class ResumableFunctionHandler
         functionWait.FirstWait.RequestedByFunctionId = methodIdentifier.MethodIdentifier.Id;
 
         if (functionWait.FirstWait is ReplayWait replayWait)
-            await ReplayWait(replayWait);
+            await ReplayWait(replayWait);//todo:review first wait is replay for what??
         else
             await GenericWaitRequested(functionWait.FirstWait);
     }
 
-    private async Task ManyFunctionsWaitRequested(ManyFunctionsWait manyFunctionsWaits)
-    {
-        foreach (var functionWait in manyFunctionsWaits.WaitingFunctions)
-        {
-            functionWait.Status = WaitStatus.Waiting;
-            functionWait.FunctionState = manyFunctionsWaits.FunctionState;
-            functionWait.RequestedByFunctionId = manyFunctionsWaits.RequestedByFunctionId;
-            functionWait.StateAfterWait = manyFunctionsWaits.StateAfterWait;
-            functionWait.ParentWaitId = manyFunctionsWaits.ParentWaitId;
-        }
-
-        await _waitsRepository.AddWait(manyFunctionsWaits);
-        await _context.SaveChangesAsync();
-
-        foreach (var functionWait in manyFunctionsWaits.WaitingFunctions)
-        {
-            try
-            {
-                await FunctionWaitRequested(functionWait);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-        }
-    }
+    
 
     private bool Validate(Wait nextWait)
     {

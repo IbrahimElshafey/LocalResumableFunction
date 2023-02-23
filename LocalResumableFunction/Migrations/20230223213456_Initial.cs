@@ -67,12 +67,11 @@ namespace LocalResumableFunction.Migrations
                     RequestedByFunctionId = table.Column<int>(type: "INTEGER", nullable: false),
                     ParentWaitId = table.Column<int>(type: "INTEGER", nullable: true),
                     Discriminator = table.Column<string>(type: "TEXT", nullable: false),
-                    CountExpressionValue = table.Column<byte[]>(type: "BLOB", nullable: true),
-                    IsOptional = table.Column<bool>(type: "INTEGER", nullable: true),
                     SetDataExpressionValue = table.Column<byte[]>(type: "BLOB", nullable: true),
                     MatchIfExpressionValue = table.Column<byte[]>(type: "BLOB", nullable: true),
                     NeedFunctionStateForMatch = table.Column<bool>(type: "INTEGER", nullable: true),
-                    WaitMethodIdentifierId = table.Column<int>(type: "INTEGER", nullable: true)
+                    WaitMethodIdentifierId = table.Column<int>(type: "INTEGER", nullable: true),
+                    CountExpressionValue = table.Column<byte[]>(type: "BLOB", nullable: true)
                 },
                 constraints: table =>
                 {

@@ -1,14 +1,17 @@
-﻿using LocalResumableFunction;
-using LocalResumableFunction.Helpers;
-using LocalResumableFunction.InOuts;
+﻿using LocalResumableFunction.InOuts;
+
+namespace Test;
 
 internal class TestWaitManyExample : ProjectApprovalExample
 {
     //[ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> WaitThreeMethod()
     {
-        Console.WriteLine("Wait three managers to approve");
-        CurrentProject = GetCurrentProject();
+        yield return
+            Wait<Project, bool>("Project Submitted", ProjectSubmitted)
+                .If((input, output) => output == true)
+                .SetData((input, output) => CurrentProject == input);
+        WriteMessage("Wait three managers to approve");
         yield return Wait(
             "Wait three methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
@@ -21,15 +24,18 @@ internal class TestWaitManyExample : ProjectApprovalExample
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).All();
-        Console.WriteLine("Three waits matched.");
+        WriteMessage("Three waits matched.");
         Success(nameof(WaitThreeMethod));
     }
 
     //[ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> WaitManyAndCountExpressionDefined()
     {
+        yield return
+            Wait<Project, bool>("Project Submitted", ProjectSubmitted)
+                .If((input, output) => output == true)
+                .SetData((input, output) => CurrentProject == input);
         WriteMessage("Wait two of three managers to approve");
-        CurrentProject = GetCurrentProject();
         yield return Wait(
             "Wait three methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
@@ -41,7 +47,7 @@ internal class TestWaitManyExample : ProjectApprovalExample
             new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output)
-        ).WhenMatchedCount(x => x == 2);
+        ).When(x => x.CompletedCount == 2);
         WriteMessage("Two waits of three waits matched.");
         WriteMessage("WaitManyAndCountExpressionDefined ended.");
         Success(nameof(WaitManyAndCountExpressionDefined));

@@ -1,19 +1,20 @@
-﻿using LocalResumableFunction;
-using LocalResumableFunction.Helpers;
+﻿using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
+
+namespace Test;
 
 internal class WaitManyFunctionsExample : ProjectApprovalExample
 {
     public async IAsyncEnumerable<Wait> WaitManyFunctions()
     {
         await Task.Delay(10);
-        Console.WriteLine("SubFunctionTest WaitManyFunctions");
+        WriteMessage("SubFunctionTest WaitManyFunctions");
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
                 .If((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
-        Console.WriteLine("After project submitted.");
-        yield return Wait("Wait multiple resumable functions", FunctionOne, ManagerThreeSubFunction);
+        WriteMessage("After project submitted.");
+        yield return Wait("Wait multiple resumable functions", WaitManagerOneAndTwoSubFunction, ManagerThreeSubFunction);
         Success(nameof(WaitManyFunctions));
     }
 
@@ -35,23 +36,24 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> WaitFirstFunction()
     {
         await Task.Delay(10);
-        Console.WriteLine("SubFunctionTest WaitManyFunctions");
+        WriteMessage("SubFunctionTest WaitManyFunctions");
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
                 .If((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
-        Console.WriteLine("After project submitted.");
+        WriteMessage("After project submitted.");
         yield return
-            Wait("Wait multiple resumable functions", FunctionOne, ManagerThreeSubFunction)
-                .WaitFirst();
-        Console.WriteLine("After wait two functions.");
+            Wait("Wait multiple resumable functions", WaitManagerOneAndTwoSubFunction, ManagerThreeSubFunction)
+                .First();
+        WriteMessage("After wait two functions.");
+        Success(nameof(WaitFirstFunction));
     }
 
     [SubResumableFunction]
-    internal async IAsyncEnumerable<Wait> FunctionOne()
+    internal async IAsyncEnumerable<Wait> WaitManagerOneAndTwoSubFunction()
     {
         await Task.Delay(10);
-        Console.WriteLine("WaitTwoManagers started");
+        WriteMessage("WaitTwoManagers started");
         yield return Wait(
             "Wait two methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
@@ -61,7 +63,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerTwoApproval == output)
         ).All();
-        Console.WriteLine("Two waits matched");
+        WriteMessage("Two waits matched");
     }
 
     [SubResumableFunction]

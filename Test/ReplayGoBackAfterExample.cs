@@ -22,12 +22,12 @@ internal class ReplayGoBackAfterExample : ProjectApprovalExample
 
         if (ManagerOneApproval is false)
         {
-            Console.WriteLine("Manager one rejected project and repaly will go after ProjectSumbitted.");
+            WriteMessage("Manager one rejected project and replay will go after ProjectSubmitted.");
             yield return GoBackAfter(ProjectSumbitted);
         }
         else
         {
-            Console.WriteLine("Manager one approved project");
+            WriteMessage("Manager one approved project");
         }
         Success(nameof(TestReplay_GoBackAfter));
     }

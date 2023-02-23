@@ -1,6 +1,8 @@
 ﻿using System.Linq.Expressions;
 using LocalResumableFunction.InOuts;
 
+namespace LocalResumableFunction;
+
 public abstract partial class ResumableFunctionLocal
 {
     /// <summary>
@@ -8,7 +10,12 @@ public abstract partial class ResumableFunctionLocal
     /// </summary>
     protected ReplayWait GoBackAfter(string name)
     {
-        return new ReplayWait { Name = name, ReplayType = ReplayType.GoAfter };
+        return new ReplayWait
+        {
+            Name = name,
+            ReplayType = ReplayType.GoAfter,
+            CurrentFunction = this,
+        };
     }
 
     /// <summary>
@@ -16,7 +23,12 @@ public abstract partial class ResumableFunctionLocal
     /// </summary>
     protected ReplayWait GoBackBefore(string name)
     {
-        return new ReplayWait { Name = name, ReplayType = ReplayType.GoBefore };
+        return new ReplayWait
+        {
+            Name = name,
+            ReplayType = ReplayType.GoBefore,
+            CurrentFunction = this
+        };
     }
 
     /// <summary>
@@ -29,7 +41,8 @@ public abstract partial class ResumableFunctionLocal
         {
             Name = name,
             ReplayType = ReplayType.GoBeforeWithNewMatch,
-            MatchExpression = newMatchExpression
+            MatchExpression = newMatchExpression,
+            CurrentFunction = this,
         };
     }
 
@@ -45,7 +58,8 @@ public abstract partial class ResumableFunctionLocal
         {
             Name = name,
             ReplayType = ReplayType.GoBeforeWithNewMatch,
-            MatchExpression = newMatchExpression
+            MatchExpression = newMatchExpression,
+            CurrentFunction = this,
         };
     }
 }

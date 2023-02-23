@@ -22,7 +22,6 @@ public abstract class Wait
 
     public WaitType WaitType { get; internal set; }
 
-
     internal ResumableFunctionState FunctionState { get; set; }
 
     internal int FunctionStateId { get; set; }
@@ -72,8 +71,9 @@ public abstract class Wait
         set => _currntFunction = value;
     }
 
-    public bool IsCompleted => Status == WaitStatus.Completed;
-    internal async Task<NextWaitResult> GetNextWait()
+    internal bool CanBeParent => this is FunctionWait || this is WaitsGroup;
+
+    internal async Task<Wait> GetNextWait()
     {
         if (IsNode)
         {
@@ -94,19 +94,10 @@ public abstract class Wait
             if (waitExist)
             {
                 Console.WriteLine($"Get next wait [{functionRunner.Current.Name}] after [{Name}]");
-                return new NextWaitResult(functionRunner.Current, false, false);
+                return functionRunner.Current;
             }
 
-            var isEntryPointEnd = ParentWaitId == null;
-            if (isEntryPointEnd)
-            {
-                Console.WriteLine($"Final exist for function [{RequestedByFunction.MethodName}] detected.");
-                return new NextWaitResult(null, true, false);
-            }
-
-            //sub function end
-            Console.WriteLine($"Sub function exit [{RequestedByFunction.MethodName}] detected.");
-            return new NextWaitResult(null, false, true);
+            return null;
         }
         catch (Exception)
         {

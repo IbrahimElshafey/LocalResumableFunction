@@ -1,5 +1,7 @@
 ﻿using LocalResumableFunction.InOuts;
 
+namespace LocalResumableFunction;
+
 public abstract partial class ResumableFunctionLocal
 {
     protected FunctionWait Wait(string name, Func<IAsyncEnumerable<Wait>> function)
@@ -9,20 +11,21 @@ public abstract partial class ResumableFunctionLocal
             Name = name,
             IsNode = true,
             WaitType = WaitType.FunctionWait,
-            FunctionInfo = function.Method
+            FunctionInfo = function.Method,
+            CurrentFunction = this,
         };
         return result;
     }
 
-    protected ManyFunctionsWait Wait
-        (string name, params Func<IAsyncEnumerable<Wait>>[] subFunctions)
+    protected WaitsGroup Wait(string name, params Func<IAsyncEnumerable<Wait>>[] subFunctions)
     {
-        var result = new ManyFunctionsWait
+        var result = new WaitsGroup
         {
             ChildWaits = new List<Wait>(new Wait[subFunctions.Length]),
             Name = name,
             IsNode = true,
-            WaitType = WaitType.AllFunctionsWait
+            WaitType = WaitType.GroupWaitAll,
+            CurrentFunction = this,
         };
         for (var index = 0; index < subFunctions.Length; index++)
         {

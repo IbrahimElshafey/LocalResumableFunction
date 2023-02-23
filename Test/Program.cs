@@ -1,10 +1,11 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Reflection;
 using LocalResumableFunction;
 using LocalResumableFunction.Data;
 using LocalResumableFunction.InOuts;
-using System.Reflection;
-using Test;
+
+namespace Test;
 
 public class Program
 {
@@ -18,19 +19,20 @@ public class Program
         };
         Console.WriteLine("Test App RUNNING.");
 
-        //await TestSubFunctionCall();
-        await TestReplayGoBackAfter();
-        await TestReplayGoBackBeforeNewMatch();
-
         //await TestWaitMany();
+        //await TestSubFunctionCall();
+        //await TestReplayGoBackAfter();
+        //await TestReplayGoBackBeforeNewMatch();
+
+
         //await TestWaitManyFunctions();
-        //await TestLoops();
+        await TestLoops();
 
         //await TestParallelScenarios();
         Console.ReadLine();
     }
 
-    
+
 
     private static async Task TestParallelScenarios()
     {
@@ -77,10 +79,12 @@ public class Program
     }
     private static async Task TestWaitMany()
     {
-        //await RegisterResumableFunction(typeof(TestWaitManyExample), nameof(TestWaitManyExample.WaitThreeMethod));
-        await RegisterResumableFunction(typeof(TestWaitManyExample), nameof(TestWaitManyExample.WaitManyAndCountExpressionDefined));
+        await RegisterResumableFunction(typeof(TestWaitManyExample), nameof(TestWaitManyExample.WaitThreeMethod));
+        //await RegisterResumableFunction(typeof(TestWaitManyExample), nameof(TestWaitManyExample.WaitManyAndCountExpressionDefined));
         var example = new TestWaitManyExample();
-        Project project = ProjectApprovalExample.GetCurrentProject();
+        var project = ProjectApprovalExample.GetCurrentProject();
+        example.CurrentProject = project;
+        await example.ProjectSubmitted(project);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
@@ -93,8 +97,8 @@ public class Program
     {
         await RegisterResumableFunction(typeof(ProjectApprovalExample), nameof(ProjectApprovalExample.SubFunctionTest));
         var example = new ProjectApprovalExample();
-        Project project = ProjectApprovalExample.GetCurrentProject();
-        example.ProjectSubmitted(project);
+        var project = ProjectApprovalExample.GetCurrentProject();
+        await example.ProjectSubmitted(project);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
@@ -105,7 +109,7 @@ public class Program
         await RegisterResumableFunction(typeof(ReplayGoBackAfterExample), nameof(ReplayGoBackAfterExample.TestReplay_GoBackAfter));
         var example = new ReplayGoBackAfterExample();
         Project project = ProjectApprovalExample.GetCurrentProject();
-        example.ProjectSubmitted(ProjectApprovalExample.GetCurrentProject());
+        await example.ProjectSubmitted(project);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
     }
@@ -114,11 +118,11 @@ public class Program
     {
         await RegisterResumableFunction(typeof(ReplayGoBackBeforeNewMatchExample), nameof(ReplayGoBackBeforeNewMatchExample.TestReplay_GoBackBefore));
         var example = new ReplayGoBackBeforeNewMatchExample();
-        Project project = ProjectApprovalExample.GetCurrentProject();
-        example.ProjectSubmitted(ProjectApprovalExample.GetCurrentProject());
+        var project = ProjectApprovalExample.GetCurrentProject();
+        await example.ProjectSubmitted(project);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
         project.Name += "-Updated";
-        example.ProjectSubmitted(project);
+        await example.ProjectSubmitted(project);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
     }
 

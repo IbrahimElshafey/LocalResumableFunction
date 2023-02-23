@@ -14,6 +14,7 @@ internal partial class ResumableFunctionHandler
         if (classInstance != null)
             try
             {
+                classInstance.CurrentResumableFunction = resumableFunction;
                 var functionRunner = new FunctionRunner(classInstance, resumableFunction);
                 if (functionRunner.ResumableFunctionExist is false)
                 {

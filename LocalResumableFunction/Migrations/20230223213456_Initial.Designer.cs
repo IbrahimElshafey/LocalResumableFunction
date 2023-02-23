@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LocalResumableFunction.Migrations
 {
     [DbContext(typeof(FunctionDataContext))]
-    [Migration("20230222175028_Initial")]
+    [Migration("20230223213456_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -140,30 +140,9 @@ namespace LocalResumableFunction.Migrations
                     b.HasDiscriminator().HasValue("FunctionWait");
                 });
 
-            modelBuilder.Entity("LocalResumableFunction.InOuts.ManyFunctionsWait", b =>
-                {
-                    b.HasBaseType("LocalResumableFunction.InOuts.Wait");
-
-                    b.HasDiscriminator().HasValue("ManyFunctionsWait");
-                });
-
-            modelBuilder.Entity("LocalResumableFunction.InOuts.ManyMethodsWait", b =>
-                {
-                    b.HasBaseType("LocalResumableFunction.InOuts.Wait");
-
-                    b.Property<byte[]>("CountExpressionValue")
-                        .HasColumnType("BLOB")
-                        .HasColumnName("CountExpressionValue");
-
-                    b.HasDiscriminator().HasValue("ManyMethodsWait");
-                });
-
             modelBuilder.Entity("LocalResumableFunction.InOuts.MethodWait", b =>
                 {
                     b.HasBaseType("LocalResumableFunction.InOuts.Wait");
-
-                    b.Property<bool>("IsOptional")
-                        .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("MatchIfExpressionValue")
                         .HasColumnType("BLOB")
@@ -182,6 +161,17 @@ namespace LocalResumableFunction.Migrations
                     b.HasIndex("WaitMethodIdentifierId");
 
                     b.HasDiscriminator().HasValue("MethodWait");
+                });
+
+            modelBuilder.Entity("LocalResumableFunction.InOuts.WaitsGroup", b =>
+                {
+                    b.HasBaseType("LocalResumableFunction.InOuts.Wait");
+
+                    b.Property<byte[]>("CountExpressionValue")
+                        .HasColumnType("BLOB")
+                        .HasColumnName("CountExpressionValue");
+
+                    b.HasDiscriminator().HasValue("WaitsGroup");
                 });
 
             modelBuilder.Entity("LocalResumableFunction.InOuts.ResumableFunctionState", b =>

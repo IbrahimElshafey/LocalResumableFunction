@@ -3,9 +3,8 @@
 public enum WaitType
 {
     MethodWait,
-    AllMethodsWait,
-    AnyMethodWait,
-    FunctionWait,
-    AllFunctionsWait,
-    AnyFunctionWait
+    GroupWaitAll,
+    GroupWaitFirst,
+    GroupWaitWithExpression,
+    FunctionWait
 }

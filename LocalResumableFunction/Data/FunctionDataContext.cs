@@ -20,9 +20,7 @@ internal class FunctionDataContext : DbContext
     public DbSet<MethodIdentifier> MethodIdentifiers { get; set; }
     public DbSet<Wait> Waits { get; set; }
     public DbSet<MethodWait> MethodWaits { get; set; }
-    public DbSet<ManyMethodsWait> ManyMethodsWaits { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
-    public DbSet<ManyFunctionsWait> ManyFunctionsWaits { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -82,9 +80,9 @@ internal class FunctionDataContext : DbContext
             .Property(mw => mw.MatchIfExpressionValue)
             .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
 
-        modelBuilder.Entity<ManyMethodsWait>()
+        modelBuilder.Entity<WaitsGroup>()
             .Property(mw => mw.CountExpressionValue)
-            .HasColumnName(nameof(ManyMethodsWait.CountExpressionValue));
+            .HasColumnName(nameof(WaitsGroup.CountExpressionValue));
 
         modelBuilder.Entity<MethodWait>()
             .Property(mw => mw.SetDataExpressionValue)

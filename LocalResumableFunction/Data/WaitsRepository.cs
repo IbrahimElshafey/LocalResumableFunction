@@ -2,6 +2,7 @@
 using System.Linq;
 using LocalResumableFunction.InOuts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace LocalResumableFunction.Data;
 
@@ -64,34 +65,7 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-    //Todo change to IEnumrubale<Waits> GetRoots()
-    public async Task<(Wait RootWait, int? MethodGroupId, int? FunctionWaitId, int? FunctionGroupId)> GetRootFunctionWait(int? parentId)
-    {
-        var result = (RootWait: default(Wait), MethodGroupId: default(int?), FunctionWaitId: default(int?), FunctionGroupId: default(int?));
-        Debugger.Launch();
-        var rootWait = await _context.Waits.FirstOrDefaultAsync(x => x.Id == parentId);
 
-        if (rootWait is ManyMethodsWait && rootWait.ParentWaitId != null)
-        {
-            result.MethodGroupId = rootWait.Id;
-            rootWait = await _context.Waits.FirstOrDefaultAsync(x => x.Id == rootWait.ParentWaitId);
-        }
-
-        if (rootWait is FunctionWait && rootWait.ParentWaitId != null)
-        {
-            result.FunctionWaitId = rootWait.Id;
-            result.FunctionGroupId = rootWait.ParentWaitId;
-            rootWait = await _context.Waits.FirstOrDefaultAsync(x => x.Id == rootWait.ParentWaitId);
-        }
-
-        if (rootWait is not null)
-        {
-            await _context.Entry(rootWait).Reference(x => x.RequestedByFunction).LoadAsync();
-            await _context.Entry(rootWait).Collection(x => x.ChildWaits).LoadAsync();
-        }
-        result.RootWait = rootWait;
-        return result;
-    }
 
     public async Task<Wait> GetWaitGroup(int? parentGroupId)
     {
@@ -122,21 +96,23 @@ internal class WaitsRepository : RepositoryBase
             x.Status == WaitStatus.Waiting);
     }
 
-    public async Task CancelFunctionGroupWaits(ManyFunctionsWait anyFunctionWait)
+   
+    public async Task CancelSubWaits(int parentId)
     {
-        var functionIds = anyFunctionWait
-            .WaitingFunctions
-            .Where(x => x.ParentWaitId != null)
-            .Select(x => x.Id)
-            .ToList();
-        var waitsToCancel = await _context
-            .Waits
-            .Where(x => functionIds.Contains((int)x.ParentWaitId!))
-            .ToListAsync();
-        foreach (var wait in waitsToCancel)
+        await CancelWaits(parentId);
+      
+        async Task CancelWaits(int pId)
         {
-            if (wait.Status == WaitStatus.Waiting)
+            var waits = await _context
+                .Waits
+                .Where(x => x.ParentWaitId == pId && x.Status==WaitStatus.Waiting)
+                .ToListAsync();
+            foreach (var wait in waits)
+            {
                 wait.Status = WaitStatus.Canceled;
+                if(wait.CanBeParent)
+                    await CancelWaits(wait.Id);
+            }
         }
     }
 
@@ -157,5 +133,12 @@ internal class WaitsRepository : RepositoryBase
     {
         wait.ChildWaits = await _context.Waits.Where(x => x.ParentWaitId == wait.Id).ToListAsync();
         return wait;
+    }
+
+    public async Task CancelOpenedWaitsForState(int stateId)
+    {
+       await _context.Waits
+             .Where(x => x.FunctionStateId == stateId && x.Status == WaitStatus.Waiting)
+             .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, status => WaitStatus.Canceled));
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace LocalResumableFunction;
+﻿namespace Test;
 
 public class Project
 {

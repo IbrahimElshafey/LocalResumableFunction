@@ -7,7 +7,6 @@ namespace LocalResumableFunction.InOuts;
 
 public class MethodWait : Wait
 {
-    public bool IsOptional { get; internal set; }
 
     [NotMapped] public LambdaExpression SetDataExpression { get; protected set; }
 
@@ -120,10 +119,5 @@ public class MethodWait<TInput, TOutput> : MethodWait
         MatchIfExpression = value;
         return this;
     }
-
-    public MethodWait<TInput, TOutput> SetOptional()
-    {
-        IsOptional = true;
-        return this;
-    }
+    
 }

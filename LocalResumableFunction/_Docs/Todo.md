@@ -1,5 +1,6 @@
 ﻿# Todo
 * Validate waits
+* No inheritance from resumable local function
 * Wait name can't duplicate in same method
 
 * Remove uniqe for method hash
