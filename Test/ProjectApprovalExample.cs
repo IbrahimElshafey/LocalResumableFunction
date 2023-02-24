@@ -10,6 +10,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
     public bool ManagerOneApproval { get; set; }
     public bool ManagerTwoApproval { get; set; }
     public bool ManagerThreeApproval { get; set; }
+    public bool ManagerFourApproval { get; set; }
 
     //any method with attribute [ResumableFunctionEntryPoint] that takes no argument
     //and return IAsyncEnumerable<Wait> is a resumbale function
@@ -108,6 +109,14 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
     public bool ManagerThreeApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Three Approve Project with decision ({args.Decision})");
+        return true;
+    }
+
+
+    [WaitMethod]
+    public bool ManagerFourApproveProject(ApprovalDecision args)
+    {
+        WriteAction($"Manager Four Approve Project with decision ({args.Decision})");
         return true;
     }
 

@@ -104,5 +104,6 @@ public abstract class Wait
             throw new Exception("Error when try to get next wait");
         }
     }
-    
+
+    public virtual bool IsFinished() => Status == WaitStatus.Completed;
 }

@@ -26,12 +26,26 @@ public class Program
 
 
         //await TestWaitManyFunctions();
-        await TestLoops();
+        //await TestLoops();
+        await TestManyWaitsTypeInGroup();
 
         //await TestParallelScenarios();
         Console.ReadLine();
     }
 
+    private static async Task TestManyWaitsTypeInGroup()
+    {
+        await RegisterResumableFunction(typeof(ManyWaitsTypeInGroupExample), nameof(ManyWaitsTypeInGroupExample.ManyWaitsTypeInGroup));
+        var example = new ManyWaitsTypeInGroupExample();
+        var currentProject = ProjectApprovalExample.GetCurrentProject();
+        await example.ProjectSubmitted(currentProject);
+        example.ManagerOneApproveProject(new ApprovalDecision(currentProject.Id, true));
+        example.ManagerTwoApproveProject(new ApprovalDecision(currentProject.Id, true));
+        //example.ManagerTwoApproveProject(new ApprovalDecision(currentProject.Id, true));
+        example.ManagerThreeApproveProject(new ApprovalDecision(currentProject.Id, true));
+        example.ManagerThreeApproveProject(new ApprovalDecision(currentProject.Id, true));
+        example.ManagerFourApproveProject(new ApprovalDecision(currentProject.Id, true));
+    }
 
 
     private static async Task TestParallelScenarios()

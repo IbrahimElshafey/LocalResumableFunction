@@ -96,21 +96,21 @@ internal class WaitsRepository : RepositoryBase
             x.Status == WaitStatus.Waiting);
     }
 
-   
+
     public async Task CancelSubWaits(int parentId)
     {
         await CancelWaits(parentId);
-      
+
         async Task CancelWaits(int pId)
         {
             var waits = await _context
                 .Waits
-                .Where(x => x.ParentWaitId == pId && x.Status==WaitStatus.Waiting)
+                .Where(x => x.ParentWaitId == pId && x.Status == WaitStatus.Waiting)
                 .ToListAsync();
             foreach (var wait in waits)
             {
                 wait.Status = WaitStatus.Canceled;
-                if(wait.CanBeParent)
+                if (wait.CanBeParent)
                     await CancelWaits(wait.Id);
             }
         }
@@ -137,8 +137,8 @@ internal class WaitsRepository : RepositoryBase
 
     public async Task CancelOpenedWaitsForState(int stateId)
     {
-       await _context.Waits
-             .Where(x => x.FunctionStateId == stateId && x.Status == WaitStatus.Waiting)
-             .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, status => WaitStatus.Canceled));
+        await _context.Waits
+              .Where(x => x.FunctionStateId == stateId && x.Status == WaitStatus.Waiting)
+              .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, status => WaitStatus.Canceled));
     }
 }

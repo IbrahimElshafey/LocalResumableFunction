@@ -20,7 +20,7 @@ public class WaitsGroup : Wait
     internal byte[] CountExpressionValue { get; set; }
     public int CompletedCount => ChildWaits?.Count(x => x.Status == WaitStatus.Completed) ?? 0;
 
-    public bool IsFinished()
+    public override bool IsFinished()
     {
 
         var isFinished = false;

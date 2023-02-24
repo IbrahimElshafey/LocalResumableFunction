@@ -10,6 +10,6 @@ public sealed class FunctionWait : Wait
 
     [NotMapped] public MethodInfo FunctionInfo { get; internal set; }
 
-    public bool IsFinished() => this.ChildWaits.Any(x => x.Status == WaitStatus.Waiting) is false;
+    public override bool IsFinished() => ChildWaits.Any(x => x.Status == WaitStatus.Waiting) is false;
 
 }

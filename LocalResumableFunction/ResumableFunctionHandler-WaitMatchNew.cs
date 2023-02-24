@@ -17,45 +17,19 @@ internal partial class ResumableFunctionHandler
             {
                 case MethodWait methodWait:
                     methodWait.Status = WaitStatus.Completed;
-                    switch (parent)
-                    {
-                        case null:
-                        case FunctionWait:
-                            await ProceedToNextWait(methodWait);
-                            break;
-                        case WaitsGroup:
-                            WriteMessage($"Wait group ({parent.Name}) to complete.");
-                            break;
-                    }
+                    await GoNext(parent, methodWait);
                     break;
 
-                case WaitsGroup waitsGroup:
-                    if (waitsGroup.IsFinished())
+                case WaitsGroup:
+                case FunctionWait:
+                    if (currentWait.IsFinished())
                     {
-                        await _waitsRepository.CancelSubWaits(waitsGroup.Id);
-                        await ProceedToNextWait(waitsGroup);
+                        WriteMessage($"Exit ({currentWait.Name})");
+                        currentWait.Status = WaitStatus.Completed;
+                        await _waitsRepository.CancelSubWaits(currentWait.Id);
+                        await GoNext(parent, currentWait);
                     }
                     else return;
-                    break;
-
-                case FunctionWait functionWait:
-                    if (functionWait.IsFinished())
-                    {
-                        WriteMessage($"Exist function ({functionWait.Name})");
-                        functionWait.Status = WaitStatus.Completed;
-                        switch (parent)
-                        {
-                            case null:
-                            case FunctionWait:
-                                await ProceedToNextWait(functionWait);
-                                break;
-                            case WaitsGroup:
-                                WriteMessage($"Wait group ({parent.Name}) to complete.");
-                                break;
-
-                        }
-                    }
-                    else return;//no backtrace
                     break;
             }
 
@@ -64,6 +38,20 @@ internal partial class ResumableFunctionHandler
             if (currentWait != null)
                 currentWait.FunctionState = previousChild.FunctionState;
         } while (currentWait != null);
+    }
+
+    private async Task GoNext(Wait parent, Wait currentWait)
+    {
+        switch (parent)
+        {
+            case null:
+            case FunctionWait:
+                await ProceedToNextWait(currentWait);
+                break;
+            case WaitsGroup:
+                WriteMessage($"Wait group ({parent.Name}) to complete.");
+                break;
+        }
     }
 
     private async Task ProceedToNextWait(Wait currentWait)
@@ -77,7 +65,7 @@ internal partial class ResumableFunctionHandler
         var nextWait = await currentWait.GetNextWait();
         if (nextWait == null)
         {
-            if(currentWait.ParentWaitId==null)
+            if (currentWait.ParentWaitId == null)
                 await FinalExit(currentWait);
             return;
         }
