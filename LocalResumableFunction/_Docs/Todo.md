@@ -1,4 +1,16 @@
 ﻿# Todo
+* Centralize state database
+	* Use many database providers [Postgres,Sql Server,Sqlite]
+	* Use Database as a service with OData implementation
+* Wait for external method
+	* Add interface with methods
+	* Mark intefaces with [WaitExternalMethod] attribute that takes
+		* AssemblyName
+		* ClassName
+		* MethodName [as method name itself]
+		* MethodSignature [as method sigature itself]
+	* External method will be pushed in custom way
+
 * Validate waits
 * No inheritance from resumable local function
 * Wait name can't duplicate in same method
@@ -18,15 +30,10 @@
 	* Implement provider for time based events
 * Parameter check lib use
 * Add UI Project
-* Mixed waits group
-* WhenMatchedCount for function group
-* Speed Analysis
-* Use many database providers [Postgres,Sql Server,Sqlite]
-* Use Database as a service with OData implementation
-* Wait for external method
-	* Add interface with methods
-	* Mark intefaces with [WaitExternalMethod] attribute
-	* External method will be pushed in custom way
+
+
+* Speed Analysis	
+
 # Test Engine Scenarios
 * Seqeunce [DONE]
 * Wait all [DONE]
