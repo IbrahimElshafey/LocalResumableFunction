@@ -26,7 +26,7 @@ internal class MethodIdentifierRepository : RepositoryBase
         var inDb = await _context
             .MethodIdentifiers
             .Where(x => x.MethodHash == methodId.MethodHash).ToListAsync();
-        if (inDb == null)
+        if (inDb.Any() is false)
             inDb = _context
                 .MethodIdentifiers
                 .Local
