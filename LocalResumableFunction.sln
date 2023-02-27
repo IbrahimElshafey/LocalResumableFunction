@@ -7,7 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LocalResumableFunction", "L
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{8F40B5D2-02DA-4A8E-ACD0-2CACCB1278D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResumableFunctionScanner", "ResumableFunctionScanner\ResumableFunctionScanner.csproj", "{C903FEBF-DF9E-4FE9-BABF-27D1AAD72713}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResumableFunctionScanner", "ResumableFunctionScanner\ResumableFunctionScanner.csproj", "{C903FEBF-DF9E-4FE9-BABF-27D1AAD72713}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "_docs", "_docs\_docs.csproj", "{D95A83DE-B134-4ED3-9D62-5EA71B23A0BF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{C903FEBF-DF9E-4FE9-BABF-27D1AAD72713}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C903FEBF-DF9E-4FE9-BABF-27D1AAD72713}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C903FEBF-DF9E-4FE9-BABF-27D1AAD72713}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D95A83DE-B134-4ED3-9D62-5EA71B23A0BF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D95A83DE-B134-4ED3-9D62-5EA71B23A0BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D95A83DE-B134-4ED3-9D62-5EA71B23A0BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D95A83DE-B134-4ED3-9D62-5EA71B23A0BF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
