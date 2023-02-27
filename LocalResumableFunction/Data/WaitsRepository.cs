@@ -16,11 +16,14 @@ internal class WaitsRepository : RepositoryBase
     {
         var isExistLocal = _context.Waits.Local.Contains(wait);
         var notAddStatus = _context.Entry(wait).State != EntityState.Added;
-        if (isExistLocal is false && notAddStatus)
+        if (isExistLocal || !notAddStatus) return Task.CompletedTask;
+
+        Console.WriteLine($"==> Add Wait [{wait.Name}] with type [{wait.WaitType}]");
+        if (wait is WaitsGroup waitGroup)
         {
-            Console.WriteLine($"==> Add Wait [{wait.Name}] with type [{wait.WaitType}]");
-            _context.Waits.Add(wait);
+            waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
         }
+        _context.Waits.Add(wait);
         return Task.CompletedTask;
     }
 

@@ -1,5 +1,5 @@
 ﻿# Todo
-* TimeWait saved to database problem
+
 * Use hangfire to 
 	* Queue pushed events requests [Fire and forget]
 	* Implement provider for time based events
