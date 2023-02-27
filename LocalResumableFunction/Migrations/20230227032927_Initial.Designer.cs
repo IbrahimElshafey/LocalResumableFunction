@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LocalResumableFunction.Migrations
 {
     [DbContext(typeof(FunctionDataContext))]
-    [Migration("20230223213456_Initial")]
+    [Migration("20230227032927_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

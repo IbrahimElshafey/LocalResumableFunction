@@ -27,10 +27,21 @@ public class Program
 
         //await TestWaitManyFunctions();
         //await TestLoops();
-        await TestManyWaitsTypeInGroup();
+        //await TestManyWaitsTypeInGroup();
+        await TestTimeWait();
 
         //await TestParallelScenarios();
         Console.ReadLine();
+    }
+
+    private static async Task TestTimeWait()
+    {
+        await RegisterResumableFunction(typeof(TestTimeExample), nameof(TestTimeExample.TimeWaitTest));
+        var example = new TestTimeExample();
+        var currentProject = ProjectApprovalExample.GetCurrentProject();
+        await example.ProjectSubmitted(currentProject);
+        await Task.Delay(TimeSpan.FromSeconds(30));
+        example.ManagerOneApproveProject(new ApprovalDecision(currentProject.Id, true));
     }
 
     private static async Task TestManyWaitsTypeInGroup()

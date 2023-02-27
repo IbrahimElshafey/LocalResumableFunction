@@ -13,7 +13,7 @@ internal class ManyWaitsTypeInGroupExample:ProjectApprovalExample
                 .SetData((input, output) => CurrentProject == input);
         WriteMessage("Wait many types in same group");
         yield return
-            WaitGroup("Many waits types",
+            Wait("Many waits types",
                 new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .If((input, output) => input.ProjectId == CurrentProject.Id)
                     .SetData((input, output) => ManagerOneApproval == output),

@@ -52,6 +52,7 @@ internal partial class ResumableFunctionHandler
             catch (Exception ex)
             {
                 Debug.Write(ex);
+                WriteMessage(ex.Message);
             }
         }
     }

@@ -29,7 +29,12 @@ internal class Scanner
 
         foreach (var resumableFunctionClass in resumableFunctions)
             await RegisterResumableFunctionsInClass(resumableFunctionClass);
-        _context.Dispose();
+       
+        WriteMessage("Register local methods");
+        await RegisterMethodWaitsIfExist(typeof(LocalRegisteredMethods));
+        await _context.SaveChangesAsync();
+
+        await _context.DisposeAsync();
         WriteMessage("Close with no errors.");
         Console.ReadLine();
     }

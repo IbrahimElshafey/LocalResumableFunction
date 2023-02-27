@@ -77,7 +77,7 @@ internal partial class ResumableFunctionHandler
         nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
         if (nextWait is ReplayWait replayWait)
             await ReplayWait(replayWait);
-        await GenericWaitRequested(nextWait);
+        await GenericWaitRequested(nextWait);//base
         currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
         await _context.SaveChangesAsync();
         await DuplicateIfFirst(currentWait);

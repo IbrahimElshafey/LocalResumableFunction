@@ -8,7 +8,7 @@ namespace LocalResumableFunction.InOuts;
 public class MethodWait : Wait
 {
 
-    [NotMapped] public LambdaExpression SetDataExpression { get; protected set; }
+    [NotMapped] public LambdaExpression SetDataExpression { get; internal set; }
 
     internal byte[] SetDataExpressionValue { get; set; }
 

@@ -106,4 +106,21 @@ public abstract class Wait
     }
 
     public virtual bool IsFinished() => Status == WaitStatus.Completed;
+
+    public void Cancel()
+    {
+        Status = WaitStatus.Canceled;
+        foreach (var childWait in ChildWaits)
+        {
+            childWait.Status = WaitStatus.Canceled;
+        }
+    }
+
+    public void CopyFromOld(Wait oldWait)
+    {
+        FunctionState = oldWait.FunctionState;
+        FunctionStateId = oldWait.FunctionStateId;
+        RequestedByFunction = oldWait.RequestedByFunction;
+        RequestedByFunctionId = oldWait.RequestedByFunctionId;
+    }
 }

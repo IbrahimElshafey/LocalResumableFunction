@@ -1,4 +1,7 @@
-﻿using LocalResumableFunction.InOuts;
+﻿using System.Linq.Expressions;
+using LocalResumableFunction.Helpers;
+using LocalResumableFunction.InOuts;
+using Microsoft.EntityFrameworkCore;
 
 namespace LocalResumableFunction;
 
@@ -11,23 +14,28 @@ internal partial class ResumableFunctionHandler
         switch (newWait)
         {
             case MethodWait methodWait:
-                await SingleWaitRequested(methodWait);
+                await MethodWaitRequested(methodWait);
                 break;
             case WaitsGroup manyWaits:
-                await ManyWaitsRequested(manyWaits);
+                await WaitsGroupRequested(manyWaits);
                 break;
             case FunctionWait functionWait:
                 await FunctionWaitRequested(functionWait);
                 break;
-            //case ManyFunctionsWait manyFunctionsWait:
-            //    await ManyFunctionsWaitRequested(manyFunctionsWait);
-            //    break;
+            case TimeWait timeWait:
+                await TimeWaitRequested(timeWait);
+                break;
+                //case ManyFunctionsWait manyFunctionsWait:
+                //    await ManyFunctionsWaitRequested(manyFunctionsWait);
+                //    break;
         }
 
         return false;
     }
 
-    private async Task SingleWaitRequested(MethodWait methodWait)
+
+
+    private async Task MethodWaitRequested(MethodWait methodWait)
     {
         var waitMethodIdentifier = await _metodIdsRepo.GetMethodIdentifier(methodWait.WaitMethodIdentifier);
         methodWait.WaitMethodIdentifier = waitMethodIdentifier;
@@ -37,7 +45,7 @@ internal partial class ResumableFunctionHandler
         await _waitsRepository.AddWait(methodWait);
     }
 
-    private async Task ManyWaitsRequested(WaitsGroup manyWaits)
+    private async Task WaitsGroupRequested(WaitsGroup manyWaits)
     {
         for (var index = 0; index < manyWaits.ChildWaits.Count; index++)
         {
@@ -52,35 +60,6 @@ internal partial class ResumableFunctionHandler
 
         await _waitsRepository.AddWait(manyWaits);
     }
-
-    //private async Task ManyFunctionsWaitRequested(ManyFunctionsWait manyFunctionsWaits)
-    //{
-    //    foreach (var functionWait in manyFunctionsWaits.WaitingFunctions)
-    //    {
-    //        functionWait.Status = WaitStatus.Waiting;
-    //        functionWait.FunctionState = manyFunctionsWaits.FunctionState;
-    //        functionWait.RequestedByFunctionId = manyFunctionsWaits.RequestedByFunctionId;
-    //        functionWait.StateAfterWait = manyFunctionsWaits.StateAfterWait;
-    //        functionWait.ParentWaitId = manyFunctionsWaits.ParentWaitId;
-    //    }
-
-    //    await _waitsRepository.AddWait(manyFunctionsWaits);
-    //    await _context.SaveChangesAsync();
-
-    //    foreach (var functionWait in manyFunctionsWaits.WaitingFunctions)
-    //    {
-    //        try
-    //        {
-    //            await FunctionWaitRequested(functionWait);
-    //            await _context.SaveChangesAsync();
-    //        }
-    //        catch (Exception e)
-    //        {
-    //            Console.WriteLine(e);
-    //            throw;
-    //        }
-    //    }
-    //}
 
     private async Task FunctionWaitRequested(FunctionWait functionWait)
     {
@@ -112,7 +91,40 @@ internal partial class ResumableFunctionHandler
             await GenericWaitRequested(functionWait.FirstWait);
     }
 
-    
+    private async Task TimeWaitRequested(TimeWait timeWait)
+    {
+        var methodWait = new MethodWait<string, string>(new LocalRegisteredMethods().TimeMatched);
+        var functionType = typeof(Func<,,>)
+            .MakeGenericType(
+                typeof(string),
+                typeof(string),
+                typeof(bool));
+        var inputParameter = Expression.Parameter(typeof(string), "input");
+        var outputParameter = Expression.Parameter(typeof(string), "output");
+        methodWait.SetDataExpression = Expression.Lambda(
+            functionType,
+            timeWait.SetDataExpression.Body,
+            inputParameter,
+            outputParameter);
+        methodWait.MatchIfExpression = Expression.Lambda(
+            functionType,
+            Expression.Equal(outputParameter, Expression.Constant(timeWait.UniqueMatchId)),
+            inputParameter,
+            outputParameter);
+        methodWait.CurrentFunction = timeWait.CurrentFunction;
+#pragma warning disable CS4014
+        Task.Delay(timeWait.TimeToWait)
+            .ContinueWith(_ => new LocalRegisteredMethods().TimeMatched(timeWait.UniqueMatchId));
+#pragma warning restore CS4014
+        //_context.Waits.Remove(timeWait);
+        _context.Entry(timeWait).State = EntityState.Detached;
+        methodWait.ParentWaitId = timeWait.ParentWaitId;
+        methodWait.FunctionState = timeWait.FunctionState;
+        methodWait.RequestedByFunctionId = timeWait.RequestedByFunctionId;
+        methodWait.StateBeforeWait = timeWait.StateBeforeWait;
+        methodWait.StateAfterWait = timeWait.StateAfterWait;
+        await MethodWaitRequested(methodWait);
+    }
 
     private bool Validate(Wait nextWait)
     {

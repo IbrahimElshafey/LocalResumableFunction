@@ -21,6 +21,7 @@ internal class FunctionDataContext : DbContext
     public DbSet<Wait> Waits { get; set; }
     public DbSet<MethodWait> MethodWaits { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
+    public DbSet<TimeWait> TimeWaits { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -87,6 +88,9 @@ internal class FunctionDataContext : DbContext
         modelBuilder.Entity<MethodWait>()
             .Property(mw => mw.SetDataExpressionValue)
             .HasColumnName(nameof(MethodWait.SetDataExpressionValue));
+
+        modelBuilder.Ignore<ReplayWait>();
+        //modelBuilder.Ignore<TimeWait>();
 
         base.OnModelCreating(modelBuilder);
     }

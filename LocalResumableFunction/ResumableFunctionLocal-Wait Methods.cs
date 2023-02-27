@@ -49,7 +49,7 @@ public abstract partial class ResumableFunctionLocal
         return result;
     }
 
-    protected WaitsGroup WaitGroup(string name, params Wait[] waits)
+    protected WaitsGroup Wait(string name, params Wait[] waits)
     {
         var result = new WaitsGroup
         {

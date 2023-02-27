@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
+using Microsoft.EntityFrameworkCore;
 
 namespace LocalResumableFunction;
 
@@ -9,7 +10,7 @@ internal partial class ResumableFunctionHandler
     private async Task<bool> ReplayWait(ReplayWait replayWait)
     {
         Debugger.Launch();
-        var oldWait = await GetOldWait(replayWait);
+        var oldWait = await GetOldWaitForReplay(replayWait);
         if (oldWait.IsFail)
         {
             WriteMessage($"Replay failed, replay is ({replayWait})");
@@ -17,6 +18,9 @@ internal partial class ResumableFunctionHandler
         }
 
         var waitToReplay = oldWait.WaitToReplay!;
+        waitToReplay.FunctionState = replayWait.FunctionState;
+        //waitToReplay.RequestedByFunction = replayWait.RequestedByFunction;
+        //waitToReplay.RequestedByFunctionId = replayWait.RequestedByFunctionId;
         switch (replayWait.ReplayType)
         {
             case ReplayType.GoAfter:
@@ -49,7 +53,15 @@ internal partial class ResumableFunctionHandler
         //oldCompletedWait.Status = WaitStatus.Canceled;
         var goBefore = await GoBefore(oldCompletedWait);
         if (goBefore.HasWait)
-            await GenericWaitRequested(goBefore.Runner.Current);
+        {
+            var nextWaitAfterReplay = goBefore.Runner.Current;
+            nextWaitAfterReplay.CopyFromOld(oldCompletedWait);
+            await GenericWaitRequested(nextWaitAfterReplay);
+        }
+        else
+        {
+            WriteMessage("Replay Go Before found no waits!!");
+        }
     }
 
     private async Task ReplayGoBeforeWithNewMatch(ReplayWait replayWait, Wait waitToReplay)
@@ -89,27 +101,31 @@ internal partial class ResumableFunctionHandler
         var hasWait = await runner.MoveNextAsync();
         if (hasWait)
         {
-            runner.Current.Name += "-Replay";
-            runner.Current.IsFirst = false;
+            var waitToReplay = runner.Current;
+            waitToReplay.Name += "-Replay";
+            waitToReplay.IsFirst = false;
         }
 
         return (runner, hasWait);
     }
 
-    private async Task<(bool IsFail, Wait WaitToReplay)> GetOldWait(ReplayWait replayWait)
+    private async Task<(bool IsFail, Wait WaitToReplay)> GetOldWaitForReplay(ReplayWait replayWait)
     {
         var functionOldWaits =
             await _waitsRepository.GetFunctionInstanceWaits(replayWait.RequestedByFunctionId,
                 replayWait.FunctionState.Id);
         var waitToReplay = functionOldWaits
-            .FirstOrDefault(x => x.Status == WaitStatus.Completed && x.Name == replayWait.Name && x.IsNode);
+            .FirstOrDefault(x => x.Name == replayWait.Name && x.IsNode);
+
         if (waitToReplay == null)
         {
             WriteMessage(
-                $"Can't replay not exiting wait [{replayWait.Name}] in function [{replayWait.RequestedByFunction.MethodName}].");
+                $"Can't replay not exiting wait [{replayWait.Name}] in function [{replayWait?.RequestedByFunction?.MethodName}].");
             return (true, null);
         }
 
+        waitToReplay.ChildWaits = await _context.Waits.Where(x => x.ParentWaitId == waitToReplay.Id).ToListAsync();
+        waitToReplay.Cancel();
         //skip active waits after replay
         //todo:[Critical] this may cause a problem 
         //wait may be a group and code will cancel children
@@ -117,6 +133,7 @@ internal partial class ResumableFunctionHandler
             .Where(x => x.Id > waitToReplay.Id && x.Status == WaitStatus.Waiting)
             .ToList()
             .ForEach(x => x.Status = WaitStatus.Canceled);
+        await _context.SaveChangesAsync();
         return (false, waitToReplay);
     }
 }
