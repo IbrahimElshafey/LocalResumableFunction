@@ -103,4 +103,9 @@ internal class FunctionDataContext : DbContext
             .Properties<Type>()
             .HaveConversion<TypeToStringConverter>();
     }
+
+    public bool IsInDb(object methodId)
+    {
+        return Entry(methodId).State != EntityState.Detached;
+    }
 }

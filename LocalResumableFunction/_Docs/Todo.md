@@ -1,4 +1,9 @@
 ﻿# Todo
+* Validate waits
+	* Wait many duplicate same method wait warnning
+* No inheritance from resumable local function
+* Wait name can't duplicate in same method
+
 * Centralize state database
 	* Use many database providers [Postgres,Sql Server,Sqlite]
 	* Use Database as a service with OData implementation
@@ -11,9 +16,7 @@
 		* MethodSignature [as method sigature itself]
 	* External method will be pushed in custom way
 
-* Validate waits
-* No inheritance from resumable local function
-* Wait name can't duplicate in same method
+
 
 * Remove uniqe for method hash
 * Run in another process

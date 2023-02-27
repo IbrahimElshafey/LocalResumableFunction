@@ -37,13 +37,12 @@ internal partial class ResumableFunctionHandler
         {
             try
             {
-
-                var methodId = await _metodIdsRepo.GetMethodIdentifier(pushedMethod.MethodInfo);
-                if (methodId.ExistInDb is false)
+                var methodId = await _metodIdsRepo.GetMethodIdentifier(pushedMethod.MethodIdentifier);
+                if (_context.IsInDb(methodId) is false)
                     //_context.MethodIdentifiers.Add(methodId.MethodIdentifier);
                     throw new Exception(
-                        $"Method [{pushedMethod.MethodInfo.Name}] is not registered in current database as [WaitMethod].");
-                pushedMethod.MethodIdentifier = methodId.MethodIdentifier;
+                        $"Method [{pushedMethod.MethodIdentifier.MethodName}] is not registered in current database as [WaitMethod].");
+                pushedMethod.MethodIdentifier = methodId;
                 var matchedWaits = await _waitsRepository.GetMatchedWaits(pushedMethod);
                 foreach (var matchedWait in matchedWaits)
                 {
