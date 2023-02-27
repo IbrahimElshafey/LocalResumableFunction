@@ -1,4 +1,8 @@
 ﻿# Todo
+* TimeWait saved to database problem
+* Use hangfire to 
+	* Queue pushed events requests [Fire and forget]
+	* Implement provider for time based events
 * Validate waits
 	* Wait many duplicate same method wait warnning
 * No inheritance from resumable local function
@@ -7,6 +11,7 @@
 * Centralize state database
 	* Use many database providers [Postgres,Sql Server,Sqlite]
 	* Use Database as a service with OData implementation
+
 * Wait for external method
 	* Add interface with methods
 	* Mark intefaces with [WaitExternalMethod] attribute that takes
@@ -28,9 +33,7 @@
 * Save function state all fields
 * Find fast and best object serializer
 * MoveFunctionToRecycleBin
-* Use hangfire to 
-	* Queue pushed events requests [Fire and forget]
-	* Implement provider for time based events
+
 * Parameter check lib use
 * Add UI Project
 
