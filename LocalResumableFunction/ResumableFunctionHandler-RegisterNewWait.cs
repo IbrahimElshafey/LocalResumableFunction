@@ -118,6 +118,7 @@ internal partial class ResumableFunctionHandler
 #pragma warning restore CS4014
         //_context.Waits.Remove(timeWait);
         _context.Entry(timeWait).State = EntityState.Detached;
+        methodWait.ParentWait = timeWait.ParentWait;
         methodWait.ParentWaitId = timeWait.ParentWaitId;
         methodWait.FunctionState = timeWait.FunctionState;
         methodWait.RequestedByFunctionId = timeWait.RequestedByFunctionId;
