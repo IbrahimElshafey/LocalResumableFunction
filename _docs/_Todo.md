@@ -1,5 +1,7 @@
 ﻿# Todo
-* #TimeMatched# Parent ID
+* Add CreationDate to entities
+	* RowVersion for optemistic lock
+	* Lock State Row aftr
 * Use hangfire to 
 	* Queue pushed events requests [Fire and forget]
 	* Implement provider for time based events
