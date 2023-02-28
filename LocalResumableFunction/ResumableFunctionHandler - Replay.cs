@@ -103,6 +103,7 @@ internal partial class ResumableFunctionHandler
         {
             var waitToReplay = runner.Current;
             waitToReplay.Name += "-Replay";
+            waitToReplay.IsReplay = true;
             waitToReplay.IsFirst = false;
         }
 

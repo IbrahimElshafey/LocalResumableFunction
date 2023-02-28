@@ -93,7 +93,7 @@ internal partial class ResumableFunctionHandler
 
     private async Task TimeWaitRequested(TimeWait timeWait)
     {
-        var methodWait = new MethodWait<string, string>(new LocalRegisteredMethods().TimeMatched);
+        var methodWait = new MethodWait<string, string>(new LocalRegisteredMethods().TimeWait);
         var functionType = typeof(Func<,,>)
             .MakeGenericType(
                 typeof(string),
@@ -114,7 +114,7 @@ internal partial class ResumableFunctionHandler
         methodWait.CurrentFunction = timeWait.CurrentFunction;
 #pragma warning disable CS4014
         Task.Delay(timeWait.TimeToWait)
-            .ContinueWith(_ => new LocalRegisteredMethods().TimeMatched(timeWait.UniqueMatchId));
+            .ContinueWith(_ => new LocalRegisteredMethods().TimeWait(timeWait.UniqueMatchId));
 #pragma warning restore CS4014
         //_context.Waits.Remove(timeWait);
         _context.Entry(timeWait).State = EntityState.Detached;
@@ -123,6 +123,7 @@ internal partial class ResumableFunctionHandler
         methodWait.RequestedByFunctionId = timeWait.RequestedByFunctionId;
         methodWait.StateBeforeWait = timeWait.StateBeforeWait;
         methodWait.StateAfterWait = timeWait.StateAfterWait;
+        methodWait.ExtraData = new { timeWait.TimeToWait, timeWait.UniqueMatchId };
         await MethodWaitRequested(methodWait);
     }
 

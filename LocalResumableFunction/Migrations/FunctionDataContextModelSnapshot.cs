@@ -85,6 +85,9 @@ namespace LocalResumableFunction.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ExtraData")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("FunctionStateId")
                         .HasColumnType("INTEGER");
 
@@ -92,6 +95,9 @@ namespace LocalResumableFunction.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsNode")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsReplay")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")

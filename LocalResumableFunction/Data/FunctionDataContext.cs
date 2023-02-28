@@ -77,6 +77,10 @@ internal class FunctionDataContext : DbContext
             .Property(x => x.StateObject)
             .HasConversion<ObjectToJsonConverter>();
 
+        modelBuilder.Entity<Wait>()
+            .Property(x => x.ExtraData)
+            .HasConversion<ObjectToJsonConverter>();
+
         modelBuilder.Entity<MethodWait>()
             .Property(mw => mw.MatchIfExpressionValue)
             .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));

@@ -19,6 +19,8 @@ public abstract class Wait
     public int StateBeforeWait { get; internal set; }
     public int StateAfterWait { get; internal set; }
     public bool IsNode { get; internal set; }
+    public bool IsReplay { get; internal set; }
+    public object ExtraData { get; internal set; }
 
     public WaitType WaitType { get; internal set; }
 

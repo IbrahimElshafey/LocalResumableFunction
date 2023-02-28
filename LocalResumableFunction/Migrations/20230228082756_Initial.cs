@@ -62,6 +62,8 @@ namespace LocalResumableFunction.Migrations
                     StateBeforeWait = table.Column<int>(type: "INTEGER", nullable: false),
                     StateAfterWait = table.Column<int>(type: "INTEGER", nullable: false),
                     IsNode = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsReplay = table.Column<bool>(type: "INTEGER", nullable: false),
+                    ExtraData = table.Column<string>(type: "TEXT", nullable: true),
                     WaitType = table.Column<int>(type: "INTEGER", nullable: false),
                     FunctionStateId = table.Column<int>(type: "INTEGER", nullable: false),
                     RequestedByFunctionId = table.Column<int>(type: "INTEGER", nullable: false),

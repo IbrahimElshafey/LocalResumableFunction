@@ -9,7 +9,7 @@ namespace LocalResumableFunction.Helpers
     internal class LocalRegisteredMethods
     {
         [WaitMethod]
-        internal string TimeMatched(string timeWaitId)
+        internal string TimeWait(string timeWaitId)
         {
             return timeWaitId;
         }
