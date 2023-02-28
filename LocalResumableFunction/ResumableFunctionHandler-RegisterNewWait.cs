@@ -54,7 +54,7 @@ internal partial class ResumableFunctionHandler
             wait.FunctionState = manyWaits.FunctionState;
             wait.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
             wait.StateAfterWait = manyWaits.StateAfterWait;
-            wait.ParentWaitId = manyWaits.ParentWaitId;
+            wait.ParentWait = manyWaits;
             await GenericWaitRequested(wait);
         }
 
@@ -119,7 +119,6 @@ internal partial class ResumableFunctionHandler
         //_context.Waits.Remove(timeWait);
         _context.Entry(timeWait).State = EntityState.Detached;
         methodWait.ParentWait = timeWait.ParentWait;
-        methodWait.ParentWaitId = timeWait.ParentWaitId;
         methodWait.FunctionState = timeWait.FunctionState;
         methodWait.RequestedByFunctionId = timeWait.RequestedByFunctionId;
         methodWait.StateBeforeWait = timeWait.StateBeforeWait;
