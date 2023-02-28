@@ -141,7 +141,6 @@ internal class Scanner
 
     private async Task RegisterMethodWaitsIfExist(Type type)
     {
-        //Debugger.Launch();
         var methodWaits = type
             .GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
             .Where(method =>

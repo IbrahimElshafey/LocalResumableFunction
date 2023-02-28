@@ -114,7 +114,8 @@ public abstract class Wait
         Status = WaitStatus.Canceled;
         foreach (var childWait in ChildWaits)
         {
-            childWait.Status = WaitStatus.Canceled;
+            if (childWait.Status == WaitStatus.Waiting)
+                childWait.Status = WaitStatus.Canceled;
         }
     }
 

@@ -7,14 +7,13 @@ namespace LocalResumableFunction;
 
 internal partial class ResumableFunctionHandler
 {
-    private async Task<bool> ReplayWait(ReplayWait replayWait)
+    private async Task ReplayWait(ReplayWait replayWait)
     {
-        Debugger.Launch();
         var oldWait = await GetOldWaitForReplay(replayWait);
         if (oldWait.IsFail)
         {
             WriteMessage($"Replay failed, replay is ({replayWait})");
-            return false;
+            return;
         }
 
         var waitToReplay = oldWait.WaitToReplay!;
@@ -36,8 +35,6 @@ internal partial class ResumableFunctionHandler
                 WriteMessage("ReplayWait type not defined.");
                 break;
         }
-
-        return true;
     }
 
 

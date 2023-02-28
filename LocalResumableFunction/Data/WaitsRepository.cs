@@ -29,7 +29,6 @@ internal class WaitsRepository : RepositoryBase
 
     public async Task<List<MethodWait>> GetMatchedWaits(PushedMethod pushedMethod)
     {
-        Debugger.Launch();
         var matchedWaits = new List<MethodWait>();
         var databaseWaits =
             await _context

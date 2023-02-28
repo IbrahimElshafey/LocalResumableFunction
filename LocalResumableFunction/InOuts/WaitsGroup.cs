@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using LocalResumableFunction.Helpers;
 
@@ -60,7 +61,6 @@ public class WaitsGroup : Wait
 
     public Wait When(Expression<Func<WaitsGroup, bool>> matchCountFilter)
     {
-        //Debugger.Launch();
         WaitType = WaitType.GroupWaitWithExpression;
         var assembly = CurrentFunction?.GetType().Assembly;
         if (assembly != null)
