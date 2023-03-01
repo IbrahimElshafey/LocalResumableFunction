@@ -1,10 +1,13 @@
 ﻿# Todo
-* Add CreationDate to entities
-	* RowVersion for optemistic lock
-	* Lock State Row aftr
+* Replay GoTo
+* Replay NewMatches
+* Add 
+	* CreationDate
+	* IsLocked for optemistic lock
 * Use hangfire to 
 	* Queue pushed events requests [Fire and forget]
-	* Implement provider for time based events
+	* Call time based events
+	* Queue matched waits for same state
 * Validate waits
 	* Wait many duplicate same method wait warnning
 * No inheritance from resumable local function

@@ -19,7 +19,7 @@ public abstract partial class ResumableFunctionLocal
     }
 
     /// <summary>
-    ///     Go back to code before the the wait and re-wait it again.
+    ///     Go back to code before the wait and re-wait it again.
     /// </summary>
     protected ReplayWait GoBackBefore(string name)
     {
@@ -32,7 +32,7 @@ public abstract partial class ResumableFunctionLocal
     }
 
     /// <summary>
-    ///     Go back to code before the the wait and re-wait it again with new match condition.
+    ///     Go back to code before the wait and re-wait it again with new match condition.
     /// </summary>
     protected ReplayWait GoBackBefore<TInput, TOutput>(string name,
         Expression<Func<TInput, TOutput, bool>> newMatchExpression)
@@ -46,18 +46,24 @@ public abstract partial class ResumableFunctionLocal
         };
     }
 
+    /// <summary>
+    ///     Go back to wait and re-wait it again.
+    /// </summary>
     protected ReplayWait GoBackTo(string name)
     {
         return new ReplayWait { Name = name, ReplayType = ReplayType.GoTo };
     }
 
+    /// <summary>
+    ///     Go back to wait and re-wait it again with new match condition.
+    /// </summary>
     protected ReplayWait GoBackTo<TInput, TOutput>(string name,
         Expression<Func<TInput, TOutput, bool>> newMatchExpression)
     {
         return new ReplayWait
         {
             Name = name,
-            ReplayType = ReplayType.GoBeforeWithNewMatch,
+            ReplayType = ReplayType.GoToWithNewMatch,
             MatchExpression = newMatchExpression,
             CurrentFunction = this,
         };

@@ -122,6 +122,7 @@ internal partial class ResumableFunctionHandler
             return (true, null);
         }
 
+        //Load child waits
         waitToReplay.ChildWaits = await _context.Waits.Where(x => x.ParentWaitId == waitToReplay.Id).ToListAsync();
         waitToReplay.Cancel();
         //skip active waits after replay
