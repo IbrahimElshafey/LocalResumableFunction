@@ -18,6 +18,8 @@ internal class MethodIdentifierRepository : RepositoryBase
 
         var inDb = existInDb.Id > 0;
         _context.Entry(methodId).State = EntityState.Detached;
+        if(inDb)
+            _context.Entry(existInDb).State = EntityState.Unchanged;
         return (existInDb, inDb);
     }
 
@@ -39,7 +41,10 @@ internal class MethodIdentifierRepository : RepositoryBase
                 x.MethodName == methodId.MethodName);
 
         if (existInDb is not null)
+        {
+            _context.Entry(existInDb).State = EntityState.Unchanged;
             _context.Entry(methodId).State = EntityState.Detached;
+        }
         return existInDb ?? methodId;
     }
 }

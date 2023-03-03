@@ -19,20 +19,31 @@ public class Program
         };
         Console.WriteLine("Test App RUNNING.");
 
-        //await TestWaitMany();
-        //await TestSubFunctionCall();
-        //await TestReplayGoBackAfter();
-        //await TestReplayGoBackBeforeNewMatch();
+        await TestWaitMany();
+        await TestSubFunctionCall();
+        await TestReplayGoBackAfter();
+        await TestReplayGoBackBeforeNewMatch();
         await TestReplayGoBackTo();
 
 
-        //await TestWaitManyFunctions();
-        //await TestLoops();
-        //await TestManyWaitsTypeInGroup();
-        //await TestTimeWait();
-        //await TestSameEventAgain();
+        await TestWaitManyFunctions();
+        await TestLoops();
+        await TestManyWaitsTypeInGroup();
+        await TestTimeWait();
+        await TestSameEventAgain();
 
-        //await TestParallelScenarios();
+
+        //await Task.WhenAll(
+        //    TestWaitMany(),
+        //    TestSubFunctionCall(),
+        //    TestReplayGoBackAfter(),
+        //    TestReplayGoBackBeforeNewMatch(),
+        //    TestReplayGoBackTo(),
+        //    TestWaitManyFunctions(),
+        //    TestLoops(),
+        //    TestManyWaitsTypeInGroup(),
+        //    TestTimeWait(),
+        //    TestSameEventAgain());
         Console.ReadLine();
     }
 
@@ -71,21 +82,6 @@ public class Program
     }
 
 
-    private static async Task TestParallelScenarios()
-    {
-        await Task.WhenAll(
-            TestSubFunctionCall(),
-            TestReplayGoBackAfter(),
-            TestReplayGoBackBeforeNewMatch(),
-            TestWaitMany(),
-            TestWaitManyFunctions());
-        //await TestSubFunctionCall();
-        //await TestReplayGoBackAfter();
-        //await TestReplayGoBackBeforeNewMatch();
-
-        //await TestWaitMany();
-        //await TestWaitManyFunctions();
-    }
 
     private static async Task TestWaitManyFunctions()
     {
