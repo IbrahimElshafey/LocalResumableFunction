@@ -13,6 +13,11 @@ public class RewriteMatchExpression : ExpressionVisitor
     {
         if (wait?.MatchIfExpression == null)
             return;
+        if (wait.MatchIfExpression?.Parameters.Count == 3)
+        {
+            Result = wait.MatchIfExpression;
+            return;
+        }
         //  .If((input, output) => output == true)
         //   return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrentFunction);
         _wait = wait;

@@ -23,17 +23,29 @@ public class Program
         //await TestSubFunctionCall();
         //await TestReplayGoBackAfter();
         //await TestReplayGoBackBeforeNewMatch();
+        await TestReplayGoBackTo();
 
 
         //await TestWaitManyFunctions();
         //await TestLoops();
         //await TestManyWaitsTypeInGroup();
-        await TestTimeWait();
+        //await TestTimeWait();
+        //await TestSameEventAgain();
 
         //await TestParallelScenarios();
         Console.ReadLine();
     }
 
+    private static async Task TestSameEventAgain()
+    {
+        
+        await RegisterResumableFunction(typeof(WaitSameEventAgain), nameof(WaitSameEventAgain.Test_WaitSameEventAgain));
+        var example = new WaitSameEventAgain();
+        var currentProject = ProjectApprovalExample.GetCurrentProject();
+        await example.ProjectSubmitted(currentProject);
+        example.ManagerOneApproveProject(new ApprovalDecision(currentProject.Id, false));
+        example.ManagerOneApproveProject(new ApprovalDecision(currentProject.Id, true));
+    }
     private static async Task TestTimeWait()
     {
         await RegisterResumableFunction(typeof(TestTimeExample), nameof(TestTimeExample.TimeWaitTest));
@@ -129,11 +141,20 @@ public class Program
         example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
     }
 
+    private static async Task TestReplayGoBackTo()
+    {
+        await RegisterResumableFunction(typeof(ReplayGoBackToExample), nameof(ReplayGoBackToExample.TestReplay_GoBackTo));
+        var example = new ReplayGoBackToExample();
+        var project = ProjectApprovalExample.GetCurrentProject();
+        await example.ProjectSubmitted(project);
+        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
+        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
+    }
     private static async Task TestReplayGoBackAfter()
     {
         await RegisterResumableFunction(typeof(ReplayGoBackAfterExample), nameof(ReplayGoBackAfterExample.TestReplay_GoBackAfter));
         var example = new ReplayGoBackAfterExample();
-        Project project = ProjectApprovalExample.GetCurrentProject();
+        var project = ProjectApprovalExample.GetCurrentProject();
         await example.ProjectSubmitted(project);
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));

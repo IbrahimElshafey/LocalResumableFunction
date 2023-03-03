@@ -12,11 +12,16 @@ public class RewriteSetDataExpression : ExpressionVisitor
 
     public RewriteSetDataExpression(MethodWait wait)
     {
+        if (wait?.SetDataExpression?.Parameters.Count == 3)
+        {
+            Result = wait.SetDataExpression;
+            return;
+        }
         //  .SetData((input, output) => Result == output);
         //   setDataExpression.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, currentWait.CurrentFunction);
         _wait = wait;
         _functionInstanceArg = Parameter(wait.CurrentFunction.GetType(), "functionInstance");
-
+      
         var updatedBoy = (LambdaExpression)Visit(wait.SetDataExpression);
         for (var i = 0; i < setValuesExpressions.Count; i++)
         {

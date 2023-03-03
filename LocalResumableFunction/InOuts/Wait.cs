@@ -43,7 +43,7 @@ public abstract class Wait
     /// </summary>
     internal Wait ParentWait { get; set; }
 
-    internal List<Wait> ChildWaits { get; set; }
+    internal List<Wait> ChildWaits { get; set; } = new();
 
     internal int? ParentWaitId { get; set; }
 
@@ -77,10 +77,10 @@ public abstract class Wait
 
     internal async Task<Wait> GetNextWait()
     {
-        if (IsNode)
-        {
-            Console.WriteLine($"Get next wait IsNode:{IsNode},Name:{Name}");
-        }
+        //if (IsNode)
+        //{
+        //    Console.WriteLine($"Get next wait IsNode:{IsNode},Name:{Name}");
+        //}
         var functionRunner = new FunctionRunner(this);
         if (functionRunner.ResumableFunctionExist is false)
         {
@@ -109,15 +109,7 @@ public abstract class Wait
 
     public virtual bool IsFinished() => Status == WaitStatus.Completed;
 
-    public void Cancel()
-    {
-        Status = WaitStatus.Canceled;
-        foreach (var childWait in ChildWaits)
-        {
-            if (childWait.Status == WaitStatus.Waiting)
-                childWait.Status = WaitStatus.Canceled;
-        }
-    }
+
 
     public void CopyFromOld(Wait oldWait)
     {
@@ -125,5 +117,68 @@ public abstract class Wait
         FunctionStateId = oldWait.FunctionStateId;
         RequestedByFunction = oldWait.RequestedByFunction;
         RequestedByFunctionId = oldWait.RequestedByFunctionId;
+    }
+
+    public Wait DuplicateWait()
+    {
+        Wait result;
+        switch (this)
+        {
+            case MethodWait methodWait:
+                result = new MethodWait();
+                result.CopyMethod(methodWait, (MethodWait)result);
+                break;
+            case FunctionWait:
+                result = new FunctionWait();
+                break;
+            case WaitsGroup waitsGroup:
+                result = new WaitsGroup
+                {
+                    CountExpressionValue = waitsGroup.CountExpressionValue
+                };
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        result.CopyCommon(this);
+        CopyChildTree(result);
+        return result;
+
+        void CopyChildTree(Wait wait)
+        {
+            foreach (var childWait in wait.ChildWaits)
+            {
+                wait.ChildWaits.Add(childWait.DuplicateWait());
+                if (childWait.CanBeParent)
+                    CopyChildTree(childWait);
+            }
+        }
+    }
+
+    private void CopyMethod(MethodWait from, MethodWait to)
+    {
+        to.SetDataExpressionValue = from.SetDataExpressionValue;
+        to.MatchIfExpressionValue = from.MatchIfExpressionValue;
+        to.NeedFunctionStateForMatch = from.NeedFunctionStateForMatch;
+        to.WaitMethodIdentifierId = from.WaitMethodIdentifierId;
+        to.WaitMethodIdentifier = from.WaitMethodIdentifier;
+        to.LoadExpressions();
+    }
+
+    private void CopyCommon(Wait wait)
+    {
+        Name = wait.Name;
+        Status = wait.Status;
+        IsFirst = wait.IsFirst;
+        StateBeforeWait = wait.StateBeforeWait;
+        StateAfterWait = wait.StateAfterWait;
+        IsNode = wait.IsNode;
+        IsReplay = wait.IsReplay;
+        ExtraData = wait.ExtraData;
+        WaitType = wait.WaitType;
+        FunctionStateId = wait.FunctionStateId;
+        FunctionState = wait.FunctionState;
+        ParentWaitId = wait.ParentWaitId;
+        RequestedByFunctionId = wait.RequestedByFunctionId;
     }
 }

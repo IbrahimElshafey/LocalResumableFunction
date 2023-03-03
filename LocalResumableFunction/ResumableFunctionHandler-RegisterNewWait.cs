@@ -25,9 +25,9 @@ internal partial class ResumableFunctionHandler
             case TimeWait timeWait:
                 await TimeWaitRequested(timeWait);
                 break;
-                //case ManyFunctionsWait manyFunctionsWait:
-                //    await ManyFunctionsWaitRequested(manyFunctionsWait);
-                //    break;
+            case ReplayWait replayWait:
+                await ReplayWait(replayWait);
+                break;
         }
 
         return false;
@@ -86,7 +86,10 @@ internal partial class ResumableFunctionHandler
         functionWait.FirstWait.RequestedByFunctionId = methodIdentifier.MethodIdentifier.Id;
 
         if (functionWait.FirstWait is ReplayWait replayWait)
-            await ReplayWait(replayWait);//todo:review first wait is replay for what??
+        {
+            WriteMessage("First wait can't be replay wait");
+            //await ReplayWait(replayWait);//todo:review first wait is replay for what??
+        }
         else
             await GenericWaitRequested(functionWait.FirstWait);
     }

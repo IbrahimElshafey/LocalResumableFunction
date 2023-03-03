@@ -17,7 +17,7 @@ internal class MethodIdentifierRepository : RepositoryBase
         var existInDb = await GetMethodIdentifier(methodId);
 
         var inDb = existInDb.Id > 0;
-
+        _context.Entry(methodId).State = EntityState.Detached;
         return (existInDb, inDb);
     }
 

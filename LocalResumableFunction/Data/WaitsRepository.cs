@@ -23,6 +23,11 @@ internal class WaitsRepository : RepositoryBase
         {
             waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
         }
+        if (wait is MethodWait { WaitMethodIdentifierId: > 0 } methodWait)
+        {
+            //does this may cause a problem
+            methodWait.WaitMethodIdentifier = null;
+        }
         _context.Waits.Add(wait);
         return Task.CompletedTask;
     }
@@ -77,16 +82,13 @@ internal class WaitsRepository : RepositoryBase
         return result!;
     }
 
-    internal async Task<List<Wait>> GetFunctionInstanceWaits(int requestedByFunctionId, int functionStateId)
+    internal IQueryable<Wait> GetFunctionInstanceWaits(int requestedByFunctionId, int functionStateId)
     {
-        var result = await _context.Waits
+        return _context.Waits
             .OrderByDescending(x => x.Id)
             .Where(x =>
                 x.RequestedByFunctionId == requestedByFunctionId &&
-                x.FunctionStateId == functionStateId)
-            .ToListAsync();
-        //&& x.ParentWaitId == replayWait.ParentWaitId
-        return result!;
+                x.FunctionStateId == functionStateId);
     }
 
     internal Task<bool> FirstWaitExistInDb(Wait firstWait, MethodIdentifier methodIdentifier)
@@ -142,5 +144,39 @@ internal class WaitsRepository : RepositoryBase
         await _context.Waits
               .Where(x => x.FunctionStateId == stateId && x.Status == WaitStatus.Waiting)
               .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, status => WaitStatus.Canceled));
+    }
+
+    public async Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId)
+    {
+        var functionWaits =
+            await GetFunctionInstanceWaits(
+                    requestedByFunctionId,
+                    functionStateId)
+                .ToListAsync();
+
+        foreach (var wait in functionWaits)
+        {
+            if (wait.Status == WaitStatus.Waiting)
+                wait.Status = WaitStatus.Canceled;
+            await CancelSubWaits(wait.Id);
+        }
+    }
+
+    internal async Task<Wait> GetOldWaitForReplay(ReplayWait replayWait)
+    {
+        var waitToReplay =
+            await GetFunctionInstanceWaits(
+                    replayWait.RequestedByFunctionId,
+                    replayWait.FunctionState.Id)
+                .FirstOrDefaultAsync(x => x.Name == replayWait.Name && x.IsNode);
+
+        if (waitToReplay == null)
+        {
+            Console.WriteLine(
+                $"Can't replay not exiting wait [{replayWait.Name}] in function [{replayWait?.RequestedByFunction?.MethodName}].");
+            return null;
+        }
+        await _context.SaveChangesAsync();
+        return waitToReplay;
     }
 }
