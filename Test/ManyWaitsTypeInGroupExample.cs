@@ -16,15 +16,15 @@ internal class ManyWaitsTypeInGroupExample:ProjectApprovalExample
             Wait("Many waits types",
                 new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .If((input, output) => input.ProjectId == CurrentProject.Id)
-                    .SetData((input, output) => ManagerOneApproval == output),
+                    .SetData((input, output) => ManagerOneApproval == input.Decision),
                 Wait(
                     "Wait Manager Two and Four",
                     new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                         .If((input, output) => input.ProjectId == CurrentProject.Id)
-                        .SetData((input, output) => ManagerTwoApproval == output),
+                        .SetData((input, output) => ManagerTwoApproval == input.Decision),
                     new MethodWait<ApprovalDecision, bool>(ManagerFourApproveProject)
                         .If((input, output) => input.ProjectId == CurrentProject.Id)
-                        .SetData((input, output) => ManagerFourApproval == output)
+                        .SetData((input, output) => ManagerFourApproval == input.Decision)
                 ).All(),
                 Wait("Sub function Wait", ManagerThreeSubFunction));
         Success(nameof(ManyWaitsTypeInGroup));
@@ -40,11 +40,11 @@ internal class ManyWaitsTypeInGroupExample:ProjectApprovalExample
         yield return
             Wait<ApprovalDecision, bool>("Manager Three Approve Project", ManagerThreeApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval == output);
+                .SetData((input, output) => ManagerThreeApproval == input.Decision);
         yield return
             Wait<ApprovalDecision, bool>("Manager Three Approve Project", ManagerThreeApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval == output);
+                .SetData((input, output) => ManagerThreeApproval == input.Decision);
         WriteMessage("End ManagerThreeSubFunction");
     }
 }

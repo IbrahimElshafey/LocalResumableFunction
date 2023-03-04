@@ -24,45 +24,46 @@ public class MethodWait : Wait
     ///     The method that we wait to resume resumable function
     /// </summary>
     internal MethodIdentifier WaitMethodIdentifier { get; set; }
-    
+
     [NotMapped]
     internal MethodData MethodData { get; set; }
 
     internal int WaitMethodIdentifierId { get; set; }
-    
+
     [NotMapped]
     public object Input { get; set; }
 
     [NotMapped]
     public object Output { get; set; }
 
+    private Assembly FunctionAssembly => 
+        RequestedByFunction?.MethodInfo.DeclaringType.Assembly??
+        WaitMethodIdentifier?.MethodInfo.DeclaringType.Assembly;
+
     internal void SetExpressions()
     {
-        var assembly = WaitMethodIdentifier.MethodInfo.DeclaringType.Assembly;
         SetMatchExpression(MatchIfExpression);
         SetDataExpression = new RewriteSetDataExpression(this).Result;
         SetDataExpressionValue =
-            TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(SetDataExpression, assembly));
+            TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(SetDataExpression, FunctionAssembly));
     }
 
     internal void SetMatchExpression(LambdaExpression matchExpression)
     {
-        var assembly = WaitMethodIdentifier.MethodInfo.DeclaringType.Assembly;
         MatchIfExpression = matchExpression;
         MatchIfExpression = new RewriteMatchExpression(this).Result;
         MatchIfExpressionValue =
-            TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, assembly));
+            TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, FunctionAssembly));
     }
 
     internal void LoadExpressions()
     {
-        var assembly = WaitMethodIdentifier.MethodInfo.DeclaringType.Assembly;
         MatchIfExpression = (LambdaExpression)
             ExpressionToJsonConverter.JsonToExpression(
-                TextCompressor.DecompressString(MatchIfExpressionValue), assembly);
+                TextCompressor.DecompressString(MatchIfExpressionValue), FunctionAssembly);
         SetDataExpression = (LambdaExpression)
             ExpressionToJsonConverter.JsonToExpression(
-                TextCompressor.DecompressString(SetDataExpressionValue), assembly);
+                TextCompressor.DecompressString(SetDataExpressionValue), FunctionAssembly);
     }
 
     public void UpdateFunctionData()
@@ -121,5 +122,5 @@ public class MethodWait<TInput, TOutput> : MethodWait
         MatchIfExpression = value;
         return this;
     }
-    
+
 }

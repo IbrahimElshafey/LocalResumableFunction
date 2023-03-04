@@ -84,6 +84,7 @@ internal class WaitsRepository : RepositoryBase
     {
         return _context.Waits
             .OrderByDescending(x => x.Id)
+            .Include(x => x.RequestedByFunction)
             .Where(x =>
                 x.RequestedByFunctionId == requestedByFunctionId &&
                 x.FunctionStateId == functionStateId);

@@ -16,10 +16,10 @@ internal class TestWaitManyExample : ProjectApprovalExample
             "Wait three methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == output),
+                .SetData((input, output) => ManagerOneApproval == input.Decision),
             new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerTwoApproval == output),
+                .SetData((input, output) => ManagerTwoApproval == input.Decision),
             new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output)
@@ -40,13 +40,13 @@ internal class TestWaitManyExample : ProjectApprovalExample
             "Wait three methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == output),
+                .SetData((input, output) => ManagerOneApproval == input.Decision),
             new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerTwoApproval == output),
+                .SetData((input, output) => ManagerTwoApproval == input.Decision),
             new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval == output)
+                .SetData((input, output) => ManagerThreeApproval == input.Decision)
         ).When(x => x.CompletedCount == 2);
         WriteMessage("Two waits of three waits matched.");
         WriteMessage("WaitManyAndCountExpressionDefined ended.");

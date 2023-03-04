@@ -17,7 +17,7 @@ internal class TestTimeExample : ProjectApprovalExample
                 waitManagerOneApprovalInSeconds,
                 new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .If((input, output) => input.ProjectId == CurrentProject.Id)
-                    .SetData((input, output) => ManagerOneApproval == output),
+                    .SetData((input, output) => ManagerOneApproval == input.Decision),
                 Wait(TimeSpan.FromSeconds(10))
             .SetData(() => TimerMatched == true)
         ).First();

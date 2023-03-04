@@ -19,16 +19,16 @@ public class Program
         };
         Console.WriteLine("Test App RUNNING.");
 
-        await TestWaitMany();
-        await TestSubFunctionCall();
-        await TestReplayGoBackAfter();
-        await TestReplayGoBackBeforeNewMatch();
+        //await TestWaitMany();
+        //await TestSubFunctionCall();
+        //await TestReplayGoBackAfter();
+        //await TestReplayGoBackBeforeNewMatch();
         await TestReplayGoBackTo();
-        await TestWaitManyFunctions();
-        await TestLoops();
-        await TestManyWaitsTypeInGroup();
-        await TestTimeWait();
-        await TestSameEventAgain();
+        //await TestWaitManyFunctions();
+        //await TestLoops();
+        //await TestManyWaitsTypeInGroup();
+        //await TestTimeWait();
+        //await TestSameEventAgain();
 
 
         //await Task.WhenAll(
@@ -137,7 +137,8 @@ public class Program
 
     private static async Task TestReplayGoBackTo()
     {
-        await RegisterResumableFunction(typeof(ReplayGoBackToExample), nameof(ReplayGoBackToExample.TestReplay_GoBackTo));
+        //await RegisterResumableFunction(typeof(ReplayGoBackToExample), nameof(ReplayGoBackToExample.TestReplay_GoBackTo));
+        await RegisterResumableFunction(typeof(ReplayGoBackToExample), nameof(ReplayGoBackToExample.TestReplay_GoBackToGroup));
         var example = new ReplayGoBackToExample();
         var project = ProjectApprovalExample.GetCurrentProject();
         await example.ProjectSubmitted(project);

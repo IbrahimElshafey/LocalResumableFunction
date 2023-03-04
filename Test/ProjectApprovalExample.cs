@@ -51,10 +51,10 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
             "Wait two methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == output),
+                .SetData((input, output) => ManagerOneApproval == input.Decision),
             new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerTwoApproval == output)
+                .SetData((input, output) => ManagerTwoApproval == input.Decision)
         ).All();
         WriteMessage("Two waits matched");
     }
@@ -71,7 +71,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
                 .SetData((input, output) => CurrentProject == input),
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == output)
+                .SetData((input, output) => ManagerOneApproval == input.Decision)
         ).First();
         WriteMessage("One of two waits matched");
     }
@@ -95,21 +95,21 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
     public bool ManagerOneApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager One Approve Project with decision ({args.Decision})");
-        return true;
+        return args.Decision;
     }
 
     [WaitMethod]
     public bool ManagerTwoApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Two Approve Project with decision ({args.Decision})");
-        return true;
+        return args.Decision;
     }
 
     [WaitMethod]
     public bool ManagerThreeApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Three Approve Project with decision ({args.Decision})");
-        return true;
+        return args.Decision;
     }
 
 
@@ -117,7 +117,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
     public bool ManagerFourApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");
-        return true;
+        return args.Decision;
     }
 
     public bool AskManagerToApprove(int projectId)

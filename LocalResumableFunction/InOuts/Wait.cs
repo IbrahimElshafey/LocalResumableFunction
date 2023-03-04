@@ -141,20 +141,20 @@ public abstract class Wait
                 throw new ArgumentOutOfRangeException();
         }
         result.CopyCommon(this);
-        CopyChildTree(result);
+        CopyChildTree(this, result);
         return result;
-
-        void CopyChildTree(Wait wait)
+    }
+    private void CopyChildTree(Wait fromWait, Wait toWait)
+    {
+        for (var index = 0; index < fromWait.ChildWaits.Count; index++)
         {
-            foreach (var childWait in wait.ChildWaits)
-            {
-                wait.ChildWaits.Add(childWait.DuplicateWait());
-                if (childWait.CanBeParent)
-                    CopyChildTree(childWait);
-            }
+            var childWait = fromWait.ChildWaits[index];
+            var duplicateWait = childWait.DuplicateWait();
+            toWait.ChildWaits.Add(duplicateWait);
+            if (childWait.CanBeParent)
+                CopyChildTree(childWait, duplicateWait);
         }
     }
-
     private void CopyMethod(MethodWait from, MethodWait to)
     {
         to.SetDataExpressionValue = from.SetDataExpressionValue;
@@ -165,20 +165,21 @@ public abstract class Wait
         to.LoadExpressions();
     }
 
-    private void CopyCommon(Wait wait)
+    private void CopyCommon(Wait fromWait)
     {
-        Name = wait.Name;
-        Status = wait.Status;
-        IsFirst = wait.IsFirst;
-        StateBeforeWait = wait.StateBeforeWait;
-        StateAfterWait = wait.StateAfterWait;
-        IsNode = wait.IsNode;
-        IsReplay = wait.IsReplay;
-        ExtraData = wait.ExtraData;
-        WaitType = wait.WaitType;
-        FunctionStateId = wait.FunctionStateId;
-        FunctionState = wait.FunctionState;
-        ParentWaitId = wait.ParentWaitId;
-        RequestedByFunctionId = wait.RequestedByFunctionId;
+        Name = fromWait.Name;
+        Status = fromWait.Status;
+        IsFirst = fromWait.IsFirst;
+        StateBeforeWait = fromWait.StateBeforeWait;
+        StateAfterWait = fromWait.StateAfterWait;
+        IsNode = fromWait.IsNode;
+        IsReplay = fromWait.IsReplay;
+        ExtraData = fromWait.ExtraData;
+        WaitType = fromWait.WaitType;
+        FunctionStateId = fromWait.FunctionStateId;
+        FunctionState = fromWait.FunctionState;
+        ParentWaitId = fromWait.ParentWaitId;
+        RequestedByFunctionId = fromWait.RequestedByFunctionId;
+        RequestedByFunction = fromWait.RequestedByFunction;
     }
 }
