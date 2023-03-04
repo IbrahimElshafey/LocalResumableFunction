@@ -40,7 +40,7 @@ internal class WaitsRepository : RepositoryBase
                 .MethodWaits
                 .Include(x => x.RequestedByFunction)
                 .Where(x =>
-                    x.WaitMethodIdentifierId == pushedMethod.MethodIdentifier.Id &&
+                    x.WaitMethodIdentifierId == pushedMethod.MethodId &&
                     x.Status == WaitStatus.Waiting)
                 .ToListAsync();
         databaseWaits.ForEach(wait => wait.LoadExpressions());
@@ -55,12 +55,10 @@ internal class WaitsRepository : RepositoryBase
                     matchedWaits.Add(methodWait);
                     break;
                 case true:
-                    {
-                        await LoadWaitFunctionState(methodWait);
-                        if (methodWait.CheckMatch())
-                            matchedWaits.Add(methodWait);
-                        break;
-                    }
+                    await LoadWaitFunctionState(methodWait);
+                    if (methodWait.CheckMatch())
+                        matchedWaits.Add(methodWait);
+                    break;
             }
         }
 

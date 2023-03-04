@@ -37,9 +37,9 @@ internal partial class ResumableFunctionHandler
 
     private async Task MethodWaitRequested(MethodWait methodWait)
     {
-        var waitMethodIdentifier = await _metodIdsRepo.GetMethodIdentifier(methodWait.WaitMethodIdentifier);
-        methodWait.WaitMethodIdentifier = waitMethodIdentifier;
-        methodWait.WaitMethodIdentifierId = waitMethodIdentifier.Id;
+        var methodId = await _metodIdsRepo.GetMethodIdentifierFromDb(methodWait.MethodData);
+        methodWait.WaitMethodIdentifier = methodId;
+        methodWait.WaitMethodIdentifierId = methodId.Id;
         methodWait.SetExpressions();
 
         await _waitsRepository.AddWait(methodWait);
@@ -81,9 +81,9 @@ internal partial class ResumableFunctionHandler
         functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
         functionWait.FirstWait.ParentWait = functionWait;
         functionWait.FirstWait.ParentWaitId = functionWait.Id;
-        var methodIdentifier = await _metodIdsRepo.GetMethodIdentifier(functionWait.FunctionInfo);
-        functionWait.FirstWait.RequestedByFunction = methodIdentifier.MethodIdentifier;
-        functionWait.FirstWait.RequestedByFunctionId = methodIdentifier.MethodIdentifier.Id;
+        var methodId = await _metodIdsRepo.GetMethodIdentifierFromDb(new MethodData(functionWait.FunctionInfo));
+        functionWait.FirstWait.RequestedByFunction = methodId;
+        functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
 
         if (functionWait.FirstWait is ReplayWait replayWait)
         {

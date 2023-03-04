@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using LocalResumableFunction.InOuts;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,41 +11,17 @@ internal class MethodIdentifierRepository : RepositoryBase
     {
     }
 
-    public async Task<(MethodIdentifier MethodIdentifier, bool ExistInDb)> GetMethodIdentifier(MethodBase methodInfo)
+    public async Task<MethodIdentifier> GetMethodIdentifierFromDb(MethodData methodId)
     {
-        var methodId = new MethodIdentifier();
-        methodId.SetMethodInfo(methodInfo);
-        var existInDb = await GetMethodIdentifier(methodId);
-
-        var inDb = existInDb.Id > 0;
-        _context.Entry(methodId).State = EntityState.Detached;
-        if(inDb)
-            _context.Entry(existInDb).State = EntityState.Unchanged;
-        return (existInDb, inDb);
-    }
-
-    public async Task<MethodIdentifier> GetMethodIdentifier(MethodIdentifier methodId)
-    {
-        var inDb = await _context
+        var sameHashList = await _context
             .MethodIdentifiers
             .Where(x => x.MethodHash == methodId.MethodHash).ToListAsync();
-        if (inDb.Any() is false)
-            inDb = _context
-                .MethodIdentifiers
-                .Local
-                .Where(x => x.MethodHash == methodId.MethodHash).ToList();
-        var existInDb =
-            inDb.FirstOrDefault(x =>
+        var matchedInstance =
+            sameHashList.FirstOrDefault(x =>
                 x.MethodSignature == methodId.MethodSignature &&
                 x.AssemblyName == methodId.AssemblyName &&
                 x.ClassName == methodId.ClassName &&
                 x.MethodName == methodId.MethodName);
-
-        if (existInDb is not null)
-        {
-            _context.Entry(existInDb).State = EntityState.Unchanged;
-            _context.Entry(methodId).State = EntityState.Detached;
-        }
-        return existInDb ?? methodId;
+        return matchedInstance;
     }
 }

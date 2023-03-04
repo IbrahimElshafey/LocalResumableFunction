@@ -16,9 +16,8 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
         args.MethodExecutionTag = false;
         _pushedMethod = new PushedMethod
         {
-            MethodIdentifier = new MethodIdentifier()
+            MethodData = new MethodData(args.Method)
         };
-        _pushedMethod.MethodIdentifier.SetMethodInfo(args.Method);
         if (args.Arguments.Length > 0)
             _pushedMethod.Input = args.Arguments[0];
     }

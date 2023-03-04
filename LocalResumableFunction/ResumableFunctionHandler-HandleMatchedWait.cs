@@ -33,10 +33,8 @@ internal partial class ResumableFunctionHandler
                     break;
             }
 
-            var previousChild = currentWait;
             currentWait = parent;
-            if (currentWait != null)
-                currentWait.FunctionState = previousChild.FunctionState;
+
         } while (currentWait != null);
     }
 
@@ -75,7 +73,7 @@ internal partial class ResumableFunctionHandler
         nextWait.ParentWaitId = currentWait.ParentWaitId;
         nextWait.FunctionState = currentWait.FunctionState;
         nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
-       
+
         await GenericWaitRequested(nextWait);//base
         currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
         await _context.SaveChangesAsync();

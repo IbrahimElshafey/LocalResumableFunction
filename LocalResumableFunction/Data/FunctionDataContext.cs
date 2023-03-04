@@ -110,9 +110,19 @@ internal class FunctionDataContext : DbContext
             .Properties<Type>()
             .HaveConversion<TypeToStringConverter>();
     }
-
-    public bool IsInDb(object methodId)
+    
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
-        return Entry(methodId).State != EntityState.Detached;
+        var falseAddEntries = 
+            ChangeTracker
+            .Entries()
+            .Where(x => x.State == EntityState.Added && x.IsKeySet)
+            .ToList();
+
+        falseAddEntries
+            .ForEach(x => x.State = EntityState.Unchanged);
+
+
+        return base.SaveChangesAsync(cancellationToken);
     }
 }

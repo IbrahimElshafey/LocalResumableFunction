@@ -24,6 +24,9 @@ public class MethodWait : Wait
     ///     The method that we wait to resume resumable function
     /// </summary>
     internal MethodIdentifier WaitMethodIdentifier { get; set; }
+    
+    [NotMapped]
+    internal MethodData MethodData { get; set; }
 
     internal int WaitMethodIdentifierId { get; set; }
     
@@ -103,8 +106,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
             throw new Exception(
                 $"You must add attribute [{nameof(WaitMethodAttribute)}] to method {method.Name}");
 
-        WaitMethodIdentifier = new MethodIdentifier();
-        WaitMethodIdentifier.SetMethodInfo(method);
+        MethodData = new MethodData(method);
         Name = $"#{method.Name}#";
     }
 

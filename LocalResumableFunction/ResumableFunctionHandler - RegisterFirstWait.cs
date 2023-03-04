@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using LocalResumableFunction.Data;
 using LocalResumableFunction.InOuts;
+using Microsoft.EntityFrameworkCore;
 
 namespace LocalResumableFunction;
 
@@ -24,20 +25,20 @@ internal partial class ResumableFunctionHandler
 
                 await functionRunner.MoveNextAsync();
                 var firstWait = functionRunner.Current;
-                var methodId = await _metodIdsRepo.GetMethodIdentifier(resumableFunction);
-                if (await _waitsRepository.FirstWaitExistInDb(firstWait, methodId.MethodIdentifier))
+                var methodId = await _metodIdsRepo.GetMethodIdentifierFromDb(new MethodData(resumableFunction));
+                if (await _waitsRepository.FirstWaitExistInDb(firstWait, methodId))
                 {
                     WriteMessage("First wait already exist.");
                     return;
                 }
 
-                firstWait.RequestedByFunction = methodId.MethodIdentifier;
-                firstWait.RequestedByFunctionId = methodId.MethodIdentifier.Id;
+                firstWait.RequestedByFunction = methodId;
+                firstWait.RequestedByFunctionId = methodId.Id;
                 firstWait.IsFirst = true;
                 //firstWait.StateAfterWait = functionRunner.GetState();
                 firstWait.FunctionState = new ResumableFunctionState
                 {
-                    ResumableFunctionIdentifier = methodId.MethodIdentifier,
+                    ResumableFunctionIdentifier = methodId,
                     StateObject = classInstance
                 };
                 await GenericWaitRequested(firstWait);
@@ -50,6 +51,8 @@ internal partial class ResumableFunctionHandler
                 WriteMessage($"Error {e.Message}");
             }
     }
+
+
 
     private void WriteMessage(string message)
     {

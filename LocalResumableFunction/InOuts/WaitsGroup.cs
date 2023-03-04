@@ -28,7 +28,7 @@ public class WaitsGroup : Wait
         switch (WaitType)
         {
             case WaitType.GroupWaitAll:
-                isFinished = ChildWaits?.Any(x => x.Status == WaitStatus.Waiting) is false;
+                isFinished = ChildWaits?.All(x => x.Status == WaitStatus.Completed) is true;
                 break;
             case WaitType.GroupWaitFirst:
                 isFinished = ChildWaits?.Any(x => x.Status == WaitStatus.Completed) is true;

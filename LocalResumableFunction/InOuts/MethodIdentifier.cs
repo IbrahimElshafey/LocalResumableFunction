@@ -9,6 +9,7 @@ namespace LocalResumableFunction.InOuts;
 [Index(nameof(MethodHash), IsUnique = true, Name = "Index_MethodHash")]
 public class MethodIdentifier
 {
+
     private MethodInfo _methodInfo;
     [Key] public int Id { get; internal set; }
 
@@ -31,40 +32,13 @@ public class MethodIdentifier
             if (AssemblyName != null && ClassName != null && MethodName != null && _methodInfo == null)
             {
                 _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
-                    ?.GetType(ClassName)
+                    .GetType(ClassName)
                     ?.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                    .FirstOrDefault(x => x.Name == MethodName && CalcSignature(x) == MethodSignature);
+                    .FirstOrDefault(x => x.Name == MethodName && MethodData.CalcSignature(x) == MethodSignature);
                 return _methodInfo;
             }
 
             return _methodInfo;
         }
-    }
-
-    internal void SetMethodInfo(MethodBase value)
-    {
-        MethodName = value.Name;
-        ClassName = value.DeclaringType?.FullName;
-        AssemblyName = Path.GetFileName(value.DeclaringType?.Assembly.Location);
-        MethodSignature = CalcSignature(value);
-        CreateMethodHash();
-    }
-
-    private string CalcSignature(MethodBase value)
-    {
-        var parameterInfos = value.GetParameters();
-        return parameterInfos.Length != 0
-            ? parameterInfos
-                .Select(x => x.ParameterType.Name)
-                .Aggregate((x, y) => $"{x}#{y}")
-            : string.Empty;
-    }
-
-    private void CreateMethodHash()
-    {
-        var input = string.Concat(MethodName, ClassName, AssemblyName, MethodSignature);
-        using var md5 = MD5.Create();
-        var inputBytes = Encoding.ASCII.GetBytes(input);
-        MethodHash = md5.ComputeHash(inputBytes);
-    }
+    } 
 }

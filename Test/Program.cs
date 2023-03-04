@@ -24,8 +24,6 @@ public class Program
         await TestReplayGoBackAfter();
         await TestReplayGoBackBeforeNewMatch();
         await TestReplayGoBackTo();
-
-
         await TestWaitManyFunctions();
         await TestLoops();
         await TestManyWaitsTypeInGroup();
@@ -178,6 +176,7 @@ public class Program
             return;
         }
         await _scanner.RegisterResumableFunction(method, MethodType.ResumableFunctionEntryPoint);
+        await _scanner._context.SaveChangesAsync();
         await _scanner.RegisterResumableFunctionFirstWait(method);
         await _scanner._context.SaveChangesAsync();
     }

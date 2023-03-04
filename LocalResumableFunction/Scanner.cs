@@ -29,7 +29,7 @@ internal class Scanner
 
         foreach (var resumableFunctionClass in resumableFunctions)
             await RegisterResumableFunctionsInClass(resumableFunctionClass);
-       
+
         WriteMessage("Register local methods");
         await RegisterMethodWaitsIfExist(typeof(LocalRegisteredMethods));
         await _context.SaveChangesAsync();
@@ -43,16 +43,19 @@ internal class Scanner
     {
         WriteMessage($"Register resumable function [{resumableFunction.Name}] of type [{type}]");
         var repo = new MethodIdentifierRepository(_context);
-        var methodId = await repo.GetMethodIdentifier(resumableFunction);
-        methodId.MethodIdentifier.Type = type;
-        if (methodId.ExistInDb)
+        var methodData = new MethodData(resumableFunction);
+        var methodId = await repo.GetMethodIdentifierFromDb(methodData);
+
+        if (methodId != null)
         {
             WriteMessage($"Resumable function [{resumableFunction.Name}] already exist in DB.");
             return;
         }
 
+        methodId = methodData.ToMethodIdentifier();
+        methodId.Type = type;
         //methodId.MethodIdentifier.CreateMethodHash();
-        _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
+        _context.MethodIdentifiers.Add(methodId);
         WriteMessage($"Save discovered resumable function [{resumableFunction.Name}].");
         await _context.SaveChangesAsync();
     }
@@ -82,7 +85,7 @@ internal class Scanner
                     }
 
                     WriteMessage($"Save discovered method waits for assembly [{assemblyPath}].");
-                    _context.SaveChanges();
+                    await _context.SaveChangesAsync();
                 }
             }
             catch (Exception e)
@@ -141,6 +144,7 @@ internal class Scanner
 
     private async Task RegisterMethodWaitsIfExist(Type type)
     {
+        //Debugger.Launch();
         var methodWaits = type
             .GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
             .Where(method =>
@@ -148,16 +152,18 @@ internal class Scanner
         foreach (var method in methodWaits)
         {
             var repo = new MethodIdentifierRepository(_context);
-            var methodId = await repo.GetMethodIdentifier(method);
-            methodId.MethodIdentifier.Type = MethodType.MethodWait;
-            if (methodId.ExistInDb)
+            var methodData = new MethodData(method);
+            var methodId = await repo.GetMethodIdentifierFromDb(methodData);
+            if (methodId != null)
             {
                 WriteMessage($"Method [{method.Name}] already exist in DB.");
                 continue;
             }
 
+            methodId = methodData.ToMethodIdentifier();
+            methodId.Type = MethodType.MethodWait;
             WriteMessage($"Add method [{method.Name}] to DB.");
-            _context.MethodIdentifiers.Add(methodId.MethodIdentifier);
+            _context.MethodIdentifiers.Add(methodId);
         }
     }
 
