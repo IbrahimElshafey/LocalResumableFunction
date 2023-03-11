@@ -15,7 +15,7 @@
 * Wait name can't duplicate in same method
 
 * Centralize state database
-	* Use many database providers [Postgres,Sql Server,Sqlite]
+	* Use many database providers [Postgres,Sql Server]
 	* Use Database as a service with OData implementation
 
 * Wait for external method

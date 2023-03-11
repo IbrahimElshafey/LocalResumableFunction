@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Reflection.Metadata;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,15 @@ internal class FunctionDataContext : DbContext
             .HasForeignKey(x => x.ParentWaitId)
             .HasConstraintName("FK_ChildWaits_For_Wait");
 
+        modelBuilder.Entity<ResumableFunctionState>()
+            .Property<DateTime>(ConstantValue.LastUpdatedProp);
+        modelBuilder.Entity<ResumableFunctionState>()
+           .Property<DateTime>(ConstantValue.CreatedProp);
+        modelBuilder.Entity<MethodIdentifier>()
+           .Property<DateTime>(ConstantValue.CreatedProp);
+        modelBuilder.Entity<Wait>()
+           .Property<DateTime>(ConstantValue.CreatedProp);
+
         //modelBuilder.Entity<ManyMethodsWait>()
         //    .HasMany(x => x.WaitingMethods)
         //    .WithOne(wait => wait.ParentWaitsGroup)
@@ -110,19 +120,45 @@ internal class FunctionDataContext : DbContext
             .Properties<Type>()
             .HaveConversion<TypeToStringConverter>();
     }
-    
+
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
-        var falseAddEntries = 
-            ChangeTracker
-            .Entries()
-            .Where(x => x.State == EntityState.Added && x.IsKeySet)
-            .ToList();
+        SetDates();
+        ExcludeFalseAddEntries();
+        
+
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void SetDates()
+    {
+        foreach (var entityEntry in ChangeTracker.Entries())
+        {
+            switch (entityEntry.State)
+            {
+                case EntityState.Modified:
+                    bool lastUpdatePropExist = entityEntry.Metadata.FindProperty(ConstantValue.LastUpdatedProp) != null;
+                    if (lastUpdatePropExist)
+                        entityEntry.Property(ConstantValue.LastUpdatedProp).CurrentValue = DateTime.Now;
+                    break;
+                case EntityState.Added:
+                    bool createdPropExist = entityEntry.Metadata.FindProperty(ConstantValue.CreatedProp) != null;
+                    if (createdPropExist)
+                        entityEntry.Property(ConstantValue.CreatedProp).CurrentValue = DateTime.Now;
+                    break;
+            }
+        }
+    }
+
+    private void ExcludeFalseAddEntries()
+    {
+        var falseAddEntries =
+                    ChangeTracker
+                    .Entries()
+                    .Where(x => x.State == EntityState.Added && x.IsKeySet)
+                    .ToList();
 
         falseAddEntries
             .ForEach(x => x.State = EntityState.Unchanged);
-
-
-        return base.SaveChangesAsync(cancellationToken);
     }
 }

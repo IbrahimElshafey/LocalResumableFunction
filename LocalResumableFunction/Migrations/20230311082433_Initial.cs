@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -21,7 +22,8 @@ namespace LocalResumableFunction.Migrations
                     MethodName = table.Column<string>(type: "TEXT", nullable: true),
                     MethodSignature = table.Column<string>(type: "TEXT", nullable: true),
                     MethodHash = table.Column<byte[]>(type: "BLOB", maxLength: 16, nullable: true),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false)
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    Created = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,7 +39,9 @@ namespace LocalResumableFunction.Migrations
                     IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false),
                     StateObject = table.Column<string>(type: "TEXT", nullable: true),
                     ResumableFunctionIdentifierId = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsInProcessing = table.Column<bool>(type: "INTEGER", nullable: false)
+                    IsLocked = table.Column<bool>(type: "INTEGER", nullable: false),
+                    Created = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    LastUpdated = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -68,6 +72,7 @@ namespace LocalResumableFunction.Migrations
                     FunctionStateId = table.Column<int>(type: "INTEGER", nullable: false),
                     RequestedByFunctionId = table.Column<int>(type: "INTEGER", nullable: false),
                     ParentWaitId = table.Column<int>(type: "INTEGER", nullable: true),
+                    Created = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Discriminator = table.Column<string>(type: "TEXT", nullable: false),
                     SetDataExpressionValue = table.Column<byte[]>(type: "BLOB", nullable: true),
                     MatchIfExpressionValue = table.Column<byte[]>(type: "BLOB", nullable: true),

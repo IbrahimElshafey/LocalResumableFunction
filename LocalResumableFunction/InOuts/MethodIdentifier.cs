@@ -16,7 +16,7 @@ public class MethodIdentifier
     public string AssemblyName { get; internal set; }
     public string ClassName { get; internal set; }
     public string MethodName { get; internal set; }
-    public string MethodSignature { get; set; }
+    public string MethodSignature { get; internal set; }
 
     [MaxLength(16)] public byte[] MethodHash { get; set; }
 

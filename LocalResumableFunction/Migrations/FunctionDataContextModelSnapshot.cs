@@ -29,6 +29,9 @@ namespace LocalResumableFunction.Migrations
                     b.Property<string>("ClassName")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
                     b.Property<byte[]>("MethodHash")
                         .HasMaxLength(16)
                         .HasColumnType("BLOB");
@@ -56,11 +59,17 @@ namespace LocalResumableFunction.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsInProcessing")
+                    b.Property<bool>("IsLocked")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ResumableFunctionIdentifierId")
                         .HasColumnType("INTEGER");
@@ -80,6 +89,9 @@ namespace LocalResumableFunction.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Discriminator")
                         .IsRequired()

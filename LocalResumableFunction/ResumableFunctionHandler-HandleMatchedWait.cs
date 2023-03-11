@@ -18,6 +18,7 @@ internal partial class ResumableFunctionHandler
                 case MethodWait methodWait:
                     methodWait.Status = WaitStatus.Completed;
                     await GoNext(parent, methodWait);
+                    await _context.SaveChangesAsync();
                     break;
 
                 case WaitsGroup:
