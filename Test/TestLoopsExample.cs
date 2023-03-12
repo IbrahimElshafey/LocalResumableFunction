@@ -17,7 +17,7 @@ internal class TestLoopsExample:ProjectApprovalExample
         {
             yield return 
                 Wait<ApprovalDecision,bool>($"Wait Manager Approval {Counter + 1}", ManagerOneApproveProject)
-                    .If((input, output) => input.ProjectId == CurrentProject.Id)
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .SetData((input, output) => ManagerOneApproval == output);
         }
         Success(nameof(WaitManagerOneThreeTimeApprovals));

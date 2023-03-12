@@ -8,7 +8,7 @@ internal class TestTimeExample : ProjectApprovalExample
     {
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         AskManagerToApprove(CurrentProject.Id);
@@ -16,8 +16,8 @@ internal class TestTimeExample : ProjectApprovalExample
         yield return Wait(
                 waitManagerOneApprovalInSeconds,
                 new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                    .If((input, output) => input.ProjectId == CurrentProject.Id)
-                    .SetData((input, output) => ManagerOneApproval == input.Decision),
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                    .SetData((input, output) => ManagerOneApproval == output),
                 Wait(TimeSpan.FromSeconds(10))
             .SetData(() => TimerMatched == true)
         ).First();

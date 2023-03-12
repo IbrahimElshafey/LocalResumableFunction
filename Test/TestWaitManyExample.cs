@@ -9,19 +9,19 @@ internal class TestWaitManyExample : ProjectApprovalExample
     {
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
         WriteMessage("Wait three managers to approve");
         yield return Wait(
             "Wait three methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == input.Decision),
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerOneApproval == output),
             new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerTwoApproval == input.Decision),
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerTwoApproval == output),
             new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).All();
         WriteMessage("Three waits matched.");
@@ -33,20 +33,20 @@ internal class TestWaitManyExample : ProjectApprovalExample
     {
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
         WriteMessage("Wait two of three managers to approve");
         yield return Wait(
             "Wait three methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == input.Decision),
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerOneApproval == output),
             new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerTwoApproval == input.Decision),
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerTwoApproval == output),
             new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval == input.Decision)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerThreeApproval == output)
         ).When(x => x.CompletedCount == 2);
         WriteMessage("Two waits of three waits matched.");
         WriteMessage("WaitManyAndCountExpressionDefined ended.");

@@ -32,7 +32,7 @@ public abstract partial class ResumableFunctionLocal
     }
 
     /// <summary>
-    ///     Go back to code before the wait and re-wait it again with new match condition.
+    ///     Go back to code before method wait and re-wait it again with new match condition.
     /// </summary>
     protected ReplayWait GoBackBefore<TInput, TOutput>(string name,
         Expression<Func<TInput, TOutput, bool>> newMatchExpression)

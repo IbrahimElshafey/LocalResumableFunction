@@ -19,7 +19,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
     {
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         AskManagerToApprove(CurrentProject.Id);
@@ -31,7 +31,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
             WriteMessage("Manager 1 & 2 approved the project");
             yield return
                 Wait<ApprovalDecision, bool>("Manager Three Approve Project", ManagerThreeApproveProject)
-                    .If((input, output) => input.ProjectId == CurrentProject.Id)
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .SetData((input, output) => ManagerThreeApproval == output);
 
             WriteMessage(ManagerThreeApproval ? "Project Approved" : "Project Rejected");
@@ -50,11 +50,11 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
         yield return Wait(
             "Wait two methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == input.Decision),
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerOneApproval == output),
             new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerTwoApproval == input.Decision)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerTwoApproval == output)
         ).All();
         WriteMessage("Two waits matched");
     }
@@ -67,11 +67,11 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
         yield return Wait(
             "Wait first in two",
             new MethodWait<Project, bool>(ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input),
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == input.Decision)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerOneApproval == output)
         ).First();
         WriteMessage("One of two waits matched");
     }
@@ -95,21 +95,21 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
     public bool ManagerOneApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager One Approve Project with decision ({args.Decision})");
-        return args.Decision;
+        return true;
     }
 
     [WaitMethod]
     public bool ManagerTwoApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Two Approve Project with decision ({args.Decision})");
-        return args.Decision;
+        return true;
     }
 
     [WaitMethod]
     public bool ManagerThreeApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Three Approve Project with decision ({args.Decision})");
-        return args.Decision;
+        return true;
     }
 
 
@@ -117,7 +117,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal
     public bool ManagerFourApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");
-        return args.Decision;
+        return true;
     }
 
     public bool AskManagerToApprove(int projectId)

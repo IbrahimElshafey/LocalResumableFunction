@@ -11,7 +11,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         WriteMessage("SubFunctionTest WaitManyFunctions");
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
         WriteMessage("After project submitted.");
         yield return Wait("Wait multiple resumable functions", WaitManagerOneAndTwoSubFunction, ManagerThreeSubFunction);
@@ -24,7 +24,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         WriteMessage("SubFunctionTest WaitSubFunctionTwoLevels");
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
         WriteMessage("After project submitted.");
         yield return Wait("Wait multiple resumable functions", ManagerThreeSubFunction, ManagerOneCallSubManagerTwo);
@@ -39,7 +39,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         WriteMessage("SubFunctionTest WaitManyFunctions");
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
         WriteMessage("After project submitted.");
         yield return
@@ -57,10 +57,10 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         yield return Wait(
             "Wait two methods",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerOneApproval == output),
             new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerTwoApproval == output)
         ).All();
         WriteMessage("Two waits matched");
@@ -73,7 +73,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         await Task.Delay(10);
         yield return
             Wait<ApprovalDecision, bool>("Manager Three Approve Project", ManagerThreeApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output);
         WriteMessage("{2}End ManagerThreeSubFunction");
     }
@@ -85,7 +85,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         await Task.Delay(10);
         yield return
             Wait<ApprovalDecision, bool>("Manager One Approve Project", ManagerOneApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerOneApproval == output);
         yield return Wait("Wait Sub Function ManagerTwoSub", ManagerTwoSub);
         WriteMessage("{1}End ManagerOneCallSubManagerTwo");
@@ -98,11 +98,11 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         await Task.Delay(10);
         yield return
             Wait<ApprovalDecision, bool>("Manager Two Approve Project1", ManagerTwoApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerTwoApproval == output);
         yield return
             Wait<ApprovalDecision, bool>("Manager Two Approve Project2", ManagerTwoApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerTwoApproval == output);
         WriteMessage("{0}End ManagerTwoSub");
     }

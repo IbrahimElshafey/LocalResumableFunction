@@ -9,22 +9,22 @@ internal class ManyWaitsTypeInGroupExample:ProjectApprovalExample
     {
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
         WriteMessage("Wait many types in same group");
         yield return
             Wait("Many waits types",
                 new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                    .If((input, output) => input.ProjectId == CurrentProject.Id)
-                    .SetData((input, output) => ManagerOneApproval == input.Decision),
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                    .SetData((input, output) => ManagerOneApproval == output),
                 Wait(
                     "Wait Manager Two and Four",
                     new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                        .If((input, output) => input.ProjectId == CurrentProject.Id)
-                        .SetData((input, output) => ManagerTwoApproval == input.Decision),
+                        .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                        .SetData((input, output) => ManagerTwoApproval == output),
                     new MethodWait<ApprovalDecision, bool>(ManagerFourApproveProject)
-                        .If((input, output) => input.ProjectId == CurrentProject.Id)
-                        .SetData((input, output) => ManagerFourApproval == input.Decision)
+                        .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                        .SetData((input, output) => ManagerFourApproval == output)
                 ).All(),
                 Wait("Sub function Wait", ManagerThreeSubFunction));
         Success(nameof(ManyWaitsTypeInGroup));
@@ -39,12 +39,12 @@ internal class ManyWaitsTypeInGroupExample:ProjectApprovalExample
         await Task.Delay(10);
         yield return
             Wait<ApprovalDecision, bool>("Manager Three Approve Project", ManagerThreeApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval == input.Decision);
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerThreeApproval == output);
         yield return
             Wait<ApprovalDecision, bool>("Manager Three Approve Project", ManagerThreeApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval == input.Decision);
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerThreeApproval == output);
         WriteMessage("End ManagerThreeSubFunction");
     }
 }

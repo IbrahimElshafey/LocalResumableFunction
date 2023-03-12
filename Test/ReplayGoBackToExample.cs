@@ -10,25 +10,25 @@ internal class ReplayGoBackToExample : ProjectApprovalExample
     {
         yield return
             Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         WriteMessage("Wait first manager of three to approve");
         yield return Wait(
             "Wait first approval in three managers",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerOneApproval == input.Decision),
             new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerTwoApproval == input.Decision),
             new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
-                .If((input, output) => input.ProjectId == CurrentProject.Id)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == input.Decision)
         ).First();
 
         var approvals = ManagerOneApproval || ManagerTwoApproval || ManagerThreeApproval;
-        if (approvals == false)
+        if (!approvals)
         {
             WriteMessage("Go back to wait three approvals again");
             yield return GoBackTo("Wait first approval in three managers");
@@ -39,16 +39,17 @@ internal class ReplayGoBackToExample : ProjectApprovalExample
         }
         Success(nameof(TestReplay_GoBackToGroup));
     }
+
     public async IAsyncEnumerable<Wait> TestReplay_GoBackTo()
     {
         yield return
             Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         AskManagerToApprove(CurrentProject.Id);
         yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
-            .If((input, output) => input.ProjectId == CurrentProject.Id)
+            .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
             .SetData((input, output) => ManagerOneApproval == input.Decision);
 
         if (ManagerOneApproval is false)

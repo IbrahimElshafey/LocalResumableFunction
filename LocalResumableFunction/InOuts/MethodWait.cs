@@ -117,7 +117,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
         return this;
     }
 
-    public MethodWait<TInput, TOutput> If(Expression<Func<TInput, TOutput, bool>> value)
+    public MethodWait<TInput, TOutput> MatchIf(Expression<Func<TInput, TOutput, bool>> value)
     {
         MatchIfExpression = value;
         return this;

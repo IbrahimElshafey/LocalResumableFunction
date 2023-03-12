@@ -12,12 +12,12 @@ internal class ReplayGoBackAfterExample : ProjectApprovalExample
     {
         yield return
             Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
-                .If((input, output) => output == true)
+                .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         AskManagerToApprove(CurrentProject.Id);
         yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
-            .If((input, output) => input.ProjectId == CurrentProject.Id)
+            .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
             .SetData((input, output) => ManagerOneApproval == input.Decision);
 
         if (ManagerOneApproval is false)
