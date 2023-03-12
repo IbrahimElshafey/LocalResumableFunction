@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using LocalResumableFunction.Attributes;
 using LocalResumableFunction.Data;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;

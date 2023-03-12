@@ -1,4 +1,5 @@
-﻿using LocalResumableFunction.Helpers;
+﻿using LocalResumableFunction.Attributes;
+using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
 
 namespace Test;

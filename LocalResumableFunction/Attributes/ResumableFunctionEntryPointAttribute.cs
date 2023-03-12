@@ -1,4 +1,4 @@
-﻿namespace LocalResumableFunction.Helpers;
+﻿namespace LocalResumableFunction.Attributes;
 
 /// <summary>
 ///     Start point for a resumable function

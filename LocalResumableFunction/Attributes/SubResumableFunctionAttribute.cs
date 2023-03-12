@@ -1,4 +1,4 @@
-﻿namespace LocalResumableFunction.Helpers;
+﻿namespace LocalResumableFunction.Attributes;
 
 public sealed class SubResumableFunctionAttribute : Attribute
 {

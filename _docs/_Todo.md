@@ -1,4 +1,5 @@
 ﻿# Todo
+
 * Replay GoTo with ne match
 * Replay NewMatches
 * IsLocked for optemistic lock
@@ -7,8 +8,8 @@
 	* Call time based events
 	* Queue matched waits for same state
 * Validate waits
-	* Wait many duplicate same method wait warnning
-* No inheritance from resumable local function
+	* Wait same wait twice in group error
+
 * Wait name can't duplicate in same method
 
 * Centralize state database
@@ -17,7 +18,7 @@
 
 * Wait for external method
 	* Add interface with methods
-	* Mark intefaces with [WaitExternalMethod] attribute that takes
+	* Mark intefaces with [WaitExternalMethods] attribute that takes
 		* AssemblyName
 		* ClassName
 		* MethodName [as method name itself]
@@ -58,3 +59,7 @@
 # Retest
 * Test loops
 * Test Replay
+
+# Cancled
+* No inheritance from resumable local function (Inheritance faclitate parsing and using waits)
+* Remove Attributes (We can't because we need to register first waits fro a resumable function)

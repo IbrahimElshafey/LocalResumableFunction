@@ -1,4 +1,5 @@
 ﻿using LocalResumableFunction;
+using LocalResumableFunction.Attributes;
 using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
 

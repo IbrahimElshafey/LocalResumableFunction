@@ -1,7 +1,8 @@
-﻿using LocalResumableFunction.InOuts;
+﻿using LocalResumableFunction.Helpers;
+using LocalResumableFunction.InOuts;
 using MethodBoundaryAspect.Fody.Attributes;
 
-namespace LocalResumableFunction.Helpers;
+namespace LocalResumableFunction.Attributes;
 
 /// <summary>
 ///     Add this to the method you want to wait to.
