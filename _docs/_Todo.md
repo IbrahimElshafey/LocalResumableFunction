@@ -1,5 +1,5 @@
 ﻿# Todo
-
+* Wait method in interface
 * Replay GoTo with ne match
 * Replay NewMatches
 * IsLocked for optemistic lock

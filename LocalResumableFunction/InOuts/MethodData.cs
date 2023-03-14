@@ -15,6 +15,7 @@ namespace LocalResumableFunction.InOuts
         public MethodData(MethodBase methodBase)
         {
             if (methodBase == null) return;
+            //methodBase.Attributes= MethodAttributes.NewSlot;
             MethodName = methodBase.Name;
             ClassName = methodBase.DeclaringType?.FullName;
             AssemblyName = Path.GetFileName(methodBase.DeclaringType?.Assembly.Location);

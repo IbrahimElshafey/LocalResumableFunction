@@ -23,12 +23,13 @@ public class Program
         //await TestSubFunctionCall();
         //await TestReplayGoBackAfter();
         //await TestReplayGoBackBeforeNewMatch();
-        await TestReplayGoBackTo();
+        //await TestReplayGoBackTo();
         //await TestWaitManyFunctions();
         //await TestLoops();
         //await TestManyWaitsTypeInGroup();
         //await TestTimeWait();
         //await TestSameEventAgain();
+        await TestWaitInterfaceMethod();
 
 
         //await Task.WhenAll(
@@ -43,6 +44,15 @@ public class Program
         //    TestTimeWait(),
         //    TestSameEventAgain());
         Console.ReadLine();
+    }
+
+    private static async Task TestWaitInterfaceMethod()
+    {
+        await RegisterResumableFunction(typeof(ProjectApprovalExample), nameof(ProjectApprovalExample.InterfaceMethod));
+        var example = new ProjectApprovalExample();
+        var currentProject = ProjectApprovalExample.GetCurrentProject();
+        await example.ProjectSubmitted(currentProject);
+        example.ManagerFiveApproveProject(new ApprovalDecision(currentProject.Id, false));
     }
 
     private static async Task TestSameEventAgain()
