@@ -63,4 +63,28 @@ internal class ReplayGoBackToExample : ProjectApprovalExample
         }
         Success(nameof(TestReplay_GoBackTo));
     }
+
+    public async IAsyncEnumerable<Wait> TestReplay_GoBackToNewMatch()
+    {
+        yield return
+            Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
+                .MatchIf((input, output) => output == true)
+                .SetData((input, output) => CurrentProject == input);
+
+        AskManagerToApprove(CurrentProject.Id);
+        yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
+            .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+            .SetData((input, output) => ManagerOneApproval == input.Decision);
+
+        if (ManagerOneApproval is false)
+        {
+            WriteMessage("Manager one rejected project and replay will go to ProjectSubmitted with new match.");
+            yield return GoBackTo<Project, bool>(ProjectSumbitted, (input, output) => input.IsResubmit && input.Id == CurrentProject.Id);
+        }
+        else
+        {
+            WriteMessage("Manager one approved project");
+        }
+        Success(nameof(TestReplay_GoBackToNewMatch));
+    }
 }

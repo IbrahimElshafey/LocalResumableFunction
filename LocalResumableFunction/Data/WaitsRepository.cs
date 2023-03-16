@@ -161,7 +161,7 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-    internal async Task<Wait> GetOldWaitForReplay(ReplayWait replayWait)
+    internal async Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait)
     {
         var waitToReplay =
             await GetFunctionInstanceWaits(

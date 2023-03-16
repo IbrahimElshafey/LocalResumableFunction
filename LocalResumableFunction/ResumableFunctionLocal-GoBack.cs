@@ -8,9 +8,9 @@ public abstract partial class ResumableFunctionLocal
     /// <summary>
     ///     Go back to code after the wait.
     /// </summary>
-    protected ReplayWait GoBackAfter(string name)
+    protected ReplayRequest GoBackAfter(string name)
     {
-        return new ReplayWait
+        return new ReplayRequest
         {
             Name = name,
             ReplayType = ReplayType.GoAfter,
@@ -21,9 +21,9 @@ public abstract partial class ResumableFunctionLocal
     /// <summary>
     ///     Go back to code before the wait and re-wait it again.
     /// </summary>
-    protected ReplayWait GoBackBefore(string name)
+    protected ReplayRequest GoBackBefore(string name)
     {
-        return new ReplayWait
+        return new ReplayRequest
         {
             Name = name,
             ReplayType = ReplayType.GoBefore,
@@ -34,10 +34,10 @@ public abstract partial class ResumableFunctionLocal
     /// <summary>
     ///     Go back to code before method wait and re-wait it again with new match condition.
     /// </summary>
-    protected ReplayWait GoBackBefore<TInput, TOutput>(string name,
+    protected ReplayRequest GoBackBefore<TInput, TOutput>(string name,
         Expression<Func<TInput, TOutput, bool>> newMatchExpression)
     {
-        return new ReplayWait
+        return new ReplayRequest
         {
             Name = name,
             ReplayType = ReplayType.GoBeforeWithNewMatch,
@@ -49,18 +49,18 @@ public abstract partial class ResumableFunctionLocal
     /// <summary>
     ///     Go back to wait and re-wait it again.
     /// </summary>
-    protected ReplayWait GoBackTo(string name)
+    protected ReplayRequest GoBackTo(string name)
     {
-        return new ReplayWait { Name = name, ReplayType = ReplayType.GoTo };
+        return new ReplayRequest { Name = name, ReplayType = ReplayType.GoTo };
     }
 
     /// <summary>
     ///     Go back to wait and re-wait it again with new match condition.
     /// </summary>
-    protected ReplayWait GoBackTo<TInput, TOutput>(string name,
+    protected ReplayRequest GoBackTo<TInput, TOutput>(string name,
         Expression<Func<TInput, TOutput, bool>> newMatchExpression)
     {
-        return new ReplayWait
+        return new ReplayRequest
         {
             Name = name,
             ReplayType = ReplayType.GoToWithNewMatch,

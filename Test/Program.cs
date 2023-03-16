@@ -29,7 +29,8 @@ public class Program
         //await TestManyWaitsTypeInGroup();
         //await TestTimeWait();
         //await TestSameEventAgain();
-        await TestWaitInterfaceMethod();
+        //await TestWaitInterfaceMethod();
+        await TestReplayGoBackToWithNewMatch();
 
 
         //await Task.WhenAll(
@@ -144,6 +145,17 @@ public class Program
         example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerTwoApproveProject(new ApprovalDecision(project.Id, true));
         example.ManagerThreeApproveProject(new ApprovalDecision(project.Id, true));
+    }
+    private static async Task TestReplayGoBackToWithNewMatch()
+    {
+        await RegisterResumableFunction(typeof(ReplayGoBackToExample), nameof(ReplayGoBackToExample.TestReplay_GoBackToNewMatch));
+        var example = new ReplayGoBackToExample();
+        var project = ProjectApprovalExample.GetCurrentProject();
+        await example.ProjectSubmitted(project);
+        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, false));
+        project.IsResubmit = true;
+        await example.ProjectSubmitted(project);
+        example.ManagerOneApproveProject(new ApprovalDecision(project.Id, true));
     }
 
     private static async Task TestReplayGoBackTo()

@@ -55,6 +55,7 @@ internal partial class ResumableFunctionHandler
 
     private async Task ProceedToNextWait(Wait currentWait)
     {
+        //bug:may cause problem for go back after
         if (currentWait.ParentWait != null && currentWait.ParentWait.Status != WaitStatus.Waiting)
         {
             WriteMessage("Can't proceed,Parent wait status is not (Waiting).");

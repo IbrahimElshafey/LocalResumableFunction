@@ -7,23 +7,23 @@ namespace LocalResumableFunction;
 
 internal partial class ResumableFunctionHandler
 {
-    private async Task ReplayWait(ReplayWait replayWait)
+    private async Task ReplayWait(ReplayRequest replayRequest)
     {
-        var waitToReplay = await _waitsRepository.GetOldWaitForReplay(replayWait);
+        var waitToReplay = await _waitsRepository.GetOldWaitForReplay(replayRequest);
         if (waitToReplay == null)
         {
-            WriteMessage($"Replay failed, replay is ({replayWait})");
+            WriteMessage($"Replay failed, replay is ({replayRequest})");
             return;
         }
+
+        //todo:review CancelFunctionWaits is suffecient
         //Cancel wait and it's child
         waitToReplay.Status = waitToReplay.Status == WaitStatus.Waiting ? WaitStatus.Canceled : waitToReplay.Status;
         await _waitsRepository.CancelSubWaits(waitToReplay.Id);
         //skip active waits after replay
         await _waitsRepository.CancelFunctionWaits(waitToReplay.RequestedByFunctionId, waitToReplay.FunctionStateId);
 
-        //waitToReplay.RequestedByFunction = replayWait.RequestedByFunction;
-        //waitToReplay.RequestedByFunctionId = replayWait.RequestedByFunctionId;
-        switch (replayWait.ReplayType)
+        switch (replayRequest.ReplayType)
         {
             case ReplayType.GoAfter:
                 await ProceedToNextWait(waitToReplay);
@@ -32,14 +32,13 @@ internal partial class ResumableFunctionHandler
                 await ReplayGoBefore(waitToReplay);
                 break;
             case ReplayType.GoBeforeWithNewMatch:
-                await ReplayGoBeforeWithNewMatch(replayWait, waitToReplay);
+                await ReplayGoBeforeWithNewMatch(replayRequest, waitToReplay);
                 break;
             case ReplayType.GoTo:
-                var duplicateWait = waitToReplay.DuplicateWait();
-                duplicateWait.Name += "-Replay";
-                duplicateWait.IsReplay = true;
-                duplicateWait.IsFirst = false;
-                await GenericWaitRequested(duplicateWait);
+                await ReplayGoTo(waitToReplay);
+                break;
+            case ReplayType.GoToWithNewMatch:
+                await ReplayGoToWithNewMatch(replayRequest,waitToReplay);
                 break;
             default:
                 WriteMessage("ReplayWait type not defined.");
@@ -47,12 +46,46 @@ internal partial class ResumableFunctionHandler
         }
     }
 
+    private async Task ReplayGoToWithNewMatch(ReplayRequest replayRequest, Wait waitToReplay)
+    {
+        if (waitToReplay is MethodWait methodWait)
+        {
+            CheckReplayMatchExpression(replayRequest, methodWait);
+
+            var duplicateWait = waitToReplay.DuplicateWait() as MethodWait;
+            duplicateWait.Name += "-Replay";
+            duplicateWait.IsReplay = true;
+            duplicateWait.IsFirst = false;
+            duplicateWait.MatchIfExpression = replayRequest.MatchExpression;
+            await GenericWaitRequested(duplicateWait);
+        }
+        else
+        {
+            throw new Exception($"When the replay type is [{ReplayType.GoToWithNewMatch}]" +
+                                $"the wait to replay  must be of type [{nameof(MethodWait)}]");
+        }
+        
+    }
+
+    private async Task ReplayGoTo(Wait waitToReplay)
+    {
+        if (waitToReplay.IsFirst)
+        {
+            WriteMessage("Go to the first wait with same match will create new separate function instance.");
+            return;
+        }
+        var duplicateWait = waitToReplay.DuplicateWait();
+        duplicateWait.Name += "-Replay";
+        duplicateWait.IsReplay = true;
+        duplicateWait.IsFirst = false;
+        await GenericWaitRequested(duplicateWait);
+    }
 
     private async Task ReplayGoBefore(Wait oldCompletedWait)
     {
         if (oldCompletedWait.IsFirst)
         {
-            WriteMessage("Go back to first wait with same match will create new separate function instance.");
+            WriteMessage("Go before the first wait with same match will create new separate function instance.");
             return;
         }
 
@@ -70,19 +103,14 @@ internal partial class ResumableFunctionHandler
         }
     }
 
-    private async Task ReplayGoBeforeWithNewMatch(ReplayWait replayWait, Wait waitToReplay)
+    private async Task ReplayGoBeforeWithNewMatch(ReplayRequest replayWait, Wait waitToReplay)
     {
         if (waitToReplay is MethodWait)
         {
             var goBefore = await GoBefore(waitToReplay);
             if (goBefore is { HasWait: true, Runner.Current: MethodWait mw })
             {
-                var isSameSignature =
-                    Extensions.SameLambadaSignatures(replayWait.MatchExpression, mw.MatchIfExpression);
-                if (isSameSignature is false)
-                    throw new Exception("Replay match expression method must have same signature as " +
-                                        "the wait that will replayed.");
-
+                CheckReplayMatchExpression(replayWait, mw);
 
                 mw.MatchIfExpression = replayWait.MatchExpression;
                 mw.FunctionState = replayWait.FunctionState;
@@ -98,6 +126,15 @@ internal partial class ResumableFunctionHandler
             throw new Exception($"When the replay type is [{ReplayType.GoBeforeWithNewMatch}]" +
                                 $"the wait to replay  must be of type [{nameof(MethodWait)}]");
         }
+    }
+
+    private static void CheckReplayMatchExpression(ReplayRequest replayWait, MethodWait mw)
+    {
+        var isSameSignature =
+            Extensions.SameLambadaSignatures(replayWait.MatchExpression, mw.MatchIfExpression);
+        if (isSameSignature is false)
+            throw new Exception("Replay match expression method must have same signature as " +
+                                "the wait that will replayed.");
     }
 
     private static async Task<(FunctionRunner Runner, bool HasWait)> GoBefore(Wait oldCompletedWait)

@@ -103,7 +103,7 @@ internal class FunctionDataContext : DbContext
             .Property(mw => mw.SetDataExpressionValue)
             .HasColumnName(nameof(MethodWait.SetDataExpressionValue));
 
-        modelBuilder.Ignore<ReplayWait>();
+        modelBuilder.Ignore<ReplayRequest>();
         modelBuilder.Ignore<TimeWait>();
         base.OnModelCreating(modelBuilder);
     }
