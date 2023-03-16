@@ -74,5 +74,29 @@ public static class Extensions
         return attrib != null;
     }
 
-  
+
+    public static string GetFullName(this MethodInfo method)
+    {
+        return $"{method.DeclaringType.FullName}.{method.Name}";
+    }
+    public static MethodInfo GetInterfaceMethod(this MethodInfo method)
+    {
+        var type = method.DeclaringType;
+        foreach (Type interf in type.GetInterfaces())
+        {
+            foreach (MethodInfo interfaceMethod in interf.GetMethods())
+            {
+                bool sameSiganture =
+                    interfaceMethod.Name == method.Name &&
+                    interfaceMethod.ReturnType == method.ReturnType &&
+                    Enumerable.SequenceEqual(interfaceMethod.GetParameters().Select(x=>x.ParameterType), method.GetParameters().Select(x => x.ParameterType));
+                if (sameSiganture)
+                    return interfaceMethod;
+            }
+        }
+        return null;
+    }
+
+
+
 }

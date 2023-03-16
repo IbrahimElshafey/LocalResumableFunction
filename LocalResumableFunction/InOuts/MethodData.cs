@@ -12,6 +12,15 @@ namespace LocalResumableFunction.InOuts
 {
     public class MethodData
     {
+        public MethodData(string assemblyName, string className, string methodName, string inputTypeName)
+        {
+            AssemblyName = assemblyName;
+            ClassName = className;
+            MethodName = methodName;
+            MethodSignature = inputTypeName;
+            CreateMethodHash();
+        }
+
         public MethodData(MethodBase methodBase)
         {
             if (methodBase == null) return;
@@ -23,15 +32,15 @@ namespace LocalResumableFunction.InOuts
             CreateMethodHash();
         }
 
-        public MethodData(MethodIdentifier methodIdentifier):this(methodIdentifier?.MethodInfo)
+        public MethodData(MethodIdentifier methodIdentifier) : this(methodIdentifier?.MethodInfo)
         {
         }
 
         public string AssemblyName { get; internal set; }
         public string ClassName { get; internal set; }
         public string MethodName { get; internal set; }
-        public string MethodSignature { get; set; }
-        public byte[] MethodHash { get; set; }
+        public string MethodSignature { get; internal set; }
+        public byte[] MethodHash { get; internal set; }
 
         internal static string CalcSignature(MethodBase value)
         {
@@ -64,5 +73,5 @@ namespace LocalResumableFunction.InOuts
         }
     }
 
-   
+
 }

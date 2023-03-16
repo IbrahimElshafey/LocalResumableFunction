@@ -1,13 +1,11 @@
 ﻿using LocalResumableFunction.Helpers;
 using LocalResumableFunction.InOuts;
 using MethodBoundaryAspect.Fody.Attributes;
+using System.Reflection;
 
 namespace LocalResumableFunction.Attributes;
 
-/// <summary>
-///     Add this to the method you want to wait to.
-/// </summary>
-public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
+public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect
 {
     private PushedMethod _pushedMethod;
     public override object TypeId => nameof(WaitMethodAttribute);
@@ -17,10 +15,27 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
         args.MethodExecutionTag = false;
         _pushedMethod = new PushedMethod
         {
-            MethodData = new MethodData(args.Method)
+            MethodData = new MethodData(GetBaseMethod(args))
         };
         if (args.Arguments.Length > 0)
             _pushedMethod.Input = args.Arguments[0];
+    }
+
+    private MethodBase GetBaseMethod(MethodExecutionArgs args)
+    {
+        var type = args.Method.DeclaringType;
+        foreach (Type interf in type.GetInterfaces())
+        {
+            foreach (MethodInfo method in interf.GetMethods())
+            {
+                bool sameSiganture = 
+                    method.Name == args.Method.Name && 
+                    method.GetParameters()[0]?.ParameterType == args.Arguments[0]?.GetType();
+                if (sameSiganture)
+                    return method;
+            }
+        }
+        return args.Method;
     }
 
     public override void OnExit(MethodExecutionArgs args)

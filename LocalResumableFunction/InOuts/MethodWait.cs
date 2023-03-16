@@ -94,21 +94,37 @@ public class MethodWait<TInput, TOutput> : MethodWait
 {
     public MethodWait(Func<TInput, Task<TOutput>> method)
     {
-        Create(method.Method);
+        Initiate(method.Method);
     }
     public MethodWait(Func<TInput, TOutput> method)
     {
-        Create(method.Method);
+        Initiate(method.Method);
     }
 
-    private void Create(MethodInfo method)
+    private void Initiate(MethodInfo method)
     {
-        var eventMethodAttributeExist = method.GetCustomAttribute(typeof(WaitMethodAttribute));
+        var eventMethodAttributeExist = 
+            method.GetCustomAttribute(typeof(WaitMethodAttribute))??
+            method.GetCustomAttribute(typeof(WaitMethodImplementationAttribute));
         if (eventMethodAttributeExist == null)
             throw new Exception(
-                $"You must add attribute [{nameof(WaitMethodAttribute)}] to method {method.Name}");
+                $"You must add attribute [WaitMethod or WaitMethodImplementation] to method {method.GetFullName()}");
 
-        MethodData = new MethodData(method);
+        if(eventMethodAttributeExist is WaitMethodAttribute)
+            MethodData = new MethodData(method);
+        else if(eventMethodAttributeExist is WaitMethodImplementationAttribute)
+        {
+            MethodInfo interfaceMethod = method.GetInterfaceMethod();
+            if(interfaceMethod == null)
+                throw new Exception(
+                    $"No interface method matched for method [{method.GetFullName()}]");
+            var waitMethodAttributeExist = interfaceMethod.GetCustomAttribute(typeof(WaitMethodAttribute));
+            if (waitMethodAttributeExist == null)
+                throw new Exception(
+                    $"You must add attribute [WaitMethodAttribute] to interface method {method.GetFullName()}");
+            MethodData = new MethodData(interfaceMethod);
+        }
+
         Name = $"#{method.Name}#";
     }
 

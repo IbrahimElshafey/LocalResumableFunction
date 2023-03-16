@@ -101,9 +101,10 @@ public abstract class Wait
 
             return null;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            throw new Exception("Error when try to get next wait");
+            Debug.Write(ex);
+            throw;
         }
     }
 

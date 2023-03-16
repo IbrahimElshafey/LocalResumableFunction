@@ -24,9 +24,8 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
          Wait<Project, bool>("Project Submitted", ProjectSubmitted)
              .MatchIf((input, output) => output == true)
              .SetData((input, output) => CurrentProject == input);
-        IManagerFiveApproval inter = this;
         yield return
-               Wait<ApprovalDecision, bool>("Manager Five Approve Project", inter.ManagerFiveApproveProject)
+               Wait<ApprovalDecision, bool>("Manager Five Approve Project", ManagerFiveApproveProject)
                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                    .SetData((input, output) => ManagerFiveApproval == output);
         Success(nameof(InterfaceMethod));
@@ -166,7 +165,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
         Console.ForegroundColor = ConsoleColor.White;
     }
 
-    [WaitMethod]
+    [WaitMethodImplementation]
     public bool ManagerFiveApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");
