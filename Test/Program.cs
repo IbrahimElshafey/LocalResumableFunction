@@ -48,7 +48,8 @@ public class Program
 
     private static async Task TestWaitInterfaceMethod()
     {
-        await RegisterResumableFunction(typeof(ProjectApprovalExample), nameof(ProjectApprovalExample.InterfaceMethod));
+        await RegisterResumableFunction(typeof(ProjectApprovalExample), nameof(ProjectApprovalExample.ExternalMethod));
+        //await RegisterResumableFunction(typeof(ProjectApprovalExample), nameof(ProjectApprovalExample.InterfaceMethod));
         var example = new ProjectApprovalExample();
         var currentProject = ProjectApprovalExample.GetCurrentProject();
         await example.ProjectSubmitted(currentProject);

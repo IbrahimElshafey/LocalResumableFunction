@@ -1,4 +1,5 @@
 ﻿using External;
+using ExternalService;
 using LocalResumableFunction;
 using LocalResumableFunction.Attributes;
 using LocalResumableFunction.Helpers;
@@ -15,6 +16,19 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
     public bool ManagerFourApproval { get; set; }
     public bool ManagerFiveApproval { get; set; }
 
+    public async IAsyncEnumerable<Wait> ExternalMethod()
+    {
+        yield return
+         Wait<Project, bool>("Project Submitted", ProjectSubmitted)
+             .MatchIf((input, output) => output == true)
+             .SetData((input, output) => CurrentProject == input);
+
+        yield return
+               Wait<ApprovalDecision, bool>("Manager Five Approve Project", new ExternalServiceClass().ManagerFiveApproveProject)
+                   .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                   .SetData((input, output) => ManagerFiveApproval == output);
+        Success(nameof(ExternalMethod));
+    }
     //any method with attribute [ResumableFunctionEntryPoint] that takes no argument
     //and return IAsyncEnumerable<Wait> is a resumbale function
     //[ResumableFunctionEntryPoint]
@@ -24,6 +38,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
          Wait<Project, bool>("Project Submitted", ProjectSubmitted)
              .MatchIf((input, output) => output == true)
              .SetData((input, output) => CurrentProject == input);
+
         yield return
                Wait<ApprovalDecision, bool>("Manager Five Approve Project", ManagerFiveApproveProject)
                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)

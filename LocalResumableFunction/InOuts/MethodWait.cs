@@ -37,8 +37,8 @@ public class MethodWait : Wait
     [NotMapped]
     public object Output { get; set; }
 
-    private Assembly FunctionAssembly => 
-        RequestedByFunction?.MethodInfo.DeclaringType.Assembly??
+    private Assembly FunctionAssembly =>
+        RequestedByFunction?.MethodInfo.DeclaringType.Assembly ??
         WaitMethodIdentifier?.MethodInfo.DeclaringType.Assembly;
 
     internal void SetExpressions()
@@ -103,26 +103,33 @@ public class MethodWait<TInput, TOutput> : MethodWait
 
     private void Initiate(MethodInfo method)
     {
-        var eventMethodAttributeExist = 
-            method.GetCustomAttribute(typeof(WaitMethodAttribute))??
-            method.GetCustomAttribute(typeof(WaitMethodImplementationAttribute));
-        if (eventMethodAttributeExist == null)
+        var methodAttribute =
+            method.GetCustomAttribute(typeof(WaitMethodAttribute)) ??
+            method.GetCustomAttribute(typeof(WaitMethodImplementationAttribute)) ??
+            method.GetCustomAttribute(typeof(ExternalWaitMethodAttribute));
+        if (methodAttribute == null)
             throw new Exception(
-                $"You must add attribute [WaitMethod or WaitMethodImplementation] to method {method.GetFullName()}");
+                $"You must add attribute [WaitMethod , WaitMethodImplementation or ExternalWaitMethod] to method {method.GetFullName()}");
 
-        if(eventMethodAttributeExist is WaitMethodAttribute)
-            MethodData = new MethodData(method);
-        else if(eventMethodAttributeExist is WaitMethodImplementationAttribute)
+        switch (methodAttribute)
         {
-            MethodInfo interfaceMethod = method.GetInterfaceMethod();
-            if(interfaceMethod == null)
-                throw new Exception(
-                    $"No interface method matched for method [{method.GetFullName()}]");
-            var waitMethodAttributeExist = interfaceMethod.GetCustomAttribute(typeof(WaitMethodAttribute));
-            if (waitMethodAttributeExist == null)
-                throw new Exception(
-                    $"You must add attribute [WaitMethodAttribute] to interface method {method.GetFullName()}");
-            MethodData = new MethodData(interfaceMethod);
+            case WaitMethodAttribute:
+                MethodData = new MethodData(method);
+                break;
+            case WaitMethodImplementationAttribute:
+                MethodInfo interfaceMethod = method.GetInterfaceMethod();
+                if (interfaceMethod == null)
+                    throw new Exception(
+                        $"No interface method matched for method [{method.GetFullName()}]");
+                var waitMethodAttributeExist = interfaceMethod.GetCustomAttribute(typeof(WaitMethodAttribute));
+                if (waitMethodAttributeExist == null)
+                    throw new Exception(
+                        $"You must add attribute [WaitMethodAttribute] to interface method {method.GetFullName()}");
+                MethodData = new MethodData(interfaceMethod);
+                break;
+            case ExternalWaitMethodAttribute externalWaitMethodAttribute:
+                MethodData = new MethodData(method, externalWaitMethodAttribute);
+                break;
         }
 
         Name = $"#{method.Name}#";

@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using LocalResumableFunction.Attributes;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,12 @@ namespace LocalResumableFunction.InOuts
 {
     public class MethodData
     {
-        public MethodData(string assemblyName, string className, string methodName, string inputTypeName)
+        public MethodData(MethodBase method, ExternalWaitMethodAttribute externalWaitMethodAttribute)
         {
-            AssemblyName = assemblyName;
-            ClassName = className;
-            MethodName = methodName;
-            MethodSignature = inputTypeName;
+            ClassName = externalWaitMethodAttribute.ClassName ?? method.DeclaringType?.FullName;
+            AssemblyName = externalWaitMethodAttribute.AssemblyName ?? Path.GetFileName(method.DeclaringType?.Assembly.Location);
+            MethodName = method.Name;
+            MethodSignature = CalcSignature(method);
             CreateMethodHash();
         }
 
@@ -42,6 +43,7 @@ namespace LocalResumableFunction.InOuts
         public string MethodSignature { get; internal set; }
         public byte[] MethodHash { get; internal set; }
 
+        //todo: must include return type
         internal static string CalcSignature(MethodBase value)
         {
             var parameterInfos = value.GetParameters();
