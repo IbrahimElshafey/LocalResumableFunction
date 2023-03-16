@@ -1,5 +1,4 @@
 ﻿# Todo
-* Replay GoTo with new match
 * IsLocked for optemistic lock
 * Use hangfire to 
 	* Queue pushed events requests [Fire and forget]

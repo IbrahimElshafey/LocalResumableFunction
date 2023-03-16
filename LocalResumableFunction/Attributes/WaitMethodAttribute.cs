@@ -32,8 +32,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
             dynamic output = args.ReturnValue;
             _pushedMethod.Output = output.Result;
         }
-        //todo: main method must wait until this completes ==> Ue hangfire
-        //_ = new ResumableFunctionHandler().MethodCalled(_pushedMethod);
+        //todo: use hangfire
         new ResumableFunctionHandler().MethodCalled(_pushedMethod).Wait();
         args.MethodExecutionTag = true;
     }
