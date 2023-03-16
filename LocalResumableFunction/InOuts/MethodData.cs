@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata;
@@ -16,7 +17,7 @@ namespace LocalResumableFunction.InOuts
         public MethodData(MethodBase method, ExternalWaitMethodAttribute externalWaitMethodAttribute)
         {
             ClassName = externalWaitMethodAttribute.ClassName ?? method.DeclaringType?.FullName;
-            AssemblyName = externalWaitMethodAttribute.AssemblyName ?? Path.GetFileName(method.DeclaringType?.Assembly.Location);
+            AssemblyName = externalWaitMethodAttribute.AssemblyName ?? method.DeclaringType?.Assembly.GetName().Name;
             MethodName = method.Name;
             MethodSignature = CalcSignature(method);
             CreateMethodHash();
@@ -28,13 +29,9 @@ namespace LocalResumableFunction.InOuts
             //methodBase.Attributes= MethodAttributes.NewSlot;
             MethodName = methodBase.Name;
             ClassName = methodBase.DeclaringType?.FullName;
-            AssemblyName = Path.GetFileName(methodBase.DeclaringType?.Assembly.Location);
+            AssemblyName = methodBase.DeclaringType?.Assembly.GetName().Name;
             MethodSignature = CalcSignature(methodBase);
             CreateMethodHash();
-        }
-
-        public MethodData(MethodIdentifier methodIdentifier) : this(methodIdentifier?.MethodInfo)
-        {
         }
 
         public string AssemblyName { get; internal set; }
@@ -47,11 +44,14 @@ namespace LocalResumableFunction.InOuts
         internal static string CalcSignature(MethodBase value)
         {
             var parameterInfos = value.GetParameters();
-            return parameterInfos.Length != 0
+            var inputs = parameterInfos.Length != 0
                 ? parameterInfos
                     .Select(x => x.ParameterType.Name)
                     .Aggregate((x, y) => $"{x}#{y}")
                 : string.Empty;
+            if (value is MethodInfo methodInfo)
+                return $"{methodInfo.ReturnType.Name}#{inputs}";
+            return inputs;
         }
 
         private void CreateMethodHash()
