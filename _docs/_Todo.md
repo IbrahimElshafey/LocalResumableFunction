@@ -1,5 +1,10 @@
 ﻿# Todo
-* IsLocked for optemistic lock
+* Replay GoTo
+* Replay NewMatches
+* Add 
+	* CreationDate
+	* IsLocked for optemistic lock
+	* Row version
 * Use hangfire to 
 	* Queue pushed events requests [Fire and forget]
 	* Call time based events

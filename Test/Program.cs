@@ -19,7 +19,7 @@ public class Program
         };
         Console.WriteLine("Test App RUNNING.");
 
-        //await TestWaitMany();
+        await TestWaitMany();
         //await TestSubFunctionCall();
         //await TestReplayGoBackAfter();
         //await TestReplayGoBackBeforeNewMatch();
