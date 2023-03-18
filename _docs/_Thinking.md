@@ -25,3 +25,7 @@
 		* Periodic
 		* Can be notified by external
 		* Queue matched waits for same state
+
+#Timer Service
+* Using Quartz.NET with ASP.NET Core and worker services
+https://andrewlock.net/using-quartz-net-with-asp-net-core-and-worker-services/
