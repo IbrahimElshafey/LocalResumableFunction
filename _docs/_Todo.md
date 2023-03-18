@@ -1,18 +1,10 @@
 ﻿# Todo
-* Replay GoTo
-* Replay NewMatches
 * Add 
-	* CreationDate
 	* IsLocked for optemistic lock
-	* Row version
-* Use hangfire to 
-	* Queue pushed events requests [Fire and forget]
-	* Call time based events
-	* Queue matched waits for same state
+	
 * Validate waits
 	* Wait same wait twice in group error
-
-* Wait name can't duplicate in same method
+	* Wait name can't duplicate in same method
 
 * Centralize state database
 	* Use many database providers [Postgres,Sql Server]
@@ -30,13 +22,12 @@
 
 
 * Remove uniqe for method hash
-* Run in another process
-	* Save pushed waits to database or queue
+
 * Logging and handle exception
-* save expression to seprate table for duplication kill
+
 * Create nuget package
-* Test with web API
-* Save function state all fields
+
+* Save function state all fields [public and non public]
 * Find fast and best object serializer
 * MoveFunctionToRecycleBin
 
@@ -45,23 +36,3 @@
 
 
 * Speed Analysis	
-
-# Test Engine Scenarios
-* Seqeunce [DONE]
-* Wait all [DONE]
-* Wait first [DONE]
-* Wait function [DONE]
-* Wait many functions [DONE]
-* Wait first function [DONE]
-* Replay [to,after,before] for types:
-	* To
-	* After [DONE]
-	* Before [DONE]
-
-# Retest
-* Test loops
-* Test Replay
-
-# Cancled
-* No inheritance from resumable local function (Inheritance faclitate parsing and using waits)
-* Remove Attributes (We can't because we need to register first waits fro a resumable function)

@@ -14,6 +14,7 @@ public abstract class Wait
 
     public int Id { get; internal set; }
     public string Name { get; internal set; }
+    public string AssemblyName { get; internal set; }
     public WaitStatus Status { get; internal set; }
     public bool IsFirst { get; internal set; }
     public int StateBeforeWait { get; internal set; }

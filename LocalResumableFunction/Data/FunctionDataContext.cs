@@ -13,9 +13,11 @@ internal class FunctionDataContext : DbContext
 
     public FunctionDataContext()
     {
-        _dbConnection = $"Data Source={AppContext.BaseDirectory}LocalResumableFunctionsData.db";
+        //_dbConnection = $"Server=(localdb)\\MSSQLLocalDB;Database=ResumableFunctionEngineDb;";
+        //_dbConnection = $"Data Source={AppContext.BaseDirectory}LocalResumableFunctionsData.db";
         Database.EnsureCreated();
     }
+
 
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
     public DbSet<MethodIdentifier> MethodIdentifiers { get; set; }
@@ -27,7 +29,9 @@ internal class FunctionDataContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.LogTo(s => Debug.WriteLine(s));
-        optionsBuilder.UseSqlite(_dbConnection);
+        optionsBuilder.UseSqlServer(
+            $"Server=(localdb)\\MSSQLLocalDB;Database=ResumableFunctionsData;");
+        //optionsBuilder.UseSqlite(_dbConnection);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -47,12 +51,14 @@ internal class FunctionDataContext : DbContext
         modelBuilder.Entity<MethodIdentifier>()
             .HasMany(x => x.WaitsCreatedByFunction)
             .WithOne(wait => wait.RequestedByFunction)
+            .OnDelete(DeleteBehavior.Restrict)
             .HasForeignKey(x => x.RequestedByFunctionId)
             .HasConstraintName("FK_Waits_In_ResumableFunction");
 
         modelBuilder.Entity<MethodIdentifier>()
             .HasMany(x => x.WaitsRequestsForMethod)
             .WithOne(wait => wait.WaitMethodIdentifier)
+            .OnDelete(DeleteBehavior.Restrict)
             .HasForeignKey(x => x.WaitMethodIdentifierId)
             .HasConstraintName("FK_Waits_RequestedForMethod");
 
@@ -125,7 +131,7 @@ internal class FunctionDataContext : DbContext
     {
         SetDates();
         ExcludeFalseAddEntries();
-        
+
 
         return base.SaveChangesAsync(cancellationToken);
     }
