@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Linq;
+using LocalResumableFunction.Attributes;
 using LocalResumableFunction.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -32,44 +33,23 @@ internal class WaitsRepository : RepositoryBase
         return Task.CompletedTask;
     }
 
-    public async Task<List<MethodWait>> GetMatchedWaits(PushedMethod pushedMethod)
+    public async Task<List<MethodWait>> GetMethodActiveWaits(MethodData methodData)
     {
+        var _metodIdsRepo = new MethodIdentifierRepository(_context);
+        var methodId = await _metodIdsRepo.GetMethodIdentifierFromDb(methodData);
+        if (methodId == null)
+            throw new Exception(
+                $"Method [{methodData.MethodName}] is not registered in current database as [{nameof(WaitMethodAttribute)}].");
         var matchedWaits = new List<MethodWait>();
         var databaseWaits =
             await _context
                 .MethodWaits
                 .Include(x => x.RequestedByFunction)
                 .Where(x =>
-                    x.WaitMethodIdentifierId == pushedMethod.MethodId &&
+                    x.WaitMethodIdentifierId == methodId.Id &&
                     x.Status == WaitStatus.Waiting)
                 .ToListAsync();
-
-        //check if match
-        databaseWaits.ForEach(wait => wait.LoadExpressions());
-        foreach (var methodWait in databaseWaits)
-        {
-            methodWait.Input = pushedMethod.Input;
-            methodWait.Output = pushedMethod.Output;
-            switch (methodWait.NeedFunctionStateForMatch)
-            {
-                case false when methodWait.CheckMatch():
-                    await LoadWaitFunctionState(methodWait);
-                    matchedWaits.Add(methodWait);
-                    break;
-                case true:
-                    await LoadWaitFunctionState(methodWait);
-                    if (methodWait.CheckMatch())
-                        matchedWaits.Add(methodWait);
-                    break;
-            }
-        }
-
-        return matchedWaits;
-
-        async Task LoadWaitFunctionState(MethodWait wait)
-        {
-            wait.FunctionState = await _context.FunctionStates.FindAsync(wait.FunctionStateId);
-        }
+        return databaseWaits;
     }
 
 

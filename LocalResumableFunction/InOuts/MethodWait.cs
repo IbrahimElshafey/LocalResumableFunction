@@ -74,7 +74,7 @@ public class MethodWait : Wait
         FunctionState.StateObject = CurrentFunction;
     }
 
-    public bool CheckMatch()
+    public bool IsMatched()
     {
         try
         {

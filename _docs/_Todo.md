@@ -1,4 +1,6 @@
 ﻿# Todo
+* TimeWaits background task
+* Handle waits background task
 * Add 
 	* IsLocked for optemistic lock
 	
@@ -6,18 +8,13 @@
 	* Wait same wait twice in group error
 	* Wait name can't duplicate in same method
 
-* Centralize state database
-	* Use many database providers [Postgres,Sql Server]
-	* Use Database as a service with OData implementation
 
 * Wait for external method
-	* Add interface with methods
-	* Mark intefaces with [WaitExternalMethods] attribute that takes
-		* AssemblyName
-		* ClassName
+	* Add class to your code
+	* Mark a method with [ExternalWaitMethod(ClassName = "Full.Class.Name",AssemblyName="SomeAssembly")]
 		* MethodName [as method name itself]
 		* MethodSignature [as method sigature itself]
-	* External method will be pushed in custom way
+		* method body is empty return default or exception it will never called
 
 
 

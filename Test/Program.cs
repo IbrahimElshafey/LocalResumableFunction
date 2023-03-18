@@ -17,9 +17,10 @@ public class Program
         {
             _context = new FunctionDataContext()
         };
+
         Console.WriteLine("Test App RUNNING.");
 
-        //await TestWaitMany();
+        await TestWaitMany();
         //await TestSubFunctionCall();
         //await TestReplayGoBackAfter();
         //await TestReplayGoBackBeforeNewMatch();
@@ -29,7 +30,7 @@ public class Program
         //await TestManyWaitsTypeInGroup();
         //await TestTimeWait();
         //await TestSameEventAgain();
-        await TestWaitInterfaceMethod();
+        //await TestWaitInterfaceMethod();
         //await TestReplayGoBackToWithNewMatch();
 
 

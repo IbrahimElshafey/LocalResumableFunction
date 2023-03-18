@@ -6,7 +6,7 @@ namespace LocalResumableFunction;
 
 internal partial class ResumableFunctionHandler
 {
-    private async Task HandleMatchedWait(Wait matchedWait)
+    private async Task ResumeExecution(Wait matchedWait)
     {
         var currentWait = matchedWait;
 
