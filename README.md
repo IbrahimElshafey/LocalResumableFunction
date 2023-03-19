@@ -1,7 +1,7 @@
 **Project Status: Work in progress**
 
 # What is Resumable Function?
-A function/method/procedure/routine that pauses and resumes execution based on external events that it waits for.
+A function that pauses and resumes execution based on external methods that it waits for to be executed.
 # Code example 
 ![sample image](./Sample.png)
 Number in image illustration:
