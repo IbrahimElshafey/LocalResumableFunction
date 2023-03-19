@@ -14,6 +14,11 @@ internal partial class ResumableFunctionHandler
     /// </summary>
     internal async Task MethodCalled(PushedMethod pushedMethod)
     {
+        await _backgroundTaskQueue.QueueBackgroundWorkItemAsync(WaitProcessing);
+    }
+
+    private async ValueTask WaitProcessing(PushedMethod pushedMethod, CancellationToken arg)
+    {
         //todo:move this code to background task
         /*
          * Notify cuurent service HandleWaitsBackground
