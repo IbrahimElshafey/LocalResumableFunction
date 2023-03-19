@@ -3,6 +3,7 @@
 # What is Resumable Function?
 A function that pauses and resumes execution based on external methods that it waits for to be executed.
 # Code example 
+
 ``` C#
 [ResumableFunctionEntryPoint]//Point 1
 public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
