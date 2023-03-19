@@ -16,13 +16,13 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
     public bool ManagerFourApproval { get; set; }
     public bool ManagerFiveApproval { get; set; }
 
-    [ResumableFunctionEntryPoint]
+    [ResumableFunctionEntryPoint]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
     {
         yield return
-         Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-             .MatchIf((project, output) => output && project.IsResubmit == false)
-             .SetData((project, output) => CurrentProject == project);
+         Wait<Project, bool>("Project Submitted", ProjectSubmitted)//Point 2
+             .MatchIf((project, output) => output && !project.IsResubmit)//Point 3
+             .SetData((project, output) => CurrentProject == project);//Point 4
 
         await AskManagerToApprove("Manager One", CurrentProject.Id);
         yield return
@@ -33,7 +33,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
         if (ManagerOneApproval is false)
         {
             WriteMessage("Go back and ask applicant to resubmitt project.");
-            await AskApplicantToTResubmittProject(CurrentProject.Id);
+            await AskApplicantToResubmittProject(CurrentProject.Id);
             yield return GoBackTo<Project, bool>("Project Submitted", (project, output) => output && project.IsResubmit && project.Id == CurrentProject.Id);
         }
         else
@@ -49,7 +49,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
         return Task.CompletedTask;
     }
 
-    private Task AskApplicantToTResubmittProject(int id)
+    private Task AskApplicantToResubmittProject(int id)
     {
         return Task.CompletedTask;
     }
