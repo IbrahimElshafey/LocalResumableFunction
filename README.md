@@ -3,12 +3,41 @@
 # What is Resumable Function?
 A function that pauses and resumes execution based on external methods that it waits for to be executed.
 # Code example 
-![sample image](./Sample.png)
+
+``` C#
+[ResumableFunctionEntryPoint]//Point 1
+public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
+{
+	yield return
+	 Wait<Project, bool>("Project Submitted", ProjectSubmitted)//Point 2
+		 .MatchIf((project, output) => output && !project.IsResubmit)//Point 3
+		 .SetData((project, output) => CurrentProject == project);//Point 4
+
+	await AskManagerToApprove("Manager One", CurrentProject.Id);
+	yield return
+		   Wait<ApprovalDecision, bool>("Manager One Approve Project", ManagerOneApproveProject)
+			   .MatchIf((approvalDecision, output) => approvalDecision.ProjectId == CurrentProject.Id)
+			   .SetData((approvalDecision, approvalResult) => ManagerOneApproval == approvalResult);
+
+	if (ManagerOneApproval is false)
+	{
+		WriteMessage("Go back and ask applicant to resubmitt project.");
+		await AskApplicantToResubmittProject(CurrentProject.Id);
+		yield return GoBackTo<Project, bool>("Project Submitted", (project, output) => output && project.IsResubmit && project.Id == CurrentProject.Id);
+	}
+	else
+	{
+		WriteMessage("Project approved");
+		await InfromApplicantAboutApproval(CurrentProject.Id);
+	}
+	Success(nameof(ProjectApprovalFlow));
+}
+```
 Number in image illustration:
-1. Line one: Mark a method with `[ResumableFunctionEntryPoint]` to indicate that the method paused and resumed based on waits inside
-2. LineTwo: Wait for the `ProjectSubmitted` method to be executed, this call will save an object representing the wait in the database (Wait Record) and pause the method execution until `ProjectSubmitted` method called.
-3. We pass an expression tree `(project, output) => output && project.IsResubmit == false` that will be evaluated when `ProjectSubmitted` method called to check if it is a match for the current instance or not, The passed expression serialized and saved with the wait record in the database.
-4. If a match occurred we update the class instance data with `SetData` expression, Note that the assignment operator is not allowed in expression trees, also we save this expression in the database with the wait record.
+1. Point 1: Mark a method with `[ResumableFunctionEntryPoint]` to indicate that the method paused and resumed based on waits inside
+2. Point 2: Wait for the `ProjectSubmitted` method to be executed, this call will save an object representing the wait in the database (Wait Record) and pause the method execution until `ProjectSubmitted` method called.
+3. Point 3: We pass an expression tree `(project, output) => output && project.IsResubmit == false` that will be evaluated when `ProjectSubmitted` method called to check if it is a match for the current instance or not, The passed expression serialized and saved with the wait record in the database.
+4. Point 4: If a match occurred we update the class instance data with `SetData` expression, Note that the assignment operator is not allowed in expression trees, also we save this expression in the database with the wait record.
 * The execution will continue after the match until the next wait.
 * The next wait will be saved to the database in the same way.
 * The resumable function library will scan your code to register first waits for each `ResumableFunctionEntryPoint`
