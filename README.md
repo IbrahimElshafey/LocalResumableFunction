@@ -2,27 +2,208 @@
 
 # What is Resumable Function?
 A function/method/procedure/routine that pauses and resumes execution based on external events that it waits for.
+# Code example 
+![sample image](./Sample.png)
+Number in image illustration:
+1. Line one: Mark a method with `[ResumableFunctionEntryPoint]` to indicate that the method paused and resumed based on waits inside
+2. LineTwo: Wait for the `ProjectSubmitted` method to be executed, this call will save an object representing the wait in the database (Wait Record) and pause the method execution until `ProjectSubmitted` method called.
+3. We pass an expression tree `(project, output) => output && project.IsResubmit == false` that will be evaluated when `ProjectSubmitted` method called to check if it is a match for the current instance or not, The passed expression serialized and saved with the wait record in the database.
+4. If a match occurred we update the class instance data with `SetData` expression, Note that the assignment operator is not allowed in expression trees, also we save this expression in the database with the wait record.
+* The execution will continue after the match until the next wait.
+* The next wait will be saved to the database in the same way.
+* The resumable function library will scan your code to register first waits for each `ResumableFunctionEntryPoint`
+* The library saves the class state to the database and loads it when a method called and matched.
+* You must add `[WaitMethod]` attribute to the methods you want to wait.
+``` C#
+	[WaitMethod]
+	internal async Task<bool> ProjectSubmitted(Project project)
+	{
+		.
+		.
+		.
+	[WaitMethod]
+	public bool ManagerOneApproveProject(ApprovalDecision args)
+	{
+		.
+		.
+		.
+```
+* The method marked with `[WaitMethod]` must have one input paramter that is serializable.
+* you can mark any instance method with `[WaitMethod]` if it have one parameter.
+# Supported Wait Types
+* Wait single method to match (similar to `await` in `async\await`)
+``` C#
+ yield return
+         Wait<Project, bool>("Project Submitted", ProjectSubmitted)
+             .MatchIf((input, output) => output == true)
+             .SetData((input, output) => CurrentProject == input);
+```
+* Wait first method match in a group of methods (similar to `Task.WhenAny()`)
+``` C#
+ yield return Wait(
+            "Wait first in two",
+            new MethodWait<Project, bool>(ProjectSubmitted)
+                .MatchIf((input, output) => output == true)
+                .SetData((input, output) => CurrentProject == input),
+            new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerOneApproval == output)
+        ).First();
+```
+* Wait group of methods to match (similar to `Task.WhenAll()`)
+``` C#
+ yield return Wait(
+            "Wait three methods",
+            new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerOneApproval == output),
+            new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerTwoApproval == output),
+            new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerThreeApproval == output)
+        ).All();
+```
+* Custom wait for a group
+``` C#
+ yield return Wait(
+            "Wait many with complex match expression",
+            new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerOneApproval == output),
+            new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerTwoApproval == output),
+            new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                .SetData((input, output) => ManagerThreeApproval == output)
+        ).When(waitGroup => waitGroup.CompletedCount == 2);//wrtite any complex exprssion against waitGroup
+```
+* You can wait a resumable sub function that is not and entry point
+``` C#
+ yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers);
+ ....
+ 	//method must have  `SubResumableFunction` attribute
+	//Must return `IAsyncEnumerable<Wait>`
+ 	[SubResumableFunction]
+	public async IAsyncEnumerable<Wait> WaitTwoManagers()
+	{
+		//wait some code
+		.
+		.
+		.
+```
+* `SubResumableFunction` Can wait another `SubResumableFunction` 
+* You can wait multiple `SubResumableFunction`s
+* You can wait mixed group that contains `SubResumableFunction`s, `MethodWait`s and `WaitsGroup`s
+* You can GoBackTo a previous wait to wait it again.
+``` C#
+if (ManagerOneApproval is false)
+{
+	WriteMessage("Manager one rejected project and replay will go to ManagerOneApproveProject.");
+	yield return GoBackTo("ManagerOneApproveProject");
+}
+```
+* You can GoBackAfter a previous wait.
+``` C#
+yield return
+	Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
+		.MatchIf((input, output) => output == true)
+		.SetData((input, output) => CurrentProject == input);
 
+await AskManagerToApprove("Manager 1",CurrentProject.Id);
+yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
+	.MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+	.SetData((input, output) => ManagerOneApproval == input.Decision);
+
+if (ManagerOneApproval is false)
+{
+	WriteMessage("Manager one rejected project and replay will go after ProjectSubmitted.");
+	yield return GoBackAfter(ProjectSumbitted);
+}
+```
+* You can GoBackBefore a previous wait
+``` C#
+WriteMessage("Before project submitted.");
+yield return
+	Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
+		.MatchIf((input, output) => output == true && input.IsResubmit == false)
+		.SetData((input, output) => CurrentProject == input);
+
+await AskManagerToApprove("Manager 1", CurrentProject.Id);
+yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
+	.MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+	.SetData((input, output) => ManagerOneApproval == input.Decision);
+
+if (ManagerOneApproval is false)
+{
+	WriteMessage(
+		"ReplayExample: Manager one rejected project and replay will wait ProjectSumbitted again.");
+	yield return
+		GoBackBefore<Project, bool>(
+			ProjectSumbitted,
+			(input, output) => input.Id == CurrentProject.Id && input.IsResubmit == true);
+}
+```
+* You can mark interface method with [WaitMethod] and in this case the implementation must have the attribute [WaitMethodImplementation]
+``` C# 
+internal interface IManagerFiveApproval
+{
+	[WaitMethod]
+	bool ManagerFiveApproveProject(ApprovalDecision args);
+}
+....
+//in class implementation
+[WaitMethodImplementation]
+public bool ManagerFiveApproveProject(ApprovalDecision args)
+{
+	WriteAction($"Manager Four Approve Project with decision ({args.Decision})");
+	return args.Decision;
+}
+```
+* [Working on waiting method in another service]
+``` C#
+//you will create empty implementation for method you want to wait from the external
+public class ExternalServiceClass
+{
+	//The [ExternalWaitMethod] attribute used to exactly point to exterbnal method you want to wait
+	//The class name is the full class name in the external service
+	//The AssemblyName is the assembly name for the external service
+	//The method name must be the same as the on in the external service
+	//The method return type name and input type name must be the same as the on in the external service
+	[ExternalWaitMethod(ClassName = "External.IManagerFiveApproval",AssemblyName ="SomeAssembly")]
+	public bool ManagerFiveApproveProject(ApprovalDecision args)
+	{
+		return default;
+	}
+}
+/// you can wiat it in your code normally
+yield return
+	Wait<ApprovalDecision, bool>("Manager Five Approve Project External Method", 
+	new ExternalServiceClass().ManagerFiveApproveProject)//here
+		.MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+		.SetData((input, output) => ManagerFiveApproval == output);
+```
 # Why this project?
 * I want to write code that reflects the business requirements so that a developer handover another without needing business documents to understand the code.
 * Most workflow engines can't be extended to support complex scenarios, for example, the below link contains a list of workflow patterns, which are elementary to implement by any developer if we just write code and not think about how communications work.
 	http://www.Functionpatterns.com/patterns/
 * The source code must be a source of truth about how project parts function, and handover a project with hundreds of classes and methods to a new developer does not tell him what business flow executed but a resumable function will simplify understanding of what happens under the hood.
-*  With Pub/Sub loosely coupled services it's hard to trace what happened without implementing a complex architecture.
+*  If we used Pub/Sub loosely coupled services it willbe hard to trace what happened without implementing a complex architecture.
 
-# Key parts
+----
+---
+---
+# Documentation from here is from [another attempt](https://github.com/IbrahimElshafey/ResumableFunction) and will be updated later.
+
+# Keywords
 * Engine: component responsible for running and resume function execution.
 * Event Provider: is a component that push events to the engine.
 * Queung service: is a way to separate engine and providers.
 * Event: Plain object but contains a property for it's provider.
 
-# Event Wait Types
-* Single Event `EventWait` (similar to `await` in `async\await`)
-* First event in a group `AnyEventWait` (similar to `Task.WhenAny()`)
-* A group of event `AllEventsWait` (similar to `Task.WhenAll()`)
-* Call another resumable function `FunctionWait` (call another async method)
-* Wait one or more resumable function to complete `AllFunctionsWait`.
-* Wait first resumable function to complete `AnyFunctionWait`.
+
 
 # What are the expected types and resources for events?
 * Any implementation for `IEventProvider` interface that push events to the engine such as:

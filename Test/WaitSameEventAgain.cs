@@ -14,7 +14,7 @@ internal class WaitSameEventAgain : ProjectApprovalExample
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
-        AskManagerToApprove(CurrentProject.Id);
+        await AskManagerToApprove("Manager 1", CurrentProject.Id);
 
         Wait ManagerApproval() => Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)

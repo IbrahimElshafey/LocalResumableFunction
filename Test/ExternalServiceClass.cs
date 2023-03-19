@@ -5,10 +5,10 @@ namespace ExternalService
 {
     public class ExternalServiceClass
     {
-        [ExternalWaitMethod(ClassName = "External.IManagerFiveApproval")]
+        [ExternalWaitMethod(ClassName = "External.IManagerFiveApproval",AssemblyName ="SomeAssembly")]
         public bool ManagerFiveApproveProject(ApprovalDecision args)
         {
-            return false;
+            return default;
         }
     }
 }

@@ -47,7 +47,7 @@ internal class ReplayGoBackToExample : ProjectApprovalExample
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
-        AskManagerToApprove(CurrentProject.Id);
+        await AskManagerToApprove("Manager 1", CurrentProject.Id);
         yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
             .SetData((input, output) => ManagerOneApproval == input.Decision);
@@ -71,7 +71,7 @@ internal class ReplayGoBackToExample : ProjectApprovalExample
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
-        AskManagerToApprove(CurrentProject.Id);
+        await AskManagerToApprove("Manager 1", CurrentProject.Id);
         yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
             .SetData((input, output) => ManagerOneApproval == input.Decision);

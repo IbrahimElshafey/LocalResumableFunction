@@ -37,7 +37,7 @@ internal class TestWaitManyExample : ProjectApprovalExample
                 .SetData((input, output) => CurrentProject == input);
         WriteMessage("Wait two of three managers to approve");
         yield return Wait(
-            "Wait three methods",
+            "Wait many with complex match expression",
             new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerOneApproval == output),
@@ -47,7 +47,7 @@ internal class TestWaitManyExample : ProjectApprovalExample
             new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output)
-        ).When(x => x.CompletedCount == 2);
+        ).When(waitGroup => waitGroup.CompletedCount == 2);
         WriteMessage("Two waits of three waits matched.");
         WriteMessage("WaitManyAndCountExpressionDefined ended.");
         Success(nameof(WaitManyAndCountExpressionDefined));

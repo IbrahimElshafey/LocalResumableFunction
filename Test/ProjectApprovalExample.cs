@@ -16,6 +16,44 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
     public bool ManagerFourApproval { get; set; }
     public bool ManagerFiveApproval { get; set; }
 
+    [ResumableFunctionEntryPoint]
+    public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
+    {
+        yield return
+         Wait<Project, bool>("Project Submitted", ProjectSubmitted)
+             .MatchIf((project, output) => output && project.IsResubmit == false)
+             .SetData((project, output) => CurrentProject == project);
+
+        await AskManagerToApprove("Manager One", CurrentProject.Id);
+        yield return
+               Wait<ApprovalDecision, bool>("Manager One Approve Project", ManagerOneApproveProject)
+                   .MatchIf((approvalDecision, output) => approvalDecision.ProjectId == CurrentProject.Id)
+                   .SetData((approvalDecision, approvalResult) => ManagerOneApproval == approvalResult);
+
+        if (ManagerOneApproval is false)
+        {
+            WriteMessage("Go back and ask applicant to resubmitt project.");
+            await AskApplicantToTResubmittProject(CurrentProject.Id);
+            yield return GoBackTo<Project, bool>("Project Submitted", (project, output) => output && project.IsResubmit && project.Id == CurrentProject.Id);
+        }
+        else
+        {
+            WriteMessage("Project approved");
+            await InfromApplicantAboutApproval(CurrentProject.Id);
+        }
+        Success(nameof(ProjectApprovalFlow));
+    }
+
+    private Task InfromApplicantAboutApproval(int id)
+    {
+        return Task.CompletedTask;
+    }
+
+    private Task AskApplicantToTResubmittProject(int id)
+    {
+        return Task.CompletedTask;
+    }
+
     public async IAsyncEnumerable<Wait> ExternalMethod()
     {
         yield return
@@ -52,7 +90,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
-        AskManagerToApprove(CurrentProject.Id);
+        await AskManagerToApprove("Manager 1", CurrentProject.Id);
         WriteMessage("Wait sub function");
         yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers);
         WriteMessage("After sub function ended");
@@ -150,15 +188,16 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
         return args.Decision;
     }
 
-    public bool AskManagerToApprove(int projectId)
+    public async Task<bool> AskManagerToApprove(string manager, int projectId)
     {
-        WriteAction("Ask Manager to Approve Project");
+        await Task.Delay(10);
+        WriteAction($"Ask Manager [{manager}] to Approve Project that has id [{projectId}]");
         return true;
     }
 
     public static Project GetCurrentProject()
     {
-        return new Project { Id = Random.Shared.Next(1,int.MaxValue), Name = "Project Name", Description = "Description" };
+        return new Project { Id = Random.Shared.Next(1, int.MaxValue), Name = "Project Name", Description = "Description" };
     }
     protected void Success(string msg)
     {

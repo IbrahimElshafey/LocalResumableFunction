@@ -11,7 +11,7 @@ internal class TestTimeExample : ProjectApprovalExample
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
-        AskManagerToApprove(CurrentProject.Id);
+        await AskManagerToApprove("Manager 1", CurrentProject.Id);
         const string waitManagerOneApprovalInSeconds = "Wait manager one approval in 10 seconds";
         yield return Wait(
                 waitManagerOneApprovalInSeconds,
