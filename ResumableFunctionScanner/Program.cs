@@ -1,4 +1,4 @@
-﻿using LocalResumableFunction;
+﻿using ResumableFunctions.Core;
 
 namespace ResumableFunctionScanner;
 

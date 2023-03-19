@@ -1,9 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
 using System.Reflection;
-using LocalResumableFunction;
-using LocalResumableFunction.Data;
-using LocalResumableFunction.InOuts;
+using ResumableFunctions.Core;
+using ResumableFunctions.Core.Data;
+using ResumableFunctions.Core.InOuts;
 
 namespace Test;
 

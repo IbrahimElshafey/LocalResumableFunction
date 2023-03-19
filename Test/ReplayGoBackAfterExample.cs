@@ -1,5 +1,5 @@
-﻿using LocalResumableFunction;
-using LocalResumableFunction.InOuts;
+﻿using ResumableFunctions.Core;
+using ResumableFunctions.Core.InOuts;
 
 namespace Test;
 

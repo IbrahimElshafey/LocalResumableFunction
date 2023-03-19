@@ -1,7 +1,7 @@
 **Project Status: Work in progress**
 
 # What is Resumable Function?
-A function that pauses and resumes execution based on external methods that it waits for to be executed.
+A function that pauses and resumes execution based on external method/s that it waits for it to be executed.
 # Code example 
 
 ``` C#
