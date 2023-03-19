@@ -33,29 +33,28 @@ public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
 	Success(nameof(ProjectApprovalFlow));
 }
 ```
-Number in image illustration:
-1. Point 1: Mark a method with `[ResumableFunctionEntryPoint]` to indicate that the method paused and resumed based on waits inside
-2. Point 2: Wait for the `ProjectSubmitted` method to be executed, this call will save an object representing the wait in the database (Wait Record) and pause the method execution until `ProjectSubmitted` method called.
-3. Point 3: We pass an expression tree `(project, output) => output && project.IsResubmit == false` that will be evaluated when `ProjectSubmitted` method called to check if it is a match for the current instance or not, The passed expression serialized and saved with the wait record in the database.
-4. Point 4: If a match occurred we update the class instance data with `SetData` expression, Note that the assignment operator is not allowed in expression trees, also we save this expression in the database with the wait record.
+* **Point 1:** Mark a method with `[ResumableFunctionEntryPoint]` to indicate that the method paused and resumed based on waits inside
+* **Point 2:** Wait for the `ProjectSubmitted` method to be executed, this call will save an object representing the wait in the database (Wait Record) and pause the method execution until `ProjectSubmitted` method called.
+* **Point 3:** We pass an expression tree `(project, output) => output && project.IsResubmit == false` that will be evaluated when `ProjectSubmitted` method called to check if it is a match for the current instance or not, The passed expression serialized and saved with the wait record in the database.
+* **Point 4:** If a match occurred we update the class instance data with `SetData` expression, Note that the assignment operator is not allowed in expression trees, also we save this expression in the database with the wait record.
 * The execution will continue after the match until the next wait.
 * The next wait will be saved to the database in the same way.
 * The resumable function library will scan your code to register first waits for each `ResumableFunctionEntryPoint`
 * The library saves the class state to the database and loads it when a method called and matched.
 * You must add `[WaitMethod]` attribute to the methods you want to wait.
 ``` C#
-	[WaitMethod]
-	internal async Task<bool> ProjectSubmitted(Project project)
-	{
-		.
-		.
-		.
-	[WaitMethod]
-	public bool ManagerOneApproveProject(ApprovalDecision args)
-	{
-		.
-		.
-		.
+[WaitMethod]
+internal async Task<bool> ProjectSubmitted(Project project)
+{
+	.
+	.
+	.
+[WaitMethod]
+public bool ManagerOneApproveProject(ApprovalDecision args)
+{
+	.
+	.
+	.
 ```
 * The method marked with `[WaitMethod]` must have one input paramter that is serializable.
 * you can mark any instance method with `[WaitMethod]` if it have one parameter.
@@ -113,15 +112,15 @@ Number in image illustration:
 ``` C#
  yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers);
  ....
- 	//method must have  `SubResumableFunction` attribute
-	//Must return `IAsyncEnumerable<Wait>`
- 	[SubResumableFunction]
-	public async IAsyncEnumerable<Wait> WaitTwoManagers()
-	{
-		//wait some code
-		.
-		.
-		.
+//method must have  `SubResumableFunction` attribute
+//Must return `IAsyncEnumerable<Wait>`
+[SubResumableFunction]
+public async IAsyncEnumerable<Wait> WaitTwoManagers()
+{
+	//wait some code
+	.
+	.
+	.
 ```
 * `SubResumableFunction` Can wait another `SubResumableFunction` 
 * You can wait multiple `SubResumableFunction`s
@@ -175,7 +174,7 @@ if (ManagerOneApproval is false)
 			(input, output) => input.Id == CurrentProject.Id && input.IsResubmit == true);
 }
 ```
-* You can mark interface method with [WaitMethod] and in this case the implementation must have the attribute [WaitMethodImplementation]
+* You can mark interface method with `[WaitMethod]` and in this case the implementation must have the attribute `[WaitMethodImplementation]`
 ``` C# 
 internal interface IManagerFiveApproval
 {
@@ -196,7 +195,7 @@ public bool ManagerFiveApproveProject(ApprovalDecision args)
 //you will create empty implementation for method you want to wait from the external
 public class ExternalServiceClass
 {
-	//The [ExternalWaitMethod] attribute used to exactly point to exterbnal method you want to wait
+	//The [ExternalWaitMethod] attribute used to exactly point to external method you want to wait
 	//The class name is the full class name in the external service
 	//The AssemblyName is the assembly name for the external service
 	//The method name must be the same as the on in the external service
@@ -207,13 +206,18 @@ public class ExternalServiceClass
 		return default;
 	}
 }
-/// you can wiat it in your code normally
+/// you can wait it in your code normally
 yield return
 	Wait<ApprovalDecision, bool>("Manager Five Approve Project External Method", 
 	new ExternalServiceClass().ManagerFiveApproveProject)//here
 		.MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
 		.SetData((input, output) => ManagerFiveApproval == output);
 ```
+* Register third party method by fake signature,This will enable
+	* Use github web hooks fro example
+	* Wait for google drive file change
+	* Http listener 
+	* More advanced scenarios
 # Why this project?
 * I want to write code that reflects the business requirements so that a developer handover another without needing business documents to understand the code.
 * Most workflow engines can't be extended to support complex scenarios, for example, the below link contains a list of workflow patterns, which are elementary to implement by any developer if we just write code and not think about how communications work.
