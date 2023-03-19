@@ -40,16 +40,13 @@ internal class WaitsRepository : RepositoryBase
         if (methodId == null)
             throw new Exception(
                 $"Method [{methodData.MethodName}] is not registered in current database as [{nameof(WaitMethodAttribute)}].");
-        var matchedWaits = new List<MethodWait>();
-        var databaseWaits =
-            await _context
+        return await _context
                 .MethodWaits
                 .Include(x => x.RequestedByFunction)
                 .Where(x =>
                     x.WaitMethodIdentifierId == methodId.Id &&
                     x.Status == WaitStatus.Waiting)
                 .ToListAsync();
-        return databaseWaits;
     }
 
 
