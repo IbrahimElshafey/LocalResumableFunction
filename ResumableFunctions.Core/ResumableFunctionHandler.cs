@@ -13,9 +13,9 @@ internal partial class ResumableFunctionHandler
     private readonly MethodIdentifierRepository _metodIdsRepo;
     private readonly IBackgroundJobClient _backgroundJobClient;
 
-    internal ResumableFunctionHandler(FunctionDataContext context = null, IBackgroundJobClient backgroundJobClient = null)
+    internal ResumableFunctionHandler(FunctionDataContext context, IBackgroundJobClient backgroundJobClient)
     {
-        _context = context ?? new FunctionDataContext();
+        _context = context;
         _waitsRepository = new WaitsRepository(_context);
         _metodIdsRepo = new MethodIdentifierRepository(_context);
         _backgroundJobClient = backgroundJobClient;

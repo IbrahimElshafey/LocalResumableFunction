@@ -9,14 +9,14 @@ using ResumableFunctions.Core.Abstraction;
 
 namespace ResumableFunctions.Core;
 
-internal partial class ResumableFunctionHandler: IPushMethodCall, IWaitMatchedHandler
+internal partial class ResumableFunctionHandler : IPushMethodCall, IWaitMatchedHandler
 {
     /// <summary>
     ///     When method called and finished
     /// </summary>
     public void MethodCalled(PushedMethod pushedMethod)
     {
-        _backgroundJobClient.Enqueue(() =>  ProcessPushedMethod(pushedMethod));
+        _backgroundJobClient.Enqueue(() => ProcessPushedMethod(pushedMethod));
     }
 
     private async Task ProcessPushedMethod(PushedMethod pushedMethod)
@@ -46,15 +46,11 @@ internal partial class ResumableFunctionHandler: IPushMethodCall, IWaitMatchedHa
                 if (isLocalWait)
                 {
                     //handle if local
-                    if (!await CheckIfMatch(pushedMethod, methodWait))
-                        continue;
-                    methodWait.UpdateFunctionData();
-                    await ResumeExecution(methodWait);
-                    await _context.SaveChangesAsync();
+                    await ProcessMatchedWait(methodWait, pushedMethod);
                 }
                 else
                 {
-                    //notify sevrice that owns the wait
+                    //todo: call "api/MatchedWaitReceiver/WaitMatched" for the other service
                 }
             }
         }
@@ -93,11 +89,34 @@ internal partial class ResumableFunctionHandler: IPushMethodCall, IWaitMatchedHa
 
     public void WaitMatched(int waitId, int pushedMethodId)
     {
-        _backgroundJobClient.Enqueue(() => ProcessMatchedWait(waitId,pushedMethodId));
+        _backgroundJobClient.Enqueue(() => ProcessMatchedWait(waitId, pushedMethodId));
     }
 
     private async Task ProcessMatchedWait(int waitId, int pushedMethodId)
     {
-        throw new NotImplementedException();
+        //_context
+        //_backgroundJobClient
+        var methodWait = await _context
+            .MethodWaits
+            .Include(x => x.RequestedByFunction)
+            .Where(x => x.Status == WaitStatus.Waiting)
+            .FirstAsync(x => x.Id == waitId);
+        var pushedMethod = await _context
+           .PushedMethodsCalls
+           .FirstAsync(x => x.Id == pushedMethodId);
+        //todo:convert pushed method input and output 
+        //Get MethodInfo and use it
+        //If assembly name not the current then search for external methods marked with [ExternalWaitMethodAttribute] that match
+        await ProcessMatchedWait(methodWait, pushedMethod);
+    }
+
+    private async Task ProcessMatchedWait(MethodWait methodWait, PushedMethod pushedMethod)
+    {
+        if (!await CheckIfMatch(pushedMethod, methodWait))
+            return;
+        //todo:cancel processing and rewait it if data is locked
+        methodWait.UpdateFunctionData();
+        await ResumeExecution(methodWait);
+        await _context.SaveChangesAsync();
     }
 }

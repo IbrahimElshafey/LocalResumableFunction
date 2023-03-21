@@ -13,8 +13,9 @@ namespace ResumableFunctions.AspNetService
         public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, ResumableFunctionSettings settings)
         {
             var services = mvcBuilder.Services;
-            mvcBuilder.AddApplicationPart(typeof(ResumableFunctionReceiverController).Assembly).AddControllersAsServices();
+            mvcBuilder.AddApplicationPart(typeof(MatchedWaitReceiverController).Assembly).AddControllersAsServices();
             services.AddScoped<IPushMethodCall, ResumableFunctionHandler>();
+            services.AddScoped<IWaitMatchedHandler, ResumableFunctionHandler>();
             services.AddDbContext<FunctionDataContext>(settings.WaitsDbConfig);
             services.AddHangfire(settings.HangFireConfig);
             services.AddHangfireServer();

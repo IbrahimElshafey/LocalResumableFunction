@@ -7,13 +7,13 @@ using ResumableFunctions.Core.Abstraction;
 namespace ResumableFunctions.AspNetService
 {
     [ApiController]
-    [Route($"api/ResumableFunctionReceiver")]
+    [Route($"api/MatchedWaitReceiver")]
     //[ApiExplorerSettings(IgnoreApi = true)]
-    public class ResumableFunctionReceiverController : ControllerBase
+    public class MatchedWaitReceiverController : ControllerBase
     {
         public IWaitMatchedHandler WaitMatchedHandler { get; }
         public IBackgroundJobClient BackgroundJobClient { get; }
-        public ResumableFunctionReceiverController(IWaitMatchedHandler waitMatched, IBackgroundJobClient backgroundJobClient)
+        public MatchedWaitReceiverController(IWaitMatchedHandler waitMatched, IBackgroundJobClient backgroundJobClient)
         {
             BackgroundJobClient = backgroundJobClient;
             WaitMatchedHandler = waitMatched;

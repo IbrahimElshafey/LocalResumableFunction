@@ -43,7 +43,7 @@ internal partial class ResumableFunctionHandler
             : await _context.MethodIdentifiers.FindAsync(methodWait.WaitMethodIdentifierId);
         methodWait.WaitMethodIdentifier = methodId;
         methodWait.WaitMethodIdentifierId = methodId.Id;
-        methodWait.SetExpressions();
+        methodWait.RewriteExpressions();
 
         await _waitsRepository.AddWait(methodWait);
     }

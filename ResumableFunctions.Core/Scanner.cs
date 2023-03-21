@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Reflection.Metadata;
 using ResumableFunctions.Core.Attributes;
 using ResumableFunctions.Core.Data;
 using ResumableFunctions.Core.Helpers;
@@ -12,6 +13,12 @@ internal class Scanner
     private const string ScannerAppName = "##SCANNER: ";
     internal FunctionDataContext _context;
     private string _currentFolder;
+    private ResumableFunctionHandler _handler;
+
+    public Scanner(ResumableFunctionHandler handler)
+    {
+        _handler = handler;
+    }
 
     public async Task Start()
     {
@@ -203,8 +210,7 @@ internal class Scanner
     internal async Task RegisterResumableFunctionFirstWait(MethodInfo resumableFunction)
     {
         WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
-        var handler = new ResumableFunctionHandler(_context);
-        await handler.RegisterFirstWait(resumableFunction);
+        await _handler.RegisterFirstWait(resumableFunction);
     }
 
     private void WriteMessage(string message)

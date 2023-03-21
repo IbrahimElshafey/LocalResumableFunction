@@ -41,21 +41,20 @@ public class MethodWait : Wait
         RequestedByFunction?.MethodInfo.DeclaringType.Assembly ??
         WaitMethodIdentifier?.MethodInfo.DeclaringType.Assembly;
 
-    internal void SetExpressions()
+    internal void RewriteExpressions()
     {
-        SetMatchExpression(MatchIfExpression);
+        //Rewrite Match Expression
+        MatchIfExpression = new RewriteMatchExpression(this).Result;
+        MatchIfExpressionValue =
+            TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, FunctionAssembly));
+        
+        //Rewrite SetData Expression
         SetDataExpression = new RewriteSetDataExpression(this).Result;
         SetDataExpressionValue =
             TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(SetDataExpression, FunctionAssembly));
     }
 
-    internal void SetMatchExpression(LambdaExpression matchExpression)
-    {
-        MatchIfExpression = matchExpression;
-        MatchIfExpression = new RewriteMatchExpression(this).Result;
-        MatchIfExpressionValue =
-            TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, FunctionAssembly));
-    }
+
 
     internal void LoadExpressions()
     {

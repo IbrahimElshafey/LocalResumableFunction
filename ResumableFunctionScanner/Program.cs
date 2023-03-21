@@ -6,6 +6,7 @@ internal class Program
 {
     public static async Task Main(string[] args)
     {
-        await new Scanner().Start();
+        //todo:Scanner should create file for [ExternalWaitMethod] matched to faclitate using 
+        await new Scanner(new ResumableFunctionHandler()).Start();
     }
 }
