@@ -4,20 +4,22 @@ using System.Reflection;
 using ResumableFunctions.Core.Attributes;
 using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
+using Hangfire;
+using ResumableFunctions.Core.Abstraction;
 
 namespace ResumableFunctions.Core;
 
-internal partial class ResumableFunctionHandler
+internal partial class ResumableFunctionHandler: IPushMethodCall, IWaitMatchedHandler
 {
     /// <summary>
     ///     When method called and finished
     /// </summary>
-    internal async Task MethodCalled(PushedMethod pushedMethod)
+    public void MethodCalled(PushedMethod pushedMethod)
     {
-        await _backgroundTaskQueue.QueueBackgroundWorkItemAsync(WaitProcessing);
+        _backgroundJobClient.Enqueue(() =>  ProcessPushedMethod(pushedMethod));
     }
 
-    private async ValueTask WaitProcessing(PushedMethod pushedMethod, CancellationToken arg)
+    private async Task ProcessPushedMethod(PushedMethod pushedMethod)
     {
         //todo:move this code to background task
         /*
@@ -31,7 +33,11 @@ internal partial class ResumableFunctionHandler
          */
         try
         {
-            var matchedWaits = await _waitsRepository.GetMethodActiveWaits(pushedMethod.MethodData);
+            var matchedWaits = await _waitsRepository.GetMethodActiveWaits(pushedMethod);
+            if (matchedWaits?.Any() is true)
+            {
+                await _context.PushedMethodsCalls.AddAsync(pushedMethod);
+            }
             foreach (var methodWait in matchedWaits)
             {
                 var isLocalWait =
@@ -85,4 +91,13 @@ internal partial class ResumableFunctionHandler
         }
     }
 
+    public void WaitMatched(int waitId, int pushedMethodId)
+    {
+        _backgroundJobClient.Enqueue(() => ProcessMatchedWait(waitId,pushedMethodId));
+    }
+
+    private async Task ProcessMatchedWait(int waitId, int pushedMethodId)
+    {
+        throw new NotImplementedException();
+    }
 }

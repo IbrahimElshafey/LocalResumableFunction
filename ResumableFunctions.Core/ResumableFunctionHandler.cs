@@ -2,6 +2,7 @@
 using ResumableFunctions.Core.Data;
 using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
+using Hangfire;
 
 namespace ResumableFunctions.Core;
 
@@ -10,14 +11,14 @@ internal partial class ResumableFunctionHandler
     private readonly FunctionDataContext _context;
     private readonly WaitsRepository _waitsRepository;
     private readonly MethodIdentifierRepository _metodIdsRepo;
-    private readonly IBackgroundTaskQueue _backgroundTaskQueue;
+    private readonly IBackgroundJobClient _backgroundJobClient;
 
-    internal ResumableFunctionHandler(FunctionDataContext context = null, IBackgroundTaskQueue backgroundTaskQueue = null)
+    internal ResumableFunctionHandler(FunctionDataContext context = null, IBackgroundJobClient backgroundJobClient = null)
     {
         _context = context ?? new FunctionDataContext();
         _waitsRepository = new WaitsRepository(_context);
         _metodIdsRepo = new MethodIdentifierRepository(_context);
-        _backgroundTaskQueue = backgroundTaskQueue;
+        _backgroundJobClient = backgroundJobClient;
     }
 
     private async Task DuplicateIfFirst(Wait currentWait)
@@ -26,7 +27,7 @@ internal partial class ResumableFunctionHandler
             await RegisterFirstWait(currentWait.RequestedByFunction.MethodInfo);
     }
 
-    private async Task<bool> MoveFunctionToRecycleBin(Wait currentWait)
+    private async Task<bool> MoveFunctionToRecycleBin(Wait lastWait)
     {
         //throw new NotImplementedException();
         return true;

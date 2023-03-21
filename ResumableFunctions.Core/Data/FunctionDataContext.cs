@@ -20,6 +20,7 @@ internal class FunctionDataContext : DbContext
     public DbSet<Wait> Waits { get; set; }
     public DbSet<MethodWait> MethodWaits { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
+    public DbSet<PushedMethod> PushedMethodsCalls { get; set; }
     //public DbSet<TimeWait> TimeWaits { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -82,6 +83,14 @@ internal class FunctionDataContext : DbContext
 
         modelBuilder.Entity<Wait>()
             .Property(x => x.ExtraData)
+            .HasConversion<ObjectToJsonConverter>();
+        
+        modelBuilder.Entity<PushedMethod>()
+            .Property(x => x.Input)
+            .HasConversion<ObjectToJsonConverter>();
+        
+        modelBuilder.Entity<PushedMethod>()
+            .Property(x => x.Output)
             .HasConversion<ObjectToJsonConverter>();
 
         modelBuilder.Entity<MethodWait>()

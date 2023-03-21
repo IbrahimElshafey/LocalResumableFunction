@@ -33,13 +33,15 @@ internal class WaitsRepository : RepositoryBase
         return Task.CompletedTask;
     }
 
-    public async Task<List<MethodWait>> GetMethodActiveWaits(MethodData methodData)
+    public async Task<List<MethodWait>> GetMethodActiveWaits(PushedMethod pushedMethod)
     {
+        var methodData = pushedMethod.MethodData;
         var _metodIdsRepo = new MethodIdentifierRepository(_context);
         var methodId = await _metodIdsRepo.GetMethodIdentifierFromDb(methodData);
         if (methodId == null)
             throw new Exception(
                 $"Method [{methodData.MethodName}] is not registered in current database as [{nameof(WaitMethodAttribute)}].");
+        pushedMethod.MethodId = methodId.Id;
         return await _context
                 .MethodWaits
                 .Include(x => x.RequestedByFunction)

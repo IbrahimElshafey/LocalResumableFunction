@@ -2,6 +2,7 @@
 using ResumableFunctions.Core.Helpers;
 using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
+using Hangfire;
 
 namespace ResumableFunctions.Core;
 
@@ -118,10 +119,8 @@ internal partial class ResumableFunctionHandler
             inputParameter,
             outputParameter);
         methodWait.CurrentFunction = timeWait.CurrentFunction;
-#pragma warning disable CS4014
-        Task.Delay(timeWait.TimeToWait)
-            .ContinueWith(_ => new LocalRegisteredMethods().TimeWait(timeWait.UniqueMatchId));
-#pragma warning restore CS4014
+
+        _backgroundJobClient.Schedule(() => new LocalRegisteredMethods().TimeWait(timeWait.UniqueMatchId), timeWait.TimeToWait);
         //_context.Waits.Remove(timeWait);
         _context.Entry(timeWait).State = EntityState.Detached;
         methodWait.ParentWait = timeWait.ParentWait;

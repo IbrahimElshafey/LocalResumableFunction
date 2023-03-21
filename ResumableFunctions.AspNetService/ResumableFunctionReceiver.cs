@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Hangfire;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using ResumableFunctions.Core;
+using ResumableFunctions.Core.Abstraction;
 
 namespace ResumableFunctions.AspNetService
 {
@@ -9,17 +11,19 @@ namespace ResumableFunctions.AspNetService
     //[ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionReceiverController : ControllerBase
     {
-        public IBackgroundTaskQueue BackgroundTaskQueue { get; }
-        public ResumableFunctionReceiverController(IBackgroundTaskQueue backgroundTaskQueue)
+        public IWaitMatchedHandler WaitMatchedHandler { get; }
+        public IBackgroundJobClient BackgroundJobClient { get; }
+        public ResumableFunctionReceiverController(IWaitMatchedHandler waitMatched, IBackgroundJobClient backgroundJobClient)
         {
-            BackgroundTaskQueue = backgroundTaskQueue;
+            BackgroundJobClient = backgroundJobClient;
+            WaitMatchedHandler = waitMatched;
         }
 
-        
+
         [HttpGet(nameof(WaitMatched))]
         public int WaitMatched(int waitId, int pushedMethodId)
         {
-           Task.Run(async() => await BackgroundTaskQueue.QueueBackgroundWorkItemAsync())
+            BackgroundJobClient.Enqueue(() => WaitMatchedHandler.WaitMatched(waitId, pushedMethodId));
             return 0;
         }
     }

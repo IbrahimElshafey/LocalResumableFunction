@@ -18,3 +18,4 @@ using System.Runtime.InteropServices;
 [assembly: Guid("6d8d5159-e480-4f1c-ab61-e5e72f60b13e")]
 [assembly: InternalsVisibleTo("ResumableFunctionScanner")]
 [assembly: InternalsVisibleTo("Test")]
+[assembly: InternalsVisibleTo("ResumableFunctions.AspNetService")]

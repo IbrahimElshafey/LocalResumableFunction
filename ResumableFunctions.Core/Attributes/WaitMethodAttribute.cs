@@ -34,7 +34,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
             _pushedMethod.Output = output.Result;
         }
         //todo: use hangfire
-        new ResumableFunctionHandler().MethodCalled(_pushedMethod).Wait();
+        new ResumableFunctionHandler().MethodCalled(_pushedMethod);
         args.MethodExecutionTag = true;
     }
 
