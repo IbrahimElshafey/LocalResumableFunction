@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Core.Abstraction;
@@ -23,12 +24,12 @@ public static class Extensions
     public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionSettings settings)
     {
         services.AddScoped<IPushMethodCall, ResumableFunctionHandler>();
-        services.AddScoped<IWaitMatchedHandler, ResumableFunctionHandler>();
+        services.AddScoped<IResumableFunctionsReceiver, ResumableFunctionHandler>();
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig);
        
         services.AddScoped<ResumableFunctionHandler>();
         services.AddScoped<Scanner>();
-        //Debugger.Launch();
+        //Debugger.Launch();    
         if (settings.HangFireConfig != null)
         {
             services.AddHangfire(x => x = settings.HangFireConfig);

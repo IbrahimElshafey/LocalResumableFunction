@@ -1,6 +1,8 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Metadata;
+using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Core.Attributes;
 using ResumableFunctions.Core.Data;
 using ResumableFunctions.Core.Helpers;
@@ -12,7 +14,6 @@ public class Scanner
 {
     private const string ScannerAppName = "##SCANNER: ";
     internal FunctionDataContext _context;
-    private string _currentFolder;
     private ResumableFunctionHandler _handler;
 
     public Scanner(ResumableFunctionHandler handler, FunctionDataContext context)
@@ -23,28 +24,35 @@ public class Scanner
 
     public async Task Start()
     {
-#if DEBUG
-        WriteMessage("DELETE [LocalResumableFunctionsData.db] DATABASE IF EXIST");
-        File.Delete($"{AppContext.BaseDirectory}LocalResumableFunctionsData.db");
-#endif
-        WriteMessage("Start Scan Resumable Functions##");
-        WriteMessage("Initiate DB context.");
-        _currentFolder = AppContext.BaseDirectory;
-        WriteMessage("Load assemblies in current directory.");
-        var assemblyPaths = Directory.EnumerateFiles(_currentFolder, "*.dll").Where(IsIncludedInScan).ToList();
-        WriteMessage("Start register method waits.");
-        var resumableFunctions = await RegisterMethodWaits(assemblyPaths);
+        //#if DEBUG
+        //        WriteMessage("DELETE [LocalResumableFunctionsData.db] DATABASE IF EXIST");
+        //        File.Delete($"{AppContext.BaseDirectory}LocalResumableFunctionsData.db");
+        //#endif
+            Debugger.Launch();
+            Debugger.Break();
+            WriteMessage("Start Scan Resumable Functions##");
+            WriteMessage("Initiate DB context.");
+            var _currentFolder = AppContext.BaseDirectory;
+            WriteMessage("Load assemblies in current directory.");
+            //var assemblyPaths = Directory.EnumerateFiles(_currentFolder, "*.dll").Where(IsIncludedInScan).ToList();
+            var assemblyPaths = new[] 
+            {
+                $"{_currentFolder}\\{Assembly.GetEntryAssembly().GetName().Name}.dll", 
+                $"{_currentFolder}\\ResumableFunctions.Core.dll" 
+            }.ToList();
+            WriteMessage("Start register method waits.");
+            var resumableFunctions = await RegisterMethodWaits(assemblyPaths);
 
-        foreach (var resumableFunctionClass in resumableFunctions)
-            await RegisterResumableFunctionsInClass(resumableFunctionClass);
+            foreach (var resumableFunctionClass in resumableFunctions)
+                await RegisterResumableFunctionsInClass(resumableFunctionClass);
 
-        WriteMessage("Register local methods");
-        await RegisterMethodWaitsIfExist(typeof(LocalRegisteredMethods));
-        await _context.SaveChangesAsync();
+            WriteMessage("Register local methods");
+            await RegisterMethodWaitsIfExist(typeof(LocalRegisteredMethods));
+            await _context.SaveChangesAsync();
 
-        await _context.DisposeAsync();
-        WriteMessage("Close with no errors.");
-        Console.ReadLine();
+            await _context.DisposeAsync();
+            WriteMessage("Close with no errors.");
+            Console.ReadLine();
     }
 
     internal async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
@@ -219,3 +227,4 @@ public class Scanner
         Console.WriteLine(message);
     }
 }
+

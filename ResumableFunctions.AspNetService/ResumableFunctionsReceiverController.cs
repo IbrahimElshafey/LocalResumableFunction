@@ -12,9 +12,9 @@ namespace ResumableFunctions.AspNetService
     //[ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionsReceiverController : ControllerBase
     {
-        public IWaitMatchedHandler WaitMatchedHandler { get; }
+        public IResumableFunctionsReceiver WaitMatchedHandler { get; }
         public IBackgroundJobClient BackgroundJobClient { get; }
-        public ResumableFunctionsReceiverController(IWaitMatchedHandler waitMatched, IBackgroundJobClient backgroundJobClient)
+        public ResumableFunctionsReceiverController(IResumableFunctionsReceiver waitMatched, IBackgroundJobClient backgroundJobClient)
         {
             BackgroundJobClient = backgroundJobClient;
             WaitMatchedHandler = waitMatched;

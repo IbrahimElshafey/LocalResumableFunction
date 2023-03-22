@@ -9,7 +9,7 @@ using ResumableFunctions.Core.Abstraction;
 
 namespace ResumableFunctions.Core;
 
-public partial class ResumableFunctionHandler : IPushMethodCall, IWaitMatchedHandler
+public partial class ResumableFunctionHandler : IPushMethodCall, IResumableFunctionsReceiver
 {
     /// <summary>
     ///     When method called and finished

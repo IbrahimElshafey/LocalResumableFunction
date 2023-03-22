@@ -2,7 +2,7 @@
 
 namespace ResumableFunctions.Core.Abstraction
 {
-    public interface IWaitMatchedHandler
+    public interface IResumableFunctionsReceiver
     {
         void WaitMatched(int waitId, int pushedMethodId);
         Task ProcessPushedMethod(PushedMethod pushedMethod);

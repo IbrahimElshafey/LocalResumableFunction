@@ -2,10 +2,12 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using ResumableFunctions.Core;
 using ResumableFunctions.Core.Abstraction;
 using ResumableFunctions.Core.Data;
 using ResumableFunctions.Core.Helpers;
+using System;
 
 namespace ResumableFunctions.AspNetService
 {
@@ -13,8 +15,15 @@ namespace ResumableFunctions.AspNetService
     {
         public static void ScanCurrentService(this WebApplication app)
         {
-            var backgroundJobClient = app.Services.GetService<IBackgroundJobClient>();
-            var scanner = app.Services.GetService<Scanner>();
+            GlobalConfiguration.Configuration
+              .UseActivator(new HangfireActivator(app));
+
+            Core.Helpers.Extensions.SetServiceProvider(app.Services);
+
+            var scannerScope = app.Services.CreateScope();
+          
+            var backgroundJobClient = scannerScope.ServiceProvider.GetService<IBackgroundJobClient>();
+            var scanner = scannerScope.ServiceProvider.GetService<Scanner>();
             backgroundJobClient.Enqueue(() => scanner.Start());
         }
 
@@ -25,17 +34,5 @@ namespace ResumableFunctions.AspNetService
                 .AddControllersAsServices();
             mvcBuilder.Services.AddResumableFunctionsCore(settings);
         }
-    }
-
-    public class HangfireActivator : JobActivator
-    {
-        private readonly IServiceProvider _serviceProvider;
-
-        public HangfireActivator(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
-
-        public override object ActivateJob(Type type) => _serviceProvider.GetService(type);
     }
 }
