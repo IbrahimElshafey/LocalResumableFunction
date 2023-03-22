@@ -25,12 +25,12 @@ internal class FunctionDataContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         //todo: resolve at runtime to enable multiple providers
-        optionsBuilder.LogTo(s => Debug.WriteLine(s));
-        optionsBuilder.UseSqlServer(
-            $"Server=(localdb)\\MSSQLLocalDB;Database=ResumableFunctionsData;");
+        //optionsBuilder.LogTo(s => Debug.WriteLine(s));
+        //optionsBuilder.UseSqlServer(
+        //    $"Server=(localdb)\\MSSQLLocalDB;Database=ResumableFunctionsData;");
 
-        //var _dbConnection = $"Data Source={AppContext.BaseDirectory}LocalResumableFunctionsData.db";
-        //optionsBuilder.UseSqlite(_dbConnection);
+        var _dbConnection = $"Data Source={AppContext.BaseDirectory}LocalResumableFunctionsData.db";
+        optionsBuilder.UseSqlite(_dbConnection);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -16,7 +16,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
     public bool ManagerFourApproval { get; set; }
     public bool ManagerFiveApproval { get; set; }
 
-    [ResumableFunctionEntryPoint]//Point 1
+    //[ResumableFunctionEntryPoint]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
     {
         yield return

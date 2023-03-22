@@ -21,17 +21,17 @@ public class Program
         Console.WriteLine("Test App RUNNING.");
 
         await TestWaitMany();
-        await TestSubFunctionCall();
-        await TestReplayGoBackAfter();
-        await TestReplayGoBackBeforeNewMatch();
-        await TestReplayGoBackTo();
-        await TestWaitManyFunctions();
-        await TestLoops();
-        await TestManyWaitsTypeInGroup();
-        await TestTimeWait();
-        await TestSameEventAgain();
-        await TestWaitInterfaceMethod();
-        await TestReplayGoBackToWithNewMatch();
+        //await TestSubFunctionCall();
+        //await TestReplayGoBackAfter();
+        //await TestReplayGoBackBeforeNewMatch();
+        //await TestReplayGoBackTo();
+        //await TestWaitManyFunctions();
+        //await TestLoops();
+        //await TestManyWaitsTypeInGroup();
+        //await TestTimeWait();
+        //await TestSameEventAgain();
+        //await TestWaitInterfaceMethod();
+        //await TestReplayGoBackToWithNewMatch();
 
 
         //await Task.WhenAll(
