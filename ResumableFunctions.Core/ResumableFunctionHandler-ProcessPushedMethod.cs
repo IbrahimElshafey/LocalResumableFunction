@@ -9,7 +9,7 @@ using ResumableFunctions.Core.Abstraction;
 
 namespace ResumableFunctions.Core;
 
-internal partial class ResumableFunctionHandler : IPushMethodCall, IWaitMatchedHandler
+public partial class ResumableFunctionHandler : IPushMethodCall, IWaitMatchedHandler
 {
     /// <summary>
     ///     When method called and finished
@@ -19,7 +19,7 @@ internal partial class ResumableFunctionHandler : IPushMethodCall, IWaitMatchedH
         _backgroundJobClient.Enqueue(() => ProcessPushedMethod(pushedMethod));
     }
 
-    private async Task ProcessPushedMethod(PushedMethod pushedMethod)
+    public async Task ProcessPushedMethod(PushedMethod pushedMethod)
     {
         //todo:move this code to background task
         /*
@@ -33,6 +33,7 @@ internal partial class ResumableFunctionHandler : IPushMethodCall, IWaitMatchedH
          */
         try
         {
+            Debugger.Launch();
             var matchedWaits = await _waitsRepository.GetMethodActiveWaits(pushedMethod);
             if (matchedWaits?.Any() is true)
             {
@@ -92,7 +93,7 @@ internal partial class ResumableFunctionHandler : IPushMethodCall, IWaitMatchedH
         _backgroundJobClient.Enqueue(() => ProcessMatchedWait(waitId, pushedMethodId));
     }
 
-    private async Task ProcessMatchedWait(int waitId, int pushedMethodId)
+    public async Task ProcessMatchedWait(int waitId, int pushedMethodId)
     {
         //_context
         //_backgroundJobClient

@@ -3,6 +3,7 @@ using ResumableFunctions.Core.InOuts;
 using MethodBoundaryAspect.Fody.Attributes;
 using ResumableFunctions.Core;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ResumableFunctions.Core.Attributes;
 
@@ -50,7 +51,7 @@ public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect
         }
         //todo: main method must wait until this completes ==> Ue hangfire
         //_ = new ResumableFunctionHandler().MethodCalled(_pushedMethod);
-        new ResumableFunctionHandler().MethodCalled(_pushedMethod).Wait();
+        Extensions.GetServiceProvider().GetService<ResumableFunctionHandler>().MethodCalled(_pushedMethod);
         args.MethodExecutionTag = true;
     }
 

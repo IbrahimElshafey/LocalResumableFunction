@@ -1,4 +1,10 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Hangfire;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json.Linq;
+using ResumableFunctions.Core.Abstraction;
+using ResumableFunctions.Core.Data;
+using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Metadata;
@@ -11,6 +17,25 @@ namespace ResumableFunctions.Core.Helpers;
 
 public static class Extensions
 {
+    private static IServiceProvider _ServiceProvider;
+    public static IServiceProvider GetServiceProvider() => _ServiceProvider;
+    public static void SetServiceProvider(IServiceProvider provider) => _ServiceProvider = provider;
+    public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionSettings settings)
+    {
+        services.AddScoped<IPushMethodCall, ResumableFunctionHandler>();
+        services.AddScoped<IWaitMatchedHandler, ResumableFunctionHandler>();
+        services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig);
+       
+        services.AddScoped<ResumableFunctionHandler>();
+        services.AddScoped<Scanner>();
+        //Debugger.Launch();
+        if (settings.HangFireConfig != null)
+        {
+            services.AddHangfire(x => x = settings.HangFireConfig);
+            services.AddHangfireServer();
+        }
+    }
+
     public static (bool IsFunctionData, MemberExpression NewExpression) GetDataParamterAccess(
         this MemberExpression node,
         ParameterExpression functionInstanceArg)
@@ -89,7 +114,7 @@ public static class Extensions
                 bool sameSiganture =
                     interfaceMethod.Name == method.Name &&
                     interfaceMethod.ReturnType == method.ReturnType &&
-                    Enumerable.SequenceEqual(interfaceMethod.GetParameters().Select(x=>x.ParameterType), method.GetParameters().Select(x => x.ParameterType));
+                    Enumerable.SequenceEqual(interfaceMethod.GetParameters().Select(x => x.ParameterType), method.GetParameters().Select(x => x.ParameterType));
                 if (sameSiganture)
                     return interfaceMethod;
             }

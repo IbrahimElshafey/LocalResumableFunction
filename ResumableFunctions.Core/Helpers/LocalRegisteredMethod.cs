@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace ResumableFunctions.Core.Helpers
 {
-    internal class LocalRegisteredMethods
+    public class LocalRegisteredMethods
     {
         [WaitMethod]
-        internal string TimeWait(string timeWaitId)
+        public string TimeWait(string timeWaitId)
         {
             return timeWaitId;
         }

@@ -7,10 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ResumableFunctions.Core.Data;
 
-internal class FunctionDataContext : DbContext
+public class FunctionDataContext : DbContext
 {
 
-    public FunctionDataContext()
+    public FunctionDataContext(DbContextOptions<FunctionDataContext> options):base(options)
     {
         Database.EnsureCreated();
     }

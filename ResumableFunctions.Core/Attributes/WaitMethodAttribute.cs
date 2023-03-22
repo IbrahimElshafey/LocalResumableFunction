@@ -2,6 +2,7 @@
 using ResumableFunctions.Core.InOuts;
 using MethodBoundaryAspect.Fody.Attributes;
 using ResumableFunctions.Core;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ResumableFunctions.Core.Attributes;
 
@@ -34,7 +35,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
             _pushedMethod.Output = output.Result;
         }
         //todo: use hangfire
-        new ResumableFunctionHandler().MethodCalled(_pushedMethod);
+        Extensions.GetServiceProvider().GetService<ResumableFunctionHandler>().MethodCalled(_pushedMethod);
         args.MethodExecutionTag = true;
     }
 

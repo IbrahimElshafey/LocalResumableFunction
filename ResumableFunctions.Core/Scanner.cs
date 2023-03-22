@@ -8,16 +8,17 @@ using ResumableFunctions.Core.InOuts;
 
 namespace ResumableFunctions.Core;
 
-internal class Scanner
+public class Scanner
 {
     private const string ScannerAppName = "##SCANNER: ";
     internal FunctionDataContext _context;
     private string _currentFolder;
     private ResumableFunctionHandler _handler;
 
-    public Scanner(ResumableFunctionHandler handler)
+    public Scanner(ResumableFunctionHandler handler, FunctionDataContext context)
     {
         _handler = handler;
+        _context = context;
     }
 
     public async Task Start()
@@ -28,7 +29,6 @@ internal class Scanner
 #endif
         WriteMessage("Start Scan Resumable Functions##");
         WriteMessage("Initiate DB context.");
-        _context = new FunctionDataContext();
         _currentFolder = AppContext.BaseDirectory;
         WriteMessage("Load assemblies in current directory.");
         var assemblyPaths = Directory.EnumerateFiles(_currentFolder, "*.dll").Where(IsIncludedInScan).ToList();

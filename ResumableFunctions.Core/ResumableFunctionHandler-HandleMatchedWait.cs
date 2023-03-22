@@ -4,7 +4,7 @@ using ResumableFunctions.Core.InOuts;
 
 namespace ResumableFunctions.Core;
 
-internal partial class ResumableFunctionHandler
+public partial class ResumableFunctionHandler
 {
     private async Task ResumeExecution(Wait matchedWait)
     {

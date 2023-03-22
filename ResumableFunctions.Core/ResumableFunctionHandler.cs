@@ -6,14 +6,15 @@ using Hangfire;
 
 namespace ResumableFunctions.Core;
 
-internal partial class ResumableFunctionHandler
+public partial class ResumableFunctionHandler
 {
     private readonly FunctionDataContext _context;
     private readonly WaitsRepository _waitsRepository;
     private readonly MethodIdentifierRepository _metodIdsRepo;
     private readonly IBackgroundJobClient _backgroundJobClient;
 
-    internal ResumableFunctionHandler(FunctionDataContext context, IBackgroundJobClient backgroundJobClient)
+
+    public ResumableFunctionHandler(FunctionDataContext context, IBackgroundJobClient backgroundJobClient=null)
     {
         _context = context;
         _waitsRepository = new WaitsRepository(_context);

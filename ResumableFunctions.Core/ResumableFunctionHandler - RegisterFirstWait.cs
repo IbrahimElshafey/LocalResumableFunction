@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ResumableFunctions.Core;
 
-internal partial class ResumableFunctionHandler
+public partial class ResumableFunctionHandler
 {
     private const string ScannerAppName = "##SCANNER: ";
 

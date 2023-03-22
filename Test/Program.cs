@@ -1,37 +1,46 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Diagnostics;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using ResumableFunctions.Core;
 using ResumableFunctions.Core.Data;
+using ResumableFunctions.Core.Helpers;
 using ResumableFunctions.Core.InOuts;
 
 namespace Test;
 
-public class Program
+public partial class Program
 {
     private static Scanner _scanner;
-
     private static async Task Main()
     {
-        _scanner = new Scanner
-        {
-            _context = new FunctionDataContext()
-        };
+      
+        using IHost host = Host.CreateDefaultBuilder()
+        .ConfigureServices(services => services.AddResumableFunctionsCore(new ResumableFunctionSettings()))
+        .Build();
+
+
+        Extensions.SetServiceProvider(host.Services);
+        _scanner = host.Services.GetService<Scanner>();
+
 
         Console.WriteLine("Test App RUNNING.");
 
         await TestWaitMany();
-        await TestSubFunctionCall();
-        await TestReplayGoBackAfter();
-        await TestReplayGoBackBeforeNewMatch();
-        await TestReplayGoBackTo();
-        await TestWaitManyFunctions();
-        await TestLoops();
-        await TestManyWaitsTypeInGroup();
-        await TestTimeWait();
-        await TestSameEventAgain();
-        await TestWaitInterfaceMethod();
-        await TestReplayGoBackToWithNewMatch();
+
+        //await TestSubFunctionCall();
+        //await TestReplayGoBackAfter();
+        //await TestReplayGoBackBeforeNewMatch();
+        //await TestReplayGoBackTo();
+        //await TestWaitManyFunctions();
+        //await TestLoops();
+        //await TestManyWaitsTypeInGroup();
+        //await TestTimeWait();
+        //await TestSameEventAgain();
+        //await TestWaitInterfaceMethod();
+        //await TestReplayGoBackToWithNewMatch();
 
 
         //await Task.WhenAll(

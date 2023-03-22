@@ -6,7 +6,7 @@ using Hangfire;
 
 namespace ResumableFunctions.Core;
 
-internal partial class ResumableFunctionHandler
+public partial class ResumableFunctionHandler
 {
     internal async Task<bool> GenericWaitRequested(Wait newWait)
     {

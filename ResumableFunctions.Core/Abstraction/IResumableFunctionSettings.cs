@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ResumableFunctions.Core.Abstraction
 {
-    public class ResumableFunctionSettings
+    public interface IResumableFunctionSettings
     {
-        public Action<IGlobalConfiguration> HangFireConfig { get; }
-        public Action<DbContextOptionsBuilder> WaitsDbConfig { get; }
+        public IGlobalConfiguration HangFireConfig { get;  }
+        public DbContextOptionsBuilder WaitsDbConfig { get; }
     }
 }

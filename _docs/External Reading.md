@@ -13,7 +13,8 @@
 # Generate swagger definition for created API
 
 
-
+# Hangfire
+* https://code-maze.com/hangfire-with-asp-net-core/
 # Event Types
 * API Called [HTTP Listener]
 * API Call to the engine [WebHook]
@@ -97,8 +98,7 @@ Note that .NET Core supports only a single application domain.
 * [EF 7 Features] https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-7.0/whatsnew#json-columns
 
 
-# Hangfire
-* https://code-maze.com/hangfire-with-asp-net-core/
+
 
 * Background tasks with hosted services in ASP.NET Core
 https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-6.0&tabs=visual-studio
