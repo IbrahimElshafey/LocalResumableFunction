@@ -4,13 +4,15 @@ using System.Reflection.Metadata;
 using ResumableFunctions.Core.Helpers;
 using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Reflection.Emit;
+using ResumableFunctions.Core.Abstraction;
 
 namespace ResumableFunctions.Core.Data;
 
 public class FunctionDataContext : DbContext
 {
-
-    public FunctionDataContext(DbContextOptions<FunctionDataContext> options):base(options)
+    public FunctionDataContext(IResumableFunctionSettings settings) : base(settings.WaitsDbConfig.Options)
     {
         Database.EnsureCreated();
     }
@@ -21,93 +23,118 @@ public class FunctionDataContext : DbContext
     public DbSet<MethodWait> MethodWaits { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
     public DbSet<PushedMethod> PushedMethodsCalls { get; set; }
-    //public DbSet<TimeWait> TimeWaits { get; set; }
+    public DbSet<ServiceData> ServicesData { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        //todo: resolve at runtime to enable multiple providers
-        optionsBuilder.LogTo(s => Debug.WriteLine(s));
-        optionsBuilder.UseSqlServer(
-            $"Server=(localdb)\\MSSQLLocalDB;Database=ResumableFunctionsData;");
 
-        //var _dbConnection = $"Data Source={AppContext.BaseDirectory}LocalResumableFunctionsData.db";
-        //optionsBuilder.UseSqlite(_dbConnection);
-    }
+    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //{
+    //    optionsBuilder = _settings.WaitsDbConfig;
+    //    //todo: resolve at runtime to enable multiple providers
+    //    //optionsBuilder.LogTo(s => Debug.WriteLine(s));
+    //    //optionsBuilder.UseSqlServer(
+    //    //    $"Server=(localdb)\\MSSQLLocalDB;Database=ResumableFunctionsData;");
+
+    //    //var _dbConnection = $"Data Source={AppContext.BaseDirectory}LocalResumableFunctionsData.db";
+    //    //optionsBuilder.UseSqlite(_dbConnection);
+    //}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<ResumableFunctionState>()
-            .HasMany(x => x.Waits)
-            .WithOne(wait => wait.FunctionState)
-            .HasForeignKey(x => x.FunctionStateId)
-            .HasConstraintName("FK_Waits_For_FunctionState");
+        ConfigureResumableFunctionState(modelBuilder.Entity<ResumableFunctionState>());
+        ConfigureMethodIdentifier(modelBuilder.Entity<MethodIdentifier>());
+        ConfigurePushedMethod(modelBuilder.Entity<PushedMethod>());
+        ConfigureServiceData(modelBuilder.Entity<ServiceData>());
+        ConfigureWaits(modelBuilder);
+        base.OnModelCreating(modelBuilder);
+    }
 
-        modelBuilder.Entity<MethodIdentifier>()
-            .HasMany(x => x.ActiveFunctionsStates)
-            .WithOne(wait => wait.ResumableFunctionIdentifier)
-            .HasForeignKey(x => x.ResumableFunctionIdentifierId)
-            .HasConstraintName("FK_FunctionsStates_For_ResumableFunction");
+    private void ConfigureServiceData(EntityTypeBuilder<ServiceData> entityTypeBuilder)
+    {
+        entityTypeBuilder.Property(x => x.LastScanDate).HasDefaultValue(DateTime.MinValue);
+        entityTypeBuilder.HasIndex(x => x.AssemblyName);
+    }
 
-        modelBuilder.Entity<MethodIdentifier>()
-            .HasMany(x => x.WaitsCreatedByFunction)
-            .WithOne(wait => wait.RequestedByFunction)
-            .OnDelete(DeleteBehavior.Restrict)
-            .HasForeignKey(x => x.RequestedByFunctionId)
-            .HasConstraintName("FK_Waits_In_ResumableFunction");
+    private void ConfigurePushedMethod(EntityTypeBuilder<PushedMethod> entityTypeBuilder)
+    {
+        entityTypeBuilder
+          .Property(x => x.Input)
+          .HasConversion<ObjectToJsonConverter>();
 
-        modelBuilder.Entity<MethodIdentifier>()
-            .HasMany(x => x.WaitsRequestsForMethod)
-            .WithOne(wait => wait.WaitMethodIdentifier)
-            .OnDelete(DeleteBehavior.Restrict)
-            .HasForeignKey(x => x.WaitMethodIdentifierId)
-            .HasConstraintName("FK_Waits_RequestedForMethod");
+        entityTypeBuilder
+            .Property(x => x.Output)
+            .HasConversion<ObjectToJsonConverter>();
+    }
 
+    private void ConfigureWaits(ModelBuilder modelBuilder)
+    {
         modelBuilder.Entity<Wait>()
             .HasMany(x => x.ChildWaits)
             .WithOne(wait => wait.ParentWait)
             .HasForeignKey(x => x.ParentWaitId)
             .HasConstraintName("FK_ChildWaits_For_Wait");
 
-        modelBuilder.Entity<ResumableFunctionState>()
-            .Property<DateTime>(ConstantValue.LastUpdatedProp);
-        modelBuilder.Entity<ResumableFunctionState>()
-           .Property<DateTime>(ConstantValue.CreatedProp);
-        modelBuilder.Entity<MethodIdentifier>()
-           .Property<DateTime>(ConstantValue.CreatedProp);
         modelBuilder.Entity<Wait>()
            .Property<DateTime>(ConstantValue.CreatedProp);
-
-        modelBuilder.Entity<ResumableFunctionState>()
-            .Property(x => x.StateObject)
-            .HasConversion<ObjectToJsonConverter>();
 
         modelBuilder.Entity<Wait>()
             .Property(x => x.ExtraData)
             .HasConversion<ObjectToJsonConverter>();
-        
-        modelBuilder.Entity<PushedMethod>()
-            .Property(x => x.Input)
-            .HasConversion<ObjectToJsonConverter>();
-        
-        modelBuilder.Entity<PushedMethod>()
-            .Property(x => x.Output)
-            .HasConversion<ObjectToJsonConverter>();
 
         modelBuilder.Entity<MethodWait>()
-            .Property(mw => mw.MatchIfExpressionValue)
-            .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
-
-        modelBuilder.Entity<WaitsGroup>()
-            .Property(mw => mw.CountExpressionValue)
-            .HasColumnName(nameof(WaitsGroup.CountExpressionValue));
+          .Property(mw => mw.MatchIfExpressionValue)
+          .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
 
         modelBuilder.Entity<MethodWait>()
             .Property(mw => mw.SetDataExpressionValue)
             .HasColumnName(nameof(MethodWait.SetDataExpressionValue));
 
+        modelBuilder.Entity<WaitsGroup>()
+           .Property(mw => mw.CountExpressionValue)
+           .HasColumnName(nameof(WaitsGroup.CountExpressionValue));
+
         modelBuilder.Ignore<ReplayRequest>();
         modelBuilder.Ignore<TimeWait>();
-        base.OnModelCreating(modelBuilder);
+    }
+
+    private void ConfigureMethodIdentifier(EntityTypeBuilder<MethodIdentifier> entityTypeBuilder)
+    {
+        entityTypeBuilder
+           .HasMany(x => x.ActiveFunctionsStates)
+           .WithOne(wait => wait.ResumableFunctionIdentifier)
+           .HasForeignKey(x => x.ResumableFunctionIdentifierId)
+           .HasConstraintName("FK_FunctionsStates_For_ResumableFunction");
+
+        entityTypeBuilder
+            .HasMany(x => x.WaitsCreatedByFunction)
+            .WithOne(wait => wait.RequestedByFunction)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasForeignKey(x => x.RequestedByFunctionId)
+            .HasConstraintName("FK_Waits_In_ResumableFunction");
+
+        entityTypeBuilder
+            .HasMany(x => x.WaitsRequestsForMethod)
+            .WithOne(wait => wait.WaitMethodIdentifier)
+            .OnDelete(DeleteBehavior.Restrict)
+            .HasForeignKey(x => x.WaitMethodIdentifierId)
+            .HasConstraintName("FK_Waits_RequestedForMethod");
+        entityTypeBuilder
+         .Property<DateTime>(ConstantValue.CreatedProp);
+    }
+
+    private void ConfigureResumableFunctionState(EntityTypeBuilder<ResumableFunctionState> entityTypeBuilder)
+    {
+        entityTypeBuilder
+            .HasMany(x => x.Waits)
+            .WithOne(wait => wait.FunctionState)
+            .HasForeignKey(x => x.FunctionStateId)
+            .HasConstraintName("FK_Waits_For_FunctionState");
+        entityTypeBuilder
+        .Property<DateTime>(ConstantValue.LastUpdatedProp);
+        entityTypeBuilder
+           .Property<DateTime>(ConstantValue.CreatedProp);
+        entityTypeBuilder
+           .Property(x => x.StateObject)
+           .HasConversion<ObjectToJsonConverter>();
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

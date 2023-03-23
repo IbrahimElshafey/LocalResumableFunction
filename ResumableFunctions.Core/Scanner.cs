@@ -2,7 +2,10 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ResumableFunctions.Core.Attributes;
 using ResumableFunctions.Core.Data;
 using ResumableFunctions.Core.Helpers;
@@ -15,30 +18,35 @@ public class Scanner
     private const string ScannerAppName = "##SCANNER: ";
     internal FunctionDataContext _context;
     private ResumableFunctionHandler _handler;
+    private IServiceProvider _serviceProvider;
+    private readonly ILogger<Scanner> _logger;
 
-    public Scanner(ResumableFunctionHandler handler, FunctionDataContext context)
+    public Scanner(IServiceProvider serviceProvider, ILogger<Scanner> logger)
     {
-        _handler = handler;
-        _context = context;
+        _serviceProvider = serviceProvider;
+        _logger = logger;
     }
 
-    public async Task Start()
+    public async Task Start(string serviceUrl)
     {
-        //#if DEBUG
-        //        WriteMessage("DELETE [LocalResumableFunctionsData.db] DATABASE IF EXIST");
-        //        File.Delete($"{AppContext.BaseDirectory}LocalResumableFunctionsData.db");
-        //#endif
-            Debugger.Launch();
-            Debugger.Break();
+        using (IServiceScope scope = _serviceProvider.CreateScope())
+        {
+            _handler = _serviceProvider.GetService<ResumableFunctionHandler>();
+            _context = _handler._context;
             WriteMessage("Start Scan Resumable Functions##");
-            WriteMessage("Initiate DB context.");
-            var _currentFolder = AppContext.BaseDirectory;
-            WriteMessage("Load assemblies in current directory.");
+
+
+            var currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
+            var currentFolder = AppContext.BaseDirectory;
+
+            if (await ShouldScan(currentServiceName, serviceUrl) is false) return;
+
+            WriteMessage("Load service assemblies in current directory.");
             //var assemblyPaths = Directory.EnumerateFiles(_currentFolder, "*.dll").Where(IsIncludedInScan).ToList();
-            var assemblyPaths = new[] 
+            var assemblyPaths = new[]
             {
-                $"{_currentFolder}\\{Assembly.GetEntryAssembly().GetName().Name}.dll", 
-                $"{_currentFolder}\\ResumableFunctions.Core.dll" 
+                $"{currentFolder}\\{currentServiceName}.dll",
+                $"{currentFolder}\\ResumableFunctions.Core.dll"
             }.ToList();
             WriteMessage("Start register method waits.");
             var resumableFunctions = await RegisterMethodWaits(assemblyPaths);
@@ -48,11 +56,48 @@ public class Scanner
 
             WriteMessage("Register local methods");
             await RegisterMethodWaitsIfExist(typeof(LocalRegisteredMethods));
+            await UpdateScanData(currentServiceName, serviceUrl);
             await _context.SaveChangesAsync();
 
-            await _context.DisposeAsync();
             WriteMessage("Close with no errors.");
-            Console.ReadLine();
+            await _context.DisposeAsync();
+        }
+    }
+
+    private async Task UpdateScanData(string currentServiceName, string serviceUrl)
+    {
+        WriteMessage($"Update last scan date for service [{currentServiceName}].");
+        var scanRecored = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentServiceName);
+        if (scanRecored == null)
+        {
+            scanRecored = new ServiceData
+            {
+                AssemblyName = currentServiceName,
+                Url = serviceUrl,
+            };
+            _context.ServicesData.Add(scanRecored);
+        }
+        scanRecored.LastScanDate = DateTime.Now;
+    }
+
+    private async Task<bool> ShouldScan(string currentServiceName, string serviceUrl)
+    {
+        WriteMessage($"Check last scan date for service [{currentServiceName}].");
+        var scanRecored = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentServiceName);
+        if (scanRecored == null)
+        {
+            scanRecored = new ServiceData
+            {
+                AssemblyName = currentServiceName,
+                Url = serviceUrl
+            };
+            _context.ServicesData.Add(scanRecored);
+            WriteMessage($"No need to rescan service [{currentServiceName}].");
+            return true;
+        }
+        var lastBuildDate = File.GetLastWriteTime($"{AppContext.BaseDirectory}\\{currentServiceName}.dll");
+        scanRecored.Url = serviceUrl;
+        return lastBuildDate > scanRecored.LastScanDate;
     }
 
     internal async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
@@ -86,7 +131,7 @@ public class Scanner
 
                 var assembly = Assembly.LoadFile(assemblyPath);
                 var isReferenceLocalResumableFunction =
-                    assembly.GetReferencedAssemblies().Any(x => x.Name == "LocalResumableFunction");
+                    assembly.GetReferencedAssemblies().Any(x => new[] { "ResumableFunctions.Core", "ResumableFunctions.AspNetService" }.Contains(x.Name));
                 if (isReferenceLocalResumableFunction is false)
                 {
                     WriteMessage($"Not reference LocalResumableFunction.dll,Scan canceled for [{assemblyPath}].");
@@ -223,8 +268,9 @@ public class Scanner
 
     private void WriteMessage(string message)
     {
-        Console.Write(ScannerAppName);
-        Console.WriteLine(message);
+        _logger.LogInformation($"{ScannerAppName}{message}\n");
+        //Console.Write(ScannerAppName);
+        //Console.WriteLine(message);
     }
 }
 

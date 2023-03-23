@@ -14,9 +14,9 @@ public class Test1RfSettings : IResumableFunctionSettings
         {
             CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
             SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
-            QueuePollInterval = TimeSpan.Zero,
+            QueuePollInterval = TimeSpan.FromSeconds(10),
             UseRecommendedIsolationLevel = true,
-            DisableGlobalLocks = true
+            DisableGlobalLocks = false
         });
 
     public DbContextOptionsBuilder WaitsDbConfig => new DbContextOptionsBuilder()

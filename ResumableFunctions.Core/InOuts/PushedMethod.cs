@@ -2,10 +2,9 @@
 using System.Reflection;
 
 namespace ResumableFunctions.Core.InOuts;
-
 public class PushedMethod
 {
-    public int Id { get; set; }
+    public int Id { get; internal set; }
     [NotMapped]
     public MethodData MethodData { get; internal set; }
     public int MethodId { get; internal set; }

@@ -13,7 +13,7 @@ namespace ResumableFunctions.AspNetService
 {
     public static class Extensions
     {
-        public static void ScanCurrentService(this WebApplication app)
+        public static void ScanCurrentService(this WebApplication app,string serviceUrl)
         {
             GlobalConfiguration.Configuration
               .UseActivator(new HangfireActivator(app));
@@ -21,10 +21,9 @@ namespace ResumableFunctions.AspNetService
             Core.Helpers.Extensions.SetServiceProvider(app.Services);
 
             var scannerScope = app.Services.CreateScope();
-          
             var backgroundJobClient = scannerScope.ServiceProvider.GetService<IBackgroundJobClient>();
             var scanner = scannerScope.ServiceProvider.GetService<Scanner>();
-            backgroundJobClient.Enqueue(() => scanner.Start());
+            backgroundJobClient.Enqueue(() => scanner.Start(serviceUrl));
         }
 
         public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, IResumableFunctionSettings settings)

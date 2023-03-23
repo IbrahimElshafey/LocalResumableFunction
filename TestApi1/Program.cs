@@ -1,11 +1,13 @@
 ﻿using Hangfire;
 using ResumableFunctions.AspNetService;
 using ResumableFunctions.Core;
+using ResumableFunctions.Core.Abstraction;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddSingleton<IResumableFunctionSettings, Test1RfSettings>();
 builder.Services.AddControllers().AddResumableFunctions(new Test1RfSettings());
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -28,6 +30,6 @@ app.MapControllers();
 app.UseHangfireDashboard();
 
 
-app.ScanCurrentService();
+app.ScanCurrentService("https://localhost:44376/");
 
 app.Run();

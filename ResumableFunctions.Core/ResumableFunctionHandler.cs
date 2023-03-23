@@ -8,7 +8,7 @@ namespace ResumableFunctions.Core;
 
 public partial class ResumableFunctionHandler
 {
-    private readonly FunctionDataContext _context;
+    internal readonly FunctionDataContext _context;
     private readonly WaitsRepository _waitsRepository;
     private readonly MethodIdentifierRepository _metodIdsRepo;
     private readonly IBackgroundJobClient _backgroundJobClient;
