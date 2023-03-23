@@ -1,7 +1,8 @@
 ﻿using ResumableFunctions.Core;
 using ResumableFunctions.Core.InOuts;
+using Test;
 
-namespace Test;
+namespace TestApi1.Examples;
 
 internal class ReplayGoBackBeforeNewMatchExample : ProjectApprovalExample
 {

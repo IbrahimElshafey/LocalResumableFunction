@@ -9,11 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResumableFunctions.Core", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestAndExamples", "TestAndExamples", "{8AF132E9-5C5A-4D6C-B0FC-82FFCA700BA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResumableFunctions.AspNetService", "ResumableFunctions.AspNetService\ResumableFunctions.AspNetService.csproj", "{E5358FFD-2C64-4213-B97A-F7575E1700B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResumableFunctions.AspNetService", "ResumableFunctions.AspNetService\ResumableFunctions.AspNetService.csproj", "{E5358FFD-2C64-4213-B97A-F7575E1700B8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApi1", "TestApi1\TestApi1.csproj", "{A9B10922-26B8-43D3-BE76-2ED33950235A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApi1", "TestApi1\TestApi1.csproj", "{A9B10922-26B8-43D3-BE76-2ED33950235A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApi2", "TestApi2\TestApi2.csproj", "{4105B620-EA88-4291-AD80-6F90C94A6A0A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApi2", "TestApi2\TestApi2.csproj", "{4105B620-EA88-4291-AD80-6F90C94A6A0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

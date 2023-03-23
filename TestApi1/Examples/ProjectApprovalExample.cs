@@ -1,11 +1,10 @@
-﻿using External;
-using ExternalService;
-using ResumableFunctions.Core;
+﻿using ResumableFunctions.Core;
 using ResumableFunctions.Core.Attributes;
 using ResumableFunctions.Core.Helpers;
 using ResumableFunctions.Core.InOuts;
+using Test;
 
-namespace Test;
+namespace TestApi1.Examples;
 
 internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveApproval
 {

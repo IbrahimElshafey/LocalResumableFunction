@@ -1,7 +1,7 @@
 ﻿using ResumableFunctions.Core.Attributes;
 using Test;
 
-namespace ExternalService
+namespace TestApi1.Examples
 {
     public class ExternalServiceClass
     {

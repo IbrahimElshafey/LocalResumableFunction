@@ -15,10 +15,10 @@ namespace ResumableFunctions.AspNetService
     {
         public static void ScanCurrentService(this WebApplication app,string serviceUrl)
         {
-            GlobalConfiguration.Configuration
-              .UseActivator(new HangfireActivator(app));
+            CoreExtensions.SetServiceProvider(app.Services);
 
-            Core.Helpers.Extensions.SetServiceProvider(app.Services);
+            GlobalConfiguration.Configuration
+              .UseActivator(new HangfireActivator());
 
             var scannerScope = app.Services.CreateScope();
             var backgroundJobClient = scannerScope.ServiceProvider.GetService<IBackgroundJobClient>();

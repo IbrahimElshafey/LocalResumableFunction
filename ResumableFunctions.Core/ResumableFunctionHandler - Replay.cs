@@ -131,7 +131,7 @@ public partial class ResumableFunctionHandler
     private static void CheckReplayMatchExpression(ReplayRequest replayWait, MethodWait mw)
     {
         var isSameSignature =
-            Extensions.SameLambadaSignatures(replayWait.MatchExpression, mw.MatchIfExpression);
+            CoreExtensions.SameLambadaSignatures(replayWait.MatchExpression, mw.MatchIfExpression);
         if (isSameSignature is false)
             throw new Exception("Replay match expression method must have same signature as " +
                                 "the wait that will replayed.");

@@ -1,7 +1,7 @@
 ﻿using ResumableFunctions.Core.Attributes;
 using Test;
 
-namespace External
+namespace TestApi1.Examples
 {
     internal interface IManagerFiveApproval
     {

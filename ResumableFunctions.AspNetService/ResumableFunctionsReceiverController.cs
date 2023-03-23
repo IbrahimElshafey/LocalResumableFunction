@@ -12,26 +12,26 @@ namespace ResumableFunctions.AspNetService
     //[ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionsReceiverController : ControllerBase
     {
-        public IResumableFunctionsReceiver WaitMatchedHandler { get; }
+        public ResumableFunctionHandler ResumableFunctionHandler { get; }
         public IBackgroundJobClient BackgroundJobClient { get; }
-        public ResumableFunctionsReceiverController(IResumableFunctionsReceiver waitMatched, IBackgroundJobClient backgroundJobClient)
+        public ResumableFunctionsReceiverController(ResumableFunctionHandler handler, IBackgroundJobClient backgroundJobClient)
         {
             BackgroundJobClient = backgroundJobClient;
-            WaitMatchedHandler = waitMatched;
+            ResumableFunctionHandler = handler;
         }
 
 
         [HttpGet(nameof(WaitMatched))]
         public int WaitMatched(int waitId, int pushedMethodId)
         {
-            BackgroundJobClient.Enqueue(() => WaitMatchedHandler.WaitMatched(waitId, pushedMethodId));
+            BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessMatchedWait(waitId, pushedMethodId));
             return 0;
         }
 
         [HttpGet(nameof(PushExternal))]
         public int PushExternal(PushedMethod pushedMethod)
         {
-            BackgroundJobClient.Enqueue(() => WaitMatchedHandler.ProcessPushedMethod(pushedMethod));
+            BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessPushedMethod(pushedMethod));
             return 0;
         }
     }

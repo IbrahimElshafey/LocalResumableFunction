@@ -1,13 +1,15 @@
-﻿using ResumableFunctions.Core.InOuts;
+﻿using ResumableFunctions.Core;
+using ResumableFunctions.Core.InOuts;
+using Test;
 
-namespace Test;
+namespace TestApi1.Examples;
 
-internal class WaitSameEventAgain : ProjectApprovalExample
+internal class ReplayGoBackAfterExample : ProjectApprovalExample
 {
     private const string ProjectSumbitted = "Project Sumbitted";
 
     //[ResumableFunctionEntryPoint]
-    public async IAsyncEnumerable<Wait> Test_WaitSameEventAgain()
+    public async IAsyncEnumerable<Wait> TestReplay_GoBackAfter()
     {
         yield return
             Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
@@ -15,21 +17,19 @@ internal class WaitSameEventAgain : ProjectApprovalExample
                 .SetData((input, output) => CurrentProject == input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
-
-        Wait ManagerApproval() => Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
+        yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
             .SetData((input, output) => ManagerOneApproval == input.Decision);
-        yield return ManagerApproval();
 
         if (ManagerOneApproval is false)
         {
-            WriteMessage("Manager one rejected project and replay will wait ManagerApproval again.");
-            yield return ManagerApproval();
+            WriteMessage("Manager one rejected project and replay will go after ProjectSubmitted.");
+            yield return GoBackAfter(ProjectSumbitted);
         }
         else
         {
             WriteMessage("Manager one approved project");
         }
-        Success(nameof(Test_WaitSameEventAgain));
+        Success(nameof(TestReplay_GoBackAfter));
     }
 }

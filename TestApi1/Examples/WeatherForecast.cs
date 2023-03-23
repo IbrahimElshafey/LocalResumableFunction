@@ -1,4 +1,4 @@
-namespace TestApi1
+namespace TestApi1.Examples
 {
     public class WeatherForecast
     {

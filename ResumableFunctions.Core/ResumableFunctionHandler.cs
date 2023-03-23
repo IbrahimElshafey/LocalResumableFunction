@@ -3,6 +3,7 @@ using ResumableFunctions.Core.Data;
 using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
+using ResumableFunctions.Core.Abstraction;
 
 namespace ResumableFunctions.Core;
 
@@ -13,8 +14,7 @@ public partial class ResumableFunctionHandler
     private readonly MethodIdentifierRepository _metodIdsRepo;
     private readonly IBackgroundJobClient _backgroundJobClient;
 
-
-    public ResumableFunctionHandler(FunctionDataContext context, IBackgroundJobClient backgroundJobClient=null)
+    public ResumableFunctionHandler(FunctionDataContext context, IBackgroundJobClient backgroundJobClient)
     {
         _context = context;
         _waitsRepository = new WaitsRepository(_context);

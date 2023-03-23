@@ -1,10 +1,11 @@
 ﻿using ResumableFunctions.Core.Attributes;
 using ResumableFunctions.Core.Helpers;
 using ResumableFunctions.Core.InOuts;
+using Test;
 
-namespace Test;
+namespace TestApi1.Examples;
 
-internal class ManyWaitsTypeInGroupExample:ProjectApprovalExample
+internal class ManyWaitsTypeInGroupExample : ProjectApprovalExample
 {
     public async IAsyncEnumerable<Wait> ManyWaitsTypeInGroup()
     {
@@ -31,7 +32,7 @@ internal class ManyWaitsTypeInGroupExample:ProjectApprovalExample
         Success(nameof(ManyWaitsTypeInGroup));
     }
 
-  
+
 
     [SubResumableFunction]
     internal async IAsyncEnumerable<Wait> ManagerThreeSubFunction()

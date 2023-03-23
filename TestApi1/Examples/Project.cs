@@ -1,4 +1,4 @@
-﻿namespace Test;
+﻿namespace TestApi1.Examples;
 
 public class Project
 {

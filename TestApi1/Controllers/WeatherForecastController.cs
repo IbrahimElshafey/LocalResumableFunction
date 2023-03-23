@@ -1,33 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
+using Test;
+using TestApi1.Examples;
 
 namespace TestApi1.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class TetController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
+        readonly ProjectApprovalExample example = new ProjectApprovalExample();
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        [HttpPost(nameof(ManagerOneApproveProject))]
+        public bool ManagerOneApproveProject(ApprovalDecision args)
         {
-            _logger = logger;
+            return example.ManagerOneApproveProject(args);
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpPost(nameof(ProjectSubmitted))]
+        public async Task<bool> ProjectSubmitted(Project project)
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+            return await example.ProjectSubmitted(project);
         }
     }
 }

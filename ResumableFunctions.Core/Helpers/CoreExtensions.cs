@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Core.Abstraction;
 using ResumableFunctions.Core.Data;
+using ResumableFunctions.Core.Implementation;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -16,15 +17,15 @@ using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Core.Helpers;
 
-public static class Extensions
+public static class CoreExtensions
 {
     private static IServiceProvider _ServiceProvider;
     public static IServiceProvider GetServiceProvider() => _ServiceProvider;
     public static void SetServiceProvider(IServiceProvider provider) => _ServiceProvider = provider;
     public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionSettings settings)
     {
-        services.AddScoped<IPushMethodCall, ResumableFunctionHandler>();
-        services.AddScoped<IResumableFunctionsReceiver, ResumableFunctionHandler>();
+        //services.AddScoped<IProcessPushedMethodCall, ProcessPushedMethodCall>();
+        //services.AddScoped<IResumableFunctionsReceiver, ResumableFunctionHandler>();
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig);
        
         services.AddScoped<ResumableFunctionHandler>();

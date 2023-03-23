@@ -9,16 +9,19 @@ using ResumableFunctions.Core.Abstraction;
 
 namespace ResumableFunctions.Core;
 
-public partial class ResumableFunctionHandler : IPushMethodCall, IResumableFunctionsReceiver
+public partial class ResumableFunctionHandler 
 {
     /// <summary>
     ///     When method called and finished
     /// </summary>
-    public void MethodCalled(PushedMethod pushedMethod)
+
+
+    internal async Task QueueProcessPushedMethod(PushedMethod pushedMethod)
     {
-        _backgroundJobClient.Enqueue(() => ProcessPushedMethod(pushedMethod));
+        _backgroundJobClient.Enqueue(()=> ProcessPushedMethod(pushedMethod));
     }
 
+    //todo:Like start
     public async Task ProcessPushedMethod(PushedMethod pushedMethod)
     {
         //todo:move this code to background task
@@ -37,7 +40,8 @@ public partial class ResumableFunctionHandler : IPushMethodCall, IResumableFunct
             var matchedWaits = await _waitsRepository.GetMethodActiveWaits(pushedMethod);
             if (matchedWaits?.Any() is true)
             {
-                await _context.PushedMethodsCalls.AddAsync(pushedMethod);
+                _context.PushedMethodsCalls.Add(pushedMethod);
+                await _context.SaveChangesAsync();
             }
             foreach (var methodWait in matchedWaits)
             {
@@ -88,11 +92,7 @@ public partial class ResumableFunctionHandler : IPushMethodCall, IResumableFunct
         }
     }
 
-    public void WaitMatched(int waitId, int pushedMethodId)
-    {
-        _backgroundJobClient.Enqueue(() => ProcessMatchedWait(waitId, pushedMethodId));
-    }
-
+   //todo:like start scan
     public async Task ProcessMatchedWait(int waitId, int pushedMethodId)
     {
         //_context
