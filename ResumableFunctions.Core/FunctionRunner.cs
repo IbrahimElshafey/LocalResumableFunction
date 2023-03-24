@@ -27,7 +27,7 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
         SetState(state ?? int.MinValue);
     }
 
-    public bool ResumableFunctionExist => _this != null;
+    public bool ResumableFunctionExistInCode => _this != null;
 
     public Wait Current => _this.Current;
 

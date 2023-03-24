@@ -64,6 +64,7 @@ internal class WaitsRepository : RepositoryBase
             {
                 x.Input = pushedMethod.Input;
                 x.Output = pushedMethod.Output;
+                x.PushedMethodCallId = pushedMethodId;
             });
             return matchedWaits;
         }

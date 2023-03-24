@@ -11,6 +11,7 @@ public class MethodWait : Wait
 
     [NotMapped] public LambdaExpression SetDataExpression { get; internal set; }
 
+    internal int PushedMethodCallId { get; set; }
     internal byte[] SetDataExpressionValue { get; set; }
 
     [NotMapped]

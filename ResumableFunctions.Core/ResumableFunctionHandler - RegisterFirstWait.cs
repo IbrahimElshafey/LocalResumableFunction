@@ -2,6 +2,8 @@
 using ResumableFunctions.Core.Data;
 using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ResumableFunctions.Core;
 
@@ -12,13 +14,15 @@ public partial class ResumableFunctionHandler
     internal async Task RegisterFirstWait(MethodInfo resumableFunction)
     {
         //todo: change this to use bependency injection
-        var classInstance = (ResumableFunctionLocal)Activator.CreateInstance(resumableFunction.DeclaringType);
+        //var classInstance = (ResumableFunctionLocal)Activator.CreateInstance(resumableFunction.DeclaringType);
+        //var classInstance = (ResumableFunctionLocal)_serviceProvider.GetService(resumableFunction.DeclaringType);
+        var classInstance = (ResumableFunctionLocal)ActivatorUtilities.CreateInstance(_serviceProvider,resumableFunction.DeclaringType); ;
         if (classInstance != null)
             try
             {
                 classInstance.CurrentResumableFunction = resumableFunction;
                 var functionRunner = new FunctionRunner(classInstance, resumableFunction);
-                if (functionRunner.ResumableFunctionExist is false)
+                if (functionRunner.ResumableFunctionExistInCode is false)
                 {
                     WriteMessage($"Resumable function ({resumableFunction.Name}) not exist in code.");
                     return;

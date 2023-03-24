@@ -42,19 +42,8 @@ public partial class ResumableFunctionHandler
         _backgroundJobClient.Enqueue(() => ProcessPushedMethod(pushedMethod.Id));
     }
 
-    //todo:Like start
     public async Task ProcessPushedMethod(int pushedMethodId)
     {
-        //todo:move this code to background task
-        /*
-         * Notify cuurent service HandleWaitsBackground
-         * Save `pushedMethod` to database table
-         * GetMethodActiveWaits
-         * Save active waits to ActiveWaits table (wait id, pushed method id, AssemblyName, status)
-         * Handle this list one by one
-         * If wait owned by current service,Handle local 
-         * If external notify the other service with ID
-         */
         try
         {
             using (IServiceScope scope = _serviceProvider.CreateScope())

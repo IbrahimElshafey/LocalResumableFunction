@@ -36,7 +36,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
                 dynamic output = args.ReturnValue;
                 _pushedMethod.Output = output.Result;
             }
-            //todo: use hangfire
+
             CoreExtensions.GetServiceProvider()
                 .CreateScope().ServiceProvider
                 .GetService<ResumableFunctionHandler>()

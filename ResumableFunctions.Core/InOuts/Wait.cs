@@ -83,7 +83,7 @@ public abstract class Wait
         //    Console.WriteLine($"Get next wait IsNode:{IsNode},Name:{Name}");
         //}
         var functionRunner = new FunctionRunner(this);
-        if (functionRunner.ResumableFunctionExist is false)
+        if (functionRunner.ResumableFunctionExistInCode is false)
         {
             Debug.WriteLine($"Resumable function ({RequestedByFunction.MethodName}) not exist in code");
             //todo:delete it and all related waits

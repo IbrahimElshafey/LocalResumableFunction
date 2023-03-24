@@ -78,8 +78,8 @@ public static class CoreExtensions
         if (isEqual is false) return false;
         if (expressionOne.ReturnType != expressionTwo.ReturnType)
             return false;
-        if (expressionOne.Parameters.Count != expressionTwo.Parameters.Count)
-            return false;
+        //if (expressionOne.Parameters.Count != expressionTwo.Parameters.Count)
+        //    return false;
 
         for (var i = 0; i < expressionOne.Parameters.Count; i++)
             if (expressionOne.Parameters[i].Type != expressionTwo.Parameters[i].Type)

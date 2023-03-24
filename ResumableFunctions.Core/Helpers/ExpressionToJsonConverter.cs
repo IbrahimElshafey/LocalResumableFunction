@@ -43,7 +43,7 @@ public class ExpressionToJsonConverter : ValueConverter<Expression, string>
     private static JsonSerializerSettings JsonSettings(Assembly assembly = null)
     {
         var settings = new JsonSerializerSettings();
-        //Todo:Replace Assembly.GetExecutingAssembly() with "GetCurrentFunctionAssembly()"
+        //Todo:Assembly.GetEntryAssembly() may cause a problem
         settings.Converters.Add(new ExpressionJsonConverter(assembly ?? Assembly.GetEntryAssembly()));
         return settings;
     }

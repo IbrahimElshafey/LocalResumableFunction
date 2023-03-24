@@ -27,18 +27,6 @@ public class FunctionDataContext : DbContext
     public DbSet<ServiceData> ServicesData { get; set; }
 
 
-    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //{
-    //    optionsBuilder = _settings.WaitsDbConfig;
-    //    //todo: resolve at runtime to enable multiple providers
-    //    //optionsBuilder.LogTo(s => Debug.WriteLine(s));
-    //    //optionsBuilder.UseSqlServer(
-    //    //    $"Server=(localdb)\\MSSQLLocalDB;Database=ResumableFunctionsData;");
-
-    //    //var _dbConnection = $"Data Source={AppContext.BaseDirectory}LocalResumableFunctionsData.db";
-    //    //optionsBuilder.UseSqlite(_dbConnection);
-    //}
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ConfigureResumableFunctionState(modelBuilder.Entity<ResumableFunctionState>());

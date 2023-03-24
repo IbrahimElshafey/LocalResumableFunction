@@ -5,6 +5,7 @@ using ResumableFunctions.Core.Attributes;
 using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
+using Microsoft.Extensions.Logging;
 
 namespace ResumableFunctions.Core;
 
@@ -47,11 +48,20 @@ public partial class ResumableFunctionHandler
 
     private async Task ProcessMatchedWait(MethodWait methodWait)
     {
-        if (!await CheckIfMatch(methodWait))
-            return;
-        //todo:cancel processing and rewait it if data is locked
-        methodWait.UpdateFunctionData();
-        await ResumeExecution(methodWait);
-        await _context.SaveChangesAsync();
+        try
+        {
+            if (!await CheckIfMatch(methodWait))
+                return;
+            //todo:cancel processing and rewait it if data is locked
+            methodWait.UpdateFunctionData();
+            await ResumeExecution(methodWait);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                $"Error when process matched wait for method [{methodWait.Name}] with id[{methodWait.Id}]");
+        }
+       
     }
 }

@@ -1,4 +1,5 @@
 ﻿# Todo
+* Filter matched waits to be unique by (stateafter,requestedbyfunction,
 * TimeWaits background task using hangfire test
 * Handle waits background task
 * Change State Is completed to be state (New,Started,Completed,ErrorOccured)
@@ -7,7 +8,7 @@
 	* IsLocked for optemistic lock
 	
 * Validate waits
-	* Wait same wait twice in group error
+	* Wait same wait twice in group is not valid
 	* Wait name can't duplicate in same method
 
 
