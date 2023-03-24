@@ -4,11 +4,15 @@ using ResumableFunctions.Core.Attributes;
 using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Newtonsoft.Json.Linq;
+using ResumableFunctions.Core.Helpers;
+using System.Reflection;
 
 namespace ResumableFunctions.Core.Data;
 
 internal class WaitsRepository : RepositoryBase
 {
+   
     public WaitsRepository(FunctionDataContext ctx) : base(ctx)
     {
     }
@@ -33,25 +37,55 @@ internal class WaitsRepository : RepositoryBase
         return Task.CompletedTask;
     }
 
-    public async Task<List<MethodWait>> GetMethodActiveWaits(PushedMethod pushedMethod)
+    public async Task<List<MethodWait>> GetMethodActiveWaits(int pushedMethodId)
     {
-        var methodData = pushedMethod.MethodData;
-        var _metodIdsRepo = new MethodIdentifierRepository(_context);
-        var methodId = await _metodIdsRepo.GetMethodIdentifierFromDb(methodData);
-        if (methodId == null)
-            throw new Exception(
-                $"Method [{methodData.MethodName}] is not registered in current database as [{nameof(WaitMethodAttribute)}].");
-        pushedMethod.MethodId = methodId.Id;
-        return await _context
-                .MethodWaits
-                .Include(x => x.RequestedByFunction)
-                .Where(x =>
-                    x.WaitMethodIdentifierId == methodId.Id &&
-                    x.Status == WaitStatus.Waiting)
-                .ToListAsync();
+
+        try
+        {
+            var pushedMethod = await _context.PushedMethodsCalls.FindAsync(pushedMethodId);
+            var metodIdsRepo = new MethodIdentifierRepository(_context);
+            var methodId = await metodIdsRepo
+               .GetMethodIdentifierFromDb(pushedMethod.MethodData);
+            if (methodId == null)
+                throw new Exception(
+                    $"Method [{pushedMethod.MethodData.MethodName}] is not registered in current database as [{nameof(WaitMethodAttribute)}].");
+
+            SetInputAndOutput(pushedMethod, methodId);
+
+            var matchedWaits = await _context
+                            .MethodWaits
+                            .Include(x => x.RequestedByFunction)
+                            .Where(x =>
+                                x.WaitMethodIdentifierId == methodId.Id &&
+                                x.Status == WaitStatus.Waiting)
+                            .ToListAsync();
+
+            matchedWaits.ForEach(x =>
+            {
+                x.Input = pushedMethod.Input;
+                x.Output = pushedMethod.Output;
+            });
+            return matchedWaits;
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
 
-
+    private static void SetInputAndOutput(PushedMethod pushedMethod, MethodIdentifier methodId)
+    {
+        if (pushedMethod.Input is JObject inputJson)
+            pushedMethod.Input = inputJson.ToObject(methodId.MethodInfo.GetParameters()[0].ParameterType);
+        if (pushedMethod.Output is JObject outputJson)
+        {
+            if(methodId.MethodInfo.IsAsyncMethod())
+                pushedMethod.Output = outputJson.ToObject(methodId.MethodInfo.ReturnType.GetGenericArguments()[0]);
+            else
+                pushedMethod.Output = outputJson.ToObject(methodId.MethodInfo.ReturnType);
+        }
+            
+    }
 
     public async Task<Wait> GetWaitGroup(int? parentGroupId)
     {

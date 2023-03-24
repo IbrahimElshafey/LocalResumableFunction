@@ -1,9 +1,7 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using ResumableFunctions.Core.Abstraction;
 using ResumableFunctions.Core.Helpers;
-using ResumableFunctions.Core.Implementation;
 
 namespace ResumableFunctions.AspNetService
 {
@@ -13,7 +11,7 @@ namespace ResumableFunctions.AspNetService
 
         public HangfireActivator()
         {
-            _serviceProvider = CoreExtensions.GetServiceProvider();
+            _serviceProvider = CoreExtensions.GetServiceProvider().CreateScope().ServiceProvider;
         }
 
         public override object ActivateJob(Type type)

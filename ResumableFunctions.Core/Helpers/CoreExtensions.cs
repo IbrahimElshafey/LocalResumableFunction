@@ -3,9 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Linq;
-using ResumableFunctions.Core.Abstraction;
 using ResumableFunctions.Core.Data;
-using ResumableFunctions.Core.Implementation;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -27,7 +25,7 @@ public static class CoreExtensions
         //services.AddScoped<IProcessPushedMethodCall, ProcessPushedMethodCall>();
         //services.AddScoped<IResumableFunctionsReceiver, ResumableFunctionHandler>();
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig);
-       
+
         services.AddScoped<ResumableFunctionHandler>();
         services.AddScoped<Scanner>();
         //Debugger.Launch();    
@@ -89,7 +87,7 @@ public static class CoreExtensions
         return true;
     }
 
-    public static bool IsAsyncMethod(MethodBase method)
+    public static bool IsAsyncMethod(this MethodBase method)
     {
         var attType = typeof(AsyncStateMachineAttribute);
 
@@ -98,7 +96,18 @@ public static class CoreExtensions
         // Null is returned if the attribute isn't present for the method. 
         var attrib = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
 
-        return attrib != null;
+
+        if (attrib == null)
+        {
+            bool returnTypeIsTask =
+              attrib == null &&
+              method is MethodInfo mi &&
+              mi != null &&
+              mi.ReturnType.IsGenericType &&
+              mi.ReturnType.GetGenericTypeDefinition() == typeof(Task<>);
+            return returnTypeIsTask;
+        }
+        return true;
     }
 
 

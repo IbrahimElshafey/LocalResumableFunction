@@ -1,6 +1,8 @@
 ﻿# Todo
-* TimeWaits background task
+* TimeWaits background task using hangfire test
 * Handle waits background task
+* Change State Is completed to be state (New,Started,Completed,ErrorOccured)
+* Hangfire access dbcontext problem
 * Add 
 	* IsLocked for optemistic lock
 	

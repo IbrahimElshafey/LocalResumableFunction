@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using ResumableFunctions.Core;
-using ResumableFunctions.Core.Abstraction;
 using ResumableFunctions.Core.InOuts;
 
 namespace ResumableFunctions.AspNetService
@@ -31,7 +30,7 @@ namespace ResumableFunctions.AspNetService
         [HttpGet(nameof(PushExternal))]
         public int PushExternal(PushedMethod pushedMethod)
         {
-            BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessPushedMethod(pushedMethod));
+            //BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessPushedMethod(pushedMethod));
             return 0;
         }
     }

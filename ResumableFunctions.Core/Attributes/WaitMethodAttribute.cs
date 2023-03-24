@@ -3,7 +3,6 @@ using ResumableFunctions.Core.InOuts;
 using MethodBoundaryAspect.Fody.Attributes;
 using ResumableFunctions.Core;
 using Microsoft.Extensions.DependencyInjection;
-using ResumableFunctions.Core.Abstraction;
 
 namespace ResumableFunctions.Core.Attributes;
 
@@ -28,16 +27,25 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
 
     public override void OnExit(MethodExecutionArgs args)
     {
-        _pushedMethod.Output = args.ReturnValue;
-        //var isTaskResult = args.ReturnValue.GetType().GetGenericTypeDefinition() == typeof(Task<>);
-        if (CoreExtensions.IsAsyncMethod(args.Method))
+        try
         {
-            dynamic output = args.ReturnValue;
-            _pushedMethod.Output = output.Result;
+            _pushedMethod.Output = args.ReturnValue;
+            //var isTaskResult = args.ReturnValue.GetType().GetGenericTypeDefinition() == typeof(Task<>);
+            if (args.Method.IsAsyncMethod())
+            {
+                dynamic output = args.ReturnValue;
+                _pushedMethod.Output = output.Result;
+            }
+            //todo: use hangfire
+            CoreExtensions.GetServiceProvider()
+                .CreateScope().ServiceProvider
+                .GetService<ResumableFunctionHandler>()
+                .QueueProcessPushedMethod(_pushedMethod).Wait();
+            args.MethodExecutionTag = true;
         }
-        //todo: use hangfire
-        CoreExtensions.GetServiceProvider().GetService<IProcessPushedMethodCall>().MethodCalled(_pushedMethod);
-        args.MethodExecutionTag = true;
+        catch (Exception)
+        {
+        }
     }
 
     public override void OnException(MethodExecutionArgs args)

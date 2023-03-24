@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ResumableFunctions.Core;
-using ResumableFunctions.Core.Abstraction;
 using ResumableFunctions.Core.Data;
 using ResumableFunctions.Core.Helpers;
 using System;

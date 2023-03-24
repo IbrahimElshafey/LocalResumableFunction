@@ -9,11 +9,21 @@ using System.Reflection.Metadata;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace ResumableFunctions.Core.InOuts
 {
     public class MethodData
     {
+        [JsonConstructor]
+        public MethodData(string assemblyName, string className, string methodName, string methodSignature, byte[] methodHash)
+        {
+            AssemblyName = assemblyName;
+            ClassName = className;
+            MethodName = methodName;
+            MethodSignature = methodSignature;
+            MethodHash = methodHash;
+        }
         public MethodData(MethodBase method, ExternalWaitMethodAttribute externalWaitMethodAttribute)
         {
             ClassName = externalWaitMethodAttribute.ClassName ?? method.DeclaringType?.FullName;
@@ -40,7 +50,6 @@ namespace ResumableFunctions.Core.InOuts
         public string MethodSignature { get; internal set; }
         public byte[] MethodHash { get; internal set; }
 
-        //todo: must include return type
         internal static string CalcSignature(MethodBase value)
         {
             var parameterInfos = value.GetParameters();

@@ -1,7 +1,7 @@
 ﻿using Hangfire;
 using Hangfire.SqlServer;
 using Microsoft.EntityFrameworkCore;
-using ResumableFunctions.Core.Abstraction;
+using ResumableFunctions.Core;
 
 public class Test1RfSettings : IResumableFunctionSettings
 {

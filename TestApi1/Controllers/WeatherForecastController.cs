@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Test;
 using TestApi1.Examples;
 
 namespace TestApi1.Controllers

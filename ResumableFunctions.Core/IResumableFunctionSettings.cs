@@ -1,11 +1,11 @@
 ﻿using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
-namespace ResumableFunctions.Core.Abstraction
+namespace ResumableFunctions.Core
 {
     public interface IResumableFunctionSettings
     {
-        public IGlobalConfiguration HangFireConfig { get;  }
+        public IGlobalConfiguration HangFireConfig { get; }
         public DbContextOptionsBuilder WaitsDbConfig { get; }
     }
 }

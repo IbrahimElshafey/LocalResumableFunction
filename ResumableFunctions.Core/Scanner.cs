@@ -31,7 +31,8 @@ public class Scanner
     {
         using (IServiceScope scope = _serviceProvider.CreateScope())
         {
-            _handler = _serviceProvider.GetService<ResumableFunctionHandler>();
+            _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
+            _handler.SetDependencies(scope.ServiceProvider);
             _context = _handler._context;
             WriteMessage("Start Scan Resumable Functions##");
 

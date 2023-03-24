@@ -60,4 +60,16 @@ public partial class ResumableFunctionHandler
         Console.Write(ScannerAppName);
         Console.WriteLine(message);
     }
+
+    private async Task DuplicateIfFirst(Wait currentWait)
+    {
+        if (currentWait.IsFirst)
+            await RegisterFirstWait(currentWait.RequestedByFunction.MethodInfo);
+    }
+
+    private async Task<bool> MoveFunctionToRecycleBin(Wait lastWait)
+    {
+        //throw new NotImplementedException();
+        return true;
+    }
 }

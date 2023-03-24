@@ -6,7 +6,8 @@ using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Reflection.Emit;
-using ResumableFunctions.Core.Abstraction;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace ResumableFunctions.Core.Data;
 
@@ -63,6 +64,12 @@ public class FunctionDataContext : DbContext
         entityTypeBuilder
             .Property(x => x.Output)
             .HasConversion<ObjectToJsonConverter>();
+
+        entityTypeBuilder
+           .Property(x => x.MethodData)
+           .HasConversion(
+            v => JsonConvert.SerializeObject(v),
+            v => JsonConvert.DeserializeObject<MethodData>(v));
     }
 
     private void ConfigureWaits(ModelBuilder modelBuilder)
