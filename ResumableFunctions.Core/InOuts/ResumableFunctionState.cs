@@ -1,11 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
-
+﻿
 namespace ResumableFunctions.Core.InOuts;
 
 public class ResumableFunctionState
 {
-    [Key] public int Id { get; internal set; }
+    public int Id { get; internal set; }
     public FunctionStatus Status { get; internal set; } = FunctionStatus.New;
     public string StatusMessage { get; internal set; }
 

@@ -4,7 +4,7 @@ namespace TestApi1.Examples
 {
     public class ExternalServiceClass
     {
-        [ExternalWaitMethod(ClassName = "External.IManagerFiveApproval", AssemblyName = "Test")]
+        [ExternalWaitMethod(ClassName = "TestApi1.Examples.IManagerFiveApproval", AssemblyName = "TestApi1")]
         public bool ManagerFiveApproveProject(ApprovalDecision args)
         {
             return default;

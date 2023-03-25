@@ -1,24 +1,23 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 
 namespace ResumableFunctions.Core.InOuts;
 
-[Index(nameof(MethodHash), IsUnique = true, Name = "Index_MethodHash")]
+
 public class MethodIdentifier
 {
 
     private MethodInfo _methodInfo;
-    [Key] public int Id { get; internal set; }
+    public int Id { get; internal set; }
 
     public string AssemblyName { get; internal set; }
     public string ClassName { get; internal set; }
     public string MethodName { get; internal set; }
     public string MethodSignature { get; internal set; }
 
-    [MaxLength(16)] public byte[] MethodHash { get; set; }
+    public byte[] MethodHash { get; set; }
 
     public MethodType Type { get; set; }
     public List<Wait> WaitsCreatedByFunction { get; internal set; }

@@ -1,22 +1,19 @@
 ﻿# Todo
-* Wait for external method
-	* Add class to your code
-	* Mark a method with [ExternalWaitMethod(ClassName = "Full.Class.Name",AssemblyName="SomeAssembly")]
-		* MethodName [as method name itself]
-		* MethodSignature [as method sigature itself]
+* Working on
+	* Scanner Add external methods
+	* Call http client
 * Filter matched waits to be unique to solve activate same wait multiple times by same method call
 * TimeWaits background task using hangfire test
 * Hangfire access dbcontext problem
 	* A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-* Add 
-	* IsLocked for optemistic lock
+* Add IsLocked for optemistic lock for state
 	
 * Validate waits
 	* Wait same wait twice in group is not valid
 	* Wait name can't duplicate in same method
 
 
-		* method body is empty return default or exception it will never called
+		
 
 
 

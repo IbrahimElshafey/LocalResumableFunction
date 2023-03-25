@@ -15,6 +15,8 @@ namespace ResumableFunctions.Core.InOuts
 {
     public class MethodData
     {
+        private MethodInfo _methodInfo;
+
         [JsonConstructor]
         public MethodData(string assemblyName, string className, string methodName, string methodSignature, byte[] methodHash)
         {
@@ -24,12 +26,12 @@ namespace ResumableFunctions.Core.InOuts
             MethodSignature = methodSignature;
             MethodHash = methodHash;
         }
-        public MethodData(MethodBase method, ExternalWaitMethodAttribute externalWaitMethodAttribute)
+        public MethodData(MethodBase externalMethod, ExternalWaitMethodAttribute externalWaitMethodAttribute)
         {
-            ClassName = externalWaitMethodAttribute.ClassName ?? method.DeclaringType?.FullName;
-            AssemblyName = externalWaitMethodAttribute.AssemblyName ?? method.DeclaringType?.Assembly.GetName().Name;
-            MethodName = method.Name;
-            MethodSignature = CalcSignature(method);
+            ClassName = externalWaitMethodAttribute.ClassName ?? externalMethod.DeclaringType?.FullName;
+            AssemblyName = externalWaitMethodAttribute.AssemblyName ?? externalMethod.DeclaringType?.Assembly.GetName().Name;
+            MethodName = externalMethod.Name;
+            MethodSignature = CalcSignature(externalMethod);
             CreateMethodHash();
         }
 
@@ -49,6 +51,24 @@ namespace ResumableFunctions.Core.InOuts
         public string MethodName { get; internal set; }
         public string MethodSignature { get; internal set; }
         public byte[] MethodHash { get; internal set; }
+
+        //todo:refactor copied code from MethodIdentifier
+        internal MethodInfo MethodInfo
+        {
+            get
+            {
+                if (AssemblyName != null && ClassName != null && MethodName != null && _methodInfo == null)
+                {
+                    _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
+                        .GetType(ClassName)
+                        ?.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                        .FirstOrDefault(x => x.Name == MethodName && MethodData.CalcSignature(x) == MethodSignature);
+                    return _methodInfo;
+                }
+
+                return _methodInfo;
+            }
+        }
 
         internal static string CalcSignature(MethodBase value)
         {

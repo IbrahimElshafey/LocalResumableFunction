@@ -25,6 +25,7 @@ public class FunctionDataContext : DbContext
     public DbSet<FunctionWait> FunctionWaits { get; set; }
     public DbSet<PushedMethod> PushedMethodsCalls { get; set; }
     public DbSet<ServiceData> ServicesData { get; set; }
+    public DbSet<ExternalMethodRecord> ExternalMethodsRegistry { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -33,8 +34,31 @@ public class FunctionDataContext : DbContext
         ConfigureMethodIdentifier(modelBuilder.Entity<MethodIdentifier>());
         ConfigurePushedMethod(modelBuilder.Entity<PushedMethod>());
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
+        ConfigureExternalMethodRecord(modelBuilder.Entity<ExternalMethodRecord>());
         ConfigureWaits(modelBuilder);
         base.OnModelCreating(modelBuilder);
+    }
+
+    private void ConfigureExternalMethodRecord(EntityTypeBuilder<ExternalMethodRecord> entityTypeBuilder)
+    {
+        entityTypeBuilder
+          .Property(x => x.MethodData)
+          .HasConversion(
+           v => JsonConvert.SerializeObject(v),
+           v => JsonConvert.DeserializeObject<MethodData>(v));
+
+        entityTypeBuilder
+            .HasIndex(x => x.MethodHash)
+            .HasDatabaseName("Index_ExternalMethodHash")
+            .IsUnique(true);
+
+        entityTypeBuilder
+          .Property(x => x.MethodHash)
+          .HasMaxLength(16);
+
+        entityTypeBuilder
+         .Property(x => x.OriginalMethodHash)
+         .HasMaxLength(16);
     }
 
     private void ConfigureServiceData(EntityTypeBuilder<ServiceData> entityTypeBuilder)
@@ -112,6 +136,16 @@ public class FunctionDataContext : DbContext
             .OnDelete(DeleteBehavior.Restrict)
             .HasForeignKey(x => x.WaitMethodIdentifierId)
             .HasConstraintName("FK_Waits_RequestedForMethod");
+
+        entityTypeBuilder
+            .HasIndex(x => x.MethodHash)
+            .HasDatabaseName("Index_MethodHash")
+            .IsUnique(true);
+
+        entityTypeBuilder
+            .Property(x => x.MethodHash)
+            .HasMaxLength(16);
+
         entityTypeBuilder
          .Property<DateTime>(ConstantValue.CreatedProp);
     }

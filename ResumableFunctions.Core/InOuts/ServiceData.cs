@@ -1,5 +1,4 @@
 ﻿namespace ResumableFunctions.Core.InOuts;
-
 public class ServiceData
 {
     public int Id { get; internal set; }

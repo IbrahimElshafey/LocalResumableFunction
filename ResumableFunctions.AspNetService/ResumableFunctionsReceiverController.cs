@@ -20,18 +20,18 @@ namespace ResumableFunctions.AspNetService
         }
 
 
-        [HttpGet(nameof(WaitMatched))]
-        public int WaitMatched(int waitId, int pushedMethodId)
+        [HttpGet(nameof(ProcessMatchedWait))]
+        public int ProcessMatchedWait(int waitId, int pushedMethodId)
         {
             BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessMatchedWait(waitId, pushedMethodId));
             return 0;
         }
 
-        [HttpGet(nameof(PushExternal))]
-        public int PushExternal(PushedMethod pushedMethod)
-        {
-            //BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessPushedMethod(pushedMethod));
-            return 0;
-        }
+        //[HttpGet(nameof(PushExternal))]
+        //public int PushExternal(PushedMethod pushedMethod)
+        //{
+        //    //BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessPushedMethod(pushedMethod));
+        //    return 0;
+        //}
     }
 }

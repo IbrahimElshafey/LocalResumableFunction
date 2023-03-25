@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using static System.Formats.Asn1.AsnWriter;
 using ResumableFunctions.Core.Attributes;
+using Newtonsoft.Json.Linq;
+using ResumableFunctions.Core.Helpers;
 
 namespace ResumableFunctions.Core;
 
@@ -60,8 +62,7 @@ public partial class ResumableFunctionHandler
                     }
                     else
                     {
-                        //todo: Find service owner
-                        // call "api/MatchedWaitReceiver/WaitMatched" for the other service with params (waitId, pushedMethodId)
+                        await CallOwnerService(methodWait, pushedMethodId);
                     }
                 }
             }
@@ -80,7 +81,7 @@ public partial class ResumableFunctionHandler
         return File.Exists(ownerAssemblyPath);
     }
 
-    private async Task<string> GetWaitOwner(MethodWait methodWait)
+    private async Task CallOwnerService(MethodWait methodWait, int pushedMethodId)
     {
         var ownerAssemblyName = methodWait.RequestedByFunction.AssemblyName;
         var ownerServiceUrl =
@@ -89,7 +90,8 @@ public partial class ResumableFunctionHandler
             .Where(x => x.AssemblyName == ownerAssemblyName)
             .Select(x => x.Url)
             .FirstOrDefaultAsync();
-        return ownerServiceUrl;
+        //return ownerServiceUrl;
+        // call "api/ResumableFunctionsReceiver/ProcessMatchedWait" for the other service with params (waitId, pushedMethodId)
     }
 
     //todo:like start scan
@@ -100,19 +102,47 @@ public partial class ResumableFunctionHandler
             _context = scope.ServiceProvider.GetService<FunctionDataContext>();
             _waitsRepository = new WaitsRepository(_context);
             _metodIdsRepo = new MethodIdentifierRepository(_context);
+
             var methodWait = await _context
-            .MethodWaits
-            .Include(x => x.RequestedByFunction)
-            .Where(x => x.Status == WaitStatus.Waiting)
-            .FirstAsync(x => x.Id == waitId);
+                .MethodWaits
+                .Include(x => x.RequestedByFunction)
+                .Where(x => x.Status == WaitStatus.Waiting)
+                .FirstAsync(x => x.Id == waitId);
 
             var pushedMethod = await _context
                .PushedMethodsCalls
                .FirstAsync(x => x.Id == pushedMethodId);
-            //todo:convert pushed method input and output 
-            //Get MethodInfo and use it
-            //If assembly name not the current then search for external methods marked with [ExternalWaitMethodAttribute] that match
+            //todo:
+            //from external methods table find 
+            //method
+            SetInputAndOutput(methodWait, pushedMethod);
             await ProcessMatchedWait(methodWait);
+        }
+    }
+
+    private async void SetInputAndOutput(MethodWait methodWait, PushedMethod pushedMethod)
+    {
+        var externalMethod = (await _context
+            .ExternalMethodsRegistry
+            .Where(x => x.OriginalMethodHash == pushedMethod.MethodData.MethodHash)
+            .ToListAsync())
+            .FirstOrDefault(x =>
+            x.MethodData.MethodName == pushedMethod.MethodData.MethodName &&
+            x.MethodData.MethodSignature == pushedMethod.MethodData.MethodName);
+        MethodInfo methodInfo = externalMethod.MethodData.MethodInfo;
+        if (pushedMethod.Input is JObject inputJson)
+        {
+            pushedMethod.Input = inputJson.ToObject(methodInfo.GetParameters()[0].ParameterType);
+            methodWait.Input = pushedMethod.Input;
+        }
+        if (pushedMethod.Output is JObject outputJson)
+        {
+            if (methodInfo.IsAsyncMethod())
+                pushedMethod.Output = outputJson.ToObject(methodInfo.ReturnType.GetGenericArguments()[0]);
+            else
+                pushedMethod.Output = outputJson.ToObject(methodInfo.ReturnType);
+
+            methodWait.Output = pushedMethod.Output;
         }
     }
 

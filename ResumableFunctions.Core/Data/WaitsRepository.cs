@@ -84,8 +84,7 @@ internal class WaitsRepository : RepositoryBase
                 pushedMethod.Output = outputJson.ToObject(methodId.MethodInfo.ReturnType.GetGenericArguments()[0]);
             else
                 pushedMethod.Output = outputJson.ToObject(methodId.MethodInfo.ReturnType);
-        }
-            
+        }   
     }
 
     public async Task<Wait> GetWaitGroup(int? parentGroupId)

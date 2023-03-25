@@ -29,8 +29,9 @@ public class Scanner
 
     public async Task Start(string serviceUrl, params string[] dllsToScan)
     {
-        using (IServiceScope scope = _serviceProvider.CreateScope())
+        try
         {
+            using IServiceScope scope = _serviceProvider.CreateScope();
             _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
             _handler.SetDependencies(scope.ServiceProvider);
             _context = _handler._context;
@@ -62,6 +63,10 @@ public class Scanner
 
             WriteMessage("Close with no errors.");
             await _context.DisposeAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error when scan [{Assembly.GetEntryAssembly().GetName().Name}]");
         }
     }
 
@@ -142,6 +147,7 @@ public class Scanner
                     foreach (var type in assembly.GetTypes())
                     {
                         await RegisterMethodWaitsIfExist(type);
+                        await RegisterExternalMethodIfExist(type);
                         if (type.IsSubclassOf(typeof(ResumableFunctionLocal)))
                             resumableFunctionClasses.Add(type);
                     }
@@ -158,14 +164,40 @@ public class Scanner
 
         return resumableFunctionClasses;
     }
-
+    private BindingFlags GetBindingFlags() => BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+    
+    private async Task RegisterExternalMethodIfExist(Type type)
+    {
+        var externalMethods = type
+           .GetMethods(GetBindingFlags())
+           .Where(method =>
+                   method.GetCustomAttributes().Any(x => x.TypeId == new ExternalWaitMethodAttribute().TypeId))
+           .Select(x => new { MethodInfo = x, Attribute = x.GetCustomAttribute(typeof(ExternalWaitMethodAttribute)) });
+        foreach (var methodRecord in externalMethods)
+        {
+            var methodData = new MethodData(methodRecord.MethodInfo);
+            var externalMethodRecord = await _context.ExternalMethodsRegistry.FirstOrDefaultAsync(x => x.MethodHash == methodData.MethodHash);
+            if (externalMethodRecord != null)
+            {
+                WriteMessage($"Method [{methodRecord.MethodInfo.Name}] already exist in DB.");
+                continue;
+            }
+            externalMethodRecord = new ExternalMethodRecord
+            {
+                MethodData = methodData,
+                MethodHash = methodData.MethodHash,
+                OriginalMethodHash = new MethodData(methodRecord.MethodInfo, (ExternalWaitMethodAttribute)methodRecord.Attribute).MethodHash,
+            };
+            WriteMessage($"Add external method [{methodRecord.MethodInfo.Name}] to DB.");
+            _context.ExternalMethodsRegistry.Add(externalMethodRecord);
+        }
+    }
 
     private async Task RegisterResumableFunctionsInClass(Type type)
     {
         WriteMessage($"Try to find resumable functions in type [{type.FullName}]");
         var resumableFunctions = type
-            .GetMethods(
-                BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .GetMethods(GetBindingFlags())
             .Where(method => method
                 .GetCustomAttributes()
                 .Any(attribute =>
@@ -208,7 +240,7 @@ public class Scanner
     {
         //Debugger.Launch();
         var methodWaits = type
-            .GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+            .GetMethods(GetBindingFlags())
             .Where(method =>
                     method.GetCustomAttributes().Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
         foreach (var method in methodWaits)
