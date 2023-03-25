@@ -13,6 +13,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
     public bool ManagerThreeApproval { get; set; }
     public bool ManagerFourApproval { get; set; }
     public bool ManagerFiveApproval { get; set; }
+    public string ExternalMethodStatus { get; private set; } = "Not matched yet.";
 
     [ResumableFunctionEntryPoint]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
@@ -52,17 +53,18 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
         return Task.CompletedTask;
     }
 
+    [ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> ExternalMethod()
     {
-        yield return
-         Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-             .MatchIf((input, output) => output == true)
-             .SetData((input, output) => CurrentProject == input);
+        await Task.Delay(1);
 
         yield return
-               Wait<ApprovalDecision, bool>("Manager Five Approve Project", new ExternalServiceClass().ManagerFiveApproveProject)
-                   .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                   .SetData((input, output) => ManagerFiveApproval == output);
+              Wait<object, int>(
+                  "Wait external method",
+              new ExternalServiceClass().ExtenalMethodTest)
+                  .MatchIf((input, output) => output % 2 == 0)
+                  .SetData((input, output) => ExternalMethodStatus == "External Method Matched.");
+      
         Success(nameof(ExternalMethod));
     }
     //any method with attribute [ResumableFunctionEntryPoint] that takes no argument

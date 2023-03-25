@@ -30,6 +30,6 @@ app.MapControllers();
 app.UseHangfireDashboard();
 
 
-app.ScanCurrentService("https://localhost:44376/");
+app.ScanCurrentService("https://localhost:7140/");
 
 app.Run();

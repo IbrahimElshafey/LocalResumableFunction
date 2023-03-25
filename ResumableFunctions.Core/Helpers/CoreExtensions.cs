@@ -28,6 +28,7 @@ public static class CoreExtensions
 
         services.AddScoped<ResumableFunctionHandler>();
         services.AddScoped<Scanner>();
+        //services.AddScoped<HangFireHttpClient>();
         //Debugger.Launch();    
         if (settings.HangFireConfig != null)
         {

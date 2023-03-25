@@ -2,6 +2,7 @@
 * Working on
 	* Scanner Add external methods
 	* Call http client
+* HangFireHttpClient
 * Filter matched waits to be unique to solve activate same wait multiple times by same method call
 * TimeWaits background task using hangfire test
 * Hangfire access dbcontext problem

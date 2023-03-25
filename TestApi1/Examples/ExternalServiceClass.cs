@@ -9,5 +9,11 @@ namespace TestApi1.Examples
         {
             return default;
         }
+
+        [ExternalWaitMethod(ClassName = "TestApi2.Controllers.TestController", AssemblyName = "TestApi2")]
+        public int ExtenalMethodTest(object o)
+        {
+            return default;
+        }
     }
 }

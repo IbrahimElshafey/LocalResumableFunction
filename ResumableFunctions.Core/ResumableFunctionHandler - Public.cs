@@ -10,6 +10,7 @@ using static System.Formats.Asn1.AsnWriter;
 using ResumableFunctions.Core.Attributes;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Core.Helpers;
+using System;
 
 namespace ResumableFunctions.Core;
 
@@ -22,13 +23,7 @@ public partial class ResumableFunctionHandler
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ResumableFunctionHandler> _logger;
-    //public ResumableFunctionHandler(FunctionDataContext context, IBackgroundJobClient backgroundJobClient)
-    //{
-    //    _context = context;
-    //    _waitsRepository = new WaitsRepository(_context);
-    //    _metodIdsRepo = new MethodIdentifierRepository(_context);
-    //    _backgroundJobClient = backgroundJobClient;
-    //}
+
     public ResumableFunctionHandler(IServiceProvider serviceProvider, ILogger<ResumableFunctionHandler> logger)
     {
         _serviceProvider = serviceProvider;
@@ -91,7 +86,13 @@ public partial class ResumableFunctionHandler
             .Select(x => x.Url)
             .FirstOrDefaultAsync();
         //return ownerServiceUrl;
-        // call "api/ResumableFunctionsReceiver/ProcessMatchedWait" for the other service with params (waitId, pushedMethodId)
+        // call "api/ResumableFunctionsReceiver/ProcessMatchedWait" for the other service with params (int waitId, int pushedMethodId)
+        var actionUrl =
+            @$"{ownerServiceUrl}api/ResumableFunctionsReceiver/ProcessMatchedWait?waitId={methodWait.Id}&pushedMethodId={pushedMethodId}";
+        using (HttpClient client = new HttpClient())
+        {
+            await client.GetAsync(actionUrl);
+        }
     }
 
     //todo:like start scan
