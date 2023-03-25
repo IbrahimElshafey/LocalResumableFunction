@@ -8,7 +8,7 @@ namespace ResumableFunctions.Core;
 
 public partial class ResumableFunctionHandler
 {
-    internal async Task<bool> GenericWaitRequested(Wait newWait)
+    internal async Task<bool> SaveWaitRequestToDb(Wait newWait)
     {
         newWait.Status = WaitStatus.Waiting;
         if (Validate(newWait) is false) return false;
@@ -59,7 +59,7 @@ public partial class ResumableFunctionHandler
             wait.RequestedByFunction = manyWaits.RequestedByFunction;
             wait.StateAfterWait = manyWaits.StateAfterWait;
             wait.ParentWait = manyWaits;
-            await GenericWaitRequested(wait);
+            await SaveWaitRequestToDb(wait);
         }
 
         await _waitsRepository.AddWait(manyWaits);
@@ -95,7 +95,7 @@ public partial class ResumableFunctionHandler
             //await ReplayWait(replayWait);//todo:review first wait is replay for what??
         }
         else
-            await GenericWaitRequested(functionWait.FirstWait);
+            await SaveWaitRequestToDb(functionWait.FirstWait);
     }
 
     private async Task TimeWaitRequested(TimeWait timeWait)

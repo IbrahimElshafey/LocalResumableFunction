@@ -72,16 +72,16 @@ public static class CoreExtensions
         }
     }
 
-    public static bool SameLambadaSignatures(LambdaExpression expressionOne, LambdaExpression expressionTwo)
+    public static bool SameMatchSignature(LambdaExpression expressionOne, LambdaExpression expressionTwo)
     {
         var isEqual = expressionOne != null && expressionTwo != null;
         if (isEqual is false) return false;
         if (expressionOne.ReturnType != expressionTwo.ReturnType)
             return false;
-        //if (expressionOne.Parameters.Count != expressionTwo.Parameters.Count)
-        //    return false;
-
-        for (var i = 0; i < expressionOne.Parameters.Count; i++)
+        if (expressionOne.Parameters.Count != expressionTwo.Parameters.Count)
+            return false;
+        var minParamsCount = Math.Min(expressionOne.Parameters.Count, expressionTwo.Parameters.Count);
+        for (var i = 0; i < minParamsCount; i++)
             if (expressionOne.Parameters[i].Type != expressionTwo.Parameters[i].Type)
                 return false;
         return true;

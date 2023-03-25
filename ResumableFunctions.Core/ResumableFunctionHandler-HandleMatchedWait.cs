@@ -76,7 +76,7 @@ public partial class ResumableFunctionHandler
         nextWait.FunctionState = currentWait.FunctionState;
         nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
 
-        await GenericWaitRequested(nextWait);//base
+        await SaveWaitRequestToDb(nextWait);
         currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
         await _context.SaveChangesAsync();
         await DuplicateIfFirst(currentWait);
@@ -87,7 +87,7 @@ public partial class ResumableFunctionHandler
         WriteMessage("Final Exit");
         currentWait.Status = WaitStatus.Completed;
         currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
-        currentWait.FunctionState.IsCompleted = true;
+        currentWait.FunctionState.Status = FunctionStatus.Completed;
         await _waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
         await MoveFunctionToRecycleBin(currentWait);
     }

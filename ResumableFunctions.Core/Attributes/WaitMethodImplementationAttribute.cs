@@ -55,7 +55,7 @@ public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect
             CoreExtensions.GetServiceProvider()
                  .CreateScope().ServiceProvider
                  .GetService<ResumableFunctionHandler>()
-                 .QueueProcessPushedMethod(_pushedMethod).Wait();
+                 .QueuePushedMethodProcessing(_pushedMethod).Wait();
             args.MethodExecutionTag = true;
         }
         catch (Exception)

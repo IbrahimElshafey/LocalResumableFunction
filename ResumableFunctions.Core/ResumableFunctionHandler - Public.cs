@@ -13,9 +13,9 @@ namespace ResumableFunctions.Core;
 
 public partial class ResumableFunctionHandler
 {
-    internal  FunctionDataContext _context;
-    private  WaitsRepository _waitsRepository;
-    private  MethodIdentifierRepository _metodIdsRepo;
+    internal FunctionDataContext _context;
+    private WaitsRepository _waitsRepository;
+    private MethodIdentifierRepository _metodIdsRepo;
 
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IServiceProvider _serviceProvider;
@@ -34,7 +34,7 @@ public partial class ResumableFunctionHandler
         _backgroundJobClient = serviceProvider.GetService<IBackgroundJobClient>();
     }
 
-    internal async Task QueueProcessPushedMethod(PushedMethod pushedMethod)
+    internal async Task QueuePushedMethodProcessing(PushedMethod pushedMethod)
     {
         SetDependencies(_serviceProvider);
         _context.PushedMethodsCalls.Add(pushedMethod);
@@ -51,24 +51,17 @@ public partial class ResumableFunctionHandler
                 SetDependencies(scope.ServiceProvider);
                 Debugger.Launch();
                 var matchedWaits = await _waitsRepository.GetMethodActiveWaits(pushedMethodId);
-                //if (matchedWaits?.Any() is true)
-                //{
-                //    _context.PushedMethodsCalls.Add(pushedMethod);
-                //    await _context.SaveChangesAsync();
-                //}
                 foreach (var methodWait in matchedWaits)
                 {
-                    var isLocalWait =
-                        methodWait.RequestedByFunction.AssemblyName ==
-                        Assembly.GetEntryAssembly().GetName().Name;//Todo:get from "ServiceName" in config
-                    if (isLocalWait)
+                    if (IsLocalWait(methodWait))
                     {
                         //handle if local
                         await ProcessMatchedWait(methodWait);
                     }
                     else
                     {
-                        //todo: call "api/MatchedWaitReceiver/WaitMatched" for the other service
+                        //todo: Find service owner
+                        // call "api/MatchedWaitReceiver/WaitMatched" for the other service with params (waitId, pushedMethodId)
                     }
                 }
             }
@@ -78,6 +71,25 @@ public partial class ResumableFunctionHandler
             Debug.Write(ex);
             WriteMessage(ex.Message);
         }
+    }
+
+    private bool IsLocalWait(MethodWait methodWait)
+    {
+        var ownerAssemblyName = methodWait.RequestedByFunction.AssemblyName;
+        string ownerAssemblyPath = $"{AppContext.BaseDirectory}{ownerAssemblyName}.dll";
+        return File.Exists(ownerAssemblyPath);
+    }
+
+    private async Task<string> GetWaitOwner(MethodWait methodWait)
+    {
+        var ownerAssemblyName = methodWait.RequestedByFunction.AssemblyName;
+        var ownerServiceUrl =
+            await _context
+            .ServicesData
+            .Where(x => x.AssemblyName == ownerAssemblyName)
+            .Select(x => x.Url)
+            .FirstOrDefaultAsync();
+        return ownerServiceUrl;
     }
 
     //todo:like start scan
@@ -93,7 +105,7 @@ public partial class ResumableFunctionHandler
             .Include(x => x.RequestedByFunction)
             .Where(x => x.Status == WaitStatus.Waiting)
             .FirstAsync(x => x.Id == waitId);
-            
+
             var pushedMethod = await _context
                .PushedMethodsCalls
                .FirstAsync(x => x.Id == pushedMethodId);

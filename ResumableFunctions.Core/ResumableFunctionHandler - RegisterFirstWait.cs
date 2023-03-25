@@ -46,7 +46,7 @@ public partial class ResumableFunctionHandler
                     ResumableFunctionIdentifier = methodId,
                     StateObject = classInstance
                 };
-                await GenericWaitRequested(firstWait);
+                await SaveWaitRequestToDb(firstWait);
                 WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.Name}].");
                 await _context.SaveChangesAsync();
             }

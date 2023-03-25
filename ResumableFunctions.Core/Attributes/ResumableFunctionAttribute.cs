@@ -5,4 +5,5 @@
 /// </summary>
 public sealed class ResumableFunctionAttribute : Attribute
 {
+    public override object TypeId => nameof(ResumableFunctionAttribute);
 }

@@ -48,16 +48,21 @@ public partial class ResumableFunctionHandler
 
     private async Task ReplayGoToWithNewMatch(ReplayRequest replayRequest, Wait waitToReplay)
     {
-        if (waitToReplay is MethodWait methodWait)
+        if (waitToReplay is MethodWait mw)
         {
-            CheckReplayMatchExpression(replayRequest, methodWait);
+            mw.LoadExpressions();
+            var oldMatchExpression = mw.MatchIfExpression;
+            mw.MatchIfExpression = replayRequest.MatchExpression;
+            replayRequest.MatchExpression = new RewriteMatchExpression(mw).Result;
+            mw.MatchIfExpression = oldMatchExpression;
+            CheckReplayMatchExpression(replayRequest, mw);
 
             var duplicateWait = waitToReplay.DuplicateWait() as MethodWait;
             duplicateWait.Name += "-Replay";
             duplicateWait.IsReplay = true;
             duplicateWait.IsFirst = false;
             duplicateWait.MatchIfExpression = replayRequest.MatchExpression;
-            await GenericWaitRequested(duplicateWait);
+            await SaveWaitRequestToDb(duplicateWait);
         }
         else
         {
@@ -78,7 +83,7 @@ public partial class ResumableFunctionHandler
         duplicateWait.Name += "-Replay";
         duplicateWait.IsReplay = true;
         duplicateWait.IsFirst = false;
-        await GenericWaitRequested(duplicateWait);
+        await SaveWaitRequestToDb(duplicateWait);
     }
 
     private async Task ReplayGoBefore(Wait oldCompletedWait)
@@ -95,7 +100,7 @@ public partial class ResumableFunctionHandler
         {
             var nextWaitAfterReplay = goBefore.Runner.Current;
             nextWaitAfterReplay.CopyFromOld(oldCompletedWait);
-            await GenericWaitRequested(nextWaitAfterReplay);
+            await SaveWaitRequestToDb(nextWaitAfterReplay);
         }
         else
         {
@@ -118,7 +123,7 @@ public partial class ResumableFunctionHandler
                 mw.RequestedByFunction = waitToReplay.RequestedByFunction;
                 mw.RequestedByFunctionId = waitToReplay.RequestedByFunctionId;
                 mw.ParentWaitId = waitToReplay.ParentWaitId;
-                await GenericWaitRequested(mw);
+                await SaveWaitRequestToDb(mw);
             }
         }
         else
@@ -130,9 +135,8 @@ public partial class ResumableFunctionHandler
 
     private static void CheckReplayMatchExpression(ReplayRequest replayWait, MethodWait mw)
     {
-        mw.LoadExpressions();
         var isSameSignature =
-            CoreExtensions.SameLambadaSignatures(replayWait.MatchExpression, mw.MatchIfExpression);
+            CoreExtensions.SameMatchSignature(replayWait.MatchExpression, mw.MatchIfExpression);
         if (isSameSignature is false)
             throw new Exception("Replay match expression method must have same signature as " +
                                 "the wait that will replayed.");

@@ -6,7 +6,8 @@ namespace ResumableFunctions.Core.InOuts;
 public class ResumableFunctionState
 {
     [Key] public int Id { get; internal set; }
-    public bool IsCompleted { get; set; } = false;
+    public FunctionStatus Status { get; internal set; } = FunctionStatus.New;
+    public string StatusMessage { get; internal set; }
 
     //class instance that contain the resumable function
     public object StateObject { get; internal set; }

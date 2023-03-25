@@ -10,7 +10,7 @@ public class Test1RfSettings : IResumableFunctionSettings
         .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
         .UseSimpleAssemblyNameTypeSerializer()
         .UseRecommendedSerializerSettings()
-        .UseSqlServerStorage($"Server=(localdb)\\MSSQLLocalDB;Database=HangfireDb;", new SqlServerStorageOptions
+        .UseSqlServerStorage($"Server=(localdb)\\MSSQLLocalDB;Database=TestApi1_HangfireDb;", new SqlServerStorageOptions
         {
             CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
             SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),

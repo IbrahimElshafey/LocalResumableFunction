@@ -27,7 +27,7 @@ public class Scanner
         _logger = logger;
     }
 
-    public async Task Start(string serviceUrl)
+    public async Task Start(string serviceUrl, params string[] dllsToScan)
     {
         using (IServiceScope scope = _serviceProvider.CreateScope())
         {
