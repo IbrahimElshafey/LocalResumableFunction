@@ -48,6 +48,7 @@ public partial class ResumableFunctionHandler
                 SetDependencies(scope.ServiceProvider);
                 Debugger.Launch();
                 var matchedWaits = await _waitsRepository.GetMethodActiveWaits(pushedMethodId);
+              
                 foreach (var methodWait in matchedWaits)
                 {
                     if (IsLocalWait(methodWait))

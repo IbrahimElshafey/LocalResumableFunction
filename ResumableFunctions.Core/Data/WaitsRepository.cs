@@ -7,12 +7,13 @@ using Microsoft.EntityFrameworkCore.Query;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Core.Helpers;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace ResumableFunctions.Core.Data;
 
 internal class WaitsRepository : RepositoryBase
 {
-   
+
     public WaitsRepository(FunctionDataContext ctx) : base(ctx)
     {
     }
@@ -66,6 +67,13 @@ internal class WaitsRepository : RepositoryBase
                 x.Output = pushedMethod.Output;
                 x.PushedMethodCallId = pushedMethodId;
             });
+
+            if (matchedWaits?.Any() is not true)
+            {
+                //_logger.LogInformation($"No waits matched for pushed method [{pushedMethodId}]");
+                _context.PushedMethodsCalls.Remove(pushedMethod);
+                await _context.SaveChangesAsync();
+            }
             return matchedWaits;
         }
         catch (Exception ex)
@@ -80,11 +88,11 @@ internal class WaitsRepository : RepositoryBase
             pushedMethod.Input = inputJson.ToObject(methodId.MethodInfo.GetParameters()[0].ParameterType);
         if (pushedMethod.Output is JObject outputJson)
         {
-            if(methodId.MethodInfo.IsAsyncMethod())
+            if (methodId.MethodInfo.IsAsyncMethod())
                 pushedMethod.Output = outputJson.ToObject(methodId.MethodInfo.ReturnType.GetGenericArguments()[0]);
             else
                 pushedMethod.Output = outputJson.ToObject(methodId.MethodInfo.ReturnType);
-        }   
+        }
     }
 
     public async Task<Wait> GetWaitGroup(int? parentGroupId)

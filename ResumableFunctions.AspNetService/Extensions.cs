@@ -30,6 +30,7 @@ namespace ResumableFunctions.AspNetService
             mvcBuilder
                 .AddApplicationPart(typeof(ResumableFunctionsReceiverController).Assembly)
                 .AddControllersAsServices();
+            mvcBuilder.Services.AddSingleton(typeof(IResumableFunctionSettings),settings.GetType());
             mvcBuilder.Services.AddResumableFunctionsCore(settings);
         }
     }

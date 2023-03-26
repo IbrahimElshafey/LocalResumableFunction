@@ -60,11 +60,18 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
 
         yield return
               Wait<object, int>(
-                  "Wait external method",
+                  "Wait external method 1",
               new ExternalServiceClass().ExternalMethodTest)
                   .MatchIf((input, output) => output % 2 == 0)
-                  .SetData((input, output) => ExternalMethodStatus == "External Method Matched.");
-      
+                  .SetData((input, output) => ExternalMethodStatus == "ExternalMethodTest Matched.");
+
+        yield return
+          Wait<string, int>(
+              "Wait external method 2",
+          new ExternalServiceClass().ExternalMethodTest2)
+              .MatchIf((input, output) => input == "Ibrahim")
+              .SetData((input, output) => ExternalMethodStatus == "ExternalMethodTest2 Matched.");
+
         Success(nameof(ExternalMethod));
     }
     //any method with attribute [ResumableFunctionEntryPoint] that takes no argument

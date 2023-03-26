@@ -38,9 +38,11 @@ public class MethodWait : Wait
     [NotMapped]
     public object Output { get; set; }
 
+    //todo:bug
     private Assembly FunctionAssembly =>
-        RequestedByFunction?.MethodInfo.DeclaringType.Assembly ??
-        WaitMethodIdentifier?.MethodInfo.DeclaringType.Assembly;
+        WaitMethodIdentifier?.MethodInfo?.DeclaringType.Assembly ??
+        RequestedByFunction?.MethodInfo?.DeclaringType.Assembly ??
+        Assembly.GetEntryAssembly();
 
     internal void RewriteExpressions()
     {
@@ -48,7 +50,7 @@ public class MethodWait : Wait
         MatchIfExpression = new RewriteMatchExpression(this).Result;
         MatchIfExpressionValue =
             TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, FunctionAssembly));
-        
+
         //Rewrite SetData Expression
         SetDataExpression = new RewriteSetDataExpression(this).Result;
         SetDataExpressionValue =
@@ -74,7 +76,7 @@ public class MethodWait : Wait
             var setDataExpression = SetDataExpression.Compile();
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             FunctionState.StateObject = CurrentFunction;
-            if(IsFirst is false)
+            if (IsFirst is false)
                 FunctionState.Status = FunctionStatus.InProgress;
         }
         catch (Exception)

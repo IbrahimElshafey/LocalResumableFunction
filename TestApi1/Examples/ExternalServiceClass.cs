@@ -10,5 +10,11 @@ namespace TestApi1.Examples
         {
             return default;
         }
+
+        [ExternalWaitMethod(ClassName = "TestApi2.Controllers.TestController", AssemblyName = "TestApi2")]
+        public int ExternalMethodTest2(string o)
+        {
+            return default;
+        }
     }
 }

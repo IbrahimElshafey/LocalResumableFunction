@@ -28,14 +28,15 @@ public class MethodIdentifier
     {
         get
         {
-            if (AssemblyName != null && ClassName != null && MethodName != null && _methodInfo == null)
-            {
-                _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
-                    .GetType(ClassName)
-                    ?.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                    .FirstOrDefault(x => x.Name == MethodName && MethodData.CalcSignature(x) == MethodSignature);
-                return _methodInfo;
-            }
+            if(File.Exists($"{AppContext.BaseDirectory}{AssemblyName}.dll"))
+                if (AssemblyName != null && ClassName != null && MethodName != null && _methodInfo == null)
+                {
+                    _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
+                        .GetType(ClassName)
+                        ?.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                        .FirstOrDefault(x => x.Name == MethodName && MethodData.CalcSignature(x) == MethodSignature);
+                    return _methodInfo;
+                }
 
             return _methodInfo;
         }

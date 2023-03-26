@@ -13,5 +13,12 @@ namespace TestApi2.Controllers
         {
            return Random.Shared.Next();
         }
+
+        [HttpPost(nameof(ExternalMethodTest2))]
+        [WaitMethod]
+        public int ExternalMethodTest2(string o)
+        {
+            return Random.Shared.Next();
+        }
     }
 }

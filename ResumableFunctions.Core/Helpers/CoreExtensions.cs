@@ -22,14 +22,10 @@ public static class CoreExtensions
     public static void SetServiceProvider(IServiceProvider provider) => _ServiceProvider = provider;
     public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionSettings settings)
     {
-        //services.AddScoped<IProcessPushedMethodCall, ProcessPushedMethodCall>();
-        //services.AddScoped<IResumableFunctionsReceiver, ResumableFunctionHandler>();
-        services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig);
+        services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
+        services.AddTransient<ResumableFunctionHandler>();
+        services.AddTransient<Scanner>();
 
-        services.AddScoped<ResumableFunctionHandler>();
-        services.AddScoped<Scanner>();
-        //services.AddScoped<HangFireHttpClient>();
-        //Debugger.Launch();    
         if (settings.HangFireConfig != null)
         {
             services.AddHangfire(x => x = settings.HangFireConfig);
