@@ -64,8 +64,7 @@ public partial class ResumableFunctionHandler
         }
         catch (Exception ex)
         {
-            Debug.Write(ex);
-            WriteMessage(ex.Message);
+            _logger.LogError(ex, $"Error when process pushed method [{pushedMethodId}]");
         }
     }
 
@@ -98,26 +97,33 @@ public partial class ResumableFunctionHandler
     //todo:like start scan
     public async Task ProcessMatchedWait(int waitId, int pushedMethodId)
     {
-        using (IServiceScope scope = _serviceProvider.CreateScope())
+        try
         {
-            _context = scope.ServiceProvider.GetService<FunctionDataContext>();
-            _waitsRepository = new WaitsRepository(_context);
-            _metodIdsRepo = new MethodIdentifierRepository(_context);
+            using (IServiceScope scope = _serviceProvider.CreateScope())
+            {
+                _context = scope.ServiceProvider.GetService<FunctionDataContext>();
+                _waitsRepository = new WaitsRepository(_context);
+                _metodIdsRepo = new MethodIdentifierRepository(_context);
 
-            var methodWait = await _context
-                .MethodWaits
-                .Include(x => x.RequestedByFunction)
-                .Where(x => x.Status == WaitStatus.Waiting)
-                .FirstAsync(x => x.Id == waitId);
+                var methodWait = await _context
+                    .MethodWaits
+                    .Include(x => x.RequestedByFunction)
+                    .Where(x => x.Status == WaitStatus.Waiting)
+                    .FirstAsync(x => x.Id == waitId);
 
-            var pushedMethod = await _context
-               .PushedMethodsCalls
-               .FirstAsync(x => x.Id == pushedMethodId);
-            //todo:
-            //from external methods table find 
-            //method
-            SetInputAndOutput(methodWait, pushedMethod);
-            await ProcessMatchedWait(methodWait);
+                var pushedMethod = await _context
+                   .PushedMethodsCalls
+                   .FirstAsync(x => x.Id == pushedMethodId);
+                //todo:
+                //from external methods table find 
+                //method
+                SetInputAndOutput(methodWait, pushedMethod);
+                await ProcessMatchedWait(methodWait);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error when process pushed method [{pushedMethodId}] and wait [{waitId}].");
         }
     }
 
@@ -129,22 +135,25 @@ public partial class ResumableFunctionHandler
             .ToListAsync())
             .FirstOrDefault(x =>
             x.MethodData.MethodName == pushedMethod.MethodData.MethodName &&
-            x.MethodData.MethodSignature == pushedMethod.MethodData.MethodName);
+            x.MethodData.MethodSignature == pushedMethod.MethodData.MethodSignature);
         MethodInfo methodInfo = externalMethod.MethodData.MethodInfo;
         if (pushedMethod.Input is JObject inputJson)
         {
             pushedMethod.Input = inputJson.ToObject(methodInfo.GetParameters()[0].ParameterType);
             methodWait.Input = pushedMethod.Input;
         }
+        else
+            methodWait.Input = pushedMethod.Input;
+
         if (pushedMethod.Output is JObject outputJson)
         {
             if (methodInfo.IsAsyncMethod())
                 pushedMethod.Output = outputJson.ToObject(methodInfo.ReturnType.GetGenericArguments()[0]);
             else
                 pushedMethod.Output = outputJson.ToObject(methodInfo.ReturnType);
-
-            methodWait.Output = pushedMethod.Output;
         }
+        else
+            methodWait.Output = Convert.ChangeType(pushedMethod.Output, methodInfo.ReturnType);
     }
 
     internal void SetDependencies(IServiceProvider serviceProvider)

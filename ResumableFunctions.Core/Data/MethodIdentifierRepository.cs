@@ -16,12 +16,11 @@ internal class MethodIdentifierRepository : RepositoryBase
         var sameHashList = await _context
             .MethodIdentifiers
             .Where(x => x.MethodHash == methodId.MethodHash).ToListAsync();
-        var matchedInstance =
+        return             
             sameHashList.FirstOrDefault(x =>
                 x.MethodSignature == methodId.MethodSignature &&
                 x.AssemblyName == methodId.AssemblyName &&
                 x.ClassName == methodId.ClassName &&
                 x.MethodName == methodId.MethodName);
-        return matchedInstance;
     }
 }

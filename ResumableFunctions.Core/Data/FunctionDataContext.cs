@@ -59,6 +59,9 @@ public class FunctionDataContext : DbContext
         entityTypeBuilder
          .Property(x => x.OriginalMethodHash)
          .HasMaxLength(16);
+
+        entityTypeBuilder
+          .Property<DateTime>(ConstantValue.CreatedProp);
     }
 
     private void ConfigureServiceData(EntityTypeBuilder<ServiceData> entityTypeBuilder)
@@ -82,6 +85,9 @@ public class FunctionDataContext : DbContext
            .HasConversion(
             v => JsonConvert.SerializeObject(v),
             v => JsonConvert.DeserializeObject<MethodData>(v));
+
+        entityTypeBuilder
+          .Property<DateTime>(ConstantValue.CreatedProp);
     }
 
     private void ConfigureWaits(ModelBuilder modelBuilder)

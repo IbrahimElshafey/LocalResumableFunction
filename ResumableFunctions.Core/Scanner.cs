@@ -57,7 +57,7 @@ public class Scanner
                 await RegisterResumableFunctionsInClass(resumableFunctionClass);
 
             WriteMessage("Register local methods");
-            await RegisterMethodWaitsIfExist(typeof(LocalRegisteredMethods));
+            await RegisterMethodWaits(typeof(LocalRegisteredMethods));
             await UpdateScanData(currentServiceName, serviceUrl);
             await _context.SaveChangesAsync();
 
@@ -69,6 +69,7 @@ public class Scanner
             _logger.LogError(ex, $"Error when scan [{Assembly.GetEntryAssembly().GetName().Name}]");
         }
     }
+    private BindingFlags GetBindingFlags() => BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
     private async Task UpdateScanData(string currentServiceName, string serviceUrl)
     {
@@ -146,8 +147,8 @@ public class Scanner
                 {
                     foreach (var type in assembly.GetTypes())
                     {
-                        await RegisterMethodWaitsIfExist(type);
-                        await RegisterExternalMethodIfExist(type);
+                        await RegisterMethodWaits(type);
+                        await RegisterExternalMethods(type);
                         if (type.IsSubclassOf(typeof(ResumableFunctionLocal)))
                             resumableFunctionClasses.Add(type);
                     }
@@ -164,9 +165,47 @@ public class Scanner
 
         return resumableFunctionClasses;
     }
-    private BindingFlags GetBindingFlags() => BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-    
-    private async Task RegisterExternalMethodIfExist(Type type)
+
+    private async Task RegisterMethodWaits(Type type)
+    {
+        //Debugger.Launch();
+        var methodWaits = type
+            .GetMethods(GetBindingFlags())
+            .Where(method =>
+                    method.GetCustomAttributes().Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
+        foreach (var method in methodWaits)
+        {
+            await AddMethodWait(new MethodData(method));
+        }
+    }
+
+    private async Task AddMethodWait(MethodData methodData)
+    {
+        var repo = new MethodIdentifierRepository(_context);
+        var methodId = await repo.GetMethodIdentifierFromDb(methodData);
+        if (methodId != null)
+        {
+            WriteMessage($"Method [{methodData.MethodName}] already exist in DB.");
+            return;
+        }
+        methodId = 
+            _context.MethodIdentifiers.Local.FirstOrDefault(x =>
+                x.MethodSignature == methodData.MethodSignature &&
+                x.AssemblyName == methodData.AssemblyName &&
+                x.ClassName == methodData.ClassName &&
+                x.MethodName == methodData.MethodName);
+        if (methodId != null)
+        {
+            WriteMessage($"Method [{methodData.MethodName}] exist in local db.");
+            return;
+        }
+        methodId = methodData.ToMethodIdentifier();
+        methodId.Type = MethodType.MethodWait;
+        WriteMessage($"Add method [{methodData.MethodName}] to DB.");
+        _context.MethodIdentifiers.Add(methodId);
+    }
+
+    private async Task RegisterExternalMethods(Type type)
     {
         var externalMethods = type
            .GetMethods(GetBindingFlags())
@@ -175,8 +214,11 @@ public class Scanner
            .Select(x => new { MethodInfo = x, Attribute = x.GetCustomAttribute(typeof(ExternalWaitMethodAttribute)) });
         foreach (var methodRecord in externalMethods)
         {
-            var methodData = new MethodData(methodRecord.MethodInfo);
-            var externalMethodRecord = await _context.ExternalMethodsRegistry.FirstOrDefaultAsync(x => x.MethodHash == methodData.MethodHash);
+            var externalMethodData = new MethodData(methodRecord.MethodInfo);
+            var originalMethodData = new MethodData(methodRecord.MethodInfo, (ExternalWaitMethodAttribute)methodRecord.Attribute);
+            await AddMethodWait(originalMethodData);
+
+            var externalMethodRecord = await _context.ExternalMethodsRegistry.FirstOrDefaultAsync(x => x.MethodHash == externalMethodData.MethodHash);
             if (externalMethodRecord != null)
             {
                 WriteMessage($"Method [{methodRecord.MethodInfo.Name}] already exist in DB.");
@@ -184,9 +226,9 @@ public class Scanner
             }
             externalMethodRecord = new ExternalMethodRecord
             {
-                MethodData = methodData,
-                MethodHash = methodData.MethodHash,
-                OriginalMethodHash = new MethodData(methodRecord.MethodInfo, (ExternalWaitMethodAttribute)methodRecord.Attribute).MethodHash,
+                MethodData = externalMethodData,
+                MethodHash = externalMethodData.MethodHash,
+                OriginalMethodHash = originalMethodData.MethodHash,
             };
             WriteMessage($"Add external method [{methodRecord.MethodInfo.Name}] to DB.");
             _context.ExternalMethodsRegistry.Add(externalMethodRecord);
@@ -236,30 +278,7 @@ public class Scanner
         return resumableFunction.GetParameters().Length == 0;
     }
 
-    private async Task RegisterMethodWaitsIfExist(Type type)
-    {
-        //Debugger.Launch();
-        var methodWaits = type
-            .GetMethods(GetBindingFlags())
-            .Where(method =>
-                    method.GetCustomAttributes().Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
-        foreach (var method in methodWaits)
-        {
-            var repo = new MethodIdentifierRepository(_context);
-            var methodData = new MethodData(method);
-            var methodId = await repo.GetMethodIdentifierFromDb(methodData);
-            if (methodId != null)
-            {
-                WriteMessage($"Method [{method.Name}] already exist in DB.");
-                continue;
-            }
 
-            methodId = methodData.ToMethodIdentifier();
-            methodId.Type = MethodType.MethodWait;
-            WriteMessage($"Add method [{method.Name}] to DB.");
-            _context.MethodIdentifiers.Add(methodId);
-        }
-    }
 
     internal async Task RegisterResumableFunctionFirstWait(MethodInfo resumableFunction)
     {

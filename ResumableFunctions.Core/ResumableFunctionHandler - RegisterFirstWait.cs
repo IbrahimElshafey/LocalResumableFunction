@@ -4,6 +4,7 @@ using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ResumableFunctions.Core;
 
@@ -52,8 +53,7 @@ public partial class ResumableFunctionHandler
             }
             catch (Exception e)
             {
-                WriteMessage($"Error when try to register first wait for function [{resumableFunction.Name}]");
-                WriteMessage($"Error {e.Message}");
+                _logger.LogError(e, $"Error when try to register first wait for function [{resumableFunction.Name}]");
             }
     }
 
