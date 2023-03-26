@@ -16,7 +16,7 @@ namespace ResumableFunctions.AspNetService
 
         public override object ActivateJob(Type type)
         {
-            return _serviceProvider.GetService(type);
+            return _serviceProvider.GetService(type) ?? ActivatorUtilities.CreateInstance(_serviceProvider, type);
         }
     }
 }

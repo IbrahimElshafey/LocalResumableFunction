@@ -12,7 +12,7 @@ using TestApi1.Examples;
 
 namespace Test;
 
-public partial class ProgramOld
+public class ProgramOld
 {
     private static Scanner _scanner;
     private static async Task MainOld()
@@ -20,7 +20,7 @@ public partial class ProgramOld
       
        
 
-        await TestWaitMany();
+        //await TestWaitMany();
 
         //await TestSubFunctionCall();
         //await TestReplayGoBackAfter();
@@ -29,7 +29,7 @@ public partial class ProgramOld
         //await TestWaitManyFunctions();
         //await TestLoops();
         //await TestManyWaitsTypeInGroup();
-        //await TestTimeWait();
+        await TestTimeWait();
         //await TestSameEventAgain();
         //await TestWaitInterfaceMethod();
         //await TestReplayGoBackToWithNewMatch();

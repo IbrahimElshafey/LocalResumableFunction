@@ -1,9 +1,11 @@
-﻿using ResumableFunctions.Core.InOuts;
+﻿using ResumableFunctions.Core.Attributes;
+using ResumableFunctions.Core.InOuts;
 
 namespace TestApi1.Examples;
 
 internal class TestTimeExample : ProjectApprovalExample
 {
+    [ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> TimeWaitTest()
     {
         yield return

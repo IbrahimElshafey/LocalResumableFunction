@@ -161,7 +161,7 @@ internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveAppr
     [WaitMethod]
     internal async Task<bool> ProjectSubmitted(Project project)
     {
-        await Task.Delay(100);
+        //await Task.Delay(100);
         WriteAction($"Project {project} Submitted ");
         return true;
     }
