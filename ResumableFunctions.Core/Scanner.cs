@@ -109,14 +109,14 @@ public class Scanner
 
     internal async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
     {
-        WriteMessage($"Register resumable function [{resumableFunction.Name}] of type [{type}]");
+        WriteMessage($"Register resumable function [{resumableFunction.GetFullName()}] of type [{type}]");
         var repo = new MethodIdentifierRepository(_context);
         var methodData = new MethodData(resumableFunction);
         var methodId = await repo.GetMethodIdentifierFromDb(methodData);
 
         if (methodId != null)
         {
-            WriteMessage($"Resumable function [{resumableFunction.Name}] already exist in DB.");
+            WriteMessage($"Resumable function [{resumableFunction.GetFullName()}] already exist in DB.");
             return;
         }
 
@@ -124,7 +124,7 @@ public class Scanner
         methodId.Type = type;
         //methodId.MethodIdentifier.CreateMethodHash();
         _context.MethodIdentifiers.Add(methodId);
-        WriteMessage($"Save discovered resumable function [{resumableFunction.Name}].");
+        WriteMessage($"Save discovered resumable function [{resumableFunction.GetFullName()}].");
         await _context.SaveChangesAsync();
     }
 
@@ -159,8 +159,7 @@ public class Scanner
             }
             catch (Exception e)
             {
-                WriteMessage($"Error when scan assembly [{assemblyPath}]");
-                WriteMessage(e.Message);
+                _logger.LogError(e,$"Error when scan assembly [{assemblyPath}]");
             }
 
         return resumableFunctionClasses;
@@ -221,7 +220,7 @@ public class Scanner
             var externalMethodRecord = await _context.ExternalMethodsRegistry.FirstOrDefaultAsync(x => x.MethodHash == externalMethodData.MethodHash);
             if (externalMethodRecord != null)
             {
-                WriteMessage($"Method [{methodRecord.MethodInfo.Name}] already exist in DB.");
+                WriteMessage($"Method [{methodRecord.MethodInfo.GetFullName()}] already exist in DB.");
                 continue;
             }
             externalMethodRecord = new ExternalMethodRecord
@@ -230,7 +229,7 @@ public class Scanner
                 MethodHash = externalMethodData.MethodHash,
                 OriginalMethodHash = originalMethodData.MethodHash,
             };
-            WriteMessage($"Add external method [{methodRecord.MethodInfo.Name}] to DB.");
+            WriteMessage($"Add external method [{methodRecord.MethodInfo.GetFullName()}] to DB.");
             _context.ExternalMethodsRegistry.Add(externalMethodRecord);
         }
     }
@@ -251,8 +250,8 @@ public class Scanner
         {
             if (MatchResumableFunctionSignature(resumableFunction) is false)
             {
-                WriteMessage(
-                    $"Error the resumable function [{resumableFunction.Name}] must match the signature `IAsyncEnumerable<Wait> {resumableFunction.Name}()`");
+                _logger.LogError(
+                    $"The resumable function [{resumableFunction.GetFullName()}] must match the signature `IAsyncEnumerable<Wait> {resumableFunction.Name}()`");
                 continue;
             }
 
@@ -282,8 +281,15 @@ public class Scanner
 
     internal async Task RegisterResumableFunctionFirstWait(MethodInfo resumableFunction)
     {
-        WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
-        await _handler.RegisterFirstWait(resumableFunction);
+        try
+        {
+            WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
+            await _handler.RegisterFirstWait(resumableFunction);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error when register first wait for function [{resumableFunction.GetFullName()}]");
+        }
     }
 
     private void WriteMessage(string message)

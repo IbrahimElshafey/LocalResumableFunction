@@ -87,7 +87,7 @@ public partial class ResumableFunctionHandler
         //return ownerServiceUrl;
         // call "api/ResumableFunctionsReceiver/ProcessMatchedWait" for the other service with params (int waitId, int pushedMethodId)
         var actionUrl =
-            @$"{ownerServiceUrl}api/ResumableFunctionsReceiver/ProcessMatchedWait?waitId={methodWait.Id}&pushedMethodId={pushedMethodId}";
+            $"{ownerServiceUrl}api/ResumableFunctionsReceiver/ProcessMatchedWait?waitId={methodWait.Id}&pushedMethodId={pushedMethodId}";
         using (HttpClient client = new HttpClient())
         {
             await client.GetAsync(actionUrl);

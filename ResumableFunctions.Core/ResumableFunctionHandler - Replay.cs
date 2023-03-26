@@ -2,6 +2,7 @@
 using ResumableFunctions.Core.Helpers;
 using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace ResumableFunctions.Core;
 
@@ -12,7 +13,7 @@ public partial class ResumableFunctionHandler
         var waitToReplay = await _waitsRepository.GetOldWaitForReplay(replayRequest);
         if (waitToReplay == null)
         {
-            WriteMessage($"Replay failed, replay is ({replayRequest})");
+            _logger.LogWarning($"Replay failed, replay is ({replayRequest})");
             return;
         }
 
@@ -41,7 +42,7 @@ public partial class ResumableFunctionHandler
                 await ReplayGoToWithNewMatch(replayRequest,waitToReplay);
                 break;
             default:
-                WriteMessage("ReplayWait type not defined.");
+                _logger.LogWarning("ReplayWait type not defined.");
                 break;
         }
     }
@@ -104,7 +105,7 @@ public partial class ResumableFunctionHandler
         }
         else
         {
-            WriteMessage("Replay Go Before found no waits!!");
+            _logger.LogWarning("Replay Go Before found no waits!!");
         }
     }
 

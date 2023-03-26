@@ -7,9 +7,9 @@ namespace TestApi2.Controllers
     [Route("[controller]")]
     public class TestController : ControllerBase
     {
-        [HttpPost(nameof(ExtenalMethodTest))]
+        [HttpPost(nameof(ExternalMethodTest))]
         [WaitMethod]
-        public int ExtenalMethodTest(object o)
+        public int ExternalMethodTest(object o)
         {
            return Random.Shared.Next();
         }

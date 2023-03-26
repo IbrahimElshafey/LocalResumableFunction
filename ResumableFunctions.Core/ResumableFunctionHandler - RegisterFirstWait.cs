@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Core.Helpers;
 
 namespace ResumableFunctions.Core;
 
@@ -25,7 +26,7 @@ public partial class ResumableFunctionHandler
                 var functionRunner = new FunctionRunner(classInstance, resumableFunction);
                 if (functionRunner.ResumableFunctionExistInCode is false)
                 {
-                    WriteMessage($"Resumable function ({resumableFunction.Name}) not exist in code.");
+                    _logger.LogWarning($"Resumable function ({resumableFunction.GetFullName()}) not exist in code.");
                     return;
                 }
 
@@ -48,12 +49,12 @@ public partial class ResumableFunctionHandler
                     StateObject = classInstance
                 };
                 await SaveWaitRequestToDb(firstWait);
-                WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.Name}].");
+                WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
                 await _context.SaveChangesAsync();
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Error when try to register first wait for function [{resumableFunction.Name}]");
+                _logger.LogError(e, $"Error when try to register first wait for function [{resumableFunction.GetFullName()}]");
             }
     }
 

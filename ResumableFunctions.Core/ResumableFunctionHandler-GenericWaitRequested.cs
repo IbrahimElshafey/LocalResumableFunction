@@ -3,6 +3,7 @@ using ResumableFunctions.Core.Helpers;
 using ResumableFunctions.Core.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
+using Microsoft.Extensions.Logging;
 
 namespace ResumableFunctions.Core;
 
@@ -75,7 +76,7 @@ public partial class ResumableFunctionHandler
         functionWait.FirstWait = functionRunner.Current;
         if (hasNext is false)
         {
-            WriteMessage($"No waits exist in sub function ({functionWait.FunctionInfo.Name})");
+            _logger.LogWarning($"No waits exist in sub function ({functionWait.FunctionInfo.GetFullName()})");
             return;
         }
 
@@ -89,9 +90,9 @@ public partial class ResumableFunctionHandler
         functionWait.FirstWait.RequestedByFunction = methodId;
         functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
 
-        if (functionWait.FirstWait is ReplayRequest replayWait)
+        if (functionWait.FirstWait is ReplayRequest)
         {
-            WriteMessage("First wait can't be replay wait");
+            _logger.LogWarning("First wait can't be a replay request");
             //await ReplayWait(replayWait);//todo:review first wait is replay for what??
         }
         else

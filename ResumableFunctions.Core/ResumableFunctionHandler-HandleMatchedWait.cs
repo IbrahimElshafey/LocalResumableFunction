@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Xml.Linq;
+using Microsoft.Extensions.Logging;
 using ResumableFunctions.Core.InOuts;
 
 namespace ResumableFunctions.Core;
@@ -58,7 +59,7 @@ public partial class ResumableFunctionHandler
         //bug:may cause problem for go back after
         if (currentWait.ParentWait != null && currentWait.ParentWait.Status != WaitStatus.Waiting)
         {
-            WriteMessage("Can't proceed,Parent wait status is not (Waiting).");
+            _logger.LogWarning($"Can't proceed to netx ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).");
             return;
         }
         currentWait.Status = WaitStatus.Completed;
@@ -67,6 +68,7 @@ public partial class ResumableFunctionHandler
         {
             if (currentWait.ParentWaitId == null)
                 await FinalExit(currentWait);
+            await DuplicateIfFirst(currentWait);
             return;
         }
 
