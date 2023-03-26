@@ -1,4 +1,4 @@
-﻿using LocalResumableFunction.Attributes;
+﻿using ResumableFunctions.Core.Attributes;
 using Test;
 
 namespace External

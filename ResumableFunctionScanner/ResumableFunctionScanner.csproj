@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LocalResumableFunction\LocalResumableFunction.csproj" />
+    <ProjectReference Include="..\ResumableFunctions.Core\ResumableFunctions.Core.csproj" />
   </ItemGroup>
 
 </Project>

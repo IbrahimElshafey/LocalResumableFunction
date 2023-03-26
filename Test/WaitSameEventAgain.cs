@@ -1,4 +1,4 @@
-﻿using LocalResumableFunction.InOuts;
+﻿using ResumableFunctions.Core.InOuts;
 
 namespace Test;
 

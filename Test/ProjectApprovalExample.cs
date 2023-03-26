@@ -1,9 +1,9 @@
 ﻿using External;
 using ExternalService;
-using LocalResumableFunction;
-using LocalResumableFunction.Attributes;
-using LocalResumableFunction.Helpers;
-using LocalResumableFunction.InOuts;
+using ResumableFunctions.Core;
+using ResumableFunctions.Core.Attributes;
+using ResumableFunctions.Core.Helpers;
+using ResumableFunctions.Core.InOuts;
 
 namespace Test;
 

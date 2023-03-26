@@ -13,7 +13,8 @@
 # Generate swagger definition for created API
 
 
-
+# Hangfire
+* https://code-maze.com/hangfire-with-asp-net-core/
 # Event Types
 * API Called [HTTP Listener]
 * API Call to the engine [WebHook]
@@ -41,7 +42,7 @@ https://devblogs.microsoft.com/dotnet/migrating-realproxy-usage-to-dispatchproxy
 # Expression Trees
 * [Converting Expression Trees to Source Code]https://bagoum.medium.com/c-heresy-converting-expression-trees-to-source-code-1082ba8963a6
 * [FastExpressionCompiler]https://github.com/dadhi/FastExpressionCompiler
-* [Expression Tree Visualizer]https://github.com/zspitz/ExpressionTreeVisualizer
+* STAR[Expression Tree Visualizer]https://github.com/zspitz/ExpressionTreeVisualizer
 
 # Get all method calls
 * https://stackoverflow.com/questions/57118269/get-all-method-calls
@@ -97,5 +98,26 @@ Note that .NET Core supports only a single application domain.
 * [EF 7 Features] https://learn.microsoft.com/en-us/ef/core/what-is-new/ef-core-7.0/whatsnew#json-columns
 
 
-# Hangfire
-* https://code-maze.com/hangfire-with-asp-net-core/
+
+
+* Background tasks with hosted services in ASP.NET Core
+https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-6.0&tabs=visual-studio
+# Dynamic class loading (we will not need this)
+* [Using reflection] (https://www.codeproject.com/Articles/13747/Dynamically-load-a-class-and-execute-a-method-in-N)
+* [Using dynamic runtime] ()
+* Using Expresssion Trees
+	* https://agileobjects.co.uk/readable-expression-trees-debug-visualizer
+
+	
+# Find a service bus
+	*Zebus https://github.com/Abc-Arbitrage/Zebus (no broker)
+
+	* Silverback https://silverback-messaging.net/ A simple but feature-rich message bus "Broker" for .NET core (Apache Kafka, MQTT and RabbitMQ)
+	
+	* [*]SlimMessageBus https://github.com/zarusz/SlimMessageBus (Apache Kafka, Azure EventHub, MQTT/Mosquitto, Redis Pub/Sub),and provides request-response implementation over message queues.
+		* wit Mosquitto http://www.steves-internet-guide.com/install-mosquitto-broker/#manual
+		* http://www.steves-internet-guide.com/mosquitto_pub-sub-clients/
+
+	* https://github.com/zarusz/SlimMessageBus
+	* Use https://github.com/Cysharp/MessagePipe to send events to the engine
+	* https://stackoverflow.com/questions/58549763/how-should-ipc-be-handled-in-net-core

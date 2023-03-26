@@ -1,7 +1,8 @@
 **Project Status: Work in progress**
 
 # What is Resumable Function?
-A function that pauses and resumes execution based on external methods that it waits for to be executed.
+A function that pauses and resumes execution based on external method/s that it waits for it to be executed.
+
 # Code example 
 
 ``` C#
@@ -58,6 +59,14 @@ public bool ManagerOneApproveProject(ApprovalDecision args)
 ```
 * The method marked with `[WaitMethod]` must have one input paramter that is serializable.
 * you can mark any instance method with `[WaitMethod]` if it have one parameter.
+
+# Why this project?
+* I want to write code that reflects the business requirements so that a developer handover another without needing business documents to understand the code.
+* Most workflow engines can't be extended to support complex scenarios, for example, the below link contains a list of workflow patterns, which are elementary to implement by any developer if we just write code and not think about how communications work.
+	http://www.Functionpatterns.com/patterns/
+* The source code must be a source of truth about how project parts function, and handover a project with hundreds of classes and methods to a new developer does not tell him what business flow executed but a resumable function will simplify understanding of what happens under the hood.
+*  If we used Pub/Sub loosely coupled services it willbe hard to trace what happened without implementing a complex architecture.
+
 # Supported Wait Types
 * Wait single method to match (similar to `await` in `async\await`)
 ``` C#
@@ -218,34 +227,12 @@ yield return
 	* Wait for google drive file change
 	* Http listener 
 	* More advanced scenarios
-# Why this project?
-* I want to write code that reflects the business requirements so that a developer handover another without needing business documents to understand the code.
-* Most workflow engines can't be extended to support complex scenarios, for example, the below link contains a list of workflow patterns, which are elementary to implement by any developer if we just write code and not think about how communications work.
-	http://www.Functionpatterns.com/patterns/
-* The source code must be a source of truth about how project parts function, and handover a project with hundreds of classes and methods to a new developer does not tell him what business flow executed but a resumable function will simplify understanding of what happens under the hood.
-*  If we used Pub/Sub loosely coupled services it willbe hard to trace what happened without implementing a complex architecture.
 
-----
----
----
-# Documentation from here is from [another attempt](https://github.com/IbrahimElshafey/ResumableFunction) and will be updated later.
-
-# Keywords
-* Engine: component responsible for running and resume function execution.
-* Event Provider: is a component that push events to the engine.
-* Queung service: is a way to separate engine and providers.
-* Event: Plain object but contains a property for it's provider.
-
-
-
-# What are the expected types and resources for events?
-* Any implementation for `IEventProvider` interface that push events to the engine such as:
-* A WEB proxy listen to server in outs HTTP calls.
-* File watcher.
-* Long pooling service that monitor a database table.
-* Timer service.
-
-
+# How it works internally
+* The library uses IAsyncEnumerable generated state machine to implement a method that can be paused and resumed.
+* The library saves a serialized object of the class that contains the resumable function for each resumable function instance.
+* The library saves waits and pauses function execution when a wait is requested by the function.
+* The library resumes function execution when a wait is matched (its method called).
 
 # Simple resumable function scenario 
 * If we assumed a very simple scenario where someone submits a request and Manager1, Manager2 and Manager3 approve the request sequentially.
@@ -261,75 +248,3 @@ I evaluated the existing solutions and found that there is no solution that fits
 * [Durable Task Framework](https://github.com/Azure/durabletask)
 * [Workflow Core](https://github.com/danielgerlag/workflow-core)
 * [Infinitic (Kotlin)](https://github.com/infiniticio/infinitic)
-
-# My Solution 
-* I will use IAsyncEnumerable generated state machine to implement a method that can be paused and resumed.
-* I will not save the state implicitly ,Because we can't depend on automatic serialization for state because compiler may remove/rename fields and variables we defined.
-
-
-# Example
-Keep in mind that the work is in progress
-```C#
-//ProjectApprovalFunctionData is the data that will bes saved to the database 
-
-//When the engine match an event it will load the related Function class
-// and set the FunctionData property by loading it from database.
-
-//No other state saved just the FunctionData and Function author must keep that in mind.
-
-//We can't depend on automatic serialize for state becuse compiler may remove fields and variables we defined.
-public class ProjectApproval : ResumableFunction<ProjectApprovalFunctionData>
-{
-	//any inherited ResumableFunction must implement 'RunFunction'
-	protected override async IAsyncEnumerable<EventWaitingResult> RunFunction()
-	{
-		//any class that inherit FunctionInstance<T> has the methods
-		//WaitEvent,WaitFirstEvent in a collection,WaitEvents and SaveFunctionData
-
-		//the engine will wait for ProjectRequested event
-		//no match function because it's the first one
-		//context prop is prop in FunctionData that we will set with event result data
-		yield return WaitEvent(typeof(ProjectRequestedEvent),"ProjectCreated").SetProp(() => FunctionData.Project);
-		//the compiler will save state after executing the previous return
-		//and wiating for the event
-		//it will continue from the line below when event cames
-
-
-		//FunctionData.Project is set by the previous event
-		//we will initiate a task for Owner and wait to the Owner response
-		//That matching function correlates the event to the right instance
-		//The matching function will be translated to query language "MongoDB query for example" by the engine to search the active instance.
-		await AskOwnerToApprove(FunctionData.Project);
-		yield return WaitEvent(typeof(ManagerApprovalEvent), "OwnerApproval")
-			.Match<ManagerApprovalEvent>(result => result.ProjectId == FunctionData.Project.Id)
-			.SetProp(() => FunctionData.OwnerApprovalResult);
-		if (FunctionData.OwnerApprovalResult.Rejected)
-		{
-			await ProjectRejected(FunctionData.Project, "Owner");
-			yield break;
-		}
-
-		await AskSponsorToApprove(FunctionData.Project);
-		yield return WaitEvent(typeof(ManagerApprovalEvent), "SponsorApproval")
-			.Match<ManagerApprovalEvent>(result => result.ProjectId == FunctionData.Project.Id)
-			.SetProp(() => FunctionData.SponsorApprovalResult);
-		if (FunctionData.SponsorApprovalResult.Rejected)
-		{
-			await ProjectRejected(FunctionData.Project, "Sponsor");
-			yield break;
-		}
-
-		await AskManagerToApprove(FunctionData.Project);
-		yield return WaitEvent(typeof(ManagerApprovalEvent), "ManagerApproval")
-			.Match<ManagerApprovalEvent>(result => result.ProjectId == FunctionData.Project.Id)
-			.SetProp(() => FunctionData.ManagerApprovalResult);
-		if (FunctionData.ManagerApprovalResult.Rejected)
-		{
-			await ProjectRejected(FunctionData.Project, "Manager");
-			yield break;
-		}
-
-		Console.WriteLine("All three approved");
-	}
-}
-```

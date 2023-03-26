@@ -1,6 +1,6 @@
-﻿using LocalResumableFunction.Attributes;
-using LocalResumableFunction.Helpers;
-using LocalResumableFunction.InOuts;
+﻿using ResumableFunctions.Core.Attributes;
+using ResumableFunctions.Core.Helpers;
+using ResumableFunctions.Core.InOuts;
 
 namespace Test;
 
