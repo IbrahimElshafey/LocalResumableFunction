@@ -1,5 +1,5 @@
 ﻿# Todo
-* Resumable function in another  dll that entry assembly
+* Resumable function in another  dll that not entry assembly
 * Activate one start wait if multiple exist for same method
 * Add IsLocked for optemistic lock for state
 * Handle concurrency problems
@@ -27,7 +27,7 @@
 * Parameter check lib use
 * Add UI Project
 	* Monitor active resumable functions
-		* Incoming wiats
+		* Incoming waits
 		* Past waits
 		* Status
 	* List completed functions

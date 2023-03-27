@@ -7,14 +7,21 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 
-builder.Services.AddControllers().AddResumableFunctions(new DefaultResumableFunctionSettings());
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services
+    .AddControllers()
+    .AddResumableFunctions(
+        new ResumableFunctionSettings()
+        {
+            ServiceUrl = "https://localhost:7140/",
+            DllsToScan = new[] { "System.Memory.Data" }
+        });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
-app.ScanCurrentService("https://localhost:7140/");
+app.ScanCurrentService();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

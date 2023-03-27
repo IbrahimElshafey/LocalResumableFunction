@@ -27,11 +27,12 @@ public class Scanner
         _logger = logger;
     }
 
-    public async Task Start(string serviceUrl, params string[] dllsToScan)
+    public async Task Start()
     {
         try
         {
             using IServiceScope scope = _serviceProvider.CreateScope();
+            var settings = scope.ServiceProvider.GetService<IResumableFunctionSettings>();
             _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
             _handler.SetDependencies(scope.ServiceProvider);
             _context = _handler._context;
@@ -41,15 +42,18 @@ public class Scanner
             var currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
             var currentFolder = AppContext.BaseDirectory;
 
-            if (await ShouldScan(currentServiceName, serviceUrl) is false) return;
+            if (await ShouldScan(currentServiceName, settings.ServiceUrl) is false) return;
 
-            WriteMessage("Load service assemblies in current directory.");
+            WriteMessage($"Load assemblies in current directory [{currentFolder}].");
             //var assemblyPaths = Directory.EnumerateFiles(_currentFolder, "*.dll").Where(IsIncludedInScan).ToList();
-            var assemblyPaths = new[]
+            var assemblyPaths = new List<string>
             {
                 $"{currentFolder}\\{currentServiceName}.dll",
                 $"{currentFolder}\\ResumableFunctions.Core.dll"
-            }.ToList();
+            };
+            if(settings.DllsToScan!=null) 
+                assemblyPaths.AddRange(
+                    settings.DllsToScan.Select(x=> $"{currentFolder}\\{x}.dll"));
             WriteMessage("Start register method waits.");
             var resumableFunctions = await RegisterMethodWaits(assemblyPaths);
 
@@ -58,7 +62,7 @@ public class Scanner
 
             WriteMessage("Register local methods");
             await RegisterMethodWaits(typeof(LocalRegisteredMethods));
-            await UpdateScanData(currentServiceName, serviceUrl);
+            await UpdateScanData(currentServiceName, settings.ServiceUrl);
             await _context.SaveChangesAsync();
 
             WriteMessage("Close with no errors.");

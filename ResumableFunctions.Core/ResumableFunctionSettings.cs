@@ -5,9 +5,9 @@ using System.Reflection;
 
 namespace ResumableFunctions.Core
 {
-    public class DefaultResumableFunctionSettings : IResumableFunctionSettings
+    public class ResumableFunctionSettings : IResumableFunctionSettings
     {
-        public IGlobalConfiguration HangFireConfig => GlobalConfiguration
+        private IGlobalConfiguration hangFireConfig = GlobalConfiguration
             .Configuration
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
             .UseSimpleAssemblyNameTypeSerializer()
@@ -20,8 +20,21 @@ namespace ResumableFunctions.Core
                 UseRecommendedIsolationLevel = true,
                 DisableGlobalLocks = false
             });
-
-        public DbContextOptionsBuilder WaitsDbConfig => new DbContextOptionsBuilder()
+        private DbContextOptionsBuilder waitsDbConfig = new DbContextOptionsBuilder()
               .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database=ResumableFunctionsData;");
+
+        public IGlobalConfiguration HangFireConfig
+        {
+            get => hangFireConfig;
+            set => hangFireConfig = value;
+        }
+        public DbContextOptionsBuilder WaitsDbConfig
+        {
+            get => waitsDbConfig;
+            set => waitsDbConfig = value;
+        }
+
+        public string ServiceUrl { get; set; }
+        public string[] DllsToScan { get; set; }
     }
 }

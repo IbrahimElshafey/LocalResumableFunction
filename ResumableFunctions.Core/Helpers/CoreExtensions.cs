@@ -27,10 +27,10 @@ public static class CoreExtensions
     {
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
         services.AddTransient<ResumableFunctionHandler>();
-        services.AddTransient<Scanner>();
+        services.AddSingleton<Scanner>();
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();
-
+        services.AddSingleton(typeof(IResumableFunctionSettings),settings);
         if (settings.HangFireConfig != null)
         {
             services.AddHangfire(x => x = settings.HangFireConfig);
