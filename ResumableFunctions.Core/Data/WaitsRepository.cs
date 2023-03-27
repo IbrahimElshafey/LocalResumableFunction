@@ -44,6 +44,7 @@ internal class WaitsRepository : RepositoryBase
         try
         {
             var pushedMethod = await _context.PushedMethodsCalls.FindAsync(pushedMethodId);
+            if(pushedMethod == null) return null;
             var metodIdsRepo = new MethodIdentifierRepository(_context);
             var methodId = await metodIdsRepo
                .GetMethodIdentifierFromDb(pushedMethod.MethodData);

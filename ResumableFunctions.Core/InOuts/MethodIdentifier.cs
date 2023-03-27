@@ -31,7 +31,7 @@ public class MethodIdentifier
             if(File.Exists($"{AppContext.BaseDirectory}{AssemblyName}.dll"))
                 if (AssemblyName != null && ClassName != null && MethodName != null && _methodInfo == null)
                 {
-                    _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
+                    _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName + ".dll")
                         .GetType(ClassName)
                         ?.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                         .FirstOrDefault(x => x.Name == MethodName && MethodData.CalcSignature(x) == MethodSignature);

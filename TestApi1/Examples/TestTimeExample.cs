@@ -14,13 +14,13 @@ internal class TestTimeExample : ProjectApprovalExample
                 .SetData((input, output) => CurrentProject == input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
-        const string waitManagerOneApprovalInSeconds = "Wait manager one approval in 10 seconds";
+        const string waitManagerOneApprovalInSeconds = "Wait manager one approval in 2 days";
         yield return Wait(
                 waitManagerOneApprovalInSeconds,
                 new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .SetData((input, output) => ManagerOneApproval == output),
-                Wait(TimeSpan.FromSeconds(10))
+                Wait(TimeSpan.FromDays(2))
             .SetData(() => TimerMatched == true)
         ).First();
 

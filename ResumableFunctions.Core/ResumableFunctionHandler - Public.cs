@@ -49,17 +49,13 @@ public partial class ResumableFunctionHandler
                 Debugger.Launch();
                 var matchedWaits = await _waitsRepository.GetMethodActiveWaits(pushedMethodId);
               
+                if (matchedWaits != null)
                 foreach (var methodWait in matchedWaits)
                 {
                     if (IsLocalWait(methodWait))
-                    {
-                        //handle if local
                         await ProcessMatchedWait(methodWait);
-                    }
                     else
-                    {
                         await CallOwnerService(methodWait, pushedMethodId);
-                    }
                 }
             }
         }
