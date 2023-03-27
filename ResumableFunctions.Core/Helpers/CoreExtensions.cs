@@ -1,7 +1,9 @@
 ﻿using Hangfire;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Internal;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Core.Data;
 using System.Diagnostics;
@@ -110,7 +112,7 @@ public static class CoreExtensions
     }
 
 
-    public static string GetFullName(this MethodInfo method)
+    public static string GetFullName(this MethodBase method)
     {
         return $"{method.DeclaringType.FullName}.{method.Name}";
     }

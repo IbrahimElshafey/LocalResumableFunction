@@ -3,6 +3,7 @@ using ResumableFunctions.Core.InOuts;
 using MethodBoundaryAspect.Fody.Attributes;
 using ResumableFunctions.Core;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace ResumableFunctions.Core.Attributes;
 
@@ -12,6 +13,18 @@ namespace ResumableFunctions.Core.Attributes;
 public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
 {
     private PushedMethod _pushedMethod;
+    private readonly ResumableFunctionHandler _functionHandler;
+    private readonly ILogger<WaitMethodAttribute> _logger;
+
+    public WaitMethodAttribute()
+    {
+        var serviceProvider = CoreExtensions.GetServiceProvider();
+        if (serviceProvider == null) return;
+        _functionHandler = serviceProvider.GetService<ResumableFunctionHandler>();
+        _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<WaitMethodAttribute>>();
+    }
+
+
     public override object TypeId => nameof(WaitMethodAttribute);
 
     public override void OnEntry(MethodExecutionArgs args)
@@ -30,21 +43,19 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
         try
         {
             _pushedMethod.Output = args.ReturnValue;
-            //var isTaskResult = args.ReturnValue.GetType().GetGenericTypeDefinition() == typeof(Task<>);
             if (args.Method.IsAsyncMethod())
             {
                 dynamic output = args.ReturnValue;
                 _pushedMethod.Output = output.Result;
             }
 
-            CoreExtensions.GetServiceProvider()
-                .CreateScope().ServiceProvider
-                .GetService<ResumableFunctionHandler>()
-                .QueuePushedMethodProcessing(_pushedMethod).Wait();
+            
+            _functionHandler.QueuePushedMethodProcessing(_pushedMethod).Wait();
             args.MethodExecutionTag = true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogError(ex, $"Error when try to pushe method call for method [{args.Method.GetFullName()}]");
         }
     }
 

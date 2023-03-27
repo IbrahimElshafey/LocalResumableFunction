@@ -3,7 +3,7 @@
 * Activate one start wait if multiple exist for same method
 * Add IsLocked for optemistic lock for state
 * Handle concurrency problems
-	* Two waits matched for same FunctionState row
+	* Two waits matched for same FunctionState
 	* First wait closed but new request come before create new one
 	* Update pushed methods calls counter
 * Validate waits

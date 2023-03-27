@@ -13,6 +13,7 @@ builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
+app.ScanCurrentService("https://localhost:7099/");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -29,6 +30,6 @@ app.MapControllers();
 app.UseHangfireDashboard();
 
 
-app.ScanCurrentService("https://localhost:7099/");
+
 
 app.Run();
