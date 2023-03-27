@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection;
 using Aq.ExpressionJsonSerializer;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -6,45 +7,26 @@ using Newtonsoft.Json;
 
 namespace ResumableFunctions.Core.Helpers;
 
-public class ExpressionToJsonConverter : ValueConverter<Expression, string>
+public class ExpressionToJsonConverter
 {
-    public ExpressionToJsonConverter()
-        : base(
-            expression => ExpressionToJson(expression),
-            json => JsonToExpression(json))
-    {
-    }
-
-    internal static string ExpressionToJson(Expression expression)
-    {
-        if (expression == null) return null;
-        return ExpressionToJson(expression, null);
-    }
-
-    internal static string ExpressionToJson(Expression expression, Assembly assembly = null)
+    internal static string ExpressionToJson(Expression expression, Assembly assembly)
     {
         if (expression != null)
             return JsonConvert.SerializeObject(expression, JsonSettings(assembly));
         return null!;
     }
 
-    internal static Expression JsonToExpression(string json)
-    {
-        return JsonToExpression(json, null);
-    }
-
-    internal static Expression JsonToExpression(string json, Assembly assembly = null)
+    internal static Expression JsonToExpression(string json, Assembly assembly)
     {
         if (!string.IsNullOrWhiteSpace(json))
             return JsonConvert.DeserializeObject<LambdaExpression>(json, JsonSettings(assembly))!;
         return null!;
     }
 
-    private static JsonSerializerSettings JsonSettings(Assembly assembly = null)
+    private static JsonSerializerSettings JsonSettings(Assembly assembly)
     {
         var settings = new JsonSerializerSettings();
-        //Todo:Assembly.GetEntryAssembly() may cause a problem
-        settings.Converters.Add(new ExpressionJsonConverter(assembly ?? Assembly.GetEntryAssembly()));
+        settings.Converters.Add(new ExpressionJsonConverter(assembly));
         return settings;
     }
 }

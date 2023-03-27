@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using ResumableFunctions.Core.Helpers;
 
 namespace ResumableFunctions.Core.InOuts
 {
@@ -52,21 +53,12 @@ namespace ResumableFunctions.Core.InOuts
         public string MethodSignature { get; internal set; }
         public byte[] MethodHash { get; internal set; }
 
-        //todo:refactor copied code from MethodIdentifier
         internal MethodInfo MethodInfo
         {
             get
             {
-                if (File.Exists($"{AppContext.BaseDirectory}{AssemblyName}.dll"))
-                    if (AssemblyName != null && ClassName != null && MethodName != null && _methodInfo == null)
-                    {
-                        _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
-                            .GetType(ClassName)
-                            ?.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                            .FirstOrDefault(x => x.Name == MethodName && MethodData.CalcSignature(x) == MethodSignature);
-                        return _methodInfo;
-                    }
-
+                if (_methodInfo == null)
+                    _methodInfo = CoreExtensions.GetMethodInfo(AssemblyName, ClassName, MethodName, MethodSignature);
                 return _methodInfo;
             }
         }

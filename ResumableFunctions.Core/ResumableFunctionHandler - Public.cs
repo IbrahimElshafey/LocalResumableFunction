@@ -89,7 +89,6 @@ public partial class ResumableFunctionHandler
         hangFireHttpClient.EnqueueGetRequest(actionUrl);
     }
 
-    //todo:like start scan
     public async Task ProcessExternalMatchedWait(int waitId, int pushedMethodId)
     {
         try

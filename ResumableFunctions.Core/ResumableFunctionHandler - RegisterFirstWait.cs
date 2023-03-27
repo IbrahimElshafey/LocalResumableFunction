@@ -15,9 +15,6 @@ public partial class ResumableFunctionHandler
 
     internal async Task RegisterFirstWait(MethodInfo resumableFunction)
     {
-        //todo: change this to use bependency injection
-        //var classInstance = (ResumableFunctionLocal)Activator.CreateInstance(resumableFunction.DeclaringType);
-        //var classInstance = (ResumableFunctionLocal)_serviceProvider.GetService(resumableFunction.DeclaringType);
         var classInstance = (ResumableFunctionLocal)ActivatorUtilities.CreateInstance(_serviceProvider,resumableFunction.DeclaringType);
         if (classInstance != null)
             try

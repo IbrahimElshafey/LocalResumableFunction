@@ -1,5 +1,5 @@
 ﻿# Todo
-
+* Resumable function in another  dll that entry assembly
 * Activate one start wait if multiple exist for same method
 * Add IsLocked for optemistic lock for state
 * Handle concurrency problems
@@ -10,12 +10,15 @@
 	* Wait same wait twice in group is not valid
 	* Wait name can't duplicate in same method
 
+* Track code changes
+	* GUID for methods for easy track 
 
 * Remove uniqe for method hash
 
 * Logging and handle exception
 
 * Create nuget package
+
 
 * Save function state all fields [public and non public]
 * Find fast and best object serializer
@@ -37,3 +40,4 @@
 
 
 * Speed Analysis	
+	* https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/event-counters?tabs=windows

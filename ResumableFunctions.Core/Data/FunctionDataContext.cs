@@ -174,12 +174,12 @@ public class FunctionDataContext : DbContext
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        configurationBuilder
-            .Properties<Expression>()
-            .HaveConversion<ExpressionToJsonConverter>();
-        configurationBuilder
-            .Properties<LambdaExpression>()
-            .HaveConversion<LambdaExpressionToJsonConverter>();
+        //configurationBuilder
+        //    .Properties<Expression>()
+        //    .HaveConversion<ExpressionToJsonConverter>();
+        //configurationBuilder
+        //    .Properties<LambdaExpression>()
+        //    .HaveConversion<LambdaExpressionToJsonConverter>();
         configurationBuilder
             .Properties<Type>()
             .HaveConversion<TypeToStringConverter>();

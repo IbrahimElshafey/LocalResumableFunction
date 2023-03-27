@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Internal;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Core.Data;
+using ResumableFunctions.Core.InOuts;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -134,6 +135,19 @@ public static class CoreExtensions
         return null;
     }
 
+    public static MethodInfo GetMethodInfo(string AssemblyName, string ClassName, string MethodName,string MethodSignature)
+    {
+        MethodInfo _methodInfo = null;
+        if (File.Exists($"{AppContext.BaseDirectory}{AssemblyName}.dll"))
+            if (AssemblyName != null && ClassName != null && MethodName != null)
+            {
+                _methodInfo = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
+                    .GetType(ClassName)
+                    ?.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                    .FirstOrDefault(x => x.Name == MethodName && MethodData.CalcSignature(x) == MethodSignature);
+                return _methodInfo;
+            }
 
-
+        return _methodInfo;
+    }
 }

@@ -78,15 +78,13 @@ public abstract class Wait
 
     internal async Task<Wait> GetNextWait()
     {
-        //if (IsNode)
-        //{
-        //    Console.WriteLine($"Get next wait IsNode:{IsNode},Name:{Name}");
-        //}
+     
         var functionRunner = new FunctionRunner(this);
         if (functionRunner.ResumableFunctionExistInCode is false)
         {
             Debug.WriteLine($"Resumable function ({RequestedByFunction.MethodName}) not exist in code");
-            //todo:delete it and all related waits
+            //todo:move to recycle bin and all related waits
+            //mark it as inactive
             //throw new Exception("Can't initiate runner");
             return null;
         }

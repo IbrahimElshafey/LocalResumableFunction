@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Reflection;
 using ResumableFunctions.Core.Helpers;
 
 namespace ResumableFunctions.Core.InOuts;
@@ -51,7 +52,9 @@ public class WaitsGroup : Wait
 
     private LambdaExpression GetCountExpression()
     {
-        var assembly = RequestedByFunction.MethodInfo.DeclaringType.Assembly;
+        var assembly =
+            RequestedByFunction.MethodInfo.DeclaringType.Assembly ??
+            Assembly.GetEntryAssembly();
         if (CountExpressionValue != null)
             return (LambdaExpression)
                 ExpressionToJsonConverter.JsonToExpression(
