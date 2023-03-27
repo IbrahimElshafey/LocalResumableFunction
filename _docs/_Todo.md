@@ -1,11 +1,11 @@
 ﻿# Todo
-* Delete PushedMethodsCalls after processing 
-* HangFireHttpClient
-* Activate on start wait if multiple exist
-* TimeWaits background task using hangfire test
-* Hangfire access dbcontext problem [solved with transiet but need test]
+
+* Activate one start wait if multiple exist for same method
 * Add IsLocked for optemistic lock for state
-	
+* Handle concurrency problems
+	* Two waits matched for same FunctionState row
+	* First wait closed but new request come before create new one
+	* Update pushed methods calls counter
 * Validate waits
 	* Wait same wait twice in group is not valid
 	* Wait name can't duplicate in same method
@@ -19,8 +19,8 @@
 
 * Save function state all fields [public and non public]
 * Find fast and best object serializer
-* MoveFunctionToRecycleBin
-
+* Move completed function instance to Recycle Bin
+* Delete PushedMethodsCalls after processing background job
 * Parameter check lib use
 * Add UI Project
 	* Monitor active resumable functions

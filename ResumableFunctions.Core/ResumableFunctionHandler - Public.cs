@@ -85,10 +85,8 @@ public partial class ResumableFunctionHandler
         // call "api/ResumableFunctionsReceiver/ProcessMatchedWait" for the other service with params (int waitId, int pushedMethodId)
         var actionUrl =
             $"{ownerServiceUrl}api/ResumableFunctionsReceiver/ProcessMatchedWait?waitId={methodWait.Id}&pushedMethodId={pushedMethodId}";
-        using (HttpClient client = new HttpClient())
-        {
-            await client.GetAsync(actionUrl);
-        }
+        var hangFireHttpClient = _serviceProvider.GetService<HangFireHttpClient>();
+        hangFireHttpClient.EnqueueGetRequest(actionUrl);
     }
 
     //todo:like start scan
@@ -111,7 +109,7 @@ public partial class ResumableFunctionHandler
                 var pushedMethod = await _context
                    .PushedMethodsCalls
                    .FirstAsync(x => x.Id == pushedMethodId);
-            
+
                 var externalMethod = (await _context
                     .ExternalMethodsRegistry
                     .Where(x => x.OriginalMethodHash == pushedMethod.MethodData.MethodHash)

@@ -10,19 +10,22 @@ namespace ResumableFunctions.Core.Helpers
     public class HangFireHttpClient
     {
         private readonly IBackgroundJobClient backgroundJobClient;
+        private readonly HttpClient client;
 
-        public HangFireHttpClient(IBackgroundJobClient backgroundJobClient)
+        public HangFireHttpClient(IBackgroundJobClient backgroundJobClient, HttpClient client)
         {
             this.backgroundJobClient = backgroundJobClient;
+            this.client = client;
         }
         public void EnqueueGetRequest(string url)
         {
-            backgroundJobClient.Enqueue(() => Get(url));
+            backgroundJobClient.Enqueue(() => HttpGet(url));
         }
 
-        public void Get(string url)
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public async Task HttpGet(string url)
         {
-            throw new NotImplementedException();
+            await client.GetAsync(url);
         }
     }
 }

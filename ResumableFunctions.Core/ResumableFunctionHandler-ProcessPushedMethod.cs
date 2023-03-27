@@ -35,7 +35,7 @@ public partial class ResumableFunctionHandler
                     return true;
                 break;
         }
-
+        await IncrementCompletedCounter(methodWait.PushedMethodCallId);
         return false;
 
         async Task LoadWaitFunctionState(MethodWait wait)
@@ -55,7 +55,7 @@ public partial class ResumableFunctionHandler
             //todo:cancel processing and rewait it if data is locked
             methodWait.UpdateFunctionData();
             await ResumeExecution(methodWait);
-            await UpdatePushedMethodCounter(methodWait.PushedMethodCallId);
+            await IncrementCompletedCounter(methodWait.PushedMethodCallId);
             await _context.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -66,7 +66,7 @@ public partial class ResumableFunctionHandler
 
     }
 
-    private async Task UpdatePushedMethodCounter(int pushedMethodCallId)
+    private async Task IncrementCompletedCounter(int pushedMethodCallId)
     {
         var entity = await _context.PushedMethodsCalls.FindAsync(pushedMethodCallId);
         entity.CompletedWaitsCount++;
