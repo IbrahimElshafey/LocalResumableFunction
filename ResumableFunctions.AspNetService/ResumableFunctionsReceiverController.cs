@@ -23,7 +23,7 @@ namespace ResumableFunctions.AspNetService
         [HttpGet(nameof(ProcessMatchedWait))]
         public int ProcessMatchedWait(int waitId, int pushedMethodId)
         {
-            BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessMatchedWait(waitId, pushedMethodId));
+            BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessExternalMatchedWait(waitId, pushedMethodId));
             return 0;
         }
 

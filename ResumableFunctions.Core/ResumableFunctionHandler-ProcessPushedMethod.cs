@@ -9,14 +9,14 @@ using Microsoft.Extensions.Logging;
 
 namespace ResumableFunctions.Core;
 
-public partial class ResumableFunctionHandler 
+public partial class ResumableFunctionHandler
 {
     /// <summary>
     ///     When method called and finished
     /// </summary>
 
 
-    
+
 
     private async Task<bool> CheckIfMatch(MethodWait methodWait)
     {
@@ -44,7 +44,7 @@ public partial class ResumableFunctionHandler
         }
     }
 
-  
+
 
     private async Task ProcessMatchedWait(MethodWait methodWait)
     {
@@ -55,6 +55,7 @@ public partial class ResumableFunctionHandler
             //todo:cancel processing and rewait it if data is locked
             methodWait.UpdateFunctionData();
             await ResumeExecution(methodWait);
+            await UpdatePushedMethodCounter(methodWait.PushedMethodCallId);
             await _context.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -62,6 +63,14 @@ public partial class ResumableFunctionHandler
             _logger.LogError(ex,
                 $"Error when process matched wait for method [{methodWait.Name}] with id[{methodWait.Id}]");
         }
-       
+
+    }
+
+    private async Task UpdatePushedMethodCounter(int pushedMethodCallId)
+    {
+        var entity = await _context.PushedMethodsCalls.FindAsync(pushedMethodCallId);
+        entity.CompletedWaitsCount++;
+        if (entity.CompletedWaitsCount == entity.MatchedWaitsCount)
+            _context.PushedMethodsCalls.Remove(entity);
     }
 }

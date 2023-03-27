@@ -1,19 +1,14 @@
 ﻿# Todo
 * Delete PushedMethodsCalls after processing 
 * HangFireHttpClient
-* Filter matched waits to be unique to solve activate same wait multiple times by same method call
+* Activate on start wait if multiple exist
 * TimeWaits background task using hangfire test
-* Hangfire access dbcontext problem
-	* A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
+* Hangfire access dbcontext problem [solved with transiet but need test]
 * Add IsLocked for optemistic lock for state
 	
 * Validate waits
 	* Wait same wait twice in group is not valid
 	* Wait name can't duplicate in same method
-
-
-		
-
 
 
 * Remove uniqe for method hash
@@ -32,6 +27,7 @@
 		* Incoming wiats
 		* Past waits
 		* Status
+	* List completed functions
 	* Verify scanned methods 
 		* delete methods not in code
 		* verify method signatures

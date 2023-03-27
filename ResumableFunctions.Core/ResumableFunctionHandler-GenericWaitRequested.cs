@@ -121,7 +121,7 @@ public partial class ResumableFunctionHandler
             outputParameter);
         methodWait.CurrentFunction = timeWait.CurrentFunction;
 
-        _backgroundJobClient.Schedule(() => new LocalRegisteredMethods().TimeWait(timeWait.UniqueMatchId), timeWait.TimeToWait);
+        var jobId = _backgroundJobClient.Schedule(() => new LocalRegisteredMethods().TimeWait(timeWait.UniqueMatchId), timeWait.TimeToWait);
         //_context.Waits.Remove(timeWait);
         _context.Entry(timeWait).State = EntityState.Detached;
         methodWait.ParentWait = timeWait.ParentWait;
@@ -129,7 +129,7 @@ public partial class ResumableFunctionHandler
         methodWait.RequestedByFunctionId = timeWait.RequestedByFunctionId;
         methodWait.StateBeforeWait = timeWait.StateBeforeWait;
         methodWait.StateAfterWait = timeWait.StateAfterWait;
-        methodWait.ExtraData = new { timeWait.TimeToWait, timeWait.UniqueMatchId };
+        methodWait.ExtraData = new TimeWaitData { TimeToWait = timeWait.TimeToWait, UniqueMatchId = timeWait.UniqueMatchId, JobId = jobId };
         await MethodWaitRequested(methodWait);
     }
 
@@ -138,5 +138,5 @@ public partial class ResumableFunctionHandler
         return true;
     }
 
-   
+
 }

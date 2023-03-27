@@ -184,4 +184,6 @@ public abstract class Wait
         RequestedByFunctionId = fromWait.RequestedByFunctionId;
         RequestedByFunction = fromWait.RequestedByFunction;
     }
+
+    internal virtual void Cancel() => Status = Status == WaitStatus.Waiting ? Status = WaitStatus.Canceled : Status;
 }

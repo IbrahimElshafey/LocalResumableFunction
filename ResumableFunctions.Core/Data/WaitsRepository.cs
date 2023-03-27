@@ -52,7 +52,7 @@ internal class WaitsRepository : RepositoryBase
                 throw new Exception(
                     $"Method [{pushedMethod.MethodData.MethodName}] is not registered in current database as [{nameof(WaitMethodAttribute)}].");
 
-            SetInputAndOutput(pushedMethod, methodId);
+            pushedMethod.ConvertJObject(methodId.MethodInfo);
 
             var matchedWaits = await _context
                             .MethodWaits
@@ -69,12 +69,16 @@ internal class WaitsRepository : RepositoryBase
                 x.PushedMethodCallId = pushedMethodId;
             });
 
-            if (matchedWaits?.Any() is not true)
+            bool noMatchedWaits = matchedWaits?.Any() is not true;
+            if (noMatchedWaits)
             {
                 //_logger.LogInformation($"No waits matched for pushed method [{pushedMethodId}]");
                 _context.PushedMethodsCalls.Remove(pushedMethod);
-                await _context.SaveChangesAsync();
             }
+            else
+                pushedMethod.MatchedWaitsCount = matchedWaits.Count;
+
+            await _context.SaveChangesAsync();
             return matchedWaits;
         }
         catch (Exception ex)
@@ -83,18 +87,7 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-    private static void SetInputAndOutput(PushedMethod pushedMethod, MethodIdentifier methodId)
-    {
-        if (pushedMethod.Input is JObject inputJson)
-            pushedMethod.Input = inputJson.ToObject(methodId.MethodInfo.GetParameters()[0].ParameterType);
-        if (pushedMethod.Output is JObject outputJson)
-        {
-            if (methodId.MethodInfo.IsAsyncMethod())
-                pushedMethod.Output = outputJson.ToObject(methodId.MethodInfo.ReturnType.GetGenericArguments()[0]);
-            else
-                pushedMethod.Output = outputJson.ToObject(methodId.MethodInfo.ReturnType);
-        }
-    }
+    
 
     public async Task<Wait> GetWaitGroup(int? parentGroupId)
     {
@@ -136,7 +129,7 @@ internal class WaitsRepository : RepositoryBase
                 .ToListAsync();
             foreach (var wait in waits)
             {
-                wait.Status = WaitStatus.Canceled;
+                wait.Cancel();
                 if (wait.CanBeParent)
                     await CancelWaits(wait.Id);
             }
@@ -179,8 +172,7 @@ internal class WaitsRepository : RepositoryBase
 
         foreach (var wait in functionWaits)
         {
-            if (wait.Status == WaitStatus.Waiting)
-                wait.Status = WaitStatus.Canceled;
+            wait.Cancel();
             await CancelSubWaits(wait.Id);
         }
     }

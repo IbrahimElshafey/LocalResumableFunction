@@ -1,6 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.RateLimiting;
+using Hangfire;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 using ResumableFunctions.Core.Attributes;
 using ResumableFunctions.Core.Helpers;
 
@@ -8,10 +12,9 @@ namespace ResumableFunctions.Core.InOuts;
 
 public class MethodWait : Wait
 {
-
+    public int PushedMethodCallId { get; internal set; }
     [NotMapped] public LambdaExpression SetDataExpression { get; internal set; }
 
-    internal int PushedMethodCallId { get; set; }
     internal byte[] SetDataExpressionValue { get; set; }
 
     [NotMapped]
@@ -99,6 +102,17 @@ public class MethodWait : Wait
         catch (Exception e)
         {
             return false;
+        }
+    }
+
+    internal override void Cancel()
+    {
+        base.Cancel();
+        if (Name == "#TimeWait#" && ExtraData is JObject ed)
+        {
+            var waitData = ed.ToObject<TimeWaitData>();
+            var client = CoreExtensions.GetServiceProvider().GetService<IBackgroundJobClient>();
+            client.Delete(waitData.JobId);
         }
     }
 }
