@@ -75,11 +75,12 @@ public partial class ResumableFunctionHandler
         WriteMessage($"Get next wait [{nextWait.Name}] after [{currentWait.Name}]");
 
         nextWait.ParentWaitId = currentWait.ParentWaitId;
+        currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
         nextWait.FunctionState = currentWait.FunctionState;
+        _context.Entry(nextWait.FunctionState).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
 
-        await SaveWaitRequestToDb(nextWait);
-        currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
+        await SaveWaitRequestToDb(nextWait);//main use
         await _context.SaveChangesAsync();
         await DuplicateIfFirst(currentWait);
     }

@@ -53,14 +53,14 @@ public partial class ResumableFunctionHandler
     {
         for (var index = 0; index < manyWaits.ChildWaits.Count; index++)
         {
-            var wait = manyWaits.ChildWaits[index];
-            wait.Status = WaitStatus.Waiting;
-            wait.FunctionState = manyWaits.FunctionState;
-            wait.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
-            wait.RequestedByFunction = manyWaits.RequestedByFunction;
-            wait.StateAfterWait = manyWaits.StateAfterWait;
-            wait.ParentWait = manyWaits;
-            await SaveWaitRequestToDb(wait);
+            var waitGroupChild = manyWaits.ChildWaits[index];
+            waitGroupChild.Status = WaitStatus.Waiting;
+            waitGroupChild.FunctionState = manyWaits.FunctionState;
+            waitGroupChild.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
+            waitGroupChild.RequestedByFunction = manyWaits.RequestedByFunction;
+            waitGroupChild.StateAfterWait = manyWaits.StateAfterWait;
+            waitGroupChild.ParentWait = manyWaits;
+            await SaveWaitRequestToDb(waitGroupChild);
         }
 
         await _waitsRepository.AddWait(manyWaits);
