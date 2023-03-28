@@ -1,4 +1,5 @@
 ﻿using ResumableFunctions.Core.Attributes;
+using ResumableFunctions.Core.InOuts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace ResumableFunctions.Core.Helpers
         [WaitMethod]
         public string TimeWait(string timeWaitId)
         {
-            return timeWaitId;
+            return nameof(MethodWait.RefineMatchModifier) + timeWaitId;
         }
     }
 }

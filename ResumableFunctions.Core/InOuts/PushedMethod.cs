@@ -14,6 +14,23 @@ public class PushedMethod
     public int MatchedWaitsCount { get; internal set; }
     public int CompletedWaitsCount { get; internal set; }
 
+    public string RefineMatchModifier
+    {
+        get
+        {
+            var name = nameof(MethodWait.RefineMatchModifier);
+            if (Input is string s && s.StartsWith(name))
+                return s.Substring(name.Length);
+            if (Output is string output && output.StartsWith(name))
+                return output.Substring(name.Length);
+            if (Input is JObject inputJson && inputJson[name] != null)
+                return inputJson[name].ToString();
+            if (Output is JObject outputJson && outputJson[name] != null)
+                return outputJson[name].ToString();
+            return null;
+        }
+    }
+
     internal void ConvertJObject(MethodInfo methodInfo)
     {
         try
@@ -46,6 +63,6 @@ public class PushedMethod
         catch (Exception)
         {
         }
-      
+
     }
 }

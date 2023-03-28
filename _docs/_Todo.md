@@ -1,11 +1,12 @@
 ﻿# Todo
-
+* Time wait exact match
 * Delete first wait subwaits if group
+* If scan error occured don't update service data lastscandate
 * Validate waits
 	* Wait same wait twice in group is not valid
 	* Wait name can't duplicate in same function
 
-* Time wait exact match
+
 
 * Activate one start wait if multiple exist for same method
 

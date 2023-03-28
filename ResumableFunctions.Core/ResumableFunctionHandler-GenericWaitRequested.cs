@@ -107,7 +107,7 @@ public partial class ResumableFunctionHandler
 
     private async Task TimeWaitRequested(TimeWait timeWait)
     {
-        var methodWait = new MethodWait<string, string>(new LocalRegisteredMethods().TimeWait);
+        var timeWaitMethod = new MethodWait<string, string>(new LocalRegisteredMethods().TimeWait);
         var functionType = typeof(Func<,,>)
             .MakeGenericType(
                 typeof(string),
@@ -115,33 +115,34 @@ public partial class ResumableFunctionHandler
                 typeof(bool));
         var inputParameter = Expression.Parameter(typeof(string), "input");
         var outputParameter = Expression.Parameter(typeof(string), "output");
-        methodWait.SetDataExpression = Expression.Lambda(
+        timeWaitMethod.SetDataExpression = Expression.Lambda(
             functionType,
             timeWait.SetDataExpression.Body,
             inputParameter,
             outputParameter);
-        methodWait.MatchIfExpression = Expression.Lambda(
+        timeWaitMethod.MatchIfExpression = Expression.Lambda(
             functionType,
-            Expression.Equal(outputParameter, Expression.Constant(timeWait.UniqueMatchId)),
+            Expression.Equal(inputParameter, Expression.Constant(timeWait.UniqueMatchId)),
             inputParameter,
             outputParameter);
-        methodWait.CurrentFunction = timeWait.CurrentFunction;
+        timeWaitMethod.CurrentFunction = timeWait.CurrentFunction;
 
         var jobId = _backgroundJobClient.Schedule(() => new LocalRegisteredMethods().TimeWait(timeWait.UniqueMatchId), timeWait.TimeToWait);
         //_context.Waits.Remove(timeWait);
         _context.Entry(timeWait).State = EntityState.Detached;
-        methodWait.ParentWait = timeWait.ParentWait;
-        methodWait.FunctionState = timeWait.FunctionState;
-        methodWait.RequestedByFunctionId = timeWait.RequestedByFunctionId;
-        methodWait.StateBeforeWait = timeWait.StateBeforeWait;
-        methodWait.StateAfterWait = timeWait.StateAfterWait;
-        methodWait.ExtraData =
+        timeWaitMethod.ParentWait = timeWait.ParentWait;
+        timeWaitMethod.FunctionState = timeWait.FunctionState;
+        timeWaitMethod.RequestedByFunctionId = timeWait.RequestedByFunctionId;
+        timeWaitMethod.StateBeforeWait = timeWait.StateBeforeWait;
+        timeWaitMethod.StateAfterWait = timeWait.StateAfterWait;
+        timeWaitMethod.ExtraData =
             new TimeWaitData
             {
                 TimeToWait = timeWait.TimeToWait,
                 UniqueMatchId = timeWait.UniqueMatchId,
                 JobId = jobId,
             };
-        await MethodWaitRequested(methodWait);
+        timeWaitMethod.RefineMatchModifier = timeWait.UniqueMatchId;
+        await MethodWaitRequested(timeWaitMethod);
     }
 }

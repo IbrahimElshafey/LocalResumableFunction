@@ -24,6 +24,8 @@ public class MethodWait : Wait
 
     public bool NeedFunctionStateForMatch { get; internal set; } = false;
 
+    public string RefineMatchModifier { get; internal set; }
+
 
     /// <summary>
     ///     The method that we wait to resume resumable function

@@ -52,15 +52,17 @@ internal class WaitsRepository : RepositoryBase
                 throw new Exception(
                     $"Method [{pushedMethod.MethodData.MethodName}] is not registered in current database as [{nameof(WaitMethodAttribute)}].");
 
-            pushedMethod.ConvertJObject(methodId.MethodInfo);
 
             var matchedWaits = await _context
                             .MethodWaits
                             .Include(x => x.RequestedByFunction)
                             .Where(x =>
                                 x.WaitMethodIdentifierId == methodId.Id &&
-                                x.Status == WaitStatus.Waiting)
+                                x.Status == WaitStatus.Waiting &&
+                                x.RefineMatchModifier == pushedMethod.RefineMatchModifier)
                             .ToListAsync();
+
+            pushedMethod.ConvertJObject(methodId.MethodInfo);
 
             matchedWaits.ForEach(x =>
             {
@@ -116,10 +118,15 @@ internal class WaitsRepository : RepositoryBase
                     x.RequestedByFunctionId == methodIdentifier.Id &&
                     x.Name == firstWait.Name &&
                     x.Status == WaitStatus.Waiting);
-        bool result = firstWaitInDb == null;
-        _context.Waits.Remove(firstWaitInDb);
-        await _context.SaveChangesAsync();
-        return result;
+
+        if(firstWaitInDb != null)
+        {
+            _context.Waits.Remove(firstWaitInDb);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+     
+        return false;
     }
 
 
