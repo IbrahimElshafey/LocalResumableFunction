@@ -10,7 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
-        new ResumableFunctionSettings() { ServiceUrl = "https://localhost:7099/" });
+        new ResumableFunctionSettings()
+        {
+            ServiceUrl = "https://localhost:7099/",
+            DllsToScan = new[] { "RefernceLibrary" }
+        });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using RefernceLibrary;
 using ResumableFunctions.Core.Attributes;
 
 namespace TestApi2.Controllers
@@ -19,6 +20,12 @@ namespace TestApi2.Controllers
         public int ExternalMethodTest2(string o)
         {
             return Random.Shared.Next();
+        }
+
+        [HttpGet(nameof(SayHello_MethodInDll))]
+        public string SayHello_MethodInDll(string userName)
+        {
+            return new CodeInDllTest().SayHello(userName);
         }
     }
 }

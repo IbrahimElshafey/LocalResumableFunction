@@ -1,4 +1,7 @@
 ﻿# Todo
+* Validate waits
+	* Wait same wait twice in group is not valid
+	* Wait name can't duplicate in same method
 * Time wait exact match
 * Resumable function in another  dll that not entry assembly
 * Activate one start wait if multiple exist for same method
@@ -7,9 +10,7 @@
 	* Two waits matched for same FunctionState
 	* First wait closed but new request come before create new one
 	* Update pushed methods calls counter
-* Validate waits
-	* Wait same wait twice in group is not valid
-	* Wait name can't duplicate in same method
+
 
 * Track code changes
 	* GUID for methods for easy track 

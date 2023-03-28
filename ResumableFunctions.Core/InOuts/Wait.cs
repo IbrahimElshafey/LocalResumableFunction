@@ -184,4 +184,9 @@ public abstract class Wait
     }
 
     internal virtual void Cancel() => Status = Status == WaitStatus.Waiting ? Status = WaitStatus.Canceled : Status;
+
+    internal virtual (bool isValid,string message) IsValidWaitRequest() 
+    {
+        return (true,null);
+    }
 }
