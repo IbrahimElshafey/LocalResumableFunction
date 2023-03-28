@@ -27,7 +27,7 @@ public static class CoreExtensions
     {
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
         services.AddTransient<ResumableFunctionHandler>();
-        services.AddSingleton<Scanner>();
+        services.AddTransient<Scanner>();
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionSettings),settings);

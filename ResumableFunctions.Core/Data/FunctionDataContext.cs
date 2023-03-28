@@ -15,7 +15,18 @@ public class FunctionDataContext : DbContext
 {
     public FunctionDataContext(IResumableFunctionSettings settings) : base(settings.WaitsDbConfig.Options)
     {
-        Database.EnsureCreated();
+        try
+        {
+            Database.EnsureCreated();
+        }
+        catch (Microsoft.Data.SqlClient.SqlException ex)
+        {
+            if (ex.ErrorCode == -2146232060)
+            {
+                Task.Delay(10000).Wait();
+                Database.EnsureCreated();
+            }
+        }
     }
 
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }

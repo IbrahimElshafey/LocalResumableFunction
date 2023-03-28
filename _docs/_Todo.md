@@ -1,13 +1,15 @@
 ﻿# Todo
-* Resumable function in another  dll that not entry assembly
+
 * Validate waits
 	* Wait same wait twice in group is not valid
-	* Wait name can't duplicate in same method
+	* Wait name can't duplicate in same function
+
 * Time wait exact match
 
 * Activate one start wait if multiple exist for same method
-* Add IsLocked for optemistic lock for state
+
 * Handle concurrency problems
+	* optimistic or pessimistic fro cases below:
 	* Two waits matched for same FunctionState
 	* First wait closed but new request come before create new one
 	* Update pushed methods calls counter
