@@ -30,7 +30,7 @@ namespace ResumableFunctions.AspNetService
         //[HttpGet(nameof(PushExternal))]
         //public int PushExternal(PushedMethod pushedMethod)
         //{
-        //    //BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessPushedMethod(pushedMethod));
+        //    BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessPushedMethod(pushedMethod));
         //    return 0;
         //}
     }

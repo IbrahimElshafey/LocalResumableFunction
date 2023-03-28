@@ -52,6 +52,7 @@ public class WaitsGroup : Wait
 
     private LambdaExpression GetCountExpression()
     {
+        //todo:may be a bug
         var assembly =
             RequestedByFunction.MethodInfo.DeclaringType.Assembly ??
             Assembly.GetEntryAssembly();

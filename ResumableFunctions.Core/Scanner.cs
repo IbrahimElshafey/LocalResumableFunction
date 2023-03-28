@@ -136,6 +136,7 @@ public class Scanner
     {
         var resumableFunctionClasses = new List<Type>();
         foreach (var assemblyPath in assemblyPaths)
+        {
             try
             {
                 WriteMessage($"Start scan assembly [{assemblyPath}]");
@@ -163,8 +164,9 @@ public class Scanner
             }
             catch (Exception e)
             {
-                _logger.LogError(e,$"Error when scan assembly [{assemblyPath}]");
+                _logger.LogError(e, $"Error when scan assembly [{assemblyPath}]");
             }
+        }
 
         return resumableFunctionClasses;
     }
