@@ -4,21 +4,29 @@
 A function that pauses and resumes execution based on external method/s that it waits for it to be executed.
 
 # Code example 
+Scenario: A project approval process states that 
+* After the project is submitted by an applicant the system will ask manager X to approve it.
+* If the manager rejected the project the system will ask the applicant to resubmit the project.
+* If the project approved by the manager then the system will send a notification to the applicant.
 
+Try to write an API service for this simple scenario and then ask a colleague to figure out what this service does by reading your code.
+
+With resumable function you can write this scenario like below:
+Just a few lines of codes that tells what system do.
 ``` C#
 [ResumableFunctionEntryPoint]//Point 1
 public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
 {
 	yield return
-	 Wait<Project, bool>("Project Submitted", ProjectSubmitted)//Point 2
-		 .MatchIf((project, output) => output && !project.IsResubmit)//Point 3
-		 .SetData((project, output) => CurrentProject == project);//Point 4
+		Wait<Project, bool>("Project Submitted", ProjectSubmitted)//Point 2
+		.MatchIf((project, output) => output && !project.IsResubmit)//Point 3
+		.SetData((project, output) => CurrentProject == project);//Point 4
 
 	await AskManagerToApprove("Manager One", CurrentProject.Id);
 	yield return
-		   Wait<ApprovalDecision, bool>("Manager One Approve Project", ManagerOneApproveProject)
-			   .MatchIf((approvalDecision, output) => approvalDecision.ProjectId == CurrentProject.Id)
-			   .SetData((approvalDecision, approvalResult) => ManagerOneApproval == approvalResult);
+		Wait<ApprovalDecision, bool>("Manager One Approve Project", ManagerOneApproveProject)
+		.MatchIf((approvalDecision, output) => approvalDecision.ProjectId == CurrentProject.Id)
+		.SetData((approvalDecision, approvalResult) => ManagerOneApproval == approvalResult);
 
 	if (ManagerOneApproval is false)
 	{
