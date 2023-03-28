@@ -2,6 +2,7 @@
 using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Core.InOuts;
+using static Azure.Core.HttpHeader;
 
 namespace ResumableFunctions.Core;
 
@@ -90,7 +91,7 @@ public partial class ResumableFunctionHandler
         WriteMessage("Final Exit");
         currentWait.Status = WaitStatus.Completed;
         currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
-        currentWait.FunctionState.Status = FunctionStatus.Completed;
+        currentWait.FunctionState.LogStatus(FunctionStatus.Completed,"Function instance completed.");
         await _waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
         await MoveFunctionToRecycleBin(currentWait);
     }

@@ -79,13 +79,16 @@ public class MethodWait : Wait
             var setDataExpression = SetDataExpression.Compile();
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             FunctionState.StateObject = CurrentFunction;
-            if (IsFirst is false)
-                FunctionState.Status = FunctionStatus.InProgress;
+            FunctionState.LogStatus(
+                FunctionStatus.Progress,
+                $"Method wait [{Name}] matched and function data updated.");
+
         }
         catch (Exception)
         {
-            FunctionState.Status = FunctionStatus.ErrorOccured;
-            FunctionState.StatusMessage += $"An error occured when try to update function data after method wait [{Name}] matched.";
+            FunctionState.LogStatus(
+                FunctionStatus.Error, 
+                $"An error occured when try to update function data after method wait [{Name}] matched.");
             throw;
         }
     }

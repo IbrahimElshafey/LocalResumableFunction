@@ -37,6 +37,7 @@ public class FunctionDataContext : DbContext
     public DbSet<PushedMethod> PushedMethodsCalls { get; set; }
     public DbSet<ServiceData> ServicesData { get; set; }
     public DbSet<ExternalMethodRecord> ExternalMethodsRegistry { get; set; }
+    public DbSet<FunctionStateLogRecord> FunctionStateLogs { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -174,10 +175,19 @@ public class FunctionDataContext : DbContext
             .WithOne(wait => wait.FunctionState)
             .HasForeignKey(x => x.FunctionStateId)
             .HasConstraintName("FK_Waits_For_FunctionState");
+
+        entityTypeBuilder
+            .HasMany(x => x.LogRecords)
+            .WithOne(wait => wait.FunctionState)
+            .HasForeignKey(x => x.FunctionStateId)
+            .HasConstraintName("FK_Logs_For_FunctionState");
+
         entityTypeBuilder
         .Property<DateTime>(ConstantValue.LastUpdatedProp);
+
         entityTypeBuilder
            .Property<DateTime>(ConstantValue.CreatedProp);
+
         entityTypeBuilder
            .Property(x => x.StateObject)
            .HasConversion<ObjectToJsonConverter>();

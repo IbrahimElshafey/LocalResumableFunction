@@ -9,7 +9,6 @@ namespace ResumableFunctions.Core.InOuts;
 
 public abstract class Wait
 {
-    private MethodBase _callerMethodInfo;
 
     private ResumableFunction _currntFunction;
 
@@ -31,8 +30,7 @@ public abstract class Wait
 
 
     /// <summary>
-    ///     The resumable function that initiated requested that wait>
-    ///     Will be set by handler.
+    ///     The resumable function that initiated/created/requested the wait.
     /// </summary>
     internal MethodIdentifier RequestedByFunction { get; set; }
 
@@ -185,8 +183,10 @@ public abstract class Wait
 
     internal virtual void Cancel() => Status = Status == WaitStatus.Waiting ? Status = WaitStatus.Canceled : Status;
 
-    internal virtual (bool isValid,string message) IsValidWaitRequest() 
+    internal virtual (bool Valid,string Message) ValidateWaitRequest() 
     {
+        //FunctionState.StatusMessage = message;
+        //FunctionState.Status = FunctionStatus.ErrorOccured;
         return (true,null);
     }
 }

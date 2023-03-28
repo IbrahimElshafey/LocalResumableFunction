@@ -73,7 +73,7 @@ internal class WaitsRepository : RepositoryBase
             if (noMatchedWaits)
             {
                 //_logger.LogInformation($"No waits matched for pushed method [{pushedMethodId}]");
-                _context.PushedMethodsCalls.Remove(pushedMethod);
+                //_context.PushedMethodsCalls.Remove(pushedMethod);
             }
             else
                 pushedMethod.MatchedWaitsCount = matchedWaits.Count;

@@ -15,7 +15,7 @@ public partial class ResumableFunctionHandler
 
     internal async Task RegisterFirstWait(MethodInfo resumableFunction)
     {
-        var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider,resumableFunction.DeclaringType);
+        var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
         if (classInstance != null)
             try
             {
@@ -40,11 +40,13 @@ public partial class ResumableFunctionHandler
                 firstWait.RequestedByFunctionId = methodId.Id;
                 firstWait.IsFirst = true;
                 //firstWait.StateAfterWait = functionRunner.GetState();
-                firstWait.FunctionState = new ResumableFunctionState
+                var functionState = new ResumableFunctionState
                 {
                     ResumableFunctionIdentifier = methodId,
                     StateObject = classInstance
                 };
+                firstWait.FunctionState = functionState;
+                functionState.LogStatus(FunctionStatus.New, $"Started and wait [{firstWait.Name}] to match.");
                 await SaveWaitRequestToDb(firstWait);
                 WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
                 await _context.SaveChangesAsync();

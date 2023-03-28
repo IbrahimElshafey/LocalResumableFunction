@@ -12,7 +12,13 @@ public partial class ResumableFunctionHandler
     internal async Task<bool> SaveWaitRequestToDb(Wait newWait)
     {
         newWait.Status = WaitStatus.Waiting;
-        if (Validate(newWait) is false) return false;
+        var validationResult = newWait.ValidateWaitRequest();
+        if (validationResult.Valid is false)
+        {
+            string message = $"Error when validate the requested wait [{newWait.Name}] that requested by function [{newWait?.RequestedByFunction.MethodName}]";
+            _logger.LogError(message);
+            return false;
+        }
         switch (newWait)
         {
             case MethodWait methodWait:
@@ -138,11 +144,4 @@ public partial class ResumableFunctionHandler
             };
         await MethodWaitRequested(methodWait);
     }
-
-    private bool Validate(Wait nextWait)
-    {
-        return true;
-    }
-
-
 }

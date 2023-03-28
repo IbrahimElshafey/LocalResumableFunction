@@ -3,7 +3,8 @@
 public enum FunctionStatus
 {
     New = 1,
-    InProgress = 2,
+    Progress = 2,
     Completed = 3,
-    ErrorOccured = -4
+    Error = -4,
+    Warning = -5,
 }   

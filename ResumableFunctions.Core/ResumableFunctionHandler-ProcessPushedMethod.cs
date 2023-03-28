@@ -70,7 +70,7 @@ public partial class ResumableFunctionHandler
     {
         var entity = await _context.PushedMethodsCalls.FindAsync(pushedMethodCallId);
         entity.CompletedWaitsCount++;
-        if (entity.CompletedWaitsCount == entity.MatchedWaitsCount)
-            _context.PushedMethodsCalls.Remove(entity);
+        //if (entity.CompletedWaitsCount == entity.MatchedWaitsCount)
+        //    _context.PushedMethodsCalls.Remove(entity);
     }
 }
