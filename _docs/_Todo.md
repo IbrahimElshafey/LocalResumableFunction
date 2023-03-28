@@ -1,5 +1,6 @@
 ﻿# Todo
 
+* Delete first wait subwaits if group
 * Validate waits
 	* Wait same wait twice in group is not valid
 	* Wait name can't duplicate in same function
@@ -23,7 +24,6 @@
 * Logging and handle exception
 
 * Create nuget package
-
 
 * Save function state all fields [public and non public]
 * Find fast and best object serializer

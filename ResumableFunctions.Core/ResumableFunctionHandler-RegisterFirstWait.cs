@@ -30,10 +30,11 @@ public partial class ResumableFunctionHandler
                 await functionRunner.MoveNextAsync();
                 var firstWait = functionRunner.Current;
                 var methodId = await _metodIdsRepo.GetMethodIdentifierFromDb(new MethodData(resumableFunction));
-                if (await _waitsRepository.FirstWaitExistInDb(firstWait, methodId))
+                if (await _waitsRepository.RemoveFirstWaitIfExist(firstWait, methodId))
                 {
-                    WriteMessage("First wait already exist.");
-                    return;
+                    //todo:expression may be changed and group may added ne one
+                    WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
+                    //return;
                 }
 
                 firstWait.RequestedByFunction = methodId;

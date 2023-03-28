@@ -72,7 +72,7 @@ public class MethodWait : Wait
                 TextCompressor.DecompressString(SetDataExpressionValue), FunctionAssembly);
     }
 
-    public void UpdateFunctionData()
+    public bool UpdateFunctionData()
     {
         try
         {
@@ -82,14 +82,15 @@ public class MethodWait : Wait
             FunctionState.LogStatus(
                 FunctionStatus.Progress,
                 $"Method wait [{Name}] matched and function data updated.");
-
+            return true;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             FunctionState.LogStatus(
-                FunctionStatus.Error, 
-                $"An error occured when try to update function data after method wait [{Name}] matched.");
-            throw;
+                FunctionStatus.Error,
+                $"An error occured when try to update function data after method wait [{Name}] matched." +
+                ex.Message);
+            return false;
         }
     }
 
@@ -104,6 +105,10 @@ public class MethodWait : Wait
         }
         catch (Exception e)
         {
+            FunctionState.LogStatus(
+               FunctionStatus.Error,
+               $"An error occured when try evaluate match for wait [{Name}]." +
+               e.Message);
             return false;
         }
     }
@@ -117,6 +122,29 @@ public class MethodWait : Wait
             var client = CoreExtensions.GetServiceProvider().GetService<IBackgroundJobClient>();
             client.Delete(waitData.JobId);
         }
+    }
+
+    internal override (bool Valid, string Message) ValidateWaitRequest()
+    {
+        if (!IsFirst && MatchIfExpression == null)
+            FunctionState.LogStatus(
+                FunctionStatus.Error,
+                $"You didn't set the `MatchIfExpression` for wait [{Name}] that is not a first wait," +
+                $"This will lead to no match for all calls," +
+                $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchIfExpression`," +
+                $"or use MatchAll() method.");
+        if (IsFirst && MatchIfExpression == null)
+            FunctionState.LogStatus(
+                FunctionStatus.Warning,
+                $"You didn't set the `MatchIfExpression` for first wait [{Name}]," +
+                $"This will lead to all calls will be matched.");
+        if (SetDataExpression == null)
+            FunctionState.LogStatus(
+                FunctionStatus.Error,
+                $"You didn't set the `SetDataExpression` for wait [{Name}], " +
+                $"The execution will not continue, " +
+                $"Please use `NoSetData()` if this is intended.");
+        return base.ValidateWaitRequest();
     }
 }
 
@@ -175,6 +203,29 @@ public class MethodWait<TInput, TOutput> : MethodWait
     {
         MatchIfExpression = value;
         return this;
+    }
+
+    public MethodWait<TInput, TOutput> MatchAll()
+    {
+        MatchIfExpression = (Expression<Func<TInput, TOutput, bool>>)((x, y) => true);
+        return this;
+    }
+
+    public MethodWait<TInput, TOutput> NoSetData()
+    {
+        SetDataExpression = (Expression<Func<TInput, TOutput, bool>>)((x, y) => true);
+        return this;
+    }
+
+    internal override (bool Valid, string Message) ValidateWaitRequest()
+    {
+        //if (!IsFirst && MatchIfExpression == null)
+        //    FunctionState.LogStatus(
+        //        FunctionStatus.Error,
+        //        $"You didn't set the `MatchIfExpression` for wait [{Name}] that is not a first wait," +
+        //        $"This will lead to no match for all calls.");
+        //Todo:validate type serialization
+        return base.ValidateWaitRequest();
     }
 
 }

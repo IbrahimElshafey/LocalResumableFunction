@@ -17,14 +17,12 @@ public class ResumableFunctionState
     public MethodIdentifier ResumableFunctionIdentifier { get; set; }
     public int ResumableFunctionIdentifierId { get; set; }
     public bool IsLocked { get; set; }
-    public bool IsCompleted { get; set; }
+    public FunctionStatus Status { get; set; }
 
     public void LogStatus(FunctionStatus status, string statusMessage)
     {
+        Status = status;
         LogRecords.Add(new FunctionStateLogRecord { Status = status, StatusMessage = statusMessage });
-
-        if (status == FunctionStatus.Completed) 
-            IsCompleted = true;
     }
 
 }

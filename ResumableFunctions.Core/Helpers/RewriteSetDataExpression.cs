@@ -12,6 +12,8 @@ public class RewriteSetDataExpression : ExpressionVisitor
 
     public RewriteSetDataExpression(MethodWait wait)
     {
+        if (wait?.SetDataExpression == null)
+            return;
         if (wait?.SetDataExpression?.Parameters.Count == 3)
         {
             Result = wait.SetDataExpression;

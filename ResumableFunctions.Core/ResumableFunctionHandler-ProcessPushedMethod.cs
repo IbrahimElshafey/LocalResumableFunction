@@ -53,9 +53,11 @@ public partial class ResumableFunctionHandler
             if (!await CheckIfMatch(methodWait))
                 return;
             //todo:cancel processing and rewait it if data is locked
-            methodWait.UpdateFunctionData();
-            await ResumeExecution(methodWait);
-            await IncrementCompletedCounter(methodWait.PushedMethodCallId);
+            if(methodWait.UpdateFunctionData())
+            {
+                await ResumeExecution(methodWait);
+                await IncrementCompletedCounter(methodWait.PushedMethodCallId);
+            }
             await _context.SaveChangesAsync();
         }
         catch (Exception ex)

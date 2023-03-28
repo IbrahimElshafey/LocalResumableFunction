@@ -14,7 +14,9 @@ namespace RefernceLibrary
             yield return Wait<string, string>
                 ("Wait say hello", SayHello)
                 .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
-                .SetData((userName, helloMsg) => UserName == userName);
+                .SetData((userName, helloMsg) => UserName == userName)
+                //.NoSetData()
+                ;
             Console.WriteLine("Done");
         }
 

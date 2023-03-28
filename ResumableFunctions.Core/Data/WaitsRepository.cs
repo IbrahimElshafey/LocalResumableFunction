@@ -44,7 +44,7 @@ internal class WaitsRepository : RepositoryBase
         try
         {
             var pushedMethod = await _context.PushedMethodsCalls.FindAsync(pushedMethodId);
-            if(pushedMethod == null) return null;
+            if (pushedMethod == null) return null;
             var metodIdsRepo = new MethodIdentifierRepository(_context);
             var methodId = await metodIdsRepo
                .GetMethodIdentifierFromDb(pushedMethod.MethodData);
@@ -87,7 +87,7 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-    
+
 
     public async Task<Wait> GetWaitGroup(int? parentGroupId)
     {
@@ -107,13 +107,19 @@ internal class WaitsRepository : RepositoryBase
                 x.FunctionStateId == functionStateId);
     }
 
-    internal Task<bool> FirstWaitExistInDb(Wait firstWait, MethodIdentifier methodIdentifier)
+    internal async Task<bool> RemoveFirstWaitIfExist(Wait firstWait, MethodIdentifier methodIdentifier)
     {
-        return _context.Waits.AnyAsync(x =>
-            x.IsFirst &&
-            x.RequestedByFunctionId == methodIdentifier.Id &&
-            x.Name == firstWait.Name &&
-            x.Status == WaitStatus.Waiting);
+        var firstWaitInDb =
+            await _context.Waits
+            .FirstOrDefaultAsync(x =>
+                    x.IsFirst &&
+                    x.RequestedByFunctionId == methodIdentifier.Id &&
+                    x.Name == firstWait.Name &&
+                    x.Status == WaitStatus.Waiting);
+        bool result = firstWaitInDb == null;
+        _context.Waits.Remove(firstWaitInDb);
+        await _context.SaveChangesAsync();
+        return result;
     }
 
 
