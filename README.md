@@ -199,7 +199,7 @@ public bool ManagerFiveApproveProject(ApprovalDecision args)
 	return args.Decision;
 }
 ```
-* [Working on waiting method in another service]
+* You can wait method in another service
 ``` C#
 //you will create empty implementation for method you want to wait from the external
 public class ExternalServiceClass
@@ -222,7 +222,30 @@ yield return
 		.MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
 		.SetData((input, output) => ManagerFiveApproval == output);
 ```
-* Register third party method by fake signature,This will enable
+* You can use time waits
+``` C#
+const string waitManagerOneApprovalInSeconds = "Wait manager one approval in 2 days";
+yield return Wait(
+        waitManagerOneApprovalInSeconds,
+        new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
+            .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+            .SetData((input, output) => ManagerOneApproval == output),
+        Wait(TimeSpan.FromDays(2))
+    .SetData(() => TimerMatched == true)
+).First();
+
+if (TimerMatched)
+{
+    WriteMessage("Timer matched");
+    TimerMatched = false;
+    yield return GoBackBefore(waitManagerOneApprovalInSeconds);
+}
+else
+{
+    WriteMessage($"Manager one approved project with decision ({ManagerOneApproval})");
+}
+```
+* [Working on]Register third party method by fake signature,This will enable
 	* Use github web hooks fro example
 	* Wait for google drive file change
 	* Http listener 
