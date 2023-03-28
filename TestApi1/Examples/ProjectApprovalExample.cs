@@ -57,6 +57,10 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     public async IAsyncEnumerable<Wait> ExternalMethod()
     {
         await Task.Delay(1);
+        yield return Wait<string, string>
+                ("Wait say hello external", new ExternalServiceClass().SayHello)
+                .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
+                .SetData((userName, helloMsg) => ExternalMethodStatus == $"Say helllo called and user name is: {userName}");
 
         yield return
               Wait<object, int>(

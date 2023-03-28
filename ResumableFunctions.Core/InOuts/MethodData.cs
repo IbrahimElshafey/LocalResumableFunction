@@ -29,7 +29,7 @@ namespace ResumableFunctions.Core.InOuts
         }
         public MethodData(MethodBase externalMethod, ExternalWaitMethodAttribute externalWaitMethodAttribute)
         {
-            ClassName = externalWaitMethodAttribute.ClassName ?? externalMethod.DeclaringType?.FullName;
+            ClassName = externalWaitMethodAttribute.ClassFullName ?? externalMethod.DeclaringType?.FullName;
             AssemblyName = externalWaitMethodAttribute.AssemblyName ?? externalMethod.DeclaringType?.Assembly.GetName().Name;
             MethodName = externalMethod.Name;
             MethodSignature = CalcSignature(externalMethod);

@@ -5,5 +5,5 @@ public sealed class ExternalWaitMethodAttribute : Attribute
 {
     public override object TypeId => nameof(ExternalWaitMethodAttribute);
     public string AssemblyName { get; set; }
-    public string ClassName { get; set; }
+    public string ClassFullName { get; set; }
 }
