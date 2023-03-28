@@ -108,9 +108,9 @@ public class MethodWait : Wait
     internal override void Cancel()
     {
         base.Cancel();
-        if (Name == "#TimeWait#" && ExtraData is JObject ed)
+        if (Name == $"#{nameof(LocalRegisteredMethods.TimeWait)}#" && ExtraData is JObject waitDataJson)
         {
-            var waitData = ed.ToObject<TimeWaitData>();
+            var waitData = waitDataJson.ToObject<TimeWaitData>();
             var client = CoreExtensions.GetServiceProvider().GetService<IBackgroundJobClient>();
             client.Delete(waitData.JobId);
         }

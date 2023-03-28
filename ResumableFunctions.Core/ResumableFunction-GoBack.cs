@@ -3,7 +3,7 @@ using ResumableFunctions.Core.InOuts;
 
 namespace ResumableFunctions.Core;
 
-public abstract partial class ResumableFunctionLocal
+public abstract partial class ResumableFunction
 {
     /// <summary>
     ///     Go back to code after the wait.
@@ -51,7 +51,12 @@ public abstract partial class ResumableFunctionLocal
     /// </summary>
     protected ReplayRequest GoBackTo(string name)
     {
-        return new ReplayRequest { Name = name, ReplayType = ReplayType.GoTo };
+        return new ReplayRequest
+        {
+            Name = name,
+            ReplayType = ReplayType.GoTo,
+            CurrentFunction = this
+        };
     }
 
     /// <summary>

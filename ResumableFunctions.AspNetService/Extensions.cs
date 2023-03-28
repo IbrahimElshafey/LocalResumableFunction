@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using ResumableFunctions.Core;
 using ResumableFunctions.Core.Data;
 using ResumableFunctions.Core.Helpers;
+using ResumableFunctions.Core.InOuts;
 using System;
 
 namespace ResumableFunctions.AspNetService

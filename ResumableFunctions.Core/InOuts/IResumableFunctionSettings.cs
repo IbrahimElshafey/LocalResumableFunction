@@ -1,7 +1,7 @@
 ﻿using Hangfire;
 using Microsoft.EntityFrameworkCore;
 
-namespace ResumableFunctions.Core
+namespace ResumableFunctions.Core.InOuts
 {
     public interface IResumableFunctionSettings
     {

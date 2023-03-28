@@ -3,7 +3,7 @@ using Hangfire.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
-namespace ResumableFunctions.Core
+namespace ResumableFunctions.Core.InOuts
 {
     public class ResumableFunctionSettings : IResumableFunctionSettings
     {

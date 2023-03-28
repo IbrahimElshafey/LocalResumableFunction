@@ -5,7 +5,7 @@ using ResumableFunctions.Core.InOuts;
 
 namespace TestApi1.Examples;
 
-internal class ProjectApprovalExample : ResumableFunctionLocal, IManagerFiveApproval
+internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
 {
     public Project CurrentProject { get; set; }
     public bool ManagerOneApproval { get; set; }

@@ -129,7 +129,13 @@ public partial class ResumableFunctionHandler
         methodWait.RequestedByFunctionId = timeWait.RequestedByFunctionId;
         methodWait.StateBeforeWait = timeWait.StateBeforeWait;
         methodWait.StateAfterWait = timeWait.StateAfterWait;
-        methodWait.ExtraData = new TimeWaitData { TimeToWait = timeWait.TimeToWait, UniqueMatchId = timeWait.UniqueMatchId, JobId = jobId };
+        methodWait.ExtraData =
+            new TimeWaitData
+            {
+                TimeToWait = timeWait.TimeToWait,
+                UniqueMatchId = timeWait.UniqueMatchId,
+                JobId = jobId,
+            };
         await MethodWaitRequested(methodWait);
     }
 

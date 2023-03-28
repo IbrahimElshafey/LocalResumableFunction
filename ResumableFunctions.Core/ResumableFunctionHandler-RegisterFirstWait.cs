@@ -15,7 +15,7 @@ public partial class ResumableFunctionHandler
 
     internal async Task RegisterFirstWait(MethodInfo resumableFunction)
     {
-        var classInstance = (ResumableFunctionLocal)ActivatorUtilities.CreateInstance(_serviceProvider,resumableFunction.DeclaringType);
+        var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider,resumableFunction.DeclaringType);
         if (classInstance != null)
             try
             {

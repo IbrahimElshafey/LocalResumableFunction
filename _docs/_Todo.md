@@ -1,4 +1,5 @@
 ﻿# Todo
+* Time wait exact match
 * Resumable function in another  dll that not entry assembly
 * Activate one start wait if multiple exist for same method
 * Add IsLocked for optemistic lock for state

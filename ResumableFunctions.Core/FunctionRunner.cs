@@ -18,7 +18,7 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
     }
 
 
-    public FunctionRunner(ResumableFunctionLocal classInstance, MethodInfo resumableFunction, int? state = null)
+    public FunctionRunner(ResumableFunction classInstance, MethodInfo resumableFunction, int? state = null)
     {
         var functionRunnerType = classInstance.GetType()
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
@@ -49,7 +49,7 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
         return hasNext;
     }
 
-    private void CreateRunner(Type functionRunnerType, ResumableFunctionLocal resumableFunctionLocal)
+    private void CreateRunner(Type functionRunnerType, ResumableFunction resumableFunctionLocal)
     {
         if (functionRunnerType == null)
         {

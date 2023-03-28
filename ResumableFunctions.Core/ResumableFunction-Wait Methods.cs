@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace ResumableFunctions.Core;
 
-public abstract partial class ResumableFunctionLocal
+public abstract partial class ResumableFunction
 {
 
     internal MethodInfo CurrentResumableFunction { get; set; }

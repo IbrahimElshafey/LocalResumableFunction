@@ -4,7 +4,7 @@ using ResumableFunctions.Core.InOuts;
 
 namespace ResumableFunctions.Core;
 
-public abstract partial class ResumableFunctionLocal
+public abstract partial class ResumableFunction
 {
     protected TimeWait Wait(TimeSpan timeToWait)
     {

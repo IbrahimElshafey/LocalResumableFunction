@@ -153,7 +153,7 @@ public class Scanner
                     {
                         await RegisterMethodWaits(type);
                         await RegisterExternalMethods(type);
-                        if (type.IsSubclassOf(typeof(ResumableFunctionLocal)))
+                        if (type.IsSubclassOf(typeof(ResumableFunction)))
                             resumableFunctionClasses.Add(type);
                     }
 

@@ -11,7 +11,7 @@ public abstract class Wait
 {
     private MethodBase _callerMethodInfo;
 
-    private ResumableFunctionLocal _currntFunction;
+    private ResumableFunction _currntFunction;
 
     public int Id { get; internal set; }
     public string Name { get; internal set; }
@@ -49,7 +49,7 @@ public abstract class Wait
     internal int? ParentWaitId { get; set; }
 
     [NotMapped]
-    internal ResumableFunctionLocal CurrentFunction
+    internal ResumableFunction CurrentFunction
     {
         get
         {
@@ -60,10 +60,10 @@ public abstract class Wait
                         .GetType(RequestedByFunction.ClassName);
                     var result = stateAsJson.ToObject(type);
                     FunctionState.StateObject = result;
-                    _currntFunction = (ResumableFunctionLocal)result;
+                    _currntFunction = (ResumableFunction)result;
                     return _currntFunction;
                 }
-                else if (FunctionState.StateObject is ResumableFunctionLocal result)
+                else if (FunctionState.StateObject is ResumableFunction result)
                 {
                     _currntFunction = result;
                     return _currntFunction;

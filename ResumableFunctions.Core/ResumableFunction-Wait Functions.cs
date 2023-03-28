@@ -2,7 +2,7 @@
 
 namespace ResumableFunctions.Core;
 
-public abstract partial class ResumableFunctionLocal
+public abstract partial class ResumableFunction
 {
     protected FunctionWait Wait(string name, Func<IAsyncEnumerable<Wait>> function)
     {
