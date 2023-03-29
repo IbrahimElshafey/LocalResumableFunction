@@ -95,9 +95,7 @@ public partial class ResumableFunctionHandler
         {
             using (IServiceScope scope = _serviceProvider.CreateScope())
             {
-                _context = scope.ServiceProvider.GetService<FunctionDataContext>();
-                _waitsRepository = new WaitsRepository(_context);
-                _metodIdsRepo = new MethodIdentifierRepository(_context);
+                SetDependencies(scope.ServiceProvider);
 
                 var methodWait = await _context
                     .MethodWaits

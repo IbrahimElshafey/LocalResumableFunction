@@ -17,6 +17,7 @@ public class Scanner
 {
     private const string ScannerAppName = "##SCANNER: ";
     internal FunctionDataContext _context;
+    private MethodIdentifierRepository _methodIdentifierRepo;
     private IResumableFunctionSettings _settings;
     private ResumableFunctionHandler _handler;
     private IServiceProvider _serviceProvider;
@@ -37,6 +38,7 @@ public class Scanner
             _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
             _handler.SetDependencies(scope.ServiceProvider);
             _context = _handler._context;
+            _methodIdentifierRepo = new MethodIdentifierRepository(_context);
 
 
             WriteMessage("Start register method waits.");
@@ -121,21 +123,7 @@ public class Scanner
     internal async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
     {
         WriteMessage($"Register resumable function [{resumableFunction.GetFullName()}] of type [{type}]");
-        var repo = new MethodIdentifierRepository(_context);
-        var methodData = new MethodData(resumableFunction);
-        var methodId = await repo.GetMethodIdentifierFromDb(methodData);
-
-        if (methodId != null)
-        {
-            WriteMessage($"Resumable function [{resumableFunction.GetFullName()}] already exist in DB.");
-            return;
-        }
-
-        methodId = methodData.ToMethodIdentifier();
-        methodId.Type = type;
-        //methodId.MethodIdentifier.CreateMethodHash();
-        _context.MethodIdentifiers.Add(methodId);
-        WriteMessage($"Save discovered resumable function [{resumableFunction.GetFullName()}].");
+        await _methodIdentifierRepo.AddMethodIdentifier(new MethodData(resumableFunction), type, null);
         await _context.SaveChangesAsync();
     }
 
@@ -196,35 +184,10 @@ public class Scanner
                     method.GetCustomAttributes().Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
         foreach (var method in methodWaits)
         {
-            await AddMethodWait(new MethodData(method));
+            await _methodIdentifierRepo.AddMethodIdentifier(new MethodData(method), MethodType.MethodWait, null);
         }
     }
 
-    private async Task AddMethodWait(MethodData methodData)
-    {
-        var repo = new MethodIdentifierRepository(_context);
-        var methodId = await repo.GetMethodIdentifierFromDb(methodData);
-        if (methodId != null)
-        {
-            WriteMessage($"Method [{methodData.MethodName}] already exist in DB.");
-            return;
-        }
-        methodId =
-            _context.MethodIdentifiers.Local.FirstOrDefault(x =>
-                x.MethodSignature == methodData.MethodSignature &&
-                x.AssemblyName == methodData.AssemblyName &&
-                x.ClassName == methodData.ClassName &&
-                x.MethodName == methodData.MethodName);
-        if (methodId != null)
-        {
-            WriteMessage($"Method [{methodData.MethodName}] exist in local db.");
-            return;
-        }
-        methodId = methodData.ToMethodIdentifier();
-        methodId.Type = MethodType.MethodWait;
-        WriteMessage($"Add method [{methodData.MethodName}] to DB.");
-        _context.MethodIdentifiers.Add(methodId);
-    }
 
     private async Task RegisterExternalMethods(Type type)
     {
@@ -236,9 +199,8 @@ public class Scanner
         foreach (var methodRecord in externalMethods)
         {
             var externalMethodData = new MethodData(methodRecord.MethodInfo);
-            var originalMethodData = new MethodData(methodRecord.MethodInfo, (ExternalWaitMethodAttribute)methodRecord.Attribute);
-            await AddMethodWait(originalMethodData);
-
+            var originalExternalMethodData = new MethodData(methodRecord.MethodInfo, (ExternalWaitMethodAttribute)methodRecord.Attribute);
+            await _methodIdentifierRepo.AddMethodIdentifier(originalExternalMethodData, MethodType.MethodWait, null);
             var externalMethodRecord = await _context.ExternalMethodsRegistry.FirstOrDefaultAsync(x => x.MethodHash == externalMethodData.MethodHash);
             if (externalMethodRecord != null)
             {
@@ -249,7 +211,7 @@ public class Scanner
             {
                 MethodData = externalMethodData,
                 MethodHash = externalMethodData.MethodHash,
-                OriginalMethodHash = originalMethodData.MethodHash,
+                OriginalMethodHash = originalExternalMethodData.MethodHash,
             };
             WriteMessage($"Add external method [{methodRecord.MethodInfo.GetFullName()}] to DB.");
             _context.ExternalMethodsRegistry.Add(externalMethodRecord);
