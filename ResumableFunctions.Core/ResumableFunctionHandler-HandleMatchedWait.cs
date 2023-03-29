@@ -25,7 +25,7 @@ public partial class ResumableFunctionHandler
 
                 case WaitsGroup:
                 case FunctionWait:
-                    if (currentWait.IsFinished())
+                    if (currentWait.IsCompleted())
                     {
                         WriteMessage($"Exit ({currentWait.Name})");
                         currentWait.Status = WaitStatus.Completed;

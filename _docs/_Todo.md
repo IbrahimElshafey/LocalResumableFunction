@@ -1,5 +1,4 @@
 ﻿# Todo
-* Time wait exact match
 * Delete first wait subwaits if group
 * If scan error occured don't update service data lastscandate
 * Validate waits
@@ -18,7 +17,7 @@
 
 
 * Track code changes
-	* GUID for methods for easy track 
+	* Uniqe identifier for methods for easy track 
 
 * Remove uniqe for method hash
 

@@ -17,6 +17,12 @@ namespace RefernceLibrary
                 .SetData((userName, helloMsg) => UserName == userName)
                 //.NoSetData()
                 ;
+            yield return Wait<string, string>
+                ("Wait say hello duplicate", SayHello)
+                .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
+                .SetData((userName, helloMsg) => UserName == userName)
+                //.NoSetData()
+                ;
             Console.WriteLine("Done");
         }
 

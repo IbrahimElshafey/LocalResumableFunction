@@ -14,15 +14,15 @@ public class WaitsGroup : Wait
     }
     private LambdaExpression _countExpression;
     [NotMapped]
-    public LambdaExpression CountExpression
+    public LambdaExpression GroupMatchExpression
     {
         get => _countExpression ?? GetCountExpression();
         internal set => _countExpression = value;
     }
-    internal byte[] CountExpressionValue { get; set; }
+    internal byte[] GroupMatchExpressionValue { get; set; }
     public int CompletedCount => ChildWaits?.Count(x => x.Status == WaitStatus.Completed) ?? 0;
 
-    public override bool IsFinished()
+    public override bool IsCompleted()
     {
 
         var isFinished = false;
@@ -34,9 +34,9 @@ public class WaitsGroup : Wait
             case WaitType.GroupWaitFirst:
                 isFinished = ChildWaits?.Any(x => x.Status == WaitStatus.Completed) is true;
                 break;
-            case WaitType.GroupWaitWithExpression when CountExpression != null:
+            case WaitType.GroupWaitWithExpression when GroupMatchExpression != null:
                 {
-                    var matchCompiled = (Func<WaitsGroup, bool>)CountExpression.Compile();
+                    var matchCompiled = (Func<WaitsGroup, bool>)GroupMatchExpression.Compile();
                     var isCompleted = matchCompiled(this);
                     Status = isCompleted ? WaitStatus.Completed : Status;
                     return isCompleted;
@@ -56,10 +56,10 @@ public class WaitsGroup : Wait
         var assembly =
             RequestedByFunction.MethodInfo.DeclaringType.Assembly ??
             Assembly.GetEntryAssembly();
-        if (CountExpressionValue != null)
+        if (GroupMatchExpressionValue != null)
             return (LambdaExpression)
                 ExpressionToJsonConverter.JsonToExpression(
-                    TextCompressor.DecompressString(CountExpressionValue), assembly);
+                    TextCompressor.DecompressString(GroupMatchExpressionValue), assembly);
         return null;
     }
 
@@ -69,10 +69,10 @@ public class WaitsGroup : Wait
         var assembly = CurrentFunction?.GetType().Assembly;
         if (assembly != null)
         {
-            CountExpression = matchCountFilter;
-            CountExpressionValue =
+            GroupMatchExpression = matchCountFilter;
+            GroupMatchExpressionValue =
                 TextCompressor.CompressString(
-                    ExpressionToJsonConverter.ExpressionToJson(CountExpression, assembly));
+                    ExpressionToJsonConverter.ExpressionToJson(GroupMatchExpression, assembly));
         }
 
         return this;
@@ -87,5 +87,15 @@ public class WaitsGroup : Wait
     {
         WaitType = WaitType.GroupWaitFirst;
         return this;
+    }
+
+    internal override bool IsValidWaitRequest()
+    {
+        foreach (var childWait in ChildWaits)
+        {
+            if (!childWait.IsValidWaitRequest())
+                break;
+        }
+        return base.IsValidWaitRequest();
     }
 }
