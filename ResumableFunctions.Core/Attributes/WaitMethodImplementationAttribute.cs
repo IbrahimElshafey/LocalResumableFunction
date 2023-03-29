@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ResumableFunctions.Core.Attributes;
 
-public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect
+public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect, ITrackingIdetifier
 {
     private PushedMethod _pushedMethod;
     private readonly ResumableFunctionHandler _functionHandler;
@@ -16,14 +16,15 @@ public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect
 
     public WaitMethodImplementationAttribute()
     {
-        _functionHandler = 
+        _functionHandler =
             CoreExtensions.GetServiceProvider()
             .GetService<ResumableFunctionHandler>();
-        _logger = 
+        _logger =
             CoreExtensions.GetServiceProvider()
             .GetService<ILogger<WaitMethodImplementationAttribute>>();
     }
     public override object TypeId => nameof(WaitMethodImplementationAttribute);
+    public string TrackingIdetifier { get; set; }
 
     public override void OnEntry(MethodExecutionArgs args)
     {
@@ -43,8 +44,8 @@ public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect
         {
             foreach (MethodInfo method in interf.GetMethods())
             {
-                bool sameSiganture = 
-                    method.Name == args.Method.Name && 
+                bool sameSiganture =
+                    method.Name == args.Method.Name &&
                     method.GetParameters()[0]?.ParameterType == args.Arguments[0]?.GetType();
                 if (sameSiganture)
                     return method;
@@ -71,7 +72,7 @@ public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect
         {
             _logger.LogError(ex, $"Error when try to pushe method call for method [{args.Method.GetFullName()}]");
         }
-        
+
     }
 
     public override void OnException(MethodExecutionArgs args)

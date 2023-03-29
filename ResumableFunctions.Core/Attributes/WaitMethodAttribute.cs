@@ -10,7 +10,7 @@ namespace ResumableFunctions.Core.Attributes;
 /// <summary>
 ///     Add this to the method you want to wait to.
 /// </summary>
-public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
+public sealed class WaitMethodAttribute : OnMethodBoundaryAspect,ITrackingIdetifier
 {
     private PushedMethod _pushedMethod;
     private readonly ResumableFunctionHandler _functionHandler;
@@ -24,7 +24,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect
         _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<WaitMethodAttribute>>();
     }
 
-
+    public string TrackingIdetifier { get; set; }
     public override object TypeId => nameof(WaitMethodAttribute);
 
     public override void OnEntry(MethodExecutionArgs args)

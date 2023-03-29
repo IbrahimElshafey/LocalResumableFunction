@@ -17,6 +17,7 @@ public class Scanner
 {
     private const string ScannerAppName = "##SCANNER: ";
     internal FunctionDataContext _context;
+    private IResumableFunctionSettings _settings;
     private ResumableFunctionHandler _handler;
     private IServiceProvider _serviceProvider;
     private readonly ILogger<Scanner> _logger;
@@ -32,18 +33,14 @@ public class Scanner
         try
         {
             using IServiceScope scope = _serviceProvider.CreateScope();
-            var settings = scope.ServiceProvider.GetService<IResumableFunctionSettings>();
+            _settings = scope.ServiceProvider.GetService<IResumableFunctionSettings>();
             _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
             _handler.SetDependencies(scope.ServiceProvider);
             _context = _handler._context;
-            WriteMessage("Start Scan Resumable Functions##");
-
-
-
 
 
             WriteMessage("Start register method waits.");
-            var resumableFunctions = await RegisterMethodWaits(GetAssembliesToScan(settings.DllsToScan), settings.ServiceUrl);
+            var resumableFunctions = await RegisterMethodWaits(GetAssembliesToScan());
 
             foreach (var resumableFunctionClass in resumableFunctions)
                 await RegisterResumableFunctionsInClass(resumableFunctionClass);
@@ -62,7 +59,7 @@ public class Scanner
         }
     }
 
-    private List<string> GetAssembliesToScan(string[] dllsToScan)
+    private List<string> GetAssembliesToScan()
     {
         var currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
         var currentFolder = AppContext.BaseDirectory;
@@ -73,9 +70,9 @@ public class Scanner
             {
                 $"{currentFolder}{currentServiceName}.dll"
             };
-        if (dllsToScan != null)
+        if (_settings.DllsToScan != null)
             assemblyPaths.AddRange(
-                dllsToScan.Select(x => $"{currentFolder}{x}.dll"));
+                _settings.DllsToScan.Select(x => $"{currentFolder}{x}.dll"));
         assemblyPaths = assemblyPaths.Distinct().ToList();
         return assemblyPaths;
     }
@@ -100,6 +97,7 @@ public class Scanner
 
     private async Task<bool> ShouldScan(string currentAssemblyName, string serviceUrl)
     {
+        if (_settings.ForceRescan) return true;
         WriteMessage($"Check last scan date for assembly [{currentAssemblyName}].");
         var scanRecored = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
         if (scanRecored == null)
@@ -141,7 +139,7 @@ public class Scanner
         await _context.SaveChangesAsync();
     }
 
-    private async Task<List<Type>> RegisterMethodWaits(List<string> assemblyPaths, string serviceUrl)
+    private async Task<List<Type>> RegisterMethodWaits(List<string> assemblyPaths)
     {
         var resumableFunctionClasses = new List<Type>();
         foreach (var assemblyPath in assemblyPaths)
@@ -156,7 +154,7 @@ public class Scanner
                     continue;
                 }
                 var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
-                if (await ShouldScan(currentAssemblyName, serviceUrl) is false) continue;
+                if (await ShouldScan(currentAssemblyName, _settings.ServiceUrl) is false) continue;
                 var assembly = Assembly.LoadFile(assemblyPath);
                 var isReferenceLocalResumableFunction =
                     assembly.GetReferencedAssemblies().Any(x => new[] { "ResumableFunctions.Core", "ResumableFunctions.AspNetService" }.Contains(x.Name));
@@ -177,7 +175,7 @@ public class Scanner
                     WriteMessage($"Save discovered method waits for assembly [{assemblyPath}].");
                     await _context.SaveChangesAsync();
 
-                    await UpdateScanData(currentAssemblyName, serviceUrl);
+                    await UpdateScanData(currentAssemblyName, _settings.ServiceUrl);
                 }
             }
             catch (Exception e)

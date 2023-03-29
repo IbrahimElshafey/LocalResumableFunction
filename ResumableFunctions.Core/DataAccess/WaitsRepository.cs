@@ -50,7 +50,7 @@ internal class WaitsRepository : RepositoryBase
                .GetMethodIdentifierFromDb(pushedMethod.MethodData);
             if (methodId == null)
                 throw new Exception(
-                    $"Method [{pushedMethod.MethodData.MethodName}] is not registered in current database as [{nameof(WaitMethodAttribute)}].");
+                    $"Method [{pushedMethod.MethodData.MethodName}] is not registered in current database as [WaitMethod].");
 
 
             var matchedWaits = await _context

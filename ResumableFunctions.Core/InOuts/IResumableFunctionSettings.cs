@@ -9,5 +9,7 @@ namespace ResumableFunctions.Core.InOuts
         public DbContextOptionsBuilder WaitsDbConfig { get; }
         public string ServiceUrl { get; }
         public string[] DllsToScan { get; set; }
+
+        public bool ForceRescan { get; set; }
     }
 }
