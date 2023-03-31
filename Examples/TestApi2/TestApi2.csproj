@@ -19,8 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ResumableFunctions.AspNetService\ResumableFunctions.AspNetService.csproj" />
     <ProjectReference Include="..\RefernceLibrary\ReferenceLibrary.csproj" />
-    <ProjectReference Include="..\ResumableFunctions.AspNetService\ResumableFunctions.AspNetService.csproj" />
   </ItemGroup>
 
 </Project>

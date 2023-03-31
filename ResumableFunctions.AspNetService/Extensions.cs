@@ -24,13 +24,15 @@ namespace ResumableFunctions.AspNetService
             var scanner = app.Services.GetService<Scanner>();
             backgroundJobClient.Enqueue(() => scanner.Start());
             app.UseHangfireDashboard();
-        }
+            app.MapRazorPages();
+        }   
 
         public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, IResumableFunctionSettings settings)
         {
             mvcBuilder
                 .AddApplicationPart(typeof(ResumableFunctionsReceiverController).Assembly)
                 .AddControllersAsServices();
+            mvcBuilder.Services.AddRazorPages();
             mvcBuilder.Services.AddResumableFunctionsCore(settings);
         }
     }

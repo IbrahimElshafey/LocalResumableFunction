@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ResumableFunctions.Core\ResumableFunctions.Core.csproj" />
+    <ProjectReference Include="..\..\ResumableFunctions.Core\ResumableFunctions.Core.csproj" />
   </ItemGroup>
 
 </Project>
