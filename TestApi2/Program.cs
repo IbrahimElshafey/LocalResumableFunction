@@ -13,7 +13,7 @@ builder.Services
         new ResumableFunctionSettings()
         {
             ServiceUrl = "https://localhost:7099/",
-            DllsToScan = new[] { "RefernceLibrary" }
+            DllsToScan = new[] { "ReferenceLibrary" }
         });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -35,7 +35,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-app.UseHangfireDashboard();
+
 
 
 

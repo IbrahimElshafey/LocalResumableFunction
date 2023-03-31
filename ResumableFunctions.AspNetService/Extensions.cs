@@ -23,6 +23,7 @@ namespace ResumableFunctions.AspNetService
             var backgroundJobClient = app.Services.GetService<IBackgroundJobClient>();
             var scanner = app.Services.GetService<Scanner>();
             backgroundJobClient.Enqueue(() => scanner.Start());
+            app.UseHangfireDashboard();
         }
 
         public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, IResumableFunctionSettings settings)

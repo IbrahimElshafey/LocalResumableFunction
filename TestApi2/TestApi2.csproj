@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RefernceLibrary\RefernceLibrary.csproj" />
+    <ProjectReference Include="..\RefernceLibrary\ReferenceLibrary.csproj" />
     <ProjectReference Include="..\ResumableFunctions.AspNetService\ResumableFunctions.AspNetService.csproj" />
   </ItemGroup>
 

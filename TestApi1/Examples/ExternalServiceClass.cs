@@ -17,7 +17,7 @@ namespace TestApi1.Examples
             return default;
         }
 
-        [ExternalWaitMethod(ClassFullName = "RefernceLibrary.CodeInDllTest", AssemblyName = "RefernceLibrary")]
+        [ExternalWaitMethod(ClassFullName = "ReferenceLibrary.CodeInDllTest", AssemblyName = "ReferenceLibrary")]
         public string SayHello(string userName)
         {
             return userName;
