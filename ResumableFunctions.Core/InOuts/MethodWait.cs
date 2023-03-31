@@ -126,7 +126,7 @@ public class MethodWait : Wait
         }
     }
 
-    internal override (bool Valid, string Message) ValidateWaitRequest()
+    internal override bool IsValidWaitRequest()
     {
         if (!IsFirst && MatchIfExpression == null)
             FunctionState.LogStatus(
@@ -146,7 +146,7 @@ public class MethodWait : Wait
                 $"You didn't set the `SetDataExpression` for wait [{Name}], " +
                 $"The execution will not continue, " +
                 $"Please use `NoSetData()` if this is intended.");
-        return base.ValidateWaitRequest();
+        return base.IsValidWaitRequest();
     }
 }
 
@@ -219,7 +219,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
         return this;
     }
 
-    internal override (bool Valid, string Message) ValidateWaitRequest()
+    internal override bool IsValidWaitRequest()
     {
         //if (!IsFirst && MatchIfExpression == null)
         //    FunctionState.LogStatus(
@@ -227,7 +227,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
         //        $"You didn't set the `MatchIfExpression` for wait [{Name}] that is not a first wait," +
         //        $"This will lead to no match for all calls.");
         //Todo:validate type serialization
-        return base.ValidateWaitRequest();
+        return base.IsValidWaitRequest();
     }
 
 }

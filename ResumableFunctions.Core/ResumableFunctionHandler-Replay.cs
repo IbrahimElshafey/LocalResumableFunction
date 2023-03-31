@@ -59,7 +59,7 @@ public partial class ResumableFunctionHandler
             CheckReplayMatchExpression(replayRequest, mw);
 
             var duplicateWait = waitToReplay.DuplicateWait() as MethodWait;
-            duplicateWait.Name += "-Replay";
+            duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
             duplicateWait.IsReplay = true;
             duplicateWait.IsFirst = false;
             duplicateWait.MatchIfExpression = replayRequest.MatchExpression;
@@ -81,7 +81,7 @@ public partial class ResumableFunctionHandler
             return;
         }
         var duplicateWait = waitToReplay.DuplicateWait();
-        duplicateWait.Name += "-Replay";
+        duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
         duplicateWait.IsReplay = true;
         duplicateWait.IsFirst = false;
         await SaveWaitRequestToDb(duplicateWait);

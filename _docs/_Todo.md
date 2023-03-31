@@ -1,10 +1,7 @@
 ﻿# Todo
-* Time wait exact match
 * Delete first wait subwaits if group
-* If scan error occured don't update service data lastscandate
-* Validate waits
-	* Wait same wait twice in group is not valid
-	* Wait name can't duplicate in same function
+* If scan error occured don't update service data LastScanDate
+
 
 
 
@@ -15,14 +12,16 @@
 	* Two waits matched for same FunctionState
 	* First wait closed but new request come before create new one
 	* Update pushed methods calls counter
+	* Database.EnsureCreated(); in same time
 
 
 * Track code changes
-	* GUID for methods for easy track 
+	* Uniqe identifier for methods for easy track 
 
 * Remove uniqe for method hash
 
-* Logging and handle exception
+* Logging for scan sessions
+* and handle exception
 
 * Create nuget package
 

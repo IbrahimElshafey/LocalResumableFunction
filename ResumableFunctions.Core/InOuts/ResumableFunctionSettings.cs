@@ -36,5 +36,6 @@ namespace ResumableFunctions.Core.InOuts
 
         public string ServiceUrl { get; set; }
         public string[] DllsToScan { get; set; }
+        public bool ForceRescan { get; set; }
     }
 }

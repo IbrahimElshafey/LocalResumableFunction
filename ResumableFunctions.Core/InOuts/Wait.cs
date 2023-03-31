@@ -76,7 +76,7 @@ public abstract class Wait
 
     internal async Task<Wait> GetNextWait()
     {
-     
+
         var functionRunner = new FunctionRunner(this);
         if (functionRunner.ResumableFunctionExistInCode is false)
         {
@@ -105,7 +105,7 @@ public abstract class Wait
         }
     }
 
-    public virtual bool IsFinished() => Status == WaitStatus.Completed;
+    public virtual bool IsCompleted() => Status == WaitStatus.Completed;
 
 
 
@@ -132,7 +132,7 @@ public abstract class Wait
             case WaitsGroup waitsGroup:
                 result = new WaitsGroup
                 {
-                    CountExpressionValue = waitsGroup.CountExpressionValue
+                    GroupMatchExpressionValue = waitsGroup.GroupMatchExpressionValue
                 };
                 break;
             default:
@@ -183,10 +183,17 @@ public abstract class Wait
 
     internal virtual void Cancel() => Status = Status == WaitStatus.Waiting ? Status = WaitStatus.Canceled : Status;
 
-    internal virtual (bool Valid,string Message) ValidateWaitRequest() 
+    internal virtual bool IsValidWaitRequest()
     {
         //FunctionState.StatusMessage = message;
         //FunctionState.Status = FunctionStatus.ErrorOccured;
-        return (true,null);
+        var isNameDuplicated = FunctionState?.Waits.Any(x => x.Name == Name) ?? false;
+        if (isNameDuplicated)
+        {
+            FunctionState?.LogStatus(
+                FunctionStatus.Warning, 
+                $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name");
+        }
+        return FunctionState?.Status != FunctionStatus.Error;
     }
 }

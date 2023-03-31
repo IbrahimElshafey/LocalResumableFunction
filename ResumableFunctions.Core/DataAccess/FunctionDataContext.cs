@@ -21,6 +21,7 @@ public class FunctionDataContext : DbContext
         }
         catch (Microsoft.Data.SqlClient.SqlException ex)
         {
+            //this not fix the problem 100%
             if (ex.ErrorCode == -2146232060)
             {
                 Task.Delay(10000).Wait();
@@ -126,8 +127,8 @@ public class FunctionDataContext : DbContext
             .HasColumnName(nameof(MethodWait.SetDataExpressionValue));
 
         modelBuilder.Entity<WaitsGroup>()
-           .Property(mw => mw.CountExpressionValue)
-           .HasColumnName(nameof(WaitsGroup.CountExpressionValue));
+           .Property(mw => mw.GroupMatchExpressionValue)
+           .HasColumnName(nameof(WaitsGroup.GroupMatchExpressionValue));
 
         modelBuilder.Ignore<ReplayRequest>();
         modelBuilder.Ignore<TimeWait>();

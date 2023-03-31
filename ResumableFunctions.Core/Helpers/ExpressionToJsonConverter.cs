@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 namespace ResumableFunctions.Core.Helpers;
 
-public class ExpressionToJsonConverter
+public static class ExpressionToJsonConverter
 {
     internal static string ExpressionToJson(Expression expression, Assembly assembly)
     {
