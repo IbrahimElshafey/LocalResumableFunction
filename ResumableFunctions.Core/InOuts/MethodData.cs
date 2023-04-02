@@ -19,14 +19,22 @@ namespace ResumableFunctions.Core.InOuts
         private MethodInfo _methodInfo;
 
         [JsonConstructor]
-        public MethodData(string assemblyName, string className, string methodName, string methodSignature, byte[] methodHash)
+        public MethodData(
+            string assemblyName,
+            string className,
+            string methodName,
+            string methodSignature,
+            byte[] methodHash,
+            string trackingId)
         {
             AssemblyName = assemblyName;
             ClassName = className;
             MethodName = methodName;
             MethodSignature = methodSignature;
             MethodHash = methodHash;
+            TrackingId = trackingId;
         }
+
         public MethodData(MethodBase externalMethod, ExternalWaitMethodAttribute externalWaitMethodAttribute)
         {
             ClassName = externalWaitMethodAttribute.ClassFullName ?? externalMethod.DeclaringType?.FullName;
@@ -34,6 +42,7 @@ namespace ResumableFunctions.Core.InOuts
             MethodName = externalMethod.Name;
             MethodSignature = CalcSignature(externalMethod);
             MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
+            TrackingId = externalWaitMethodAttribute.TrackingIdetifier;
         }
 
         public MethodData(MethodBase methodBase)
@@ -47,6 +56,7 @@ namespace ResumableFunctions.Core.InOuts
             MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
         }
 
+        public string TrackingId { get; internal set; }
         public string AssemblyName { get; internal set; }
         public string ClassName { get; internal set; }
         public string MethodName { get; internal set; }
@@ -98,7 +108,7 @@ namespace ResumableFunctions.Core.InOuts
 
         public override string ToString()
         {
-            return $"{AssemblyName} # {ClassName}{MethodName} # {MethodSignature}";
+            return $"{AssemblyName} # {ClassName}.{MethodName} # {MethodSignature}";
         }
     }
 

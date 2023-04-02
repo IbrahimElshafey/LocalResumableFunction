@@ -9,4 +9,5 @@ public class ExternalMethodRecord
     public byte[] MethodHash { get; internal set; }
 
     public byte[] OriginalMethodHash { get; internal set; }
+    public string TrackingId { get; internal set; }
 }

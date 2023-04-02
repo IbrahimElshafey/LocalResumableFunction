@@ -33,7 +33,7 @@ public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect, 
         args.MethodExecutionTag = false;
         _pushedMethod = new PushedMethod
         {
-            MethodData = new MethodData(GetBaseMethod(args))
+            MethodData = new MethodData(GetBaseMethod(args)) { TrackingId = TrackingIdetifier }
         };
         if (args.Arguments.Length > 0)
             _pushedMethod.Input = args.Arguments[0];

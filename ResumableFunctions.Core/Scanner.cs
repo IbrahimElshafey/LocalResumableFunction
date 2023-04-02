@@ -138,7 +138,7 @@ public class Scanner
                 attribute.TypeId == new ResumableFunctionAttribute().TypeId ||
                 attribute.TypeId == new WaitMethodAttribute().TypeId ||
                 attribute.TypeId == new WaitMethodImplementationAttribute().TypeId ||
-                attribute.TypeId == new ExternalWaitMethodAttribute().TypeId
+                attribute.TypeId == (object)nameof(ExternalWaitMethodAttribute)
             );
 
         return (trackId as ITrackingIdetifier)?.TrackingIdetifier;
@@ -213,15 +213,21 @@ public class Scanner
            .Where(method =>
                    method
                    .GetCustomAttributes()
-                   .Any(x => x.TypeId == new ExternalWaitMethodAttribute().TypeId))
+                   .Any(x => x.TypeId == (object)nameof(ExternalWaitMethodAttribute)))
            .Select(x => new { MethodInfo = x, Attribute = x.GetCustomAttribute(typeof(ExternalWaitMethodAttribute)) });
         foreach (var methodRecord in externalMethods)
         {
             var externalMethodData = new MethodData(methodRecord.MethodInfo);
             var originalExternalMethodData = new MethodData(methodRecord.MethodInfo, (ExternalWaitMethodAttribute)methodRecord.Attribute);
             var trackingId = GetTrackingId(methodRecord.MethodInfo);
-            var originalMethod = await _methodIdentifierRepo.GetMethodByTrackingId(trackingId);
-            await _methodIdentifierRepo.UpsertMethodIdentifier(originalExternalMethodData, MethodType.MethodWait, trackingId);
+
+            if (trackingId is not null)
+            {
+                var originalMethod = await _methodIdentifierRepo.GetMethodByTrackingId(trackingId);
+                if (originalMethod == null)
+                    await _methodIdentifierRepo.UpsertMethodIdentifier(originalExternalMethodData, MethodType.MethodWait, trackingId);
+            }
+
             var externalMethodRecord = await _context.ExternalMethodsRegistry.FirstOrDefaultAsync(x => x.MethodHash == externalMethodData.MethodHash);
             if (externalMethodRecord != null)
             {
@@ -233,6 +239,7 @@ public class Scanner
                 MethodData = externalMethodData,
                 MethodHash = externalMethodData.MethodHash,
                 OriginalMethodHash = originalExternalMethodData.MethodHash,
+                TrackingId = trackingId,
             };
             WriteMessage($"Add external method [{methodRecord.MethodInfo.GetFullName()}] to DB.");
             _context.ExternalMethodsRegistry.Add(externalMethodRecord);

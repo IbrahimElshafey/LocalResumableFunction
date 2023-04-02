@@ -17,17 +17,25 @@ internal class MethodIdentifierRepository : RepositoryBase
         _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<MethodIdentifierRepository>>();
     }
 
-    public async Task<MethodIdentifier> GetMethodIdentifierFromDb(MethodData methodId)
+    public async Task<MethodIdentifier> GetMethodIdentifierFromDb(MethodData methodData)
     {
+        if (methodData.TrackingId is not null)
+        {
+            var result = await _context
+                .MethodIdentifiers
+                .FirstOrDefaultAsync(x => x.TrackingId == methodData.TrackingId);
+            if (result != null)
+                return result;
+        }
         var sameHashList = await _context
             .MethodIdentifiers
-            .Where(x => x.MethodHash == methodId.MethodHash).ToListAsync();
+            .Where(x => x.MethodHash == methodData.MethodHash).ToListAsync();
         return
             sameHashList.FirstOrDefault(x =>
-                x.MethodSignature == methodId.MethodSignature &&
-                x.AssemblyName == methodId.AssemblyName &&
-                x.ClassName == methodId.ClassName &&
-                x.MethodName == methodId.MethodName);
+                x.MethodSignature == methodData.MethodSignature &&
+                x.AssemblyName == methodData.AssemblyName &&
+                x.ClassName == methodData.ClassName &&
+                x.MethodName == methodData.MethodName);
     }
 
     public async Task UpsertMethodIdentifier(MethodData methodData, MethodType methodType, string trackingId)
@@ -78,6 +86,7 @@ internal class MethodIdentifierRepository : RepositoryBase
         _logger.LogInformation($"Add method [{methodData.MethodName}] to DB.");
         methodId = methodData.ToMethodIdentifier();
         methodId.Type = methodType;
+        methodId.TrackingId = trackingId;
         _context.MethodIdentifiers.Add(methodId);
     }
 

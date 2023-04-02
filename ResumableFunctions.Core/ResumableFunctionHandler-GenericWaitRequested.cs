@@ -48,6 +48,11 @@ public partial class ResumableFunctionHandler
         var methodId = methodWait.MethodData != null
             ? await _metodIdsRepo.GetMethodIdentifierFromDb(methodWait.MethodData)
             : await _context.MethodIdentifiers.FindAsync(methodWait.WaitMethodIdentifierId);
+        if (methodId == null)
+        {
+            _logger.LogError($"No method ({methodWait.MethodData}) exist in DB.");
+            return;
+        }
         methodWait.WaitMethodIdentifier = methodId;
         methodWait.WaitMethodIdentifierId = methodId.Id;
         methodWait.RewriteExpressions();
