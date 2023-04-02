@@ -1,11 +1,8 @@
 ﻿namespace ResumableFunctions.Core.Attributes;
 
-/// <summary>
-/// Put this 
-/// </summary>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 public sealed class ResumableFunctionAttribute : Attribute, ITrackingIdetifier
 {
     public override object TypeId => nameof(ResumableFunctionAttribute);
-
     public string TrackingIdetifier { get; set; }
 }

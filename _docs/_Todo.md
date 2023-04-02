@@ -31,6 +31,9 @@
 		* Push External Mehtod Call
 
 		
+* Logging for scan sessions
+* Use track ID for external methods subscribe
+
 * Delete first wait subwaits if group
 * If scan error occured don't update service data LastScanDate
 
@@ -62,10 +65,19 @@
 * Move completed function instance to Recycle Bin
 * Delete PushedMethodsCalls after processing background job
 * Parameter check lib use
-
+* Add UI Project
+	* Monitor active resumable functions
+		* Incoming waits
+		* Past waits
+		* Status
+	* List completed functions
+	* Verify scanned methods 
+		* delete methods not in code
+		* verify method signatures
+		* verofy start waits exist in db
+	* Register External Method
+		* For example github web hook
 
 
 * Speed Analysis	
 	* https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/event-counters?tabs=windows
-
-

@@ -115,7 +115,7 @@ public class Scanner
         var lastBuildDate = File.GetLastWriteTime($"{AppContext.BaseDirectory}\\{currentAssemblyName}.dll");
         scanRecored.Url = serviceUrl;
         bool shouldScan = lastBuildDate > scanRecored.LastScanDate;
-        if(shouldScan is false)
+        if (shouldScan is false)
             WriteMessage($"No need to rescan assembly [{currentAssemblyName}].");
         return shouldScan;
     }
@@ -123,8 +123,25 @@ public class Scanner
     internal async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
     {
         WriteMessage($"Register resumable function [{resumableFunction.GetFullName()}] of type [{type}]");
-        await _methodIdentifierRepo.AddMethodIdentifier(new MethodData(resumableFunction), type, null);
+
+        await _methodIdentifierRepo.UpsertMethodIdentifier(new MethodData(resumableFunction), type, GetTrackingId(resumableFunction));
         await _context.SaveChangesAsync();
+    }
+
+    private string GetTrackingId(MethodInfo method)
+    {
+        var trackId = method
+            .GetCustomAttributes()
+            .FirstOrDefault(
+            attribute =>
+                attribute.TypeId == new ResumableFunctionEntryPointAttribute().TypeId ||
+                attribute.TypeId == new ResumableFunctionAttribute().TypeId ||
+                attribute.TypeId == new WaitMethodAttribute().TypeId ||
+                attribute.TypeId == new WaitMethodImplementationAttribute().TypeId ||
+                attribute.TypeId == new ExternalWaitMethodAttribute().TypeId
+            );
+
+        return (trackId as ITrackingIdetifier)?.TrackingIdetifier;
     }
 
     private async Task<List<Type>> RegisterMethodWaits(List<string> assemblyPaths)
@@ -184,7 +201,7 @@ public class Scanner
                     method.GetCustomAttributes().Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
         foreach (var method in methodWaits)
         {
-            await _methodIdentifierRepo.AddMethodIdentifier(new MethodData(method), MethodType.MethodWait, null);
+            await _methodIdentifierRepo.UpsertMethodIdentifier(new MethodData(method), MethodType.MethodWait, GetTrackingId(method));
         }
     }
 
@@ -194,13 +211,17 @@ public class Scanner
         var externalMethods = type
            .GetMethods(GetBindingFlags())
            .Where(method =>
-                   method.GetCustomAttributes().Any(x => x.TypeId == new ExternalWaitMethodAttribute().TypeId))
+                   method
+                   .GetCustomAttributes()
+                   .Any(x => x.TypeId == new ExternalWaitMethodAttribute().TypeId))
            .Select(x => new { MethodInfo = x, Attribute = x.GetCustomAttribute(typeof(ExternalWaitMethodAttribute)) });
         foreach (var methodRecord in externalMethods)
         {
             var externalMethodData = new MethodData(methodRecord.MethodInfo);
             var originalExternalMethodData = new MethodData(methodRecord.MethodInfo, (ExternalWaitMethodAttribute)methodRecord.Attribute);
-            await _methodIdentifierRepo.AddMethodIdentifier(originalExternalMethodData, MethodType.MethodWait, null);
+            var trackingId = GetTrackingId(methodRecord.MethodInfo);
+            var originalMethod = await _methodIdentifierRepo.GetMethodByTrackingId(trackingId);
+            await _methodIdentifierRepo.UpsertMethodIdentifier(originalExternalMethodData, MethodType.MethodWait, trackingId);
             var externalMethodRecord = await _context.ExternalMethodsRegistry.FirstOrDefaultAsync(x => x.MethodHash == externalMethodData.MethodHash);
             if (externalMethodRecord != null)
             {
@@ -227,12 +248,12 @@ public class Scanner
                 .GetCustomAttributes()
                 .Any(attribute =>
                     attribute.TypeId == new ResumableFunctionEntryPointAttribute().TypeId ||
-                    attribute.TypeId == new SubResumableFunctionAttribute().TypeId
+                    attribute.TypeId == new ResumableFunctionAttribute().TypeId
                 ));
 
         foreach (var resumableFunction in resumableFunctions)
         {
-            if (MatchResumableFunctionSignature(resumableFunction) is false)
+            if (CheckResumableFunctionSignature(resumableFunction) is false)
             {
                 _logger.LogError(
                     $"The resumable function [{resumableFunction.GetFullName()}] must match the signature `IAsyncEnumerable<Wait> {resumableFunction.Name}()`");
@@ -240,7 +261,9 @@ public class Scanner
             }
 
             var isEntryPoint = IsEntryPoint(resumableFunction);
-            var methodType = isEntryPoint ? MethodType.ResumableFunctionEntryPoint : MethodType.SubResumableFunction;
+            var methodType = isEntryPoint ?
+                MethodType.ResumableFunctionEntryPoint :
+                MethodType.SubResumableFunction;
             await RegisterResumableFunction(resumableFunction, methodType);
             if (isEntryPoint)
                 await RegisterResumableFunctionFirstWait(resumableFunction);
@@ -254,7 +277,7 @@ public class Scanner
             .Any(attribute => attribute.TypeId == new ResumableFunctionEntryPointAttribute().TypeId);
     }
 
-    private bool MatchResumableFunctionSignature(MethodInfo resumableFunction)
+    private bool CheckResumableFunctionSignature(MethodInfo resumableFunction)
     {
         if (resumableFunction.ReturnType != typeof(IAsyncEnumerable<Wait>))
             return false;

@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 
 namespace ResumableFunctions.Core.Attributes;
 
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+
 public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect, ITrackingIdetifier
 {
     private PushedMethod _pushedMethod;
