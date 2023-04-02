@@ -159,6 +159,11 @@ public class FunctionDataContext : DbContext
         entityTypeBuilder
             .HasIndex(x => x.MethodHash)
             .HasDatabaseName("Index_MethodHash")
+            .IsUnique(false);
+
+        entityTypeBuilder
+            .HasIndex(x => x.TrackingId)
+            .HasDatabaseName("Index_TrackingId")
             .IsUnique(true);
 
         entityTypeBuilder

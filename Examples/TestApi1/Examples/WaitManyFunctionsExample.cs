@@ -50,7 +50,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         Success(nameof(WaitFirstFunction));
     }
 
-    [SubResumableFunction]
+    [ResumableFunction]
     internal async IAsyncEnumerable<Wait> WaitManagerOneAndTwoSubFunction()
     {
         await Task.Delay(10);
@@ -67,7 +67,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         WriteMessage("Two waits matched");
     }
 
-    [SubResumableFunction]
+    [ResumableFunction]
     internal async IAsyncEnumerable<Wait> ManagerThreeSubFunction()
     {
         WriteMessage("Start ManagerThreeSubFunction");
@@ -79,7 +79,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         WriteMessage("{2}End ManagerThreeSubFunction");
     }
 
-    [SubResumableFunction]
+    [ResumableFunction]
     internal async IAsyncEnumerable<Wait> ManagerOneCallSubManagerTwo()
     {
         WriteMessage("Start ManagerOneCallSubManagerTwo");
@@ -92,7 +92,7 @@ internal class WaitManyFunctionsExample : ProjectApprovalExample
         WriteMessage("{1}End ManagerOneCallSubManagerTwo");
     }
 
-    [SubResumableFunction]
+    [ResumableFunction]
     internal async IAsyncEnumerable<Wait> ManagerTwoSub()
     {
         WriteMessage("Start ManagerTwoSub");

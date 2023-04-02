@@ -33,7 +33,7 @@ namespace ResumableFunctions.Core.InOuts
             AssemblyName = externalWaitMethodAttribute.AssemblyName ?? externalMethod.DeclaringType?.Assembly.GetName().Name;
             MethodName = externalMethod.Name;
             MethodSignature = CalcSignature(externalMethod);
-            CreateMethodHash();
+            MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
         }
 
         public MethodData(MethodBase methodBase)
@@ -44,7 +44,7 @@ namespace ResumableFunctions.Core.InOuts
             ClassName = methodBase.DeclaringType?.FullName;
             AssemblyName = methodBase.DeclaringType?.Assembly.GetName().Name;
             MethodSignature = CalcSignature(methodBase);
-            CreateMethodHash();
+            MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
         }
 
         public string AssemblyName { get; internal set; }
@@ -76,12 +76,12 @@ namespace ResumableFunctions.Core.InOuts
             return inputs;
         }
 
-        private void CreateMethodHash()
+        internal static byte[] GetMethodHash(string MethodName, string ClassName, string AssemblyName, string MethodSignature)
         {
             var input = string.Concat(MethodName, ClassName, AssemblyName, MethodSignature);
             using var md5 = MD5.Create();
             var inputBytes = Encoding.ASCII.GetBytes(input);
-            MethodHash = md5.ComputeHash(inputBytes);
+            return md5.ComputeHash(inputBytes);
         }
 
         internal MethodIdentifier ToMethodIdentifier()
@@ -94,6 +94,11 @@ namespace ResumableFunctions.Core.InOuts
                 ClassName = ClassName,
                 MethodHash = MethodHash
             };
+        }
+
+        public override string ToString()
+        {
+            return $"{AssemblyName} # {ClassName}{MethodName} # {MethodSignature}";
         }
     }
 

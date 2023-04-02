@@ -1,4 +1,7 @@
 ﻿# Todo
+* Logging for scan sessions
+* Use track ID for external methods subscribe
+
 * Delete first wait subwaits if group
 * If scan error occured don't update service data LastScanDate
 
@@ -15,12 +18,9 @@
 	* Database.EnsureCreated(); in same time
 
 
-* Track code changes
-	* Uniqe identifier for methods for easy track 
 
-* Remove uniqe for method hash
 
-* Logging for scan sessions
+
 * and handle exception
 
 * Create nuget package
@@ -46,21 +46,3 @@
 
 * Speed Analysis	
 	* https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/event-counters?tabs=windows
-
-
-* Hnagfire problem
-Category: ResumableFunctions.Core.Scanner
-EventId: 0
-
-Error when scan [TestApi2]
-
-Exception: 
-System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-   at Microsoft.EntityFrameworkCore.Infrastructure.Internal.ConcurrencyDetector.EnterCriticalSection()
-   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-   at ResumableFunctions.Core.Data.MethodIdentifierRepository.GetMethodIdentifierFromDb(MethodData methodId) in C:\LocalResumableFunction\ResumableFunctions.Core\Data\MethodIdentifierRepository.cs:line 16
-   at ResumableFunctions.Core.Scanner.AddMethodWait(MethodData methodData) in C:\LocalResumableFunction\ResumableFunctions.Core\Scanner.cs:line 208
-   at ResumableFunctions.Core.Scanner.RegisterMethodWaitsInType(Type type) in C:\LocalResumableFunction\ResumableFunctions.Core\Scanner.cs:line 201
-   at ResumableFunctions.Core.Scanner.Start() in C:\LocalResumableFunction\ResumableFunctions.Core\Scanner.cs:line 52

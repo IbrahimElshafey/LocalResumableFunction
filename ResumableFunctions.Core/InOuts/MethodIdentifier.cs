@@ -20,6 +20,7 @@ public class MethodIdentifier
     public string ClassName { get; internal set; }
     public string MethodName { get; internal set; }
     public string MethodSignature { get; internal set; }
+    public string TrackingId { get; internal set; }
 
     public byte[] MethodHash { get; set; }
 
@@ -36,6 +37,11 @@ public class MethodIdentifier
                 _methodInfo = CoreExtensions.GetMethodInfo(AssemblyName, ClassName, MethodName, MethodSignature);
             return _methodInfo;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"{AssemblyName} # {ClassName}{MethodName} # {MethodSignature}";
     }
 }
 

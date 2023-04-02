@@ -122,7 +122,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Success(nameof(SubFunctionTest));
     }
 
-    [SubResumableFunction]
+    [ResumableFunction]
     public async IAsyncEnumerable<Wait> WaitTwoManagers()
     {
         WriteMessage("WaitTwoManagers started");
@@ -170,7 +170,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         return true;
     }
 
-    [WaitMethod]
+    [WaitMethod(TrackingIdetifier = "ManagerOneApproveProject")]
     public bool ManagerOneApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager One Approve Project with decision ({args.Decision})");
