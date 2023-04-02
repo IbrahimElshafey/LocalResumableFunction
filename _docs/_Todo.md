@@ -32,7 +32,6 @@
 
 		
 * Logging for scan sessions
-* Use track ID for external methods subscribe
 
 * Delete first wait subwaits if group
 * If scan error occured don't update service data LastScanDate
@@ -43,19 +42,16 @@
 * Activate one start wait if multiple exist for same method
 
 * Handle concurrency problems
-	* optimistic or pessimistic fro cases below:
+	* optimistic or pessimistic for cases below:
 	* Two waits matched for same FunctionState
 	* First wait closed but new request come before create new one
 	* Update pushed methods calls counter
 	* Database.EnsureCreated(); in same time
 
 
-* Track code changes
-	* Uniqe identifier for methods for easy track 
 
-* Remove uniqe for method hash
 
-* Logging for scan sessions
+
 * and handle exception
 
 * Create nuget package
@@ -65,18 +61,7 @@
 * Move completed function instance to Recycle Bin
 * Delete PushedMethodsCalls after processing background job
 * Parameter check lib use
-* Add UI Project
-	* Monitor active resumable functions
-		* Incoming waits
-		* Past waits
-		* Status
-	* List completed functions
-	* Verify scanned methods 
-		* delete methods not in code
-		* verify method signatures
-		* verify start waits exist in db
-	* Register External Method
-		* For example github web hook
+
 
 
 * Speed Analysis	
