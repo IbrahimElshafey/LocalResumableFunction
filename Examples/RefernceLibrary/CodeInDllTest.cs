@@ -29,7 +29,13 @@ namespace RefernceLibrary
         [WaitMethod]
         public string SayHello(string userName)
         {
-            return $"Hello {userName}";
+            return $"Hello, {userName}.";
+        }
+
+        [WaitMethod(TrackingIdetifier = "889f52f5-be6b-41db-8312-99abc8db5883")]
+        public string SayGoodby(string userName)
+        {
+            return $"Goodby, {userName}.";
         }
     }
 }

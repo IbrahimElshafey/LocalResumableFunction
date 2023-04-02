@@ -27,5 +27,11 @@ namespace TestApi2.Controllers
         {
             return new CodeInDllTest().SayHello(userName);
         }
+
+        [HttpGet(nameof(SayGoodby_MethodInDll))]
+        public string SayGoodby_MethodInDll(string userName)
+        {
+            return new CodeInDllTest().SayGoodby(userName);
+        }
     }
 }
