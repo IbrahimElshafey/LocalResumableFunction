@@ -17,22 +17,22 @@ public class ProgramOld
     private static Scanner _scanner;
     private static async Task MainOld()
     {
-      
-       
 
-        //await TestWaitMany();
 
-        //await TestSubFunctionCall();
-        //await TestReplayGoBackAfter();
-        //await TestReplayGoBackBeforeNewMatch();
-        //await TestReplayGoBackTo();
-        //await TestWaitManyFunctions();
-        //await TestLoops();
-        //await TestManyWaitsTypeInGroup();
+
+        await TestWaitMany();
+
+        await TestSubFunctionCall();
+        await TestReplayGoBackAfter();
+        await TestReplayGoBackBeforeNewMatch();
+        await TestReplayGoBackTo();
+        await TestWaitManyFunctions();
+        await TestLoops();
+        await TestManyWaitsTypeInGroup();
         await TestTimeWait();
-        //await TestSameEventAgain();
-        //await TestWaitInterfaceMethod();
-        //await TestReplayGoBackToWithNewMatch();
+        await TestSameEventAgain();
+        await TestWaitInterfaceMethod();
+        await TestReplayGoBackToWithNewMatch();
 
 
         //await Task.WhenAll(

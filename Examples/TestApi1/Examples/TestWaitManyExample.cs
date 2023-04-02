@@ -29,7 +29,7 @@ internal class TestWaitManyExample : ProjectApprovalExample
     }
 
     //[ResumableFunctionEntryPoint]
-    public async IAsyncEnumerable<Wait> WaitManyAndCountExpressionDefined()
+    public async IAsyncEnumerable<Wait> WaitManyAndGroupExpressionDefined()
     {
         yield return
             Wait<Project, bool>("Project Submitted", ProjectSubmitted)
@@ -50,6 +50,6 @@ internal class TestWaitManyExample : ProjectApprovalExample
         ).When(waitGroup => waitGroup.CompletedCount == 2);
         WriteMessage("Two waits of three waits matched.");
         WriteMessage("WaitManyAndCountExpressionDefined ended.");
-        Success(nameof(WaitManyAndCountExpressionDefined));
+        Success(nameof(WaitManyAndGroupExpressionDefined));
     }
 }

@@ -16,7 +16,7 @@ public class WaitsGroup : Wait
     [NotMapped]
     public LambdaExpression GroupMatchExpression
     {
-        get => _countExpression ?? GetCountExpression();
+        get => _countExpression ?? GetGroupMatchExpression();
         internal set => _countExpression = value;
     }
     internal byte[] GroupMatchExpressionValue { get; set; }
@@ -50,7 +50,7 @@ public class WaitsGroup : Wait
 
 
 
-    private LambdaExpression GetCountExpression()
+    private LambdaExpression GetGroupMatchExpression()
     {
         //todo:may be a bug
         var assembly =

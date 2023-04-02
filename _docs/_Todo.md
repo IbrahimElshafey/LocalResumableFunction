@@ -1,4 +1,36 @@
 ﻿# Todo
+* Add UI Project
+	* Monitor active resumable functions
+		* It's props 
+			* Status
+			* Name (Full Name)
+			* CurrentStateObject
+			* Created
+			* LastUpdated
+		* Waits tree
+			* Wait Name
+			* Status
+			* Is Replay
+			* Extra Data
+			* Wait Type
+			* Created
+			* If match --> Pushed method input & output
+			* Expressions if method wait
+			* Need Load Function Data for match
+			* Wait method
+			* Count Expression if group
+			* Actions on Method Wait ()
+			* Actions on Group Wait ()
+			* Actions on Function Wait ()
+		* Logs list from function state logs
+	* Servcies Registred
+		* Verify scanned methods 
+		* delete methods not in code
+		* verify method signatures
+		* verofy start waits exist in db
+		* Push External Mehtod Call
+
+		
 * Delete first wait subwaits if group
 * If scan error occured don't update service data LastScanDate
 
@@ -30,37 +62,10 @@
 * Move completed function instance to Recycle Bin
 * Delete PushedMethodsCalls after processing background job
 * Parameter check lib use
-* Add UI Project
-	* Monitor active resumable functions
-		* Incoming waits
-		* Past waits
-		* Status
-	* List completed functions
-	* Verify scanned methods 
-		* delete methods not in code
-		* verify method signatures
-		* verofy start waits exist in db
-	* Register External Method
-		* For example github web hook
+
 
 
 * Speed Analysis	
 	* https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/event-counters?tabs=windows
 
 
-* Hnagfire problem
-Category: ResumableFunctions.Core.Scanner
-EventId: 0
-
-Error when scan [TestApi2]
-
-Exception: 
-System.InvalidOperationException: A second operation was started on this context instance before a previous operation completed. This is usually caused by different threads concurrently using the same instance of DbContext. For more information on how to avoid threading issues with DbContext, see https://go.microsoft.com/fwlink/?linkid=2097913.
-   at Microsoft.EntityFrameworkCore.Infrastructure.Internal.ConcurrencyDetector.EnterCriticalSection()
-   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.MoveNextAsync()
-   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync[TSource](IQueryable`1 source, CancellationToken cancellationToken)
-   at ResumableFunctions.Core.Data.MethodIdentifierRepository.GetMethodIdentifierFromDb(MethodData methodId) in C:\LocalResumableFunction\ResumableFunctions.Core\Data\MethodIdentifierRepository.cs:line 16
-   at ResumableFunctions.Core.Scanner.AddMethodWait(MethodData methodData) in C:\LocalResumableFunction\ResumableFunctions.Core\Scanner.cs:line 208
-   at ResumableFunctions.Core.Scanner.RegisterMethodWaitsInType(Type type) in C:\LocalResumableFunction\ResumableFunctions.Core\Scanner.cs:line 201
-   at ResumableFunctions.Core.Scanner.Start() in C:\LocalResumableFunction\ResumableFunctions.Core\Scanner.cs:line 52

@@ -48,8 +48,15 @@ public class FunctionDataContext : DbContext
         ConfigurePushedMethod(modelBuilder.Entity<PushedMethod>());
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
         ConfigureExternalMethodRecord(modelBuilder.Entity<ExternalMethodRecord>());
+        ConfigureFunctionStateLogRecord(modelBuilder.Entity<FunctionStateLogRecord>());
         ConfigureWaits(modelBuilder);
         base.OnModelCreating(modelBuilder);
+    }
+
+    private void ConfigureFunctionStateLogRecord(EntityTypeBuilder<FunctionStateLogRecord> entityTypeBuilder)
+    {
+        entityTypeBuilder
+           .Property<DateTime>(ConstantValue.CreatedProp);
     }
 
     private void ConfigureExternalMethodRecord(EntityTypeBuilder<ExternalMethodRecord> entityTypeBuilder)
@@ -113,6 +120,8 @@ public class FunctionDataContext : DbContext
 
         modelBuilder.Entity<Wait>()
            .Property<DateTime>(ConstantValue.CreatedProp);
+        modelBuilder.Entity<Wait>()
+         .Property<DateTime>(ConstantValue.LastUpdatedProp);
 
         modelBuilder.Entity<Wait>()
             .Property(x => x.ExtraData)
