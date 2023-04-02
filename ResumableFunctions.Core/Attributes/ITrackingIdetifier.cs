@@ -2,5 +2,5 @@
 
 public interface ITrackingIdetifier
 {
-    string TrackingIdetifier { get; set; }
+    string TrackingIdetifier { get; }
 }
