@@ -41,7 +41,7 @@ public class MethodIdentifier
 
     public override string ToString()
     {
-        return $"{AssemblyName} # {ClassName}{MethodName} # {MethodSignature}";
+        return $"{AssemblyName} # {ClassName}.{MethodName} # {MethodSignature}";
     }
 }
 

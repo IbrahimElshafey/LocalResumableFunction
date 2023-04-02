@@ -74,7 +74,7 @@
 	* Verify scanned methods 
 		* delete methods not in code
 		* verify method signatures
-		* verofy start waits exist in db
+		* verify start waits exist in db
 	* Register External Method
 		* For example github web hook
 
