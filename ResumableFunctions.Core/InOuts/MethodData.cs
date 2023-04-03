@@ -19,21 +19,30 @@ namespace ResumableFunctions.Core.InOuts
         private MethodInfo _methodInfo;
 
         [JsonConstructor]
-        public MethodData(string assemblyName, string className, string methodName, string methodSignature, byte[] methodHash)
+        public MethodData(
+            string assemblyName,
+            string className,
+            string methodName,
+            string methodSignature,
+            byte[] methodHash,
+            string trackingId)
         {
             AssemblyName = assemblyName;
             ClassName = className;
             MethodName = methodName;
             MethodSignature = methodSignature;
             MethodHash = methodHash;
+            TrackingId = trackingId;
         }
+
         public MethodData(MethodBase externalMethod, ExternalWaitMethodAttribute externalWaitMethodAttribute)
         {
             ClassName = externalWaitMethodAttribute.ClassFullName ?? externalMethod.DeclaringType?.FullName;
             AssemblyName = externalWaitMethodAttribute.AssemblyName ?? externalMethod.DeclaringType?.Assembly.GetName().Name;
             MethodName = externalMethod.Name;
             MethodSignature = CalcSignature(externalMethod);
-            CreateMethodHash();
+            MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
+            TrackingId = externalWaitMethodAttribute.TrackingIdetifier;
         }
 
         public MethodData(MethodBase methodBase)
@@ -44,9 +53,10 @@ namespace ResumableFunctions.Core.InOuts
             ClassName = methodBase.DeclaringType?.FullName;
             AssemblyName = methodBase.DeclaringType?.Assembly.GetName().Name;
             MethodSignature = CalcSignature(methodBase);
-            CreateMethodHash();
+            MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
         }
 
+        public string TrackingId { get; internal set; }
         public string AssemblyName { get; internal set; }
         public string ClassName { get; internal set; }
         public string MethodName { get; internal set; }
@@ -76,12 +86,12 @@ namespace ResumableFunctions.Core.InOuts
             return inputs;
         }
 
-        private void CreateMethodHash()
+        internal static byte[] GetMethodHash(string MethodName, string ClassName, string AssemblyName, string MethodSignature)
         {
             var input = string.Concat(MethodName, ClassName, AssemblyName, MethodSignature);
             using var md5 = MD5.Create();
             var inputBytes = Encoding.ASCII.GetBytes(input);
-            MethodHash = md5.ComputeHash(inputBytes);
+            return md5.ComputeHash(inputBytes);
         }
 
         internal MethodIdentifier ToMethodIdentifier()
@@ -94,6 +104,11 @@ namespace ResumableFunctions.Core.InOuts
                 ClassName = ClassName,
                 MethodHash = MethodHash
             };
+        }
+
+        public override string ToString()
+        {
+            return $"{AssemblyName} # {ClassName}.{MethodName} # {MethodSignature}";
         }
     }
 

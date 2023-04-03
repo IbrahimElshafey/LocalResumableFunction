@@ -78,6 +78,17 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
 
         Success(nameof(ExternalMethod));
     }
+
+    [ResumableFunctionEntryPoint]
+    public async IAsyncEnumerable<Wait> ExternalMethodWaitGoodby()
+    {
+        await Task.Delay(1);
+        yield return Wait<string, string>
+                ("Wait good by external", new ExternalServiceClass().SayGoodby)
+                .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
+                .SetData((userName, helloMsg) => ExternalMethodStatus == $"Say goodby called and user name is: {userName}");
+        Success(nameof(ExternalMethodWaitGoodby));
+    }
     //any method with attribute [ResumableFunctionEntryPoint] that takes no argument
     //and return IAsyncEnumerable<Wait> is a resumbale function
     //[ResumableFunctionEntryPoint]
@@ -122,7 +133,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Success(nameof(SubFunctionTest));
     }
 
-    [SubResumableFunction]
+    [ResumableFunction]
     public async IAsyncEnumerable<Wait> WaitTwoManagers()
     {
         WriteMessage("WaitTwoManagers started");
@@ -170,7 +181,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         return true;
     }
 
-    [WaitMethod]
+    [WaitMethod(TrackingIdetifier = "ManagerOneApproveProject")]
     public bool ManagerOneApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager One Approve Project with decision ({args.Decision})");

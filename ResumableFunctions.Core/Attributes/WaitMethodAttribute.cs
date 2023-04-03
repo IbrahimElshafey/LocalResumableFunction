@@ -10,7 +10,9 @@ namespace ResumableFunctions.Core.Attributes;
 /// <summary>
 ///     Add this to the method you want to wait to.
 /// </summary>
-public sealed class WaitMethodAttribute : OnMethodBoundaryAspect,ITrackingIdetifier
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+
+public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdetifier
 {
     private PushedMethod _pushedMethod;
     private readonly ResumableFunctionHandler _functionHandler;
@@ -24,6 +26,9 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect,ITrackingIdetif
         _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<WaitMethodAttribute>>();
     }
 
+    /// <summary>
+    /// used to enable developer to change method name an parameters and keep point to the old one
+    /// </summary>
     public string TrackingIdetifier { get; set; }
     public override object TypeId => nameof(WaitMethodAttribute);
 
@@ -32,7 +37,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect,ITrackingIdetif
         args.MethodExecutionTag = false;
         _pushedMethod = new PushedMethod
         {
-            MethodData = new MethodData(args.Method)
+            MethodData = new MethodData(args.Method) { TrackingId = TrackingIdetifier },
         };
         if (args.Arguments.Length > 0)
             _pushedMethod.Input = args.Arguments[0];
@@ -49,7 +54,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect,ITrackingIdetif
                 _pushedMethod.Output = output.Result;
             }
 
-            
+
             _functionHandler.QueuePushedMethodProcessing(_pushedMethod).Wait();
             args.MethodExecutionTag = true;
         }

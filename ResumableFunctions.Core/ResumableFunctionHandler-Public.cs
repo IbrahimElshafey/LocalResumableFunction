@@ -106,14 +106,29 @@ public partial class ResumableFunctionHandler
                 var pushedMethod = await _context
                    .PushedMethodsCalls
                    .FirstAsync(x => x.Id == pushedMethodId);
-
-                var externalMethod = (await _context
-                    .ExternalMethodsRegistry
-                    .Where(x => x.OriginalMethodHash == pushedMethod.MethodData.MethodHash)
-                    .ToListAsync())
-                    .FirstOrDefault(x =>
-                        x.MethodData.MethodName == pushedMethod.MethodData.MethodName &&
-                        x.MethodData.MethodSignature == pushedMethod.MethodData.MethodSignature);
+                ExternalMethodRecord externalMethod = null;
+                if (pushedMethod?.MethodData.TrackingId is not null)
+                {
+                    externalMethod = await _context
+                                    .ExternalMethodsRegistry
+                                    .FirstOrDefaultAsync(x => x.TrackingId == pushedMethod.MethodData.TrackingId);
+                }
+                else
+                {
+                    externalMethod =
+                        (await _context
+                        .ExternalMethodsRegistry
+                        .Where(x => x.OriginalMethodHash == pushedMethod.MethodData.MethodHash)
+                        .ToListAsync())
+                        .FirstOrDefault(x =>
+                            x.MethodData.MethodName == pushedMethod.MethodData.MethodName &&
+                            x.MethodData.MethodSignature == pushedMethod.MethodData.MethodSignature);
+                }
+                if(externalMethod == null)
+                {
+                    _logger.LogError($"No external method exist that match ({pushedMethod.MethodData}).");
+                    return;
+                }
                 pushedMethod.ConvertJObject(externalMethod.MethodData.MethodInfo);
                 methodWait.Input = pushedMethod.Input;
                 methodWait.Output = pushedMethod.Output;
