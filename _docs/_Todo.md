@@ -1,5 +1,11 @@
 ﻿# Todo
-* Add UI Project
+* Add UI Project (Use MVC not pages)
+	* Servcies Registred
+		* Verify scanned methods 
+		* Find methods not in code
+		* verify method signatures
+		* verofy start waits exist in db
+		* Push External Mehtod Call
 	* Monitor active resumable functions
 		* It's props 
 			* Status
@@ -23,13 +29,11 @@
 			* Actions on Group Wait ()
 			* Actions on Function Wait ()
 		* Logs list from function state logs
-	* Servcies Registred
-		* Verify scanned methods 
-		* delete methods not in code
-		* verify method signatures
-		* verofy start waits exist in db
-		* Push External Mehtod Call
 
+* Check External Methods Background Job
+* All logs goes to one location
+* Generate unit test code for resumable function
+* Generate external service class for methods in a service
 		
 * Logging for scan sessions
 
@@ -51,8 +55,6 @@
 
 
 
-
-* and handle exception
 
 * Create nuget package
 

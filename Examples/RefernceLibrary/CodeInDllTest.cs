@@ -2,7 +2,7 @@
 using ResumableFunctions.Core.Attributes;
 using ResumableFunctions.Core.InOuts;
 
-namespace RefernceLibrary
+namespace ReferenceLibrary
 {
     public class CodeInDllTest : ResumableFunction
     {
