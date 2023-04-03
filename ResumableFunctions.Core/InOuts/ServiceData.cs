@@ -5,4 +5,5 @@ public class ServiceData
     public string AssemblyName { get; internal set; }
     public string Url { get; internal set; }
     public DateTime LastScanDate { get; internal set; }
+    public int ParentId { get; internal set; }
 }

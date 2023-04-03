@@ -87,30 +87,32 @@ public class Scanner
     private async Task UpdateScanData(string currentAssemblyName, string serviceUrl)
     {
         WriteMessage($"Update last scan date for service [{currentAssemblyName}].");
+        var scanRecored = await _context
+            .ServicesData
+            .FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
+        if (scanRecored != null)
+            scanRecored.LastScanDate = DateTime.Now;
+    }
+
+    private async Task<bool> ShouldScan(string currentAssemblyName, string serviceUrl)
+    {
+        WriteMessage($"Check last scan date for assembly [{currentAssemblyName}].");
         var scanRecored = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
+        var entryAssemblyName = Assembly.GetEntryAssembly().GetName().Name;
+        var parentId =
+            entryAssemblyName == currentAssemblyName ?
+            -1 :
+            await _context.ServicesData
+            .Where(x => x.AssemblyName == entryAssemblyName)
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync();
         if (scanRecored == null)
         {
             scanRecored = new ServiceData
             {
                 AssemblyName = currentAssemblyName,
                 Url = serviceUrl,
-            };
-            _context.ServicesData.Add(scanRecored);
-        }
-        scanRecored.LastScanDate = DateTime.Now;
-    }
-
-    private async Task<bool> ShouldScan(string currentAssemblyName, string serviceUrl)
-    {
-        if (_settings.ForceRescan) return true;
-        WriteMessage($"Check last scan date for assembly [{currentAssemblyName}].");
-        var scanRecored = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
-        if (scanRecored == null)
-        {
-            scanRecored = new ServiceData
-            {
-                AssemblyName = currentAssemblyName,
-                Url = serviceUrl
+                ParentId = parentId
             };
             _context.ServicesData.Add(scanRecored);
             return true;
@@ -120,7 +122,7 @@ public class Scanner
         bool shouldScan = lastBuildDate > scanRecored.LastScanDate;
         if (shouldScan is false)
             WriteMessage($"No need to rescan assembly [{currentAssemblyName}].");
-        return shouldScan;
+        return shouldScan || _settings.ForceRescan;
     }
 
     internal async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
@@ -164,11 +166,15 @@ public class Scanner
                 var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
                 if (await ShouldScan(currentAssemblyName, _settings.ServiceUrl) is false) continue;
                 var assembly = Assembly.LoadFile(assemblyPath);
-                var isReferenceLocalResumableFunction =
-                    assembly.GetReferencedAssemblies().Any(x => new[] { "ResumableFunctions.Core", "ResumableFunctions.AspNetService" }.Contains(x.Name));
-                if (isReferenceLocalResumableFunction is false)
+                var isReferenceResumableFunction =
+                    assembly.GetReferencedAssemblies().Any(x => new[]
+                    {
+                        "ResumableFunctions.Core",
+                        "ResumableFunctions.AspNetService"
+                    }.Contains(x.Name));
+                if (isReferenceResumableFunction is false)
                 {
-                    WriteMessage($"Not reference LocalResumableFunction dlls,Scan canceled for [{assemblyPath}].");
+                    WriteMessage($"Not reference ResumableFunction dlls,Scan canceled for [{assemblyPath}].");
                 }
                 else
                 {
