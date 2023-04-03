@@ -10,4 +10,7 @@ public class ExternalMethodRecord
 
     public byte[] OriginalMethodHash { get; internal set; }
     public string TrackingId { get; internal set; }
+
+    //todo:to use
+    public bool IsOriginalMethodExist { get; set; }
 }

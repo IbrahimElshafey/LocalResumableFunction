@@ -7,13 +7,13 @@ using ResumableFunctions.Core.InOuts;
 namespace ResumableFunctions.AspNetService
 {
     [ApiController]
-    [Route($"api/ResumableFunctionsReceiver")]
+    [Route($"api/ResumableFunctions")]
     //[ApiExplorerSettings(IgnoreApi = true)]
-    public class ResumableFunctionsReceiverController : ControllerBase
+    public class ResumableFunctionsController : ControllerBase
     {
         public ResumableFunctionHandler ResumableFunctionHandler { get; }
         public IBackgroundJobClient BackgroundJobClient { get; }
-        public ResumableFunctionsReceiverController(ResumableFunctionHandler handler, IBackgroundJobClient backgroundJobClient)
+        public ResumableFunctionsController(ResumableFunctionHandler handler, IBackgroundJobClient backgroundJobClient)
         {
             BackgroundJobClient = backgroundJobClient;
             ResumableFunctionHandler = handler;
@@ -27,11 +27,16 @@ namespace ResumableFunctions.AspNetService
             return 0;
         }
 
+        //todo:PushExternal
         //[HttpGet(nameof(PushExternal))]
         //public int PushExternal(PushedMethod pushedMethod)
         //{
         //    BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessPushedMethod(pushedMethod));
         //    return 0;
         //}
+
+        //todo:CheckMethod/s exist
+        //todo:force rescan
+        //
     }
 }

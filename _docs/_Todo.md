@@ -4,7 +4,7 @@
 		* Verify scanned methods 
 		* Find methods not in code
 		* verify method signatures
-		* verofy start waits exist in db
+		* verify start waits exist in db
 		* Push External Mehtod Call
 	* Monitor active resumable functions
 		* It's props 
@@ -30,8 +30,9 @@
 			* Actions on Function Wait ()
 		* Logs list from function state logs
 
-* Check External Methods Background Job
-* All logs goes to one location
+* Check External Methods Background Job after each scan process
+* All logs goes to one table
+
 * Generate unit test code for resumable function
 * Generate external service class for methods in a service
 		

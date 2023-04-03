@@ -30,7 +30,7 @@ namespace ResumableFunctions.AspNetService
         public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, IResumableFunctionSettings settings)
         {
             mvcBuilder
-                .AddApplicationPart(typeof(ResumableFunctionsReceiverController).Assembly)
+                .AddApplicationPart(typeof(ResumableFunctionsController).Assembly)
                 .AddControllersAsServices();
             mvcBuilder.Services.AddRazorPages();
             mvcBuilder.Services.AddResumableFunctionsCore(settings);
