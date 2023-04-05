@@ -110,14 +110,14 @@ public partial class ResumableFunctionHandler
                 if (pushedMethod?.MethodData.TrackingId is not null)
                 {
                     externalMethod = await _context
-                                    .ExternalMethodsRegistry
+                                    .ExternalMethodRecords
                                     .FirstOrDefaultAsync(x => x.TrackingId == pushedMethod.MethodData.TrackingId);
                 }
                 else
                 {
                     externalMethod =
                         (await _context
-                        .ExternalMethodsRegistry
+                        .ExternalMethodRecords
                         .Where(x => x.OriginalMethodHash == pushedMethod.MethodData.MethodHash)
                         .ToListAsync())
                         .FirstOrDefault(x =>

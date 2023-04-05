@@ -7,7 +7,7 @@ namespace ResumableFunctions.Core.InOuts
     {
         public IGlobalConfiguration HangFireConfig { get; }
         public DbContextOptionsBuilder WaitsDbConfig { get; }
-        public string ServiceUrl { get; }
+        public string CurrentServiceUrl { get; }
         public string[] DllsToScan { get; set; }
 
         public bool ForceRescan { get; set; }

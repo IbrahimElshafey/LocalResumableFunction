@@ -42,7 +42,7 @@ namespace ResumableFunctions.Core.InOuts
             MethodName = externalMethod.Name;
             MethodSignature = CalcSignature(externalMethod);
             MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
-            TrackingId = externalWaitMethodAttribute.TrackingIdetifier;
+            TrackingId = externalWaitMethodAttribute.TrackingIdentifier;
         }
 
         public MethodData(MethodBase methodBase)

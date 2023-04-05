@@ -26,14 +26,14 @@ public sealed class WaitMethodImplementationAttribute : OnMethodBoundaryAspect, 
             .GetService<ILogger<WaitMethodImplementationAttribute>>();
     }
     public override object TypeId => nameof(WaitMethodImplementationAttribute);
-    public string TrackingIdetifier { get; set; }
+    public string TrackingIdentifier { get; set; }
 
     public override void OnEntry(MethodExecutionArgs args)
     {
         args.MethodExecutionTag = false;
         _pushedMethod = new PushedMethod
         {
-            MethodData = new MethodData(GetBaseMethod(args)) { TrackingId = TrackingIdetifier }
+            MethodData = new MethodData(GetBaseMethod(args)) { TrackingId = TrackingIdentifier }
         };
         if (args.Arguments.Length > 0)
             _pushedMethod.Input = args.Arguments[0];

@@ -4,5 +4,5 @@
 public sealed class ResumableFunctionAttribute : Attribute, ITrackingIdetifier
 {
     public override object TypeId => nameof(ResumableFunctionAttribute);
-    public string TrackingIdetifier { get; set; }
+    public string TrackingIdentifier { get; set; }
 }

@@ -181,7 +181,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         return true;
     }
 
-    [WaitMethod(TrackingIdetifier = "ManagerOneApproveProject")]
+    [WaitMethod(TrackingIdentifier = "ManagerOneApproveProject")]
     public bool ManagerOneApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager One Approve Project with decision ({args.Decision})");

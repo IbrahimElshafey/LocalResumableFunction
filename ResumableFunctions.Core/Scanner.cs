@@ -146,7 +146,7 @@ public class Scanner
                 attribute.TypeId == (object)nameof(ExternalWaitMethodAttribute)
             );
 
-        return (trackId as ITrackingIdetifier)?.TrackingIdetifier;
+        return (trackId as ITrackingIdetifier)?.TrackingIdentifier;
     }
 
     private async Task<List<Type>> RegisterMethodWaits(List<string> assemblyPaths)
@@ -164,7 +164,7 @@ public class Scanner
                     continue;
                 }
                 var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
-                if (await ShouldScan(currentAssemblyName, _settings.ServiceUrl) is false) continue;
+                if (await ShouldScan(currentAssemblyName, _settings.CurrentServiceUrl) is false) continue;
                 var assembly = Assembly.LoadFile(assemblyPath);
                 var isReferenceResumableFunction =
                     assembly.GetReferencedAssemblies().Any(x => new[]
@@ -189,7 +189,7 @@ public class Scanner
                     WriteMessage($"Save discovered method waits for assembly [{assemblyPath}].");
                     await _context.SaveChangesAsync();
 
-                    await UpdateScanData(currentAssemblyName, _settings.ServiceUrl);
+                    await UpdateScanData(currentAssemblyName, _settings.CurrentServiceUrl);
                 }
             }
             catch (Exception e)
@@ -237,7 +237,7 @@ public class Scanner
                     await _methodIdentifierRepo.UpsertMethodIdentifier(originalExternalMethodData, MethodType.MethodWait, trackingId);
             }
 
-            var externalMethodRecord = await _context.ExternalMethodsRegistry.FirstOrDefaultAsync(x => x.MethodHash == externalMethodData.MethodHash);
+            var externalMethodRecord = await _context.ExternalMethodRecords.FirstOrDefaultAsync(x => x.MethodHash == externalMethodData.MethodHash);
             if (externalMethodRecord != null)
             {
                 WriteMessage($"Method [{methodRecord.MethodInfo.GetFullName()}] already exist in DB.");
@@ -251,7 +251,7 @@ public class Scanner
                 TrackingId = trackingId,
             };
             WriteMessage($"Add external method [{methodRecord.MethodInfo.GetFullName()}] to DB.");
-            _context.ExternalMethodsRegistry.Add(externalMethodRecord);
+            _context.ExternalMethodRecords.Add(externalMethodRecord);
         }
     }
 

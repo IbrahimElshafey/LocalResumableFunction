@@ -13,6 +13,15 @@ namespace ResumableFunctions.AspNetService
 {
     public static class Extensions
     {
+        public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, IResumableFunctionSettings settings)
+        {
+            mvcBuilder
+                .AddApplicationPart(typeof(ResumableFunctionsController).Assembly)
+                .AddControllersAsServices();
+            mvcBuilder.Services.AddRazorPages();
+            mvcBuilder.Services.AddResumableFunctionsCore(settings);
+        }
+
         public static void ScanCurrentService(this WebApplication app)
         {
             CoreExtensions.SetServiceProvider(app.Services);
@@ -26,14 +35,5 @@ namespace ResumableFunctions.AspNetService
             app.UseHangfireDashboard();
             app.MapRazorPages();
         }   
-
-        public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, IResumableFunctionSettings settings)
-        {
-            mvcBuilder
-                .AddApplicationPart(typeof(ResumableFunctionsController).Assembly)
-                .AddControllersAsServices();
-            mvcBuilder.Services.AddRazorPages();
-            mvcBuilder.Services.AddResumableFunctionsCore(settings);
-        }
     }
 }

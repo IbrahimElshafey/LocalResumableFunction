@@ -13,4 +13,5 @@ public class ExternalMethodRecord
 
     //todo:to use
     public bool IsOriginalMethodExist { get; set; }
+    public bool IsWebhook { get; set; }
 }

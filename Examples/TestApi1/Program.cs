@@ -13,7 +13,7 @@ builder.Services
     .AddResumableFunctions(
         new ResumableFunctionSettings()
         {
-            ServiceUrl = "https://localhost:7140/",
+            CurrentServiceUrl = "https://localhost:7140/",
             //DllsToScan = new[] { "System.Memory.Data" }
         });
 

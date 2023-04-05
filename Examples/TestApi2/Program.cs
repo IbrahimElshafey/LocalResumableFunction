@@ -12,7 +12,7 @@ builder.Services
     .AddResumableFunctions(
         new ResumableFunctionSettings()
         {
-            ServiceUrl = "https://localhost:7099/",
+            CurrentServiceUrl = "https://localhost:7099/",
             DllsToScan = new[] { "ReferenceLibrary" }
         });
 

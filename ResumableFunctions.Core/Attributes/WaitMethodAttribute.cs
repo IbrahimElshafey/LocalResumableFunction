@@ -29,7 +29,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
     /// <summary>
     /// used to enable developer to change method name an parameters and keep point to the old one
     /// </summary>
-    public string TrackingIdetifier { get; set; }
+    public string TrackingIdentifier { get; set; }
     public override object TypeId => nameof(WaitMethodAttribute);
 
     public override void OnEntry(MethodExecutionArgs args)
@@ -37,7 +37,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
         args.MethodExecutionTag = false;
         _pushedMethod = new PushedMethod
         {
-            MethodData = new MethodData(args.Method) { TrackingId = TrackingIdetifier },
+            MethodData = new MethodData(args.Method) { TrackingId = TrackingIdentifier },
         };
         if (args.Arguments.Length > 0)
             _pushedMethod.Input = args.Arguments[0];

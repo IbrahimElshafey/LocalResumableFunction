@@ -34,7 +34,7 @@ namespace ResumableFunctions.Core.InOuts
             set => waitsDbConfig = value;
         }
 
-        public string ServiceUrl { get; set; }
+        public string CurrentServiceUrl { get; set; }
         public string[] DllsToScan { get; set; }
         public bool ForceRescan { get; set; }
     }

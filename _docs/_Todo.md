@@ -1,4 +1,9 @@
 ﻿# Todo
+* Work on webhook calls 
+	 * If external method is web hook save it to method identifiers
+* Create nuget package
+
+
 * Add UI Project (Use MVC not pages)
 	* Servcies Registred
 		* Verify scanned methods 
@@ -31,6 +36,7 @@
 		* Logs list from function state logs
 
 * Check External Methods Background Job after each scan process
+	* External Method may not exist
 * All logs goes to one table
 
 * Generate unit test code for resumable function
@@ -57,7 +63,7 @@
 
 
 
-* Create nuget package
+
 
 * Save function state all fields [public and non public]
 * Find fast and best object serializer
@@ -69,3 +75,10 @@
 
 * Speed Analysis	
 	* https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/event-counters?tabs=windows
+
+
+# External Waits 
+* Monitor network requests using reverse proxy and push MethodCalls [TCP Listener]
+* WebHook for the service
+* RabbitMQ or any service bus [Subscribe to event]
+* File/Folder Changes [File Watcher]

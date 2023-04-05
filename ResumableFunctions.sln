@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApi2", "Examples\TestAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResumableFunctions.AspNetService", "ResumableFunctions.AspNetService\ResumableFunctions.AspNetService.csproj", "{846B343E-AF4E-4428-AB66-50894CE0B390}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResumableFunctions.PublishWebhooks", "ResumableFunctions.PushWebhooks\ResumableFunctions.PublishWebhooks.csproj", "{D0A30F3B-7007-421F-A55A-26B834634556}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{846B343E-AF4E-4428-AB66-50894CE0B390}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{846B343E-AF4E-4428-AB66-50894CE0B390}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{846B343E-AF4E-4428-AB66-50894CE0B390}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0A30F3B-7007-421F-A55A-26B834634556}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0A30F3B-7007-421F-A55A-26B834634556}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0A30F3B-7007-421F-A55A-26B834634556}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0A30F3B-7007-421F-A55A-26B834634556}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

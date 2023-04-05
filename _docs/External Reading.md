@@ -10,11 +10,12 @@
 
 # Code generation
 * https://github.com/Testura/Testura.Code
-# Generate swagger definition for created API
+
 
 
 # Hangfire
 * https://code-maze.com/hangfire-with-asp-net-core/
+
 # Event Types
 * API Called [HTTP Listener]
 * API Call to the engine [WebHook]
@@ -118,6 +119,7 @@ https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?v
 		* wit Mosquitto http://www.steves-internet-guide.com/install-mosquitto-broker/#manual
 		* http://www.steves-internet-guide.com/mosquitto_pub-sub-clients/
 
-	* https://github.com/zarusz/SlimMessageBus
+	* SlimMessageBus https://github.com/zarusz/SlimMessageBus
 	* Use https://github.com/Cysharp/MessagePipe to send events to the engine
 	* https://stackoverflow.com/questions/58549763/how-should-ipc-be-handled-in-net-core
+	* DotNetWorkQueue https://github.com/blehnen/DotNetWorkQueue

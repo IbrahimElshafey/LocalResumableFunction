@@ -11,29 +11,28 @@ namespace ResumableFunctions.AspNetService
     //[ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionsController : ControllerBase
     {
-        public ResumableFunctionHandler ResumableFunctionHandler { get; }
-        public IBackgroundJobClient BackgroundJobClient { get; }
+        private readonly ResumableFunctionHandler _resumableFunctionHandler;
+        public readonly IBackgroundJobClient _backgroundJobClient;
         public ResumableFunctionsController(ResumableFunctionHandler handler, IBackgroundJobClient backgroundJobClient)
         {
-            BackgroundJobClient = backgroundJobClient;
-            ResumableFunctionHandler = handler;
+            _backgroundJobClient = backgroundJobClient;
+            _resumableFunctionHandler = handler;
         }
 
 
         [HttpGet(nameof(ProcessMatchedWait))]
         public int ProcessMatchedWait(int waitId, int pushedMethodId)
         {
-            BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessExternalMatchedWait(waitId, pushedMethodId));
+            _backgroundJobClient.Enqueue(() => _resumableFunctionHandler.ProcessExternalMatchedWait(waitId, pushedMethodId));
             return 0;
         }
 
-        //todo:PushExternal
-        //[HttpGet(nameof(PushExternal))]
-        //public int PushExternal(PushedMethod pushedMethod)
-        //{
-        //    BackgroundJobClient.Enqueue(() => ResumableFunctionHandler.ProcessPushedMethod(pushedMethod));
-        //    return 0;
-        //}
+        [HttpPost(nameof(WebHookMethod))]
+        public async Task WebHookMethod(WebhookCall pushedMethod)
+        {
+            await 
+                _resumableFunctionHandler.QueuePushedMethodProcessing(pushedMethod);
+        }
 
         //todo:CheckMethod/s exist
         //todo:force rescan

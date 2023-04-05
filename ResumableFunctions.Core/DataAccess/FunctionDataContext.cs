@@ -37,7 +37,7 @@ public class FunctionDataContext : DbContext
     public DbSet<FunctionWait> FunctionWaits { get; set; }
     public DbSet<PushedMethod> PushedMethodsCalls { get; set; }
     public DbSet<ServiceData> ServicesData { get; set; }
-    public DbSet<ExternalMethodRecord> ExternalMethodsRegistry { get; set; }
+    public DbSet<ExternalMethodRecord> ExternalMethodRecords { get; set; }
     public DbSet<FunctionStateLogRecord> FunctionStateLogs { get; set; }
 
 

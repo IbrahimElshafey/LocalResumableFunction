@@ -9,5 +9,5 @@
 public sealed class ResumableFunctionEntryPointAttribute : Attribute, ITrackingIdetifier
 {
     public override object TypeId => nameof(ResumableFunctionEntryPointAttribute);
-    public string TrackingIdetifier { get; set; }
+    public string TrackingIdentifier { get; set; }
 }
