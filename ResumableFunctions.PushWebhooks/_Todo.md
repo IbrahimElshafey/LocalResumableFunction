@@ -3,4 +3,4 @@
 * Use PeriodicTimer to handle background tasks
 	* Send requests to orchestrator
 	* Scan Dlls
-* Use liteDb to save scan data and failed requests
+* Use liteDb to save scan Data and requests

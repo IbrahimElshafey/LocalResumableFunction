@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ResumableFunctions.PublishWebhooks
+namespace ResumableFunctions.Publisher
 {
     public static class Extensions
     {

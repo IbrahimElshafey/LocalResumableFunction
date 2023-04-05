@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace  ResumableFunctions.PublishWebhooks;
+namespace  ResumableFunctions.Publisher;
 
 /// <summary>
 ///     Add this to the method you want to 
@@ -16,14 +16,16 @@ namespace  ResumableFunctions.PublishWebhooks;
 
 public sealed class PublishWebhookAttribute : OnMethodBoundaryAspect
 {
-    private WebhookCall _pushedMethod;
+    private WebhookCall _webhookCall;
     private ILogger<PublishWebhookAttribute> _logger;
+    private IPublishWebhook _publishWebhook;
     public PublishWebhookAttribute(string webhookIdetifier)
     {
         if (string.IsNullOrWhiteSpace(webhookIdetifier))
             throw new ArgumentNullException("WebhookIdentifier can't be null or empty.");
         WebhookIdentifier = webhookIdetifier;
         _logger = Extensions.GetServiceProvider().GetService<ILogger<PublishWebhookAttribute>>();
+        _publishWebhook = Extensions.GetServiceProvider().GetService<IPublishWebhook>();
     }
 
     /// <summary>
@@ -35,27 +37,28 @@ public sealed class PublishWebhookAttribute : OnMethodBoundaryAspect
     public override void OnEntry(MethodExecutionArgs args)
     {
         args.MethodExecutionTag = false;
-        _pushedMethod = new WebhookCall
+        _webhookCall = new WebhookCall
         {
             WebhookIdentifier = WebhookIdentifier
         };
         if (args.Arguments.Length > 0)
-            _pushedMethod.Input = args.Arguments[0];
+            _webhookCall.Input = args.Arguments[0];
     }
 
     public override void OnExit(MethodExecutionArgs args)
     {
         try
         {
-            _pushedMethod.Output = args.ReturnValue;
+            _webhookCall.Output = args.ReturnValue;
             if (args.Method.IsAsyncMethod())
             {
                 dynamic output = args.ReturnValue;
-                _pushedMethod.Output = output.Result;
+                _webhookCall.Output = output.Result;
             }
 
             //call `/api/ResumableFunctions/WebHookMethod`
             //_functionHandler.QueuePushedMethodProcessing(_pushedMethod).Wait();
+            _publishWebhook.Publish(_webhookCall);
             args.MethodExecutionTag = true;
         }
         catch (Exception ex)

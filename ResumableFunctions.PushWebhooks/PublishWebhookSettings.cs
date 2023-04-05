@@ -1,4 +1,4 @@
-﻿namespace ResumableFunctions.PublishWebhooks
+﻿namespace ResumableFunctions.Publisher
 {
     public class PublishWebhookSettings
     {
