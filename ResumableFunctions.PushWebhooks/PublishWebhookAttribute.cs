@@ -3,8 +3,10 @@ using MethodBoundaryAspect.Fody.Attributes;
 using ResumableFunctions.Core;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace ResumableFunctions.Core.Attributes;
+namespace  ResumableFunctions.PublishWebhooks;
 
 /// <summary>
 ///     Add this to the method you want to 
@@ -15,12 +17,13 @@ namespace ResumableFunctions.Core.Attributes;
 public sealed class PublishWebhookAttribute : OnMethodBoundaryAspect
 {
     private WebhookCall _pushedMethod;
-
+    private ILogger<PublishWebhookAttribute> _logger;
     public PublishWebhookAttribute(string webhookIdetifier)
     {
         if (string.IsNullOrWhiteSpace(webhookIdetifier))
             throw new ArgumentNullException("WebhookIdentifier can't be null or empty.");
         WebhookIdentifier = webhookIdetifier;
+        _logger = Extensions.GetServiceProvider().GetService<ILogger<PublishWebhookAttribute>>();
     }
 
     /// <summary>
@@ -45,7 +48,7 @@ public sealed class PublishWebhookAttribute : OnMethodBoundaryAspect
         try
         {
             _pushedMethod.Output = args.ReturnValue;
-            if (IsAsyncMethod(args.Method))
+            if (args.Method.IsAsyncMethod())
             {
                 dynamic output = args.ReturnValue;
                 _pushedMethod.Output = output.Result;
@@ -57,7 +60,7 @@ public sealed class PublishWebhookAttribute : OnMethodBoundaryAspect
         }
         catch (Exception ex)
         {
-            //_logger.LogError(ex, $"Error when try to pushe method call for method [{args.Method.GetFullName()}]");
+            _logger.LogError(ex, $"Error when try to pushe method call for method [{args.Method.GetFullName()}]");
         }
     }
 
@@ -68,26 +71,5 @@ public sealed class PublishWebhookAttribute : OnMethodBoundaryAspect
         Console.WriteLine("On exception");
     }
 
-    private static bool IsAsyncMethod(MethodBase method)
-    {
-        var attType = typeof(AsyncStateMachineAttribute);
-
-        // Obtain the custom attribute for the method. 
-        // The value returned contains the StateMachineType property. 
-        // Null is returned if the attribute isn't present for the method. 
-        var attrib = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
-
-
-        if (attrib == null)
-        {
-            bool returnTypeIsTask =
-              attrib == null &&
-              method is MethodInfo mi &&
-              mi != null &&
-              mi.ReturnType.IsGenericType &&
-              mi.ReturnType.GetGenericTypeDefinition() == typeof(Task<>);
-            return returnTypeIsTask;
-        }
-        return true;
-    }
+    
 }
