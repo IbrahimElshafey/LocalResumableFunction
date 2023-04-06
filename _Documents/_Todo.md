@@ -1,6 +1,7 @@
 ﻿# Todo
-* Work on webhook calls 
-	 * If external method is web hook save it to method identifiers
+* Work simplify attributes
+	 * WaitMethodAttribute taskes MethodIdentifier mandatory
+	 * Remove WaitMethodImplementationAttribute and, ExternalWaitMethodAttribute
 * Create nuget package
 
 
