@@ -1,6 +1,6 @@
-﻿using ResumableFunctions.Core.Attributes;
-using ResumableFunctions.Core.Helpers;
-using ResumableFunctions.Core.InOuts;
+﻿using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts;
 
 namespace TestApi1.Examples;
 

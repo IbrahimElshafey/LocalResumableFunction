@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ResumableFunctions.Core;
-using ResumableFunctions.Core.Data;
-using ResumableFunctions.Core.Helpers;
-using ResumableFunctions.Core.InOuts;
+using ResumableFunctions.Handler;
+using ResumableFunctions.Handler.Data;
+using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts;
 using System;
 
 namespace ResumableFunctions.AspNetService

@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ResumableFunctions.Core;
-using ResumableFunctions.Core.Data;
-using ResumableFunctions.Core.Helpers;
-using ResumableFunctions.Core.InOuts;
+using ResumableFunctions.Handler;
+using ResumableFunctions.Handler.Data;
+using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts;
 using TestApi1.Examples;
 
 namespace Test;

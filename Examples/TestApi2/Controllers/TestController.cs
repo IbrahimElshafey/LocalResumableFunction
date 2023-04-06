@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ReferenceLibrary;
-using ResumableFunctions.Core.Attributes;
+using ResumableFunctions.Handler.Attributes;
 
 namespace TestApi2.Controllers
 {
