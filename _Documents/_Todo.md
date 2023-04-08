@@ -1,5 +1,12 @@
 ﻿# Todo
 * Work simplify attributes
+* Handle concurrency problems,optimistic or pessimistic for cases below:
+	* Two waits matched for same FunctionState
+	* First wait closed but new request come before create new one
+	* Update pushed methods calls counter
+	* Database.EnsureCreated(); in same time
+	* Multiple scan process in same time
+* All logs goes to one table
 * Create nuget package
 
 
@@ -36,7 +43,7 @@
 
 * Check External Methods Background Job after each scan process
 	* External Method may not exist
-* All logs goes to one table
+
 
 * Generate unit test code for resumable function
 * Generate external service class for methods in a service
@@ -51,13 +58,7 @@
 
 * Activate one start wait if multiple exist for same method
 
-* Handle concurrency problems
-	* optimistic or pessimistic for cases below:
-	* Two waits matched for same FunctionState
-	* First wait closed but new request come before create new one
-	* Update pushed methods calls counter
-	* Database.EnsureCreated(); in same time
-	* One scan process in time
+
 
 
 

@@ -46,7 +46,7 @@ internal class WaitsRepository : RepositoryBase
             var pushedMethod = await _context.PushedMethodsCalls.FindAsync(pushedMethodId);
             if (pushedMethod == null) return null;
             var metodIdsRepo = new MethodIdentifierRepository(_context);
-            var methodGroupId = 
+            var methodGroupId =
                 await metodIdsRepo.GetMethodGroupId(pushedMethod.MethodData.MethodUrn);
 
 
@@ -117,13 +117,14 @@ internal class WaitsRepository : RepositoryBase
                     x.Name == firstWait.Name &&
                     x.Status == WaitStatus.Waiting);
 
-        if(firstWaitInDb != null)
+        if (firstWaitInDb != null)
         {
             _context.Waits.Remove(firstWaitInDb);
+            _context.FunctionStates.Remove(new ResumableFunctionState { Id = firstWaitInDb.FunctionStateId });
             await _context.SaveChangesAsync();
             return true;
         }
-     
+
         return false;
     }
 

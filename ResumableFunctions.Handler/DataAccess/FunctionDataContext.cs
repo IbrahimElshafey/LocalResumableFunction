@@ -161,23 +161,25 @@ public class FunctionDataContext : DbContext
             .HasConstraintName("FK_Waits_In_ResumableFunction");
 
         modelBuilder.Entity<WaitMethodGroup>()
-            .HasMany(x => x.WaitsRequestsForMethod)
-            .WithOne(wait => wait.WaitMethodGroup)
+            .HasMany(x => x.WaitsRequestsForGroup)
+            .WithOne(mw => mw.WaitMethodGroup)
             .OnDelete(DeleteBehavior.Restrict)
             .HasForeignKey(x => x.WaitMethodGroupId)
-            .HasConstraintName("FK_Waits_RequestedForMethod");
+            .HasConstraintName("FK_WaitsRequestsForGroup");
 
         modelBuilder.Entity<WaitMethodGroup>()
           .HasMany(x => x.WaitMethodIdentifiers)
-          .WithOne(wait => wait.WaitMethodGroup)
+          .WithOne(waitMid => waitMid.WaitMethodGroup)
           .OnDelete(DeleteBehavior.Restrict)
           .HasForeignKey(x => x.WaitMethodGroupId)
           .HasConstraintName("FK_Group_WaitMethodIdentifiers");
 
-        //entityTypeBuilder
-        //    .HasIndex(x => x.MethodHash)
-        //    .HasDatabaseName("Index_MethodHash")
-        //    .IsUnique(false);
+        modelBuilder.Entity<WaitMethodIdentifier>()
+        .HasMany(x => x.WaitsRequestsForMethod)
+        .WithOne(mw => mw.MethodToWait)
+        .OnDelete(DeleteBehavior.Restrict)
+        .HasForeignKey(x => x.MethodToWaitId)
+        .HasConstraintName("FK_WaitsRequestsForMethod");
 
         modelBuilder.Entity<WaitMethodGroup>()
            .HasIndex(x => x.MethodGroupUrn)
