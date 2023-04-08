@@ -53,7 +53,7 @@ public partial class ResumableFunctionHandler
                     foreach (var methodWait in matchedWaits)
                     {
                         if (IsLocalWait(methodWait))
-                            await ProcessMatchedWait(methodWait);
+                            await ProcessWait(methodWait);
                         else
                             await CallOwnerService(methodWait, pushedMethodId);
                     }
@@ -81,8 +81,7 @@ public partial class ResumableFunctionHandler
             .Where(x => x.AssemblyName == ownerAssemblyName)
             .Select(x => x.Url)
             .FirstOrDefaultAsync();
-        //return ownerServiceUrl;
-        // call "api/ResumableFunctionsReceiver/ProcessMatchedWait" for the other service with params (int waitId, int pushedMethodId)
+
         var actionUrl =
             $"{ownerServiceUrl}api/ResumableFunctionsReceiver/ProcessMatchedWait?waitId={methodWait.Id}&pushedMethodId={pushedMethodId}";
         var hangFireHttpClient = _serviceProvider.GetService<HangFireHttpClient>();
@@ -100,40 +99,38 @@ public partial class ResumableFunctionHandler
                 var methodWait = await _context
                     .MethodWaits
                     .Include(x => x.RequestedByFunction)
+                    .Include(x => x.MethodToWait)
+                    //.Include(x => x.WaitMethodGroup)
                     .Where(x => x.Status == WaitStatus.Waiting)
                     .FirstAsync(x => x.Id == waitId);
+                if (methodWait == null)
+                {
+                    _logger.LogError($"No method wait exist with ID ({waitId}) and status ({WaitStatus.Waiting}).");
+                    return;
+                }
 
                 var pushedMethod = await _context
                    .PushedMethodsCalls
                    .FirstAsync(x => x.Id == pushedMethodId);
-                ExternalMethodRecord externalMethod = null;
-                if (pushedMethod?.MethodData.TrackingId is not null)
+                if (pushedMethod == null)
                 {
-                    externalMethod = await _context
-                                    .ExternalMethodRecords
-                                    .FirstOrDefaultAsync(x => x.TrackingId == pushedMethod.MethodData.TrackingId);
+                    _logger.LogError($"No pushed method exist with ID ({pushedMethodId}).");
+                    return;
                 }
-                else
-                {
-                    externalMethod =
-                        (await _context
-                        .ExternalMethodRecords
-                        .Where(x => x.OriginalMethodHash == pushedMethod.MethodData.MethodHash)
-                        .ToListAsync())
-                        .FirstOrDefault(x =>
-                            x.MethodData.MethodName == pushedMethod.MethodData.MethodName &&
-                            x.MethodData.MethodSignature == pushedMethod.MethodData.MethodSignature);
-                }
-                if(externalMethod == null)
+
+                var targetMethod = await _context
+                       .WaitMethodIdentifiers
+                       .FirstOrDefaultAsync(x => x.Id == methodWait.MethodToWaitId);
+             
+                if (targetMethod == null)
                 {
                     _logger.LogError($"No external method exist that match ({pushedMethod.MethodData}).");
                     return;
                 }
-                pushedMethod.ConvertJObject(externalMethod.MethodData.MethodInfo);
+
                 methodWait.Input = pushedMethod.Input;
                 methodWait.Output = pushedMethod.Output;
-
-                await ProcessMatchedWait(methodWait);
+                await ProcessWait(methodWait);
             }
         }
         catch (Exception ex)

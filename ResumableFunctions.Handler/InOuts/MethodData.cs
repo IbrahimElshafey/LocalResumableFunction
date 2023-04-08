@@ -25,43 +25,46 @@ namespace ResumableFunctions.Handler.InOuts
             string methodName,
             string methodSignature,
             byte[] methodHash,
-            string trackingId)
+            string methodUrn)
         {
             AssemblyName = assemblyName;
             ClassName = className;
             MethodName = methodName;
             MethodSignature = methodSignature;
             MethodHash = methodHash;
-            TrackingId = trackingId;
+            MethodUrn = methodUrn;
         }
 
-        public MethodData(MethodBase externalMethod, ExternalWaitMethodAttribute externalWaitMethodAttribute)
+        public MethodData(MethodInfo methodInfo)
         {
-            ClassName = externalWaitMethodAttribute.ClassFullName ?? externalMethod.DeclaringType?.FullName;
-            AssemblyName = externalWaitMethodAttribute.AssemblyName ?? externalMethod.DeclaringType?.Assembly.GetName().Name;
-            MethodName = externalMethod.Name;
-            MethodSignature = CalcSignature(externalMethod);
+            if (methodInfo == null) return;
+            AssemblyName = methodInfo.DeclaringType?.Assembly.GetName().Name;
+            ClassName = methodInfo.DeclaringType?.FullName;
+            MethodName = methodInfo.Name;
+            MethodSignature = CalcSignature(methodInfo);
             MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
-            TrackingId = externalWaitMethodAttribute.TrackingIdentifier;
+            MethodUrn = GetMethodUrn(methodInfo);
         }
 
-        public MethodData(MethodBase methodBase)
-        {
-            if (methodBase == null) return;
-            //methodBase.Attributes= MethodAttributes.NewSlot;
-            MethodName = methodBase.Name;
-            ClassName = methodBase.DeclaringType?.FullName;
-            AssemblyName = methodBase.DeclaringType?.Assembly.GetName().Name;
-            MethodSignature = CalcSignature(methodBase);
-            MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
-        }
-
-        public string TrackingId { get; internal set; }
+        public string MethodUrn { get; internal set; }
         public string AssemblyName { get; internal set; }
         public string ClassName { get; internal set; }
         public string MethodName { get; internal set; }
         public string MethodSignature { get; internal set; }
         public byte[] MethodHash { get; internal set; }
+        private string GetMethodUrn(MethodInfo method)
+        {
+            var trackId = method
+                .GetCustomAttributes()
+                .FirstOrDefault(
+                attribute =>
+                    attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId ||
+                    attribute.TypeId == ResumableFunctionAttribute.AttributeId ||
+                    attribute.TypeId == WaitMethodAttribute.AttributeId
+                );
+
+            return (trackId as ITrackingIdetifier)?.MethodUrn;
+        }
 
         internal MethodInfo MethodInfo
         {
@@ -72,6 +75,10 @@ namespace ResumableFunctions.Handler.InOuts
                 return _methodInfo;
             }
         }
+
+        public MethodIdentifier MethodIdentifier { get; internal set; }
+        public int MethodIdentifierId { get; internal set; }
+        public MethodType MethodType { get; internal set; }
 
         internal static string CalcSignature(MethodBase value)
         {
@@ -94,21 +101,28 @@ namespace ResumableFunctions.Handler.InOuts
             return md5.ComputeHash(inputBytes);
         }
 
-        internal MethodIdentifier ToMethodIdentifier()
-        {
-            return new MethodIdentifier
-            {
-                MethodName = MethodName,
-                MethodSignature = MethodSignature,
-                AssemblyName = AssemblyName,
-                ClassName = ClassName,
-                MethodHash = MethodHash
-            };
-        }
+        //internal MethodIdentifier ToMethodIdentifier()
+        //{
+        //    return new MethodIdentifier
+        //    {
+        //        MethodName = MethodName,
+        //        MethodSignature = MethodSignature,
+        //        AssemblyName = AssemblyName,
+        //        ClassName = ClassName,
+        //        MethodHash = MethodHash
+        //    };
+        //}
 
         public override string ToString()
         {
             return $"{AssemblyName} # {ClassName}.{MethodName} # {MethodSignature}";
+        }
+
+        internal bool Validate()
+        {
+            if (MethodUrn == null)
+                throw new NullReferenceException($"For method ({this}) MethodUrn must not be null");
+            return true;
         }
     }
 

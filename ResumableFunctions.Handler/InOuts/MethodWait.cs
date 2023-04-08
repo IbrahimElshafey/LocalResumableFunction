@@ -30,12 +30,14 @@ public class MethodWait : Wait
     /// <summary>
     ///     The method that we wait to resume resumable function
     /// </summary>
-    internal MethodIdentifier WaitMethodIdentifier { get; set; }
+    internal WaitMethodIdentifier MethodToWait { get; set; }
+
+    internal int MethodToWaitId { get; set; }
+    internal WaitMethodGroup WaitMethodGroup { get; set; }
+    internal int WaitMethodGroupId { get; set; }
 
     [NotMapped]
     internal MethodData MethodData { get; set; }
-
-    internal int WaitMethodIdentifierId { get; set; }
 
     [NotMapped]
     public object Input { get; set; }
@@ -45,7 +47,7 @@ public class MethodWait : Wait
 
     //todo:bug
     private Assembly FunctionAssembly =>
-        WaitMethodIdentifier?.MethodInfo?.DeclaringType.Assembly ??
+        MethodToWait?.MethodInfo?.DeclaringType.Assembly ??
         RequestedByFunction?.MethodInfo?.DeclaringType.Assembly ??
         Assembly.GetEntryAssembly();
 
@@ -148,6 +150,42 @@ public class MethodWait : Wait
                 $"Please use `NoSetData()` if this is intended.");
         return base.IsValidWaitRequest();
     }
+
+    internal void SetInputAndOutput()
+    {
+        var methodInfo = MethodToWait.MethodInfo;
+        try
+        {
+            var inputType = methodInfo.GetParameters()[0].ParameterType;
+            if (Input is JObject inputJson)
+            {
+                Input = inputJson.ToObject(inputType);
+            }
+            else
+                Input = Convert.ChangeType(Input.ToString(), inputType);
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+        try
+        {
+            if (Output is JObject outputJson)
+            {
+                if (methodInfo.IsAsyncMethod())
+                    Output = outputJson.ToObject(methodInfo.ReturnType.GetGenericArguments()[0]);
+                else
+                    Output = outputJson.ToObject(methodInfo.ReturnType);
+            }
+            else
+                Output = Convert.ChangeType(Output.ToString(), methodInfo.ReturnType);
+        }
+        catch (Exception)
+        {
+        }
+
+    }
 }
 
 public class MethodWait<TInput, TOutput> : MethodWait
@@ -164,34 +202,12 @@ public class MethodWait<TInput, TOutput> : MethodWait
     private void Initiate(MethodInfo method)
     {
         var methodAttribute =
-            method.GetCustomAttribute(typeof(WaitMethodAttribute)) ??
-            method.GetCustomAttribute(typeof(WaitMethodImplementationAttribute)) ??
-            method.GetCustomAttribute(typeof(ExternalWaitMethodAttribute));
+            method.GetCustomAttribute(typeof(WaitMethodAttribute));
         if (methodAttribute == null)
             throw new Exception(
                 $"You must add attribute [WaitMethod , WaitMethodImplementation or ExternalWaitMethod] to method {method.GetFullName()}");
 
-        switch (methodAttribute)
-        {
-            case WaitMethodAttribute:
-                MethodData = new MethodData(method);
-                break;
-            case WaitMethodImplementationAttribute:
-                MethodInfo interfaceMethod = method.GetInterfaceMethod();
-                if (interfaceMethod == null)
-                    throw new Exception(
-                        $"No interface method matched for method [{method.GetFullName()}]");
-                var waitMethodAttributeExist = interfaceMethod.GetCustomAttribute(typeof(WaitMethodAttribute));
-                if (waitMethodAttributeExist == null)
-                    throw new Exception(
-                        $"You must add attribute [WaitMethodAttribute] to interface method {method.GetFullName()}");
-                MethodData = new MethodData(interfaceMethod);
-                break;
-            case ExternalWaitMethodAttribute externalWaitMethodAttribute:
-                MethodData = new MethodData(method, externalWaitMethodAttribute);
-                break;
-        }
-
+        MethodData = new MethodData(method);
         Name = $"#{method.Name}#";
     }
 

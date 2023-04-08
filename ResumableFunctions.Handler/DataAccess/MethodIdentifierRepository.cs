@@ -17,82 +17,124 @@ internal class MethodIdentifierRepository : RepositoryBase
         _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<MethodIdentifierRepository>>();
     }
 
-    public async Task<MethodIdentifier> GetMethodIdentifierFromDb(MethodData methodData)
+    internal async Task<int> GetMethodGroupId(string methodUrn)
     {
-        if (methodData.TrackingId is not null)
+        var waitMethodIdentifier =
+           await _context
+               .WaitMethodGroups
+               .Where(x => x.MethodGroupUrn == methodUrn)
+               .Select(x => x.Id)
+               .FirstOrDefaultAsync();
+        if (waitMethodIdentifier != default)
+            return waitMethodIdentifier;
+        else
         {
-            var result = await _context
-                .MethodIdentifiers
-                .FirstOrDefaultAsync(x => x.TrackingId == methodData.TrackingId);
-            if (result != null)
-                return result;
+            _logger.LogWarning($"Method [{methodUrn}] is not registered in current database as [WaitMethod].");
+            return default;
         }
-        var sameHashList = await _context
-            .MethodIdentifiers
-            .Where(x => x.MethodHash == methodData.MethodHash).ToListAsync();
-        return
-            sameHashList.FirstOrDefault(x =>
-                x.MethodSignature == methodData.MethodSignature &&
-                x.AssemblyName == methodData.AssemblyName &&
-                x.ClassName == methodData.ClassName &&
-                x.MethodName == methodData.MethodName);
     }
 
-    public async Task UpsertMethodIdentifier(MethodData methodData, MethodType methodType, string trackingId)
+    internal async Task<ResumableFunctionIdentifier> GetResumableFunction(MethodData methodData)
     {
-        var updateMethodId = await GetMethodByTrackingId(trackingId);
-        if (updateMethodId != null)
+        methodData.Validate();
+        var resumableFunctionIdentifier =
+            await _context
+                .ResumableFunctionIdentifiers
+                .FirstOrDefaultAsync(x => x.MethodUrn == methodData.MethodUrn);
+        if (resumableFunctionIdentifier != null)
+            return resumableFunctionIdentifier;
+        else
         {
-            _logger.LogWarning($"Updating method ({updateMethodId}) to  ({methodData})");
-            updateMethodId.MethodSignature = methodData.MethodSignature;
-            updateMethodId.AssemblyName = methodData.AssemblyName;
-            updateMethodId.ClassName = methodData.ClassName;
-            updateMethodId.MethodName = methodData.MethodName;
-            updateMethodId.TrackingId = trackingId;
-            updateMethodId.MethodHash =
-                MethodData.GetMethodHash(
-                    methodData.MethodName,
-                    methodData.ClassName,
-                    methodData.AssemblyName,
-                    methodData.MethodSignature);
+            _logger.LogWarning($"Can't find resumable function ({methodData}) in database.");
+            return null;
+        }
+    }
+
+    internal async Task AddResumableFunctionIdentifier(MethodData methodData)
+    {
+        var inDb = await GetResumableFunction(methodData);
+        if (inDb != null)
+        {
+            inDb.FillFromMethodData(methodData);
+        }
+        else
+        {
+            var add = new ResumableFunctionIdentifier();
+            add.FillFromMethodData(methodData);
+            _context.ResumableFunctionIdentifiers.Add(add);
+        }
+    }
+
+    internal async Task AddWaitMethodIdentifier(MethodData methodData)
+    {
+        var methodGroup =
+            await _context
+                .WaitMethodGroups
+                .Include(x => x.WaitMethodIdentifiers)
+                .FirstOrDefaultAsync(x => x.MethodGroupUrn == methodData.MethodUrn);
+        var methodInDb = methodGroup?.WaitMethodIdentifiers?
+            .FirstOrDefault(x => x.MethodHash.SequenceEqual(methodData.MethodHash));
+
+
+
+        var isUpdate =
+            methodGroup != null &&
+            methodInDb != null;
+        if (isUpdate)
+        {
+            methodInDb.FillFromMethodData(methodData);
             return;
         }
 
-        //if add not update
-        var methodId = await GetMethodIdentifierFromDb(methodData);
-        if (methodId != null)
+
+        var toAdd = new WaitMethodIdentifier();
+        toAdd.FillFromMethodData(methodData);
+
+        var isChildAdd =
+            methodGroup != null &&
+            methodInDb == null;
+        var isNewParent = methodGroup == null;
+
+        if (isChildAdd)
+            methodGroup.WaitMethodIdentifiers.Add(toAdd);
+        else if (isNewParent)
         {
-            if (methodId.TrackingId != trackingId)
+            var group = new WaitMethodGroup
             {
-                methodId.TrackingId = trackingId;
-                _logger.LogWarning($"Tracking ID changed for method ({methodData}).");
-            }
-            _logger.LogInformation($"Method [{methodData.MethodName}] already exist in DB.");
-            return;
+                MethodGroupUrn = methodData.MethodUrn,
+            };
+            group.WaitMethodIdentifiers.Add(toAdd);
+            _context.WaitMethodGroups.Add(group);
+            await _context.SaveChangesAsync();
         }
 
-        methodId =
-            _context.MethodIdentifiers.Local.FirstOrDefault(x =>
-                x.MethodSignature == methodData.MethodSignature &&
-                x.AssemblyName == methodData.AssemblyName &&
-                x.ClassName == methodData.ClassName &&
-                x.MethodName == methodData.MethodName);
-        if (methodId != null)
-        {
-            _logger.LogInformation($"Method [{methodData.MethodName}] exist in local db.");
-            return;
-        }
-
-        _logger.LogInformation($"Add method [{methodData.MethodName}] to DB.");
-        methodId = methodData.ToMethodIdentifier();
-        methodId.Type = methodType;
-        methodId.TrackingId = trackingId;
-        _context.MethodIdentifiers.Add(methodId);
     }
 
-    internal async Task<MethodIdentifier> GetMethodByTrackingId(string trackingId)
+    internal async Task<WaitMethodIdentifier> GetWaitMethod(MethodWait methodWait)
     {
-        if (string.IsNullOrWhiteSpace(trackingId)) return null;
-        return await _context.MethodIdentifiers.FirstOrDefaultAsync(x => x.TrackingId == trackingId);
+        if (methodWait.MethodData == null)
+            return
+                await _context
+                .WaitMethodIdentifiers
+                .Include(x => x.WaitMethodGroup)
+                .FirstOrDefaultAsync(x => x.Id == methodWait.MethodToWaitId);
+
+        var methodData = methodWait.MethodData;
+        methodData.Validate();
+        var methodGroup =
+            await _context
+                .WaitMethodGroups
+                .Include(x => x.WaitMethodIdentifiers)
+                .FirstOrDefaultAsync(x => x.MethodGroupUrn == methodData.MethodUrn);
+        var childMethodIdentifier = 
+            methodGroup
+            .WaitMethodIdentifiers
+            .FirstOrDefault(x => x.MethodHash.SequenceEqual(methodData.MethodHash));
+        if (childMethodIdentifier != null)
+        {
+            return childMethodIdentifier;
+        }
+        else
+            throw new NullReferenceException($"Can't find wait method ({methodData}) in database.");
     }
 }

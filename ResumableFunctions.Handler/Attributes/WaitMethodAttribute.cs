@@ -4,6 +4,7 @@ using MethodBoundaryAspect.Fody.Attributes;
 using ResumableFunctions.Handler;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.Attributes;
 
@@ -18,8 +19,10 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
     private readonly ResumableFunctionHandler _functionHandler;
     private readonly ILogger<WaitMethodAttribute> _logger;
 
-    public WaitMethodAttribute()
+    public WaitMethodAttribute(string methodUrn, bool publishFromExternal = false)
     {
+        MethodUrn = methodUrn;
+        PublishFromExternal = publishFromExternal;
         var serviceProvider = CoreExtensions.GetServiceProvider();
         if (serviceProvider == null) return;
         _functionHandler = serviceProvider.GetService<ResumableFunctionHandler>();
@@ -29,15 +32,18 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
     /// <summary>
     /// used to enable developer to change method name an parameters and keep point to the old one
     /// </summary>
-    public string TrackingIdentifier { get; set; }
-    public override object TypeId => nameof(WaitMethodAttribute);
+    public string MethodUrn { get; }
+    public bool PublishFromExternal { get; }
+
+    public const string AttributeId = nameof(WaitMethodAttribute);
+    public override object TypeId => AttributeId;
 
     public override void OnEntry(MethodExecutionArgs args)
     {
         args.MethodExecutionTag = false;
         _pushedMethod = new PushedMethod
         {
-            MethodData = new MethodData(args.Method) { TrackingId = TrackingIdentifier },
+            MethodData = new MethodData(args.Method as MethodInfo) { MethodUrn = MethodUrn },
         };
         if (args.Arguments.Length > 0)
             _pushedMethod.Input = args.Arguments[0];

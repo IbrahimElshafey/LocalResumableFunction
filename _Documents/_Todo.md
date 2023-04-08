@@ -1,7 +1,5 @@
 ﻿# Todo
 * Work simplify attributes
-	 * WaitMethodAttribute taskes MethodIdentifier mandatory
-	 * Remove WaitMethodImplementationAttribute and, ExternalWaitMethodAttribute
 * Create nuget package
 
 
@@ -59,6 +57,7 @@
 	* First wait closed but new request come before create new one
 	* Update pushed methods calls counter
 	* Database.EnsureCreated(); in same time
+	* One scan process in time
 
 
 

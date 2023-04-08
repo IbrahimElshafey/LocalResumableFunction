@@ -29,7 +29,7 @@ public partial class ResumableFunctionHandler
 
                 await functionRunner.MoveNextAsync();
                 var firstWait = functionRunner.Current;
-                var methodId = await _metodIdsRepo.GetMethodIdentifierFromDb(new MethodData(resumableFunction));
+                var methodId = await _metodIdsRepo.GetResumableFunction(new MethodData(resumableFunction));
                 if (await _waitsRepository.RemoveFirstWaitIfExist(firstWait, methodId))
                 {
                     //todo:expression may be changed and group may added ne one

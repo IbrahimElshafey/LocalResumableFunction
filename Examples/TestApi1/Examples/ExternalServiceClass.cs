@@ -5,25 +5,25 @@ namespace TestApi1.Examples
     public class ExternalServiceClass
     {
 
-        [ExternalWaitMethod("TestApi2", "TestApi2.Controllers.TestController")]
+        [WaitMethod("TestController.ExternalMethodTest")]
         public int ExternalMethodTest(object o)
         {
             return default;
         }
 
-        [ExternalWaitMethod("TestApi2", "TestApi2.Controllers.TestController")]
+        [WaitMethod("TestController.ExternalMethodTest2")]
         public int ExternalMethodTest2(string o)
         {
             return default;
         }
 
-        [ExternalWaitMethod("ReferenceLibrary", "ReferenceLibrary.CodeInDllTest")]
+        [WaitMethod("CodeInDllTest.SayHello")]
         public string SayHello(string userName)
         {
             return userName;
         }
 
-        [ExternalWaitMethod("889f52f5-be6b-41db-8312-99abc8db5883")]
+        [WaitMethod("CodeInDllTest.SayGoodby")]
         public string SayGoodby(string userName)
         {
             return userName;

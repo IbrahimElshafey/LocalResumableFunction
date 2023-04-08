@@ -32,22 +32,24 @@ public class FunctionDataContext : DbContext
 
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
     public DbSet<MethodIdentifier> MethodIdentifiers { get; set; }
+    public DbSet<WaitMethodGroup> WaitMethodGroups { get; set; }
+    public DbSet<WaitMethodIdentifier> WaitMethodIdentifiers { get; set; }
+    public DbSet<ResumableFunctionIdentifier> ResumableFunctionIdentifiers { get; set; }
     public DbSet<Wait> Waits { get; set; }
     public DbSet<MethodWait> MethodWaits { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
     public DbSet<PushedMethod> PushedMethodsCalls { get; set; }
     public DbSet<ServiceData> ServicesData { get; set; }
-    public DbSet<ExternalMethodRecord> ExternalMethodRecords { get; set; }
     public DbSet<FunctionStateLogRecord> FunctionStateLogs { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ConfigureResumableFunctionState(modelBuilder.Entity<ResumableFunctionState>());
-        ConfigureMethodIdentifier(modelBuilder.Entity<MethodIdentifier>());
+        ConfigureMethodIdentifier(modelBuilder);
         ConfigurePushedMethod(modelBuilder.Entity<PushedMethod>());
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
-        ConfigureExternalMethodRecord(modelBuilder.Entity<ExternalMethodRecord>());
+        //ConfigureExternalMethodRecord(modelBuilder.Entity<ExternalMethodRecord>());
         ConfigureFunctionStateLogRecord(modelBuilder.Entity<FunctionStateLogRecord>());
         ConfigureWaits(modelBuilder);
         base.OnModelCreating(modelBuilder);
@@ -59,30 +61,30 @@ public class FunctionDataContext : DbContext
            .Property<DateTime>(ConstantValue.CreatedProp);
     }
 
-    private void ConfigureExternalMethodRecord(EntityTypeBuilder<ExternalMethodRecord> entityTypeBuilder)
-    {
-        entityTypeBuilder
-          .Property(x => x.MethodData)
-          .HasConversion(
-           v => JsonConvert.SerializeObject(v),
-           v => JsonConvert.DeserializeObject<MethodData>(v));
+    //private void ConfigureExternalMethodRecord(EntityTypeBuilder<ExternalMethodRecord> entityTypeBuilder)
+    //{
+    //    entityTypeBuilder
+    //      .Property(x => x.MethodData)
+    //      .HasConversion(
+    //       v => JsonConvert.SerializeObject(v),
+    //       v => JsonConvert.DeserializeObject<MethodData>(v));
 
-        entityTypeBuilder
-            .HasIndex(x => x.MethodHash)
-            .HasDatabaseName("Index_ExternalMethodHash")
-            .IsUnique(true);
+    //    entityTypeBuilder
+    //        .HasIndex(x => x.MethodHash)
+    //        .HasDatabaseName("Index_ExternalMethodHash")
+    //        .IsUnique(true);
 
-        entityTypeBuilder
-          .Property(x => x.MethodHash)
-          .HasMaxLength(16);
+    //    entityTypeBuilder
+    //      .Property(x => x.MethodHash)
+    //      .HasMaxLength(16);
 
-        entityTypeBuilder
-         .Property(x => x.OriginalMethodHash)
-         .HasMaxLength(16);
+    //    entityTypeBuilder
+    //     .Property(x => x.OriginalMethodHash)
+    //     .HasMaxLength(16);
 
-        entityTypeBuilder
-          .Property<DateTime>(ConstantValue.CreatedProp);
-    }
+    //    entityTypeBuilder
+    //      .Property<DateTime>(ConstantValue.CreatedProp);
+    //}
 
     private void ConfigureServiceData(EntityTypeBuilder<ServiceData> entityTypeBuilder)
     {
@@ -143,43 +145,50 @@ public class FunctionDataContext : DbContext
         modelBuilder.Ignore<TimeWait>();
     }
 
-    private void ConfigureMethodIdentifier(EntityTypeBuilder<MethodIdentifier> entityTypeBuilder)
+    private void ConfigureMethodIdentifier(ModelBuilder modelBuilder)
     {
-        entityTypeBuilder
+        modelBuilder.Entity<ResumableFunctionIdentifier>()
            .HasMany(x => x.ActiveFunctionsStates)
            .WithOne(wait => wait.ResumableFunctionIdentifier)
            .HasForeignKey(x => x.ResumableFunctionIdentifierId)
            .HasConstraintName("FK_FunctionsStates_For_ResumableFunction");
 
-        entityTypeBuilder
+        modelBuilder.Entity<ResumableFunctionIdentifier>()
             .HasMany(x => x.WaitsCreatedByFunction)
             .WithOne(wait => wait.RequestedByFunction)
             .OnDelete(DeleteBehavior.Restrict)
             .HasForeignKey(x => x.RequestedByFunctionId)
             .HasConstraintName("FK_Waits_In_ResumableFunction");
 
-        entityTypeBuilder
+        modelBuilder.Entity<WaitMethodGroup>()
             .HasMany(x => x.WaitsRequestsForMethod)
-            .WithOne(wait => wait.WaitMethodIdentifier)
+            .WithOne(wait => wait.WaitMethodGroup)
             .OnDelete(DeleteBehavior.Restrict)
-            .HasForeignKey(x => x.WaitMethodIdentifierId)
+            .HasForeignKey(x => x.WaitMethodGroupId)
             .HasConstraintName("FK_Waits_RequestedForMethod");
 
-        entityTypeBuilder
-            .HasIndex(x => x.MethodHash)
-            .HasDatabaseName("Index_MethodHash")
-            .IsUnique(false);
+        modelBuilder.Entity<WaitMethodGroup>()
+          .HasMany(x => x.WaitMethodIdentifiers)
+          .WithOne(wait => wait.WaitMethodGroup)
+          .OnDelete(DeleteBehavior.Restrict)
+          .HasForeignKey(x => x.WaitMethodGroupId)
+          .HasConstraintName("FK_Group_WaitMethodIdentifiers");
 
-        entityTypeBuilder
-            .HasIndex(x => x.TrackingId)
-            .HasDatabaseName("Index_TrackingId")
+        //entityTypeBuilder
+        //    .HasIndex(x => x.MethodHash)
+        //    .HasDatabaseName("Index_MethodHash")
+        //    .IsUnique(false);
+
+        modelBuilder.Entity<WaitMethodGroup>()
+           .HasIndex(x => x.MethodGroupUrn)
+            .HasDatabaseName("Index_MethodGroupUniqueUrn")
             .IsUnique(true);
 
-        entityTypeBuilder
-            .Property(x => x.MethodHash)
-            .HasMaxLength(16);
+        //entityTypeBuilder
+        //    .Property(x => x.MethodHash)
+        //    .HasMaxLength(16);
 
-        entityTypeBuilder
+        modelBuilder.Entity<MethodIdentifier>()
          .Property<DateTime>(ConstantValue.CreatedProp);
     }
 

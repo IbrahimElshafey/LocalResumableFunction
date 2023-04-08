@@ -14,7 +14,7 @@ public class ResumableFunctionState
 
     public List<Wait> Waits { get; internal set; } = new();
     public List<FunctionStateLogRecord> LogRecords { get; internal set; } = new();
-    public MethodIdentifier ResumableFunctionIdentifier { get; set; }
+    public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; set; }
     public int ResumableFunctionIdentifierId { get; set; }
     public bool IsLocked { get; set; }
     public FunctionStatus Status { get; set; }

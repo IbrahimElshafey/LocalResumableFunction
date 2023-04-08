@@ -29,10 +29,10 @@ internal class WaitsRepository : RepositoryBase
         {
             waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
         }
-        if (wait is MethodWait { WaitMethodIdentifierId: > 0 } methodWait)
+        if (wait is MethodWait { MethodToWaitId: > 0 } methodWait)
         {
             //does this may cause a problem
-            methodWait.WaitMethodIdentifier = null;
+            methodWait.MethodToWait = null;
         }
         _context.Waits.Add(wait);
         return Task.CompletedTask;
@@ -46,23 +46,21 @@ internal class WaitsRepository : RepositoryBase
             var pushedMethod = await _context.PushedMethodsCalls.FindAsync(pushedMethodId);
             if (pushedMethod == null) return null;
             var metodIdsRepo = new MethodIdentifierRepository(_context);
-            var methodId = await metodIdsRepo
-               .GetMethodIdentifierFromDb(pushedMethod.MethodData);
-            if (methodId == null)
-                throw new Exception(
-                    $"Method [{pushedMethod.MethodData.MethodName}] is not registered in current database as [WaitMethod].");
+            var methodGroupId = 
+                await metodIdsRepo.GetMethodGroupId(pushedMethod.MethodData.MethodUrn);
 
 
             var matchedWaits = await _context
                             .MethodWaits
                             .Include(x => x.RequestedByFunction)
+                            .Include(x => x.MethodToWait)
+                            //.Include(x => x.WaitMethodGroup)
                             .Where(x =>
-                                x.WaitMethodIdentifierId == methodId.Id &&
+                                x.WaitMethodGroupId == methodGroupId &&
                                 x.Status == WaitStatus.Waiting &&
                                 x.RefineMatchModifier == pushedMethod.RefineMatchModifier)
                             .ToListAsync();
 
-            pushedMethod.ConvertJObject(methodId.MethodInfo);
 
             matchedWaits.ForEach(x =>
             {
@@ -201,7 +199,7 @@ internal class WaitsRepository : RepositoryBase
         if (waitToReplay == null)
         {
             Console.WriteLine(
-                $"Can't replay not exiting wait [{replayWait.Name}] in function [{replayWait?.RequestedByFunction?.MethodName}].");
+                $"Can't replay not exiting wait [{replayWait.Name}] in function [{replayWait?.RequestedByFunction}].");
             return null;
         }
         await _context.SaveChangesAsync();

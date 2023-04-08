@@ -21,8 +21,6 @@ public partial class ResumableFunctionHandler
     private async Task<bool> CheckIfMatch(MethodWait methodWait)
     {
         methodWait.LoadExpressions();
-        //methodWait.Input = pushedMethod.Input;
-        //methodWait.Output = pushedMethod.Output;
         switch (methodWait.NeedFunctionStateForMatch)
         {
             case false when methodWait.IsMatched():
@@ -46,14 +44,15 @@ public partial class ResumableFunctionHandler
 
 
 
-    private async Task ProcessMatchedWait(MethodWait methodWait)
+    private async Task ProcessWait(MethodWait methodWait)
     {
         try
         {
+            methodWait.SetInputAndOutput();
             if (!await CheckIfMatch(methodWait))
                 return;
             //todo:cancel processing and rewait it if data is locked
-            if(methodWait.UpdateFunctionData())
+            if (methodWait.UpdateFunctionData())
             {
                 await ResumeExecution(methodWait);
                 await IncrementCompletedCounter(methodWait.PushedMethodCallId);

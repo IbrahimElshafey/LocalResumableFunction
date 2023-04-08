@@ -45,16 +45,12 @@ public partial class ResumableFunctionHandler
 
     private async Task MethodWaitRequested(MethodWait methodWait)
     {
-        var methodId = methodWait.MethodData != null
-            ? await _metodIdsRepo.GetMethodIdentifierFromDb(methodWait.MethodData)
-            : await _context.MethodIdentifiers.FindAsync(methodWait.WaitMethodIdentifierId);
-        if (methodId == null)
-        {
-            _logger.LogError($"No method ({methodWait.MethodData}) exist in DB.");
-            return;
-        }
-        methodWait.WaitMethodIdentifier = methodId;
-        methodWait.WaitMethodIdentifierId = methodId.Id;
+        var methodToWait = await _metodIdsRepo.GetWaitMethod(methodWait);
+      
+        methodWait.MethodToWait = methodToWait;
+        methodWait.MethodToWaitId = methodToWait.Id;
+        methodWait.WaitMethodGroup = methodToWait.WaitMethodGroup;
+        methodWait.WaitMethodGroupId = methodToWait.WaitMethodGroupId;
         methodWait.RewriteExpressions();
 
         await _waitsRepository.AddWait(methodWait);
@@ -97,7 +93,7 @@ public partial class ResumableFunctionHandler
         functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
         functionWait.FirstWait.ParentWait = functionWait;
         functionWait.FirstWait.ParentWaitId = functionWait.Id;
-        var methodId = await _metodIdsRepo.GetMethodIdentifierFromDb(new MethodData(functionWait.FunctionInfo));
+        var methodId = await _metodIdsRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
         functionWait.FirstWait.RequestedByFunction = methodId;
         functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
 

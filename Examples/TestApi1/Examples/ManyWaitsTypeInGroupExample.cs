@@ -33,7 +33,7 @@ internal class ManyWaitsTypeInGroupExample : ProjectApprovalExample
 
 
 
-    [ResumableFunction]
+    [ResumableFunction("ManyWaitsTypeInGroupExample.ManagerThreeSubFunction")]
     internal async IAsyncEnumerable<Wait> ManagerThreeSubFunction()
     {
         WriteMessage("Start ManagerThreeSubFunction");

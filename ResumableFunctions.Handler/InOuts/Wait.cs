@@ -32,7 +32,7 @@ public abstract class Wait
     /// <summary>
     ///     The resumable function that initiated/created/requested the wait.
     /// </summary>
-    internal MethodIdentifier RequestedByFunction { get; set; }
+    internal ResumableFunctionIdentifier RequestedByFunction { get; set; }
 
     internal int RequestedByFunctionId { get; set; }
 
@@ -158,8 +158,8 @@ public abstract class Wait
         to.SetDataExpressionValue = from.SetDataExpressionValue;
         to.MatchIfExpressionValue = from.MatchIfExpressionValue;
         to.NeedFunctionStateForMatch = from.NeedFunctionStateForMatch;
-        to.WaitMethodIdentifierId = from.WaitMethodIdentifierId;
-        to.WaitMethodIdentifier = from.WaitMethodIdentifier;
+        to.MethodToWaitId = from.MethodToWaitId;
+        to.MethodToWait = from.MethodToWait;
         to.LoadExpressions();
     }
 

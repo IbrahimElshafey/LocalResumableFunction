@@ -129,25 +129,11 @@ public class Scanner
     {
         WriteMessage($"Register resumable function [{resumableFunction.GetFullName()}] of type [{type}]");
 
-        await _methodIdentifierRepo.UpsertMethodIdentifier(new MethodData(resumableFunction), type, GetTrackingId(resumableFunction));
+        await _methodIdentifierRepo.AddResumableFunctionIdentifier(new MethodData(resumableFunction) { MethodType = type });
         await _context.SaveChangesAsync();
     }
 
-    private string GetTrackingId(MethodInfo method)
-    {
-        var trackId = method
-            .GetCustomAttributes()
-            .FirstOrDefault(
-            attribute =>
-                attribute.TypeId == new ResumableFunctionEntryPointAttribute().TypeId ||
-                attribute.TypeId == new ResumableFunctionAttribute().TypeId ||
-                attribute.TypeId == new WaitMethodAttribute().TypeId ||
-                attribute.TypeId == new WaitMethodImplementationAttribute().TypeId ||
-                attribute.TypeId == (object)nameof(ExternalWaitMethodAttribute)
-            );
 
-        return (trackId as ITrackingIdetifier)?.TrackingIdentifier;
-    }
 
     private async Task<List<Type>> RegisterMethodWaits(List<string> assemblyPaths)
     {
@@ -181,7 +167,7 @@ public class Scanner
                     foreach (var type in assembly.GetTypes())
                     {
                         await RegisterMethodWaitsInType(type);
-                        await RegisterExternalMethods(type);
+                        //await RegisterExternalMethods(type);
                         if (type.IsSubclassOf(typeof(ResumableFunction)))
                             resumableFunctionClasses.Add(type);
                     }
@@ -207,53 +193,14 @@ public class Scanner
         var methodWaits = type
             .GetMethods(GetBindingFlags())
             .Where(method =>
-                    method.GetCustomAttributes().Any(x => x.TypeId == new WaitMethodAttribute().TypeId));
+                    method.GetCustomAttributes().Any(x => x.TypeId == WaitMethodAttribute.AttributeId));
         foreach (var method in methodWaits)
         {
-            await _methodIdentifierRepo.UpsertMethodIdentifier(new MethodData(method), MethodType.MethodWait, GetTrackingId(method));
+            await _methodIdentifierRepo.AddWaitMethodIdentifier(new MethodData(method) { MethodType = MethodType.MethodWait });
         }
     }
 
 
-    private async Task RegisterExternalMethods(Type type)
-    {
-        var externalMethods = type
-           .GetMethods(GetBindingFlags())
-           .Where(method =>
-                   method
-                   .GetCustomAttributes()
-                   .Any(x => x.TypeId == (object)nameof(ExternalWaitMethodAttribute)))
-           .Select(x => new { MethodInfo = x, Attribute = x.GetCustomAttribute(typeof(ExternalWaitMethodAttribute)) });
-        foreach (var methodRecord in externalMethods)
-        {
-            var externalMethodData = new MethodData(methodRecord.MethodInfo);
-            var originalExternalMethodData = new MethodData(methodRecord.MethodInfo, (ExternalWaitMethodAttribute)methodRecord.Attribute);
-            var trackingId = GetTrackingId(methodRecord.MethodInfo);
-
-            if (trackingId is not null)
-            {
-                var originalMethod = await _methodIdentifierRepo.GetMethodByTrackingId(trackingId);
-                if (originalMethod == null)
-                    await _methodIdentifierRepo.UpsertMethodIdentifier(originalExternalMethodData, MethodType.MethodWait, trackingId);
-            }
-
-            var externalMethodRecord = await _context.ExternalMethodRecords.FirstOrDefaultAsync(x => x.MethodHash == externalMethodData.MethodHash);
-            if (externalMethodRecord != null)
-            {
-                WriteMessage($"Method [{methodRecord.MethodInfo.GetFullName()}] already exist in DB.");
-                continue;
-            }
-            externalMethodRecord = new ExternalMethodRecord
-            {
-                MethodData = externalMethodData,
-                MethodHash = externalMethodData.MethodHash,
-                OriginalMethodHash = originalExternalMethodData.MethodHash,
-                TrackingId = trackingId,
-            };
-            WriteMessage($"Add external method [{methodRecord.MethodInfo.GetFullName()}] to DB.");
-            _context.ExternalMethodRecords.Add(externalMethodRecord);
-        }
-    }
 
     private async Task RegisterResumableFunctionsInClass(Type type)
     {
@@ -263,8 +210,8 @@ public class Scanner
             .Where(method => method
                 .GetCustomAttributes()
                 .Any(attribute =>
-                    attribute.TypeId == new ResumableFunctionEntryPointAttribute().TypeId ||
-                    attribute.TypeId == new ResumableFunctionAttribute().TypeId
+                    attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId ||
+                    attribute.TypeId == ResumableFunctionAttribute.AttributeId
                 ));
 
         foreach (var resumableFunction in resumableFunctions)
@@ -290,7 +237,7 @@ public class Scanner
     private bool IsEntryPoint(MethodInfo resumableFunction)
     {
         return resumableFunction.GetCustomAttributes()
-            .Any(attribute => attribute.TypeId == new ResumableFunctionEntryPointAttribute().TypeId);
+            .Any(attribute => attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId);
     }
 
     private bool CheckResumableFunctionSignature(MethodInfo resumableFunction)

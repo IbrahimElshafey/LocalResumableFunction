@@ -31,38 +31,5 @@ public class PushedMethod
         }
     }
 
-    internal void ConvertJObject(MethodInfo methodInfo)
-    {
-        try
-        {
-            var inputType = methodInfo.GetParameters()[0].ParameterType;
-            if (Input is JObject inputJson)
-            {
-                Input = inputJson.ToObject(inputType);
-            }
-            else
-                Input = Convert.ChangeType(Input.ToString(), inputType);
-        }
-        catch (Exception ex)
-        {
-
-        }
-
-        try
-        {
-            if (Output is JObject outputJson)
-            {
-                if (methodInfo.IsAsyncMethod())
-                    Output = outputJson.ToObject(methodInfo.ReturnType.GetGenericArguments()[0]);
-                else
-                    Output = outputJson.ToObject(methodInfo.ReturnType);
-            }
-            else
-                Output = Convert.ChangeType(Output.ToString(), methodInfo.ReturnType);
-        }
-        catch (Exception)
-        {
-        }
-
-    }
+    
 }

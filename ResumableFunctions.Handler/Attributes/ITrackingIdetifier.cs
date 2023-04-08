@@ -1,6 +1,7 @@
-﻿namespace ResumableFunctions.Handler.Attributes;
-
-public interface ITrackingIdetifier
+﻿namespace ResumableFunctions.Handler.Attributes
 {
-    string TrackingIdentifier { get;     }
+    internal interface ITrackingIdetifier
+    {
+        string MethodUrn { get; }
+    }
 }

@@ -8,6 +8,12 @@
 
 public sealed class ResumableFunctionEntryPointAttribute : Attribute, ITrackingIdetifier
 {
-    public override object TypeId => nameof(ResumableFunctionEntryPointAttribute);
-    public string TrackingIdentifier { get; set; }
+    public const string AttributeId = nameof(ResumableFunctionEntryPointAttribute);
+    public override object TypeId => AttributeId;
+    public string MethodUrn { get; }
+
+    public ResumableFunctionEntryPointAttribute(string methodUrn)
+    {
+        MethodUrn = methodUrn;
+    }
 }

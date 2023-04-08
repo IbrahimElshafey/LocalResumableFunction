@@ -15,7 +15,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     public bool ManagerFiveApproval { get; set; }
     public string ExternalMethodStatus { get; private set; } = "Not matched yet.";
 
-    [ResumableFunctionEntryPoint]//Point 1
+    [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow")]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
     {
         yield return
@@ -53,7 +53,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         return Task.CompletedTask;
     }
 
-    [ResumableFunctionEntryPoint]
+    [ResumableFunctionEntryPoint("ProjectApprovalExample.ExternalMethod")]
     public async IAsyncEnumerable<Wait> ExternalMethod()
     {
         await Task.Delay(1);
@@ -79,7 +79,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Success(nameof(ExternalMethod));
     }
 
-    [ResumableFunctionEntryPoint]
+    [ResumableFunctionEntryPoint("ProjectApprovalExample.ExternalMethodWaitGoodby")]
     public async IAsyncEnumerable<Wait> ExternalMethodWaitGoodby()
     {
         await Task.Delay(1);
@@ -133,7 +133,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Success(nameof(SubFunctionTest));
     }
 
-    [ResumableFunction]
+    [ResumableFunction("ProjectApprovalExample.WaitTwoManagers")]
     public async IAsyncEnumerable<Wait> WaitTwoManagers()
     {
         WriteMessage("WaitTwoManagers started");
@@ -166,14 +166,14 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         WriteMessage("One of two waits matched");
     }
 
-    [WaitMethod]
+    [WaitMethod("ProjectApprovalExample.PrivateMethod")]
     internal bool PrivateMethod(Project project)
     {
         WriteMessage("Project Submitted");
         return true;
     }
 
-    [WaitMethod]
+    [WaitMethod("ProjectApprovalExample.ProjectSubmitted")]
     internal async Task<bool> ProjectSubmitted(Project project)
     {
         //await Task.Delay(100);
@@ -181,21 +181,21 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         return true;
     }
 
-    [WaitMethod(TrackingIdentifier = "ManagerOneApproveProject")]
+    [WaitMethod("ProjectApprovalExample.ManagerOneApproveProject")]
     public bool ManagerOneApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager One Approve Project with decision ({args.Decision})");
         return args.Decision;
     }
 
-    [WaitMethod]
+    [WaitMethod("ProjectApprovalExample.ManagerTwoApproveProject")]
     public bool ManagerTwoApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Two Approve Project with decision ({args.Decision})");
         return args.Decision;
     }
 
-    [WaitMethod]
+    [WaitMethod("ProjectApprovalExample.ManagerThreeApproveProject")]
     public bool ManagerThreeApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Three Approve Project with decision ({args.Decision})");
@@ -203,7 +203,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     }
 
 
-    [WaitMethod]
+    [WaitMethod("ProjectApprovalExample.ManagerFourApproveProject")]
     public bool ManagerFourApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");
@@ -241,7 +241,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Console.ForegroundColor = ConsoleColor.White;
     }
 
-    [WaitMethodImplementation]
+    [WaitMethod("IManagerFiveApproval.ManagerFiveApproveProject")]
     public bool ManagerFiveApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");
