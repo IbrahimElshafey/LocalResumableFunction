@@ -1,10 +1,10 @@
-﻿using ResumableFunctions.Core.Attributes;
+﻿using ResumableFunctions.Handler.Attributes;
 
 namespace TestApi1.Examples
 {
     internal interface IManagerFiveApproval
     {
-        [WaitMethod]
+        [WaitMethod("IManagerFiveApproval.ManagerFiveApproveProject")]
         bool ManagerFiveApproveProject(ApprovalDecision args);
     }
 }

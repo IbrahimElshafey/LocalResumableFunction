@@ -4,8 +4,8 @@
 ##SCANNER: Start register method waits.
 ##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\TestApi1.dll]
 ##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\TestApi1.dll].
-##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Core.dll]
-##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Core.dll].
+##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Handler.dll]
+##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Handler.dll].
 ##SCANNER: Register local methods
 ##SCANNER: Method [TimeWait] already exist in DB.
 ##SCANNER: Close with no errors.
@@ -15,8 +15,8 @@
 ##SCANNER: Start register method waits.
 ##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\TestApi1.dll]
 ##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\TestApi1.dll].
-##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Core.dll]
-##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Core.dll].
+##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Handler.dll]
+##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Handler.dll].
 ##SCANNER: Register local methods
 ##SCANNER: Start Scan Resumable Functions##
 ##SCANNER: Initiate DB context.
@@ -24,8 +24,8 @@
 ##SCANNER: Start register method waits.
 ##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\TestApi1.dll]
 ##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\TestApi1.dll].
-##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Core.dll]
-##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Core.dll].
+##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Handler.dll]
+##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Handler.dll].
 ##SCANNER: Register local methods
 ##SCANNER: Start Scan Resumable Functions##
 ##SCANNER: Initiate DB context.
@@ -33,8 +33,8 @@
 ##SCANNER: Start register method waits.
 ##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\TestApi1.dll]
 ##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\TestApi1.dll].
-##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Core.dll]
-##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Core.dll].
+##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Handler.dll]
+##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Handler.dll].
 ##SCANNER: Register local methods
 ##SCANNER: Start Scan Resumable Functions##
 ##SCANNER: Initiate DB context.
@@ -42,8 +42,8 @@
 ##SCANNER: Start register method waits.
 ##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\TestApi1.dll]
 ##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\TestApi1.dll].
-##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Core.dll]
-##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Core.dll].
+##SCANNER: Start scan assembly [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Handler.dll]
+##SCANNER: Not reference LocalResumableFunction.dll,Scan canceled for [C:\LocalResumableFunction\TestApi1\bin\Debug\net7.0\\ResumableFunctions.Handler.dll].
 ##SCANNER: Register local methods
 ##SCANNER: Method [TimeWait] already exist in DB.
 ##SCANNER: Close with no errors.

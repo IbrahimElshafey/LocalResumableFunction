@@ -1,7 +1,7 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using ResumableFunctions.Core.Helpers;
+using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.AspNetService
 {

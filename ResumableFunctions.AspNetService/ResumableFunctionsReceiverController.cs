@@ -1,8 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using ResumableFunctions.Core;
-using ResumableFunctions.Core.InOuts;
+using ResumableFunctions.Handler;
 
 namespace ResumableFunctions.AspNetService
 {
@@ -23,16 +21,16 @@ namespace ResumableFunctions.AspNetService
         [HttpGet(nameof(ProcessMatchedWait))]
         public int ProcessMatchedWait(int waitId, int pushedMethodId)
         {
-            _backgroundJobClient.Enqueue(() => _resumableFunctionHandler.ProcessExternalMatchedWait(waitId, pushedMethodId));
+            _backgroundJobClient.Enqueue(() => _resumableFunctionHandler.ProcessMatchedWait(waitId, pushedMethodId));
             return 0;
         }
 
-        [HttpPost(nameof(WebHookMethod))]
-        public async Task WebHookMethod(WebhookCall pushedMethod)
-        {
-            await 
-                _resumableFunctionHandler.QueuePushedMethodProcessing(pushedMethod);
-        }
+        //[HttpPost(nameof(MethodCalled))]
+        //public async Task MethodCalled(MethodCall pushedMethod)
+        //{
+        //    //await 
+        //    //    _resumableFunctionHandler.QueuePushedMethodProcessing(pushedMethod);
+        //}
 
         //todo:CheckMethod/s exist
         //todo:force rescan

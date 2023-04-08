@@ -1,6 +1,6 @@
-﻿using ResumableFunctions.Core;
-using ResumableFunctions.Core.Attributes;
-using ResumableFunctions.Core.InOuts;
+﻿using ResumableFunctions.Handler;
+using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.InOuts;
 
 namespace ReferenceLibrary
 {
@@ -8,7 +8,7 @@ namespace ReferenceLibrary
     {
         public string UserName { get; set; }
 
-        [ResumableFunctionEntryPoint]
+        [ResumableFunctionEntryPoint("TestFunctionInDll")]
         public async IAsyncEnumerable<Wait> TestFunctionInDll()
         {
             yield return Wait<string, string>
@@ -26,13 +26,13 @@ namespace ReferenceLibrary
             Console.WriteLine("Done");
         }
 
-        [WaitMethod]
+        [WaitMethod("CodeInDllTest.SayHello")]
         public string SayHello(string userName)
         {
             return $"Hello, {userName}.";
         }
 
-        [WaitMethod(TrackingIdentifier = "889f52f5-be6b-41db-8312-99abc8db5883")]
+        [WaitMethod("CodeInDllTest.SayGoodby")]
         public string SayGoodby(string userName)
         {
             return $"Goodby, {userName}.";

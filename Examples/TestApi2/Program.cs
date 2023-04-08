@@ -1,7 +1,7 @@
 using Hangfire;
 using ResumableFunctions.AspNetService;
-using ResumableFunctions.Core;
-using ResumableFunctions.Core.InOuts;
+using ResumableFunctions.Handler;
+using ResumableFunctions.Handler.InOuts;
 
 var builder = WebApplication.CreateBuilder(args);
 

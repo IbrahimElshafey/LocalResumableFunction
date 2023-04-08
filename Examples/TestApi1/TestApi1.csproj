@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ResumableFunctions.AspNetService\ResumableFunctions.AspNetService.csproj" />
+    <ProjectReference Include="..\..\ResumableFunctions.Handler\ResumableFunctions.Handler.csproj" />
   </ItemGroup>
 
   <ItemGroup>
