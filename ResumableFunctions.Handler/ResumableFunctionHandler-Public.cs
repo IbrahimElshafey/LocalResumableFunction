@@ -47,7 +47,7 @@ public partial class ResumableFunctionHandler
             {
                 SetDependencies(scope.ServiceProvider);
                 Debugger.Launch();
-                var matchedWaits = await _waitsRepository.GetMethodActiveWaits(pushedMethodId);
+                var matchedWaits = await _waitsRepository.GetMethodWaits(pushedMethodId);
 
                 if (matchedWaits != null)
                     foreach (var methodWait in matchedWaits)
@@ -83,12 +83,12 @@ public partial class ResumableFunctionHandler
             .FirstOrDefaultAsync();
 
         var actionUrl =
-            $"{ownerServiceUrl}api/ResumableFunctionsReceiver/ProcessMatchedWait?waitId={methodWait.Id}&pushedMethodId={pushedMethodId}";
+            $"{ownerServiceUrl}api/ResumableFunctions/ProcessMatchedWait?waitId={methodWait.Id}&pushedMethodId={pushedMethodId}";
         var hangFireHttpClient = _serviceProvider.GetService<HangFireHttpClient>();
         hangFireHttpClient.EnqueueGetRequest(actionUrl);
     }
 
-    public async Task ProcessExternalMatchedWait(int waitId, int pushedMethodId)
+    public async Task ProcessMatchedWait(int waitId, int pushedMethodId)
     {
         try
         {

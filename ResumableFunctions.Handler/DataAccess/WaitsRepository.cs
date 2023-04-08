@@ -38,7 +38,7 @@ internal class WaitsRepository : RepositoryBase
         return Task.CompletedTask;
     }
 
-    public async Task<List<MethodWait>> GetMethodActiveWaits(int pushedMethodId)
+    public async Task<List<MethodWait>> GetMethodWaits(int pushedMethodId)
     {
 
         try
@@ -120,7 +120,7 @@ internal class WaitsRepository : RepositoryBase
         if (firstWaitInDb != null)
         {
             _context.Waits.Remove(firstWaitInDb);
-            _context.FunctionStates.Remove(new ResumableFunctionState { Id = firstWaitInDb.FunctionStateId });
+            //_context.FunctionStates.Remove(new ResumableFunctionState { Id = firstWaitInDb.FunctionStateId });
             await _context.SaveChangesAsync();
             return true;
         }

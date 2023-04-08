@@ -3,6 +3,10 @@ namespace ResumableFunctions.Handler.InOuts;
 
 public class ResumableFunctionState
 {
+    public ResumableFunctionState()
+    {
+
+    }
     public int Id { get; internal set; }
 
 

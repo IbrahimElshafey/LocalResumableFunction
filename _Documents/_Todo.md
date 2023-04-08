@@ -1,5 +1,5 @@
 ﻿# Todo
-* Work simplify attributes
+
 * Handle concurrency problems,optimistic or pessimistic for cases below:
 	* Two waits matched for same FunctionState
 	* First wait closed but new request come before create new one
@@ -7,6 +7,19 @@
 	* Database.EnsureCreated(); in same time
 	* Multiple scan process in same time
 * All logs goes to one table
+* Background Cleaning Job
+	* Move completed/cancled function instance to Recycle Bin
+		* It's logs
+		* Waits
+	* Move completed pushed methods
+	* Move inactive methods identifier
+	* Move old logs for scan 
+* Resumable function hooks
+	* Before initiating the first wait
+	* After initiate first wait
+	* After Resumed
+	* After Completed
+	* On Error Occurred
 * Create nuget package
 
 
@@ -68,7 +81,7 @@
 
 * Save function state all fields [public and non public]
 * Find fast and best object serializer
-* Move completed function instance to Recycle Bin
+
 * Delete PushedMethodsCalls after processing background job
 * Parameter check lib use
 

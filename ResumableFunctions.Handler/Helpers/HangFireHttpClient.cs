@@ -25,7 +25,8 @@ namespace ResumableFunctions.Handler.Helpers
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public async Task HttpGet(string url)
         {
-            await client.GetAsync(url);
+            var resposne = await client.GetAsync(url);
+            resposne.EnsureSuccessStatusCode();
         }
     }
 }
