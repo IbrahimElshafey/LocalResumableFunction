@@ -23,10 +23,25 @@
 
 
 # Tables
-* FunctionStateLogs (Insert Only)
 * FunctionStates (Insert,Update,Delete)
 * MethodIdentifiers (Insert,Update)
-* PushedMethodsCalls (Insert)
 * ServicesData (Insert,Update)
-* WaitMethodGroups (Insert)
+
 * Waits (Insert)
+
+
+# Read
+* EF core Handling Concurrency Conflicts
+	https://learn.microsoft.com/en-us/ef/core/saving/concurrency?tabs=fluent-api#native-database-generated-concurrency-tokens
+* Item-level locks for a large number of items
+	https://codereview.stackexchange.com/questions/105523/item-level-locks-for-a-large-number-of-items
+
+
+1 - For methods in the same service
+2 - For methods in different services
+3 - Database locks
+ImmutableList<T> Class
+ConcurrentBag<T> Class
+
+https://stackoverflow.com/questions/45943048/ef-core-fluent-api-set-all-column-types-of-interface
+https://stackoverflow.com/questions/51763168/common-configurations-for-entities-implementing-an-interface
