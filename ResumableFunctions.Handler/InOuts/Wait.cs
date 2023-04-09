@@ -7,7 +7,7 @@ using ResumableFunctions.Handler;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class Wait
+public abstract class Wait : IEntityWithUpdate
 {
 
     private ResumableFunction _currntFunction;
@@ -23,6 +23,9 @@ public abstract class Wait
     public object ExtraData { get; internal set; }
 
     public WaitType WaitType { get; internal set; }
+    public DateTime Modified { get; internal set; }
+    public string ConcurrencyToken { get; internal set; }
+    public DateTime Created { get; internal set; }
 
     internal ResumableFunctionState FunctionState { get; set; }
 
@@ -191,7 +194,7 @@ public abstract class Wait
         if (isNameDuplicated)
         {
             FunctionState?.LogStatus(
-                FunctionStatus.Warning, 
+                FunctionStatus.Warning,
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name");
         }
         return FunctionState?.Status != FunctionStatus.Error;

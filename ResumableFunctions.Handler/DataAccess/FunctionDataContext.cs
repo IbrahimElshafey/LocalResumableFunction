@@ -27,16 +27,20 @@ public class FunctionDataContext : DbContext
     }
 
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
+    public DbSet<FunctionStateLogRecord> FunctionStateLogs { get; set; }
+
     public DbSet<MethodIdentifier> MethodIdentifiers { get; set; }
-    public DbSet<WaitMethodGroup> WaitMethodGroups { get; set; }
     public DbSet<WaitMethodIdentifier> WaitMethodIdentifiers { get; set; }
     public DbSet<ResumableFunctionIdentifier> ResumableFunctionIdentifiers { get; set; }
+
     public DbSet<Wait> Waits { get; set; }
     public DbSet<MethodWait> MethodWaits { get; set; }
+    public DbSet<WaitMethodGroup> WaitMethodGroups { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
+
     public DbSet<PushedMethod> PushedMethodsCalls { get; set; }
     public DbSet<ServiceData> ServicesData { get; set; }
-    public DbSet<FunctionStateLogRecord> FunctionStateLogs { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -45,46 +49,28 @@ public class FunctionDataContext : DbContext
         ConfigureMethodIdentifier(modelBuilder);
         ConfigurePushedMethod(modelBuilder.Entity<PushedMethod>());
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
-        //ConfigureExternalMethodRecord(modelBuilder.Entity<ExternalMethodRecord>());
-        ConfigureFunctionStateLogRecord(modelBuilder.Entity<FunctionStateLogRecord>());
         ConfigureWaits(modelBuilder);
+        ConfigurConcurrencyToken(modelBuilder);
         base.OnModelCreating(modelBuilder);
     }
 
-    private void ConfigureFunctionStateLogRecord(EntityTypeBuilder<FunctionStateLogRecord> entityTypeBuilder)
+    private void ConfigurConcurrencyToken(ModelBuilder modelBuilder)
     {
-        entityTypeBuilder
-           .Property<DateTime>(ConstantValue.CreatedProp);
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            if (typeof(IEntityWithUpdate).IsAssignableFrom(entityType.ClrType))
+            {
+                modelBuilder
+                    .Entity(entityType.ClrType)
+                    .Property<string>(nameof(IEntityWithUpdate.ConcurrencyToken))
+                    .IsConcurrencyToken();
+            }
+        }
     }
-
-    //private void ConfigureExternalMethodRecord(EntityTypeBuilder<ExternalMethodRecord> entityTypeBuilder)
-    //{
-    //    entityTypeBuilder
-    //      .Property(x => x.MethodData)
-    //      .HasConversion(
-    //       v => JsonConvert.SerializeObject(v),
-    //       v => JsonConvert.DeserializeObject<MethodData>(v));
-
-    //    entityTypeBuilder
-    //        .HasIndex(x => x.MethodHash)
-    //        .HasDatabaseName("Index_ExternalMethodHash")
-    //        .IsUnique(true);
-
-    //    entityTypeBuilder
-    //      .Property(x => x.MethodHash)
-    //      .HasMaxLength(16);
-
-    //    entityTypeBuilder
-    //     .Property(x => x.OriginalMethodHash)
-    //     .HasMaxLength(16);
-
-    //    entityTypeBuilder
-    //      .Property<DateTime>(ConstantValue.CreatedProp);
-    //}
 
     private void ConfigureServiceData(EntityTypeBuilder<ServiceData> entityTypeBuilder)
     {
-        entityTypeBuilder.Property(x => x.LastScanDate).HasDefaultValue(DateTime.MinValue);
+        //entityTypeBuilder.Property(x => x.Modified).HasDefaultValue(DateTime.MinValue);
         entityTypeBuilder.HasIndex(x => x.AssemblyName);
     }
 
@@ -103,9 +89,6 @@ public class FunctionDataContext : DbContext
            .HasConversion(
             v => JsonConvert.SerializeObject(v),
             v => JsonConvert.DeserializeObject<MethodData>(v));
-
-        entityTypeBuilder
-          .Property<DateTime>(ConstantValue.CreatedProp);
     }
 
     private void ConfigureWaits(ModelBuilder modelBuilder)
@@ -115,11 +98,6 @@ public class FunctionDataContext : DbContext
             .WithOne(wait => wait.ParentWait)
             .HasForeignKey(x => x.ParentWaitId)
             .HasConstraintName("FK_ChildWaits_For_Wait");
-
-        modelBuilder.Entity<Wait>()
-           .Property<DateTime>(ConstantValue.CreatedProp);
-        modelBuilder.Entity<Wait>()
-         .Property<DateTime>(ConstantValue.LastUpdatedProp);
 
         modelBuilder.Entity<Wait>()
             .Property(x => x.ExtraData)
@@ -181,13 +159,6 @@ public class FunctionDataContext : DbContext
            .HasIndex(x => x.MethodGroupUrn)
             .HasDatabaseName("Index_MethodGroupUniqueUrn")
             .IsUnique(true);
-
-        //entityTypeBuilder
-        //    .Property(x => x.MethodHash)
-        //    .HasMaxLength(16);
-
-        modelBuilder.Entity<MethodIdentifier>()
-         .Property<DateTime>(ConstantValue.CreatedProp);
     }
 
     private void ConfigureResumableFunctionState(EntityTypeBuilder<ResumableFunctionState> entityTypeBuilder)
@@ -203,12 +174,6 @@ public class FunctionDataContext : DbContext
             .WithOne(wait => wait.FunctionState)
             .HasForeignKey(x => x.FunctionStateId)
             .HasConstraintName("FK_Logs_For_FunctionState");
-
-        entityTypeBuilder
-        .Property<DateTime>(ConstantValue.LastUpdatedProp);
-
-        entityTypeBuilder
-           .Property<DateTime>(ConstantValue.CreatedProp);
 
         entityTypeBuilder
            .Property(x => x.StateObject)
@@ -242,15 +207,16 @@ public class FunctionDataContext : DbContext
         {
             switch (entityEntry.State)
             {
-                case EntityState.Modified:
-                    bool lastUpdatePropExist = entityEntry.Metadata.FindProperty(ConstantValue.LastUpdatedProp) != null;
-                    if (lastUpdatePropExist)
-                        entityEntry.Property(ConstantValue.LastUpdatedProp).CurrentValue = DateTime.Now;
+                case EntityState.Modified when entityEntry.Entity is IEntityWithUpdate:
+                    entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.Now;
+                    entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
                     break;
-                case EntityState.Added:
-                    bool createdPropExist = entityEntry.Metadata.FindProperty(ConstantValue.CreatedProp) != null;
-                    if (createdPropExist)
-                        entityEntry.Property(ConstantValue.CreatedProp).CurrentValue = DateTime.Now;
+                case EntityState.Added when entityEntry.Entity is IEntityWithUpdate:
+                    entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
+                    entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
+                    break;
+                case EntityState.Added when entityEntry.Entity is IEntity:
+                    entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
                     break;
             }
         }

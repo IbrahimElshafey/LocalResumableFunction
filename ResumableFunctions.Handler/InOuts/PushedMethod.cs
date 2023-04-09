@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts;
-public class PushedMethod
+public class PushedMethod : IEntity
 {
     public int Id { get; internal set; }
     public MethodData MethodData { get; internal set; }
@@ -31,5 +31,5 @@ public class PushedMethod
         }
     }
 
-    
+    public DateTime Created { get; internal set; }
 }

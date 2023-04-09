@@ -1,8 +1,8 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
-public interface IEntity
+internal interface IEntity
 {
-    int Id { get; internal set; }
-    DateTime Created { get; internal set; }
+    int Id { get; }
+    DateTime Created { get; }
 }
 

@@ -1,7 +1,7 @@
 ﻿
 namespace ResumableFunctions.Handler.InOuts;
 
-public class ResumableFunctionState
+public class ResumableFunctionState : IEntityWithUpdate
 {
     public ResumableFunctionState()
     {
@@ -21,6 +21,10 @@ public class ResumableFunctionState
     public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; set; }
     public int ResumableFunctionIdentifierId { get; set; }
     public FunctionStatus Status { get; set; }
+    public DateTime Modified { get; internal set; }
+    public string ConcurrencyToken { get; internal set; }
+    public DateTime Created { get; internal set; }
+
 
     public void LogStatus(FunctionStatus status, string statusMessage)
     {
