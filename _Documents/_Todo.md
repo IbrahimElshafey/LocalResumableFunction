@@ -1,16 +1,19 @@
 ﻿# Todo
-* If scan error occured don't update service data LastScanDate
+
 * Handle concurrency problems,optimistic or pessimistic for cases below:
 	* Two waits matched for same FunctionState
 	* First wait closed but new request come before create new one
 	* Update pushed methods calls counter
 	* Database.EnsureCreated(); in same time
 	* Multiple scan process in same time
-* Complete publisher project and test it
+* Compelete publisher project and test it
 * Wait methods in same group must have the same signature
+
 * Verify that fody MethodBoundaryAspect is active
 * All logs goes to one table
 	* Logging for scan sessions
+	* If scan error occured don't update service data LastScanDate
+
 * Background Cleaning Job
 	* Move completed/cancled function instance to Recycle Bin
 		* It's logs
@@ -18,12 +21,14 @@
 	* Move completed pushed methods
 	* Move inactive methods identifier
 	* Move old logs for scan sessions
+
 * Resumable function hooks
 	* Before initiating the first wait
 	* After initiate first wait
 	* After Resumed
 	* After Completed
 	* On Error Occurred
+
 * Add UI Project (Use MVC not pages)
 	* Servcies Registred
 		* Verify scanned methods 
@@ -54,40 +59,24 @@
 			* Actions on Group Wait ()
 			* Actions on Function Wait ()
 		* Logs list from function state logs
+
 * Create nuget package
 
 
 
 
-
-* Generate unit test code for resumable function
-* Generate external service class for methods in a service
+* How to unit test a resumable function
+	* Generate unit test code for resumable function
+* Generate external service class form (swagger defention)
 		
-
-
 * Delete first wait subwaits if group
 
-
-
-
-
 * Activate one start wait if multiple exist for same method
-
-
-
-
-
-
-
-
 
 * Save function state all fields [public and non public]
 * Find fast and best object serializer
 
-
 * Parameter check lib use
-
-
 
 * Speed Analysis	
 	* https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/event-counters?tabs=windows
