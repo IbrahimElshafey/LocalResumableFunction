@@ -6,6 +6,9 @@
 	* Update pushed methods calls counter
 	* Database.EnsureCreated(); in same time
 	* Multiple scan process in same time
+* Complete publisher project and test it
+* Wait methods in same group must have the same signature
+* Verify that fody MethodBoundaryAspect is active
 * All logs goes to one table
 * Background Cleaning Job
 	* Move completed/cancled function instance to Recycle Bin
@@ -20,9 +23,6 @@
 	* After Resumed
 	* After Completed
 	* On Error Occurred
-* Create nuget package
-
-
 * Add UI Project (Use MVC not pages)
 	* Servcies Registred
 		* Verify scanned methods 
@@ -53,9 +53,10 @@
 			* Actions on Group Wait ()
 			* Actions on Function Wait ()
 		* Logs list from function state logs
+* Create nuget package
 
-* Check External Methods Background Job after each scan process
-	* External Method may not exist
+
+
 
 
 * Generate unit test code for resumable function
