@@ -1,11 +1,6 @@
 ﻿# Todo
 
-* Handle concurrency problems,optimistic or pessimistic for cases below:
-	* Two waits matched for same FunctionState
-	* First wait closed but new request come before create new one
-	* Update pushed methods calls counter
-	* Database.EnsureCreated(); in same time
-	* Multiple scan process in same time
+* Handle concurrency problems
 * Compelete publisher project and test it
 * Wait methods in same group must have the same signature
 

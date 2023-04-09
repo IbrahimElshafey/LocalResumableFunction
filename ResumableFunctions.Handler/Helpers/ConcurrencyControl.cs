@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace ResumableFunctions.Handler.Helpers
 {
-    internal interface ConcurrencyControl
+    public class ConcurrencyControl
     {
-        public ILock AcquireProcssLock(string lockName);
-        public ILock AcquireInterServicesLock(string lockName);
-    }
-
-    public interface ILock : IDisposable
-    {
-
+        public Task<bool> AcquireLock(string entityName,int entityId)
+        {
+            return Task.FromResult(true);
+        }
+        public Task<bool> ReleaseLock(string entityName, int entityId)
+        {
+            return Task.FromResult(true);
+        }
     }
 }
