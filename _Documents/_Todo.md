@@ -1,5 +1,5 @@
 ﻿# Todo
-
+* If scan error occured don't update service data LastScanDate
 * Handle concurrency problems,optimistic or pessimistic for cases below:
 	* Two waits matched for same FunctionState
 	* First wait closed but new request come before create new one
@@ -10,13 +10,14 @@
 * Wait methods in same group must have the same signature
 * Verify that fody MethodBoundaryAspect is active
 * All logs goes to one table
+	* Logging for scan sessions
 * Background Cleaning Job
 	* Move completed/cancled function instance to Recycle Bin
 		* It's logs
 		* Waits
 	* Move completed pushed methods
 	* Move inactive methods identifier
-	* Move old logs for scan 
+	* Move old logs for scan sessions
 * Resumable function hooks
 	* Before initiating the first wait
 	* After initiate first wait
@@ -62,10 +63,10 @@
 * Generate unit test code for resumable function
 * Generate external service class for methods in a service
 		
-* Logging for scan sessions
+
 
 * Delete first wait subwaits if group
-* If scan error occured don't update service data LastScanDate
+
 
 
 
@@ -83,7 +84,7 @@
 * Save function state all fields [public and non public]
 * Find fast and best object serializer
 
-* Delete PushedMethodsCalls after processing background job
+
 * Parameter check lib use
 
 
@@ -94,6 +95,6 @@
 
 # External Waits 
 * Monitor network requests using reverse proxy and push MethodCalls [TCP Listener]
-* WebHook for the service
+* WebHook for the service [Publisher Project]
 * RabbitMQ or any service bus [Subscribe to event]
 * File/Folder Changes [File Watcher]

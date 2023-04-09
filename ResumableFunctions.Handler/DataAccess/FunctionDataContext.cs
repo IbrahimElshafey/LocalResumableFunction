@@ -19,14 +19,10 @@ public class FunctionDataContext : DbContext
         {
             Database.EnsureCreated();
         }
-        catch (Microsoft.Data.SqlClient.SqlException ex)
+        catch (Exception)
         {
-            //this not fix the problem 100%
-            if (ex.ErrorCode == -2146232060)
-            {
-                Task.Delay(10000).Wait();
-                Database.EnsureCreated();
-            }
+            Task.Delay(TimeSpan.FromMinutes(3)).Wait();
+            Database.EnsureCreated();
         }
     }
 

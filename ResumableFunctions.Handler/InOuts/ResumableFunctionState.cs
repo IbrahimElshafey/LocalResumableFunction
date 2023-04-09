@@ -20,7 +20,6 @@ public class ResumableFunctionState
     public List<FunctionStateLogRecord> LogRecords { get; internal set; } = new();
     public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; set; }
     public int ResumableFunctionIdentifierId { get; set; }
-    public bool IsLocked { get; set; }
     public FunctionStatus Status { get; set; }
 
     public void LogStatus(FunctionStatus status, string statusMessage)

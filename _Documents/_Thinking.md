@@ -13,10 +13,20 @@
 * Update pushed methods calls counter
 * Database.EnsureCreated(); in same time
 * Multiple scan process in same time
-	* Raised in same service
+	* Raised in same service [done]
 	* Raised in same service another instance when using load balancer
 * Diffrent services may update/add same methods wait group at same time
 
 
 # Reading
 * lock in async method https://blog.cdemi.io/async-waiting-inside-c-sharp-locks/
+
+
+# Tables
+* FunctionStateLogs (Insert Only)
+* FunctionStates (Insert,Update,Delete)
+* MethodIdentifiers (Insert,Update)
+* PushedMethodsCalls (Insert)
+* ServicesData (Insert,Update)
+* WaitMethodGroups (Insert)
+* Waits (Insert)
