@@ -13,7 +13,7 @@ namespace ResumableFunctions.Handler.Data;
 
 public class FunctionDataContext : DbContext
 {
-    public FunctionDataContext(IResumableFunctionSettings settings) : base(settings.WaitsDbConfig.Options)
+    public FunctionDataContext(IResumableFunctionsSettings settings) : base(settings.WaitsDbConfig.Options)
     {
         try
         {

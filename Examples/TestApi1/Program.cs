@@ -11,11 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
-        new ResumableFunctionSettings()
-        {
-            CurrentServiceUrl = "https://localhost:7140/",
-            //DllsToScan = new[] { "System.Memory.Data" }
-        });
+        new ResumableFunctionsSettings()
+        .UseSqlServer()
+        .SetCurrentServiceUrl("https://localhost:7140/"));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

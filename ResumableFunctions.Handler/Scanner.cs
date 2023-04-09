@@ -18,7 +18,7 @@ public class Scanner
     private const string ScannerAppName = "##SCANNER: ";
     internal FunctionDataContext _context;
     private MethodIdentifierRepository _methodIdentifierRepo;
-    private IResumableFunctionSettings _settings;
+    private IResumableFunctionsSettings _settings;
     private ResumableFunctionHandler _handler;
     private IServiceProvider _serviceProvider;
     private readonly ILogger<Scanner> _logger;
@@ -34,7 +34,7 @@ public class Scanner
         try
         {
             using IServiceScope scope = _serviceProvider.CreateScope();
-            _settings = scope.ServiceProvider.GetService<IResumableFunctionSettings>();
+            _settings = scope.ServiceProvider.GetService<IResumableFunctionsSettings>();
 #if DEBUG
             _settings.ForceRescan = true;
 #endif

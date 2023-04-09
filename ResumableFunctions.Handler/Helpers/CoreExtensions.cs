@@ -23,14 +23,14 @@ public static class CoreExtensions
     private static IServiceProvider _ServiceProvider;
     public static IServiceProvider GetServiceProvider() => _ServiceProvider;
     public static void SetServiceProvider(IServiceProvider provider) => _ServiceProvider = provider;
-    public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionSettings settings)
+    public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
     {
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
         services.AddTransient<ResumableFunctionHandler>();
         services.AddTransient<Scanner>();
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();
-        services.AddSingleton(typeof(IResumableFunctionSettings),settings);
+        services.AddSingleton(typeof(IResumableFunctionsSettings),settings);
         if (settings.HangFireConfig != null)
         {
             services.AddHangfire(x => x = settings.HangFireConfig);

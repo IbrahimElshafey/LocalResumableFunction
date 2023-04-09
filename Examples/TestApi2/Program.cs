@@ -10,11 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
-        new ResumableFunctionSettings()
-        {
-            CurrentServiceUrl = "https://localhost:7099/",
-            DllsToScan = new[] { "ReferenceLibrary" }
-        });
+        new ResumableFunctionsSettings()
+        .UseSqlServer()
+        .SetCurrentServiceUrl("https://localhost:7099/")
+        .SetDllsToScan("ReferenceLibrary"));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
