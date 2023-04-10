@@ -8,14 +8,17 @@ using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Helpers;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ResumableFunctions.Handler.Data;
 
 internal class WaitsRepository : RepositoryBase
 {
+    private ILogger<WaitsRepository> _logger;
 
     public WaitsRepository(FunctionDataContext ctx) : base(ctx)
     {
+        _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<WaitsRepository>>();
     }
 
     public Task AddWait(Wait wait)
@@ -38,48 +41,50 @@ internal class WaitsRepository : RepositoryBase
         return Task.CompletedTask;
     }
 
-    public async Task<List<MethodWait>> GetMethodWaits(int pushedMethodId)
+    public async Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedMethodId)
     {
 
         try
         {
             var pushedMethod = await _context.PushedMethodsCalls.FindAsync(pushedMethodId);
-            if (pushedMethod == null) return null;
+            if (pushedMethod == null)
+                throw new NullReferenceException($"No pushed method with ID [{pushedMethodId}] exist in DB.");
+
             var metodIdsRepo = new MethodIdentifierRepository(_context);
             var methodGroupId =
                 await metodIdsRepo.GetMethodGroupId(pushedMethod.MethodData.MethodUrn);
 
 
-            var matchedWaits = await _context
+            var matchedWaitsIds = await _context
                             .MethodWaits
                             .Include(x => x.RequestedByFunction)
-                            .Include(x => x.MethodToWait)
-                            //.Include(x => x.WaitMethodGroup)
+                            //.Include(x => x.MethodToWait)
                             .Where(x =>
                                 x.WaitMethodGroupId == methodGroupId &&
                                 x.Status == WaitStatus.Waiting &&
                                 x.RefineMatchModifier == pushedMethod.RefineMatchModifier)
+                            .Select(x => new WaitId(x.Id, x.RequestedByFunction.AssemblyName))
                             .ToListAsync();
 
 
-            matchedWaits.ForEach(x =>
-            {
-                x.Input = pushedMethod.Input;
-                x.Output = pushedMethod.Output;
-                x.PushedMethodCallId = pushedMethodId;
-            });
+            //matchedWaitsIds.ForEach(x =>
+            //{
+            //    x.Input = pushedMethod.Input;
+            //    x.Output = pushedMethod.Output;
+            //    //x.PushedMethodCallId = pushedMethodId;
+            //});
 
-            bool noMatchedWaits = matchedWaits?.Any() is not true;
+            bool noMatchedWaits = matchedWaitsIds?.Any() is not true;
             if (noMatchedWaits)
             {
-                //_logger.LogInformation($"No waits matched for pushed method [{pushedMethodId}]");
+                _logger.LogWarning($"No waits matched for pushed method [{pushedMethodId}]");
                 //_context.PushedMethodsCalls.Remove(pushedMethod);
             }
             else
-                pushedMethod.MatchedWaitsCount = matchedWaits.Count;
+                pushedMethod.MatchedWaitsCount = matchedWaitsIds.Count;
 
             await _context.SaveChangesAsync();
-            return matchedWaits;
+            return matchedWaitsIds;
         }
         catch (Exception ex)
         {

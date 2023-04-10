@@ -21,7 +21,7 @@ public class FunctionDataContext : DbContext
         }
         catch (Exception)
         {
-            Task.Delay(TimeSpan.FromMinutes(3)).Wait();
+            //Task.Delay(TimeSpan.FromMinutes(3)).Wait();
             Database.EnsureCreated();
         }
     }

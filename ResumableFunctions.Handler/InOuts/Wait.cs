@@ -193,7 +193,7 @@ public abstract class Wait : IEntityWithUpdate
         var isNameDuplicated = FunctionState?.Waits.Any(x => x.Name == Name) ?? false;
         if (isNameDuplicated)
         {
-            FunctionState?.LogStatus(
+            FunctionState?.AddLog(
                 FunctionStatus.Warning,
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name");
         }

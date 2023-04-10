@@ -47,7 +47,7 @@ public partial class ResumableFunctionHandler
                     StateObject = classInstance
                 };
                 firstWait.FunctionState = functionState;
-                functionState.LogStatus(FunctionStatus.New, $"Started and wait [{firstWait.Name}] to match.");
+                functionState.AddLog(FunctionStatus.New, $"Started and wait [{firstWait.Name}] to match.");
                 await SaveWaitRequestToDb(firstWait);
                 WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
                 await _context.SaveChangesAsync();

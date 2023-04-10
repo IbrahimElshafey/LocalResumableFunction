@@ -5,9 +5,8 @@
 * Wait methods in same group must have the same signature
 
 * Verify that fody MethodBoundaryAspect is active
-* All logs goes to one table
-	* Logging for scan sessions
-	* If scan error occured don't update service data LastScanDate
+
+* Logging for scan sessions
 
 * Background Cleaning Job
 	* Move completed/cancled function instance to Recycle Bin

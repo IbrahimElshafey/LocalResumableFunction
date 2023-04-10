@@ -17,9 +17,17 @@ namespace ResumableFunctions.Handler.Helpers
             this.backgroundJobClient = backgroundJobClient;
             this.client = client;
         }
-        public void EnqueueGetRequest(string url)
+        public async Task EnqueueGetRequestIfFail(string url)
         {
-            backgroundJobClient.Enqueue(() => HttpGet(url));
+            try
+            {
+                await HttpGet(url);
+            }
+            catch (Exception)
+            {
+                backgroundJobClient.Enqueue(() => HttpGet(url));
+            }
+            
         }
 
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]

@@ -1,4 +1,16 @@
-﻿# Simple Stupid Locking
+﻿
+
+# Scenarios
+* Two waits trying update same FunctionState [Done with no test]
+* First wait closed but new request come before create new one
+* Update pushed methods calls counter
+* Database.EnsureCreated(); in same time
+* Multiple scan process in same time
+	* Raised in same service [done]
+	* Raised in same service another instance when using load balancer
+* Diffrent services may update/add same methods wait group at same time
+
+# Cross Services Locking
 * Table with Insert/Delete only (No Update)
 	* Indexed string column for entity name
 	*Intger column for entity ID
@@ -8,17 +20,6 @@
 * If no row exist then process can start
 * After process finished the row will be deleted
 * Background process to delete dead locks
-
-# Scenarios
-* Two waits matched for same FunctionState
-* First wait closed but new request come before create new one
-* Update pushed methods calls counter
-* Database.EnsureCreated(); in same time
-* Multiple scan process in same time
-	* Raised in same service [done]
-	* Raised in same service another instance when using load balancer
-* Diffrent services may update/add same methods wait group at same time
-
 
 # Reading
 * lock in async method https://blog.cdemi.io/async-waiting-inside-c-sharp-locks/

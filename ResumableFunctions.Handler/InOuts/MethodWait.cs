@@ -12,7 +12,7 @@ namespace ResumableFunctions.Handler.InOuts;
 
 public class MethodWait : Wait
 {
-    public int PushedMethodCallId { get; internal set; }
+    public int PushedCallId { get; internal set; }
     [NotMapped] public LambdaExpression SetDataExpression { get; internal set; }
 
     internal byte[] SetDataExpressionValue { get; set; }
@@ -82,15 +82,15 @@ public class MethodWait : Wait
         {
             var setDataExpression = SetDataExpression.Compile();
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
-            FunctionState.StateObject = CurrentFunction;
-            FunctionState.LogStatus(
+            FunctionState.StateObject = CurrentFunction; 
+            FunctionState.AddLog(
                 FunctionStatus.Progress,
                 $"Method wait [{Name}] matched and function data updated.");
             return true;
         }
         catch (Exception ex)
         {
-            FunctionState.LogStatus(
+            FunctionState.AddLog(
                 FunctionStatus.Error,
                 $"An error occured when try to update function data after method wait [{Name}] matched." +
                 ex.Message);
@@ -109,7 +109,7 @@ public class MethodWait : Wait
         }
         catch (Exception e)
         {
-            FunctionState.LogStatus(
+            FunctionState.AddLog(
                FunctionStatus.Error,
                $"An error occured when try evaluate match for wait [{Name}]." +
                e.Message);
@@ -131,19 +131,19 @@ public class MethodWait : Wait
     internal override bool IsValidWaitRequest()
     {
         if (!IsFirst && MatchIfExpression == null)
-            FunctionState.LogStatus(
+            FunctionState.AddLog(
                 FunctionStatus.Error,
                 $"You didn't set the `MatchIfExpression` for wait [{Name}] that is not a first wait," +
                 $"This will lead to no match for all calls," +
                 $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchIfExpression`," +
                 $"or use MatchAll() method.");
         if (IsFirst && MatchIfExpression == null)
-            FunctionState.LogStatus(
+            FunctionState.AddLog(
                 FunctionStatus.Warning,
                 $"You didn't set the `MatchIfExpression` for first wait [{Name}]," +
                 $"This will lead to all calls will be matched.");
         if (SetDataExpression == null)
-            FunctionState.LogStatus(
+            FunctionState.AddLog(
                 FunctionStatus.Error,
                 $"You didn't set the `SetDataExpression` for wait [{Name}], " +
                 $"The execution will not continue, " +

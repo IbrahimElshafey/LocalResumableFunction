@@ -26,7 +26,7 @@ public class ResumableFunctionState : IEntityWithUpdate
     public DateTime Created { get; internal set; }
 
 
-    public void LogStatus(FunctionStatus status, string statusMessage)
+    public void AddLog(FunctionStatus status, string statusMessage)
     {
         Status = status;
         LogRecords.Add(new FunctionStateLogRecord { Status = status, StatusMessage = statusMessage });

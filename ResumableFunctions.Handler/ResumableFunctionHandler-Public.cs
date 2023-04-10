@@ -47,15 +47,16 @@ public partial class ResumableFunctionHandler
             {
                 SetDependencies(scope.ServiceProvider);
                 Debugger.Launch();
-                var matchedWaits = await _waitsRepository.GetMethodWaits(pushedMethodId);
+                var waitsIds = await _waitsRepository.GetWaitsIdsForMethodCall(pushedMethodId);
 
-                if (matchedWaits != null)
-                    foreach (var methodWait in matchedWaits)
+                if (waitsIds != null)
+                    foreach (var waitId in waitsIds)
                     {
-                        if (IsLocalWait(methodWait))
-                            await ProcessWait(methodWait);
+                        if (IsLocalWait(waitId))
+                            _backgroundJobClient.Enqueue(() => ProcessMatchedWait(waitId.Id, pushedMethodId));
+                        //await ProcessWait(matchedMethodWait, pushedMethodId);
                         else
-                            await CallOwnerService(methodWait, pushedMethodId);
+                            await CallOwnerService(waitId, pushedMethodId);
                     }
             }
         }
@@ -65,16 +66,16 @@ public partial class ResumableFunctionHandler
         }
     }
 
-    private bool IsLocalWait(MethodWait methodWait)
+    private bool IsLocalWait(WaitId methodWait)
     {
-        var ownerAssemblyName = methodWait.RequestedByFunction.AssemblyName;
+        var ownerAssemblyName = methodWait.RequestedByAssembly;
         string ownerAssemblyPath = $"{AppContext.BaseDirectory}{ownerAssemblyName}.dll";
         return File.Exists(ownerAssemblyPath);
     }
 
-    private async Task CallOwnerService(MethodWait methodWait, int pushedMethodId)
+    private async Task CallOwnerService(WaitId methodWait, int pushedMethodId)
     {
-        var ownerAssemblyName = methodWait.RequestedByFunction.AssemblyName;
+        var ownerAssemblyName = methodWait.RequestedByAssembly;
         var ownerServiceUrl =
             await _context
             .ServicesData
@@ -85,7 +86,7 @@ public partial class ResumableFunctionHandler
         var actionUrl =
             $"{ownerServiceUrl}api/ResumableFunctions/ProcessMatchedWait?waitId={methodWait.Id}&pushedMethodId={pushedMethodId}";
         var hangFireHttpClient = _serviceProvider.GetService<HangFireHttpClient>();
-        hangFireHttpClient.EnqueueGetRequest(actionUrl);
+        await hangFireHttpClient.EnqueueGetRequestIfFail(actionUrl);
     }
 
     public async Task ProcessMatchedWait(int waitId, int pushedMethodId)
@@ -103,6 +104,7 @@ public partial class ResumableFunctionHandler
                     //.Include(x => x.WaitMethodGroup)
                     .Where(x => x.Status == WaitStatus.Waiting)
                     .FirstAsync(x => x.Id == waitId);
+                
                 if (methodWait == null)
                 {
                     _logger.LogError($"No method wait exist with ID ({waitId}) and status ({WaitStatus.Waiting}).");
@@ -121,16 +123,16 @@ public partial class ResumableFunctionHandler
                 var targetMethod = await _context
                        .WaitMethodIdentifiers
                        .FirstOrDefaultAsync(x => x.Id == methodWait.MethodToWaitId);
-             
+
                 if (targetMethod == null)
                 {
-                    _logger.LogError($"No external method exist that match ({pushedMethod.MethodData}).");
+                    _logger.LogError($"No method exist that match ({pushedMethod.MethodData}).");
                     return;
                 }
 
                 methodWait.Input = pushedMethod.Input;
                 methodWait.Output = pushedMethod.Output;
-                await ProcessWait(methodWait);
+                await ProcessWait(methodWait, pushedMethodId);
             }
         }
         catch (Exception ex)
