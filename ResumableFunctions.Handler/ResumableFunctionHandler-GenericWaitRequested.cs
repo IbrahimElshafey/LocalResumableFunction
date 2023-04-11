@@ -49,8 +49,8 @@ public partial class ResumableFunctionHandler
       
         methodWait.MethodToWait = methodToWait;
         methodWait.MethodToWaitId = methodToWait.Id;
-        methodWait.WaitMethodGroup = methodToWait.WaitMethodGroup;
-        methodWait.WaitMethodGroupId = methodToWait.WaitMethodGroupId;
+        methodWait.MethodGroupToWait = methodToWait.ParentMethodGroup;
+        methodWait.MethodGroupToWaitId = methodToWait.ParentMethodGroupId;
         methodWait.RewriteExpressions();
 
         await _waitsRepository.AddWait(methodWait);

@@ -31,10 +31,10 @@ public class MethodWait : Wait
     ///     The method that we wait to resume resumable function
     /// </summary>
     internal WaitMethodIdentifier MethodToWait { get; set; }
-
     internal int MethodToWaitId { get; set; }
-    internal WaitMethodGroup WaitMethodGroup { get; set; }
-    internal int WaitMethodGroupId { get; set; }
+
+    internal MethodsGroup MethodGroupToWait { get; set; }
+    internal int MethodGroupToWaitId { get; set; }
 
     [NotMapped]
     internal MethodData MethodData { get; set; }

@@ -6,6 +6,7 @@ using ResumableFunctions.Handler.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using Microsoft.Extensions.Logging;
+using System;
 
 namespace ResumableFunctions.Handler;
 
@@ -90,9 +91,30 @@ public partial class ResumableFunctionHandler
 
     private async Task IncrementCompletedCounter(int pushedCallId)
     {
-        var entity = await _context.PushedCalls.FindAsync(pushedCallId);
-        entity.CompletedWaitsCount++;
-        if (entity.CompletedWaitsCount == entity.MatchedWaitsCount)
-            _context.PushedCalls.Remove(entity);
+
+        try
+        {
+            var pushedCall = await _context.PushedCalls.FirstAsync(x => x.Id == pushedCallId);
+            pushedCall.CompletedWaitsCount++;
+            if (pushedCall.CompletedWaitsCount == pushedCall.MatchedWaitsCount)
+                _context.PushedCalls.Remove(pushedCall);
+            await _context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            foreach (var entry in ex.Entries)
+            {
+                if (entry.Entity is PushedCall call)
+                {
+                    //entry.OriginalValues.SetValues(await entry.GetDatabaseValuesAsync());
+                    await IncrementCompletedCounter(call.Id);
+                }
+                else
+                {
+                    _logger.LogError(ex, $"Failed to update {entry.Entity}");
+                }
+            }
+
+        }
     }
 }

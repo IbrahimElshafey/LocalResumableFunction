@@ -3,7 +3,7 @@
 # Scenarios
 * Two waits trying update same FunctionState [Done with no test]
 * First wait closed but new request come before create new one
-* Update pushed methods calls counter
+* Update pushed calls counter [Done with no test]
 * Database.EnsureCreated(); in same time from multiple services
 	* use inter services lock
 * Multiple scan process in same time

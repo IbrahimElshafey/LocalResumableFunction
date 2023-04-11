@@ -60,7 +60,7 @@ internal class WaitsRepository : RepositoryBase
                             .Include(x => x.RequestedByFunction)
                             //.Include(x => x.MethodToWait)
                             .Where(x =>
-                                x.WaitMethodGroupId == methodGroupId &&
+                                x.MethodGroupToWaitId == methodGroupId &&
                                 x.Status == WaitStatus.Waiting &&
                                 x.RefineMatchModifier == pushedCall.RefineMatchModifier)
                             .Select(x => new WaitId(x.Id, x.RequestedByFunction.AssemblyName))
