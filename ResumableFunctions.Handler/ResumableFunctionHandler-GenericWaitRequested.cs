@@ -129,7 +129,6 @@ public partial class ResumableFunctionHandler
         timeWaitMethod.CurrentFunction = timeWait.CurrentFunction;
 
         var jobId = _backgroundJobClient.Schedule(() => new LocalRegisteredMethods().TimeWait(timeWait.UniqueMatchId), timeWait.TimeToWait);
-        //_context.Waits.Remove(timeWait);
         _context.Entry(timeWait).State = EntityState.Detached;
         timeWaitMethod.ParentWait = timeWait.ParentWait;
         timeWaitMethod.FunctionState = timeWait.FunctionState;

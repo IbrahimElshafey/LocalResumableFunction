@@ -78,7 +78,7 @@ internal class WaitsRepository : RepositoryBase
             if (noMatchedWaits)
             {
                 _logger.LogWarning($"No waits matched for pushed method [{pushedMethodId}]");
-                //_context.PushedMethodsCalls.Remove(pushedMethod);
+                _context.PushedMethodsCalls.Remove(pushedMethod);
             }
             else
                 pushedMethod.MatchedWaitsCount = matchedWaitsIds.Count;
@@ -125,7 +125,11 @@ internal class WaitsRepository : RepositoryBase
         if (firstWaitInDb != null)
         {
             _context.Waits.Remove(firstWaitInDb);
-            _context.FunctionStates.Remove(new ResumableFunctionState { Id = firstWaitInDb.FunctionStateId });
+            //load entity to delete it , concurrency controltoken and FKs
+            var functionState = await _context
+                .FunctionStates
+                .FirstAsync(x => x.Id == firstWaitInDb.FunctionStateId);
+            _context.FunctionStates.Remove(functionState);
             await _context.SaveChangesAsync();
             return true;
         }

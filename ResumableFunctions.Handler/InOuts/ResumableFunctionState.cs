@@ -1,7 +1,7 @@
 ﻿
 namespace ResumableFunctions.Handler.InOuts;
 
-public class ResumableFunctionState : IEntityWithUpdate
+public class ResumableFunctionState : IEntityWithUpdate,IEntityWithDelete
 {
     public ResumableFunctionState()
     {
@@ -25,6 +25,7 @@ public class ResumableFunctionState : IEntityWithUpdate
     public string ConcurrencyToken { get; internal set; }
     public DateTime Created { get; internal set; }
 
+    public bool IsDeleted { get; internal set; }
 
     public void AddLog(FunctionStatus status, string statusMessage)
     {

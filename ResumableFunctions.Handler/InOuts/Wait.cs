@@ -7,7 +7,7 @@ using ResumableFunctions.Handler;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class Wait : IEntityWithUpdate
+public abstract class Wait : IEntityWithUpdate,IEntityWithDelete
 {
 
     private ResumableFunction _currntFunction;
@@ -26,6 +26,7 @@ public abstract class Wait : IEntityWithUpdate
     public DateTime Modified { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
     public DateTime Created { get; internal set; }
+    public bool IsDeleted { get; internal set; }
 
     internal ResumableFunctionState FunctionState { get; set; }
 
@@ -76,6 +77,7 @@ public abstract class Wait : IEntityWithUpdate
     }
 
     internal bool CanBeParent => this is FunctionWait || this is WaitsGroup;
+
 
     internal async Task<Wait> GetNextWait()
     {

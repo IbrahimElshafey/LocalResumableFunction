@@ -1,5 +1,8 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -30,7 +33,7 @@ public static class CoreExtensions
         services.AddTransient<Scanner>();
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();
-        services.AddSingleton(typeof(IResumableFunctionsSettings),settings);
+        services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
         if (settings.HangFireConfig != null)
         {
             services.AddHangfire(x => x = settings.HangFireConfig);
@@ -135,7 +138,7 @@ public static class CoreExtensions
         return null;
     }
 
-    public static MethodInfo GetMethodInfo(string AssemblyName, string ClassName, string MethodName,string MethodSignature)
+    public static MethodInfo GetMethodInfo(string AssemblyName, string ClassName, string MethodName, string MethodSignature)
     {
         MethodInfo _methodInfo = null;
         string assemblyPath = $"{AppContext.BaseDirectory}{AssemblyName}.dll";
@@ -150,5 +153,26 @@ public static class CoreExtensions
             }
 
         return _methodInfo;
+    }
+
+    //from:https://haacked.com/archive/2019/07/29/query-filter-by-interface/
+    public static void AppendQueryFilter<T>(
+                this EntityTypeBuilder<T> entityTypeBuilder, Expression<Func<T, bool>> expression) where T : class
+    {
+        var parameterType = Parameter(entityTypeBuilder.Metadata.ClrType);
+
+        var expressionFilter = ReplacingExpressionVisitor.Replace(
+            expression.Parameters.Single(), parameterType, expression.Body);
+
+        if (entityTypeBuilder.Metadata.GetQueryFilter() != null)
+        {
+            var currentQueryFilter = entityTypeBuilder.Metadata.GetQueryFilter();
+            var currentExpressionFilter = ReplacingExpressionVisitor.Replace(
+                currentQueryFilter.Parameters.Single(), parameterType, currentQueryFilter.Body);
+            expressionFilter = AndAlso(currentExpressionFilter, expressionFilter);
+        }
+
+        var lambdaExpression = Lambda(expressionFilter, parameterType);
+        entityTypeBuilder.HasQueryFilter(lambdaExpression);
     }
 }

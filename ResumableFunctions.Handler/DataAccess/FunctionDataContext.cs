@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using System.Reflection.Emit;
 using System.Text.Json;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Hosting;
 
 namespace ResumableFunctions.Handler.Data;
 
@@ -51,7 +52,17 @@ public class FunctionDataContext : DbContext
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
         ConfigureWaits(modelBuilder);
         ConfigurConcurrencyToken(modelBuilder);
+        ConfigurSoftDeleteFilter(modelBuilder);
+
         base.OnModelCreating(modelBuilder);
+    }
+
+    private void ConfigurSoftDeleteFilter(ModelBuilder modelBuilder)
+    {
+        //todo:https://haacked.com/archive/2019/07/29/query-filter-by-interface/
+        modelBuilder.Entity<Wait>().HasQueryFilter(p => !p.IsDeleted);
+        modelBuilder.Entity<ResumableFunctionState>().HasQueryFilter(p => !p.IsDeleted);
+        modelBuilder.Entity<PushedMethod>().HasQueryFilter(p => !p.IsDeleted);
     }
 
     private void ConfigurConcurrencyToken(ModelBuilder modelBuilder)
@@ -196,9 +207,24 @@ public class FunctionDataContext : DbContext
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
         SetDates();
+        HandleSoftDelete();
         ExcludeFalseAddEntries();
 
         return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void HandleSoftDelete()
+    {
+        foreach (var entityEntry in ChangeTracker.Entries())
+        {
+            switch (entityEntry.State)
+            {
+                case EntityState.Deleted when entityEntry.Entity is IEntityWithDelete:
+                    entityEntry.Property(nameof(IEntityWithDelete.IsDeleted)).CurrentValue = true;
+                    entityEntry.State = EntityState.Modified;
+                    break;
+            }
+        }
     }
 
     private void SetDates()
