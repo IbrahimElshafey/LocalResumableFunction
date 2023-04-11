@@ -29,7 +29,7 @@ namespace ResumableFunctions.AspNetService
         //public async Task MethodCalled(MethodCall pushedCall)
         //{
         //    //await 
-        //    //    _resumableFunctionHandler.QueuePushedMethodProcessing(pushedCall);
+        //    //    _resumableFunctionHandler.QueuePushedCallProcessing(pushedCall);
         //}
 
         //todo:CheckMethod/s exist

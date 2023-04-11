@@ -13,4 +13,3 @@ public sealed class FunctionWait : Wait
     public override bool IsCompleted() => ChildWaits.Any(x => x.Status == WaitStatus.Waiting) is false;
 
 }
-internal record WaitId(int Id, string RequestedByAssembly);
