@@ -39,7 +39,7 @@ public class FunctionDataContext : DbContext
     public DbSet<WaitMethodGroup> WaitMethodGroups { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
 
-    public DbSet<PushedMethod> PushedMethodsCalls { get; set; }
+    public DbSet<PushedCall> PushedCalls { get; set; }
     public DbSet<ServiceData> ServicesData { get; set; }
 
 
@@ -48,7 +48,7 @@ public class FunctionDataContext : DbContext
     {
         ConfigureResumableFunctionState(modelBuilder.Entity<ResumableFunctionState>());
         ConfigureMethodIdentifier(modelBuilder);
-        ConfigurePushedMethod(modelBuilder.Entity<PushedMethod>());
+        ConfigurePushedCalls(modelBuilder.Entity<PushedCall>());
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
         ConfigureWaits(modelBuilder);
         ConfigurConcurrencyToken(modelBuilder);
@@ -62,7 +62,7 @@ public class FunctionDataContext : DbContext
         //todo:https://haacked.com/archive/2019/07/29/query-filter-by-interface/
         modelBuilder.Entity<Wait>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<ResumableFunctionState>().HasQueryFilter(p => !p.IsDeleted);
-        modelBuilder.Entity<PushedMethod>().HasQueryFilter(p => !p.IsDeleted);
+        modelBuilder.Entity<PushedCall>().HasQueryFilter(p => !p.IsDeleted);
     }
 
     private void ConfigurConcurrencyToken(ModelBuilder modelBuilder)
@@ -85,7 +85,7 @@ public class FunctionDataContext : DbContext
         entityTypeBuilder.HasIndex(x => x.AssemblyName);
     }
 
-    private void ConfigurePushedMethod(EntityTypeBuilder<PushedMethod> entityTypeBuilder)
+    private void ConfigurePushedCalls(EntityTypeBuilder<PushedCall> entityTypeBuilder)
     {
         entityTypeBuilder
           .Property(x => x.Input)

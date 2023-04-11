@@ -44,7 +44,7 @@ public partial class ResumableFunctionHandler
 
 
 
-    private async Task ProcessWait(MethodWait methodWait, int pushedCallId)
+    private async Task ProcessWait(MethodWait methodWait)
     {
         try
         {
@@ -54,29 +54,8 @@ public partial class ResumableFunctionHandler
             //todo:cancel processing and rewait it if data is locked
             if (methodWait.UpdateFunctionData())
             {
-                try
-                {
-                    methodWait.PushedCallId = pushedCallId;
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException ex)
-                {
-                    if (ex.Entries.All(x => x.Entity is ResumableFunctionState))
-                    {
-                        methodWait.FunctionState.AddLog(
-                            FunctionStatus.Warning,
-                            $"Currency Exception occured when try to update function state [{methodWait.FunctionState.Id}]." +
-                            $"\nError message:{ex.Message}" +
-                            $"\nProcessing this wait will be scheduled.");
-                        _backgroundJobClient.Schedule(
-                            () => ProcessMatchedWait(methodWait.Id, methodWait.PushedCallId), TimeSpan.FromMinutes(3));
-                        return;
-                    }
-                    throw ex;
-                }
-
                 await ResumeExecution(methodWait);
-                await IncrementCompletedCounter(pushedCallId);
+                await IncrementCompletedCounter(methodWait.PushedCallId);
             }
             await _context.SaveChangesAsync();
         }
@@ -90,9 +69,9 @@ public partial class ResumableFunctionHandler
 
     private async Task IncrementCompletedCounter(int pushedCallId)
     {
-        var entity = await _context.PushedMethodsCalls.FindAsync(pushedCallId);
+        var entity = await _context.PushedCalls.FindAsync(pushedCallId);
         entity.CompletedWaitsCount++;
-        if (entity.CompletedWaitsCount == entity.MatchedWaitsCount)
-            _context.PushedMethodsCalls.Remove(entity);
+        //if (entity.CompletedWaitsCount == entity.MatchedWaitsCount)
+        //    _context.PushedMethodsCalls.Remove(entity);
     }
 }

@@ -69,7 +69,10 @@ public partial class ResumableFunctionHandler
         {
             if (currentWait.ParentWaitId == null)
                 await FinalExit(currentWait);
-            await DuplicateIfFirst(currentWait);
+
+            //function contains one wait
+            if (currentWait.IsFirst)
+                await RegisterFirstWait(currentWait.RequestedByFunction.MethodInfo);
             return;
         }
 
@@ -83,7 +86,8 @@ public partial class ResumableFunctionHandler
 
         await SaveWaitRequestToDb(nextWait);//main use
         await _context.SaveChangesAsync();
-        await DuplicateIfFirst(currentWait);
+        if (currentWait.IsFirst)
+            await RegisterFirstWait(currentWait.RequestedByFunction.MethodInfo);
     }
 
     private async Task FinalExit(Wait currentWait)

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts;
-public class PushedMethod : IEntityWithDelete
+public class PushedCall : IEntityWithDelete
 {
     public int Id { get; internal set; }
     public MethodData MethodData { get; internal set; }

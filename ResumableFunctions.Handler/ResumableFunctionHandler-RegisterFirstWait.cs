@@ -66,15 +66,14 @@ public partial class ResumableFunctionHandler
         Console.WriteLine(message);
     }
 
-    private async Task DuplicateIfFirst(Wait currentWait)
-    {
-        if (currentWait.IsFirst)
-            await RegisterFirstWait(currentWait.RequestedByFunction.MethodInfo);
-    }
+
 
     private async Task<bool> MoveFunctionToRecycleBin(Wait lastWait)
     {
-        //throw new NotImplementedException();
+        //move function state
+        //it's logs
+        //it's waits
+        //to recycle bin;
         return true;
     }
 }

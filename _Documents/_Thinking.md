@@ -4,7 +4,8 @@
 * Two waits trying update same FunctionState [Done with no test]
 * First wait closed but new request come before create new one
 * Update pushed methods calls counter
-* Database.EnsureCreated(); in same time
+* Database.EnsureCreated(); in same time from multiple services
+	* use inter services lock
 * Multiple scan process in same time
 	* Raised in same service [done]
 	* Raised in same service another instance when using load balancer

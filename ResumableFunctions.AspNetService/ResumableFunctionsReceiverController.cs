@@ -19,17 +19,17 @@ namespace ResumableFunctions.AspNetService
 
 
         [HttpGet(nameof(ProcessMatchedWait))]
-        public int ProcessMatchedWait(int waitId, int pushedMethodId)
+        public int ProcessMatchedWait(int waitId, int pushedCallId)
         {
-            _backgroundJobClient.Enqueue(() => _resumableFunctionHandler.ProcessMatchedWait(waitId, pushedMethodId));
+            _backgroundJobClient.Enqueue(() => _resumableFunctionHandler.ProcessMatchedWait(waitId, pushedCallId));
             return 0;
         }
 
         //[HttpPost(nameof(MethodCalled))]
-        //public async Task MethodCalled(MethodCall pushedMethod)
+        //public async Task MethodCalled(MethodCall pushedCall)
         //{
         //    //await 
-        //    //    _resumableFunctionHandler.QueuePushedMethodProcessing(pushedMethod);
+        //    //    _resumableFunctionHandler.QueuePushedMethodProcessing(pushedCall);
         //}
 
         //todo:CheckMethod/s exist

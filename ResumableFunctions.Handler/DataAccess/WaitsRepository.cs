@@ -8,17 +8,14 @@ using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Helpers;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace ResumableFunctions.Handler.Data;
 
 internal class WaitsRepository : RepositoryBase
 {
-    private ILogger<WaitsRepository> _logger;
 
     public WaitsRepository(FunctionDataContext ctx) : base(ctx)
     {
-        _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<WaitsRepository>>();
     }
 
     public Task AddWait(Wait wait)
@@ -41,50 +38,48 @@ internal class WaitsRepository : RepositoryBase
         return Task.CompletedTask;
     }
 
-    public async Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedMethodId)
+    public async Task<List<MethodWait>> GetMethodWaits(int pushedCallId)
     {
 
         try
         {
-            var pushedMethod = await _context.PushedMethodsCalls.FindAsync(pushedMethodId);
-            if (pushedMethod == null)
-                throw new NullReferenceException($"No pushed method with ID [{pushedMethodId}] exist in DB.");
-
+            var pushedCall = await _context.PushedCalls.FindAsync(pushedCallId);
+            if (pushedCall == null) return null;
             var metodIdsRepo = new MethodIdentifierRepository(_context);
             var methodGroupId =
-                await metodIdsRepo.GetMethodGroupId(pushedMethod.MethodData.MethodUrn);
+                await metodIdsRepo.GetMethodGroupId(pushedCall.MethodData.MethodUrn);
 
 
-            var matchedWaitsIds = await _context
+            var matchedWaits = await _context
                             .MethodWaits
                             .Include(x => x.RequestedByFunction)
-                            //.Include(x => x.MethodToWait)
+                            .Include(x => x.MethodToWait)
+                            //.Include(x => x.WaitMethodGroup)
                             .Where(x =>
                                 x.WaitMethodGroupId == methodGroupId &&
                                 x.Status == WaitStatus.Waiting &&
-                                x.RefineMatchModifier == pushedMethod.RefineMatchModifier)
-                            .Select(x => new WaitId(x.Id, x.RequestedByFunction.AssemblyName))
+                                x.RefineMatchModifier == pushedCall.RefineMatchModifier)
                             .ToListAsync();
 
 
-            //matchedWaitsIds.ForEach(x =>
-            //{
-            //    x.Input = pushedMethod.Input;
-            //    x.Output = pushedMethod.Output;
-            //    //x.PushedMethodCallId = pushedMethodId;
-            //});
+            matchedWaits.ForEach(x =>
+            {
+                x.Input = pushedCall.Input;
+                x.Output = pushedCall.Output;
+                x.PushedCallId = pushedCallId;
+            });
 
-            bool noMatchedWaits = matchedWaitsIds?.Any() is not true;
+            bool noMatchedWaits = matchedWaits?.Any() is not true;
             if (noMatchedWaits)
             {
-                _logger.LogWarning($"No waits matched for pushed method [{pushedMethodId}]");
-                _context.PushedMethodsCalls.Remove(pushedMethod);
+                //_logger.LogInformation($"No waits matched for pushed method [{pushedCallId}]");
+                //_context.PushedMethodsCalls.Remove(pushedCall);
             }
             else
-                pushedMethod.MatchedWaitsCount = matchedWaitsIds.Count;
+                pushedCall.MatchedWaitsCount = matchedWaits.Count;
 
             await _context.SaveChangesAsync();
-            return matchedWaitsIds;
+            return matchedWaits;
         }
         catch (Exception ex)
         {
@@ -125,11 +120,7 @@ internal class WaitsRepository : RepositoryBase
         if (firstWaitInDb != null)
         {
             _context.Waits.Remove(firstWaitInDb);
-            //load entity to delete it , concurrency controltoken and FKs
-            var functionState = await _context
-                .FunctionStates
-                .FirstAsync(x => x.Id == firstWaitInDb.FunctionStateId);
-            _context.FunctionStates.Remove(functionState);
+            _context.FunctionStates.Remove(new ResumableFunctionState { Id = firstWaitInDb.FunctionStateId });
             await _context.SaveChangesAsync();
             return true;
         }
