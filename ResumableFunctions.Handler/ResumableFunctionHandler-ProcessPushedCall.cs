@@ -10,6 +10,7 @@ using System;
 using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.Helpers;
+using Newtonsoft.Json.Linq;
 
 namespace ResumableFunctions.Handler;
 
@@ -53,7 +54,6 @@ public partial class ResumableFunctionHandler
                     {
                         if (IsLocalWait(waitId))
                             _backgroundJobClient.Enqueue(() => ProcessMatchedWait(waitId.Id, pushedCallId));
-                        //await ProcessWait(matchedMethodWait, pushedCallId);
                         else
                             await CallOwnerService(waitId, pushedCallId);
                     }
@@ -107,6 +107,7 @@ public partial class ResumableFunctionHandler
 
                 methodWait.Input = pushedCall.Input;
                 methodWait.Output = pushedCall.Output;
+
                 await ProcessWait(methodWait, pushedCallId);
             }
         }
@@ -179,6 +180,8 @@ public partial class ResumableFunctionHandler
             if (!await CheckIfMatch(methodWait))
                 return;
             //todo:cancel processing and rewait it if data is locked
+            if (methodWait.IsFirst)
+                methodWait.FunctionState.StateObject = new JObject();
             if (methodWait.UpdateFunctionData())
             {
                 try
