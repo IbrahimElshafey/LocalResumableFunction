@@ -1,15 +1,19 @@
 ﻿
 
 # Scenarios
-* Two waits trying update same FunctionState [Done with no test]
+* Two waits trying update same FunctionState 
+	* [Done with no test]
 * First wait closed but new request come before create new one
-* Update pushed calls counter [Done with no test]
+* Update pushed calls counter 
+	* [Done with no test]
 * Database.EnsureCreated(); in same time from multiple services
-	* use inter services lock
+	* [Scan on second process will be failed and retried by hangfire]
 * Multiple scan process in same time
 	* Raised in same service [done]
-	* Raised in same service another instance when using load balancer
-* Diffrent services may update/add same methods wait group at same time
+	* Raised in same service another instance when using load balancer 
+		* Exception will throw and hangfire will retry
+* Diffrent services may try to add same MethodGroup at same time 
+	* uniqe index exception handel
 
 # Cross Services Locking
 * Table with Insert/Delete only (No Update)

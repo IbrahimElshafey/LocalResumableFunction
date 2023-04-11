@@ -184,7 +184,8 @@ public partial class ResumableFunctionHandler
                 try
                 {
                     methodWait.PushedCallId = pushedCallId;
-                    await _context.SaveChangesAsync();
+                    if (!methodWait.IsFirst)//save state changes if not first wait
+                        await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {

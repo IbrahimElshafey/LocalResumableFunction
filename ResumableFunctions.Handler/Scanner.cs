@@ -15,7 +15,6 @@ namespace ResumableFunctions.Handler;
 
 public class Scanner
 {
-    private const string ScannerAppName = "##SCANNER: ";
     internal FunctionDataContext _context;
     private MethodIdentifierRepository _methodIdentifierRepo;
     private IResumableFunctionsSettings _settings;
@@ -41,6 +40,7 @@ public class Scanner
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Error when scan [{Assembly.GetEntryAssembly().GetName().Name}]");
+            throw;
         }
         finally
         {
@@ -192,7 +192,8 @@ public class Scanner
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Error when scan assembly [{assemblyPath}]");
+                _logger.LogError(e, $"Error when register method waits in assembly [{assemblyPath}]");
+                throw;
             }
         }
 
@@ -276,9 +277,7 @@ public class Scanner
 
     private void WriteMessage(string message)
     {
-        _logger.LogInformation($"{ScannerAppName}{message}\n");
-        //Console.Write(ScannerAppName);
-        //Console.WriteLine(message);
+        _logger.LogInformation(message);
     }
 }
 

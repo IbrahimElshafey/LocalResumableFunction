@@ -57,7 +57,7 @@
 * Create nuget package
 
 
-
+* Handle power shut down
 
 * How to unit test a resumable function
 	* Generate unit test code for resumable function

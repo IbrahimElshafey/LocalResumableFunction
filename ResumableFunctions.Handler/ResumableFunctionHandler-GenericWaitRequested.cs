@@ -11,7 +11,6 @@ public partial class ResumableFunctionHandler
 {
     internal async Task<bool> SaveWaitRequestToDb(Wait newWait)
     {
-        newWait.Status = WaitStatus.Waiting;
         if (!newWait.IsValidWaitRequest())
         {
             string message = $"Error when validate the requested wait [{newWait.Name}] that requested by function [{newWait?.RequestedByFunction.MethodName}] wait will not be saved to DB.";

@@ -11,8 +11,56 @@ namespace ResumableFunctions.Handler;
 
 public partial class ResumableFunctionHandler
 {
-    private const string ScannerAppName = "##SCANNER: ";
+    internal async Task<Wait> GetFirstWaitClone(Wait firstWait)
+    {
+        MethodInfo resumableFunction = firstWait.RequestedByFunction.MethodInfo;
+        var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
+        if (classInstance == null)
+            throw new ArgumentNullException(nameof(classInstance), $"Can't create instance of class [{resumableFunction.DeclaringType.FullName}]");
+        try
+        {
+            classInstance.CurrentResumableFunction = resumableFunction;
+            var functionRunner = new FunctionRunner(classInstance, resumableFunction);
+            if (functionRunner.ResumableFunctionExistInCode is false)
+            {
+                string message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
+                _logger.LogWarning(message);
+                throw new Exception(message);
+            }
 
+            await functionRunner.MoveNextAsync();
+            var firstWaitClone = functionRunner.Current;
+            var methodId = await _metodIdsRepo.GetResumableFunction(new MethodData(resumableFunction));
+
+            firstWaitClone.RequestedByFunction = methodId;
+            firstWaitClone.RequestedByFunctionId = methodId.Id;
+            firstWaitClone.Status = WaitStatus.Temp;
+            //firstWaitClone.Name += "Clone";
+
+            //if (firstWait is MethodWait wait && firstWaitClone is MethodWait waitClone)
+            //{
+            //    waitClone.Input = wait.Input;
+            //    waitClone.Output = wait.Output;
+            //}
+
+            var functionState = new ResumableFunctionState
+            {
+                ResumableFunctionIdentifier = methodId,
+                StateObject = firstWait.FunctionState.StateObject
+            };
+            firstWaitClone.FunctionState = functionState;
+            functionState.AddLog(FunctionStatus.New, $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.");
+            functionState.AddLog(FunctionStatus.InProgress, $"First wait matched [{firstWaitClone.Name}] for [{resumableFunction.GetFullName()}].");
+            await SaveWaitRequestToDb(firstWaitClone);
+            await _context.SaveChangesAsync();
+            return firstWaitClone;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error when try to register first wait for function [{resumableFunction.GetFullName()}]");
+            throw;
+        }
+    }
     internal async Task RegisterFirstWait(MethodInfo resumableFunction)
     {
         var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
@@ -39,7 +87,7 @@ public partial class ResumableFunctionHandler
 
                 firstWait.RequestedByFunction = methodId;
                 firstWait.RequestedByFunctionId = methodId.Id;
-                firstWait.IsFirst = true;
+                firstWait.CascadeSetIsFirst(true);
                 //firstWait.StateAfterWait = functionRunner.GetState();
                 var functionState = new ResumableFunctionState
                 {
@@ -47,7 +95,7 @@ public partial class ResumableFunctionHandler
                     StateObject = classInstance
                 };
                 firstWait.FunctionState = functionState;
-                functionState.AddLog(FunctionStatus.New, $"Started and wait [{firstWait.Name}] to match.");
+                functionState.AddLog(FunctionStatus.New, $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.");
                 await SaveWaitRequestToDb(firstWait);
                 WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
                 await _context.SaveChangesAsync();
@@ -62,8 +110,7 @@ public partial class ResumableFunctionHandler
 
     private void WriteMessage(string message)
     {
-        Console.Write(ScannerAppName);
-        Console.WriteLine(message);
+        _logger.LogInformation(message);
     }
 
 

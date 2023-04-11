@@ -7,14 +7,14 @@ using ResumableFunctions.Handler;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class Wait : IEntityWithUpdate,IEntityWithDelete
+public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
 {
 
     private ResumableFunction _currntFunction;
 
     public int Id { get; internal set; }
     public string Name { get; internal set; }
-    public WaitStatus Status { get; internal set; }
+    public WaitStatus Status { get; internal set; } = WaitStatus.Waiting;
     public bool IsFirst { get; internal set; }
     public int StateBeforeWait { get; internal set; }
     public int StateAfterWait { get; internal set; }
@@ -200,5 +200,14 @@ public abstract class Wait : IEntityWithUpdate,IEntityWithDelete
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name");
         }
         return FunctionState?.Status != FunctionStatus.Error;
+    }
+
+    internal void CascadeSetIsFirst(bool isFirst)
+    {
+        IsFirst = isFirst;
+        foreach (var child in ChildWaits)
+        {
+            child.CascadeSetIsFirst(isFirst);
+        }
     }
 }
