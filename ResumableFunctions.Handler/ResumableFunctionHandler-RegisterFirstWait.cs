@@ -92,7 +92,7 @@ public partial class ResumableFunctionHandler
                     //return;
                 }
 
-                firstWait.CascadeAction(x=>x.RequestedByFunction = methodId);
+                firstWait.CascadeAction(x => x.RequestedByFunction = methodId);
                 firstWait.CascadeAction(x => x.RequestedByFunctionId = methodId.Id);
                 firstWait.CascadeAction(x => x.IsFirst = true);
                 //firstWait.StateAfterWait = functionRunner.GetState();
@@ -101,7 +101,7 @@ public partial class ResumableFunctionHandler
                     ResumableFunctionIdentifier = methodId,
                     StateObject = classInstance
                 };
-                firstWait.FunctionState = functionState;
+                firstWait.CascadeAction(x => x.FunctionState = functionState);
                 functionState.AddLog(LogStatus.New, $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.");
                 await SaveWaitRequestToDb(firstWait);
                 WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
