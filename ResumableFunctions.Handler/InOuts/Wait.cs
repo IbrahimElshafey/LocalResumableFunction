@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler;
+using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
@@ -196,10 +198,10 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
         if (isNameDuplicated)
         {
             FunctionState?.AddLog(
-                FunctionStatus.Warning,
+                LogStatus.Warning,
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name");
         }
-        return FunctionState?.Status != FunctionStatus.Error;
+        return FunctionState?.Status != LogStatus.Error;
     }
 
     internal void CascadeSetIsFirst(bool isFirst)
@@ -218,4 +220,6 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
             child.CascadeSetDeleted();
         }
     }
+
+    
 }

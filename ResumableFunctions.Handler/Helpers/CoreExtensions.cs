@@ -175,4 +175,35 @@ public static class CoreExtensions
         var lambdaExpression = Lambda(expressionFilter, parameterType);
         entityTypeBuilder.HasQueryFilter(lambdaExpression);
     }
+
+    public static IEnumerable<T> Flatten<T>(
+           this IEnumerable<T> e,
+           Func<T, IEnumerable<T>> f) =>
+               e.SelectMany(c => f(c).Flatten(f)).Concat(e);
+
+    public static void CascadeSet<T, Prop>(
+        this T objectToSet,
+        Expression<Func<IEnumerable<T>>> childs,
+        Expression<Func<Prop>> prop,
+        Prop value)
+    {
+        //IsDeleted = true;
+        //foreach (var child in ChildWaits)
+        //{
+        //    child.CascadeSetDeleted();
+        //}
+    }
+    public static IEnumerable<Prop> CascadeGet<T, Prop>(
+       this T objectToSet,
+       Expression<Func<IEnumerable<T>>> childs,
+       Expression<Func<Prop>> prop,
+       Prop value)
+    {
+        //IsDeleted = true;
+        //foreach (var child in ChildWaits)
+        //{
+        //    child.CascadeSetDeleted();
+        //}
+        return null;
+    }
 }

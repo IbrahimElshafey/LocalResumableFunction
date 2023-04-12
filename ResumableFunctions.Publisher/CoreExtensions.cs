@@ -112,22 +112,5 @@ namespace ResumableFunctions.Publisher
             }
             return null;
         }
-
-        //public static MethodInfo GetMethodInfo(string AssemblyName, string ClassName, string MethodName,string MethodSignature)
-        //{
-        //    MethodInfo _methodInfo = null;
-        //    string assemblyPath = $"{AppContext.BaseDirectory}{AssemblyName}.dll";
-        //    if (File.Exists(assemblyPath))
-        //        if (AssemblyName != null && ClassName != null && MethodName != null)
-        //        {
-        //            _methodInfo = Assembly.LoadFrom(assemblyPath)
-        //                .GetType(ClassName)
-        //                ?.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-        //                .FirstOrDefault(x => x.Name == MethodName && MethodData.CalcSignature(x) == MethodSignature);
-        //            return _methodInfo;
-        //        }
-
-        //    return _methodInfo;
-        //}
     }
 }

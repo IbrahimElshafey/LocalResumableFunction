@@ -1,6 +1,6 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
-public enum FunctionStatus
+public enum LogStatus
 {
     New = 1,
     InProgress = 2,

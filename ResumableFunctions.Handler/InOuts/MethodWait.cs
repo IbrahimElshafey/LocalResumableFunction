@@ -84,14 +84,14 @@ public class MethodWait : Wait
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             FunctionState.StateObject = CurrentFunction; 
             FunctionState.AddLog(
-                FunctionStatus.InProgress,
+                LogStatus.InProgress,
                 $"Method wait [{Name}] matched and function data updated.");
             return true;
         }
         catch (Exception ex)
         {
             FunctionState.AddLog(
-                FunctionStatus.Error,
+                LogStatus.Error,
                 $"An error occured when try to update function data after method wait [{Name}] matched." +
                 ex.Message);
             return false;
@@ -110,7 +110,7 @@ public class MethodWait : Wait
         catch (Exception e)
         {
             FunctionState.AddLog(
-               FunctionStatus.Error,
+               LogStatus.Error,
                $"An error occured when try evaluate match for wait [{Name}]." +
                e.Message);
             return false;
@@ -132,19 +132,19 @@ public class MethodWait : Wait
     {
         if (!IsFirst && MatchIfExpression == null)
             FunctionState.AddLog(
-                FunctionStatus.Error,
+                LogStatus.Error,
                 $"You didn't set the `MatchIfExpression` for wait [{Name}] that is not a first wait," +
                 $"This will lead to no match for all calls," +
                 $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchIfExpression`," +
                 $"or use MatchAll() method.");
         if (IsFirst && MatchIfExpression == null)
             FunctionState.AddLog(
-                FunctionStatus.Warning,
+                LogStatus.Warning,
                 $"You didn't set the `MatchIfExpression` for first wait [{Name}]," +
                 $"This will lead to all calls will be matched.");
         if (SetDataExpression == null)
             FunctionState.AddLog(
-                FunctionStatus.Error,
+                LogStatus.Error,
                 $"You didn't set the `SetDataExpression` for wait [{Name}], " +
                 $"The execution will not continue, " +
                 $"Please use `NoSetData()` if this is intended.");

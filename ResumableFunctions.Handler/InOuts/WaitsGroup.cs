@@ -96,6 +96,28 @@ public class WaitsGroup : Wait
             if (!childWait.IsValidWaitRequest())
                 break;
         }
-        return base.IsValidWaitRequest();
+
+        return CheckNameDuplication() ? base.IsValidWaitRequest() : false;
     }
+
+    private bool CheckNameDuplication()
+    {
+        var duplicatedWaits =
+             ChildWaits
+             .Flatten(child => child.ChildWaits)
+             .GroupBy(child => child.Name)
+             .Where(child => child.Count() > 1)
+             .ToList();
+        if (duplicatedWaits?.Any() is true)
+        {
+            FunctionState?.AddLog(
+                   LogStatus.Error,
+                   $"The wait named [{duplicatedWaits.First().First().Name}] is duplicated in group [{Name}]," +
+                   $",fix it to not cause a problem. Name can't be duplicated in the group.");
+            return false;
+        }
+        return true;
+    }
+
+
 }

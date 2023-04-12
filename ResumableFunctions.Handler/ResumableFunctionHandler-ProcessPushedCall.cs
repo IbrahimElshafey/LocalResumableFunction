@@ -199,7 +199,7 @@ public partial class ResumableFunctionHandler
                     if (ex.Entries.All(x => x.Entity is ResumableFunctionState))
                     {
                         methodWait.FunctionState.AddLog(
-                            FunctionStatus.Warning,
+                            LogStatus.Warning,
                             $"Currency Exception occured when try to update function state [{methodWait.FunctionState.Id}]." +
                             $"\nError message:{ex.Message}" +
                             $"\nProcessing this wait will be scheduled.");
