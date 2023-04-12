@@ -34,14 +34,14 @@ public partial class ResumableFunctionHandler
             //todo: handle cloning complex wait
             switch (firstWaitClone)
             {
-                case WaitsGroup mg:break;
-                case FunctionWait fw:break;
-            }   
+                case WaitsGroup mg: break;
+                case FunctionWait fw: break;
+            }
             //todo:cascade set
             firstWaitClone.RequestedByFunction = firstWait.RequestedByFunction;
             firstWaitClone.RequestedByFunctionId = firstWait.RequestedByFunction.Id;
             firstWaitClone.Status = WaitStatus.Temp;
-            firstWaitClone.CascadeSetIsFirst(false);
+            firstWaitClone.CascadeAction(x => x.IsFirst = false);
 
             if (firstWait is MethodWait wait && firstWaitClone is MethodWait waitClone)
             {
@@ -92,9 +92,9 @@ public partial class ResumableFunctionHandler
                     //return;
                 }
 
-                firstWait.RequestedByFunction = methodId;
-                firstWait.RequestedByFunctionId = methodId.Id;
-                firstWait.CascadeSetIsFirst(true);
+                firstWait.CascadeAction(x=>x.RequestedByFunction = methodId);
+                firstWait.CascadeAction(x => x.RequestedByFunctionId = methodId.Id);
+                firstWait.CascadeAction(x => x.IsFirst = true);
                 //firstWait.StateAfterWait = functionRunner.GetState();
                 var functionState = new ResumableFunctionState
                 {

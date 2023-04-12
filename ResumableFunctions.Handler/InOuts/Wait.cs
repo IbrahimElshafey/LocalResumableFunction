@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Helpers;
@@ -204,22 +205,13 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
         return FunctionState?.Status != LogStatus.Error;
     }
 
-    internal void CascadeSetIsFirst(bool isFirst)
+
+    internal void CascadeAction(Action<Wait> action)
     {
-        IsFirst = isFirst;
-        foreach (var child in ChildWaits)
-        {
-            child.CascadeSetIsFirst(isFirst);
-        }
-    }
-    internal void CascadeSetDeleted()
-    {
-        IsDeleted = true;
-        foreach (var child in ChildWaits)
-        {
-            child.CascadeSetDeleted();
-        }
+        action(this);
+        if (ChildWaits != null)
+            foreach (var item in ChildWaits)
+                item.CascadeAction(action);
     }
 
-    
 }

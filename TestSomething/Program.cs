@@ -18,7 +18,14 @@ var node = new Node
         new Node { Id=5,}
     }
 };
-foreach (var item in node.CascadeGet())
+
+node.CascadeAction(x =>
+{
+    x.Id2 = x.Id * 10;
+    Console.WriteLine($"Node:{x.Id},{x.Id2}");
+});
+foreach (var item in node.CascadeFunc(x => x))
 {
     Console.WriteLine($"Node Id:{item.Id}");
 }
+
