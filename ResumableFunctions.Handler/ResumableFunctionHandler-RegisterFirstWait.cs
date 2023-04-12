@@ -11,7 +11,7 @@ namespace ResumableFunctions.Handler;
 
 public partial class ResumableFunctionHandler
 {
-    internal async Task<Wait> GetFirstWaitClone(Wait firstWait)
+    internal async Task<Wait> CloneFirstWait(MethodWait firstWait)
     {
         MethodInfo resumableFunction = firstWait.RequestedByFunction.MethodInfo;
         var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
@@ -30,22 +30,29 @@ public partial class ResumableFunctionHandler
 
             await functionRunner.MoveNextAsync();
             var firstWaitClone = functionRunner.Current;
-            var methodId = await _metodIdsRepo.GetResumableFunction(new MethodData(resumableFunction));
 
-            firstWaitClone.RequestedByFunction = methodId;
-            firstWaitClone.RequestedByFunctionId = methodId.Id;
+            //todo: handle cloning complex wait
+            switch (firstWaitClone)
+            {
+                case WaitsGroup mg:break;
+                case FunctionWait fw:break;
+            }   
+            //todo:cascade set
+            firstWaitClone.RequestedByFunction = firstWait.RequestedByFunction;
+            firstWaitClone.RequestedByFunctionId = firstWait.RequestedByFunction.Id;
             firstWaitClone.Status = WaitStatus.Temp;
-            //firstWaitClone.Name += "Clone";
+            firstWaitClone.CascadeSetIsFirst(false);
 
-            //if (firstWait is MethodWait wait && firstWaitClone is MethodWait waitClone)
-            //{
-            //    waitClone.Input = wait.Input;
-            //    waitClone.Output = wait.Output;
-            //}
+            if (firstWait is MethodWait wait && firstWaitClone is MethodWait waitClone)
+            {
+                waitClone.PushedCallId = wait.PushedCallId;
+                //waitClone.Input = wait.Input;
+                //waitClone.Output = wait.Output;
+            }
 
             var functionState = new ResumableFunctionState
             {
-                ResumableFunctionIdentifier = methodId,
+                ResumableFunctionIdentifier = firstWait.RequestedByFunction,
                 StateObject = firstWait.FunctionState.StateObject
             };
             firstWaitClone.FunctionState = functionState;

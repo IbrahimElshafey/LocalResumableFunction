@@ -4,6 +4,7 @@
 * Two waits trying update same FunctionState 
 	* [Done with no test]
 * First wait closed but new request come before create new one
+	* Dont update the first wait , clone it [done]
 * Update pushed calls counter 
 	* [Done with no test]
 * Database.EnsureCreated(); in same time from multiple services

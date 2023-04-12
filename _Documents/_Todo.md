@@ -1,6 +1,9 @@
 ﻿# Todo
 
 * Handle concurrency problems
+* Scan Enhamvements
+	* Validate URN duplication when scan
+	* Detect deleted methods
 * Compelete publisher project and test it
 * Wait methods in same group must have the same signature
 
@@ -57,13 +60,11 @@
 * Create nuget package
 
 
-* Handle power shut down
 
 * How to unit test a resumable function
 	* Generate unit test code for resumable function
 * Generate external service class form (swagger defention)
 		
-* Delete first wait subwaits if group
 
 * Activate one start wait if multiple exist for same method
 

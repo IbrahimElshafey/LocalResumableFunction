@@ -78,7 +78,7 @@ public partial class ResumableFunctionHandler
                     .Include(x => x.RequestedByFunction)
                     .Include(x => x.MethodToWait)
                     .Where(x => x.Status == WaitStatus.Waiting)
-                    .FirstAsync(x => x.Id == waitId);
+                    .FirstOrDefaultAsync(x => x.Id == waitId);
 
                 if (methodWait == null)
                 {
@@ -88,7 +88,7 @@ public partial class ResumableFunctionHandler
 
                 var pushedCall = await _context
                    .PushedCalls
-                   .FirstAsync(x => x.Id == pushedCallId);
+                   .FirstOrDefaultAsync(x => x.Id == pushedCallId);
                 if (pushedCall == null)
                 {
                     _logger.LogError($"No pushed method exist with ID ({pushedCallId}).");
@@ -146,7 +146,7 @@ public partial class ResumableFunctionHandler
         string ownerAssemblyPath = $"{AppContext.BaseDirectory}{ownerAssemblyName}.dll";
         return File.Exists(ownerAssemblyPath);
     }
-    private async Task<bool> CheckIfMatch(MethodWait methodWait)
+    private async Task<bool> CheckIfMatch(MethodWait methodWait, int pushedCallId)
     {
         methodWait.LoadExpressions();
         switch (methodWait.NeedFunctionStateForMatch)
@@ -161,12 +161,15 @@ public partial class ResumableFunctionHandler
                     return true;
                 break;
         }
-        await IncrementCompletedCounter(methodWait.PushedCallId);
+        //if matche or not it's completed
+        await IncrementCompletedCounter(pushedCallId);
         return false;
 
         async Task LoadWaitFunctionState(MethodWait wait)
         {
-            wait.FunctionState = await _context.FunctionStates.FindAsync(wait.FunctionStateId);
+            wait.FunctionState = await _context
+                .FunctionStates
+                .FirstOrDefaultAsync(x => x.Id == wait.FunctionStateId);
         }
     }
 
@@ -177,11 +180,12 @@ public partial class ResumableFunctionHandler
         try
         {
             methodWait.SetInputAndOutput();
-            if (!await CheckIfMatch(methodWait))
+            if (!await CheckIfMatch(methodWait, pushedCallId))
                 return;
-            //todo:cancel processing and rewait it if data is locked
-            if (methodWait.IsFirst)
-                methodWait.FunctionState.StateObject = new JObject();
+
+            //if (methodWait.IsFirst)
+            //    methodWait.FunctionState.StateObject = new JObject();
+
             if (methodWait.UpdateFunctionData())
             {
                 try
@@ -224,7 +228,7 @@ public partial class ResumableFunctionHandler
 
         try
         {
-            var pushedCall = await _context.PushedCalls.FirstAsync(x => x.Id == pushedCallId);
+            var pushedCall = await _context.PushedCalls.FirstOrDefaultAsync(x => x.Id == pushedCallId);
             pushedCall.CompletedWaitsCount++;
             if (pushedCall.CompletedWaitsCount == pushedCall.MatchedWaitsCount)
                 _context.PushedCalls.Remove(pushedCall);
@@ -242,9 +246,13 @@ public partial class ResumableFunctionHandler
                 else
                 {
                     _logger.LogError(ex, $"Failed to update {entry.Entity}");
+                    throw;
                 }
             }
-
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Failed to IncrementCompletedCounter pushedCallId:{pushedCallId}");
         }
     }
 

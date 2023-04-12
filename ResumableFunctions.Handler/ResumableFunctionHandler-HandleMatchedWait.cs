@@ -8,10 +8,13 @@ namespace ResumableFunctions.Handler;
 
 public partial class ResumableFunctionHandler
 {
-    private async Task ResumeExecution(Wait matchedWait)
+    private async Task ResumeExecution(MethodWait matchedWait)
     {
-        var currentWait = matchedWait;
-
+        Wait currentWait = matchedWait;
+        if (matchedWait.IsFirst)
+        {
+            currentWait = await CloneFirstWait(matchedWait);
+        }
         do
         {
             var parent = await _waitsRepository.GetWaitParent(currentWait);
@@ -57,11 +60,6 @@ public partial class ResumableFunctionHandler
 
     private async Task ProceedToNextWait(Wait currentWait)
     {
-        if (currentWait.IsFirst)
-        {
-            currentWait = await GetFirstWaitClone(currentWait);
-        }
-
         //bug:may cause problem for go back after
         if (currentWait.ParentWait != null && currentWait.ParentWait.Status != WaitStatus.Waiting)
         {

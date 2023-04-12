@@ -119,6 +119,7 @@ internal class WaitsRepository : RepositoryBase
         if (firstWaitInDb != null)
         {
             _context.Waits.Remove(firstWaitInDb);
+            firstWaitInDb.CascadeSetDeleted();
             //load entity to delete it , concurrency controltoken and FKs
             var functionState = await _context
                 .FunctionStates

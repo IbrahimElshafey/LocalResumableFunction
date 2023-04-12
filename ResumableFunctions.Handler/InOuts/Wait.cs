@@ -210,4 +210,12 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
             child.CascadeSetIsFirst(isFirst);
         }
     }
+    internal void CascadeSetDeleted()
+    {
+        IsDeleted = true;
+        foreach (var child in ChildWaits)
+        {
+            child.CascadeSetDeleted();
+        }
+    }
 }
