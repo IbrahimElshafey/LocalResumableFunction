@@ -63,7 +63,7 @@ public partial class ResumableFunctionHandler
             duplicateWait.IsReplay = true;
             duplicateWait.IsFirst = false;
             duplicateWait.MatchIfExpression = replayRequest.MatchExpression;
-            await SaveWaitRequestToDb(duplicateWait);
+            await SaveWaitRequestToDb(duplicateWait);// when replay goto with new match
         }
         else
         {
@@ -84,7 +84,7 @@ public partial class ResumableFunctionHandler
         duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
         duplicateWait.IsReplay = true;
         duplicateWait.IsFirst = false;
-        await SaveWaitRequestToDb(duplicateWait);
+        await SaveWaitRequestToDb(duplicateWait);//when replay go to
     }
 
     private async Task ReplayGoBefore(Wait oldCompletedWait)
@@ -101,7 +101,7 @@ public partial class ResumableFunctionHandler
         {
             var nextWaitAfterReplay = goBefore.Runner.Current;
             nextWaitAfterReplay.CopyFromOld(oldCompletedWait);
-            await SaveWaitRequestToDb(nextWaitAfterReplay);
+            await SaveWaitRequestToDb(nextWaitAfterReplay);//when replay go before
         }
         else
         {
@@ -124,7 +124,7 @@ public partial class ResumableFunctionHandler
                 mw.RequestedByFunction = waitToReplay.RequestedByFunction;
                 mw.RequestedByFunctionId = waitToReplay.RequestedByFunctionId;
                 mw.ParentWaitId = waitToReplay.ParentWaitId;
-                await SaveWaitRequestToDb(mw);
+                await SaveWaitRequestToDb(mw);//when go before with new match
             }
         }
         else

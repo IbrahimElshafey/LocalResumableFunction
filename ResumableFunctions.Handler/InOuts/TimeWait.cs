@@ -6,8 +6,8 @@ namespace ResumableFunctions.Handler.InOuts;
 public class TimeWait : Wait
 {
     public TimeSpan TimeToWait { get; internal set; }
-    public string UniqueMatchId { get; internal set; }
-    public LambdaExpression SetDataExpression { get; internal set; }
+    internal string UniqueMatchId { get; set; }
+    internal LambdaExpression SetDataExpression { get; set; }
 
     public Wait SetData(Expression<Func<bool>> value)
     {

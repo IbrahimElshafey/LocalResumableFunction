@@ -9,9 +9,9 @@ internal class TestTimeExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> TimeWaitTest()
     {
         yield return
-            Wait<Project, bool>("Project Submitted", ProjectSubmitted)
+            Wait<Project, bool>("Project Submitted in TimeWaitTest", ProjectSubmitted)
                 .MatchIf((input, output) => output == true)
-                .SetData((input, output) => CurrentProject == input);
+                .SetData((project, outputResult) => CurrentProject == project);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         const string waitManagerOneApprovalInSeconds = "Wait manager one approval in 2 days";

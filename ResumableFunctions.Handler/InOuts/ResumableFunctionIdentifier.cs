@@ -11,5 +11,6 @@ public class ResumableFunctionIdentifier : MethodIdentifier
         MethodUrn = methodData.MethodUrn;
         base.FillFromMethodData(methodData);
     }
+    //todo:add get first wait here
 }
 

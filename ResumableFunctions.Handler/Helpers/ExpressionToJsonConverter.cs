@@ -11,16 +11,24 @@ public static class ExpressionToJsonConverter
 {
     internal static string ExpressionToJson(Expression expression, Assembly assembly)
     {
-        if (expression != null)
-            return JsonConvert.SerializeObject(expression, JsonSettings(assembly));
-        return null!;
+        lock (_lockExpressionToJson)
+        {
+            if (expression != null)
+                return JsonConvert.SerializeObject(expression, JsonSettings(assembly));
+            return null!;
+        }
     }
 
+    private static object _lockExpressionToJson = new object();
+    private static object _lockJsonToExpression = new object();
     internal static Expression JsonToExpression(string json, Assembly assembly)
     {
-        if (!string.IsNullOrWhiteSpace(json))
-            return JsonConvert.DeserializeObject<LambdaExpression>(json, JsonSettings(assembly))!;
-        return null!;
+        lock (_lockJsonToExpression)
+        {
+            if (!string.IsNullOrWhiteSpace(json))
+                return JsonConvert.DeserializeObject<LambdaExpression>(json, JsonSettings(assembly))!;
+            return null!;
+        }
     }
 
     private static JsonSerializerSettings JsonSettings(Assembly assembly)

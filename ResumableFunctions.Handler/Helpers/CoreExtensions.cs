@@ -1,5 +1,8 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -23,14 +26,14 @@ public static class CoreExtensions
     private static IServiceProvider _ServiceProvider;
     public static IServiceProvider GetServiceProvider() => _ServiceProvider;
     public static void SetServiceProvider(IServiceProvider provider) => _ServiceProvider = provider;
-    public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionSettings settings)
+    public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
     {
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
         services.AddTransient<ResumableFunctionHandler>();
         services.AddTransient<Scanner>();
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();
-        services.AddSingleton(typeof(IResumableFunctionSettings),settings);
+        services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
         if (settings.HangFireConfig != null)
         {
             services.AddHangfire(x => x = settings.HangFireConfig);
@@ -135,7 +138,7 @@ public static class CoreExtensions
         return null;
     }
 
-    public static MethodInfo GetMethodInfo(string AssemblyName, string ClassName, string MethodName,string MethodSignature)
+    public static MethodInfo GetMethodInfo(string AssemblyName, string ClassName, string MethodName, string MethodSignature)
     {
         MethodInfo _methodInfo = null;
         string assemblyPath = $"{AppContext.BaseDirectory}{AssemblyName}.dll";
@@ -150,5 +153,69 @@ public static class CoreExtensions
             }
 
         return _methodInfo;
+    }
+
+    //from:https://haacked.com/archive/2019/07/29/query-filter-by-interface/
+    public static void AppendQueryFilter<T>(
+                this EntityTypeBuilder<T> entityTypeBuilder, Expression<Func<T, bool>> expression) where T : class
+    {
+        var parameterType = Parameter(entityTypeBuilder.Metadata.ClrType);
+
+        var expressionFilter = ReplacingExpressionVisitor.Replace(
+            expression.Parameters.Single(), parameterType, expression.Body);
+
+        if (entityTypeBuilder.Metadata.GetQueryFilter() != null)
+        {
+            var currentQueryFilter = entityTypeBuilder.Metadata.GetQueryFilter();
+            var currentExpressionFilter = ReplacingExpressionVisitor.Replace(
+                currentQueryFilter.Parameters.Single(), parameterType, currentQueryFilter.Body);
+            expressionFilter = AndAlso(currentExpressionFilter, expressionFilter);
+        }
+
+        var lambdaExpression = Lambda(expressionFilter, parameterType);
+        entityTypeBuilder.HasQueryFilter(lambdaExpression);
+    }
+
+    public static IEnumerable<T> Flatten<T>(
+           this IEnumerable<T> e,
+           Func<T, IEnumerable<T>> f) =>
+               e.SelectMany(c => f(c).Flatten(f)).Concat(e);
+
+    public static IEnumerable<T> Flatten<T>(this T value, Func<T, IEnumerable<T>> childrens)
+    {
+        foreach (var currentItem in childrens(value))
+        {
+            foreach (var currentChild in Flatten(currentItem, childrens))
+            {
+                yield return currentChild;
+            }
+        }
+        yield return value;
+    }
+
+    public static void CascadeSet<T, Prop>(
+        this T objectToSet,
+        Expression<Func<IEnumerable<T>>> childs,
+        Expression<Func<Prop>> prop,
+        Prop value)
+    {
+        //IsDeleted = true;
+        //foreach (var child in ChildWaits)
+        //{
+        //    child.CascadeSetDeleted();
+        //}
+    }
+    public static IEnumerable<Prop> CascadeGet<T, Prop>(
+       this T objectToSet,
+       Expression<Func<IEnumerable<T>>> childs,
+       Expression<Func<Prop>> prop,
+       Prop value)
+    {
+        //IsDeleted = true;
+        //foreach (var child in ChildWaits)
+        //{
+        //    child.CascadeSetDeleted();
+        //}
+        return null;
     }
 }

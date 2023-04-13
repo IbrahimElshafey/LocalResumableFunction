@@ -15,10 +15,9 @@ namespace ResumableFunctions.Handler;
 
 public class Scanner
 {
-    private const string ScannerAppName = "##SCANNER: ";
     internal FunctionDataContext _context;
     private MethodIdentifierRepository _methodIdentifierRepo;
-    private IResumableFunctionSettings _settings;
+    private IResumableFunctionsSettings _settings;
     private ResumableFunctionHandler _handler;
     private IServiceProvider _serviceProvider;
     private readonly ILogger<Scanner> _logger;
@@ -29,39 +28,52 @@ public class Scanner
         _logger = logger;
     }
 
+    static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
     public async Task Start()
     {
         try
         {
-            using IServiceScope scope = _serviceProvider.CreateScope();
-            _settings = scope.ServiceProvider.GetService<IResumableFunctionSettings>();
-#if DEBUG
-            _settings.ForceRescan = true;
-#endif
-            _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
-            _handler.SetDependencies(scope.ServiceProvider);
-            _context = _handler._context;
-            _methodIdentifierRepo = new MethodIdentifierRepository(_context);
-
-
-            WriteMessage("Start register method waits.");
-            var resumableFunctions = await RegisterMethodWaits(GetAssembliesToScan());
-
-            foreach (var resumableFunctionClass in resumableFunctions)
-                await RegisterResumableFunctionsInClass(resumableFunctionClass);
-
-            WriteMessage("Register local methods");
-            await RegisterMethodWaitsInType(typeof(LocalRegisteredMethods));
-
-            await _context.SaveChangesAsync();
-
-            WriteMessage("Close with no errors.");
-            await _context.DisposeAsync();
+            //prevent concurrent scan in same service
+            await semaphoreSlim.WaitAsync();
+            await StartScanService();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Error when scan [{Assembly.GetEntryAssembly().GetName().Name}]");
+            throw;
         }
+        finally
+        {
+            semaphoreSlim.Release();
+        }
+    }
+
+    private async Task StartScanService()
+    {
+        using IServiceScope scope = _serviceProvider.CreateScope();
+        _settings = scope.ServiceProvider.GetService<IResumableFunctionsSettings>();
+#if DEBUG
+        _settings.ForceRescan = true;
+#endif
+        _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
+        _handler.SetDependencies(scope.ServiceProvider);
+        _context = _handler._context;
+        _methodIdentifierRepo = new MethodIdentifierRepository(_context);
+
+
+        WriteMessage("Start register method waits.");
+        var resumableFunctions = await RegisterMethodWaits(GetAssembliesToScan());
+
+        foreach (var resumableFunctionClass in resumableFunctions)
+            await RegisterResumableFunctionsInClass(resumableFunctionClass);
+
+        WriteMessage("Register local methods");
+        await RegisterMethodWaitsInType(typeof(LocalRegisteredMethods));
+
+        await _context.SaveChangesAsync();
+
+        WriteMessage("Close with no errors.");
+        await _context.DisposeAsync();
     }
 
     private List<string> GetAssembliesToScan()
@@ -91,7 +103,7 @@ public class Scanner
             .ServicesData
             .FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
         if (scanRecored != null)
-            scanRecored.LastScanDate = DateTime.Now;
+            scanRecored.Modified = DateTime.Now;
     }
 
     private async Task<bool> ShouldScan(string currentAssemblyName, string serviceUrl)
@@ -119,7 +131,7 @@ public class Scanner
         }
         var lastBuildDate = File.GetLastWriteTime($"{AppContext.BaseDirectory}\\{currentAssemblyName}.dll");
         scanRecored.Url = serviceUrl;
-        bool shouldScan = lastBuildDate > scanRecored.LastScanDate;
+        bool shouldScan = lastBuildDate > scanRecored.Modified;
         if (shouldScan is false)
             WriteMessage($"No need to rescan assembly [{currentAssemblyName}].");
         return shouldScan || _settings.ForceRescan;
@@ -128,7 +140,6 @@ public class Scanner
     internal async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
     {
         WriteMessage($"Register resumable function [{resumableFunction.GetFullName()}] of type [{type}]");
-
         await _methodIdentifierRepo.AddResumableFunctionIdentifier(new MethodData(resumableFunction) { MethodType = type });
         await _context.SaveChangesAsync();
     }
@@ -180,7 +191,8 @@ public class Scanner
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Error when scan assembly [{assemblyPath}]");
+                _logger.LogError(e, $"Error when register method waits in assembly [{assemblyPath}]");
+                throw;
             }
         }
 
@@ -264,9 +276,7 @@ public class Scanner
 
     private void WriteMessage(string message)
     {
-        _logger.LogInformation($"{ScannerAppName}{message}\n");
-        //Console.Write(ScannerAppName);
-        //Console.WriteLine(message);
+        _logger.LogInformation(message);
     }
 }
 

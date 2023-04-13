@@ -15,7 +15,7 @@ namespace ResumableFunctions.Handler.Attributes;
 
 public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdetifier
 {
-    private PushedMethod _pushedMethod;
+    private PushedCall _pushedCall;
     private readonly ResumableFunctionHandler _functionHandler;
     private readonly ILogger<WaitMethodAttribute> _logger;
 
@@ -41,27 +41,27 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
     public override void OnEntry(MethodExecutionArgs args)
     {
         args.MethodExecutionTag = false;
-        _pushedMethod = new PushedMethod
+        _pushedCall = new PushedCall
         {
             MethodData = new MethodData(args.Method as MethodInfo) { MethodUrn = MethodUrn },
         };
         if (args.Arguments.Length > 0)
-            _pushedMethod.Input = args.Arguments[0];
+            _pushedCall.Input = args.Arguments[0];
     }
 
     public override void OnExit(MethodExecutionArgs args)
     {
         try
         {
-            _pushedMethod.Output = args.ReturnValue;
+            _pushedCall.Output = args.ReturnValue;
             if (args.Method.IsAsyncMethod())
             {
                 dynamic output = args.ReturnValue;
-                _pushedMethod.Output = output.Result;
+                _pushedCall.Output = output.Result;
             }
 
 
-            _functionHandler.QueuePushedMethodProcessing(_pushedMethod).Wait();
+            _functionHandler.QueuePushedCallProcessing(_pushedCall).Wait();
             args.MethodExecutionTag = true;
         }
         catch (Exception ex)

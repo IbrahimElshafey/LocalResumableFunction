@@ -11,13 +11,14 @@ public partial class ResumableFunctionHandler
 {
     internal async Task<bool> SaveWaitRequestToDb(Wait newWait)
     {
-        newWait.Status = WaitStatus.Waiting;
         if (!newWait.IsValidWaitRequest())
         {
-            string message = $"Error when validate the requested wait [{newWait.Name}] that requested by function [{newWait?.RequestedByFunction.MethodName}] wait will not be saved to DB.";
+            string message = 
+                $"Error when validate the requested wait [{newWait.Name}] " +
+                $"that requested by function [{newWait?.RequestedByFunction}].";
             _logger.LogError(message);
-            //newWait.FunctionState.LogStatus(FunctionStatus.Error, message);
-            return false;
+            //await _context.SaveChangesAsync();
+            //return false;
         }
         switch (newWait)
         {
@@ -49,8 +50,8 @@ public partial class ResumableFunctionHandler
       
         methodWait.MethodToWait = methodToWait;
         methodWait.MethodToWaitId = methodToWait.Id;
-        methodWait.WaitMethodGroup = methodToWait.WaitMethodGroup;
-        methodWait.WaitMethodGroupId = methodToWait.WaitMethodGroupId;
+        methodWait.MethodGroupToWait = methodToWait.ParentMethodGroup;
+        methodWait.MethodGroupToWaitId = methodToWait.ParentMethodGroupId;
         methodWait.RewriteExpressions();
 
         await _waitsRepository.AddWait(methodWait);
@@ -61,13 +62,12 @@ public partial class ResumableFunctionHandler
         for (var index = 0; index < manyWaits.ChildWaits.Count; index++)
         {
             var waitGroupChild = manyWaits.ChildWaits[index];
-            waitGroupChild.Status = WaitStatus.Waiting;
             waitGroupChild.FunctionState = manyWaits.FunctionState;
             waitGroupChild.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
             waitGroupChild.RequestedByFunction = manyWaits.RequestedByFunction;
             waitGroupChild.StateAfterWait = manyWaits.StateAfterWait;
             waitGroupChild.ParentWait = manyWaits;
-            await SaveWaitRequestToDb(waitGroupChild);
+            await SaveWaitRequestToDb(waitGroupChild);//child wait in group
         }
 
         await _waitsRepository.AddWait(manyWaits);
@@ -76,7 +76,6 @@ public partial class ResumableFunctionHandler
     private async Task FunctionWaitRequested(FunctionWait functionWait)
     {
         await _waitsRepository.AddWait(functionWait);
-        //await _context.SaveChangesAsync();
 
         var functionRunner = new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
         var hasNext = await functionRunner.MoveNextAsync();
@@ -103,7 +102,7 @@ public partial class ResumableFunctionHandler
             //await ReplayWait(replayWait);//todo:review first wait is replay for what??
         }
         else
-            await SaveWaitRequestToDb(functionWait.FirstWait);
+            await SaveWaitRequestToDb(functionWait.FirstWait);//first wait for sub function
     }
 
     private async Task TimeWaitRequested(TimeWait timeWait)
@@ -129,7 +128,6 @@ public partial class ResumableFunctionHandler
         timeWaitMethod.CurrentFunction = timeWait.CurrentFunction;
 
         var jobId = _backgroundJobClient.Schedule(() => new LocalRegisteredMethods().TimeWait(timeWait.UniqueMatchId), timeWait.TimeToWait);
-        //_context.Waits.Remove(timeWait);
         _context.Entry(timeWait).State = EntityState.Detached;
         timeWaitMethod.ParentWait = timeWait.ParentWait;
         timeWaitMethod.FunctionState = timeWait.FunctionState;

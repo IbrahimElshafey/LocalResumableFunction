@@ -1,27 +1,30 @@
 ﻿# Todo
 
-* Handle concurrency problems,optimistic or pessimistic for cases below:
-	* Two waits matched for same FunctionState
-	* First wait closed but new request come before create new one
-	* Update pushed methods calls counter
-	* Database.EnsureCreated(); in same time
-	* Multiple scan process in same time
-* All logs goes to one table
+* Handle concurrency problems
+* Scan Enhamvements
+	* Validate URN duplication when scan
+	* Detect deleted methods
+* Compelete publisher project and test it
+* Wait methods in same group must have the same signature
+
+* Verify that fody MethodBoundaryAspect is active
+
+* Logging for scan sessions
+
 * Background Cleaning Job
 	* Move completed/cancled function instance to Recycle Bin
 		* It's logs
 		* Waits
 	* Move completed pushed methods
 	* Move inactive methods identifier
-	* Move old logs for scan 
+	* Move old logs for scan sessions
+
 * Resumable function hooks
 	* Before initiating the first wait
 	* After initiate first wait
 	* After Resumed
 	* After Completed
 	* On Error Occurred
-* Create nuget package
-
 
 * Add UI Project (Use MVC not pages)
 	* Servcies Registred
@@ -54,38 +57,21 @@
 			* Actions on Function Wait ()
 		* Logs list from function state logs
 
-* Check External Methods Background Job after each scan process
-	* External Method may not exist
+* Create nuget package
 
 
-* Generate unit test code for resumable function
-* Generate external service class for methods in a service
+
+* How to unit test a resumable function
+	* Generate unit test code for resumable function
+* Generate external service class form (swagger defention)
 		
-* Logging for scan sessions
-
-* Delete first wait subwaits if group
-* If scan error occured don't update service data LastScanDate
-
-
-
 
 * Activate one start wait if multiple exist for same method
-
-
-
-
-
-
-
-
 
 * Save function state all fields [public and non public]
 * Find fast and best object serializer
 
-* Delete PushedMethodsCalls after processing background job
 * Parameter check lib use
-
-
 
 * Speed Analysis	
 	* https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/event-counters?tabs=windows
@@ -93,6 +79,6 @@
 
 # External Waits 
 * Monitor network requests using reverse proxy and push MethodCalls [TCP Listener]
-* WebHook for the service
+* WebHook for the service [Publisher Project]
 * RabbitMQ or any service bus [Subscribe to event]
 * File/Folder Changes [File Watcher]

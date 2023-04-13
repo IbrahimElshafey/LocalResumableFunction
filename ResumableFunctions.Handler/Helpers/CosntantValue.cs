@@ -12,7 +12,5 @@ namespace ResumableFunctions.Handler.Helpers
     internal class ConstantValue
     {
         internal const string TimeWait = "TimeWait";
-        internal const string LastUpdatedProp = "LastUpdated";
-        internal const string CreatedProp = "Created";
     }
 }

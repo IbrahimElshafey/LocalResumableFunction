@@ -20,7 +20,7 @@ public class RewriteSetDataExpression : ExpressionVisitor
             return;
         }
         //  .SetData((input, output) => Result == output);
-        //   setDataExpression.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, currentWait.CurrentFunction);
+        //   setDataExpression.DynamicInvoke(pushedCall.Input, pushedCall.Output, currentWait.CurrentFunction);
         _wait = wait;
         _functionInstanceArg = Parameter(wait.CurrentFunction.GetType(), "functionInstance");
       

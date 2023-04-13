@@ -13,7 +13,7 @@ namespace ResumableFunctions.AspNetService
 {
     public static class Extensions
     {
-        public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, IResumableFunctionSettings settings)
+        public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, IResumableFunctionsSettings settings)
         {
             mvcBuilder
                 .AddApplicationPart(typeof(ResumableFunctionsController).Assembly)

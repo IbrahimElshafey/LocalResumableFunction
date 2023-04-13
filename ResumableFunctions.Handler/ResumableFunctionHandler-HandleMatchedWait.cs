@@ -8,17 +8,21 @@ namespace ResumableFunctions.Handler;
 
 public partial class ResumableFunctionHandler
 {
-    private async Task ResumeExecution(Wait matchedWait)
+    private async Task ResumeExecution(MethodWait matchedMethodWait)
     {
-        var currentWait = matchedWait;
-
+        if (matchedMethodWait.IsFirst)
+        {
+            matchedMethodWait = await CloneFirstWait(matchedMethodWait);
+        }
+        
+        Wait currentWait = matchedMethodWait;
         do
         {
             var parent = await _waitsRepository.GetWaitParent(currentWait);
             switch (currentWait)
             {
                 case MethodWait methodWait:
-                    methodWait.Status = WaitStatus.Completed;
+                    currentWait.Status = currentWait.IsFirst ? currentWait.Status : WaitStatus.Completed;
                     await GoNext(parent, methodWait);
                     await _context.SaveChangesAsync();
                     break;
@@ -60,16 +64,16 @@ public partial class ResumableFunctionHandler
         //bug:may cause problem for go back after
         if (currentWait.ParentWait != null && currentWait.ParentWait.Status != WaitStatus.Waiting)
         {
-            _logger.LogWarning($"Can't proceed to netx ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).");
+            _logger.LogWarning($"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).");
             return;
         }
+
         currentWait.Status = WaitStatus.Completed;
         var nextWait = await currentWait.GetNextWait();
         if (nextWait == null)
         {
             if (currentWait.ParentWaitId == null)
                 await FinalExit(currentWait);
-            await DuplicateIfFirst(currentWait);
             return;
         }
 
@@ -81,9 +85,8 @@ public partial class ResumableFunctionHandler
         _context.Entry(nextWait.FunctionState).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
 
-        await SaveWaitRequestToDb(nextWait);//main use
+        await SaveWaitRequestToDb(nextWait);//next wait after resume function
         await _context.SaveChangesAsync();
-        await DuplicateIfFirst(currentWait);
     }
 
     private async Task FinalExit(Wait currentWait)
@@ -91,7 +94,7 @@ public partial class ResumableFunctionHandler
         WriteMessage("Final Exit");
         currentWait.Status = WaitStatus.Completed;
         currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
-        currentWait.FunctionState.LogStatus(FunctionStatus.Completed,"Function instance completed.");
+        currentWait.FunctionState.AddLog(LogStatus.Completed, "Function instance completed.");
         await _waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
         await MoveFunctionToRecycleBin(currentWait);
     }

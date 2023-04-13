@@ -21,7 +21,7 @@ internal class MethodIdentifierRepository : RepositoryBase
     {
         var waitMethodIdentifier =
            await _context
-               .WaitMethodGroups
+               .MethodsGroups
                .Where(x => x.MethodGroupUrn == methodUrn)
                .Select(x => x.Id)
                .FirstOrDefaultAsync();
@@ -69,7 +69,7 @@ internal class MethodIdentifierRepository : RepositoryBase
     {
         var methodGroup =
             await _context
-                .WaitMethodGroups
+                .MethodsGroups
                 .Include(x => x.WaitMethodIdentifiers)
                 .FirstOrDefaultAsync(x => x.MethodGroupUrn == methodData.MethodUrn);
         var methodInDb = methodGroup?.WaitMethodIdentifiers?
@@ -99,12 +99,12 @@ internal class MethodIdentifierRepository : RepositoryBase
             methodGroup.WaitMethodIdentifiers.Add(toAdd);
         else if (isNewParent)
         {
-            var group = new WaitMethodGroup
+            var group = new MethodsGroup
             {
                 MethodGroupUrn = methodData.MethodUrn,
             };
             group.WaitMethodIdentifiers.Add(toAdd);
-            _context.WaitMethodGroups.Add(group);
+            _context.MethodsGroups.Add(group);
             await _context.SaveChangesAsync();
         }
 
@@ -116,14 +116,14 @@ internal class MethodIdentifierRepository : RepositoryBase
             return
                 await _context
                 .WaitMethodIdentifiers
-                .Include(x => x.WaitMethodGroup)
+                .Include(x => x.ParentMethodGroup)
                 .FirstOrDefaultAsync(x => x.Id == methodWait.MethodToWaitId);
 
         var methodData = methodWait.MethodData;
         methodData.Validate();
         var methodGroup =
             await _context
-                .WaitMethodGroups
+                .MethodsGroups
                 .Include(x => x.WaitMethodIdentifiers)
                 .FirstOrDefaultAsync(x => x.MethodGroupUrn == methodData.MethodUrn);
         var childMethodIdentifier = 

@@ -1,7 +1,7 @@
 ﻿
 namespace ResumableFunctions.Handler.InOuts;
 
-public class ResumableFunctionState
+public class ResumableFunctionState : IEntityWithUpdate,IEntityWithDelete
 {
     public ResumableFunctionState()
     {
@@ -20,10 +20,14 @@ public class ResumableFunctionState
     public List<FunctionStateLogRecord> LogRecords { get; internal set; } = new();
     public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; set; }
     public int ResumableFunctionIdentifierId { get; set; }
-    public bool IsLocked { get; set; }
-    public FunctionStatus Status { get; set; }
+    public LogStatus Status { get; set; }
+    public DateTime Modified { get; internal set; }
+    public string ConcurrencyToken { get; internal set; }
+    public DateTime Created { get; internal set; }
 
-    public void LogStatus(FunctionStatus status, string statusMessage)
+    public bool IsDeleted { get; internal set; }
+
+    public void AddLog(LogStatus status, string statusMessage)
     {
         Status = status;
         LogRecords.Add(new FunctionStateLogRecord { Status = status, StatusMessage = statusMessage });

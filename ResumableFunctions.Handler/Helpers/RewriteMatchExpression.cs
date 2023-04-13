@@ -19,7 +19,7 @@ public class RewriteMatchExpression : ExpressionVisitor
             return;
         }
         //  .If((input, output) => output == true)
-        //   return (bool)check.DynamicInvoke(pushedMethod.Input, pushedMethod.Output, methodWait.CurrentFunction);
+        //   return (bool)check.DynamicInvoke(pushedCall.Input, pushedCall.Output, methodWait.CurrentFunction);
         _wait = wait;
         _functionInstanceArg = Parameter(wait.CurrentFunction.GetType(), "functionInstance");
 

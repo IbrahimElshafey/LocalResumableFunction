@@ -1,20 +1,23 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Xml.Linq;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler;
+using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class Wait
+public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
 {
 
     private ResumableFunction _currntFunction;
 
     public int Id { get; internal set; }
     public string Name { get; internal set; }
-    public WaitStatus Status { get; internal set; }
+    public WaitStatus Status { get; internal set; } = WaitStatus.Waiting;
     public bool IsFirst { get; internal set; }
     public int StateBeforeWait { get; internal set; }
     public int StateAfterWait { get; internal set; }
@@ -23,6 +26,10 @@ public abstract class Wait
     public object ExtraData { get; internal set; }
 
     public WaitType WaitType { get; internal set; }
+    public DateTime Modified { get; internal set; }
+    public string ConcurrencyToken { get; internal set; }
+    public DateTime Created { get; internal set; }
+    public bool IsDeleted { get; internal set; }
 
     internal ResumableFunctionState FunctionState { get; set; }
 
@@ -73,6 +80,7 @@ public abstract class Wait
     }
 
     internal bool CanBeParent => this is FunctionWait || this is WaitsGroup;
+
 
     internal async Task<Wait> GetNextWait()
     {
@@ -187,13 +195,35 @@ public abstract class Wait
     {
         //FunctionState.StatusMessage = message;
         //FunctionState.Status = FunctionStatus.ErrorOccured;
-        var isNameDuplicated = FunctionState?.Waits.Any(x => x.Name == Name) ?? false;
+        var isNameDuplicated =
+            FunctionState?
+            .Waits
+            .Count(x => x.Name == Name) > 1;
         if (isNameDuplicated)
         {
-            FunctionState?.LogStatus(
-                FunctionStatus.Warning, 
+            FunctionState?.AddLog(
+                LogStatus.Error,
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name");
         }
-        return FunctionState?.Status != FunctionStatus.Error;
+        return FunctionState?.Status != LogStatus.Error;
+    }
+
+
+    internal void CascadeAction(Action<Wait> action)
+    {
+        action(this);
+        if (ChildWaits != null)
+            foreach (var item in ChildWaits)
+                item.CascadeAction(action);
+    }
+
+    internal MethodWait GetChildMethodWait(string name)
+    {
+        var result = this
+            .Flatten(x => x.ChildWaits)
+            .FirstOrDefault(x => x.Name == name && x is MethodWait mw);
+        if (result == null)
+            throw new NullReferenceException($"No MethodWait with name [{name}] exist in ChildWaits tree [{Name}]");
+        return (MethodWait)result;
     }
 }

@@ -91,7 +91,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     }
     //any method with attribute [ResumableFunctionEntryPoint] that takes no argument
     //and return IAsyncEnumerable<Wait> is a resumbale function
-    //[ResumableFunctionEntryPoint]
+    [ResumableFunctionEntryPoint("PAE.InterfaceMethod")]
     public async IAsyncEnumerable<Wait> InterfaceMethod()
     {
         yield return

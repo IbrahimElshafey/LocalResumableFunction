@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class MethodIdentifier
+public abstract class MethodIdentifier : IEntityWithUpdate
 {
     private MethodInfo _methodInfo;
 
@@ -20,7 +20,6 @@ public abstract class MethodIdentifier
     public string MethodSignature { get; internal set; }
     public byte[] MethodHash { get; internal set; }
     public MethodType Type { get; set; }
-
     internal MethodInfo MethodInfo
     {
         get
@@ -31,9 +30,13 @@ public abstract class MethodIdentifier
         }
     }
 
+    public DateTime Modified { get; internal set; }
+    public string ConcurrencyToken { get; internal set; }
+    public DateTime Created { get; internal set; }
+
     public override string ToString()
     {
-        return $"{AssemblyName} # {ClassName}.{MethodName} # {MethodSignature}";
+        return $"AssemblyName:{AssemblyName}, ClassName:{ClassName}, MethodName:{MethodName}, MethodSignature:{MethodSignature}";
     }
 
     internal virtual void FillFromMethodData(MethodData methodData)

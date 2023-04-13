@@ -55,7 +55,7 @@ public sealed class PublishMethodAttribute : OnMethodBoundaryAspect
             }
 
             //call `/api/ResumableFunctions/MethodMethod`
-            //_functionHandler.QueuePushedMethodProcessing(_pushedMethod).Wait();
+            //_functionHandler.QueuePushedCallProcessing(_pushedCall).Wait();
             _publishMethod.Publish(_methodCall);
             args.MethodExecutionTag = true;
         }

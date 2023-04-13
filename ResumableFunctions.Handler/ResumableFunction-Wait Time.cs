@@ -10,7 +10,7 @@ public abstract partial class ResumableFunction
     {
         return new TimeWait
         {
-            Name = ConstantValue.TimeWait,
+            Name = nameof(TimeWait),
             TimeToWait = timeToWait,
             UniqueMatchId = Guid.NewGuid().ToString(),
             CurrentFunction = this
