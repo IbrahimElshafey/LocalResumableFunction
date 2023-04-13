@@ -23,7 +23,7 @@ public partial class ResumableFunctionHandler
             firstWaitClone.CascadeAction(x =>
             {
                 x.IsFirst = false;
-                x.FunctionState.StateObject = firstWaitClone?.FunctionState?.StateObject;
+                x.FunctionState.StateObject = firstMatchedMethodWait?.FunctionState?.StateObject;
             });
             firstWaitClone.FunctionState.AddLog(
                 LogStatus.New, $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.");

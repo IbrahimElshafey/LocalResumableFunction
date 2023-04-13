@@ -62,6 +62,9 @@ public partial class ResumableFunctionHandler
         for (var index = 0; index < manyWaits.ChildWaits.Count; index++)
         {
             var waitGroupChild = manyWaits.ChildWaits[index];
+            waitGroupChild.FunctionState = manyWaits.FunctionState;
+            waitGroupChild.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
+            waitGroupChild.RequestedByFunction = manyWaits.RequestedByFunction;
             waitGroupChild.StateAfterWait = manyWaits.StateAfterWait;
             waitGroupChild.ParentWait = manyWaits;
             await SaveWaitRequestToDb(waitGroupChild);//child wait in group

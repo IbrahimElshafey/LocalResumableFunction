@@ -15,7 +15,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     public bool ManagerFiveApproval { get; set; }
     public string ExternalMethodStatus { get; private set; } = "Not matched yet.";
 
-    //[ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow")]//Point 1
+    [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow")]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
     {
         yield return
@@ -53,7 +53,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         return Task.CompletedTask;
     }
 
-    //[ResumableFunctionEntryPoint("ProjectApprovalExample.ExternalMethod")]
+    [ResumableFunctionEntryPoint("ProjectApprovalExample.ExternalMethod")]
     public async IAsyncEnumerable<Wait> ExternalMethod()
     {
         await Task.Delay(1);
@@ -79,7 +79,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Success(nameof(ExternalMethod));
     }
 
-    //[ResumableFunctionEntryPoint("ProjectApprovalExample.ExternalMethodWaitGoodby")]
+    [ResumableFunctionEntryPoint("ProjectApprovalExample.ExternalMethodWaitGoodby")]
     public async IAsyncEnumerable<Wait> ExternalMethodWaitGoodby()
     {
         await Task.Delay(1);
@@ -91,7 +91,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     }
     //any method with attribute [ResumableFunctionEntryPoint] that takes no argument
     //and return IAsyncEnumerable<Wait> is a resumbale function
-    //[ResumableFunctionEntryPoint("PAE.InterfaceMethod")]
+    [ResumableFunctionEntryPoint("PAE.InterfaceMethod")]
     public async IAsyncEnumerable<Wait> InterfaceMethod()
     {
         yield return

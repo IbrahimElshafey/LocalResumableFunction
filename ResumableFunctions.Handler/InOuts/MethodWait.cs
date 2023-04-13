@@ -54,14 +54,25 @@ public class MethodWait : Wait
     internal void RewriteExpressions()
     {
         //Rewrite Match Expression
-        MatchIfExpression = new RewriteMatchExpression(this).Result;
-        MatchIfExpressionValue =
-            TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, FunctionAssembly));
+        try
+        {
+            MatchIfExpression = new RewriteMatchExpression(this).Result;
+            MatchIfExpressionValue =
+                TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, FunctionAssembly));
 
-        //Rewrite SetData Expression
-        SetDataExpression = new RewriteSetDataExpression(this).Result;
-        SetDataExpressionValue =
-            TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(SetDataExpression, FunctionAssembly));
+            //Rewrite SetData Expression
+            SetDataExpression = new RewriteSetDataExpression(this).Result;
+            SetDataExpressionValue =
+                TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(SetDataExpression, FunctionAssembly));
+        }
+        catch (Exception ex)
+        {
+            FunctionState?.AddLog(
+                LogStatus.Warning,
+                 $"Error happened when rewrite expressions for method wait [{Name}].\n" +
+                 $"{ex.Message}\n" +
+                 $"{ex.StackTrace}");
+        }
     }
 
 
@@ -82,7 +93,7 @@ public class MethodWait : Wait
         {
             var setDataExpression = SetDataExpression.Compile();
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
-            FunctionState.StateObject = CurrentFunction; 
+            FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog(
                 LogStatus.InProgress,
                 $"Method wait [{Name}] matched and function data updated.");

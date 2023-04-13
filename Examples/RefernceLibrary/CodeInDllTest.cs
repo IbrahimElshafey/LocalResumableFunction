@@ -8,7 +8,7 @@ namespace ReferenceLibrary
     {
         public string UserName { get; set; }
 
-        //[ResumableFunctionEntryPoint("TestFunctionInDll")]
+        [ResumableFunctionEntryPoint("TestFunctionInDll")]
         public async IAsyncEnumerable<Wait> TestFunctionInDll()
         {
             yield return Wait<string, string>
