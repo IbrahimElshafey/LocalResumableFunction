@@ -28,7 +28,8 @@ internal class TestWaitManyExample : ProjectApprovalExample
         WriteMessage("Three waits matched.");
         Success(nameof(WaitThreeMethodAtStart));
     }
-    [ResumableFunctionEntryPoint("TestWaitManyExample.WaitThreeMethod")]
+
+    //[ResumableFunctionEntryPoint("TestWaitManyExample.WaitThreeMethod")]
     public async IAsyncEnumerable<Wait> WaitThreeMethod()
     {
         yield return
@@ -52,7 +53,7 @@ internal class TestWaitManyExample : ProjectApprovalExample
         Success(nameof(WaitThreeMethod));
     }
 
-    [ResumableFunctionEntryPoint("TestWaitManyExample.WaitManyAndGroupExpressionDefined")]
+    //[ResumableFunctionEntryPoint("TestWaitManyExample.WaitManyAndGroupExpressionDefined")]
     public async IAsyncEnumerable<Wait> WaitManyAndGroupExpressionDefined()
     {
         yield return

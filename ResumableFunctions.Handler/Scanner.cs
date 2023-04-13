@@ -140,7 +140,6 @@ public class Scanner
     internal async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
     {
         WriteMessage($"Register resumable function [{resumableFunction.GetFullName()}] of type [{type}]");
-
         await _methodIdentifierRepo.AddResumableFunctionIdentifier(new MethodData(resumableFunction) { MethodType = type });
         await _context.SaveChangesAsync();
     }

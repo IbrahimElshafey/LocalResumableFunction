@@ -36,7 +36,7 @@ public abstract class MethodIdentifier : IEntityWithUpdate
 
     public override string ToString()
     {
-        return $"{AssemblyName} # {ClassName}.{MethodName} # {MethodSignature}";
+        return $"AssemblyName:{AssemblyName}, ClassName:{ClassName}, MethodName:{MethodName}, MethodSignature:{MethodSignature}";
     }
 
     internal virtual void FillFromMethodData(MethodData methodData)

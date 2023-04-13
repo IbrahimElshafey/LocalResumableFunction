@@ -130,6 +130,7 @@ public class MethodWait : Wait
 
     internal override bool IsValidWaitRequest()
     {
+        //Todo:validate type serialization
         if (!IsFirst && MatchIfExpression == null)
             FunctionState.AddLog(
                 LogStatus.Error,
@@ -233,17 +234,6 @@ public class MethodWait<TInput, TOutput> : MethodWait
     {
         SetDataExpression = (Expression<Func<TInput, TOutput, bool>>)((x, y) => true);
         return this;
-    }
-
-    internal override bool IsValidWaitRequest()
-    {
-        //if (!IsFirst && MatchIfExpression == null)
-        //    FunctionState.LogStatus(
-        //        FunctionStatus.Error,
-        //        $"You didn't set the `MatchIfExpression` for wait [{Name}] that is not a first wait," +
-        //        $"This will lead to no match for all calls.");
-        //Todo:validate type serialization
-        return base.IsValidWaitRequest();
     }
 
 }

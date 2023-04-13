@@ -11,56 +11,31 @@ namespace ResumableFunctions.Handler;
 
 public partial class ResumableFunctionHandler
 {
-    internal async Task<Wait> CloneFirstWait(MethodWait firstWait)
+
+    internal async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
     {
-        MethodInfo resumableFunction = firstWait.RequestedByFunction.MethodInfo;
-        var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
-        if (classInstance == null)
-            throw new ArgumentNullException(nameof(classInstance), $"Can't create instance of class [{resumableFunction.DeclaringType.FullName}]");
+        var resumableFunction = firstMatchedMethodWait.RequestedByFunction.MethodInfo;
+
         try
         {
-            classInstance.CurrentResumableFunction = resumableFunction;
-            var functionRunner = new FunctionRunner(classInstance, resumableFunction);
-            if (functionRunner.ResumableFunctionExistInCode is false)
-            {
-                string message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
-                _logger.LogWarning(message);
-                throw new Exception(message);
-            }
-
-            await functionRunner.MoveNextAsync();
-            var firstWaitClone = functionRunner.Current;
-
-            //todo: handle cloning complex wait
-            switch (firstWaitClone)
-            {
-                case WaitsGroup mg: break;
-                case FunctionWait fw: break;
-            }
-            //todo:cascade set
-            firstWaitClone.RequestedByFunction = firstWait.RequestedByFunction;
-            firstWaitClone.RequestedByFunctionId = firstWait.RequestedByFunction.Id;
+            var firstWaitClone = await GetFirstWait(resumableFunction, false);
             firstWaitClone.Status = WaitStatus.Temp;
-            firstWaitClone.CascadeAction(x => x.IsFirst = false);
-
-            if (firstWait is MethodWait wait && firstWaitClone is MethodWait waitClone)
+            firstWaitClone.CascadeAction(x =>
             {
-                waitClone.PushedCallId = wait.PushedCallId;
-                //waitClone.Input = wait.Input;
-                //waitClone.Output = wait.Output;
-            }
+                x.IsFirst = false;
+                x.FunctionState.StateObject = firstWaitClone?.FunctionState?.StateObject;
+            });
+            firstWaitClone.FunctionState.AddLog(
+                LogStatus.New, $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.");
+            firstWaitClone.FunctionState.AddLog(
+                LogStatus.InProgress, $"First wait matched [{firstWaitClone.Name}] for [{resumableFunction.GetFullName()}].");
+            await SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
-            var functionState = new ResumableFunctionState
-            {
-                ResumableFunctionIdentifier = firstWait.RequestedByFunction,
-                StateObject = firstWait.FunctionState.StateObject
-            };
-            firstWaitClone.FunctionState = functionState;
-            functionState.AddLog(LogStatus.New, $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.");
-            functionState.AddLog(LogStatus.InProgress, $"First wait matched [{firstWaitClone.Name}] for [{resumableFunction.GetFullName()}].");
-            await SaveWaitRequestToDb(firstWaitClone);
+            var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
+            currentMw.PushedCallId = firstMatchedMethodWait.PushedCallId;
+            currentMw.Status = WaitStatus.Completed;
             await _context.SaveChangesAsync();
-            return firstWaitClone;
+            return currentMw;
         }
         catch (Exception ex)
         {
@@ -70,6 +45,27 @@ public partial class ResumableFunctionHandler
     }
     internal async Task RegisterFirstWait(MethodInfo resumableFunction)
     {
+
+        try
+        {
+            var firstWait = await GetFirstWait(resumableFunction, true);
+            if (firstWait == null)
+                firstWait.FunctionState.AddLog(
+                    LogStatus.New,
+                    $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.");
+            await SaveWaitRequestToDb(firstWait);//first wait when register function
+            WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
+            await _context.SaveChangesAsync();
+
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, $"Error when try to register first wait for function [{resumableFunction.GetFullName()}]");
+        }
+    }
+
+    private async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
+    {
         var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
         if (classInstance != null)
             try
@@ -78,39 +74,43 @@ public partial class ResumableFunctionHandler
                 var functionRunner = new FunctionRunner(classInstance, resumableFunction);
                 if (functionRunner.ResumableFunctionExistInCode is false)
                 {
-                    _logger.LogWarning($"Resumable function ({resumableFunction.GetFullName()}) not exist in code.");
-                    return;
+                    string message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
+                    _logger.LogWarning(message);
+                    throw new NullReferenceException(message);
                 }
 
                 await functionRunner.MoveNextAsync();
                 var firstWait = functionRunner.Current;
                 var methodId = await _metodIdsRepo.GetResumableFunction(new MethodData(resumableFunction));
-                if (await _waitsRepository.RemoveFirstWaitIfExist(firstWait, methodId))
+                if (removeIfExist)
                 {
-                    //todo:expression may be changed and group may added ne one
                     WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
-                    //return;
+                    await _waitsRepository.RemoveFirstWaitIfExist(firstWait, methodId);
                 }
-
-                firstWait.CascadeAction(x => x.RequestedByFunction = methodId);
-                firstWait.CascadeAction(x => x.RequestedByFunctionId = methodId.Id);
-                firstWait.CascadeAction(x => x.IsFirst = true);
-                //firstWait.StateAfterWait = functionRunner.GetState();
                 var functionState = new ResumableFunctionState
                 {
                     ResumableFunctionIdentifier = methodId,
                     StateObject = classInstance
                 };
-                firstWait.CascadeAction(x => x.FunctionState = functionState);
-                functionState.AddLog(LogStatus.New, $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.");
-                await SaveWaitRequestToDb(firstWait);
-                WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
-                await _context.SaveChangesAsync();
+                firstWait.CascadeAction(x =>
+                {
+                    x.RequestedByFunction = methodId;
+                    x.RequestedByFunctionId = methodId.Id;
+                    x.IsFirst = true;
+                    x.FunctionState = functionState;
+                });
+                return firstWait;
             }
             catch (Exception e)
             {
-                _logger.LogError(e, $"Error when try to register first wait for function [{resumableFunction.GetFullName()}]");
+                string message = $"Error when try to register first wait for function [{resumableFunction.GetFullName()}]";
+                _logger.LogError(e, message);
+                throw new NullReferenceException(message);
             }
+        else
+        {
+            throw new NullReferenceException($"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]");
+        }
     }
 
 

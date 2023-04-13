@@ -181,6 +181,18 @@ public static class CoreExtensions
            Func<T, IEnumerable<T>> f) =>
                e.SelectMany(c => f(c).Flatten(f)).Concat(e);
 
+    public static IEnumerable<T> Flatten<T>(this T value, Func<T, IEnumerable<T>> childrens)
+    {
+        foreach (var currentItem in childrens(value))
+        {
+            foreach (var currentChild in Flatten(currentItem, childrens))
+            {
+                yield return currentChild;
+            }
+        }
+        yield return value;
+    }
+
     public static void CascadeSet<T, Prop>(
         this T objectToSet,
         Expression<Func<IEnumerable<T>>> childs,

@@ -8,13 +8,14 @@ namespace ResumableFunctions.Handler;
 
 public partial class ResumableFunctionHandler
 {
-    private async Task ResumeExecution(MethodWait matchedWait)
+    private async Task ResumeExecution(MethodWait matchedMethodWait)
     {
-        Wait currentWait = matchedWait;
-        if (matchedWait.IsFirst)
+        if (matchedMethodWait.IsFirst)
         {
-            currentWait = await CloneFirstWait(matchedWait);
+            matchedMethodWait = await CloneFirstWait(matchedMethodWait);
         }
+        
+        Wait currentWait = matchedMethodWait;
         do
         {
             var parent = await _waitsRepository.GetWaitParent(currentWait);
@@ -31,7 +32,7 @@ public partial class ResumableFunctionHandler
                     if (currentWait.IsCompleted())
                     {
                         WriteMessage($"Exit ({currentWait.Name})");
-                        currentWait.Status =  WaitStatus.Completed;
+                        currentWait.Status = WaitStatus.Completed;
                         await _waitsRepository.CancelSubWaits(currentWait.Id);
                         await GoNext(parent, currentWait);
                     }
@@ -84,7 +85,7 @@ public partial class ResumableFunctionHandler
         _context.Entry(nextWait.FunctionState).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
 
-        await SaveWaitRequestToDb(nextWait);//main use
+        await SaveWaitRequestToDb(nextWait);//next wait after resume function
         await _context.SaveChangesAsync();
     }
 

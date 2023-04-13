@@ -106,7 +106,7 @@ internal class WaitsRepository : RepositoryBase
                 x.FunctionStateId == functionStateId);
     }
 
-    internal async Task<bool> RemoveFirstWaitIfExist(Wait firstWait, MethodIdentifier methodIdentifier)
+    internal async Task RemoveFirstWaitIfExist(Wait firstWait, MethodIdentifier methodIdentifier)
     {
         var firstWaitInDb =
             await _context.Waits
@@ -126,10 +126,7 @@ internal class WaitsRepository : RepositoryBase
                 .FirstAsync(x => x.Id == firstWaitInDb.FunctionStateId);
             _context.FunctionStates.Remove(functionState);
             await _context.SaveChangesAsync();
-            return true;
         }
-
-        return false;
     }
 
 

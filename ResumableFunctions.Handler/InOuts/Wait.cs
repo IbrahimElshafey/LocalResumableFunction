@@ -195,11 +195,14 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
     {
         //FunctionState.StatusMessage = message;
         //FunctionState.Status = FunctionStatus.ErrorOccured;
-        var isNameDuplicated = FunctionState?.Waits.Any(x => x.Name == Name) ?? false;
+        var isNameDuplicated =
+            FunctionState?
+            .Waits
+            .Count(x => x.Name == Name) > 1;
         if (isNameDuplicated)
         {
             FunctionState?.AddLog(
-                LogStatus.Warning,
+                LogStatus.Error,
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name");
         }
         return FunctionState?.Status != LogStatus.Error;
@@ -214,4 +217,13 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
                 item.CascadeAction(action);
     }
 
+    internal MethodWait GetChildMethodWait(string name)
+    {
+        var result = this
+            .Flatten(x => x.ChildWaits)
+            .FirstOrDefault(x => x.Name == name && x is MethodWait mw);
+        if (result == null)
+            throw new NullReferenceException($"No MethodWait with name [{name}] exist in ChildWaits tree [{Name}]");
+        return (MethodWait)result;
+    }
 }

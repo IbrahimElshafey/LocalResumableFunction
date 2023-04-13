@@ -96,10 +96,10 @@ public class WaitsGroup : Wait
             if (!childWait.IsValidWaitRequest())
                 break;
         }
-
-        return CheckNameDuplication() ? base.IsValidWaitRequest() : false;
+        return base.IsValidWaitRequest();
     }
 
+    //todo: no need remove it, wait name must be unique in per function
     private bool CheckNameDuplication()
     {
         var duplicatedWaits =
