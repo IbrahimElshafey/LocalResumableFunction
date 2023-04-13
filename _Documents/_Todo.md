@@ -1,30 +1,5 @@
 ﻿# Todo
-
-* Handle concurrency problems
-* Scan Enhamvements
-	* Validate URN duplication when scan
-	* Detect deleted methods
 * Compelete publisher project and test it
-* Wait methods in same group must have the same signature
-
-* Verify that fody MethodBoundaryAspect is active
-
-* Logging for scan sessions
-
-* Background Cleaning Job
-	* Move completed/cancled function instance to Recycle Bin
-		* It's logs
-		* Waits
-	* Move completed pushed methods
-	* Move inactive methods identifier
-	* Move old logs for scan sessions
-
-* Resumable function hooks
-	* Before initiating the first wait
-	* After initiate first wait
-	* After Resumed
-	* After Completed
-	* On Error Occurred
 
 * Add UI Project (Use MVC not pages)
 	* Servcies Registred
@@ -57,27 +32,47 @@
 			* Actions on Function Wait ()
 		* Logs list from function state logs
 
+* Scan Enhancements
+	* Validate URN duplication when scan if diffrent method signature
+	* Detect deleted methods
+	* Wait methods in same method group must have the same signature
+	* Verify that fody MethodBoundaryAspect is active
+	* Logging for scan sessions
+
+
 * Create nuget package
 
+* Background Cleaning Job
+	* Move completed/cancled function instance to Recycle Bin
+		* It's logs
+		* Waits
+	* Move completed pushed methods
+	* Move inactive methods identifier
+	* Move old logs for scan sessions
+	* Move soft deleted rows to recyle bin DB
+
+* Resumable function hooks
+	* Before initiating the first wait
+	* After initiate first wait
+	* After Resumed
+	* After Completed
+	* On Error Occurred
 
 
-* How to unit test a resumable function
+* How to unit test a resumable functions
 	* Generate unit test code for resumable function
-* Generate external service class form (swagger defention)
 		
 
-* Activate one start wait if multiple exist for same method
 
 * Save function state all fields [public and non public]
 * Find fast and best object serializer
-
 * Parameter check lib use
 
 * Speed Analysis	
 	* https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/event-counters?tabs=windows
 
 
-# External Waits 
+# External Waits (Will be seprate projects)
 * Monitor network requests using reverse proxy and push MethodCalls [TCP Listener]
 * WebHook for the service [Publisher Project]
 * RabbitMQ or any service bus [Subscribe to event]

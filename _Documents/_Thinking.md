@@ -9,6 +9,7 @@
 	* [Done with no test]
 * Database.EnsureCreated(); in same time from multiple services
 	* [Scan on second process will be failed and retried by hangfire]
+	* We can use global lock service
 * Multiple scan process in same time
 	* Raised in same service [done]
 	* Raised in same service another instance when using load balancer 
