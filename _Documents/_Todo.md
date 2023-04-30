@@ -1,5 +1,8 @@
 ﻿# Todo
 
+* Implement workflows in 
+	* https://tallyfy.com/workflow-examples/
+	* https://clickup.com/blog/workflow-examples/
 
 * Add UI Project (Use MVC not pages)
 	* Servcies Registred
