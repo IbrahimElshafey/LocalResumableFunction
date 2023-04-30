@@ -19,10 +19,10 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
     private readonly ResumableFunctionHandler _functionHandler;
     private readonly ILogger<WaitMethodAttribute> _logger;
 
-    public WaitMethodAttribute(string methodUrn, bool publishFromExternal = false)
+    public WaitMethodAttribute(string methodUrn, bool canPublishFromExternal = false)
     {
         MethodUrn = methodUrn;
-        PublishFromExternal = publishFromExternal;
+        CanPublishFromExternal = canPublishFromExternal;
         var serviceProvider = CoreExtensions.GetServiceProvider();
         if (serviceProvider == null) return;
         _functionHandler = serviceProvider.GetService<ResumableFunctionHandler>();
@@ -33,7 +33,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
     /// used to enable developer to change method name an parameters and keep point to the old one
     /// </summary>
     public string MethodUrn { get; }
-    public bool PublishFromExternal { get; }
+    public bool CanPublishFromExternal { get; }
 
     public const string AttributeId = nameof(WaitMethodAttribute);
     public override object TypeId => AttributeId;
@@ -43,7 +43,11 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
         args.MethodExecutionTag = false;
         _pushedCall = new PushedCall
         {
-            MethodData = new MethodData(args.Method as MethodInfo) { MethodUrn = MethodUrn },
+            MethodData = new MethodData(args.Method as MethodInfo)
+            {
+                MethodUrn = MethodUrn,
+                CanPublishFromExternal = CanPublishFromExternal,
+            },
         };
         if (args.Arguments.Length > 0)
             _pushedCall.Input = args.Arguments[0];

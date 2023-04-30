@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.Helpers;
 using Newtonsoft.Json.Linq;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace ResumableFunctions.Handler;
 

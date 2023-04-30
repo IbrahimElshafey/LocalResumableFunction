@@ -25,7 +25,8 @@ namespace ResumableFunctions.Handler.InOuts
             string methodName,
             string methodSignature,
             byte[] methodHash,
-            string methodUrn)
+            string methodUrn,
+            bool canPublishFromExternal)
         {
             AssemblyName = assemblyName;
             ClassName = className;
@@ -33,6 +34,7 @@ namespace ResumableFunctions.Handler.InOuts
             MethodSignature = methodSignature;
             MethodHash = methodHash;
             MethodUrn = methodUrn;
+            CanPublishFromExternal = canPublishFromExternal;
         }
         public MethodData()
         {
@@ -47,6 +49,18 @@ namespace ResumableFunctions.Handler.InOuts
             MethodSignature = CalcSignature(methodInfo);
             MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
             MethodUrn = GetMethodUrn(methodInfo);
+            CanPublishFromExternal = GetCanPublishFromExternal(methodInfo);
+        }
+
+        private bool GetCanPublishFromExternal(MethodInfo methodInfo)
+        {
+            var wma = methodInfo
+              .GetCustomAttributes()
+              .FirstOrDefault(
+              attribute => attribute.TypeId == WaitMethodAttribute.AttributeId
+              ) as WaitMethodAttribute;
+
+            return wma?.CanPublishFromExternal ?? false;
         }
 
         public string MethodUrn { get; internal set; }
@@ -82,6 +96,7 @@ namespace ResumableFunctions.Handler.InOuts
         public MethodIdentifier MethodIdentifier { get; internal set; }
         public int MethodIdentifierId { get; internal set; }
         public MethodType MethodType { get; internal set; }
+        public bool CanPublishFromExternal { get; internal set; }
 
         internal static string CalcSignature(MethodBase value)
         {

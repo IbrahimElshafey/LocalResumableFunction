@@ -10,16 +10,15 @@ public abstract class MethodIdentifier : IEntityWithUpdate
 {
     private MethodInfo _methodInfo;
 
-    //private MethodInfo _methodInfo;
     public int Id { get; internal set; }
 
-    //editable props
     public string AssemblyName { get; internal set; }
     public string ClassName { get; internal set; }
     public string MethodName { get; internal set; }
     public string MethodSignature { get; internal set; }
     public byte[] MethodHash { get; internal set; }
     public MethodType Type { get; set; }
+    public bool CanPublishFromExternal { get; set; }
     internal MethodInfo MethodInfo
     {
         get
@@ -48,6 +47,7 @@ public abstract class MethodIdentifier : IEntityWithUpdate
         MethodName = methodData.MethodName;
         MethodSignature = methodData.MethodSignature;
         MethodHash = methodData.MethodHash;
+        CanPublishFromExternal = methodData.CanPublishFromExternal;
     }
 }
 

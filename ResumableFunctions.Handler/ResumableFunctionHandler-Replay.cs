@@ -39,7 +39,7 @@ public partial class ResumableFunctionHandler
                 await ReplayGoTo(waitToReplay);
                 break;
             case ReplayType.GoToWithNewMatch:
-                await ReplayGoToWithNewMatch(replayRequest,waitToReplay);
+                await ReplayGoToWithNewMatch(replayRequest, waitToReplay);
                 break;
             default:
                 _logger.LogWarning("ReplayWait type not defined.");
@@ -70,7 +70,7 @@ public partial class ResumableFunctionHandler
             throw new Exception($"When the replay type is [{ReplayType.GoToWithNewMatch}]" +
                                 $"the wait to replay  must be of type [{nameof(MethodWait)}]");
         }
-        
+
     }
 
     private async Task ReplayGoTo(Wait waitToReplay)
@@ -159,5 +159,14 @@ public partial class ResumableFunctionHandler
         return (runner, hasWait);
     }
 
-
+    internal async Task<bool> IsExternal(string methodUrn)
+    {
+        SetDependencies(_serviceProvider);
+        return await _context
+            .MethodsGroups
+            .Include(x => x.WaitMethodIdentifiers)
+            .Where(x => x.MethodGroupUrn == methodUrn)
+            .SelectMany(x => x.WaitMethodIdentifiers)
+            .AnyAsync(x => x.CanPublishFromExternal);
+    }
 }

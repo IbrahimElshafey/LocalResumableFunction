@@ -40,7 +40,7 @@ internal class MethodIdentifierRepository : RepositoryBase
         var resumableFunctionIdentifier =
             await _context
                 .ResumableFunctionIdentifiers
-                .FirstOrDefaultAsync(x => x.MethodUrn == methodData.MethodUrn);
+                .FirstOrDefaultAsync(x => x.RF_MethodUrn == methodData.MethodUrn);
         if (resumableFunctionIdentifier != null)
             return resumableFunctionIdentifier;
         else

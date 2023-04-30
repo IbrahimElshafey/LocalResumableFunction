@@ -37,7 +37,7 @@ public sealed class PublishMethodAttribute : OnMethodBoundaryAspect
         args.MethodExecutionTag = false;
         _methodCall = new MethodCall
         {
-            MethodIdentifier = MethodIdentifier
+            MethodUrn = MethodIdentifier
         };
         if (args.Arguments.Length > 0)
             _methodCall.Input = args.Arguments[0];

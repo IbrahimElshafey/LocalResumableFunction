@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.InOuts;
@@ -14,9 +15,15 @@ namespace ResumableFunctions.AspNetService
     {
         private readonly ResumableFunctionHandler _resumableFunctionHandler;
         public readonly IBackgroundJobClient _backgroundJobClient;
-        public ResumableFunctionsController(ResumableFunctionHandler handler, IBackgroundJobClient backgroundJobClient)
+        private readonly ILogger<ResumableFunctionsController> _logger;
+
+        public ResumableFunctionsController(
+            ResumableFunctionHandler handler, 
+            IBackgroundJobClient backgroundJobClient,
+            ILogger<ResumableFunctionsController> logger)
         {
             _backgroundJobClient = backgroundJobClient;
+            _logger = logger;
             _resumableFunctionHandler = handler;
         }
 
@@ -32,18 +39,31 @@ namespace ResumableFunctions.AspNetService
         //public async Task ExternalCall(ExternalCallArgs externalCall)
         public async Task ExternalCall([FromBody]dynamic input)
         {
-            var externalCall = 
-                JsonConvert.DeserializeObject<ExternalCallArgs>((string)input.ToString());
-            await
-                _resumableFunctionHandler.QueuePushedCallProcessing(new PushedCall
-                {
-                    MethodData = new MethodData
+            try
+            {
+                var externalCall =
+                    JsonConvert.DeserializeObject<ExternalCallArgs>((string)input.ToString());
+                if(externalCall == null) 
+                    throw new ArgumentNullException(nameof(externalCall));
+                if (await _resumableFunctionHandler.IsExternal(externalCall.MethodUrn) is false)
+                    throw new Exception(
+                        $"There is no method with URN [{externalCall?.MethodUrn}] that can be called from external.");
+                await
+                    _resumableFunctionHandler.QueuePushedCallProcessing(new PushedCall
                     {
-                        MethodUrn = externalCall.MethodIdentifier
-                    },
-                    Input = externalCall.Input,
-                    Output = externalCall.Output
-                });
+                        MethodData = new MethodData
+                        {
+                            MethodUrn = externalCall.MethodUrn
+                        },
+                        Input = externalCall.Input,
+                        Output = externalCall.Output
+                    });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error when handle external method call.");
+            }
+            
         }
 
         //todo:CheckMethod/s exist
