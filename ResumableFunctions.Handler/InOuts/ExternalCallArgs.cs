@@ -1,8 +1,10 @@
-﻿namespace ResumableFunctions.Handler.InOuts;
+﻿using Newtonsoft.Json.Linq;
+
+namespace ResumableFunctions.Handler.InOuts;
 
 public class ExternalCallArgs
 {
     public string MethodIdentifier { get; set; }
-    public object Input { get; internal set; }
-    public object Output { get; internal set; }
+    public dynamic Input { get; set; }
+    public dynamic Output { get; set; }
 }

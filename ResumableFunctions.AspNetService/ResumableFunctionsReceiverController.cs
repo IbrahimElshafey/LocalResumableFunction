@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.InOuts;
+using System.Text.Json;
 
 namespace ResumableFunctions.AspNetService
 {
@@ -28,11 +29,11 @@ namespace ResumableFunctions.AspNetService
         }
 
         [HttpPost(nameof(ExternalCall))]
-        public async Task ExternalCall(ExternalCallArgs externalCall)//todo:fix here
+        //public async Task ExternalCall(ExternalCallArgs externalCall)
+        public async Task ExternalCall([FromBody]dynamic input)
         {
-            //var rawRequestBody = new StreamReader(Request.Body).ReadToEnd();
-            //var externalCall = JsonConvert.DeserializeObject<ExternalCallArgs>(rawRequestBody);
-            //todo:check if method wait exist and marked as external
+            var externalCall = 
+                JsonConvert.DeserializeObject<ExternalCallArgs>((string)input.ToString());
             await
                 _resumableFunctionHandler.QueuePushedCallProcessing(new PushedCall
                 {

@@ -20,7 +20,7 @@ namespace TestPublisherApi.Controllers
         [PublishMethod("PublisherController.Method123")]
         public string Method123(string input)
         {
-            return $"Method {nameof(Method123)} called with input `{input}`";
+            return $"{nameof(Method123)} called with input `{input}`";
         }
     }
 }
