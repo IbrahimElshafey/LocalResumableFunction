@@ -22,17 +22,11 @@ namespace ResumableFunctions.AspNetService
             mvcBuilder.Services.AddRazorPages();
             mvcBuilder.Services.AddResumableFunctionsCore(settings);
         }
+       
 
         public static void ScanCurrentService(this WebApplication app)
         {
-            CoreExtensions.SetServiceProvider(app.Services);
-
-            GlobalConfiguration.Configuration
-              .UseActivator(new HangfireActivator());
-
-            var backgroundJobClient = app.Services.GetService<IBackgroundJobClient>();
-            var scanner = app.Services.GetService<Scanner>();
-            backgroundJobClient.Enqueue(() => scanner.Start());
+            app.UseResumableFunctions();
             app.UseHangfireDashboard();
             app.MapRazorPages();
         }

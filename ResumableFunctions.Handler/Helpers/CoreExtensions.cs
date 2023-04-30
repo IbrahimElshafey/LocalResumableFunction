@@ -40,7 +40,17 @@ public static class CoreExtensions
             services.AddHangfireServer();
         }
     }
+    public static void UseResumableFunctions(this IHost app)
+    {
+        SetServiceProvider(app.Services);
 
+        GlobalConfiguration.Configuration
+          .UseActivator(new HangfireActivator());
+
+        var backgroundJobClient = app.Services.GetService<IBackgroundJobClient>();
+        var scanner = app.Services.GetService<Scanner>();
+        backgroundJobClient.Enqueue(() => scanner.Start());
+    }
     public static (bool IsFunctionData, MemberExpression NewExpression) GetDataParamterAccess(
         this MemberExpression node,
         ParameterExpression functionInstanceArg)
