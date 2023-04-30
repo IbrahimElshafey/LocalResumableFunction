@@ -7,7 +7,7 @@ namespace TestApi1.Examples
     public class TestExternalMethodPush : ResumableFunction
     {
 
-        public string Output { get; set; }
+        public string Result { get; set; }
 
         [ResumableFunctionEntryPoint("TestExternalMethodPush.ResumableFunctionThatWaitExternal")]//Point 1
         public async IAsyncEnumerable<Wait> ResumableFunctionThatWaitExternal()
@@ -15,8 +15,8 @@ namespace TestApi1.Examples
             yield return
              Wait<string, string>("External method `Method123`", Method123)//Point 2
                  .MatchIf((input, output) => input.StartsWith("M"))//Point 3
-                 .SetData((input, output) => Output == Output);//Point 4
-            Console.WriteLine($"Output is :{Output}");
+                 .SetData((input, output) => Result == output);//Point 4
+            Console.WriteLine($"Output is :{Result}");
             Console.WriteLine("^^^Success for ResumableFunctionThatWaitExternal^^^");
         }
 

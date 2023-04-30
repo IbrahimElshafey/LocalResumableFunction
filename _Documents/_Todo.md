@@ -1,5 +1,5 @@
 ﻿# Todo
-* Compelete publisher project and test it
+
 
 * Add UI Project (Use MVC not pages)
 	* Servcies Registred
@@ -41,7 +41,15 @@
 
 * Refactor ResumableFunctionHandler to be multiple classes
 * what are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
-* Create nuget package
+
+****** Create nuget package
+
+* Publisher Project
+	* Scan and send scan result to orchestrator
+	* Use PeriodicTimer to handle background tasks
+		* Send requests to orchestrator
+		* Scan Dlls
+	* Use liteDb to save scan Data and requests
 
 * Background Cleaning Job
 	* Move completed/cancled function instance to Recycle Bin
