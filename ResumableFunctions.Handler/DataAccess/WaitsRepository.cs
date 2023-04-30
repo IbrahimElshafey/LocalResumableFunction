@@ -108,25 +108,34 @@ internal class WaitsRepository : RepositoryBase
 
     internal async Task RemoveFirstWaitIfExist(Wait firstWait, MethodIdentifier methodIdentifier)
     {
-        var firstWaitInDb =
-            await _context.Waits
-            .FirstOrDefaultAsync(x =>
-                    x.IsFirst &&
-                    x.RequestedByFunctionId == methodIdentifier.Id &&
-                    x.Name == firstWait.Name &&
-                    x.Status == WaitStatus.Waiting);
-
-        if (firstWaitInDb != null)
+        try
         {
-            _context.Waits.Remove(firstWaitInDb);
-            firstWaitInDb.CascadeAction(x => x.IsDeleted = true);
-            //load entity to delete it , concurrency controltoken and FKs
-            var functionState = await _context
-                .FunctionStates
-                .FirstAsync(x => x.Id == firstWaitInDb.FunctionStateId);
-            _context.FunctionStates.Remove(functionState);
-            await _context.SaveChangesAsync();
+            var firstWaitInDb =
+           await _context.Waits
+           .FirstOrDefaultAsync(x =>
+                   x.IsFirst &&
+                   x.RequestedByFunctionId == methodIdentifier.Id &&
+                   x.Name == firstWait.Name &&
+                   x.Status == WaitStatus.Waiting);
+
+            if (firstWaitInDb != null)
+            {
+                _context.Waits.Remove(firstWaitInDb);
+                firstWaitInDb.CascadeAction(x => _context.Waits.Remove(x));
+                //load entity to delete it , concurrency controltoken and FKs
+                var functionState = await _context
+                    .FunctionStates
+                    .FirstAsync(x => x.Id == firstWaitInDb.FunctionStateId);
+                _context.FunctionStates.Remove(functionState);
+                await _context.SaveChangesAsync();
+            }
         }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+       
     }
 
 

@@ -16,14 +16,12 @@ public sealed class PublishMethodAttribute : OnMethodBoundaryAspect
 {
     private MethodCall _methodCall;
     private ILogger<PublishMethodAttribute> _logger;
-    private IPublishMethodCall _publishMethod;
+    private IPublishCall _publishMethod;
     public PublishMethodAttribute(string methodIdetifier)
     {
         if (string.IsNullOrWhiteSpace(methodIdetifier))
             throw new ArgumentNullException("MethodIdentifier can't be null or empty.");
         MethodIdentifier = methodIdetifier;
-        _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<PublishMethodAttribute>>();
-        _publishMethod = CoreExtensions.GetServiceProvider().GetService<IPublishMethodCall>();
     }
 
     /// <summary>
@@ -34,6 +32,8 @@ public sealed class PublishMethodAttribute : OnMethodBoundaryAspect
 
     public override void OnEntry(MethodExecutionArgs args)
     {
+        _logger = Extensions.GetServiceProvider().GetService<ILogger<PublishMethodAttribute>>();
+        _publishMethod = Extensions.GetServiceProvider().GetService<IPublishCall>();
         args.MethodExecutionTag = false;
         _methodCall = new MethodCall
         {
@@ -54,8 +54,7 @@ public sealed class PublishMethodAttribute : OnMethodBoundaryAspect
                 _methodCall.Output = output.Result;
             }
 
-            //call `/api/ResumableFunctions/MethodMethod`
-            //_functionHandler.QueuePushedCallProcessing(_pushedCall).Wait();
+         
             _publishMethod.Publish(_methodCall);
             args.MethodExecutionTag = true;
         }

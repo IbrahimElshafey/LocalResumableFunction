@@ -39,7 +39,7 @@
 	* Verify that fody MethodBoundaryAspect is active
 	* Logging for scan sessions
 
-
+* what are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 * Create nuget package
 
 * Background Cleaning Job

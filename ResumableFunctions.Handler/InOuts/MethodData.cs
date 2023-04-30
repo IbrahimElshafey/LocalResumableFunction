@@ -34,7 +34,10 @@ namespace ResumableFunctions.Handler.InOuts
             MethodHash = methodHash;
             MethodUrn = methodUrn;
         }
+        public MethodData()
+        {
 
+        }
         public MethodData(MethodInfo methodInfo)
         {
             if (methodInfo == null) return;

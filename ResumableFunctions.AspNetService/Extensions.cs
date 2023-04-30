@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.Helpers;
@@ -34,6 +35,17 @@ namespace ResumableFunctions.AspNetService
             backgroundJobClient.Enqueue(() => scanner.Start());
             app.UseHangfireDashboard();
             app.MapRazorPages();
-        }   
+        }
+
+        public static T ToObject<T>(this Stream stream)
+        {
+            var serializer = new JsonSerializer();
+
+            using (var sr = new StreamReader(stream))
+            using (var jsonTextReader = new JsonTextReader(sr))
+            {
+                return serializer.Deserialize<T>(jsonTextReader);
+            }
+        }
     }
 }

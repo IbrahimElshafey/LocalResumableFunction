@@ -7,9 +7,13 @@ using System.Threading.Tasks;
 
 namespace ResumableFunctions.Publisher
 {
-    public interface IPublishMethodCall
+    public interface IPublishCall
     {
-        Task Publish<TInput, TOutput>(Func<TInput, Task<TOutput>> methodToPush, TInput input, TOutput output);
+        Task Publish<TInput, TOutput>(
+            Func<TInput, Task<TOutput>> methodToPush,
+            TInput input,
+            TOutput output,
+            string methodIdetifier);
         Task Publish(MethodCall MethodCall);
     }
 }

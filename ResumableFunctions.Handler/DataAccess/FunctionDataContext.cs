@@ -207,9 +207,9 @@ public class FunctionDataContext : DbContext
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
         SetDates();
+        //NeverUpdateFirstWait();
         HandleSoftDelete();
         ExcludeFalseAddEntries();
-        NeverUpdateFirstWait();
         return base.SaveChangesAsync(cancellationToken);
     }
 
