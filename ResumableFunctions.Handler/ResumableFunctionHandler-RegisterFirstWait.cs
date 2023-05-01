@@ -66,7 +66,17 @@ public partial class ResumableFunctionHandler
 
     private async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
-        var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
+        //var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
+
+        //var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(CoreExtensions.GetServiceProvider(), resumableFunction.DeclaringType);
+
+        var constructor = resumableFunction.DeclaringType.GetConstructors().Single();
+        var classInstance = (ResumableFunction)constructor.Invoke(
+                constructor.GetParameters()
+                    .Select(parameter =>
+                    _serviceProvider.GetService(parameter.ParameterType) ?? Activator.CreateInstance(parameter.ParameterType))
+                    .ToArray()
+                );
         if (classInstance != null)
             try
             {
