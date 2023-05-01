@@ -1,5 +1,8 @@
 ﻿# Todo
 
+****** Create nuget package
+	* https://learn.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package-using-visual-studio?tabs=netcore-cli
+	* https://learn.microsoft.com/en-us/nuget/create-packages/multiple-target-frameworks-project-file
 * Implement workflows in 
 	* https://tallyfy.com/workflow-examples/
 	* https://clickup.com/blog/workflow-examples/
@@ -45,7 +48,6 @@
 * Refactor ResumableFunctionHandler to be multiple classes
 * what are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 
-****** Create nuget package
 
 * Publisher Project
 	* Scan and send scan result to orchestrator

@@ -5,6 +5,11 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>$(AssemblyName)</Title>
+    <Authors>ibrahim.ragab.net</Authors>
+    <RepositoryUrl>https://github.com/IbrahimElshafey/ResumableFunctions</RepositoryUrl>
+    <Description>To be used with WEB API projects.</Description>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +30,11 @@
     <Folder Include="UiLogic\" />
   </ItemGroup>
 
-
+	<ItemGroup>
+		<Content Include="FodyWeavers.xml">
+			<Pack>true</Pack>
+			<PackagePath>\</PackagePath>
+		</Content>
+	</ItemGroup>
 
 </Project>

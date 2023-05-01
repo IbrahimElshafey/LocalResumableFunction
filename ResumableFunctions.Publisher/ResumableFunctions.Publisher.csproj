@@ -3,6 +3,11 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>$(AssemblyName)</Title>
+    <Authors>ibrahim.ragab.net</Authors>
+    <Description>Publish calls to resumable function service</Description>
+    <RepositoryUrl>https://github.com/IbrahimElshafey/ResumableFunctions</RepositoryUrl>
     <!--<Nullable>enable</Nullable>-->
   </PropertyGroup>
 

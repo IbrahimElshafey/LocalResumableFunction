@@ -3,7 +3,7 @@ Add-Migration -Name "Initial" -verbose
 
 Add-Migration -Context "EngineDataContext" -Name "Initial" -Project ResumableFunction.Engine.Data.Sqlite -Verbose -StartupProject ResumableFunction.Engine.Service
 
-
+oy2lfaeltwgaoq7b6yhq5wfefhgf57vejasyopsf3rikpauuuuuu
 # Force Migration
 
 # Update DataBase
@@ -16,3 +16,9 @@ Remove-Migration -Project ResumableFunction.Engine.Data.SqlServer -Verbose -Star
 
 # Commands Page
 https://learn.microsoft.com/en-us/ef/core/cli/powershell
+
+
+# Nuget
+dotnet nuget push ResumableFunctions.Handler.1.0.0.nupkg --api-key <key> --source https://api.nuget.org/v3/index.json
+dotnet nuget push ResumableFunctions.AspNetService.1.0.0.nupkg --api-key <key> --source https://api.nuget.org/v3/index.json
+dotnet nuget push ResumableFunctions.Publisher.1.0.0.nupkg --api-key <key> --source https://api.nuget.org/v3/index.json
