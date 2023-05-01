@@ -6,15 +6,15 @@ using ResumableFunctions.Handler.InOuts;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddTransient<ClientOnboardingService>();
-builder.Services.AddTransient<ClientOnboardingWorkflow>();
+
 builder.Services
     .AddControllers()
     .AddResumableFunctions(new ResumableFunctionsSettings().UseSqlServer());
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddScoped<ClientOnboardingService>();
+builder.Services.AddScoped<ClientOnboardingWorkflow>();
 
 var app = builder.Build();
 app.ScanCurrentService();

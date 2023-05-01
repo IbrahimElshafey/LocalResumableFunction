@@ -13,10 +13,11 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
 
-public class Scanner
+public class Scanner:IDisposable
 {
     internal FunctionDataContext _context;
     private MethodIdentifierRepository _methodIdentifierRepo;
+    private IServiceScope _scope;
     private IResumableFunctionsSettings _settings;
     private ResumableFunctionHandler _handler;
     private IServiceProvider _serviceProvider;
@@ -50,13 +51,13 @@ public class Scanner
 
     private async Task StartScanService()
     {
-        using IServiceScope scope = _serviceProvider.CreateScope();
-        _settings = scope.ServiceProvider.GetService<IResumableFunctionsSettings>();
+         _scope = _serviceProvider.CreateScope();
+        _settings = _scope.ServiceProvider.GetService<IResumableFunctionsSettings>();
 #if DEBUG
         _settings.ForceRescan = true;
 #endif
-        _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
-        _handler.SetDependencies(scope.ServiceProvider);
+        _handler = _scope.ServiceProvider.GetService<ResumableFunctionHandler>();
+        _handler.SetDependencies(_scope.ServiceProvider);
         _context = _handler._context;
         _methodIdentifierRepo = new MethodIdentifierRepository(_context);
 
@@ -266,6 +267,9 @@ public class Scanner
         try
         {
             WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
+            //var instance = _scope.ServiceProvider.GetRequiredService(resumableFunction.DeclaringType);
+            //var instance = ActivatorUtilities.CreateInstance(_scope.ServiceProvider,resumableFunction.DeclaringType);
+            var instance = ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
             await _handler.RegisterFirstWait(resumableFunction);
         }
         catch (Exception ex)
@@ -277,6 +281,11 @@ public class Scanner
     private void WriteMessage(string message)
     {
         _logger.LogInformation(message);
+    }
+
+    public void Dispose()
+    {
+        _scope.Dispose();
     }
 }
 

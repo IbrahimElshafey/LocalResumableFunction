@@ -5,7 +5,10 @@ namespace ClientOnboarding.Services
 {
     public class ClientOnboardingService
     {
+        public ClientOnboardingService()
+        {
 
+        }
         [WaitMethod("ClientOnboardingService.ClientFillsForm")]
         internal RegistrationResult ClientFillsForm(RegistrationForm registrationForm)
         {
