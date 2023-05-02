@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,11 +14,10 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
 
-public class Scanner:IDisposable
+public class Scanner
 {
     internal FunctionDataContext _context;
     private MethodIdentifierRepository _methodIdentifierRepo;
-    private IServiceScope _scope;
     private IResumableFunctionsSettings _settings;
     private ResumableFunctionHandler _handler;
     private IServiceProvider _serviceProvider;
@@ -51,16 +51,8 @@ public class Scanner:IDisposable
 
     private async Task StartScanService()
     {
-         _scope = _serviceProvider.CreateScope();
-        _settings = _scope.ServiceProvider.GetService<IResumableFunctionsSettings>();
-#if DEBUG
-        _settings.ForceRescan = true;
-#endif
-        _handler = _scope.ServiceProvider.GetService<ResumableFunctionHandler>();
-        _handler.SetDependencies(_scope.ServiceProvider);
-        _context = _handler._context;
-        _methodIdentifierRepo = new MethodIdentifierRepository(_context);
-
+        using var scope = _serviceProvider.CreateScope();
+        ScopeInit(scope);
 
         WriteMessage("Start register method waits.");
         var resumableFunctions = await RegisterMethodWaits(GetAssembliesToScan());
@@ -75,6 +67,18 @@ public class Scanner:IDisposable
 
         WriteMessage("Close with no errors.");
         await _context.DisposeAsync();
+    }
+
+    private void ScopeInit(IServiceScope scope)
+    {
+        _settings = scope.ServiceProvider.GetService<IResumableFunctionsSettings>();
+#if DEBUG
+        _settings.ForceRescan = true;
+#endif
+        _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
+        _handler.SetDependencies(scope.ServiceProvider);
+        _context = _handler._context;
+        _methodIdentifierRepo = new MethodIdentifierRepository(_context);
     }
 
     private List<string> GetAssembliesToScan()
@@ -138,14 +142,32 @@ public class Scanner:IDisposable
         return shouldScan || _settings.ForceRescan;
     }
 
-    internal async Task RegisterResumableFunction(MethodInfo resumableFunction, MethodType type)
+    internal async Task RegisterResumableFunction(MethodInfo resumableFunctionMinfo)
     {
-        WriteMessage($"Register resumable function [{resumableFunction.GetFullName()}] of type [{type}]");
-        await _methodIdentifierRepo.AddResumableFunctionIdentifier(new MethodData(resumableFunction) { MethodType = type });
+        var isEntryPoint = IsEntryPoint(resumableFunctionMinfo);
+        var methodType = isEntryPoint ?
+            MethodType.ResumableFunctionEntryPoint :
+            MethodType.SubResumableFunction;
+        WriteMessage($"Register resumable function [{resumableFunctionMinfo.GetFullName()}] of type [{methodType}]");
+        var mi = await _methodIdentifierRepo.AddResumableFunctionIdentifier(new MethodData(resumableFunctionMinfo) { MethodType = methodType });
         await _context.SaveChangesAsync();
+        if (isEntryPoint)
+        {
+            var bjc = _serviceProvider.GetService<IBackgroundJobClient>();
+            bjc.Enqueue(() => RegisterResumableFunctionFirstWait(mi.Id));
+
+        }
     }
 
-
+    public async Task RegisterResumableFunctionFirstWait(int id)
+    {
+        using (var scope = _serviceProvider.CreateScope())
+        {
+            ScopeInit(scope);
+            var mi = await _methodIdentifierRepo.GetResumableFunction(id);
+            await RegisterResumableFunctionFirstWait(mi.MethodInfo);
+        }
+    }
 
     private async Task<List<Type>> RegisterMethodWaits(List<string> assemblyPaths)
     {
@@ -227,22 +249,18 @@ public class Scanner:IDisposable
                     attribute.TypeId == ResumableFunctionAttribute.AttributeId
                 ));
 
-        foreach (var resumableFunction in resumableFunctions)
+        foreach (var resumableFunctionMinfo in resumableFunctions)
         {
-            if (CheckResumableFunctionSignature(resumableFunction) is false)
+            if (CheckResumableFunctionSignature(resumableFunctionMinfo) is false)
             {
                 _logger.LogError(
-                    $"The resumable function [{resumableFunction.GetFullName()}] must match the signature `IAsyncEnumerable<Wait> {resumableFunction.Name}()`");
+                    $"The resumable function [{resumableFunctionMinfo.GetFullName()}] must match the signature `IAsyncEnumerable<Wait> {resumableFunctionMinfo.Name}()`");
                 continue;
             }
 
-            var isEntryPoint = IsEntryPoint(resumableFunction);
-            var methodType = isEntryPoint ?
-                MethodType.ResumableFunctionEntryPoint :
-                MethodType.SubResumableFunction;
-            await RegisterResumableFunction(resumableFunction, methodType);
-            if (isEntryPoint)
-                await RegisterResumableFunctionFirstWait(resumableFunction);
+
+            await RegisterResumableFunction(resumableFunctionMinfo);
+
         }
     }
 
@@ -269,7 +287,6 @@ public class Scanner:IDisposable
             WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
             //var instance = _scope.ServiceProvider.GetRequiredService(resumableFunction.DeclaringType);
             //var instance = ActivatorUtilities.CreateInstance(_scope.ServiceProvider,resumableFunction.DeclaringType);
-            var instance = ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
             await _handler.RegisterFirstWait(resumableFunction);
         }
         catch (Exception ex)
@@ -283,9 +300,5 @@ public class Scanner:IDisposable
         _logger.LogInformation(message);
     }
 
-    public void Dispose()
-    {
-        _scope.Dispose();
-    }
 }
 

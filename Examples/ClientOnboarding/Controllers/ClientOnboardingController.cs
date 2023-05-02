@@ -1,5 +1,6 @@
 using ClientOnboarding.InOuts;
 using ClientOnboarding.Services;
+using ClientOnboarding.Workflow;
 using Microsoft.AspNetCore.Mvc;
 using ResumableFunctions.Handler.Helpers;
 
@@ -14,10 +15,13 @@ namespace ClientOnboarding.Controllers
         private readonly ILogger<ClientOnboardingController> _logger;
         private readonly ClientOnboardingService service;
 
-        public ClientOnboardingController(ILogger<ClientOnboardingController> logger, ClientOnboardingService service)
+        public ClientOnboardingController(
+            ILogger<ClientOnboardingController> logger,
+            ClientOnboardingService service)
         {
             _logger = logger;
             this.service = service;
+            
         }
 
         [HttpPost(nameof(ClientFillsForm))]

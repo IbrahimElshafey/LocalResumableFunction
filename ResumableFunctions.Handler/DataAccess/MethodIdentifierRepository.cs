@@ -34,6 +34,20 @@ internal class MethodIdentifierRepository : RepositoryBase
         }
     }
 
+    internal async Task<ResumableFunctionIdentifier> GetResumableFunction(int id)
+    {
+        var resumableFunctionIdentifier =
+           await _context
+               .ResumableFunctionIdentifiers
+               .FirstOrDefaultAsync(x => x.Id == id);
+        if (resumableFunctionIdentifier != null)
+            return resumableFunctionIdentifier;
+        else
+        {
+            _logger.LogWarning($"Can't find resumable function with ID ({id}) in database.");
+            return null;
+        }
+    }
     internal async Task<ResumableFunctionIdentifier> GetResumableFunction(MethodData methodData)
     {
         methodData.Validate();
@@ -50,18 +64,20 @@ internal class MethodIdentifierRepository : RepositoryBase
         }
     }
 
-    internal async Task AddResumableFunctionIdentifier(MethodData methodData)
+    internal async Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData)
     {
         var inDb = await GetResumableFunction(methodData);
         if (inDb != null)
         {
             inDb.FillFromMethodData(methodData);
+            return inDb;
         }
         else
         {
             var add = new ResumableFunctionIdentifier();
             add.FillFromMethodData(methodData);
             _context.ResumableFunctionIdentifiers.Add(add);
+            return add;
         }
     }
 
@@ -126,7 +142,7 @@ internal class MethodIdentifierRepository : RepositoryBase
                 .MethodsGroups
                 .Include(x => x.WaitMethodIdentifiers)
                 .FirstOrDefaultAsync(x => x.MethodGroupUrn == methodData.MethodUrn);
-        var childMethodIdentifier = 
+        var childMethodIdentifier =
             methodGroup
             .WaitMethodIdentifiers
             .FirstOrDefault(x => x.MethodHash.SequenceEqual(methodData.MethodHash));

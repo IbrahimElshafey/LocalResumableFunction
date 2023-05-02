@@ -22,7 +22,7 @@ namespace ClientOnboarding.Workflow
         {
             yield return
                 Wait<RegistrationForm, RegistrationResult>("Wait User Registration", service.ClientFillsForm)
-                .MatchIf((regForm, regResult) => regResult.FormId > -1)
+                .MatchIf((regForm, regResult) => regResult.FormId > 0)
                 .SetData((regForm, regResult) => RegitrationForm == regForm);
             Console.WriteLine("User Registration Done");
         }

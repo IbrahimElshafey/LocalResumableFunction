@@ -14,7 +14,7 @@ builder.Services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<ClientOnboardingService>();
-builder.Services.AddScoped<ClientOnboardingWorkflow>();
+//builder.Services.AddScoped<ClientOnboardingWorkflow>();
 
 var app = builder.Build();
 app.ScanCurrentService();
