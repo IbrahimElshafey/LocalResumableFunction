@@ -6,6 +6,7 @@ namespace ResumableFunctions.Publisher
     public class MethodCall
     {
         public string MethodUrn { get; set; }
+        public string ServiceName { get; set; }
         public object Input { get; internal set; }
         public object Output { get; internal set; }
         public override string ToString()

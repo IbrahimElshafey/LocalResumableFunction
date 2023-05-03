@@ -36,8 +36,9 @@ namespace ResumableFunctions.Publisher
             {
                 //call `/api/ResumableFunctions/ExternalCall`
                 //_functionHandler.QueuePushedCallProcessing(_pushedCall).Wait();
+                var serviceUrl = _settings.ServicesRegistry[methodCall.ServiceName];
                 var actionUrl =
-                    $"{_settings.ConsumerServiceUrl}api/ResumableFunctions/ExternalCall";
+                    $"{serviceUrl}api/ResumableFunctions/ExternalCall";
                 var resposne = await _client.PostAsJsonAsync(actionUrl, methodCall);
                 resposne.EnsureSuccessStatusCode();
             }

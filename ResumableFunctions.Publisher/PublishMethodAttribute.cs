@@ -17,27 +17,32 @@ public sealed class PublishMethodAttribute : OnMethodBoundaryAspect
     private MethodCall _methodCall;
     private ILogger<PublishMethodAttribute> _logger;
     private IPublishCall _publishMethod;
-    public PublishMethodAttribute(string methodIdetifier)
+    internal static IServiceProvider ServiceProvider;
+
+    public PublishMethodAttribute(string methodIdetifier, string toServiceName)
     {
         if (string.IsNullOrWhiteSpace(methodIdetifier))
             throw new ArgumentNullException("MethodIdentifier can't be null or empty.");
         MethodIdentifier = methodIdetifier;
+        ServiceName = toServiceName;
     }
 
     /// <summary>
     /// used to enable developer to change method name an parameters and keep point to the old one
     /// </summary>
     public string MethodIdentifier { get; }
+    public string ServiceName { get; }
     public override object TypeId => nameof(PublishMethodAttribute);
 
     public override void OnEntry(MethodExecutionArgs args)
     {
-        _logger = Extensions.GetServiceProvider().GetService<ILogger<PublishMethodAttribute>>();
-        _publishMethod = Extensions.GetServiceProvider().GetService<IPublishCall>();
+        _logger = ServiceProvider.GetService<ILogger<PublishMethodAttribute>>();
+        _publishMethod = ServiceProvider.GetService<IPublishCall>();
         args.MethodExecutionTag = false;
         _methodCall = new MethodCall
         {
-            MethodUrn = MethodIdentifier
+            MethodUrn = MethodIdentifier,
+            ServiceName = ServiceName
         };
         if (args.Arguments.Length > 0)
             _methodCall.Input = args.Arguments[0];
@@ -54,7 +59,7 @@ public sealed class PublishMethodAttribute : OnMethodBoundaryAspect
                 _methodCall.Output = output.Result;
             }
 
-         
+
             _publishMethod.Publish(_methodCall);
             args.MethodExecutionTag = true;
         }
@@ -71,5 +76,5 @@ public sealed class PublishMethodAttribute : OnMethodBoundaryAspect
         Console.WriteLine("On exception");
     }
 
-    
+
 }

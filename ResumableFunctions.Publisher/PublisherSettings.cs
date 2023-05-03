@@ -1,15 +1,16 @@
 ﻿namespace ResumableFunctions.Publisher
 {
-    public class PublisherSettings: IPublisherSettings
+    public class PublisherSettings : IPublisherSettings
     {
-        public string ConsumerServiceUrl { get;}
 
-        public PublisherSettings(string consumerServiceUrl)
+        public PublisherSettings(Dictionary<string, string> servicesRegistry)
         {
-            ConsumerServiceUrl = consumerServiceUrl;
+            ServicesRegistry = servicesRegistry;
         }
 
 
         public Type PublishCallImplementation => typeof(PublishCallDirect);
+
+        public Dictionary<string, string> ServicesRegistry { get; }
     }
 }

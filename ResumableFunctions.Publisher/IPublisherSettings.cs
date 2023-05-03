@@ -2,7 +2,7 @@
 {
     public interface IPublisherSettings
     {
-        string ConsumerServiceUrl { get;}
+        Dictionary<string,string> ServicesRegistry { get;}
         Type PublishCallImplementation { get; }
     }
 }

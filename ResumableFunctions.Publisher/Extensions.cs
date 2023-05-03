@@ -17,9 +17,6 @@ namespace ResumableFunctions.Publisher
         //public static IServiceProvider GetServiceProvider() => _ServiceProvider;
         //public static void SetServiceProvider(IServiceProvider provider) => _ServiceProvider = provider;
 
-        private static IServiceProvider _ServiceProvider;
-        public static IServiceProvider GetServiceProvider() => _ServiceProvider;
-        public static void SetServiceProvider(IServiceProvider provider) => _ServiceProvider = provider;
 
         public static void AddResumableFunctionsPublisher(this IServiceCollection services, IPublisherSettings settings)
         {
@@ -30,7 +27,7 @@ namespace ResumableFunctions.Publisher
 
         public static void UseResumableFunctionsPublisher(this IHost app)
         {
-            SetServiceProvider(app.Services);
+            PublishMethodAttribute.ServiceProvider = app.Services;
         }
 
         public static bool IsAsyncMethod(this MethodBase method)

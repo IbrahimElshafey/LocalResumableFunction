@@ -47,7 +47,7 @@ namespace ResumableFunctions.AspNetService
                     throw new ArgumentNullException(nameof(externalCall));
                 if (await _resumableFunctionHandler.IsExternal(externalCall.MethodUrn) is false)
                     throw new Exception(
-                        $"There is no method with URN [{externalCall?.MethodUrn}] that can be called from external.");
+                        $"There is no method with URN [{externalCall?.MethodUrn}] that can be called from external in service [{externalCall?.ServiceName}].");
                 await
                     _resumableFunctionHandler.QueuePushedCallProcessing(new PushedCall
                     {
