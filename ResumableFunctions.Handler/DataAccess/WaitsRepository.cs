@@ -9,16 +9,21 @@ using ResumableFunctions.Handler.Helpers;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Hangfire;
 
 namespace ResumableFunctions.Handler.Data;
 
 internal class WaitsRepository : RepositoryBase
 {
     private ILogger<WaitsRepository> _logger;
+    private readonly IBackgroundJobClient backgroundJobClient;
 
-    public WaitsRepository(FunctionDataContext ctx) : base(ctx)
+    public WaitsRepository(
+        ILogger<WaitsRepository> logger,
+        IBackgroundJobClient backgroundJobClient) : base()
     {
-        _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<WaitsRepository>>();
+        _logger = logger;
+        this.backgroundJobClient = backgroundJobClient;
     }
 
     public Task AddWait(Wait wait)
@@ -50,9 +55,8 @@ internal class WaitsRepository : RepositoryBase
             if (pushedCall == null)
                 throw new NullReferenceException($"No pushed method with ID [{pushedCallId}] exist in DB.");
 
-            var metodIdsRepo = new MethodIdentifierRepository(_context);
             var methodGroupId =
-                await metodIdsRepo.GetMethodGroupId(pushedCall.MethodData.MethodUrn);
+                await GetMethodGroupId(pushedCall.MethodData.MethodUrn);
 
 
             var matchedWaitsIds = await _context
@@ -86,7 +90,22 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-
+    internal async Task<int> GetMethodGroupId(string methodUrn)
+    {
+        var waitMethodIdentifier =
+           await _context
+               .MethodsGroups
+               .Where(x => x.MethodGroupUrn == methodUrn)
+               .Select(x => x.Id)
+               .FirstOrDefaultAsync();
+        if (waitMethodIdentifier != default)
+            return waitMethodIdentifier;
+        else
+        {
+            _logger.LogWarning($"Method [{methodUrn}] is not registered in current database as [WaitMethod].");
+            return default;
+        }
+    }
 
     public async Task<Wait> GetWaitGroup(int? parentGroupId)
     {
@@ -151,10 +170,22 @@ internal class WaitsRepository : RepositoryBase
                 .ToListAsync();
             foreach (var wait in waits)
             {
-                wait.Cancel();
+                CancelWait(wait);
                 if (wait.CanBeParent)
                     await CancelWaits(wait.Id);
             }
+        }
+    }
+
+    private void CancelWait(Wait wait)
+    {
+        wait.Cancel();
+        if (wait is MethodWait mw&&
+            mw.Name == $"#{nameof(LocalRegisteredMethods.TimeWait)}#" &&
+            mw.ExtraData is JObject waitDataJson)
+        {
+            var waitData = waitDataJson.ToObject<TimeWaitData>();
+            backgroundJobClient.Delete(waitData.JobId);
         }
     }
 

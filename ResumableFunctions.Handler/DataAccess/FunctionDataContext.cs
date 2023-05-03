@@ -9,16 +9,25 @@ using System.Reflection.Emit;
 using System.Text.Json;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ResumableFunctions.Handler.Data;
 
 public class FunctionDataContext : DbContext
 {
-    public FunctionDataContext(IResumableFunctionsSettings settings) : base(settings.WaitsDbConfig.Options)
+    internal readonly MethodIdentifierRepository methodIdentifierRepo;
+    internal readonly WaitsRepository waitsRepository;
+
+    public FunctionDataContext(
+        IServiceProvider serviceProvider, IResumableFunctionsSettings settings) : base(settings.WaitsDbConfig.Options)
     {
         try
         {
             Database.EnsureCreated();
+            methodIdentifierRepo = ActivatorUtilities.CreateInstance<MethodIdentifierRepository>(serviceProvider);
+            waitsRepository = ActivatorUtilities.CreateInstance<WaitsRepository>(serviceProvider);
+            methodIdentifierRepo._context = this;
+            waitsRepository._context = this;
         }
         catch (Exception)
         {

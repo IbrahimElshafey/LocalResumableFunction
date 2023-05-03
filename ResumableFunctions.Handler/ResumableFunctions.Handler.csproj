@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -9,8 +9,14 @@
     <Authors>ibrahim.ragab.net</Authors>
     <PackageProjectUrl></PackageProjectUrl>
     <RepositoryUrl>https://github.com/IbrahimElshafey/ResumableFunctions</RepositoryUrl>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <Version>1.0.3</Version>
     <!--<Nullable>enable</Nullable>-->
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="FodyWeavers.xml" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aq.ExpressionJsonSerializer" Version="0.18.0" />

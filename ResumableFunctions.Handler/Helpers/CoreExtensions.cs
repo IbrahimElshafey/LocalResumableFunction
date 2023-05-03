@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Internal;
 using Newtonsoft.Json.Linq;
+using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.InOuts;
 using System.Diagnostics;
@@ -23,9 +24,7 @@ namespace ResumableFunctions.Handler.Helpers;
 
 public static class CoreExtensions
 {
-    private static IServiceProvider _ServiceProvider;
-    public static IServiceProvider GetServiceProvider() => _ServiceProvider;
-    public static void SetServiceProvider(IServiceProvider provider) => _ServiceProvider = provider;
+    //internal static IServiceProvider GetServiceProvider() => _ServiceProvider;
     public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
     {
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
@@ -42,8 +41,8 @@ public static class CoreExtensions
     }
     public static void UseResumableFunctions(this IHost app)
     {
-        SetServiceProvider(app.Services);
-
+        WaitMethodAttribute.ServiceProvider = app.Services;
+        HangfireActivator.ServiceProvider = app.Services;
         GlobalConfiguration.Configuration
           .UseActivator(new HangfireActivator());
 

@@ -10,7 +10,7 @@ public partial class ResumableFunctionHandler
 {
     private async Task ReplayWait(ReplayRequest replayRequest)
     {
-        var waitToReplay = await _waitsRepository.GetOldWaitForReplay(replayRequest);
+        var waitToReplay = await _context.waitsRepository.GetOldWaitForReplay(replayRequest);
         if (waitToReplay == null)
         {
             _logger.LogWarning($"Replay failed, replay is ({replayRequest})");
@@ -20,9 +20,9 @@ public partial class ResumableFunctionHandler
         //todo:review CancelFunctionWaits is suffecient
         //Cancel wait and it's child
         waitToReplay.Status = waitToReplay.Status == WaitStatus.Waiting ? WaitStatus.Canceled : waitToReplay.Status;
-        await _waitsRepository.CancelSubWaits(waitToReplay.Id);
+        await _context.waitsRepository.CancelSubWaits(waitToReplay.Id);
         //skip active waits after replay
-        await _waitsRepository.CancelFunctionWaits(waitToReplay.RequestedByFunctionId, waitToReplay.FunctionStateId);
+        await _context.waitsRepository.CancelFunctionWaits(waitToReplay.RequestedByFunctionId, waitToReplay.FunctionStateId);
 
         switch (replayRequest.ReplayType)
         {

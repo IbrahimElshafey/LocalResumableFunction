@@ -18,7 +18,7 @@ public partial class ResumableFunctionHandler
         Wait currentWait = matchedMethodWait;
         do
         {
-            var parent = await _waitsRepository.GetWaitParent(currentWait);
+            var parent = await _context.waitsRepository.GetWaitParent(currentWait);
             switch (currentWait)
             {
                 case MethodWait methodWait:
@@ -33,7 +33,7 @@ public partial class ResumableFunctionHandler
                     {
                         WriteMessage($"Exit ({currentWait.Name})");
                         currentWait.Status = WaitStatus.Completed;
-                        await _waitsRepository.CancelSubWaits(currentWait.Id);
+                        await _context.waitsRepository.CancelSubWaits(currentWait.Id);
                         await GoNext(parent, currentWait);
                     }
                     else return;
@@ -95,7 +95,7 @@ public partial class ResumableFunctionHandler
         currentWait.Status = WaitStatus.Completed;
         currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
         currentWait.FunctionState.AddLog(LogStatus.Completed, "Function instance completed.");
-        await _waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
+        await _context.waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
         await MoveFunctionToRecycleBin(currentWait);
     }
 }

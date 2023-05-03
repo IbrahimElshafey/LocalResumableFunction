@@ -1,9 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Xml.Linq;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Helpers;
@@ -13,7 +16,6 @@ namespace ResumableFunctions.Handler.InOuts;
 public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
 {
 
-    private ResumableFunction _currntFunction;
 
     public int Id { get; internal set; }
     public string Name { get; internal set; }
@@ -53,30 +55,33 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
 
     internal int? ParentWaitId { get; set; }
 
+    private ResumableFunction _currentFunction;
     [NotMapped]
     internal ResumableFunction CurrentFunction
     {
         get
         {
-            if (FunctionState is not null)
-                if (FunctionState.StateObject is JObject stateAsJson)
-                {
-                    var type = Assembly.LoadFrom(AppContext.BaseDirectory + RequestedByFunction.AssemblyName)
-                        .GetType(RequestedByFunction.ClassName);
-                    var result = stateAsJson.ToObject(type);
-                    FunctionState.StateObject = result;
-                    _currntFunction = (ResumableFunction)result;
-                    return _currntFunction;
-                }
-                else if (FunctionState.StateObject is ResumableFunction result)
-                {
-                    _currntFunction = result;
-                    return _currntFunction;
-                }
+            if (
+                FunctionState is not null &&
+                FunctionState.StateObject is JObject stateAsJson)
+            {
+                var type = Assembly.LoadFrom(AppContext.BaseDirectory + RequestedByFunction.AssemblyName)
+                    .GetType(RequestedByFunction.ClassName);
 
-            return _currntFunction;
+                var result = (ResumableFunction)stateAsJson.ToObject(type);
+
+                FunctionState.StateObject = result;
+                _currentFunction = result;
+            }
+
+            return (ResumableFunction)FunctionState?.StateObject ?? _currentFunction;
         }
-        set => _currntFunction = value;
+        set
+        {
+            _currentFunction = value;
+            if (FunctionState is not null)
+                FunctionState.StateObject = value;
+        }
     }
 
     internal bool CanBeParent => this is FunctionWait || this is WaitsGroup;

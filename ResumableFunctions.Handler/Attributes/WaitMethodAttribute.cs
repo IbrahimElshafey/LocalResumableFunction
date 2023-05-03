@@ -15,6 +15,7 @@ namespace ResumableFunctions.Handler.Attributes;
 
 public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdetifier
 {
+    internal static IServiceProvider ServiceProvider;
     private PushedCall _pushedCall;
     private readonly ResumableFunctionHandler _functionHandler;
     private readonly ILogger<WaitMethodAttribute> _logger;
@@ -23,10 +24,9 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
     {
         MethodUrn = methodUrn;
         CanPublishFromExternal = canPublishFromExternal;
-        var serviceProvider = CoreExtensions.GetServiceProvider();
-        if (serviceProvider == null) return;
-        _functionHandler = serviceProvider.GetService<ResumableFunctionHandler>();
-        _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<WaitMethodAttribute>>();
+        if (ServiceProvider == null) return;
+        _functionHandler = ServiceProvider.GetService<ResumableFunctionHandler>();
+        _logger = ServiceProvider.GetService<ILogger<WaitMethodAttribute>>();
     }
 
     /// <summary>

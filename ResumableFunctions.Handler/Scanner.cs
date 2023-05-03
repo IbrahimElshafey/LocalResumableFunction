@@ -17,7 +17,6 @@ namespace ResumableFunctions.Handler;
 public class Scanner
 {
     internal FunctionDataContext _context;
-    private MethodIdentifierRepository _methodIdentifierRepo;
     private IResumableFunctionsSettings _settings;
     private ResumableFunctionHandler _handler;
     private IServiceProvider _serviceProvider;
@@ -78,7 +77,6 @@ public class Scanner
         _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
         _handler.SetDependencies(scope.ServiceProvider);
         _context = _handler._context;
-        _methodIdentifierRepo = new MethodIdentifierRepository(_context);
     }
 
     private List<string> GetAssembliesToScan()
@@ -149,7 +147,7 @@ public class Scanner
             MethodType.ResumableFunctionEntryPoint :
             MethodType.SubResumableFunction;
         WriteMessage($"Register resumable function [{resumableFunctionMinfo.GetFullName()}] of type [{methodType}]");
-        var mi = await _methodIdentifierRepo.AddResumableFunctionIdentifier(new MethodData(resumableFunctionMinfo) { MethodType = methodType });
+        var mi = await _context.methodIdentifierRepo.AddResumableFunctionIdentifier(new MethodData(resumableFunctionMinfo) { MethodType = methodType });
         await _context.SaveChangesAsync();
         if (isEntryPoint)
         {
@@ -164,7 +162,7 @@ public class Scanner
         using (var scope = _serviceProvider.CreateScope())
         {
             ScopeInit(scope);
-            var mi = await _methodIdentifierRepo.GetResumableFunction(id);
+            var mi = await _context.methodIdentifierRepo.GetResumableFunction(id);
             await RegisterResumableFunctionFirstWait(mi.MethodInfo);
         }
     }
@@ -231,7 +229,7 @@ public class Scanner
                     method.GetCustomAttributes().Any(x => x.TypeId == WaitMethodAttribute.AttributeId));
         foreach (var method in methodWaits)
         {
-            await _methodIdentifierRepo.AddWaitMethodIdentifier(new MethodData(method) { MethodType = MethodType.MethodWait });
+            await _context.methodIdentifierRepo.AddWaitMethodIdentifier(new MethodData(method) { MethodType = MethodType.MethodWait });
         }
     }
 
@@ -285,8 +283,6 @@ public class Scanner
         try
         {
             WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
-            //var instance = _scope.ServiceProvider.GetRequiredService(resumableFunction.DeclaringType);
-            //var instance = ActivatorUtilities.CreateInstance(_scope.ServiceProvider,resumableFunction.DeclaringType);
             await _handler.RegisterFirstWait(resumableFunction);
         }
         catch (Exception ex)

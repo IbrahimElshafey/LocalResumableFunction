@@ -2,7 +2,6 @@
 {
     public class RegistrationForm
     {
-        public int Id { get; internal set; }
         public int UserId { get;  set; }
         public string FormData { get;  set; }
     }
@@ -10,5 +9,30 @@
     public class RegistrationResult
     {
         public int FormId { get; set; }
+    }
+
+    public class TaskId
+    {
+        public int Id { get; set; }
+    }
+
+    public class OwnerApproveClientResult
+    {
+        public bool Decision { get; set; }
+        public int TaskId { get; set; }
+        public int RegistrationFormId { get; set; }
+    }
+
+    public class ClientMeetingId
+    {
+        public int MeetingId { get; set; }
+        public int UserId { get; set; }
+    }
+    public class MeetingResult
+    {
+        public int MeetingId { get; set; }
+        public int MeetingResultId { get; set; }
+        public bool ClientRejectTheDeal { get; set; }
+        public bool ClientAcceptTheDeal { get; set; }
     }
 }

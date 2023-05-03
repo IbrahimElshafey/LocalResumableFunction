@@ -128,17 +128,6 @@ public class MethodWait : Wait
         }
     }
 
-    internal override void Cancel()
-    {
-        base.Cancel();
-        if (Name == $"#{nameof(LocalRegisteredMethods.TimeWait)}#" && ExtraData is JObject waitDataJson)
-        {
-            var waitData = waitDataJson.ToObject<TimeWaitData>();
-            var client = CoreExtensions.GetServiceProvider().GetService<IBackgroundJobClient>();
-            client.Delete(waitData.JobId);
-        }
-    }
-
     internal override bool IsValidWaitRequest()
     {
         //Todo:validate type serialization

@@ -1,12 +1,14 @@
 ﻿# Todo
 
 ****** Create nuget package
-	* https://learn.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package-using-visual-studio?tabs=netcore-cli
-	* https://learn.microsoft.com/en-us/nuget/create-packages/multiple-target-frameworks-project-file
+	*  Add FodyWeavers.xml automatic
+	*  Why fody not work directlly
 * Implement workflows in 
 	* https://tallyfy.com/workflow-examples/
 	* https://clickup.com/blog/workflow-examples/
-
+* Refactor 
+	* UOW to support no-sql implementation
+	* Refactor ResumableFunctionHandler to be multiple classes
 * Add UI Project (Use MVC not pages)
 	* Servcies Registred
 		* Verify scanned methods 
@@ -45,11 +47,12 @@
 	* Verify that fody MethodBoundaryAspect is active
 	* Logging for scan sessions
 
-* Refactor ResumableFunctionHandler to be multiple classes
+
 * what are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 
 
 * Publisher Project
+	* Multiple services [Add service name to attribute]
 	* Scan and send scan result to orchestrator
 	* Use PeriodicTimer to handle background tasks
 		* Send requests to orchestrator

@@ -3,6 +3,7 @@ using ClientOnboarding.Services;
 using ClientOnboarding.Workflow;
 using Microsoft.AspNetCore.Mvc;
 using ResumableFunctions.Handler.Helpers;
+using System.Threading.Tasks;
 
 namespace ClientOnboarding.Controllers
 {
@@ -28,6 +29,18 @@ namespace ClientOnboarding.Controllers
         public RegistrationResult ClientFillsForm(RegistrationForm registrationForm)
         {
             return service.ClientFillsForm(registrationForm);
+        }
+
+        [HttpGet(nameof(OwnerApproveClient))]
+        public OwnerApproveClientResult OwnerApproveClient(int taskId)
+        {
+            return service.OwnerApproveClient(taskId);
+        }
+
+        [HttpGet(nameof(SendMeetingResult))]
+        public MeetingResult SendMeetingResult(int meetingId)
+        {
+            return service.SendMeetingResult(meetingId);
         }
     }
 }

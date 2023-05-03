@@ -12,27 +12,12 @@ internal class MethodIdentifierRepository : RepositoryBase
 {
     private ILogger<MethodIdentifierRepository> _logger;
 
-    public MethodIdentifierRepository(FunctionDataContext ctx) : base(ctx)
+    public MethodIdentifierRepository(ILogger<MethodIdentifierRepository> logger) : base()
     {
-        _logger = CoreExtensions.GetServiceProvider().GetService<ILogger<MethodIdentifierRepository>>();
+        _logger = logger;
     }
 
-    internal async Task<int> GetMethodGroupId(string methodUrn)
-    {
-        var waitMethodIdentifier =
-           await _context
-               .MethodsGroups
-               .Where(x => x.MethodGroupUrn == methodUrn)
-               .Select(x => x.Id)
-               .FirstOrDefaultAsync();
-        if (waitMethodIdentifier != default)
-            return waitMethodIdentifier;
-        else
-        {
-            _logger.LogWarning($"Method [{methodUrn}] is not registered in current database as [WaitMethod].");
-            return default;
-        }
-    }
+    
 
     internal async Task<ResumableFunctionIdentifier> GetResumableFunction(int id)
     {

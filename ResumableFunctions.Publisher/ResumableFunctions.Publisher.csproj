@@ -8,6 +8,7 @@
     <Authors>ibrahim.ragab.net</Authors>
     <Description>Publish calls to resumable function service</Description>
     <RepositoryUrl>https://github.com/IbrahimElshafey/ResumableFunctions</RepositoryUrl>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <!--<Nullable>enable</Nullable>-->
   </PropertyGroup>
 

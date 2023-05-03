@@ -12,14 +12,13 @@ using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.Helpers;
 using Newtonsoft.Json.Linq;
 using static System.Formats.Asn1.AsnWriter;
+using Newtonsoft.Json;
 
 namespace ResumableFunctions.Handler;
 
 public partial class ResumableFunctionHandler
 {
     internal FunctionDataContext _context;
-    private WaitsRepository _waitsRepository;
-    private MethodIdentifierRepository _metodIdsRepo;
 
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IServiceProvider _serviceProvider;
@@ -48,7 +47,7 @@ public partial class ResumableFunctionHandler
             {
                 SetDependencies(scope.ServiceProvider);
                 Debugger.Launch();
-                var waitsIds = await _waitsRepository.GetWaitsIdsForMethodCall(pushedCallId);
+                var waitsIds = await _context.waitsRepository.GetWaitsIdsForMethodCall(pushedCallId);
 
                 if (waitsIds != null)
                     foreach (var waitId in waitsIds)
@@ -189,6 +188,12 @@ public partial class ResumableFunctionHandler
 
             if (methodWait.UpdateFunctionData())
             {
+                var currentFunctionClassWithDi =
+                     ActivatorUtilities.CreateInstance(
+                     _serviceProvider, methodWait.CurrentFunction.GetType());
+                JsonConvert.PopulateObject(
+                    JsonConvert.SerializeObject(methodWait.CurrentFunction), currentFunctionClassWithDi);
+                methodWait.CurrentFunction = (ResumableFunction)currentFunctionClassWithDi;
                 try
                 {
                     methodWait.PushedCallId = pushedCallId;
@@ -260,7 +265,5 @@ public partial class ResumableFunctionHandler
     internal void SetDependencies(IServiceProvider serviceProvider)
     {
         _context = serviceProvider.GetService<FunctionDataContext>();
-        _waitsRepository = new WaitsRepository(_context);
-        _metodIdsRepo = new MethodIdentifierRepository(_context);
     }
 }

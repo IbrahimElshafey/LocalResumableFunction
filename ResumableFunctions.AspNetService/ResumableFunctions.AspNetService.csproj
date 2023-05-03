@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
@@ -10,6 +10,8 @@
     <Authors>ibrahim.ragab.net</Authors>
     <RepositoryUrl>https://github.com/IbrahimElshafey/ResumableFunctions</RepositoryUrl>
     <Description>To be used with WEB API projects.</Description>
+    <PackageOutputPath>D:\Nuget</PackageOutputPath>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,11 +32,9 @@
     <Folder Include="UiLogic\" />
   </ItemGroup>
 
-	<ItemGroup>
-		<Content Include="FodyWeavers.xml">
-			<Pack>true</Pack>
-			<PackagePath>\</PackagePath>
-		</Content>
-	</ItemGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Fody" Version="6.6.4" />
+		<PackageReference Include="MethodBoundaryAspect.Fody" Version="2.0.148" />
+	</ItemGroup>
 </Project>

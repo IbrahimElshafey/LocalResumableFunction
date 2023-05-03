@@ -46,7 +46,7 @@ public partial class ResumableFunctionHandler
 
     private async Task MethodWaitRequested(MethodWait methodWait)
     {
-        var methodToWait = await _metodIdsRepo.GetWaitMethod(methodWait);
+        var methodToWait = await _context.methodIdentifierRepo.GetWaitMethod(methodWait);
       
         methodWait.MethodToWait = methodToWait;
         methodWait.MethodToWaitId = methodToWait.Id;
@@ -54,7 +54,7 @@ public partial class ResumableFunctionHandler
         methodWait.MethodGroupToWaitId = methodToWait.ParentMethodGroupId;
         methodWait.RewriteExpressions();
 
-        await _waitsRepository.AddWait(methodWait);
+        await _context.waitsRepository.AddWait(methodWait);
     }
 
     private async Task WaitsGroupRequested(WaitsGroup manyWaits)
@@ -70,12 +70,12 @@ public partial class ResumableFunctionHandler
             await SaveWaitRequestToDb(waitGroupChild);//child wait in group
         }
 
-        await _waitsRepository.AddWait(manyWaits);
+        await _context.waitsRepository.AddWait(manyWaits);
     }
 
     private async Task FunctionWaitRequested(FunctionWait functionWait)
     {
-        await _waitsRepository.AddWait(functionWait);
+        await _context.waitsRepository.AddWait(functionWait);
 
         var functionRunner = new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
         var hasNext = await functionRunner.MoveNextAsync();
@@ -92,7 +92,7 @@ public partial class ResumableFunctionHandler
         functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
         functionWait.FirstWait.ParentWait = functionWait;
         functionWait.FirstWait.ParentWaitId = functionWait.Id;
-        var methodId = await _metodIdsRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
+        var methodId = await _context.methodIdentifierRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
         functionWait.FirstWait.RequestedByFunction = methodId;
         functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
 

@@ -67,16 +67,6 @@ public partial class ResumableFunctionHandler
     private async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
         var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType);
-
-        //var classInstance = (ResumableFunction)ActivatorUtilities.CreateInstance(CoreExtensions.GetServiceProvider(), resumableFunction.DeclaringType);
-
-        //var constructor = resumableFunction.DeclaringType.GetConstructors().Single();
-        //var classInstance = (ResumableFunction)constructor.Invoke(
-        //        constructor.GetParameters()
-        //            .Select(parameter =>
-        //            _serviceProvider.GetService(parameter.ParameterType) ?? Activator.CreateInstance(parameter.ParameterType))
-        //            .ToArray()
-        //        );
         if (classInstance != null)
             try
             {
@@ -91,11 +81,11 @@ public partial class ResumableFunctionHandler
 
                 await functionRunner.MoveNextAsync();
                 var firstWait = functionRunner.Current;
-                var methodId = await _metodIdsRepo.GetResumableFunction(new MethodData(resumableFunction));
+                var methodId = await _context.methodIdentifierRepo.GetResumableFunction(new MethodData(resumableFunction));
                 if (removeIfExist)
                 {
                     WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
-                    await _waitsRepository.RemoveFirstWaitIfExist(firstWait, methodId);
+                    await _context.waitsRepository.RemoveFirstWaitIfExist(firstWait, methodId);
                 }
                 var functionState = new ResumableFunctionState
                 {
