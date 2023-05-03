@@ -6,9 +6,7 @@
 * Implement workflows in 
 	* https://tallyfy.com/workflow-examples/
 	* https://clickup.com/blog/workflow-examples/
-* Refactor 
-	* UOW to support no-sql implementation
-	* Refactor ResumableFunctionHandler to be multiple classes
+
 * Add UI Project (Use MVC not pages)
 	* Servcies Registred
 		* Verify scanned methods 
@@ -47,17 +45,23 @@
 	* Verify that fody MethodBoundaryAspect is active
 	* Logging for scan sessions
 
+* Refactor 
+	* UOW to support no-sql implementation
+	* Refactor ResumableFunctionHandler to be multiple classes
+		* RegisterFirstWait
+		* CloneFirstWait
+		* ProcessPushedCall
+		* ProcessMatchedWait
 
 * what are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 
 
 * Publisher Project
-	* Multiple services [Add service name to attribute]
-	* Scan and send scan result to orchestrator
+	* Scan and send scan result to service owner to verify signatures
 	* Use PeriodicTimer to handle background tasks
-		* Send requests to orchestrator
+		* Send failed requests to servies
 		* Scan Dlls
-	* Use liteDb to save scan Data and requests
+	* Use LiteDb to save scan Data and requests
 
 * Background Cleaning Job
 	* Move completed/cancled function instance to Recycle Bin
@@ -68,12 +72,7 @@
 	* Move old logs for scan sessions
 	* Move soft deleted rows to recyle bin DB
 
-* Resumable function hooks
-	* Before initiating the first wait
-	* After initiate first wait
-	* After Resumed
-	* After Completed
-	* On Error Occurred
+
 
 
 * How to unit test a resumable functions
@@ -94,3 +93,12 @@
 * WebHook for the service [Publisher Project]
 * RabbitMQ or any service bus [Subscribe to event]
 * File/Folder Changes [File Watcher]
+
+
+## Less Priority
+* Resumable function hooks
+	* Before initiating the first wait => write your cod in function
+	* After initiate first wait => write your cod in function
+	* After Resumed
+	* After Completed => write your cod in function end
+	* On Error Occurred => write your cod in function catch block
