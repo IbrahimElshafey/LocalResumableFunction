@@ -216,7 +216,7 @@ public class FunctionDataContext : DbContext
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
         SetDates();
-        //NeverUpdateFirstWait();
+        NeverUpdateFirstWait();
         HandleSoftDelete();
         ExcludeFalseAddEntries();
         return base.SaveChangesAsync(cancellationToken);
@@ -226,7 +226,11 @@ public class FunctionDataContext : DbContext
     {
         foreach (var entityEntry in ChangeTracker.Entries())
         {
-            if (entityEntry.State == EntityState.Modified && entityEntry.Entity is Wait wait && wait.IsFirst)
+            if (
+                entityEntry.State == EntityState.Modified &&
+                entityEntry.Entity is Wait wait &&
+                wait.IsFirst &&
+                wait.IsDeleted == false)
             {
                 entityEntry.State = EntityState.Unchanged;
                 Entry(wait.FunctionState).State = EntityState.Unchanged;
