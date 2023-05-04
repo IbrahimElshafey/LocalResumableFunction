@@ -9,9 +9,9 @@ namespace ClientOnboarding.Workflow
     //from:https://tallyfy.com/workflow-examples/#onboarding
     public class ClientOnboardingWorkflow : ResumableFunction
     {
-        private readonly ClientOnboardingService service;
+        private readonly IClientOnboardingService service;
 
-        public ClientOnboardingWorkflow(ClientOnboardingService service)
+        public ClientOnboardingWorkflow(IClientOnboardingService service)
         {
             this.service = service;
         }

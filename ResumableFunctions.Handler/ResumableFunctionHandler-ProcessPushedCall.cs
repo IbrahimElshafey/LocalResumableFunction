@@ -189,8 +189,8 @@ public partial class ResumableFunctionHandler
             if (methodWait.UpdateFunctionData())
             {
                 var currentFunctionClassWithDi =
-                     ActivatorUtilities.CreateInstance(
-                     _serviceProvider, methodWait.CurrentFunction.GetType());
+                    _serviceProvider.GetService(methodWait.CurrentFunction.GetType())??
+                    ActivatorUtilities.CreateInstance(_serviceProvider, methodWait.CurrentFunction.GetType());
                 JsonConvert.PopulateObject(
                     JsonConvert.SerializeObject(methodWait.CurrentFunction), currentFunctionClassWithDi);
                 methodWait.CurrentFunction = (ResumableFunction)currentFunctionClassWithDi;

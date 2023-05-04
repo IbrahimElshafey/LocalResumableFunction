@@ -24,8 +24,8 @@ public class FunctionDataContext : DbContext
         try
         {
             Database.EnsureCreated();
-            methodIdentifierRepo = ActivatorUtilities.CreateInstance<MethodIdentifierRepository>(serviceProvider);
-            waitsRepository = ActivatorUtilities.CreateInstance<WaitsRepository>(serviceProvider);
+            methodIdentifierRepo = serviceProvider.GetService<MethodIdentifierRepository>();
+            waitsRepository = serviceProvider.GetService<WaitsRepository>();
             methodIdentifierRepo._context = this;
             waitsRepository._context = this;
         }

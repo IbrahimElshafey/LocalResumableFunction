@@ -14,11 +14,11 @@ namespace ClientOnboarding.Controllers
 
 
         private readonly ILogger<ClientOnboardingController> _logger;
-        private readonly ClientOnboardingService service;
+        private readonly IClientOnboardingService service;
 
         public ClientOnboardingController(
             ILogger<ClientOnboardingController> logger,
-            ClientOnboardingService service)
+            IClientOnboardingService service)
         {
             _logger = logger;
             this.service = service;

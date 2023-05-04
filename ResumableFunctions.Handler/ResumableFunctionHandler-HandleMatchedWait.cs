@@ -80,11 +80,14 @@ public partial class ResumableFunctionHandler
         WriteMessage($"Get next wait [{nextWait.Name}] after [{currentWait.Name}]");
 
         nextWait.ParentWaitId = currentWait.ParentWaitId;
+        WriteMessage("1111");
         currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
+        WriteMessage("2222");
         nextWait.FunctionState = currentWait.FunctionState;
+        WriteMessage("3333");
         _context.Entry(nextWait.FunctionState).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
-
+        WriteMessage("4444");
         await SaveWaitRequestToDb(nextWait);//next wait after resume function
         await _context.SaveChangesAsync();
     }

@@ -3,7 +3,7 @@ using ResumableFunctions.Handler.Attributes;
 
 namespace ClientOnboarding.Services
 {
-    public class ClientOnboardingService
+    internal class ClientOnboardingService : IClientOnboardingService
     {
         public ClientOnboardingService()
         {
@@ -11,7 +11,7 @@ namespace ClientOnboarding.Services
         }
 
         [WaitMethod("ClientOnboardingService.ClientFillsForm")]
-        internal RegistrationResult ClientFillsForm(RegistrationForm registrationForm)
+        public RegistrationResult ClientFillsForm(RegistrationForm registrationForm)
         {
             return new RegistrationResult
             {
@@ -19,13 +19,13 @@ namespace ClientOnboarding.Services
             };
         }
 
-        internal TaskId AskOwnerToApproveClient(int registrationFormId)
+        public TaskId AskOwnerToApproveClient(int registrationFormId)
         {
             return new TaskId { Id = registrationFormId };
         }
 
         [WaitMethod("ClientOnboardingService.OwnerApproveClient")]
-        internal OwnerApproveClientResult OwnerApproveClient(int taskId)
+        public OwnerApproveClientResult OwnerApproveClient(int taskId)
         {
             return new OwnerApproveClientResult
             {
@@ -35,17 +35,17 @@ namespace ClientOnboarding.Services
             };
         }
 
-        internal void InformUserAboutRejection(int userId)
+        public void InformUserAboutRejection(int userId)
         {
             Console.WriteLine($"InformUserAboutRejection called userId: {userId}");
         }
 
-        internal void SendWelcomePackage(int userId)
+        public void SendWelcomePackage(int userId)
         {
             Console.WriteLine($"SendWelcomePackage called userId: {userId}");
         }
 
-        internal ClientMeetingId SetupInitalMeetingAndAgenda(int userId)
+        public ClientMeetingId SetupInitalMeetingAndAgenda(int userId)
         {
             Console.WriteLine($"SetupInitalMeetingAndAgenda called userId: {userId}");
             return new ClientMeetingId
@@ -56,7 +56,7 @@ namespace ClientOnboarding.Services
         }
 
         [WaitMethod("ClientOnboardingService.SendMeetingResult")]
-        internal MeetingResult SendMeetingResult(int meetingId)
+        public MeetingResult SendMeetingResult(int meetingId)
         {
             var id = Random.Shared.Next();
             return new MeetingResult
