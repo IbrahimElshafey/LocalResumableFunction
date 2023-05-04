@@ -159,20 +159,27 @@ public class Scanner
 
     public async Task RegisterResumableFunctionFirstWait(int id)
     {
-        using (var scope = _serviceProvider.CreateScope())
+        try
         {
-            ScopeInit(scope);
-            var mi = await _context.methodIdentifierRepo.GetResumableFunction(id);
-            var resumableFunctionMethodInfo = mi.MethodInfo;
-            try
+            using (var scope = _serviceProvider.CreateScope())
             {
-                WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
-                await _handler.RegisterFirstWait(resumableFunctionMethodInfo);
+                ScopeInit(scope);
+                var mi = await _context.methodIdentifierRepo.GetResumableFunction(id);
+                var resumableFunctionMethodInfo = mi.MethodInfo;
+                try
+                {
+                    WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
+                    await _handler.RegisterFirstWait(resumableFunctionMethodInfo);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error when register first wait for function [{resumableFunctionMethodInfo.GetFullName()}]");
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error when register first wait for function [{resumableFunctionMethodInfo.GetFullName()}]");
-            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error when RegisterResumableFunctionFirstWait");
         }
     }
 

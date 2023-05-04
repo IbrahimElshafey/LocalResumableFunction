@@ -15,7 +15,7 @@ namespace ResumableFunctions.Handler.Attributes;
 
 public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdetifier
 {
-    internal static IServiceProvider ServiceProvider;
+    public static IServiceProvider ServiceProvider;
     private PushedCall _pushedCall;
     private readonly ResumableFunctionHandler _functionHandler;
     private readonly ILogger<WaitMethodAttribute> _logger;

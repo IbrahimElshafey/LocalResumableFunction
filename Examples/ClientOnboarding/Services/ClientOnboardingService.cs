@@ -25,13 +25,11 @@ namespace ClientOnboarding.Services
         }
 
         [WaitMethod("ClientOnboardingService.OwnerApproveClient")]
-        public OwnerApproveClientResult OwnerApproveClient(int taskId)
+        public OwnerApproveClientResult OwnerApproveClient(OwnerApproveClientInput ownerApproveClientInput)
         {
             return new OwnerApproveClientResult
             {
-                Decision = Random.Shared.Next() % 2 == 1,
-                RegistrationFormId = taskId,
-                TaskId = taskId
+                OwnerApprovalId = Random.Shared.Next(),
             };
         }
 

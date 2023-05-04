@@ -2,6 +2,7 @@ using ClientOnboarding.Services;
 using ClientOnboarding.Workflow;
 using ResumableFunctions.AspNetService;
 using ResumableFunctions.Handler.InOuts;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,5 +31,15 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.Run();
+try
+{
+    app.Run();
+}
+catch (Exception ex)
+{
+    Debug.Write(ex);
+    Console.WriteLine(ex);
+    Console.WriteLine(ex.Message);
+    Console.WriteLine(ex.StackTrace);
+	throw;
+}

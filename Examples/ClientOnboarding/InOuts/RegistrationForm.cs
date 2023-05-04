@@ -16,11 +16,14 @@
         public int Id { get; set; }
     }
 
-    public class OwnerApproveClientResult
+    public class OwnerApproveClientInput
     {
         public bool Decision { get; set; }
         public int TaskId { get; set; }
-        public int RegistrationFormId { get; set; }
+    }
+    public class OwnerApproveClientResult
+    {
+        public int OwnerApprovalId { get; set; }
     }
 
     public class ClientMeetingId

@@ -61,35 +61,42 @@ public partial class ResumableFunctionHandler
 
     private async Task ProceedToNextWait(Wait currentWait)
     {
-        //bug:may cause problem for go back after
-        if (currentWait.ParentWait != null && currentWait.ParentWait.Status != WaitStatus.Waiting)
+        try
         {
-            _logger.LogWarning($"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).");
-            return;
-        }
+            //bug:may cause problem for go back after
+            if (currentWait.ParentWait != null && currentWait.ParentWait.Status != WaitStatus.Waiting)
+            {
+                _logger.LogWarning($"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).");
+                return;
+            }
 
-        currentWait.Status = WaitStatus.Completed;
-        var nextWait = await currentWait.GetNextWait();
-        if (nextWait == null)
+            currentWait.Status = WaitStatus.Completed;
+            var nextWait = await currentWait.GetNextWait();
+            if (nextWait == null)
+            {
+                if (currentWait.ParentWaitId == null)
+                    await FinalExit(currentWait);
+                return;
+            }
+
+            WriteMessage($"Get next wait [{nextWait.Name}] after [{currentWait.Name}]");
+
+            nextWait.ParentWaitId = currentWait.ParentWaitId;
+            WriteMessage("1111");
+            currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
+            WriteMessage("2222");
+            nextWait.FunctionState = currentWait.FunctionState;
+            WriteMessage("3333");
+            _context.Entry(nextWait.FunctionState).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
+            WriteMessage("4444");
+            await SaveWaitRequestToDb(nextWait);//next wait after resume function
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
         {
-            if (currentWait.ParentWaitId == null)
-                await FinalExit(currentWait);
-            return;
+            _logger.LogError(ex, "Error when ProceedToNextWait");
         }
-
-        WriteMessage($"Get next wait [{nextWait.Name}] after [{currentWait.Name}]");
-
-        nextWait.ParentWaitId = currentWait.ParentWaitId;
-        WriteMessage("1111");
-        currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
-        WriteMessage("2222");
-        nextWait.FunctionState = currentWait.FunctionState;
-        WriteMessage("3333");
-        _context.Entry(nextWait.FunctionState).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-        nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
-        WriteMessage("4444");
-        await SaveWaitRequestToDb(nextWait);//next wait after resume function
-        await _context.SaveChangesAsync();
     }
 
     private async Task FinalExit(Wait currentWait)

@@ -31,10 +31,10 @@ namespace ClientOnboarding.Controllers
             return service.ClientFillsForm(registrationForm);
         }
 
-        [HttpGet(nameof(OwnerApproveClient))]
-        public OwnerApproveClientResult OwnerApproveClient(int taskId)
+        [HttpPost(nameof(OwnerApproveClient))]
+        public OwnerApproveClientResult OwnerApproveClient(OwnerApproveClientInput ownerApproveClientInput)
         {
-            return service.OwnerApproveClient(taskId);
+            return service.OwnerApproveClient(ownerApproveClientInput);
         }
 
         [HttpGet(nameof(SendMeetingResult))]
