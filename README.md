@@ -1,81 +1,158 @@
-**Project Status: Work in progress**
+**Project Status: Main functionality done but Todos exist here()**
 
 # What is Resumable Function?
-A function that pauses and resumes execution based on external method/s that it waits for it to be executed.
+A function that pauses and resumes execution based on other methods that it waits for them to be executed.
 
-# Code example 
-Scenario: A project approval process states that 
-* After the project is submitted by an applicant the system will ask manager X to approve it.
-* If the manager rejected the project the system will ask the applicant to resubmit the project.
-* If the project approved by the manager then the system will send a notification to the applicant.
+**Example** (this is not a pseudocode it's debuggable code):
+``` C#
+[ResumableFunctionEntryPoint("ClientOnboardingWorkflow.StartClientOnboardingWorkflow")]
+internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
+{
+    yield return WaitUserRegistration();
+    OwnerTaskId = service.AskOwnerToApproveClient(RegistrationResult.FormId);
 
-Try to write an API service for this simple scenario and then ask a colleague to figure out what this service does by reading your code.
+    yield return WaitOwnerApproveClient();
+    if (OwnerApprovalInput.Decision is false)
+    {
+        service.InformUserAboutRejection(RegistrationForm.UserId);
+    }
+    else if (OwnerApprovalInput.Decision is true)
+    {
+        service.SendWelcomePackage(RegistrationForm.UserId);
+        ClientMeetingId = service.SetupInitalMeetingAndAgenda(RegistrationForm.UserId);
+
+        yield return WaitMeetingResult();
+        Console.WriteLine(MeetingResult);
+    }
+
+    Console.WriteLine("User Registration Done");
+}
+```
+Each `yield return` is a place for pause/resume function execution (explained later).
+
+# Why this project?
+* The nature of server processing that depends on the fast response for efficient use of processor and memory prevents us from writing a single block of code (a method) that uses two or more long-running actions in the same code block, this means we can't translate the pseudocode below to one block of code:
+```
+	VactionRequest()
+		when UserSubmitRequest();
+		SendRequestToManager();
+		wait ManagerResponse();
+		DoSomeStuffAfterManagerResponse();
+```
+* I want to write code that reflects the business requirements so that a developer handover another without needing business documents to understand the code.
+* The source code must be a source of truth about how project parts function. Handovering a project with hundreds of classes and methods to a new developer does not tell him how business flows but a resumable function will simplify understanding of what happens under the hood.
+* Business functions/methods must not call each other directly, For example, the method that submits a user request should not call the manager approval method directly, a traditional solution is to create Pub/Sub services that enable the system to be loosely coupled.
+*  If we used Pub/Sub loosely coupled services it will be hard to trace what happened without implementing a complex architecture.
+
+# Example Explained
+Scenario:
+1. Collect client information through a registration form.
+1. Send client registration for approval.
+1. If rejected, inform the client about the rejection.
+1. If approved, send the welcome package – email, welcome gift, etc.
+1. Setup initial meeting
+1. Some business after the meeting is done.
+
 
 With resumable function you can write this scenario like below:
 Just a few lines of codes that tells what system do.
 ``` C#
-[ResumableFunctionEntryPoint]//Point 1
-public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
+[ResumableFunctionEntryPoint("ClientOnboardingWorkflow.StartClientOnboardingWorkflow")]
+internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
 {
-	yield return
-		Wait<Project, bool>("Project Submitted", ProjectSubmitted)//Point 2
-		.MatchIf((project, output) => output && !project.IsResubmit)//Point 3
-		.SetData((project, output) => CurrentProject == project);//Point 4
+    yield return WaitUserRegistration();
+    OwnerTaskId = service.AskOwnerToApproveClient(RegistrationResult.FormId);
 
-	await AskManagerToApprove("Manager One", CurrentProject.Id);
-	yield return
-		Wait<ApprovalDecision, bool>("Manager One Approve Project", ManagerOneApproveProject)
-		.MatchIf((approvalDecision, output) => approvalDecision.ProjectId == CurrentProject.Id)
-		.SetData((approvalDecision, approvalResult) => ManagerOneApproval == approvalResult);
+    yield return WaitOwnerApproveClient();
+    if (OwnerApprovalInput.Decision is false)
+    {
+        service.InformUserAboutRejection(RegistrationForm.UserId);
+    }
+    else if (OwnerApprovalInput.Decision is true)
+    {
+        service.SendWelcomePackage(RegistrationForm.UserId);
+        ClientMeetingId = service.SetupInitalMeetingAndAgenda(RegistrationForm.UserId);
 
-	if (ManagerOneApproval is false)
-	{
-		WriteMessage("Go back and ask applicant to resubmitt project.");
-		await AskApplicantToResubmittProject(CurrentProject.Id);
-		yield return GoBackTo<Project, bool>("Project Submitted", (project, output) => output && project.IsResubmit && project.Id == CurrentProject.Id);
-	}
-	else
-	{
-		WriteMessage("Project approved");
-		await InfromApplicantAboutApproval(CurrentProject.Id);
-	}
-	Success(nameof(ProjectApprovalFlow));
+        yield return WaitMeetingResult();
+        Console.WriteLine(MeetingResult);
+		//Todo:some business based on meeting result
+    }
+
+    Console.WriteLine("User Registration Done");
 }
 ```
-* **Point 1:** Mark a method with `[ResumableFunctionEntryPoint]` to indicate that the method paused and resumed based on waits inside
-* **Point 2:** Wait for the `ProjectSubmitted` method to be executed, this call will save an object representing the wait in the database (Wait Record) and pause the method execution until `ProjectSubmitted` method called.
-* **Point 3:** We pass an expression tree `(project, output) => output && project.IsResubmit == false` that will be evaluated when `ProjectSubmitted` method called to check if it is a match for the current instance or not, The passed expression serialized and saved with the wait record in the database.
-* **Point 4:** If a match occurred we update the class instance data with `SetData` expression, Note that the assignment operator is not allowed in expression trees, also we save this expression in the database with the wait record.
-* The execution will continue after the match until the next wait.
+* The resumable function must match the signature `IAsyncEnumerable<Wait> FunctionName()`
+* The class that contains the resumable function must inherit `ResumableFunction`
+```C#
+public class ClientOnboardingWorkflow : ResumableFunction
+```
+* Mark a method with `[ResumableFunctionEntryPoint]` to indicate that the method paused and resumed based on waits inside
+* `ResumableFunctionEntryPoint` attributes takes `string methodUrn` mandatory to track the resumable function by the library.
+* `WaitUserRegistration` body is
+```C#
+private MethodWait<RegistrationForm, RegistrationResult> WaitUserRegistration()
+{
+	return Wait<RegistrationForm, RegistrationResult>("Wait User Registration", service.ClientFillsForm)
+					.MatchIf((regForm, regResult) => regResult.FormId > 0)
+					.SetData((regForm, regResult) => RegistrationForm == regForm && RegistrationResult == regResult);
+}
+```
+* Wait for the `ClientFillsForm` method to be executed, this call will save an object representing the wait in the database (Wait Record) and pause the method execution until `ClientFillsForm` method called.
+* We define match expression `MatchIf((regForm, regResult) => regResult.FormId > 0)` that will be evaluated when `ClientFillsForm` method called to check if it is a match for the current instance or not, The passed expression serialized and saved with the wait record in the database.
+* If a match occurred (after `ClientFillsForm` called) we update the class instance data with `SetData` expression, Note that the assignment operator is not allowed in expression trees, also we save this expression in the database with the wait record.
+* The execution will continue after setting data until the next wait.
 * The next wait will be saved to the database in the same way.
 * The resumable function library will scan your code to register first waits for each `ResumableFunctionEntryPoint`
 * The library saves the class state to the database and loads it when a method called and matched.
-* You must add `[WaitMethod]` attribute to the methods you want to wait.
+* You must add `[WaitMethod]` attribute to the methods you want to wait,like below:
 ``` C#
-[WaitMethod]
-internal async Task<bool> ProjectSubmitted(Project project)
+[WaitMethod("ClientOnboardingService.ClientFillsForm")]
+public RegistrationResult ClientFillsForm(RegistrationForm registrationForm)
 {
 	.
 	.
 	.
-[WaitMethod]
-public bool ManagerOneApproveProject(ApprovalDecision args)
-{
-	.
-	.
-	.
+}
 ```
-* The method marked with `[WaitMethod]` must have one input paramter that is serializable.
-* you can mark any instance method with `[WaitMethod]` if it have one parameter.
+* The method marked with `[WaitMethod]` must have one input paramter that is serializable, you can use value types and strings also.
+* You can mark any instance method with `[WaitMethod]` if it have one parameter.
 
-# Why this project?
-* I want to write code that reflects the business requirements so that a developer handover another without needing business documents to understand the code.
-* Most workflow engines can't be extended to support complex scenarios, for example, the below link contains a list of workflow patterns, which are elementary to implement by any developer if we just write code and not think about how communications work.
-	http://www.Functionpatterns.com/patterns/
-* The source code must be a source of truth about how project parts function, and handover a project with hundreds of classes and methods to a new developer does not tell him what business flow executed but a resumable function will simplify understanding of what happens under the hood.
-*  If we used Pub/Sub loosely coupled services it willbe hard to trace what happened without implementing a complex architecture.
+# Start using the library
+* Create new Web API project, Name it `RequestApproval`
+* Check `Enable OpenApi Support`
+* Change target framework to '.Net 7.0'
+* Add packages (Package Manager Consol)
+```
+Install-package ResumableFunctions.AspNetService
+Install-package Fody
+Install-package MethodBoundaryAspect.Fody
+```
+* Add file 'FodyWeavers.xml' to project root with content
+```xml
+<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <MethodBoundaryAspect />
+</Weavers>
+```
+* In `Program.cs` change:
+``` C#
+builder.Services.AddControllers();
+```
+To
+```C#
+builder.Services
+    .AddControllers()
+    .AddResumableFunctions(new ResumableFunctionsSettings().UseSqlServer());
+```
+* After line `var app = builder.Build();` add line `app.ScanCurrentService();`
+* This configuration uses LocalDb
+* In Visual Studio `View Menu` then `SQL Server Object Explorer` add empty database with name `RequestApproval_HangfireDb` to server `(localdb)\MSSQLLocalDB`
+* Change `WeatherForecastController.cs` file contect with content (here).
+* Rename `WeatherForecastController.cs` to `RequestApprovalController.cs`
+* Register service `RequestApprovalService` in program.cs `builder.Services.AddScoped<RequestApprovalService>();`
+* Set Breakpoint at line `44` in file `RequestApprovalController.cs`
+* Run the app and from swagger UI call `RequestApproval/UserSubmitRequest` the breakpoint will be hit if `(Id > 0)`
 
-# Supported Wait Types
+# Supported wait types and other features
 * Wait single method to match (similar to `await` in `async\await`)
 ``` C#
  yield return
@@ -125,13 +202,13 @@ public bool ManagerOneApproveProject(ApprovalDecision args)
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).When(waitGroup => waitGroup.CompletedCount == 2);//wrtite any complex exprssion against waitGroup
 ```
-* You can wait a resumable sub function that is not and entry point
+* You can wait a resumable sub function that is not an entry point
 ``` C#
  yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers);
  ....
 //method must have  `SubResumableFunction` attribute
 //Must return `IAsyncEnumerable<Wait>`
-[SubResumableFunction]
+[SubResumableFunction("WaitTwoManagers")]
 public async IAsyncEnumerable<Wait> WaitTwoManagers()
 {
 	//wait some code
@@ -253,8 +330,9 @@ else
     WriteMessage($"Manager one approved project with decision ({ManagerOneApproval})");
 }
 ```
-* [Working on]Register third party method by fake signature,This will enable
-	* Use github web hooks fro example
+* Wait method in another service [browse exmaples folder in source code. I'll add docs later.]
+* Register third party method by fake signature,This will enable
+	* Use github web hooks for example
 	* Wait for google drive file change
 	* Http listener 
 	* More advanced scenarios
@@ -264,18 +342,3 @@ else
 * The library saves a serialized object of the class that contains the resumable function for each resumable function instance.
 * The library saves waits and pauses function execution when a wait is requested by the function.
 * The library resumes function execution when a wait is matched (its method called).
-
-# Simple resumable function scenario 
-* If we assumed a very simple scenario where someone submits a request and Manager1, Manager2 and Manager3 approve the request sequentially.
-* If we implement this as an API without any messaging (message broker) then we will have actions (SumbitRequest, AskManager_X_Approval, Manager_X_SumbitApproval)
-* Each of these actions will call the other based on the Function, And if the Function changes to another scenario (for example send the request to the three managers in parallel and wait for them all) we must update these actions in different places.
-* Using a messaging bus instead of direct calls does not tell us how the Function goes and didn't solve the sparse update problem.
-* Using a commercial Function engine is expensive and as a rule, any technology that is drag and drop will not solve the problem because we can't control every bit.
-
-# Search for a solution results
-I evaluated the existing solutions and found that there is no solution that fits all scenarios,I found that D-Async is the best for what I need but I need a more simple generic solution.
-* [D-Async (The best)](https://github.com/Dasync/Dasync)
-* [MassTransit](https://masstransit-project.com/)
-* [Durable Task Framework](https://github.com/Azure/durabletask)
-* [Workflow Core](https://github.com/danielgerlag/workflow-core)
-* [Infinitic (Kotlin)](https://github.com/infiniticio/infinitic)

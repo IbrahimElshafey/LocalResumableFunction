@@ -10,6 +10,7 @@
     <RepositoryUrl>https://github.com/IbrahimElshafey/ResumableFunctions</RepositoryUrl>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
     <!--<Nullable>enable</Nullable>-->
+	<Version>1.0.4</Version>
   </PropertyGroup>
 
   <ItemGroup>

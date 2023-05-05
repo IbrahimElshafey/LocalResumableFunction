@@ -44,8 +44,8 @@
 			* Actions on Group Wait ()
 			* Actions on Function Wait ()
 		* Logs list from function state logs
-## Migrate DB
-* How to migrate resumable function database from development to production??
+
+
 
 ## Scan Enhancements
 * Validate URN duplication when scan if diffrent method signature
@@ -80,6 +80,9 @@
 * Move old logs for scan sessions
 * Move soft deleted rows to recyle bin DB
 
+## Migrate Resumable Function DB
+* How to migrate resumable function database from development to production??
+* What about HangfireDb
 
 
 ## How to Test resumable function?

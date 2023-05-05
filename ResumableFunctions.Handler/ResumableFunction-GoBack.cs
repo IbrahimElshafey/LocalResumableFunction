@@ -1,10 +1,20 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.Extensions.DependencyInjection;
+using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
 
 public abstract partial class ResumableFunction
 {
+    public ResumableFunction()
+    {
+        CurrentServiceProvider =
+               WaitMethodAttribute.ServiceProvider.CreateScope().ServiceProvider;
+    }
+
+    protected IServiceProvider CurrentServiceProvider { get; }
+
     /// <summary>
     ///     Go back to code after the wait.
     /// </summary>
