@@ -2,11 +2,11 @@
 
 
 
-## Prepare how to use manual
+## Prepare how to use?
 * Implement workflows in 
 	* https://tallyfy.com/workflow-examples/
 	* https://clickup.com/blog/workflow-examples/
-* Write manual
+* Inter services waits documentation
 * Record videos
 * Enhance nuget package use
 	*  Add FodyWeavers.xml automatic
