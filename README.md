@@ -1,5 +1,11 @@
-**Project Status: Main functionality done but Todos exist here()**
-
+**Project Status: Main functionality done but Todos/Bugs/Enhancements exist [here](https://github.com/IbrahimElshafey/ResumableFunctions/blob/main/_Documents/_Todo.md)**
+* [What is Resumable Function?](#what-is-resumable-function)
+* [Why this project?](#why-this-project)
+* [Example Explained](#example-explained)
+* [Start using the library NuGet package](#start-using-the-library)
+* [Supported wait types and other features](#supported-wait-types-and-other-features)
+* [Samples](https://github.com/IbrahimElshafey/ResumableFunctionsSamples)
+* [How it works internally](#how-it-works-internally)
 # What is Resumable Function?
 A function that pauses and resumes execution based on other methods that it waits for them to be executed.
 
@@ -146,7 +152,7 @@ builder.Services
 * After line `var app = builder.Build();` add line `app.ScanCurrentService();`
 * This configuration uses LocalDb
 * In Visual Studio `View Menu` then `SQL Server Object Explorer` add empty database with name `RequestApproval_HangfireDb` to server `(localdb)\MSSQLLocalDB`
-* Change `WeatherForecastController.cs` file contect with content (here).
+* Change `WeatherForecastController.cs` file contect with content [here](https://raw.githubusercontent.com/IbrahimElshafey/ResumableFunctionsSamples/Main/RequestApproval/Controllers/RequestApprovalController.cs).
 * Rename `WeatherForecastController.cs` to `RequestApprovalController.cs`
 * Register service `RequestApprovalService` in program.cs `builder.Services.AddScoped<RequestApprovalService>();`
 * Set Breakpoint at line `44` in file `RequestApprovalController.cs`
