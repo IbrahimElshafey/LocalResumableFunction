@@ -155,8 +155,12 @@ builder.Services
 * Change `WeatherForecastController.cs` file contect with content [here](https://raw.githubusercontent.com/IbrahimElshafey/ResumableFunctionsSamples/Main/RequestApproval/Controllers/RequestApprovalController.cs).
 * Rename `WeatherForecastController.cs` to `RequestApprovalController.cs`
 * Register service `RequestApprovalService` in program.cs `builder.Services.AddScoped<RequestApprovalService>();`
-* Set Breakpoint at line `44` in file `RequestApprovalController.cs`
-* Run the app and from swagger UI call `RequestApproval/UserSubmitRequest` the breakpoint will be hit if `(Id > 0)`
+* Set Breakpoint at lines `54,56` in file `RequestApprovalController.cs`
+* Run the app and from swagger UI call `UserSubmitRequest` the breakpoint at 54 will be hit if `(Id > 0)`
+* Continue excecution and copy value in `ManagerApprovalTaskId`
+* From swagger call `ManagerApproval` with the `ManagerApprovalTaskId` you copied before and `Accept` for Decision prop.
+* The breakpoint at 56 will be hit.
+* You done.
 
 # Supported wait types and other features
 * Wait single method to match (similar to `await` in `async\await`)

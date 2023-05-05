@@ -7,13 +7,6 @@ namespace ResumableFunctions.Handler;
 
 public abstract partial class ResumableFunction
 {
-    public ResumableFunction()
-    {
-        CurrentServiceProvider =
-               WaitMethodAttribute.ServiceProvider.CreateScope().ServiceProvider;
-    }
-
-    protected IServiceProvider CurrentServiceProvider { get; }
 
     /// <summary>
     ///     Go back to code after the wait.

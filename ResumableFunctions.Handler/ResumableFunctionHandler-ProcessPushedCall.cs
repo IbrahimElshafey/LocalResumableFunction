@@ -188,8 +188,9 @@ public partial class ResumableFunctionHandler
 
             if (methodWait.UpdateFunctionData())
             {
+                using var scope = _serviceProvider.CreateScope();
                 var currentFunctionClassWithDi =
-                    _serviceProvider.GetService(methodWait.CurrentFunction.GetType())??
+                    scope.ServiceProvider.GetService(methodWait.CurrentFunction.GetType())??
                     ActivatorUtilities.CreateInstance(_serviceProvider, methodWait.CurrentFunction.GetType());
                 JsonConvert.PopulateObject(
                     JsonConvert.SerializeObject(methodWait.CurrentFunction), currentFunctionClassWithDi);
