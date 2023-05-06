@@ -104,7 +104,7 @@ public partial class ResumableFunctionHandler
         WriteMessage("Final Exit");
         currentWait.Status = WaitStatus.Completed;
         currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
-        currentWait.FunctionState.AddLog(LogStatus.Completed, "Function instance completed.");
+        currentWait.FunctionState.AddLog(LogType.Info, "Function instance completed.");
         await _context.waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
         await MoveFunctionToRecycleBin(currentWait);
     }

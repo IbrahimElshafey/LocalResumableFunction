@@ -10,6 +10,8 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.Logging;
 
 namespace ResumableFunctions.Handler.Data;
 
@@ -17,9 +19,12 @@ public class FunctionDataContext : DbContext
 {
     internal readonly MethodIdentifierRepository methodIdentifierRepo;
     internal readonly WaitsRepository waitsRepository;
+    private readonly ILogger<FunctionDataContext> logger;
 
     public FunctionDataContext(
-        IServiceProvider serviceProvider, IResumableFunctionsSettings settings) : base(settings.WaitsDbConfig.Options)
+        IServiceProvider serviceProvider,
+        ILogger<FunctionDataContext> logger,
+        IResumableFunctionsSettings settings) : base(settings.WaitsDbConfig.Options)
     {
         try
         {
@@ -34,10 +39,11 @@ public class FunctionDataContext : DbContext
             //Task.Delay(TimeSpan.FromMinutes(3)).Wait();
             Database.EnsureCreated();
         }
+
+        this.logger = logger;
     }
 
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
-    public DbSet<FunctionStateLogRecord> FunctionStateLogs { get; set; }
 
     public DbSet<MethodIdentifier> MethodIdentifiers { get; set; }
     public DbSet<WaitMethodIdentifier> WaitMethodIdentifiers { get; set; }
@@ -51,6 +57,7 @@ public class FunctionDataContext : DbContext
     public DbSet<PushedCall> PushedCalls { get; set; }
     public DbSet<ServiceData> ServicesData { get; set; }
 
+    public DbSet<LogRecord> Logs { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -190,36 +197,62 @@ public class FunctionDataContext : DbContext
             .HasConstraintName("FK_Waits_For_FunctionState");
 
         entityTypeBuilder
-            .HasMany(x => x.LogRecords)
-            .WithOne(wait => wait.FunctionState)
-            .HasForeignKey(x => x.FunctionStateId)
-            .HasConstraintName("FK_Logs_For_FunctionState");
-
-        entityTypeBuilder
            .Property(x => x.StateObject)
            .HasConversion<ObjectToJsonConverter>();
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
-        //configurationBuilder
-        //    .Properties<Expression>()
-        //    .HaveConversion<ExpressionToJsonConverter>();
-        //configurationBuilder
-        //    .Properties<LambdaExpression>()
-        //    .HaveConversion<LambdaExpressionToJsonConverter>();
         configurationBuilder
             .Properties<Type>()
             .HaveConversion<TypeToStringConverter>();
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
-        SetDates();
-        NeverUpdateFirstWait();
-        HandleSoftDelete();
-        ExcludeFalseAddEntries();
-        return base.SaveChangesAsync(cancellationToken);
+        try
+        {
+            SetDates();
+            NeverUpdateFirstWait();
+            HandleSoftDelete();
+            ExcludeFalseAddEntries();
+            var result = await base.SaveChangesAsync(cancellationToken);
+            await SaveEntityLogs(cancellationToken);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error when save changes.");
+            throw;
+        }
+
+    }
+
+    private async Task SaveEntityLogs(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var entitiesWithLog =
+                ChangeTracker
+                .Entries()
+                    .Where(x => x.Entity is EntityWithLog entityWithLog && entityWithLog.Logs.Any())
+                    .Select(x => (EntityWithLog)x.Entity)
+                    .ToList();
+            foreach (var entity in entitiesWithLog)
+            {
+                entity.Logs.ForEach(x =>
+                {
+                    x.EntityId = entity.Id;
+                    x.Created = DateTime.Now;
+                });
+                Logs.AddRange(entity.Logs);
+            }
+            await base.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error when save entity logs.");
+        }
     }
 
     private void NeverUpdateFirstWait()

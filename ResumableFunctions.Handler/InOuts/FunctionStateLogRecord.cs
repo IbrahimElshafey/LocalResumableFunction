@@ -1,12 +1,13 @@
 ﻿
 namespace ResumableFunctions.Handler.InOuts;
 
-public class FunctionStateLogRecord:IEntity
+public class LogRecord : IEntity
 {
     public int Id { get; internal set; }
-    public int FunctionStateId { get; internal set; }
-    public ResumableFunctionState FunctionState { get; internal set; }
-    public LogStatus Status { get; internal set; } = LogStatus.New;
-    public string StatusMessage { get; internal set; }
+    public int? EntityId { get; internal set; }
+    public string EntityType { get; internal set; }
+    public LogType Type { get; internal set; } = LogType.Info;
+    public string Message { get; internal set; }
     public DateTime Created { get; internal set; }
+    public string Code { get; internal set; }
 }

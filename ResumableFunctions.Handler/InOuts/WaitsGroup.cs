@@ -111,7 +111,7 @@ public class WaitsGroup : Wait
         if (duplicatedWaits?.Any() is true)
         {
             FunctionState?.AddLog(
-                   LogStatus.Error,
+                   LogType.Error,
                    $"The wait named [{duplicatedWaits.First().First().Name}] is duplicated in group [{Name}]," +
                    $",fix it to not cause a problem. Name can't be duplicated in the group.");
             return false;
