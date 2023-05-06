@@ -22,16 +22,6 @@
     <ProjectReference Include="..\ResumableFunctions.Handler\ResumableFunctions.Handler.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Update="Areas\RF\Shared\_RFLayout.cshtml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="UiLogic\" />
-  </ItemGroup>
-
 
 	<ItemGroup>
 		<PackageReference Include="Fody" Version="6.6.4" />
