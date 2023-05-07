@@ -14,7 +14,7 @@
 
 
 ## UI project
-* Add UI Project (Use MVC not pages)
+* Add UI Project (
 	* Servcies Registred
 		* Verify scanned methods 
 		* Find methods not in code
@@ -52,16 +52,15 @@
 * Detect deleted methods
 * Wait methods in same method group must have the same signature
 * Verify that fody MethodBoundaryAspect is active
-* Logging for scan sessions
 
 ## Refactoring and rewrite code
 * UOW to support no-sql implementation
-* Refactor ResumableFunctionHandler to be multiple classes
+* Refactor ResumableFunctionHandler to be multiple classes/services
 	* RegisterFirstWait
 	* CloneFirstWait
 	* ProcessPushedCall
 	* ProcessMatchedWait
-* what are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
+* What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 
 
 ## Publisher Project
@@ -97,13 +96,10 @@
 * Save function state all fields [public and non public]
 * Find fast and best object serializer
 * Parameter check lib use
-* Speed Analysis	
-	* https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/event-counters?tabs=windows
-
+* Performance Analysis
 
 # External Waits (Will be seprate projects)
 * Monitor network requests using reverse proxy and push MethodCalls [TCP Listener]
-* WebHook for the service [Publisher Project Done]
 * RabbitMQ or any service bus [Subscribe to event]
 * File/Folder Changes [File Watcher]
 
