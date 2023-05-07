@@ -54,30 +54,29 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     }
 
     [ResumableFunctionEntryPoint("ProjectApprovalExample.ExternalMethod")]
-    public static async IAsyncEnumerable<Wait> ExternalMethod(int xx)
+    public async IAsyncEnumerable<Wait> ExternalMethod()
     {
-        yield return null;
-        //await Task.Delay(1);
-        //yield return Wait<string, string>
-        //        ("Wait say hello external", new ExternalServiceClass().SayHello)
-        //        .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
-        //        .SetData((userName, helloMsg) => ExternalMethodStatus == $"Say helllo called and user name is: {userName}");
+        await Task.Delay(1);
+        yield return Wait<string, string>
+                ("Wait say hello external", new ExternalServiceClass().SayHello)
+                .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
+                .SetData((userName, helloMsg) => ExternalMethodStatus == $"Say helllo called and user name is: {userName}");
 
-        ////yield return
-        ////      Wait<object, int>(
-        ////          "Wait external method 1",
-        ////      new ExternalServiceClass().ExternalMethodTest)
-        ////          .MatchIf((input, output) => output % 2 == 0)
-        ////          .SetData((input, output) => ExternalMethodStatus == "ExternalMethodTest Matched.");
+        yield return
+              Wait<object, int>(
+                  "Wait external method 1",
+              new ExternalServiceClass().ExternalMethodTest)
+                  .MatchIf((input, output) => output % 2 == 0)
+                  .SetData((input, output) => ExternalMethodStatus == "ExternalMethodTest Matched.");
 
-        //yield return
-        //  Wait<string, int>(
-        //      "Wait external method 2",
-        //  new ExternalServiceClass().ExternalMethodTest2)
-        //      .MatchIf((input, output) => input == "Ibrahim")
-        //      .SetData((input, output) => ExternalMethodStatus == "ExternalMethodTest2 Matched.");
+        yield return
+          Wait<string, int>(
+              "Wait external method 2",
+          new ExternalServiceClass().ExternalMethodTest2)
+              .MatchIf((input, output) => input == "Ibrahim")
+              .SetData((input, output) => ExternalMethodStatus == "ExternalMethodTest2 Matched.");
 
-        //Success(nameof(ExternalMethod));
+        Success(nameof(ExternalMethod));
     }
 
     [ResumableFunctionEntryPoint("ProjectApprovalExample.ExternalMethodWaitGoodby")]

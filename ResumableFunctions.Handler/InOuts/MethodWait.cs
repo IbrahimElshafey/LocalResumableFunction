@@ -67,7 +67,7 @@ public class MethodWait : Wait
         }
         catch (Exception ex)
         {
-            FunctionState?.AddLog(
+            AddLog(
                 $"Error happened when rewrite expressions for method wait [{Name}].\n" +
                  $"{ex.Message}\n" +
                  $"{ex.StackTrace}",
@@ -94,14 +94,14 @@ public class MethodWait : Wait
             var setDataExpression = SetDataExpression.Compile();
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             FunctionState.StateObject = CurrentFunction;
-            FunctionState.AddLog(
+            AddLog(
                 $"Method wait [{Name}] matched and function data updated.",
                 LogType.Info);//todo:function state in progress
             return true;
         }
         catch (Exception ex)
         {
-            FunctionState.AddLog(
+            AddLog(
                 $"An error occured when try to update function data after method wait [{Name}] matched." +
                 ex.Message,
                 LogType.Error);
@@ -118,12 +118,12 @@ public class MethodWait : Wait
             var check = MatchIfExpression.Compile();
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            FunctionState.AddLog(
+            AddError(
                $"An error occured when try evaluate match for wait [{Name}]." +
-               e.Message,
-               LogType.Error);
+               ex.Message,
+               ex);
             return false;
         }
     }
@@ -132,23 +132,21 @@ public class MethodWait : Wait
     {
         //Todo:validate type serialization
         if (!IsFirst && MatchIfExpression == null)
-            FunctionState.AddLog(
+            AddError(
                 $"You didn't set the `MatchIfExpression` for wait [{Name}] that is not a first wait," +
                 $"This will lead to no match for all calls," +
                 $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchIfExpression`," +
-                $"or use MatchAll() method.",
-                LogType.Error);
+                $"or use MatchAll() method.");
         if (IsFirst && MatchIfExpression == null)
-            FunctionState.AddLog(
+            AddLog(
                 $"You didn't set the `MatchIfExpression` for first wait [{Name}]," +
                 $"This will lead to all calls will be matched.",
                 LogType.Warning);
         if (SetDataExpression == null)
-            FunctionState.AddLog(
+            AddError(
                 $"You didn't set the `SetDataExpression` for wait [{Name}], " +
                 $"The execution will not continue, " +
-                $"Please use `NoSetData()` if this is intended.",
-                LogType.Error);
+                $"Please use `NoSetData()` if this is intended.");
         return base.IsValidWaitRequest();
     }
 

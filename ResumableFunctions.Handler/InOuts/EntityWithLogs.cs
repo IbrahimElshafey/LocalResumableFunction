@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public class EntityWithLog : IEntity
+public class EntityWithLogs : IEntity
 {
     [Key]
     public int Id { get; internal set; }

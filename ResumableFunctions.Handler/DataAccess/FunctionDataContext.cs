@@ -217,7 +217,7 @@ public class FunctionDataContext : DbContext
             HandleSoftDelete();
             ExcludeFalseAddEntries();
             var result = await base.SaveChangesAsync(cancellationToken);
-            await SaveEntityLogs(cancellationToken);
+            await SaveEntitiesLogs(cancellationToken);
             return result;
         }
         catch (Exception ex)
@@ -228,15 +228,15 @@ public class FunctionDataContext : DbContext
 
     }
 
-    private async Task SaveEntityLogs(CancellationToken cancellationToken)
+    private async Task SaveEntitiesLogs(CancellationToken cancellationToken)
     {
         try
         {
             var entitiesWithLog =
                 ChangeTracker
                 .Entries()
-                    .Where(x => x.Entity is EntityWithLog entityWithLog && entityWithLog.Logs.Any())
-                    .Select(x => (EntityWithLog)x.Entity)
+                    .Where(x => x.Entity is EntityWithLogs entityWithLog && entityWithLog.Logs.Any())
+                    .Select(x => (EntityWithLogs)x.Entity)
                     .ToList();
             foreach (var entity in entitiesWithLog)
             {

@@ -1,5 +1,5 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
-public class ServiceData : EntityWithLog, IEntityWithUpdate
+public class ServiceData : EntityWithLogs, IEntityWithUpdate
 {
     public string AssemblyName { get; internal set; }
     public string Url { get; internal set; }

@@ -13,7 +13,7 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class Wait : EntityWithLog, IEntityWithUpdate, IEntityWithDelete
+public abstract class Wait : EntityWithLogs, IEntityWithUpdate, IEntityWithDelete
 {
 
     public string Name { get; internal set; }
@@ -90,6 +90,8 @@ public abstract class Wait : EntityWithLog, IEntityWithUpdate, IEntityWithDelete
         var functionRunner = new FunctionRunner(this);
         if (functionRunner.ResumableFunctionExistInCode is false)
         {
+            var errorMsg = $"Resumable function ({RequestedByFunction.MethodName}) not exist in code";
+            FunctionState.AddError(errorMsg);
             Debug.WriteLine($"Resumable function ({RequestedByFunction.MethodName}) not exist in code");
             //todo:move to recycle bin and all related waits
             //mark it as inactive
@@ -110,6 +112,8 @@ public abstract class Wait : EntityWithLog, IEntityWithUpdate, IEntityWithDelete
         }
         catch (Exception ex)
         {
+            FunctionState.AddError(
+                $"An error occurred after resuming execution after wait `{this}`.",ex);
             Debug.Write(ex);
             throw;
         }
@@ -207,7 +211,7 @@ public abstract class Wait : EntityWithLog, IEntityWithUpdate, IEntityWithDelete
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name",
                 LogType.Error);
         }
-        return FunctionState?.Status != FunctionStatus.Error;
+        return ErrorCounter == 0;
     }
 
 
@@ -227,5 +231,10 @@ public abstract class Wait : EntityWithLog, IEntityWithUpdate, IEntityWithDelete
         if (result == null)
             throw new NullReferenceException($"No MethodWait with name [{name}] exist in ChildWaits tree [{Name}]");
         return (MethodWait)result;
+    }
+
+    public override string ToString()
+    {
+        return $"Name:{Name}, Type:{WaitType}, Id:{Id}";
     }
 }

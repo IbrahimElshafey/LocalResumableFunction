@@ -206,7 +206,7 @@ public partial class ResumableFunctionHandler
                     if (ex.Entries.All(x => x.Entity is ResumableFunctionState))
                     {
                         methodWait.FunctionState.AddLog(
-                            $"Currency Exception occured when try to update function state [{methodWait.FunctionState.Id}]." +
+                            $"Concurrency Exception occured when try to update function state [{methodWait.FunctionState.Id}]." +
                             $"\nError message:{ex.Message}" +
                             $"\nProcessing this wait will be scheduled.",
                             LogType.Warning);
@@ -214,7 +214,7 @@ public partial class ResumableFunctionHandler
                             () => ProcessMatchedWait(methodWait.Id, methodWait.PushedCallId), TimeSpan.FromMinutes(3));
                         return;
                     }
-                    throw ex;
+                    throw;
                 }
 
                 await ResumeExecution(methodWait);

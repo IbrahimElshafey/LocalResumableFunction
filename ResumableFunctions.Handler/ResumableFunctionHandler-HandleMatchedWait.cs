@@ -14,7 +14,7 @@ public partial class ResumableFunctionHandler
         {
             matchedMethodWait = await CloneFirstWait(matchedMethodWait);
         }
-        
+
         Wait currentWait = matchedMethodWait;
         do
         {
@@ -82,20 +82,16 @@ public partial class ResumableFunctionHandler
             WriteMessage($"Get next wait [{nextWait.Name}] after [{currentWait.Name}]");
 
             nextWait.ParentWaitId = currentWait.ParentWaitId;
-            WriteMessage("1111");
             currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
-            WriteMessage("2222");
             nextWait.FunctionState = currentWait.FunctionState;
-            WriteMessage("3333");
             _context.Entry(nextWait.FunctionState).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
             nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
-            WriteMessage("4444");
             await SaveWaitRequestToDb(nextWait);//next wait after resume function
             await _context.SaveChangesAsync();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error when ProceedToNextWait");
+            _logger.LogError(ex, "Error when proceed to next wait");
         }
     }
 
@@ -105,6 +101,7 @@ public partial class ResumableFunctionHandler
         currentWait.Status = WaitStatus.Completed;
         currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
         currentWait.FunctionState.AddLog("Function instance completed.", LogType.Info);
+        currentWait.FunctionState.Status = FunctionStatus.Completed;
         await _context.waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
         await MoveFunctionToRecycleBin(currentWait);
     }

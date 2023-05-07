@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public class ResumableFunctionState : EntityWithLog, IEntityWithUpdate, IEntityWithDelete
+public class ResumableFunctionState : EntityWithLogs, IEntityWithUpdate, IEntityWithDelete
 {
 
     /// <summary>

@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class MethodIdentifier : EntityWithLog, IEntityWithUpdate
+public abstract class MethodIdentifier : EntityWithLogs, IEntityWithUpdate
 {
     private MethodInfo _methodInfo;
 

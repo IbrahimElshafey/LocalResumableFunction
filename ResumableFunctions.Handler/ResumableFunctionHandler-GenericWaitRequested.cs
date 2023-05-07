@@ -17,8 +17,6 @@ public partial class ResumableFunctionHandler
                 $"Error when validate the requested wait [{newWait.Name}] " +
                 $"that requested by function [{newWait?.RequestedByFunction}].";
             _logger.LogError(message);
-            //await _context.SaveChangesAsync();
-            //return false;
         }
         switch (newWait)
         {

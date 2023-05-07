@@ -25,10 +25,11 @@ public partial class ResumableFunctionHandler
                 x.IsFirst = false;
                 x.FunctionState.StateObject = firstMatchedMethodWait?.FunctionState?.StateObject;
             });
-            firstWaitClone.FunctionState.AddLog(
-                $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.", LogType.Info);
+            //firstWaitClone.FunctionState.AddLog(
+            //    $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.", LogType.Info);
             firstWaitClone.FunctionState.AddLog(
                 $"First wait matched [{firstWaitClone.Name}] for [{resumableFunction.GetFullName()}].", LogType.Info);
+            firstWaitClone.FunctionState.Status = FunctionStatus.InProgress;
             await SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
