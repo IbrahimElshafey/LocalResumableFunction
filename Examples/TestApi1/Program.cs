@@ -13,7 +13,9 @@ builder.Services
     .AddResumableFunctions(
         new ResumableFunctionsSettings()
         .UseSqlServer()
-        .SetCurrentServiceUrl("https://localhost:7140/"));
+        .SetCurrentServiceUrl("https://localhost:7140/")
+        //.SetDllsToScan(new[] { "Nklkdok" })
+        );
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

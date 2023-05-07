@@ -5,10 +5,6 @@ namespace ResumableFunctions.Handler.InOuts;
 
 public class ResumableFunctionState : EntityWithLog, IEntityWithUpdate, IEntityWithDelete
 {
-    public ResumableFunctionState()
-    {
-
-    }
 
     /// <summary>
     /// Serailized class instance that contain the resumable function class

@@ -240,12 +240,8 @@ public class FunctionDataContext : DbContext
                     .ToList();
             foreach (var entity in entitiesWithLog)
             {
-                entity.Logs.ForEach(x =>
-                {
-                    x.EntityId = entity.Id;
-                    x.Created = DateTime.Now;
-                });
-                Logs.AddRange(entity.Logs);
+                entity.Logs.ForEach(x => x.EntityId = entity.Id);
+                Logs.AddRange(entity.Logs.Where(x => x.Id == 0));
             }
             await base.SaveChangesAsync(cancellationToken);
         }

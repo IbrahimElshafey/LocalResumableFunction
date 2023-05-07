@@ -6,5 +6,4 @@ public class ServiceData : EntityWithLog, IEntityWithUpdate
     public DateTime Modified { get; internal set; }
     public int ParentId { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
-
 }
