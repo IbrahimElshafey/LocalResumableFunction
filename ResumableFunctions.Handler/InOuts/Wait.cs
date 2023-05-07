@@ -204,8 +204,8 @@ public abstract class Wait : EntityWithLog, IEntityWithUpdate, IEntityWithDelete
         if (isNameDuplicated)
         {
             FunctionState?.AddLog(
-                LogType.Error,
-                $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name");
+                $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name",
+                LogType.Error);
         }
         return FunctionState?.Status != FunctionStatus.Error;
     }

@@ -9,9 +9,9 @@ public class EntityWithLog : IEntity
 
 
     [NotMapped]
-    public List<LogRecord> Logs { get; private set; } = new List<LogRecord>();
+    public List<LogRecord> Logs { get; } = new();
 
-    public void AddLog(LogType logType, string message, string code = "")
+    public void AddLog(string message, LogType logType = LogType.Info, string code = "")
     {
         Logs.Add(new LogRecord
         {
@@ -20,6 +20,22 @@ public class EntityWithLog : IEntity
             Message = message,
             Code = code
         });
+    }
+    public void AddError(string message, Exception ex = null, string code = "")
+    {
+        var logRecord = new LogRecord
+        {
+            EntityType = GetType().Name,
+            Type = LogType.Error,
+            Message = message,
+            Code = code
+        };
+        Logs.Add(logRecord);
+        if(ex != null )
+        {
+            logRecord.Message += $"\n{ex.Message}";
+            logRecord.Message += $"\n{ex.StackTrace}";
+        }
     }
 }
 

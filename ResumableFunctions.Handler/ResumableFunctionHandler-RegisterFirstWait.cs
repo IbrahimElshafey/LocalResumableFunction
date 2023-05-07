@@ -26,9 +26,9 @@ public partial class ResumableFunctionHandler
                 x.FunctionState.StateObject = firstMatchedMethodWait?.FunctionState?.StateObject;
             });
             firstWaitClone.FunctionState.AddLog(
-                LogType.Info, $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.");
+                $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.", LogType.Info);
             firstWaitClone.FunctionState.AddLog(
-                LogType.Info, $"First wait matched [{firstWaitClone.Name}] for [{resumableFunction.GetFullName()}].");
+                $"First wait matched [{firstWaitClone.Name}] for [{resumableFunction.GetFullName()}].", LogType.Info);
             await SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
@@ -51,8 +51,8 @@ public partial class ResumableFunctionHandler
             var firstWait = await GetFirstWait(resumableFunction, true);
             if (firstWait == null)
                 firstWait.FunctionState.AddLog(
-                    LogType.Info,
-                    $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.");
+                    $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.",
+                    LogType.Info);
             await SaveWaitRequestToDb(firstWait);//first wait when register function
             WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
             await _context.SaveChangesAsync();

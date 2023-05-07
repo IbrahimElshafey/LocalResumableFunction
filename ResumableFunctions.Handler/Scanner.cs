@@ -4,9 +4,11 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using Hangfire;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.Helpers;
@@ -21,7 +23,7 @@ public class Scanner
     private ResumableFunctionHandler _handler;
     private IServiceProvider _serviceProvider;
     private readonly ILogger<Scanner> _logger;
-
+    private readonly string Code = DateTime.Now.Ticks.ToString();
     public Scanner(IServiceProvider serviceProvider, ILogger<Scanner> logger)
     {
         _serviceProvider = serviceProvider;
@@ -54,13 +56,13 @@ public class Scanner
         ScopeInit(scope);
 
         WriteMessage("Start register method waits.");
-        var resumableFunctions = await RegisterMethodWaits(GetAssembliesToScan());
+        await RegisterMethods(GetAssembliesToScan());
 
-        foreach (var resumableFunctionClass in resumableFunctions)
-            await RegisterResumableFunctionsInClass(resumableFunctionClass);
+
+
 
         WriteMessage("Register local methods");
-        await RegisterMethodWaitsInType(typeof(LocalRegisteredMethods));
+        await RegisterMethodWaitsInType(typeof(LocalRegisteredMethods), null);
 
         await _context.SaveChangesAsync();
 
@@ -99,20 +101,19 @@ public class Scanner
 
     private BindingFlags GetBindingFlags() => BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
-    private async Task UpdateScanData(string currentAssemblyName, string serviceUrl)
+    private async Task UpdateScanDate(ServiceData serviceData)
     {
-        WriteMessage($"Update last scan date for service [{currentAssemblyName}].");
-        var scanRecored = await _context
-            .ServicesData
-            .FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
-        if (scanRecored != null)
-            scanRecored.Modified = DateTime.Now;
+        await _context.Entry(serviceData).ReloadAsync();
+        serviceData.AddLog($"Update last scan date for service [{serviceData.AssemblyName}] to [{DateTime.Now}].");
+        if (serviceData != null)
+            serviceData.Modified = DateTime.Now;
+        await _context.SaveChangesAsync();
     }
 
-    private async Task<bool> ShouldScan(string currentAssemblyName, string serviceUrl)
+    private async Task<bool> CheckScan(string assemblyPath, string serviceUrl)
     {
-        WriteMessage($"Check last scan date for assembly [{currentAssemblyName}].");
-        var scanRecored = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
+        var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
+        var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
         var entryAssemblyName = Assembly.GetEntryAssembly().GetName().Name;
         var parentId =
             entryAssemblyName == currentAssemblyName ?
@@ -121,39 +122,60 @@ public class Scanner
             .Where(x => x.AssemblyName == entryAssemblyName)
             .Select(x => x.Id)
             .FirstOrDefaultAsync();
-        if (scanRecored == null)
+        if (serviceData == null)
         {
-            scanRecored = new ServiceData
+            serviceData = new ServiceData
             {
                 AssemblyName = currentAssemblyName,
                 Url = serviceUrl,
                 ParentId = parentId
             };
-            _context.ServicesData.Add(scanRecored);
+            _context.ServicesData.Add(serviceData);
+            serviceData.AddLog($"Assembly [{currentAssemblyName}] will be scaned.");
+            await _context.SaveChangesAsync();
             return true;
         }
-        var lastBuildDate = File.GetLastWriteTime($"{AppContext.BaseDirectory}\\{currentAssemblyName}.dll");
-        scanRecored.Url = serviceUrl;
-        bool shouldScan = lastBuildDate > scanRecored.Modified;
+        if (File.Exists(assemblyPath) is false)
+        {
+            string message = $"Assembly file ({assemblyPath}) not exist.";
+            _logger.LogError(message);
+            serviceData.AddError(message);
+            return false;
+        }
+        var assembly = Assembly.LoadFile(assemblyPath);
+        var isReferenceResumableFunction =
+            assembly.GetReferencedAssemblies().Any(x => new[]
+            {
+                        "ResumableFunctions.Handler",
+                        "ResumableFunctions.AspNetService"
+            }.Contains(x.Name));
+        if (isReferenceResumableFunction is false)
+        {
+            serviceData.AddError($"Not reference ResumableFunction DLLs,Scan canceled for [{assemblyPath}].");
+            return false;
+        }
+        var lastBuildDate = File.GetLastWriteTime(assemblyPath);
+        serviceData.Url = serviceUrl;
+        serviceData.AddLog($"Check last scan date for assembly [{currentAssemblyName}].");
+        bool shouldScan = lastBuildDate > serviceData.Modified;
         if (shouldScan is false)
-            WriteMessage($"No need to rescan assembly [{currentAssemblyName}].");
+            serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].");
         return shouldScan || _settings.ForceRescan;
     }
 
-    internal async Task RegisterResumableFunction(MethodInfo resumableFunctionMinfo)
+    internal async Task RegisterResumableFunction(MethodInfo resumableFunctionMinfo, ServiceData serviceData)
     {
         var isEntryPoint = IsEntryPoint(resumableFunctionMinfo);
         var methodType = isEntryPoint ?
             MethodType.ResumableFunctionEntryPoint :
             MethodType.SubResumableFunction;
-        WriteMessage($"Register resumable function [{resumableFunctionMinfo.GetFullName()}] of type [{methodType}]");
+        serviceData.AddLog($"Register resumable function [{resumableFunctionMinfo.GetFullName()}] of type [{methodType}]");
         var mi = await _context.methodIdentifierRepo.AddResumableFunctionIdentifier(new MethodData(resumableFunctionMinfo) { MethodType = methodType });
         await _context.SaveChangesAsync();
         if (isEntryPoint)
         {
-            var bjc = _serviceProvider.GetService<IBackgroundJobClient>();
-            bjc.Enqueue(() => RegisterResumableFunctionFirstWait(mi.Id));
-
+            var backgroundJobClient = _serviceProvider.GetService<IBackgroundJobClient>();
+            backgroundJobClient.Enqueue(() => RegisterResumableFunctionFirstWait(mi.Id));
         }
     }
 
@@ -183,7 +205,7 @@ public class Scanner
         }
     }
 
-    private async Task<List<Type>> RegisterMethodWaits(List<string> assemblyPaths)
+    private async Task RegisterMethods(List<string> assemblyPaths)
     {
         var resumableFunctionClasses = new List<Type>();
         foreach (var assemblyPath in assemblyPaths)
@@ -192,68 +214,105 @@ public class Scanner
             {
                 //check if file exist
                 WriteMessage($"Start scan assembly [{assemblyPath}]");
-                if (File.Exists(assemblyPath) is false)
-                {
-                    _logger.LogError($"Assembly path ({assemblyPath}) not exist.");
-                    continue;
-                }
-                var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
-                if (await ShouldScan(currentAssemblyName, _settings.CurrentServiceUrl) is false) continue;
+
+
+                if (await CheckScan(assemblyPath, _settings.CurrentServiceUrl) is false) continue;
+
                 var assembly = Assembly.LoadFile(assemblyPath);
-                var isReferenceResumableFunction =
-                    assembly.GetReferencedAssemblies().Any(x => new[]
-                    {
-                        "ResumableFunctions.Handler",
-                        "ResumableFunctions.AspNetService"
-                    }.Contains(x.Name));
-                if (isReferenceResumableFunction is false)
+                var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assembly.GetName().Name);
+                foreach (var type in assembly.GetTypes())
                 {
-                    WriteMessage($"Not reference ResumableFunction dlls,Scan canceled for [{assemblyPath}].");
+                    await RegisterMethodWaitsInType(type, serviceData);
+                    //await RegisterExternalMethods(type);
+                    if (type.IsSubclassOf(typeof(ResumableFunction)))
+                        resumableFunctionClasses.Add(type);
                 }
-                else
-                {
-                    foreach (var type in assembly.GetTypes())
-                    {
-                        await RegisterMethodWaitsInType(type);
-                        //await RegisterExternalMethods(type);
-                        if (type.IsSubclassOf(typeof(ResumableFunction)))
-                            resumableFunctionClasses.Add(type);
-                    }
 
-                    WriteMessage($"Save discovered method waits for assembly [{assemblyPath}].");
-                    await _context.SaveChangesAsync();
+                WriteMessage($"Save discovered method waits for assembly [{assemblyPath}].");
+                await _context.SaveChangesAsync();
 
-                    await UpdateScanData(currentAssemblyName, _settings.CurrentServiceUrl);
-                }
+                foreach (var resumableFunctionClass in resumableFunctionClasses)
+                    await RegisterResumableFunctionsInClass(resumableFunctionClass);
+
+                await UpdateScanDate(serviceData);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                _logger.LogError(e, $"Error when register method waits in assembly [{assemblyPath}]");
+                _logger.LogError(ex, $"Error when register a method in assembly [{assemblyPath}]");
                 throw;
             }
         }
-
-        return resumableFunctionClasses;
     }
 
-    private async Task RegisterMethodWaitsInType(Type type)
+    private async Task RegisterMethodWaitsInType(Type type, ServiceData serviceData)
     {
-        //Debugger.Launch();
-        var methodWaits = type
-            .GetMethods(GetBindingFlags())
-            .Where(method =>
-                    method.GetCustomAttributes().Any(x => x.TypeId == WaitMethodAttribute.AttributeId));
-        foreach (var method in methodWaits)
+        try
         {
-            await _context.methodIdentifierRepo.AddWaitMethodIdentifier(new MethodData(method) { MethodType = MethodType.MethodWait });
+            //Debugger.Launch();
+            var methodWaits = type
+                .GetMethods(GetBindingFlags())
+                .Where(method =>
+                        method.GetCustomAttributes().Any(x => x.TypeId == WaitMethodAttribute.AttributeId));
+            foreach (var method in methodWaits)
+            {
+                if (ValidateMethodWait(method, serviceData))
+                {
+                    var methodData = new MethodData(method) { MethodType = MethodType.MethodWait };
+                    await _context.methodIdentifierRepo.AddWaitMethodIdentifier(methodData);
+                    serviceData?.AddLog($"Adding method identifier {methodData}");
+                }
+                else
+                    serviceData?.AddLog($"Can't add method identifier `{method.GetFullName()}` since it does not match the criteria.");
+            }
         }
+        catch (Exception ex)
+        {
+            var errorMsg = $"Error when adding a method identifier of type `MethodWait` for type `{type.FullName}`";
+            serviceData?.AddError(errorMsg, ex);
+            _logger.LogError(errorMsg, ex);
+            throw;
+        }
+
     }
 
-
+    private bool ValidateMethodWait(MethodInfo method, ServiceData serviceData)
+    {
+        var result = true;
+        if (method.IsGenericMethod)
+        {
+            serviceData?.AddError($"`{method.GetFullName()}` must not be generic.");
+            result = false;
+        }
+        if (method.ReturnType == typeof(void))
+        {
+            serviceData?.AddError($"`{method.GetFullName()}` must return a value, void is not allowed.");
+            result = false;
+        }
+        if (method.IsAsyncMethod() && method.ReturnType.GetGenericTypeDefinition() != typeof(Task<>))
+        {
+            serviceData?.AddError($"`{method.GetFullName()}` async method must return Task<T> object.");
+            result = false;
+        }
+        if (method.IsStatic)
+        {
+            serviceData?.AddError($"`{method.GetFullName()}` must be instance function.");
+            result = false;
+        }
+        if (method.GetParameters().Length != 1)
+        {
+            serviceData?.AddError($"`{method.GetFullName()}` must have only one parameter.");
+            result = false;
+        }
+        return result;
+    }
 
     private async Task RegisterResumableFunctionsInClass(Type type)
     {
-        WriteMessage($"Try to find resumable functions in type [{type.FullName}]");
+        var currentAssemblyName = type.Assembly.GetName().Name;
+        var serviceData = await _context
+            .ServicesData
+            .FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
+        serviceData.AddLog($"Try to find resumable functions in type [{type.FullName}]");
         var resumableFunctions = type
             .GetMethods(GetBindingFlags())
             .Where(method => method
@@ -263,18 +322,12 @@ public class Scanner
                     attribute.TypeId == ResumableFunctionAttribute.AttributeId
                 ));
 
-        foreach (var resumableFunctionMinfo in resumableFunctions)
+        foreach (var resumableFunctionInfo in resumableFunctions)
         {
-            if (CheckResumableFunctionSignature(resumableFunctionMinfo) is false)
-            {
-                _logger.LogError(
-                    $"The resumable function [{resumableFunctionMinfo.GetFullName()}] must match the signature `IAsyncEnumerable<Wait> {resumableFunctionMinfo.Name}()`");
-                continue;
-            }
-
-
-            await RegisterResumableFunction(resumableFunctionMinfo);
-
+            if (ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
+                await RegisterResumableFunction(resumableFunctionInfo, serviceData);
+            else
+                serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.");
         }
     }
 
@@ -285,11 +338,24 @@ public class Scanner
             .Any(attribute => attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId);
     }
 
-    private bool CheckResumableFunctionSignature(MethodInfo resumableFunction)
+    private bool ValidateResumableFunctionSignature(MethodInfo resumableFunction, ServiceData serviceData)
     {
-        if (resumableFunction.ReturnType != typeof(IAsyncEnumerable<Wait>))
-            return false;
-        return resumableFunction.GetParameters().Length == 0;
+        var result = true;
+        if (resumableFunction.ReturnType != typeof(IAsyncEnumerable<Wait>) && resumableFunction.GetParameters().Length != 0)
+        {
+            var errorMsg =
+                $"The resumable function [{resumableFunction.GetFullName()}] must match the signature `IAsyncEnumerable<Wait> {resumableFunction.Name}()`.\n" +
+                $"Must have no parameter and return type must be `IAsyncEnumerable<Wait>`";
+            serviceData.AddError(errorMsg);
+            _logger.LogError(errorMsg);
+            result = false;
+        }
+        if (resumableFunction.IsStatic)
+        {
+            serviceData.AddError($"Resumable function `{resumableFunction.GetFullName()}` must be instance function.");
+            result = false;
+        }
+        return result;
     }
 
 

@@ -19,7 +19,7 @@
 		* Verify scanned methods 
 		* Find methods not in code
 		* verify method signatures
-		* verify start waits exist in db
+		* verify start waits exist in db for each RF
 		* Push External Mehtod Call
 	* Monitor active resumable functions
 		* It's props 
@@ -91,6 +91,9 @@
 		
 
 ## Enhancements
+* Encrypt sensitive data
+	* Function state
+	* Match and SetData Expressions
 * Save function state all fields [public and non public]
 * Find fast and best object serializer
 * Parameter check lib use

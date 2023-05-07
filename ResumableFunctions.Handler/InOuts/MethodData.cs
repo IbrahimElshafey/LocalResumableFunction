@@ -133,7 +133,7 @@ namespace ResumableFunctions.Handler.InOuts
 
         public override string ToString()
         {
-            return $"{AssemblyName} # {ClassName}.{MethodName} # {MethodSignature}";
+            return $"[{AssemblyName} # {ClassName}.{MethodName} # {MethodSignature}] with type {MethodType}";
         }
 
         internal bool Validate()
