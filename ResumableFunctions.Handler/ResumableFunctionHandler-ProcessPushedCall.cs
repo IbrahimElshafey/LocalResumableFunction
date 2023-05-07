@@ -259,7 +259,7 @@ public partial class ResumableFunctionHandler
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Failed to IncrementCompletedCounter pushedCallId:{pushedCallId}");
+            _logger.LogError(ex, $"Failed to increment completed counter for PushedCall:{pushedCallId}");
         }
     }
 

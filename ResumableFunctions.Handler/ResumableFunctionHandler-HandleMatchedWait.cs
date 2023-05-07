@@ -66,7 +66,9 @@ public partial class ResumableFunctionHandler
             //bug:may cause problem for go back after
             if (currentWait.ParentWait != null && currentWait.ParentWait.Status != WaitStatus.Waiting)
             {
-                _logger.LogWarning($"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).");
+                string errorMsg = $"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).";
+                _logger.LogWarning(errorMsg);
+                currentWait.AddError(errorMsg);
                 return;
             }
 
@@ -91,7 +93,9 @@ public partial class ResumableFunctionHandler
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error when proceed to next wait");
+            var errorMessage = $"Error when proceed to next wait after {currentWait}";
+            _logger.LogError(ex, errorMessage);
+            //currentWait.AddError(errorMessage);
         }
     }
 

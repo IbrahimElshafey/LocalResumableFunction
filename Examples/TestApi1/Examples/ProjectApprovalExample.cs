@@ -18,12 +18,14 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow")]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
     {
+        //throw new NotImplementedException("Exception and no body.");
         yield return
          Wait<Project, bool>("Project Submitted", ProjectSubmitted)//Point 2
              .MatchIf((project, output) => output && !project.IsResubmit)//Point 3
              .SetData((project, output) => CurrentProject == project);//Point 4
 
         await AskManagerToApprove("Manager One", CurrentProject.Id);
+        //throw new Exception("Critical exception aftrer AskManagerToApprove");
         yield return
                Wait<ApprovalDecision, bool>("Manager One Approve Project", ManagerOneApproveProject)
                    .MatchIf((approvalDecision, output) => approvalDecision.ProjectId == CurrentProject.Id)
