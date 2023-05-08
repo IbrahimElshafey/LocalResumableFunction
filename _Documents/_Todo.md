@@ -24,7 +24,7 @@
 * All Logs View
 * Add UI Project
 	* Servcies Registred
-		* Verify scanned methods 
+		* Verify Scanned Methods 
 		* Find methods not in code
 		* verify method signatures
 		* verify start waits exist in db for each RF

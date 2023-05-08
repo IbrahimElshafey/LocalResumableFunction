@@ -1,1 +1,90 @@
-﻿
+﻿@*Services*@
+<div class="w3-margin-buttom">
+
+    <div class="w3-bar-block w3-light-grey w3-cell w3-border-right">
+        <button class="w3-bar-item w3-button tablink w3-indigo"
+        onclick="openCity(event, 'service-details')">TestApi1 Service Details</button>
+        <button class="w3-bar-item w3-button tablink" 
+        onclick="openCity(event, 'scan-logs')">Scan Logs</button>
+        <button class="w3-bar-item w3-button tablink" 
+        onclick="openCity(event, 'resumable-functions')">Resumable Functions(10)</button>
+        <button class="w3-bar-item w3-button tablink" 
+        onclick="openCity(event, 'methods')">Methods(34)</button>
+    </div>
+
+    <div class="w3-cell">
+
+        <div id="service-details" class="city w3-margin">
+            <h2>TestApi1 Service Details</h2>
+            <table class="w3-table" style="width:100%;">
+                <tr>
+                    <td><b>Service Name:</b></td>
+                    <td>TestApi1</td>
+                </tr>
+                <tr>
+                    <td><b>Service Url:</b></td>
+                    <td><a class="w3-text-blue" href="https://localhost:4555">https://localhost:4555</a></td>
+                </tr>
+                <tr>
+                    <td><b>Hangfire Url:</b></td>
+                    <td><a class="w3-text-blue" href="https://localhost:4555/hangfire">https://localhost:4555/hangfire</a></td>
+                </tr>
+                <tr>
+                    <td><b>Swagger Url:</b></td>
+                    <td><a class="w3-text-blue" href="https://localhost:4555/swagger">https://localhost:4555/swagger</a></td>
+                </tr>
+                <tr>
+                    <td><b>Other Dlls:</b></td>
+                    <td>Abc.test.dll, MRZ.dll</td>
+                </tr>
+                <tr>
+                    <td><b>Registration Date:</b></td>
+                    <td>08/05/2023</td>
+                </tr>
+                <tr>
+                    <td><b>Last Scan Date:</b></td>
+                    <td>10/05/2023</td>
+                </tr>
+                <tr>
+                    <td><b>Scan Errors Count:</b></td>
+                    <td>10</td>
+                </tr>
+            </table>
+            <h2>Actions</h2>
+            <button class="w3-button w3-indigo">Rescan Service</button>
+            <button class="w3-button w3-indigo">Verify Scanned Methods </button>
+            <button class="w3-button w3-indigo">Verify Start Waits</button>
+        </div>
+
+        <div id="scan-logs" class="w3-margin city" style="display:none">
+            <h2>scan-logs</h2>
+            <p>scan-logs is the capital of France.</p>
+            <p>The scan-logs area is one of the largest population centers in Europe, with more than 12 million inhabitants.</p>
+        </div>
+
+        <div id="resumable-functions" class="w3-margin city" style="display:none">
+            <partial name="./_ResumableFunctionsList" />
+        </div>
+
+        <div id="methods" class="w3-margin city" style="display:none">
+            <partial name="./_MethodsList" />
+        </div>
+
+    </div>
+
+    <script>
+        function openCity(evt, cityName) {
+            var i, x, tablinks;
+            x = document.getElementsByClassName("city");
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablink");
+            for (i = 0; i < x.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" w3-indigo", "");
+            }
+            document.getElementById(cityName).style.display = "block";
+            evt.currentTarget.className += " w3-indigo";
+        }
+    </script>
+</div>
