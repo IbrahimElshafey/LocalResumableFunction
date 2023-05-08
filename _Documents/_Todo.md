@@ -23,7 +23,7 @@
 	* Pushed Call Details
 * All Logs View
 * Add UI Project
-	* Servcies Registred
+	* Servcies Registered
 		* Verify Scanned Methods 
 		* Find methods not in code
 		* verify method signatures
@@ -31,7 +31,6 @@
 	* Monitor active resumable functions
 		* It's props 
 			* Status
-			* Name (Full Name)
 			* CurrentStateObject
 			* Created
 			* LastUpdated

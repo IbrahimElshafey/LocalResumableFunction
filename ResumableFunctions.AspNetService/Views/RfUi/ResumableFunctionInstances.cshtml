@@ -1,1 +1,51 @@
-﻿<h1>Resumable Function Instances</h1>
+﻿@*https://www.jqueryscript.net/other/jQuery-Plugin-For-Easily-Readable-JSON-Data-Viewer.html*@
+<div class="w3-container w3-margin">
+    <header class="w3-text-indigo">
+        <h2 class="w3-margin-top"><b>ProjectApprovalExample.ProjectApprovalFlow Instances</b></h2>
+    </header>
+    <select class="w3-select" name="option">
+        <option value="" disabled selected>Choose a Status</option>
+        <option value="1">In Progress</option>
+        <option value="2">Error</option>
+        <option value="3">Completed</option>
+    </select>
+    <table class="w3-table-all w3-padding-32" style="width: 100%;table-layout: fixed;">
+        <thead>
+            <tr class="w3-indigo">
+                <th>ID</th>
+                <th>Status</th>
+                <th width="35%">Current State Object</th>
+                <th>Current Wait</th>
+                <th>History</th>
+                <th>Created</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tr>
+            <td>12</td>
+            <td class="w3-text-green">Completed</td>
+            <td>
+                <span class="w3-text-brown JsonData" style=" word-wrap: break-word;">
+                    {"CurrentProject":{"Id":100,"Name":"string","Description":"string","IsResubmit":false},"ManagerOneApproval":true,"ManagerTwoApproval":false,"ManagerThreeApproval":false,"ManagerFourApproval":false,"ManagerFiveApproval":false,"ExternalMethodStatus":"Not matched yet."}
+                </span>
+            </td>
+            <td>No Wait (Completed)</td>
+            <td><a href="#completed" class="w3-text-blue">8 Waits</a></td>
+            <td>12/02/2022</td>
+            <td>12/02/2023</td>
+        </tr>
+        <tr>
+            <td>14</td>
+            <td class="w3-text-orange">In Progress</td>
+            <td>
+                <span class="w3-text-brown JsonData" style=" word-wrap: break-word;">
+                    {"CurrentProject":{"Id":100,"Name":"string","Description":"string","IsResubmit":false},"ManagerOneApproval":true,"ManagerTwoApproval":false,"ManagerThreeApproval":false,"ManagerFourApproval":false,"ManagerFiveApproval":false,"ExternalMethodStatus":"Not matched yet."}
+                </span>
+            </td>
+            <td>Wait Manager Approval</td>
+            <td><a href="#completed" class="w3-text-blue">4 Waits</a></td>
+            <td>12/02/2022</td>
+            <td>12/02/2023</td>
+        </tr>
+    </table>
+</div>
