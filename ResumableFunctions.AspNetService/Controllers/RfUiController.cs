@@ -24,6 +24,26 @@ namespace MVC.Controllers
             return View();
         }
 
+        public IActionResult PushedCallDetails()
+        {
+            return View();
+        }
+            
+        public IActionResult MethodsInGroup()
+        {
+            return View();
+        }
+
+        public IActionResult ResumableFunctionInstances()
+        {
+            return View();
+        }
+
+        public IActionResult MethodWaits()
+        {
+            return View();
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
