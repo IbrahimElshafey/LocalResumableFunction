@@ -1,0 +1,62 @@
+﻿@*Services*@
+<div class="w3-margin-buttom">
+
+    <div class="w3-bar-block w3-light-grey w3-cell w3-border-right">
+        <button class="w3-bar-item w3-button tablink w3-indigo"
+                onclick="openCity(event, 'service-details')">
+            TestApi1 Service Details
+        </button>
+        <button class="w3-bar-item w3-button tablink"
+                onclick="openCity(event, 'scan-logs')">
+            Scan Logs
+        </button>
+        <button class="w3-bar-item w3-button tablink"
+                onclick="openCity(event, 'resumable-functions')">
+            Resumable Functions(10)
+        </button>
+        <button class="w3-bar-item w3-button tablink"
+                onclick="openCity(event, 'methods')">
+            Methods(34)
+        </button>
+    </div>
+
+    <div class="w3-cell">
+
+        <div id="service-details" class="city w3-margin">
+            <partial name="./_ServiceInfo" />
+        </div>
+
+        <div id="scan-logs" class="w3-margin city" style="display:none">
+            <h2>Scan Logs</h2>
+            <partial name="./_ScanLogs" />
+        </div>
+
+        <div id="resumable-functions" class="w3-margin city" style="display:none">
+            <partial name="./_ResumableFunctionsList" />
+        </div>
+
+        <div id="methods" class="w3-margin city" style="display:none">
+            <partial name="./_MethodsList" />
+        </div>
+    </div>
+  
+</div>
+
+
+@section Scripts{
+    <script>
+        function openCity(evt, cityName) {
+            var i, x, tablinks;
+            x = document.getElementsByClassName("city");
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablink");
+            for (i = 0; i < x.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" w3-indigo", "");
+            }
+            document.getElementById(cityName).style.display = "block";
+            evt.currentTarget.className += " w3-indigo";
+        }
+    </script>
+}
