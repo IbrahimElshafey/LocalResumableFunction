@@ -3,39 +3,41 @@
 
     <div class="w3-bar-block w3-light-grey w3-cell w3-border-right">
         <button class="w3-bar-item w3-button tablink w3-indigo"
-                onclick="openCity(event, 'service-details')">
+                onclick="openViewPart(event, 'service-details')">
             TestApi1 Service Details
         </button>
         <button class="w3-bar-item w3-button tablink"
-                onclick="openCity(event, 'scan-logs')">
+                onclick="openViewPart(event, 'scan-logs')">
             Scan Logs
         </button>
         <button class="w3-bar-item w3-button tablink"
-                onclick="openCity(event, 'resumable-functions')">
+                onclick="openViewPart(event, 'resumable-functions')">
             Resumable Functions(10)
         </button>
         <button class="w3-bar-item w3-button tablink"
-                onclick="openCity(event, 'methods')">
+                onclick="openViewPart(event, 'methods')">
             Methods(34)
         </button>
     </div>
 
     <div class="w3-cell">
 
-        <div id="service-details" class="city w3-margin">
+        <div id="service-details" class="ViewPart w3-margin">
             <partial name="./_ServiceInfo" />
         </div>
 
-        <div id="scan-logs" class="w3-margin city" style="display:none">
-            <h2>Scan Logs</h2>
+        <div id="scan-logs" class="w3-margin ViewPart" style="display:none">
+            <header class="w3-text-indigo">
+                <h2 class="w3-margin-top"><b>Scan Logs</b></h2>
+            </header>
             <partial name="./_ScanLogs" />
         </div>
 
-        <div id="resumable-functions" class="w3-margin city" style="display:none">
+        <div id="resumable-functions" class="w3-margin ViewPart" style="display:none">
             <partial name="./_ResumableFunctionsList" />
         </div>
 
-        <div id="methods" class="w3-margin city" style="display:none">
+        <div id="methods" class="w3-margin ViewPart" style="display:none">
             <partial name="./_MethodsList" />
         </div>
     </div>
@@ -45,9 +47,9 @@
 
 @section Scripts{
     <script>
-        function openCity(evt, cityName) {
+        function openViewPart(evt, ViewPartName) {
             var i, x, tablinks;
-            x = document.getElementsByClassName("city");
+            x = document.getElementsByClassName("ViewPart");
             for (i = 0; i < x.length; i++) {
                 x[i].style.display = "none";
             }
@@ -55,7 +57,7 @@
             for (i = 0; i < x.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" w3-indigo", "");
             }
-            document.getElementById(cityName).style.display = "block";
+            document.getElementById(ViewPartName).style.display = "block";
             evt.currentTarget.className += " w3-indigo";
         }
     </script>

@@ -1,37 +1,38 @@
-﻿@*Latest Calls*@
-<div class="w3-margin-buttom w3-border-bottom w3-border-indigo w3-bottombar w3-padding-32">
-    <header class="w3-container w3-text-indigo">
-        <h2 class="w3-margin-top"><b><i class="fa fa-dashboard"></i>Latest Calls</b></h2>
-    </header>
-    <div class="w3-container">
-        <table class="w3-table-all">
-            <thead>
-                <tr class="w3-indigo">
-                    <th>Method</th>
-                    <th>Input</th>
-                    <th>Output</th>
-                    <th>Status</th>
-                    <th>Matched Waits</th>
-                    <th>Completed Waits</th>
-                </tr>
-            </thead>
-            <tr>
-                <td><a href="./RFUI/PushedCallDetails" class="w3-text-blue">ProjectSumbmitted</a></td>
-                <td>{ProjectId:12,Name:"skjdikm"}</td>
-                <td>true</a></td>
-                <td>Processing Finished</td>
-                <td><a href="#completed" class="w3-text-blue">23</a></td>
-                <td><a href="#completed" class="w3-text-blue">23</a></td>
+﻿<header class="w3-text-indigo">
+    <h2 class="w3-margin-top"><b>Latest Calls</b></h2>
+</header>
+
+<div class="w3-container">
+    <p>
+        <label>Search</label>
+        <input class="w3-input w3-border" type="text" required="" placeholder="Search by Method Name">
+    </p>
+    <table class="w3-table-all">
+        <thead>
+            <tr class="w3-indigo">
+                <th>Method</th>
+                <th>Input</th>
+                <th>Output</th>
+                <th>Status</th>
+                <th>Matched Waits</th>
+                <th>Completed Waits</th>
             </tr>
-            <tr>
-                <td><a href="./RFUI/PushedCallDetails" class="w3-text-blue">ManagerOneApproval</a></td>
-                <td>{Id:12,Name:"skjdikm"}</td>
-                <td>{decision:"Approved"}</a></td>
-                <td>Processing Finished</td>
-                <td><a href="#completed" class="w3-text-blue">23</a></td>
-                <td><a href="#completed" class="w3-text-blue">23</a></td>
-            </tr>
-        </table>
-        <button class="w3-button w3-indigo w3-margin-top">Show All</button>
-    </div>
+        </thead>
+        <tr>
+            <td><a href="./RFUI/PushedCallDetails" class="w3-text-blue">ProjectSumbmitted</a></td>
+            <td class="w3-text-deep-orange">{ProjectId:12,Name:"skjdikm"}</td>
+            <td class="w3-text-deep-orange">true</a></td>
+            <td>Processing Finished</td>
+            <td><a href="#completed" class="w3-text-blue">23</a></td>
+            <td><a href="#completed" class="w3-text-blue">23</a></td>
+        </tr>
+        <tr>
+            <td><a href="./RFUI/PushedCallDetails" class="w3-text-blue">ManagerOneApproval</a></td>
+            <td class="w3-text-dark-gray">{Id:12,Name:"skjdikm"}</td>
+            <td class="w3-text-dark-gray">{decision:"Approved"}</a></td>
+            <td>Processing Finished</td>
+            <td><a href="#completed" class="w3-text-blue">23</a></td>
+            <td><a href="#completed" class="w3-text-blue">23</a></td>
+        </tr>
+    </table>
 </div>

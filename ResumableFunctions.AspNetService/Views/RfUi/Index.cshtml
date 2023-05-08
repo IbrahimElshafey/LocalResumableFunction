@@ -2,37 +2,57 @@
     ViewData["Title"] = "Home Page";
 }
 
-<!-- !PAGE CONTENT! -->
-<div class="w3-main w3-container">   
-    <partial name="./_Services" />
-    <partial name="./_LatestCalls" />
-    <partial name="./_LatestLogs" />
+@*Services*@
+<div class="w3-margin-buttom">
+
+    <div class="w3-bar-block w3-light-grey w3-cell w3-border-right" style="width:200px;">
+        <button class="w3-bar-item w3-button tablink w3-indigo"
+                onclick="openViewPart(event, 'service-details')">
+            Services (2)
+        </button>
+        <button class="w3-bar-item w3-button tablink"
+                onclick="openViewPart(event, 'scan-logs')">
+            Pushed Calls (1256)
+        </button>
+        <button class="w3-bar-item w3-button tablink"
+                onclick="openViewPart(event, 'resumable-functions')">
+           Logs (7 New Error)
+        </button>
+    </div>
+
+    <div class="w3-cell">
+
+        <div id="service-details" class="ViewPart w3-margin">
+            <partial name="./_Services" />
+        </div>
+
+        <div id="scan-logs" class="w3-margin ViewPart" style="display:none">
+            <partial name="./_LatestCalls" />
+        </div>
+
+        <div id="resumable-functions" class="w3-margin ViewPart" style="display:none">
+            <partial name="./_LatestLogs" />
+        </div>
+    </div>
+
 </div>
 
 
 @section Scripts{
     <script>
-        // Get the Sidebar
-        var mySidebar = document.getElementById("mySidebar");
-
-        // Get the DIV with overlay effect
-        var overlayBg = document.getElementById("myOverlay");
-
-        // Toggle between showing and hiding the sidebar, and add overlay effect
-        function w3_open() {
-            if (mySidebar.style.display === 'block') {
-                mySidebar.style.display = 'none';
-                overlayBg.style.display = "none";
-            } else {
-                mySidebar.style.display = 'block';
-                overlayBg.style.display = "block";
+        function openViewPart(evt, ViewPartName) {
+            var i, x, tablinks;
+            x = document.getElementsByClassName("ViewPart");
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
             }
-        }
-
-        // Close the sidebar with the close button
-        function w3_close() {
-            mySidebar.style.display = "none";
-            overlayBg.style.display = "none";
+            tablinks = document.getElementsByClassName("tablink");
+            for (i = 0; i < x.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" w3-indigo", "");
+            }
+            document.getElementById(ViewPartName).style.display = "block";
+            evt.currentTarget.className += " w3-indigo";
         }
     </script>
 }
+
