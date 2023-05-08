@@ -20,7 +20,7 @@
 # Cross Services Locking
 * Table with Insert/Delete only (No Update)
 	* Indexed string column for entity name
-	*Intger column for entity ID
+	* Intger column for entity ID
 	* Creation date column
 * Process that may cause lock add row at starting contains (EntityName-EntityID)
 * Process check if row exist the entity is locked
@@ -30,14 +30,6 @@
 
 # Reading
 * lock in async method https://blog.cdemi.io/async-waiting-inside-c-sharp-locks/
-
-
-# Tables
-* FunctionStates (Insert,Update,Delete)
-* MethodIdentifiers (Insert,Update)
-* ServicesData (Insert,Update)
-
-* Waits (Insert)
 
 
 # Read

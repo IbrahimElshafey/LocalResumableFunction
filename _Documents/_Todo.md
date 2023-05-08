@@ -1,6 +1,6 @@
 ﻿# Todo
 
-
+* Write analyzer to force right use for the library
 
 ## Prepare how to use?
 * Implement workflows in 
@@ -14,13 +14,20 @@
 
 
 ## UI project
-* Add UI Project (
+* Service Details Page
+	* Service Resumable Functions List
+		* Resumable Function Active Instances
+			* RF Instance Details
+	* Service Method Wait List
+* Pushed Calls List
+	* Pushed Call Details
+* All Logs View
+* Add UI Project
 	* Servcies Registred
 		* Verify scanned methods 
 		* Find methods not in code
 		* verify method signatures
 		* verify start waits exist in db for each RF
-		* Push External Mehtod Call
 	* Monitor active resumable functions
 		* It's props 
 			* Status

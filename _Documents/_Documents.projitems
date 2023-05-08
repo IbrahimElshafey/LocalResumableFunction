@@ -11,7 +11,6 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Commands.md" />
     <None Include="$(MSBuildThisFileDirectory)External Reading.md" />
-    <None Include="$(MSBuildThisFileDirectory)ReadMe.md" />
     <None Include="$(MSBuildThisFileDirectory)Test Scenarios.md" />
     <None Include="$(MSBuildThisFileDirectory)_Thinking.md" />
     <None Include="$(MSBuildThisFileDirectory)_Todo.md" />
