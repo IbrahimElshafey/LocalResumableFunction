@@ -20,13 +20,15 @@ namespace ResumableFunctions.Publisher
         public async Task Publish<TInput, TOutput>(Func<TInput, Task<TOutput>> methodToPush,
             TInput input,
             TOutput output,
-            string methodUrn)
+            string methodUrn,
+            string serviceName)
         {
             await Publish(new MethodCall
             {
                 MethodUrn = methodUrn,
                 Input = input,
                 Output = output,
+                ServiceName = serviceName
             });
         }
 

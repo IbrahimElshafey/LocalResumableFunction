@@ -13,7 +13,8 @@ namespace ResumableFunctions.Publisher
             Func<TInput, Task<TOutput>> methodToPush,
             TInput input,
             TOutput output,
-            string methodIdetifier);
+            string methodIdetifier,
+            string serviceName);
         Task Publish(MethodCall MethodCall);
     }
 }

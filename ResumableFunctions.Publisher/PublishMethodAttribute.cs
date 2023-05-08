@@ -19,12 +19,12 @@ public sealed class PublishMethodAttribute : OnMethodBoundaryAspect
     private IPublishCall _publishMethod;
     internal static IServiceProvider ServiceProvider;
 
-    public PublishMethodAttribute(string methodIdetifier, string toServiceName)
+    public PublishMethodAttribute(string methodIdetifier, string serviceName)
     {
         if (string.IsNullOrWhiteSpace(methodIdetifier))
             throw new ArgumentNullException("MethodIdentifier can't be null or empty.");
         MethodIdentifier = methodIdetifier;
-        ServiceName = toServiceName;
+        ServiceName = serviceName;
     }
 
     /// <summary>
