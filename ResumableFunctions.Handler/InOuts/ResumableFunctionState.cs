@@ -13,8 +13,7 @@ public class ResumableFunctionState : EntityWithLogs, IEntityWithUpdate, IEntity
 
     public List<Wait> Waits { get; internal set; } = new();
 
-    [NotMapped]
-    public List<LogRecord> LogRecords { get; internal set; } = new();
+
 
     public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; set; }
     public int ResumableFunctionIdentifierId { get; set; }

@@ -68,7 +68,7 @@ public partial class ResumableFunctionHandler
             {
                 string errorMsg = $"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).";
                 _logger.LogWarning(errorMsg);
-                currentWait.AddError(errorMsg);
+                currentWait.FunctionState.AddError(errorMsg);
                 return;
             }
 

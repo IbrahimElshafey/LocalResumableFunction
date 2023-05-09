@@ -51,7 +51,7 @@
 			* Actions on Function Wait 
 				* Cancel
 				* Go Back (To,Before,After)
-		* Logs list from function state logs
+		* Logs list from function state logs3
 
 
 

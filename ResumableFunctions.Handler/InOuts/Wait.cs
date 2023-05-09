@@ -13,9 +13,10 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class Wait : EntityWithLogs, IEntityWithUpdate, IEntityWithDelete
+public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
 {
-
+    public int Id { get; internal set; }
+    public DateTime Created { get; internal set; }
     public string Name { get; internal set; }
     public WaitStatus Status { get; internal set; } = WaitStatus.Waiting;
     public bool IsFirst { get; internal set; }
@@ -113,7 +114,7 @@ public abstract class Wait : EntityWithLogs, IEntityWithUpdate, IEntityWithDelet
         catch (Exception ex)
         {
             FunctionState.AddError(
-                $"An error occurred after resuming execution after wait `{this}`.",ex);
+                $"An error occurred after resuming execution after wait `{this}`.", ex);
             Debug.Write(ex);
             throw;
         }
@@ -211,7 +212,7 @@ public abstract class Wait : EntityWithLogs, IEntityWithUpdate, IEntityWithDelet
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name",
                 LogType.Error);
         }
-        return ErrorCounter == 0;
+        return FunctionState?.HasError ?? true;
     }
 
 

@@ -14,7 +14,7 @@ public class EntityWithLogs : IEntity
 
     [NotMapped]
     public List<LogRecord> Logs { get; } = new();
-
+    public bool HasError => Logs.Any(x => x.Type == LogType.Error);
     public virtual void AddLog(string message, LogType logType = LogType.Info, string code = "")
     {
         Logs.Add(new LogRecord
