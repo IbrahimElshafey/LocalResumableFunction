@@ -1,1 +1,81 @@
-﻿<h1>Pushed Call Details</h1>
+﻿@*https://www.jqueryscript.net/other/jQuery-Plugin-For-Easily-Readable-JSON-Data-Viewer.html*@
+<div class="w3-container w3-margin">
+    <header class="w3-text-indigo">
+        <h2 class="w3-margin-top">Pushed Call <b>ProjectSumbitted</b> Details</h2>
+    </header>
+
+    <header class="w3-text-indigo">
+        <h4 class="w3-margin-top"><b>Input & Output</b></h4>
+    </header>
+    <div class="w3-row-padding">
+        <span class="w3-text-brown w3-col s6 JsonData" style=" word-wrap: break-word;">
+            {"CurrentProject":{"Id":100,"Name":"string","Description":"string","IsResubmit":false},"ManagerOneApproval":true,"ManagerTwoApproval":false,"ManagerThreeApproval":false,"ManagerFourApproval":false,"ManagerFiveApproval":false,"ExternalMethodStatus":"Not matched yet."}
+        </span>
+        <span class="w3-text-brown w3-col s6 JsonData" style=" word-wrap: break-word;">
+            {"CurrentProject":{"Id":100,"Name":"string","Description":"string","IsResubmit":false},"ManagerOneApproval":true,"ManagerTwoApproval":false,"ManagerThreeApproval":false,"ManagerFourApproval":false,"ManagerFiveApproval":false,"ExternalMethodStatus":"Not matched yet."}
+        </span>
+    </div>
+
+   @* <header class="w3-text-indigo">
+        <h4 class="w3-margin-top"><b>Actions</b></h4>
+    </header>
+    <button class="w3-button w3-indigo">Re-push</button>
+    <button class="w3-button w3-indigo">Cancel Active Waits</button>
+    <button class="w3-button w3-indigo">Reopen Completed Waits</button>*@
+    <br />
+    <header class="w3-text-indigo">
+        <h4 class="w3-margin-top"><b>Waits List</b></h4>
+    </header>
+    <p class="w3-col m6 l4">
+        <select class="w3-select" name="option">
+            <option value="" disabled selected>Choose a Status</option>
+            <option value="1">Completed</option>
+            <option value="3">Cancled</option>
+            <option value="3">Waiting</option>
+            <option value="3">All</option>
+
+        </select>
+    </p>
+    <table class="w3-table-all w3-padding-32" style="width: 100%;table-layout: fixed;">
+        <thead>
+            <tr class="w3-indigo">
+                <th>Name</th>
+                <th>In Resumable Function</th>
+                <th width="120px">Status</th>
+                <th>Match Expression</th>
+                <th>Set Data Expression</th>
+                <th width="120px">Created</th>
+                <th width="120px">Matched</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tr>
+            <td>Wait Project Submit</td>
+            <td><a href="~/rfui/ResumableFunctionInstances" class="w3-text-blue">ProjectApprovalWorkflowStart</a></td>
+            <td class="w3-text-green">Completed</td>
+            <td>(project, output) => output && !project.IsResubmit</td>
+            <td>(project, output) => CurrentProject == project</td>
+            <td>12/02/2022</td>
+            <td>12/02/2023</td>
+            <td>
+                <div class="w3-row">
+                    <button class="w3-button w3-col l6 w3-tiny w3-indigo">Wait Again</button>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>Wait Project Submit For Verification</td>
+            <td><a href="~/rfui/ResumableFunctionInstances" class="w3-text-blue">SubmitVerificationWorkflow</a></td>
+            <td class="w3-text-orange">Waiting</td>
+            <td>(project, output) => output && !project.IsResubmit</td>
+            <td>(project, output) => CurrentProject == project</td>
+            <td>12/02/2022</td>
+            <td>None</td>
+             <td>
+                <div class="w3-row">
+                    <button class="w3-button w3-col l6 w3-tiny w3-indigo">Cancel</button>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>

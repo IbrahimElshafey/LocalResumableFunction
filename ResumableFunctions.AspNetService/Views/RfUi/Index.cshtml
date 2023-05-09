@@ -10,6 +10,10 @@
                 onclick="openViewPart(event, 'service-details')">
             Services (2)
         </button>
+         <button class="w3-bar-item w3-button tablink"
+                onclick="openViewPart(event, 'all-resumable-functions')">
+            All Resumable Functions (12)
+        </button>
         <button class="w3-bar-item w3-button tablink"
                 onclick="openViewPart(event, 'scan-logs')">
             Pushed Calls (1256)
@@ -24,6 +28,10 @@
 
         <div id="service-details" class="ViewPart w3-margin">
             <partial name="./_Services" />
+        </div>
+
+        <div id="all-resumable-functions" class="ViewPart w3-margin" style="display:none">
+            <partial name="./_ResumableFunctionsList" />
         </div>
 
         <div id="scan-logs" class="w3-margin ViewPart" style="display:none">
