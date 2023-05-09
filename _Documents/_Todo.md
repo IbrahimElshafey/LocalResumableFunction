@@ -46,9 +46,11 @@
 			* Need Load Function Data for match
 			* Wait method
 			* Count Expression if group
-			* Actions on Method Wait ()
-			* Actions on Group Wait ()
-			* Actions on Function Wait ()
+			* Actions on Method Wait 
+			* Actions on Group Wait 
+			* Actions on Function Wait 
+				* Cancel
+				* Go Back (To,Before,After)
 		* Logs list from function state logs
 
 
