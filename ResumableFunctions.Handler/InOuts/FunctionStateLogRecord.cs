@@ -10,4 +10,9 @@ public class LogRecord : IEntity
     public string Message { get; internal set; }
     public DateTime Created { get; internal set; }
     public string Code { get; internal set; }
+
+    public override string ToString()
+    {
+        return $"{Type}: {Message}";
+    }
 }

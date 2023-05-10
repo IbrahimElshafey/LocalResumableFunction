@@ -93,16 +93,13 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
         {
             var errorMsg = $"Resumable function ({RequestedByFunction.MethodName}) not exist in code";
             FunctionState.AddError(errorMsg);
-            Debug.WriteLine($"Resumable function ({RequestedByFunction.MethodName}) not exist in code");
-            //todo:move to recycle bin and all related waits
-            //mark it as inactive
-            //throw new Exception("Can't initiate runner");
-            return null;
+            throw new Exception(errorMsg);
         }
 
         try
         {
             var waitExist = await functionRunner.MoveNextAsync();
+            FunctionState.Logs.AddRange(CurrentFunction.Logs);
             if (waitExist)
             {
                 Console.WriteLine($"Get next wait [{functionRunner.Current.Name}] after [{Name}]");

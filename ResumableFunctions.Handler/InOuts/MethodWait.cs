@@ -96,7 +96,7 @@ public class MethodWait : Wait
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog(
-                $"Method wait [{Name}] matched and function data updated.",
+                $"Function instance data updated after wait [{Name}] matched.",
                 LogType.Info);//todo:function state in progress
             return true;
         }

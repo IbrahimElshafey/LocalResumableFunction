@@ -77,7 +77,7 @@ public partial class ResumableFunctionHandler
         serviceData.AddError(errorMsg, ex);
         await _context.SaveChangesAsync();
     }
-
+    
     private async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
         var classInstance = (ResumableFunction)

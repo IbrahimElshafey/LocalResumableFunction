@@ -3,9 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public class ResumableFunctionState : EntityWithLogs, IEntityWithUpdate, IEntityWithDelete
+public class ResumableFunctionState : ObjectWithLog, IEntityWithUpdate, IEntityWithDelete
 {
-
+    public int Id { get; internal set; }
+    public DateTime Created { get; internal set; }
     /// <summary>
     /// Serailized class instance that contain the resumable function class
     /// </summary>

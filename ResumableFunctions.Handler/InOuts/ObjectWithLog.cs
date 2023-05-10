@@ -1,30 +1,32 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public class EntityWithLogs : IEntity
+public abstract class ObjectWithLog
 {
-    [Key]
-    public int Id { get; internal set; }
-    public DateTime Created { get; internal set; }
+    [JsonIgnore]
     public int ErrorCounter { get; internal set; }
 
-
+    [JsonIgnore]
     [NotMapped]
     public List<LogRecord> Logs { get; } = new();
+
+    [JsonIgnore]
     public bool HasError => Logs.Any(x => x.Type == LogType.Error);
+
     public virtual void AddLog(string message, LogType logType = LogType.Info, string code = "")
     {
-        Logs.Add(new LogRecord
+        var logRecord = new LogRecord
         {
             EntityType = GetType().Name,
             Type = logType,
             Message = message,
             Code = code,
             Created = DateTime.Now,
-        });
+        };
+        Logs.Add(logRecord);
+        Console.WriteLine(logRecord);
     }
     public virtual void AddError(string message, Exception ex = null, string code = "")
     {
@@ -36,7 +38,6 @@ public class EntityWithLogs : IEntity
             Code = code,
             Created = DateTime.Now,
         };
-        Debug.WriteLine("Error: " + message);
         Logs.Add(logRecord);
         ErrorCounter++;
         if (ex != null)
@@ -44,6 +45,8 @@ public class EntityWithLogs : IEntity
             logRecord.Message += $"\n{ex.Message}";
             logRecord.Message += $"\n{ex.StackTrace}";
         }
+        Console.WriteLine(logRecord);
     }
 }
+
 

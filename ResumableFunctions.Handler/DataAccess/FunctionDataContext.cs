@@ -234,12 +234,12 @@ public class FunctionDataContext : DbContext
             var entitiesWithLog =
                 ChangeTracker
                 .Entries()
-                    .Where(x => x.Entity is EntityWithLogs entityWithLog && entityWithLog.Logs.Any())
-                    .Select(x => (EntityWithLogs)x.Entity)
+                    .Where(x => x.Entity is ObjectWithLog entityWithLog && entityWithLog.Logs.Any())
+                    .Select(x => (ObjectWithLog)x.Entity)
                     .ToList();
             foreach (var entity in entitiesWithLog)
             {
-                entity.Logs.ForEach(x => x.EntityId = entity.Id);
+                entity.Logs.ForEach(x => x.EntityId = ((IEntity)entity).Id);
                 Logs.AddRange(entity.Logs.Where(x => x.Id == 0));
             }
             await base.SaveChangesAsync(cancellationToken);

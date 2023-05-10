@@ -23,7 +23,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
          Wait<Project, bool>("Project Submitted", ProjectSubmitted)//Point 2
              .MatchIf((project, output) => output && !project.IsResubmit)//Point 3
              .SetData((project, output) => CurrentProject == project);//Point 4
-
+        AddLog("After Project Submitted");
         await AskManagerToApprove("Manager One", CurrentProject.Id);
         //throw new Exception("Critical exception aftrer AskManagerToApprove");
         yield return
@@ -33,7 +33,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
 
         if (ManagerOneApproval is false)
         {
-            WriteMessage("Go back and ask applicant to resubmitt project.");
+            AddLog("Go back and ask applicant to resubmitt project.");
             await AskApplicantToResubmittProject(CurrentProject.Id);
             yield return GoBackTo<Project, bool>("Project Submitted", (project, output) => output && project.IsResubmit && project.Id == CurrentProject.Id);
         }
@@ -43,6 +43,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
             await InfromApplicantAboutApproval(CurrentProject.Id);
         }
         Success(nameof(ProjectApprovalFlow));
+        
     }
 
     private Task InfromApplicantAboutApproval(int id)
