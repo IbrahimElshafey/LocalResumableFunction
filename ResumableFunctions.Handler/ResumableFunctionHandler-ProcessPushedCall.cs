@@ -53,7 +53,7 @@ public partial class ResumableFunctionHandler
                     foreach (var waitId in waitsIds)
                     {
                         if (IsLocalWait(waitId))
-                            _backgroundJobClient.Enqueue(() => ProcessMatchedWait(waitId.Id, pushedCallId));
+                            _backgroundJobClient.Enqueue(() => ProcessExpectedWaitMatch(waitId.Id, pushedCallId));
                         else
                             await CallOwnerService(waitId, pushedCallId);
                     }
@@ -65,7 +65,7 @@ public partial class ResumableFunctionHandler
         }
     }
 
-    public async Task ProcessMatchedWait(int waitId, int pushedCallId)
+    public async Task ProcessExpectedWaitMatch(int waitId, int pushedCallId)
     {
         try
         {
@@ -146,24 +146,43 @@ public partial class ResumableFunctionHandler
         string ownerAssemblyPath = $"{AppContext.BaseDirectory}{ownerAssemblyName}.dll";
         return File.Exists(ownerAssemblyPath);
     }
+
     private async Task<bool> CheckIfMatch(MethodWait methodWait, int pushedCallId)
     {
-        methodWait.LoadExpressions();
-        switch (methodWait.NeedFunctionStateForMatch)
+        var isMatch = false;
+        try
         {
-            case false when methodWait.IsMatched():
-                await LoadWaitFunctionState(methodWait);
-                return true;
+            methodWait.LoadExpressions();
+            switch (methodWait.NeedFunctionStateForMatch)
+            {
+                case false when methodWait.IsMatched():
+                    await LoadWaitFunctionState(methodWait);
+                    isMatch = true;
+                    break;
 
-            case true:
-                await LoadWaitFunctionState(methodWait);
-                if (methodWait.IsMatched())
-                    return true;
-                break;
+                case true:
+                    await LoadWaitFunctionState(methodWait);
+                    if (methodWait.IsMatched())
+                        isMatch = true;
+                    break;
+            }
+            if (isMatch)
+                methodWait.FunctionState.AddLog(
+                    $"Wait matched [{methodWait.Name}] for [{methodWait.RequestedByFunction}].", LogType.Info);
+            return isMatch;
         }
-        //if matche or not it's completed
-        await IncrementCompletedCounter(pushedCallId);
-        return false;
+        catch (Exception ex)
+        {
+            if (isMatch)
+                methodWait.FunctionState.AddError(
+                    $"Error occured when evaluate match for [{methodWait.Name}] in [{methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].", ex);
+            return false;
+        }
+        finally
+        {
+            if (isMatch)
+                await IncrementCompletedCounter(pushedCallId);
+        }
 
         async Task LoadWaitFunctionState(MethodWait wait)
         {
@@ -179,8 +198,21 @@ public partial class ResumableFunctionHandler
     {
         try
         {
-            methodWait.SetInputAndOutput();
-            if (!await CheckIfMatch(methodWait, pushedCallId))
+            if (methodWait.IsFirst)
+                methodWait = await CloneFirstWait(methodWait);
+
+            //todo:log message `Wait is expected match`
+            var setInputOutputResult = methodWait.SetInputAndOutput();
+            if (setInputOutputResult.Result is false)
+            {
+                await LogErrorToService(
+                    methodWait.MethodToWait.MethodInfo,
+                    setInputOutputResult.ex,
+                    $"Error occured when deserialize `Input or Output` for wait `{methodWait.Name}`,Pushed call id was `{pushedCallId}`");
+                return;
+            }
+
+            if (await CheckIfMatch(methodWait, pushedCallId) is false)
                 return;
 
             //if (methodWait.IsFirst)
@@ -190,7 +222,7 @@ public partial class ResumableFunctionHandler
             {
                 using var scope = _serviceProvider.CreateScope();
                 var currentFunctionClassWithDi =
-                    scope.ServiceProvider.GetService(methodWait.CurrentFunction.GetType())??
+                    scope.ServiceProvider.GetService(methodWait.CurrentFunction.GetType()) ??
                     ActivatorUtilities.CreateInstance(_serviceProvider, methodWait.CurrentFunction.GetType());
                 JsonConvert.PopulateObject(
                     JsonConvert.SerializeObject(methodWait.CurrentFunction), currentFunctionClassWithDi);
@@ -211,7 +243,7 @@ public partial class ResumableFunctionHandler
                             $"\nProcessing this wait will be scheduled.",
                             LogType.Warning);
                         _backgroundJobClient.Schedule(
-                            () => ProcessMatchedWait(methodWait.Id, methodWait.PushedCallId), TimeSpan.FromMinutes(3));
+                            () => ProcessExpectedWaitMatch(methodWait.Id, methodWait.PushedCallId), TimeSpan.FromMinutes(3));
                         return;
                     }
                     throw;

@@ -1,5 +1,5 @@
 ﻿# Todo
-
+* Disable processing if there is a scan process in progress
 * Write analyzer to force right use for the library
 
 ## Prepare how to use?

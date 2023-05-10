@@ -10,11 +10,6 @@ public partial class ResumableFunctionHandler
 {
     private async Task ResumeExecution(MethodWait matchedMethodWait)
     {
-        if (matchedMethodWait.IsFirst)
-        {
-            matchedMethodWait = await CloneFirstWait(matchedMethodWait);
-        }
-
         Wait currentWait = matchedMethodWait;
         do
         {
@@ -31,7 +26,7 @@ public partial class ResumableFunctionHandler
                 case FunctionWait:
                     if (currentWait.IsCompleted())
                     {
-                        WriteMessage($"Exit ({currentWait.Name})");
+                        currentWait.FunctionState.AddLog($"Exit ({currentWait.Name})");
                         currentWait.Status = WaitStatus.Completed;
                         await _context.waitsRepository.CancelSubWaits(currentWait.Id);
                         await GoNext(parent, currentWait);
@@ -54,7 +49,7 @@ public partial class ResumableFunctionHandler
                 await ProceedToNextWait(currentWait);
                 break;
             case WaitsGroup:
-                WriteMessage($"Wait group ({parent.Name}) to complete.");
+                parent.FunctionState.AddLog($"Wait group ({parent.Name}) to complete.");
                 break;
         }
     }
@@ -95,7 +90,7 @@ public partial class ResumableFunctionHandler
         {
             var errorMessage = $"Error when proceed to next wait after {currentWait}";
             _logger.LogError(ex, errorMessage);
-            //currentWait.AddError(errorMessage);
+            currentWait.FunctionState.AddError(errorMessage,ex);
         }
     }
 

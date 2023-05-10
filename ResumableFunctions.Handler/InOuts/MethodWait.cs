@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.RateLimiting;
 using Hangfire;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Attributes;
@@ -121,7 +122,7 @@ public class MethodWait : Wait
         catch (Exception ex)
         {
             FunctionState.AddError(
-               $"An error occured when try evaluate match for wait [{Name}]." +
+               $"An error occured when try evaluate match expression for wait [{Name}]." +
                ex.Message,
                ex);
             return false;
@@ -150,7 +151,7 @@ public class MethodWait : Wait
         return base.IsValidWaitRequest();
     }
 
-    internal void SetInputAndOutput()
+    internal (bool Result, Exception ex) SetInputAndOutput()
     {
         var methodInfo = MethodToWait.MethodInfo;
         try
@@ -165,7 +166,7 @@ public class MethodWait : Wait
         }
         catch (Exception ex)
         {
-
+            return (false, ex);
         }
 
         try
@@ -177,13 +178,16 @@ public class MethodWait : Wait
                 else
                     Output = outputJson.ToObject(methodInfo.ReturnType);
             }
+            else if (methodInfo.IsAsyncMethod())
+                Output = Convert.ChangeType(Output.ToString(), methodInfo.ReturnType.GetGenericArguments()[0]);
             else
                 Output = Convert.ChangeType(Output.ToString(), methodInfo.ReturnType);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            return (false, ex);
         }
-
+        return (true,null);
     }
 }
 
