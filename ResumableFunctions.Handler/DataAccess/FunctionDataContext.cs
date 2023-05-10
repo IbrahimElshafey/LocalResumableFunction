@@ -69,7 +69,6 @@ public class FunctionDataContext : DbContext
         ConfigureWaits(modelBuilder);
         ConfigurConcurrencyToken(modelBuilder);
         ConfigurSoftDeleteFilter(modelBuilder);
-
         base.OnModelCreating(modelBuilder);
     }
 

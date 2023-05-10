@@ -1,6 +1,5 @@
 ﻿# Todo
-* Disable processing if there is a scan process in progress
-* Write analyzer to force right use for the library
+
 
 ## Prepare how to use?
 * Implement workflows in 
@@ -61,8 +60,12 @@
 * Wait methods in same method group must have the same signature
 * Verify that fody MethodBoundaryAspect is active
 
-## Refactoring and rewrite code
-* UOW to support no-sql implementation
+# Coding
+* Write Roslyn analyzer to force the right use for the library
+* Enable support for other store options
+	* MongoDb,Tarantool or Couchbase Server
+	* InMemory
+* Disable processing if there is a scan process in progress
 * Refactor ResumableFunctionHandler to be multiple classes/services
 	* RegisterFirstWait
 	* CloneFirstWait
