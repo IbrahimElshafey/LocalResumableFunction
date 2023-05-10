@@ -75,7 +75,7 @@ public class FunctionDataContext : DbContext
 
     private void ConfigurSoftDeleteFilter(ModelBuilder modelBuilder)
     {
-        //todo:https://haacked.com/archive/2019/07/29/query-filter-by-interface/
+        //todo:query filter by interface https://haacked.com/archive/2019/07/29/query-filter-by-interface/
         modelBuilder.Entity<Wait>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<ResumableFunctionState>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<PushedCall>().HasQueryFilter(p => !p.IsDeleted);

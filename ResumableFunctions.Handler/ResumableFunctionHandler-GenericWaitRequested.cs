@@ -11,7 +11,7 @@ public partial class ResumableFunctionHandler
 {
     internal async Task<bool> SaveWaitRequestToDb(Wait newWait)
     {
-        if (!newWait.IsValidWaitRequest())
+        if (newWait.IsValidWaitRequest() is false)
         {
             string message = 
                 $"Error when validate the requested wait [{newWait.Name}] " +

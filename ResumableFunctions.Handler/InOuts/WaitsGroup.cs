@@ -91,11 +91,11 @@ public class WaitsGroup : Wait
 
     internal override bool IsValidWaitRequest()
     {
-        foreach (var childWait in ChildWaits)
-        {
-            if (!childWait.IsValidWaitRequest())
-                break;
-        }
+        //foreach (var childWait in ChildWaits)
+        //{
+        //    if (!childWait.IsValidWaitRequest())
+        //        break;
+        //}
         return base.IsValidWaitRequest();
     }
 

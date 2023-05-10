@@ -203,16 +203,16 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
         //FunctionState.StatusMessage = message;
         //FunctionState.Status = FunctionStatus.ErrorOccured;
         var isNameDuplicated =
-            FunctionState?
+            FunctionState
             .Waits
             .Count(x => x.Name == Name) > 1;
         if (isNameDuplicated)
         {
-            FunctionState?.AddLog(
+            FunctionState.AddLog(
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name",
-                LogType.Error);
+                LogType.Warning);
         }
-        return FunctionState?.HasError ?? true;
+        return FunctionState.HasError is false;
     }
 
 

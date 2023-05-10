@@ -77,6 +77,7 @@ public partial class ResumableFunctionHandler
                     .MethodWaits
                     .Include(x => x.RequestedByFunction)
                     .Include(x => x.MethodToWait)
+                    .Include(x => x.FunctionState)
                     .Where(x => x.Status == WaitStatus.Waiting)
                     .FirstOrDefaultAsync(x => x.Id == waitId);
 
@@ -153,19 +154,7 @@ public partial class ResumableFunctionHandler
         try
         {
             methodWait.LoadExpressions();
-            switch (methodWait.NeedFunctionStateForMatch)
-            {
-                case false when methodWait.IsMatched():
-                    await LoadWaitFunctionState(methodWait);
-                    isMatch = true;
-                    break;
-
-                case true:
-                    await LoadWaitFunctionState(methodWait);
-                    if (methodWait.IsMatched())
-                        isMatch = true;
-                    break;
-            }
+            isMatch = methodWait.IsMatched();
             if (isMatch)
                 methodWait.FunctionState.AddLog(
                     $"Wait matched [{methodWait.Name}] for [{methodWait.RequestedByFunction}].", LogType.Info);
@@ -183,13 +172,6 @@ public partial class ResumableFunctionHandler
             if (isMatch)
                 await IncrementCompletedCounter(pushedCallId);
         }
-
-        async Task LoadWaitFunctionState(MethodWait wait)
-        {
-            wait.FunctionState = await _context
-                .FunctionStates
-                .FirstOrDefaultAsync(x => x.Id == wait.FunctionStateId);
-        }
     }
 
 
@@ -202,12 +184,13 @@ public partial class ResumableFunctionHandler
                 methodWait = await CloneFirstWait(methodWait);
 
             //todo:log message `Wait is expected match`
+            methodWait.FunctionState.AddLog(
+                   $"Wait `{methodWait.Name}` may be a match for pushed call `{pushedCallId}`");
+
             var setInputOutputResult = methodWait.SetInputAndOutput();
             if (setInputOutputResult.Result is false)
             {
-                await LogErrorToService(
-                    methodWait.MethodToWait.MethodInfo,
-                    setInputOutputResult.ex,
+                methodWait.FunctionState.AddError(
                     $"Error occured when deserialize `Input or Output` for wait `{methodWait.Name}`,Pushed call id was `{pushedCallId}`");
                 return;
             }
@@ -279,7 +262,6 @@ public partial class ResumableFunctionHandler
             {
                 if (entry.Entity is PushedCall call)
                 {
-                    //entry.OriginalValues.SetValues(await entry.GetDatabaseValuesAsync());
                     await IncrementCompletedCounter(call.Id);
                 }
                 else
