@@ -187,6 +187,7 @@ internal class WaitsRepository : RepositoryBase
             var waitData = waitDataJson.ToObject<TimeWaitData>();
             backgroundJobClient.Delete(waitData.JobId);
         }
+        wait.FunctionState.AddLog($"Wait `{wait.Name}` canceled.");
     }
 
     public async Task<Wait> GetWaitParent(Wait wait)

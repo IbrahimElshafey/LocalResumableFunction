@@ -218,18 +218,13 @@ public partial class ResumableFunctionHandler
                 }
                 catch (DbUpdateConcurrencyException ex)
                 {
-                    if (ex.Entries.All(x => x.Entity is ResumableFunctionState))
-                    {
-                        methodWait.FunctionState.AddLog(
-                            $"Concurrency Exception occured when try to update function state [{methodWait.FunctionState.Id}]." +
-                            $"\nError message:{ex.Message}" +
+                    methodWait.FunctionState.AddError(
+                            $"Concurrency Exception occured when process wait [{methodWait.Name}]." +
                             $"\nProcessing this wait will be scheduled.",
-                            LogType.Warning);
-                        _backgroundJobClient.Schedule(
-                            () => ProcessExpectedWaitMatch(methodWait.Id, methodWait.PushedCallId), TimeSpan.FromMinutes(3));
-                        return;
-                    }
-                    throw;
+                            ex);
+                    _backgroundJobClient.Schedule(
+                        () => ProcessExpectedWaitMatch(methodWait.Id, methodWait.PushedCallId), TimeSpan.FromMinutes(3));
+                    return;
                 }
 
                 await ResumeExecution(methodWait);

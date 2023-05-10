@@ -133,7 +133,7 @@ public partial class ResumableFunctionHandler
 
 
 
-    private async Task<bool> MoveFunctionToRecycleBin(Wait lastWait)
+    private async Task<bool> MoveFunctionToRecycleBin(int functionStateId)
     {
         //move function state
         //it's logs

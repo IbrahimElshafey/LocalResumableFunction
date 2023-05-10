@@ -27,4 +27,10 @@
 		<PackageReference Include="Fody" Version="6.6.4" />
 		<PackageReference Include="MethodBoundaryAspect.Fody" Version="2.0.148" />
 	</ItemGroup>
+
+
+	<ItemGroup>
+	  <Folder Include="Views\RfPushedCallDetails\" />
+	  <Folder Include="Views\RfServiceDetails\" />
+	</ItemGroup>
 </Project>

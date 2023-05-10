@@ -26,7 +26,7 @@ public partial class ResumableFunctionHandler
                 case FunctionWait:
                     if (currentWait.IsCompleted())
                     {
-                        currentWait.FunctionState.AddLog($"Exit ({currentWait.Name})");
+                        currentWait.FunctionState.AddLog($"Wait `{currentWait.Name}` is completed.");
                         currentWait.Status = WaitStatus.Completed;
                         await _context.waitsRepository.CancelSubWaits(currentWait.Id);
                         await GoNext(parent, currentWait);
@@ -102,6 +102,6 @@ public partial class ResumableFunctionHandler
         currentWait.FunctionState.AddLog("Function instance completed.", LogType.Info);
         currentWait.FunctionState.Status = FunctionStatus.Completed;
         await _context.waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
-        await MoveFunctionToRecycleBin(currentWait);
+        await MoveFunctionToRecycleBin(currentWait.FunctionStateId);
     }
 }
