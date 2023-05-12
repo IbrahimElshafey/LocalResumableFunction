@@ -1765,8 +1765,8 @@
         .jsonContainer {
             background-color: ghostwhite;
             border: 1px solid silver;
-          /*  padding: 10px 20px;
-            margin: 20px;*/
+            /*  padding: 10px 20px;
+                    margin: 20px;*/
         }
 
         .json-key {
@@ -1782,38 +1782,53 @@
         }
     </style>
     <script>
-    if (!library)
-    var library = {};
+        if (!library)
+            var library = {};
 
-    library.json = {
-       replacer: function(match, pIndent, pKey, pVal, pEnd) {
-          var key = '<span class=json-key>';
-          var val = '<span class=json-value>';
-          var str = '<span class=json-string>';
-          var r = pIndent || '';
-          if (pKey)
-             r = r + key + pKey.replace(/[": ]/g, '') + '</span>: ';
-          if (pVal)
-             r = r + (pVal[0] == '"' ? str : val) + pVal + '</span>';
-          return r + (pEnd || '');
-          },
-       prettyPrint: function(obj) {
-          var jsonLine = /^( *)("[\w]+": )?("[^"]*"|[\w.+-]*)?([,[{])?$/mg;
-          return JSON.stringify(obj, null, 3)
-             .replace(/&/g, '&amp;').replace(/\\"/g, '&quot;')
-             .replace(/</g, '&lt;').replace(/>/g, '&gt;')
-             .replace(jsonLine, library.json.replacer);
-          }
-       };
-       document.addEventListener("DOMContentLoaded", function() {
-        var nodes=document.querySelectorAll('.JsonObject');
+        library.json = {
+            replacer: function (match, pIndent, pKey, pVal, pEnd) {
+                var key = '<span class=json-key>';
+                var val = '<span class=json-value>';
+                var str = '<span class=json-string>';
+                var r = pIndent || '';
+                if (pKey)
+                    r = r + key + pKey.replace(/[": ]/g, '') + '</span>: ';
+                if (pVal)
+                    r = r + (pVal[0] == '"' ? str : val) + pVal + '</span>';
+                return r + (pEnd || '');
+            },
+            prettyPrint: function (obj) {
+                var jsonLine = /^( *)("[\w]+": )?("[^"]*"|[\w.+-]*)?([,[{])?$/mg;
+                return JSON.stringify(obj, null, 3)
+                    .replace(/&/g, '&amp;').replace(/\\"/g, '&quot;')
+                    .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(jsonLine, library.json.replacer);
+            }
+        };
+        document.addEventListener("DOMContentLoaded", function () {
+            var nodes = document.querySelectorAll('.JsonObject');
             var items = [...nodes];
             console.log(items);
-            items.forEach(item=>{
+            items.forEach(item => {
                 item.innerHTML = library.json.prettyPrint(JSON.parse(item.innerHTML));
                 //console.log(library.json.prettyPrint());
             });
         });
+
+
+        function openViewPart(evt, ViewPartName) {
+            var i, x, tablinks;
+            x = document.getElementsByClassName("ViewPart");
+            for (i = 0; i < x.length; i++) {
+                x[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablink");
+            for (i = 0; i < x.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" w3-indigo", "");
+            }
+            document.getElementById(ViewPartName).style.display = "block";
+            evt.currentTarget.className += " w3-indigo";
+        }
     </script>
 </head>
 <body class="w3-light-grey">
@@ -1822,7 +1837,7 @@
     <header class="w3-container w3-indigo">
         <a href="~/rfui"><h3 class="w3-right">Resumable Functions</h3></a>
     </header>
-    
+
 
     <!-- Overlay effect when opening sidebar on small screens -->
     @RenderBody()

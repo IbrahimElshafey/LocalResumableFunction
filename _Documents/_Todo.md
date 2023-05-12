@@ -64,7 +64,8 @@
 * Write Roslyn analyzer to force the right use for the library
 * Enable support for other store options
 	* MongoDb,Tarantool or Couchbase Server
-	* InMemory
+	* Kafka,RbbittMQ or ActiveMQ 
+		* will be applicable for waits queuing but not states so it will be an option with use a DB
 * Disable processing if there is a scan process in progress
 * Refactor ResumableFunctionHandler to be multiple classes/services
 	* RegisterFirstWait

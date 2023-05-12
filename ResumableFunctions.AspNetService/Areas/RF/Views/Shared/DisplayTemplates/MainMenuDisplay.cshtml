@@ -1,0 +1,27 @@
+﻿@using ResumableFunctions.AspNetService.DisplayObject;
+@model MainMenuDisplay
+<div class="w3-margin-buttom">
+
+    <div class="w3-bar-block w3-light-grey w3-cell w3-border-right" style="width:230px;">
+        @for (int i = 0; i < Model.Items.Length; i++)
+        {
+            var menuItem = Model.Items[i];
+            <button class="w3-bar-item w3-button tablink"
+                    onclick="openViewPart(event, 'partial-view-@i')">
+                @menuItem.DisplayName
+            </button>
+        }
+    </div>
+
+    <div class="w3-cell">
+
+        @for (int i = 0; i < Model.Items.Length; i++)
+        {
+            var menuItem = Model.Items[i];
+            <div id="partial-view-@i" class="ViewPart w3-margin" style="display:none">
+                <partial name="@(menuItem.PartialViewUrl)" />
+            </div>
+        }
+    </div>
+
+</div>

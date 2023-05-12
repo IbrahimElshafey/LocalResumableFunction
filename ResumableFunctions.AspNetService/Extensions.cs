@@ -22,7 +22,7 @@ namespace ResumableFunctions.AspNetService
             mvcBuilder.Services.AddRazorPages();
             mvcBuilder.Services.AddResumableFunctionsCore(settings);
         }
-       
+
 
         public static void ScanCurrentService(this WebApplication app)
         {
@@ -34,6 +34,9 @@ namespace ResumableFunctions.AspNetService
 
             app.UseRouting();
 
+            app.MapControllerRoute(
+                name: "MyArea",
+                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
             app.MapControllerRoute(
                 name: "default",

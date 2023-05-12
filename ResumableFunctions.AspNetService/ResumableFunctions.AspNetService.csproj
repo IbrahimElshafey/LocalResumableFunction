@@ -30,7 +30,7 @@
 
 
 	<ItemGroup>
-	  <Folder Include="Views\RfPushedCallDetails\" />
-	  <Folder Include="Views\RfServiceDetails\" />
+	  <Folder Include="Areas\RF\ViewComponents\" />
+	  <Folder Include="Areas\RF\Views\Shared\Components\" />
 	</ItemGroup>
 </Project>
