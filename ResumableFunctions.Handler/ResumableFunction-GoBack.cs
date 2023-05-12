@@ -5,8 +5,12 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
 
-public abstract partial class ResumableFunction: ObjectWithLog
+public abstract partial class ResumableFunction : ObjectWithLog
 {
+    public virtual string GetInstanceId(string functionUrn)
+    {
+        return default;
+    }
 
     /// <summary>
     ///     Go back to code after the wait.

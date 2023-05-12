@@ -25,5 +25,10 @@ namespace MVC.Controllers
             model.SetMenu(await _uiService.GetMainStatistics());
             return View(model);
         }
+
+        public async Task<IActionResult> ServicesView()
+        {
+            return PartialView("_Services", new ServicesListModel(await _uiService.GetServicesInfo()));
+        }
     }
 }

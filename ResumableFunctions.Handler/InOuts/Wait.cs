@@ -99,6 +99,11 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
         try
         {
             var waitExist = await functionRunner.MoveNextAsync();
+            CurrentFunction.Logs.ForEach(log =>
+            {
+                log.IsCustom = true;
+                log.EntityType = nameof(ResumableFunctionState);
+            });
             FunctionState.Logs.AddRange(CurrentFunction.Logs);
             if (waitExist)
             {

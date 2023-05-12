@@ -24,6 +24,7 @@ public class Scanner
     private IServiceProvider _serviceProvider;
     private readonly ILogger<Scanner> _logger;
     private readonly string Code = DateTime.Now.Ticks.ToString();
+    private int currentServiceId = -1;
     public Scanner(IServiceProvider serviceProvider, ILogger<Scanner> logger)
     {
         _serviceProvider = serviceProvider;
@@ -123,7 +124,8 @@ public class Scanner
             MethodType.ResumableFunctionEntryPoint :
             MethodType.SubResumableFunction;
         serviceData.AddLog($"Register resumable function [{resumableFunctionMinfo.GetFullName()}] of type [{methodType}]");
-        var mi = await _context.methodIdentifierRepo.AddResumableFunctionIdentifier(new MethodData(resumableFunctionMinfo) { MethodType = methodType });
+        var mi = await _context.methodIdentifierRepo
+            .AddResumableFunctionIdentifier(new MethodData(resumableFunctionMinfo) { MethodType = methodType }, currentServiceId);
         await _context.SaveChangesAsync();
         if (isEntryPoint)
         {
@@ -224,9 +226,12 @@ public class Scanner
         if (serviceData == null)
         {
             serviceData = await AddNewServiceData(serviceUrl, currentAssemblyName);
+            currentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
             return true;
         }
+
         serviceData.ErrorCounter = 0;
+        currentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
         if (File.Exists(assemblyPath) is false)
         {
             string message = $"Assembly file ({assemblyPath}) not exist.";
@@ -301,7 +306,7 @@ public class Scanner
                 if (ValidateMethodWait(method, serviceData))
                 {
                     var methodData = new MethodData(method) { MethodType = MethodType.MethodWait };
-                    await _context.methodIdentifierRepo.AddWaitMethodIdentifier(methodData);
+                    await _context.methodIdentifierRepo.AddWaitMethodIdentifier(methodData, currentServiceId);
                     serviceData?.AddLog($"Adding method identifier {methodData}");
                 }
                 else

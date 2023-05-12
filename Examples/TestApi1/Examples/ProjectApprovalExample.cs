@@ -45,7 +45,10 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Success(nameof(ProjectApprovalFlow));
         
     }
-
+    public override string GetInstanceId(string functionUrn)
+    {
+        return CurrentProject?.Id.ToString();
+    }
     private Task InfromApplicantAboutApproval(int id)
     {
         return Task.CompletedTask;

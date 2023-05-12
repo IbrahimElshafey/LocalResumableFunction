@@ -28,6 +28,7 @@ public abstract class MethodIdentifier : IEntityWithUpdate
             return _methodInfo;
         }
     }
+    public int? ServiceId { get; internal set; }
 
     public DateTime Modified { get; internal set; }
     public string ConcurrencyToken { get; internal set; }

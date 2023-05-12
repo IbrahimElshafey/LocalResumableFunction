@@ -29,6 +29,7 @@ public partial class ResumableFunctionHandler
             //    $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.", LogType.Info);
           
             firstWaitClone.FunctionState.Status = FunctionStatus.InProgress;
+           
             await SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);

@@ -15,7 +15,7 @@ namespace MVC.Models
                     {
                         new MainMenuItem(
                             $"Services ({mainStatistics.Services})",
-                            "./_Services"),
+                            "/RF/Home/ServicesView"),
                         new MainMenuItem(
                             $"Resumable Functions ({mainStatistics.ResumableFunctions}) & ({mainStatistics.ResumableFunctionsInstances}) Instances",
                             "./_ResumableFunctionsList"),

@@ -17,7 +17,7 @@ internal class MethodIdentifierRepository : RepositoryBase
         _logger = logger;
     }
 
-    
+
 
     internal async Task<ResumableFunctionIdentifier> GetResumableFunction(int id)
     {
@@ -49,24 +49,26 @@ internal class MethodIdentifierRepository : RepositoryBase
         }
     }
 
-    internal async Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData)
+    internal async Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData, int? serviceId)
     {
         var inDb = await GetResumableFunction(methodData);
         if (inDb != null)
         {
             inDb.FillFromMethodData(methodData);
+            inDb.ServiceId = serviceId;
             return inDb;
         }
         else
         {
             var add = new ResumableFunctionIdentifier();
             add.FillFromMethodData(methodData);
+            add.ServiceId = serviceId;
             _context.ResumableFunctionIdentifiers.Add(add);
             return add;
         }
     }
 
-    internal async Task AddWaitMethodIdentifier(MethodData methodData)
+    internal async Task AddWaitMethodIdentifier(MethodData methodData,int service)
     {
         //todo:validate same signature for group methods
         var methodGroup =
@@ -85,13 +87,14 @@ internal class MethodIdentifierRepository : RepositoryBase
         if (isUpdate)
         {
             methodInDb.FillFromMethodData(methodData);
+            methodInDb.ServiceId = service;
             return;
         }
 
 
         var toAdd = new WaitMethodIdentifier();
         toAdd.FillFromMethodData(methodData);
-
+        toAdd.ServiceId = service;
         var isChildAdd =
             methodGroup != null &&
             methodInDb == null;

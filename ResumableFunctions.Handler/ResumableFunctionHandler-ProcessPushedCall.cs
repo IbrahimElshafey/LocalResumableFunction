@@ -210,6 +210,8 @@ public partial class ResumableFunctionHandler
                 JsonConvert.PopulateObject(
                     JsonConvert.SerializeObject(methodWait.CurrentFunction), currentFunctionClassWithDi);
                 methodWait.CurrentFunction = (ResumableFunction)currentFunctionClassWithDi;
+                methodWait.FunctionState.UserDefinedId =
+                    methodWait.CurrentFunction.GetInstanceId(methodWait.RequestedByFunction.RF_MethodUrn);
                 try
                 {
                     methodWait.PushedCallId = pushedCallId;

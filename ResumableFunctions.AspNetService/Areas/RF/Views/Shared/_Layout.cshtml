@@ -1818,22 +1818,46 @@
 
         function openViewPart(index) {
             console.log(index);
-            var i, views, tablinks;
-            views = document.getElementsByClassName("ViewPart");
-            //hide all views
-            for (i = 0; i < views.length; i++) {
-                views[i].style.display = "none";
-            }
-            //activate all menu items
+            if(index==undefined)
+                index='0';
+            var i, tablinks;
+          
+            //de-activate all menu items
             tablinks = document.getElementsByClassName("tablink");
-            for (i = 0; i < views.length; i++) {
+            for (i = 0; i < tablinks.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" w3-indigo", "");
             }
-            //show requested view
-            document.getElementById('partial-view-' +index).style.display = "block";
+            //open requested view
+            //document.getElementById('partial-view-' +index).style.display = "block";
             //activate requestd menu item
-            document.getElementById('tab-link-' +index).className += " w3-indigo";
+            var currentButton = document.getElementById('tab-link-' +index);
+            currentButton.className += " w3-indigo";
+            var viewUrl = currentButton.getAttribute('data-view-link');
+            fetch(viewUrl)
+            .then((response) => { return response.text(); })
+            .then((result) => {
+                   var homeDiv = document.querySelector('#main-page-content');
+                   homeDiv.innerHTML = result;
+            });
+            window.location.hash = "#view="+index;
         }
+
+        function hashParts(){
+            var hash = window.location.hash.substr(1);
+
+            var result = hash.split('&').reduce(function (res, item) {
+                var parts = item.split('=');
+                res[parts[0]] = parts[1];
+                return res;
+            }, {});
+            return result;
+        }
+
+        //document ready
+        document.addEventListener("DOMContentLoaded", function() {
+            if(document.getElementById('is-menu-page').value)
+                openViewPart(hashParts().view);
+        });
     </script>
 </head>
 <body class="w3-light-grey">

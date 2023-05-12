@@ -10,5 +10,7 @@ namespace ResumableFunctions.Handler.UiService
     public interface IUiService
     {
         Task<MainStatistics> GetMainStatistics();
+
+        Task<List<ServiceInfo>> GetServicesInfo();
     }
 }
