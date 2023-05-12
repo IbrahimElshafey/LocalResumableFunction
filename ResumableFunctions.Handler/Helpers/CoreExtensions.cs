@@ -11,6 +11,7 @@ using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.UiService;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -35,6 +36,7 @@ public static class CoreExtensions
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
+        services.AddScoped<IUiService, UiService.UiService>();
         if (settings.HangFireConfig != null)
         {
             services.AddHangfire(x => x = settings.HangFireConfig);

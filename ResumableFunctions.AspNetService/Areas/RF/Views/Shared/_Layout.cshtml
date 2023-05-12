@@ -1816,18 +1816,23 @@
         });
 
 
-        function openViewPart(evt, ViewPartName) {
-            var i, x, tablinks;
-            x = document.getElementsByClassName("ViewPart");
-            for (i = 0; i < x.length; i++) {
-                x[i].style.display = "none";
+        function openViewPart(index) {
+            console.log(index);
+            var i, views, tablinks;
+            views = document.getElementsByClassName("ViewPart");
+            //hide all views
+            for (i = 0; i < views.length; i++) {
+                views[i].style.display = "none";
             }
+            //activate all menu items
             tablinks = document.getElementsByClassName("tablink");
-            for (i = 0; i < x.length; i++) {
+            for (i = 0; i < views.length; i++) {
                 tablinks[i].className = tablinks[i].className.replace(" w3-indigo", "");
             }
-            document.getElementById(ViewPartName).style.display = "block";
-            evt.currentTarget.className += " w3-indigo";
+            //show requested view
+            document.getElementById('partial-view-' +index).style.display = "block";
+            //activate requestd menu item
+            document.getElementById('tab-link-' +index).className += " w3-indigo";
         }
     </script>
 </head>
