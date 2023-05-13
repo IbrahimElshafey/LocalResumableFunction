@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MVC.Models;
 using ResumableFunctions.AspNetService.DisplayObject;
 using System.Diagnostics;
 

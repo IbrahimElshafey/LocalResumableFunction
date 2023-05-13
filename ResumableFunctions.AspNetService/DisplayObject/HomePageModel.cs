@@ -1,10 +1,17 @@
-using ResumableFunctions.AspNetService.DisplayObject;
 using ResumableFunctions.Handler.UiService.InOuts;
 
-namespace MVC.Models
+namespace ResumableFunctions.AspNetService.DisplayObject
 {
     public class HomePageModel
     {
+        public class PartialNames
+        {
+            public const string ServicesList = "_Services";
+            public const string ResumableFunctions = "_ResumableFunctionsList";
+            public const string LatestCalls = "_LatestCalls";
+            public const string LatestLogs = "_LatestLogs";
+
+        }
         public MainMenuDisplay Menu { get; private set; }
 
         internal void SetMenu(MainStatistics mainStatistics)
@@ -15,16 +22,16 @@ namespace MVC.Models
                     {
                         new MainMenuItem(
                             $"Services ({mainStatistics.Services})",
-                            "/RF/Home/ServicesView"),
+                            $"/RF/Home/{PartialNames.ServicesList}"),
                         new MainMenuItem(
                             $"Resumable Functions ({mainStatistics.ResumableFunctions}) & ({mainStatistics.ResumableFunctionsInstances}) Instances",
-                            "./_ResumableFunctionsList"),
+                            $"/RF/Home/{PartialNames.ResumableFunctions}"),
                         new MainMenuItem(
                             $"Pushed Calls ({mainStatistics.PushedCalls})",
-                            "./_LatestCalls"),
+                            $"/RF/Home/{PartialNames.LatestCalls}"),
                         new MainMenuItem(
                             $"Latest Logs ({mainStatistics.LatestLogErrors} New Error)",
-                            "./_LatestLogs"),
+                            $"/RF/Home/{PartialNames.LatestLogs}"),
                 }
             };
         }

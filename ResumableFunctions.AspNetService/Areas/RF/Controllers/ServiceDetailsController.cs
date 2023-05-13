@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MVC.Models;
 using ResumableFunctions.AspNetService.DisplayObject;
 using ResumableFunctions.Handler.UiService;
 using System.Diagnostics;
@@ -19,15 +18,36 @@ namespace MVC.Controllers
             _uiService = uiService;
         }
 
-        public async Task<IActionResult> IndexAsync(int id)
+        public async Task<IActionResult> Index(int id)
         {
-            var model = new ServiceDetailsModel();
+            var model = new ServiceDetailsModel() { ServiceId = id };
+            model.SetMenu();
             return View(model);
         }
 
-        public IActionResult ServiceInfoView(int id)
+        [ActionName(ServiceDetailsModel.PartialNames.ServiceDetails)]
+        public IActionResult ServiceInfoView(int serviceId)
         {
-            return PartialView("");
+            return PartialView(ServiceDetailsModel.PartialNames.ServiceDetails);
         }
+
+        [ActionName(ServiceDetailsModel.PartialNames.ScanLogs)]
+        public IActionResult GetScanLogs(int serviceId)
+        {
+            return PartialView(ServiceDetailsModel.PartialNames.ScanLogs);
+        }
+
+        [ActionName(ServiceDetailsModel.PartialNames.ResumabelFunctions)]
+        public IActionResult GetResumabelFunctions(int serviceId)
+        {
+            return PartialView(ServiceDetailsModel.PartialNames.ResumabelFunctions);
+        }
+
+        [ActionName(ServiceDetailsModel.PartialNames.MethodsList)]
+        public IActionResult GetMethodsList(int serviceId)
+        {
+            return PartialView(ServiceDetailsModel.PartialNames.MethodsList);
+        }
+
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using MVC.Models;
 using ResumableFunctions.AspNetService.DisplayObject;
 using ResumableFunctions.Handler.UiService;
 using System.Diagnostics;
@@ -26,9 +25,28 @@ namespace MVC.Controllers
             return View(model);
         }
 
+        [ActionName(HomePageModel.PartialNames.ServicesList)]
         public async Task<IActionResult> ServicesView()
         {
-            return PartialView("_Services", new ServicesListModel(await _uiService.GetServicesInfo()));
+            return PartialView(HomePageModel.PartialNames.ServicesList, new ServicesListModel(await _uiService.GetServicesInfo()));
+        }
+
+        [ActionName(HomePageModel.PartialNames.ResumableFunctions)]
+        public async Task<IActionResult> ResumableFunctions()
+        {
+            return PartialView(HomePageModel.PartialNames.ResumableFunctions);
+        }
+
+        [ActionName(HomePageModel.PartialNames.LatestCalls)]
+        public async Task<IActionResult> LatestCalls()
+        {
+            return PartialView(HomePageModel.PartialNames.LatestCalls);
+        }
+
+        [ActionName(HomePageModel.PartialNames.LatestLogs)]
+        public async Task<IActionResult> LatestLogs()
+        {
+            return PartialView(HomePageModel.PartialNames.LatestLogs);
         }
     }
 }

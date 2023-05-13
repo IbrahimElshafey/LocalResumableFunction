@@ -18,11 +18,11 @@
             </thead>
             @foreach (var service in Model.Services)
             {
-                var swaggerUrl = string.Concat(service.Url.TrimEnd('/'), "/swagger");
-                var hangfireUrl = string.Concat(service.Url.TrimEnd('/'), "/hangfire");
+                var swaggerUrl = string.Concat(service.Url?.TrimEnd('/')??"NO", "/swagger");
+                var hangfireUrl = string.Concat(service.Url?.TrimEnd('/')??"NO", "/hangfire");
                 <tr>
                     <td><a href="./RF/ServiceDetails?id=@(service.Id)" class="w3-text-blue">@service.Name</a></td>
-                    <td><a href="@swaggerUrl" class="w3-text-blue">@swaggerUrl</a></td>
+                    <td><a href="@swaggerUrl" class="w3-text-blue">Swagger</a></td>
                     <td>
                         <a href="#" class="w3-text-@(service.ScanLogErrors == 0 ? "green" :"red")">
                             @(service.ScanLogErrors == 0 ? "No Errors" : $"{service.ScanLogErrors} Error")
@@ -30,7 +30,7 @@
                     </td>
                     <td><a href="#res" class="w3-text-blue">@service.FunctionsCount</a></td>
                     <td><a href="#res" class="w3-text-blue">@service.MethodsCount</a></td>
-                    <td><a href="@hangfireUrl" class="w3-text-blue">@hangfireUrl</a></td>
+                    <td><a href="@hangfireUrl" class="w3-text-blue">HangFire</a></td>
                 </tr>
             }
         </table>
