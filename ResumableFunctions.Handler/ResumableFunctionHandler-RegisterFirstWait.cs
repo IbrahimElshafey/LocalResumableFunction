@@ -27,9 +27,9 @@ public partial class ResumableFunctionHandler
             });
             //firstWaitClone.FunctionState.AddLog(
             //    $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.", LogType.Info);
-          
+
             firstWaitClone.FunctionState.Status = FunctionStatus.InProgress;
-           
+
             await SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
@@ -78,7 +78,7 @@ public partial class ResumableFunctionHandler
         serviceData.AddError(errorMsg, ex);
         await _context.SaveChangesAsync();
     }
-    
+
     private async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
         var classInstance = (ResumableFunction)
@@ -103,10 +103,12 @@ public partial class ResumableFunctionHandler
                 WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
                 await _context.waitsRepository.RemoveFirstWaitIfExist(firstWait, methodId);
             }
+            var service = await _context.ServicesData.FirstAsync(x => x.AssemblyName == methodId.AssemblyName);
             var functionState = new ResumableFunctionState
             {
                 ResumableFunctionIdentifier = methodId,
-                StateObject = classInstance
+                StateObject = classInstance,
+                ServiceId = service.GetRootServiceId()
             };
             firstWait.CascadeAction(x =>
             {

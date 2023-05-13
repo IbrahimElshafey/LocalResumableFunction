@@ -1,4 +1,6 @@
-﻿<div class="w3-margin">
+﻿@using ResumableFunctions.Handler.UiService.InOuts;
+@model List<FunctionInfo>
+<div class="w3-margin">
     <header class="w3-text-indigo">
         <h2 class="w3-margin-top"><b>Resumable Functions</b></h2>
     </header>
@@ -11,33 +13,56 @@
             <thead>
                 <tr class="w3-indigo">
                     <th>Function URN</th>
-                    <th>Full Name</th>
-                    <th>In Progress</th>
-                    <th>Error</th>
-                    <th>Completed</th>
+                    <th>Function Name</th>
+                    <th>Instances In-progress</th>
+                    <th>Instances Failed</th>
+                    <th>Instnaces Completed</th>
                     <th>Created</th>
                     <th>Last Updated</th>
                 </tr>
             </thead>
-            <tr>
-                <td><a href="~/rfui/ResumableFunctionInstances" class="w3-text-blue">ProjectSumbmitted</a></td>
-                <td>TestApi.ProjectApproval.ProjectSumbmitted</td>
-                <td><a href="#completed" class="w3-text-blue">12</a></td>
-                <td><a href="#completed" class="w3-text-blue">1</a></td>
-                <td><a href="#completed" class="w3-text-blue">122</a></td>
-                <td>12/02/2022</td>
-                <td>12/02/2023</td>
-            </tr>
-            <tr>
-                <td><a href="~/rfui/ResumableFunctionInstances" class="w3-text-blue">ManagerOneApproval</a></td>
-                <td>TestApi.ProjectApproval.ManagerOneApproval</td>
-                <td><a href="#completed" class="w3-text-blue">45</a></td>
-                <td><a href="#completed" class="w3-text-blue">0</a></td>
-                <td><a href="#completed" class="w3-text-blue">1233</a></td>
-                <td>12/02/2020</td>
-                <td>12/02/2023</td>
-            </tr>
+            @for (int i = 0; i < Model.Count; i++)
+            {
+                var function = Model[i];
+
+                <tr>
+                    <td><a href="~/rf/ResumableFunctionInstances" class="w3-text-blue">@function.URN</a></td>
+                    <td>@function.FullName</td>
+                    <td>
+                        @if (@function.InProgress != 0)
+                        {
+                            <a href="#completed" class="w3-text-blue">@function.InProgress</a>
+                        }
+                        else
+                        {
+                            <span>No Instances</span>
+                        }
+                    </td>
+                    <td>
+                        @if (@function.Failed != 0)
+                        {
+                            <a href="#completed" class="w3-text-blue">@function.Failed</a>
+                        }
+                        else
+                        {
+                            <span>No Instances</span>
+                        }
+                    </td>
+                    <td>
+                        @if (@function.Completed != 0)
+                        {
+                            <a href="#completed" class="w3-text-blue">@function.Completed</a>
+                        }
+                        else
+                        {
+                            <span>No Instances</span>
+                        }
+                    </td>
+                    <td>@function.Created</td>
+                    <td>@function.LastUpdated</td>
+                </tr>
+            }
         </table>
-        <button class="w3-button w3-indigo w3-margin-top">Show More...</button>
+        @*<button class="w3-button w3-indigo w3-margin-top">Show More...</button>*@
     </div>
 </div>

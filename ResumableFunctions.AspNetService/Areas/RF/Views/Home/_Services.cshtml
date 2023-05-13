@@ -30,8 +30,8 @@
                         }
                     </td>
                     <td>
-                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=1" class="w3-text-@(service.ScanLogErrors == 0 ? "green" :"red")">
-                            @(service.ScanLogErrors == 0 ? "No Errors" : $"{service.ScanLogErrors} Error")
+                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=1" class="w3-text-@(service.LogErrors == 0 ? "green" :"red")">
+                            @(service.LogErrors == 0 ? "No Errors" : $"{service.LogErrors} Error")
                         </a>
                     </td>
                     <td>

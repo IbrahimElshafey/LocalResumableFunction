@@ -1805,7 +1805,8 @@
                     .replace(jsonLine, library.json.replacer);
             }
         };
-        document.addEventListener("DOMContentLoaded", function () {
+       
+        function JsonObjectRender() {
             var nodes = document.querySelectorAll('.JsonObject');
             var items = [...nodes];
             console.log(items);
@@ -1813,7 +1814,7 @@
                 item.innerHTML = library.json.prettyPrint(JSON.parse(item.innerHTML));
                 //console.log(library.json.prettyPrint());
             });
-        });
+        }
 
 
         function openViewPart(index) {
@@ -1838,8 +1839,10 @@
                 .then((result) => {
                     var homeDiv = document.querySelector('#main-page-content');
                     homeDiv.innerHTML = result;
+                    JsonObjectRender();
                 });
             window.location.hash = "#view=" + index;
+            
         }
 
         function hashParts() {

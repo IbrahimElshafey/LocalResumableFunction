@@ -6,15 +6,15 @@ namespace ResumableFunctions.Handler.InOuts;
 public class ResumableFunctionState : ObjectWithLog, IEntityWithUpdate, IEntityWithDelete
 {
     public int Id { get; internal set; }
+    public int ServiceId { get; internal set; }
     public string UserDefinedId { get; internal set; }
     public DateTime Created { get; internal set; }
     /// <summary>
-    /// Serailized class instance that contain the resumable function class
+    /// Serailized class instance that contain the resumable function instance data
     /// </summary>
     public object StateObject { get; internal set; }
 
     public List<Wait> Waits { get; internal set; } = new();
-
 
 
     public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; set; }

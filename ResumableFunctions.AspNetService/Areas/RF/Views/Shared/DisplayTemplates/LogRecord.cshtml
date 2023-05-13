@@ -5,5 +5,5 @@
 }
 <div class="w3-panel @type.Class log-item-@Model.Type">
     <h5><b>@type.Title [@Model.Created]</b></h5>
-    <p>@Model.Message</p>
+    <p>@Html.Raw(Html.Encode(Model.Message).Replace("\n", "<br />"))</p>
 </div>

@@ -38,9 +38,10 @@ namespace MVC.Controllers
         }
 
         [ActionName(ServiceDetailsModel.PartialNames.ResumabelFunctions)]
-        public IActionResult GetResumabelFunctions(int serviceId)
+        public async Task<IActionResult> GetResumabelFunctionsAsync(int serviceId)
         {
-            return PartialView(ServiceDetailsModel.PartialNames.ResumabelFunctions);
+            return PartialView(ServiceDetailsModel.PartialNames.ResumabelFunctions,
+                await _uiService.GetFunctionsInfo(serviceId));
         }
 
         [ActionName(ServiceDetailsModel.PartialNames.MethodsList)]

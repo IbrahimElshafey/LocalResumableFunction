@@ -14,7 +14,7 @@ builder.Services
         new ResumableFunctionsSettings()
         .UseSqlServer()
         .SetCurrentServiceUrl("https://localhost:7140/")
-        .SetDllsToScan(new[] { "TestSomethingaa" })
+        //.SetDllsToScan(new[] { "TestSomethingaa" })
         );
 
 builder.Services.AddEndpointsApiExplorer();

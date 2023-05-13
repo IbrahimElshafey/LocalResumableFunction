@@ -226,11 +226,8 @@ public class Scanner
         {
             serviceData = await AddNewServiceData(serviceUrl, currentAssemblyName);
             currentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
-            return true;
         }
 
-        serviceData.ErrorCounter = 0;
-        currentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
         if (File.Exists(assemblyPath) is false)
         {
             string message = $"Assembly file ({assemblyPath}) not exist.";
@@ -238,6 +235,18 @@ public class Scanner
             serviceData.AddError(message);
             return false;
         }
+
+        serviceData.ErrorCounter = 0;
+        currentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
+
+        if (serviceData.ParentId == -1)
+        {
+            await _context
+               .ServicesData
+               .Where(x => x.ParentId == serviceData.Id)
+               .ExecuteDeleteAsync();
+        }
+        
 
         var assembly = Assembly.LoadFile(assemblyPath);
         var isReferenceResumableFunction =
@@ -248,7 +257,7 @@ public class Scanner
             }.Contains(x.Name));
         if (isReferenceResumableFunction is false)
         {
-            serviceData.AddError($"Not reference ResumableFunction DLLs,Scan canceled for [{assemblyPath}].");
+            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].");
             return false;
         }
 

@@ -2,6 +2,8 @@
 using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
+using System;
+using System.Linq;
 
 namespace ResumableFunctions.Handler.UiService
 {
@@ -41,13 +43,19 @@ namespace ResumableFunctions.Handler.UiService
 
         public async Task<List<ServiceInfo>> GetServicesList()
         {
-            var services = await _context.ServicesData.ToListAsync();
+            var result = new List<ServiceInfo>();
+            var services = await
+                _context
+                .ServicesData
+                .Where(x => x.ParentId == -1)
+                .ToListAsync();
             var childDllsErrors =
                 await _context
                .ServicesData
+               .Where(x => x.ParentId != -1)
                .GroupBy(x => x.ParentId)
                .Select(x => new { ServiceId = x.Key, ErrorsCount = x.Sum(x => x.ErrorCounter) })
-               .ToListAsync();
+               .ToDictionaryAsync(x => x.ServiceId);
             var counts = await _context
                 .MethodIdentifiers
                 .GroupBy(x => x.ServiceId)
@@ -55,22 +63,24 @@ namespace ResumableFunctions.Handler.UiService
                 {
                     FunctionsCount = x.Count(x => x.Type == MethodType.ResumableFunctionEntryPoint),
                     MethodsCount = x.Count(x => x.Type == MethodType.MethodWait),
-                    Id = x.Key
+                    ServiceId = x.Key
                 })
-                .ToListAsync();
-            var join = (from service in services
-                        from counter in counts
-                        from childError in childDllsErrors
-                        where service.Id == counter.Id && childError.ServiceId == service.Id
-                        select new ServiceInfo(
-                            service.Id,
-                            service.AssemblyName,
-                            service.Url,
-                            service.ErrorCounter + childError.ErrorsCount,
-                            counter.FunctionsCount,
-                            counter.MethodsCount))
-                           .ToList();
-            return join.ToList();
+                .ToDictionaryAsync(x => x.ServiceId);
+            foreach (var service in services)
+            {
+                var item = new ServiceInfo(service.Id, service.AssemblyName, service.Url);
+                item.LogErrors = service.ErrorCounter;
+                if (childDllsErrors.ContainsKey(service.Id))
+                    item.LogErrors += childDllsErrors[service.Id].ErrorsCount;
+                if (counts.ContainsKey(service.Id))
+                {
+                    var methodsCounter = counts[service.Id];
+                    item.FunctionsCount = methodsCounter.FunctionsCount;
+                    item.MethodsCount = methodsCounter.MethodsCount;
+                }
+                result.Add(item);
+            }
+            return result;
         }
 
         public async Task<ServiceStatistics> GetServiceStatistics(int serviceId)
@@ -119,6 +129,41 @@ namespace ResumableFunctions.Handler.UiService
                 .Logs
                 .Where(x => x.EntityId == serviceId && x.EntityType == nameof(ServiceData))
                 .ToListAsync();
+        }
+
+        public async Task<List<FunctionInfo>> GetFunctionsInfo(int? serviceId)
+        {
+            var functionInfos =
+                await
+                _context
+                .FunctionStates
+                .Where(x => x.ServiceId == serviceId || serviceId == null)
+                .Include(x => x.ResumableFunctionIdentifier)
+                .GroupBy(x => x.ResumableFunctionIdentifierId)
+                .Select(group =>
+                        new
+                        {
+                            FunctionId = group.Key,
+                            FunctionDetails = group.First().ResumableFunctionIdentifier,
+                            InProgress = group.Count(x => x.Status == FunctionStatus.InProgress),
+                            Completed = group.Count(x => x.Status == FunctionStatus.Completed),
+                            Failed = group.Count(x => x.Status == FunctionStatus.Error)
+                        }
+                )
+                .ToListAsync();
+
+            return functionInfos
+                .Select(x =>
+                    new FunctionInfo(
+                        x.FunctionId,
+                        x.FunctionDetails.RF_MethodUrn,
+                        x.FunctionDetails.MethodName,
+                        x.InProgress,
+                        x.Completed,
+                        x.Failed,
+                        x.FunctionDetails.Created,
+                        x.FunctionDetails.Modified)).ToList();
+            //return await functionInfos.ToListAsync();
         }
     }
 }

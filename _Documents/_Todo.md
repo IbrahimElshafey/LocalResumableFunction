@@ -67,11 +67,13 @@
 	* Kafka,RbbittMQ or ActiveMQ 
 		* will be applicable for waits queuing but not states so it will be an option with use a DB
 * Disable processing if there is a scan process in progress
-* Refactor ResumableFunctionHandler to be multiple classes/services
-	* RegisterFirstWait
-	* CloneFirstWait
-	* ProcessPushedCall
-	* ProcessMatchedWait
+* Refactor 
+	* Many long methods
+	* ResumableFunctionHandler to be multiple classes/services
+		* RegisterFirstWait
+		* CloneFirstWait
+		* ProcessPushedCall
+		* ProcessMatchedWait
 * What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 
 

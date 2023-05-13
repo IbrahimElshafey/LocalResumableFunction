@@ -26,4 +26,9 @@ public class ServiceData : ObjectWithLog, IEntityWithUpdate
         base.AddLog(message, logType, code);
         Logs.Last().EntityId = ParentId == -1 ? Id : ParentId;
     }
+
+    internal int GetRootServiceId()
+    {
+        return ParentId == -1 ? Id : ParentId;
+    }
 }
