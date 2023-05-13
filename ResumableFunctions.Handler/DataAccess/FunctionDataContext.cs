@@ -239,7 +239,11 @@ public class FunctionDataContext : DbContext
                     .ToList();
             foreach (var entity in entitiesWithLog)
             {
-                entity.Logs.ForEach(x => x.EntityId = ((IEntity)entity).Id);
+                entity.Logs.ForEach(logRecord =>
+                {
+                    if (logRecord.EntityId <= 0)
+                        logRecord.EntityId = ((IEntity)entity).Id;
+                });
                 Logs.AddRange(entity.Logs.Where(x => x.Id == 0));
             }
             await base.SaveChangesAsync(cancellationToken);

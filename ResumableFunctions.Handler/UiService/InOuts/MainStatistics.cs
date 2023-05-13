@@ -15,4 +15,6 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         int LatestLogErrors);
 
     public record ServiceInfo(int Id,string Name,string Url,int ScanLogErrors,int FunctionsCount,int MethodsCount);
+
+    public record ServiceStatistics(int Id, string ServiceName, int ErrorCounter, int FunctionsCount, int MethodsCount);
 }

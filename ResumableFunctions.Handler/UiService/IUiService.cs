@@ -1,4 +1,5 @@
-﻿using ResumableFunctions.Handler.UiService.InOuts;
+﻿using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.UiService.InOuts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,9 @@ namespace ResumableFunctions.Handler.UiService
     public interface IUiService
     {
         Task<MainStatistics> GetMainStatistics();
-
-        Task<List<ServiceInfo>> GetServicesInfo();
+        Task<ServiceData> GetServiceInfo(int serviceId);
+        Task<List<LogRecord>> GetServiceLogs(int serviceId);
+        Task<List<ServiceInfo>> GetServicesList();
+        Task<ServiceStatistics> GetServiceStatistics(int serviceId);
     }
 }

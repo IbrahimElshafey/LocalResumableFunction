@@ -1766,7 +1766,7 @@
             background-color: ghostwhite;
             border: 1px solid silver;
             /*  padding: 10px 20px;
-                    margin: 20px;*/
+                            margin: 20px;*/
         }
 
         .json-key {
@@ -1818,10 +1818,10 @@
 
         function openViewPart(index) {
             console.log(index);
-            if(index==undefined)
-                index='0';
+            if (index == undefined)
+                index = '0';
             var i, tablinks;
-          
+
             //de-activate all menu items
             tablinks = document.getElementsByClassName("tablink");
             for (i = 0; i < tablinks.length; i++) {
@@ -1830,19 +1830,19 @@
             //open requested view
             //document.getElementById('partial-view-' +index).style.display = "block";
             //activate requestd menu item
-            var currentButton = document.getElementById('tab-link-' +index);
+            var currentButton = document.getElementById('tab-link-' + index);
             currentButton.className += " w3-indigo";
             var viewUrl = currentButton.getAttribute('data-view-link');
             fetch(viewUrl)
-            .then((response) => { return response.text(); })
-            .then((result) => {
-                   var homeDiv = document.querySelector('#main-page-content');
-                   homeDiv.innerHTML = result;
-            });
-            window.location.hash = "#view="+index;
+                .then((response) => { return response.text(); })
+                .then((result) => {
+                    var homeDiv = document.querySelector('#main-page-content');
+                    homeDiv.innerHTML = result;
+                });
+            window.location.hash = "#view=" + index;
         }
 
-        function hashParts(){
+        function hashParts() {
             var hash = window.location.hash.substr(1);
 
             var result = hash.split('&').reduce(function (res, item) {
@@ -1854,17 +1854,23 @@
         }
 
         //document ready
-        document.addEventListener("DOMContentLoaded", function() {
-            if(document.getElementById('is-menu-page').value)
+        document.addEventListener("DOMContentLoaded", function () {
+            if (document.getElementById('is-menu-page').value)  
                 openViewPart(hashParts().view);
         });
+
+        function toggleShow(selector) {
+            document.querySelectorAll(selector).forEach(function (el) {
+                el.style.display = el.style.display == 'none' ? 'block' : 'none';
+            });
+        }
     </script>
 </head>
 <body class="w3-light-grey">
 
     <!-- Top container -->
     <header class="w3-container w3-indigo">
-        <a href="~/rfui"><h3 class="w3-right">Resumable Functions</h3></a>
+        <a href="~/RF"><h3 class="w3-right">Resumable Functions</h3></a>
     </header>
 
 

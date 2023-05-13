@@ -9,28 +9,43 @@
             <thead>
                 <tr class="w3-indigo">
                     <th>Service Name</th>
-                    <th>Service Url (Swagger)</th>
+                    <th>Swagger</th>
                     <th>Scan Logs</th>
                     <th>Resumable Functions</th>
-                    <th>Method Waits</th>
+                    <th>Methods</th>
                     <th>Hangfire Dashboard</th>
                 </tr>
             </thead>
-            @foreach (var service in Model.Services)
+            @for (int i = 0; i < Model.Services.Count; i++)
             {
-                var swaggerUrl = string.Concat(service.Url?.TrimEnd('/')??"NO", "/swagger");
-                var hangfireUrl = string.Concat(service.Url?.TrimEnd('/')??"NO", "/hangfire");
+                var service = Model.Services[i];
+                var swaggerUrl = service.Url?.TrimEnd('/') + (service.Url == null ? "" : "/swagger");
+                var hangfireUrl = service.Url?.TrimEnd('/') + (service.Url == null ? "" : "/hangfire");
                 <tr>
-                    <td><a href="./RF/ServiceDetails?id=@(service.Id)" class="w3-text-blue">@service.Name</a></td>
-                    <td><a href="@swaggerUrl" class="w3-text-blue">Swagger</a></td>
+                    <td><a href="./RF/ServiceDetails?serviceId=@(service.Id)" class="w3-text-blue">@service.Name</a></td>
                     <td>
-                        <a href="#" class="w3-text-@(service.ScanLogErrors == 0 ? "green" :"red")">
+                        @if (!string.IsNullOrEmpty(swaggerUrl))
+                        {
+                            <a href="@swaggerUrl" class="w3-text-blue">Swagger</a>
+                        }
+                    </td>
+                    <td>
+                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=1" class="w3-text-@(service.ScanLogErrors == 0 ? "green" :"red")">
                             @(service.ScanLogErrors == 0 ? "No Errors" : $"{service.ScanLogErrors} Error")
                         </a>
                     </td>
-                    <td><a href="#res" class="w3-text-blue">@service.FunctionsCount</a></td>
-                    <td><a href="#res" class="w3-text-blue">@service.MethodsCount</a></td>
-                    <td><a href="@hangfireUrl" class="w3-text-blue">HangFire</a></td>
+                    <td>
+                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=2" class="w3-text-blue">@service.FunctionsCount</a>
+                    </td>
+                    <td>
+                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=3" class="w3-text-blue">@service.MethodsCount</a>
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(hangfireUrl))
+                        {
+                            <a href="@hangfireUrl" class="w3-text-blue">Hangfire</a>
+                        }
+                    </td>
                 </tr>
             }
         </table>

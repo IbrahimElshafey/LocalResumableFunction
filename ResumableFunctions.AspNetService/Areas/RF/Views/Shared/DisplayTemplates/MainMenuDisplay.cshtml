@@ -12,17 +12,15 @@
                 @menuItem.DisplayName
             </button>
         }
+        @if (Model.BackLinkText != null)
+        {
+            <button class="w3-bar-item w3-button w3-text-indigo" onclick="location.href='@(Model.BackLink)';">
+                <b>@Model.BackLinkText</b>
+            </button>
+        }
     </div>
 
     <div id="main-page-content" class="w3-cell">
-
-        @*@for (int i = 0; i < Model.Items.Length; i++)
-        {
-            var menuItem = Model.Items[i];
-            <div id="partial-view-@i" class="ViewPart w3-margin" style="display:none">
-                <partial name="@(menuItem.PartialViewUrl)" />
-            </div>
-        }*@
     </div>
 
 </div>

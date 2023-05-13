@@ -28,7 +28,7 @@ namespace MVC.Controllers
         [ActionName(HomePageModel.PartialNames.ServicesList)]
         public async Task<IActionResult> ServicesView()
         {
-            return PartialView(HomePageModel.PartialNames.ServicesList, new ServicesListModel(await _uiService.GetServicesInfo()));
+            return PartialView(HomePageModel.PartialNames.ServicesList, new ServicesListModel(await _uiService.GetServicesList()));
         }
 
         [ActionName(HomePageModel.PartialNames.ResumableFunctions)]

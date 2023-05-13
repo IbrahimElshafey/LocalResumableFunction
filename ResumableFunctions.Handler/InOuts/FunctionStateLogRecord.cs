@@ -16,4 +16,15 @@ public class LogRecord : IEntity
     {
         return $"{Type}: {Message}";
     }
+
+    public (string Class,string Title) TypeClass()
+    {
+        switch (Type)
+        {
+            case LogType.Info:return ("w3-gray","Info");
+            case LogType.Error:return ("w3-deep-orange", "Error");
+            case LogType.Warning:return ("w3-amber", "Warning");
+        }
+        return ("w3-gray", "Undefined");
+    }
 }

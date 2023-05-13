@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.Data;
+using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
 
 namespace ResumableFunctions.Handler.UiService
@@ -38,30 +39,86 @@ namespace ResumableFunctions.Handler.UiService
                 latestLogErrors);
         }
 
-        public async Task<List<ServiceInfo>> GetServicesInfo()
+        public async Task<List<ServiceInfo>> GetServicesList()
         {
             var services = await _context.ServicesData.ToListAsync();
+            var childDllsErrors =
+                await _context
+               .ServicesData
+               .GroupBy(x => x.ParentId)
+               .Select(x => new { ServiceId = x.Key, ErrorsCount = x.Sum(x => x.ErrorCounter) })
+               .ToListAsync();
             var counts = await _context
                 .MethodIdentifiers
                 .GroupBy(x => x.ServiceId)
                 .Select(x => new
                 {
-                    FunctionsCount = x.Count(x => x.Type == Handler.InOuts.MethodType.ResumableFunctionEntryPoint),
-                    MethodsCount = x.Count(x => x.Type == Handler.InOuts.MethodType.MethodWait),
+                    FunctionsCount = x.Count(x => x.Type == MethodType.ResumableFunctionEntryPoint),
+                    MethodsCount = x.Count(x => x.Type == MethodType.MethodWait),
                     Id = x.Key
                 })
                 .ToListAsync();
-            var join = from service in services
-                       from counter in counts
-                       where service.Id == counter.Id
-                       select new ServiceInfo(
-                           service.Id,
-                           service.AssemblyName,
-                           service.Url,
-                           service.ErrorCounter,
-                           counter.FunctionsCount,
-                           counter.MethodsCount);
+            var join = (from service in services
+                        from counter in counts
+                        from childError in childDllsErrors
+                        where service.Id == counter.Id && childError.ServiceId == service.Id
+                        select new ServiceInfo(
+                            service.Id,
+                            service.AssemblyName,
+                            service.Url,
+                            service.ErrorCounter + childError.ErrorsCount,
+                            counter.FunctionsCount,
+                            counter.MethodsCount))
+                           .ToList();
             return join.ToList();
+        }
+
+        public async Task<ServiceStatistics> GetServiceStatistics(int serviceId)
+        {
+            //name,error counts,functions count,methods count
+            var service = await _context.ServicesData.FindAsync(serviceId);
+            var counts = await _context
+               .MethodIdentifiers
+               .Where(x => x.ServiceId == serviceId)
+               .GroupBy(x => x.ServiceId)
+               .Select(x => new
+               {
+                   FunctionsCount = x.Count(x => x.Type == Handler.InOuts.MethodType.ResumableFunctionEntryPoint),
+                   MethodsCount = x.Count(x => x.Type == Handler.InOuts.MethodType.MethodWait),
+                   Id = x.Key
+               })
+               .FirstOrDefaultAsync();
+            return new ServiceStatistics(
+                service.Id,
+                service.AssemblyName,
+                service.ErrorCounter + await _context
+                    .ServicesData
+                    .Where(x => x.ParentId == serviceId)
+                    .Select(x => x.ErrorCounter)
+                    .SumAsync(),
+                counts?.FunctionsCount ?? 0,
+                counts?.MethodsCount ?? 0);
+        }
+
+        public async Task<ServiceData> GetServiceInfo(int serviceId)
+        {
+            var service = await _context.ServicesData.FindAsync(serviceId);
+            var dlls = await _context
+                .ServicesData
+                .Where(x => x.ParentId == serviceId)
+                .Select(x => new { x.AssemblyName, x.ErrorCounter })
+                .ToListAsync();
+            service.ReferencedDlls = dlls.Select(x => x.AssemblyName).ToArray();
+            //service.ErrorCounter += dlls.Sum(x => x.ErrorCounter);
+            return service;
+        }
+
+        public Task<List<LogRecord>> GetServiceLogs(int serviceId)
+        {
+            return _context
+                .Logs
+                .Where(x => x.EntityId == serviceId && x.EntityType == nameof(ServiceData))
+                .ToListAsync();
         }
     }
 }

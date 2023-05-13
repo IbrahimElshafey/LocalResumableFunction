@@ -192,7 +192,7 @@ public class Scanner
                     await RegisterResumableFunctionsInClass(resumableFunctionClass);
 
                 await UpdateScanDate(serviceData);
-                await DeleteOldScanData(serviceData, dateBeforeScan);
+                await DeleteOldScanData(dateBeforeScan);
             }
             catch (Exception ex)
             {
@@ -202,17 +202,16 @@ public class Scanner
         }
     }
 
-    private async Task DeleteOldScanData(ServiceData serviceData, DateTime dateBeforeScan)
+    private async Task DeleteOldScanData(DateTime dateBeforeScan)
     {
-        var ids = await _context
+        var currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
+        var currentService = await _context
             .ServicesData
-            .Where(x => x.ParentId == serviceData.Id)
-            .Select(x => x.Id)
-            .ToListAsync();
+            .FirstAsync(x => x.AssemblyName == currentServiceName);
         await _context
             .Logs
             .Where(x =>
-                (x.EntityId == serviceData.Id || ids.Contains((int)x.EntityId)) &&
+                x.EntityId == currentService.Id &&
                 x.EntityType == nameof(ServiceData) &&
                 x.Created < dateBeforeScan)
             .ExecuteDeleteAsync();
@@ -259,7 +258,8 @@ public class Scanner
         bool shouldScan = lastBuildDate > serviceData.Modified;
         if (shouldScan is false)
             serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].");
-
+        if (_settings.ForceRescan)
+            serviceData.AddLog($"Will be scanned because force rescan is enabled in Debug mode.", LogType.Warning);
         return shouldScan || _settings.ForceRescan;
 
         async Task<ServiceData> AddNewServiceData(string serviceUrl, string currentAssemblyName)

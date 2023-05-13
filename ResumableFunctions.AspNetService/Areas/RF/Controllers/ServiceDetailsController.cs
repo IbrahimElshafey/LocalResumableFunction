@@ -18,23 +18,23 @@ namespace MVC.Controllers
             _uiService = uiService;
         }
 
-        public async Task<IActionResult> Index(int id)
+        public async Task<IActionResult> Index(int serviceId)
         {
-            var model = new ServiceDetailsModel() { ServiceId = id };
-            model.SetMenu();
+            var model = new ServiceDetailsModel() { ServiceId = serviceId };
+            model.SetMenu(await _uiService.GetServiceStatistics(serviceId));
             return View(model);
         }
 
         [ActionName(ServiceDetailsModel.PartialNames.ServiceDetails)]
-        public IActionResult ServiceInfoView(int serviceId)
+        public async Task<IActionResult> ServiceInfoView(int serviceId)
         {
-            return PartialView(ServiceDetailsModel.PartialNames.ServiceDetails);
+            return PartialView(ServiceDetailsModel.PartialNames.ServiceDetails, await _uiService.GetServiceInfo(serviceId));
         }
 
-        [ActionName(ServiceDetailsModel.PartialNames.ScanLogs)]
-        public IActionResult GetScanLogs(int serviceId)
+        [ActionName(ServiceDetailsModel.PartialNames.ServiceLogs)]
+        public async Task<IActionResult> GetLogs(int serviceId)
         {
-            return PartialView(ServiceDetailsModel.PartialNames.ScanLogs);
+            return PartialView(ServiceDetailsModel.PartialNames.ServiceLogs, await _uiService.GetServiceLogs(serviceId));
         }
 
         [ActionName(ServiceDetailsModel.PartialNames.ResumabelFunctions)]
