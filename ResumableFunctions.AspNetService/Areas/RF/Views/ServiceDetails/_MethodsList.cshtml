@@ -1,39 +1,36 @@
-﻿<div class="w3-margin">
+﻿@using ResumableFunctions.Handler.UiService.InOuts;
+@model List<MethodGroupInfo>
+<div class="w3-margin">
     <header class="w3-text-indigo">
-        <h2 class="w3-margin-top"><b>Methods</b></h2>
+        <h2 class="w3-margin-top"><b>Methods Groups</b></h2>
     </header>
     <div class="w3-container">
         <p>
             <label>Search</label>
-            <input class="w3-input w3-border" type="text" required="" placeholder="Search by Method Name">
+            <input class="w3-input w3-border" type="text" required="" placeholder="Search by URN">
         </p>
         <table class="w3-table-all">
             <thead>
                 <tr class="w3-indigo">
                     <th>Method Group URN</th>
-                    <th>Identifiers</th>
+                    <th>Methods</th>
                     <th>Active Waits</th>
-                    <th>Matched Waits</th>
-                    <th>Created</th>
-                    <th>Last Updated</th>
+                    <th>Completed Waits</th>
+                    <th>Canceled Waits</th>
+                    <th>Registration Date</th>
                 </tr>
             </thead>
-            <tr>
-                <td><a href="~/rfui/MethodWaits" class="w3-text-blue">ProjectSumbmitted</a></td>
-                <td><a href="~/rfui/MethodsInGroup" class="w3-text-blue">12</a></td>
-                <td><a href="~/rfui/MethodWaits" class="w3-text-blue">1</a></td>
-                <td><a href="~/rfui/MethodWaits" class="w3-text-blue">122</a></td>
-                <td>12/02/2022</td>
-                <td>12/02/2023</td>
-            </tr>
-            <tr>
-                <td><a href="./MethodWaits" class="w3-text-blue">ManagerOneApproval</a></td>
-                <td><a href="~/rfui/MethodsInGroup" class="w3-text-blue">45</a></td>
-                <td><a href="~/rfui/MethodWaits" class="w3-text-blue">0</a></td>
-                <td><a href="~/rfui/MethodWaits" class="w3-text-blue">1233</a></td>
-                <td>12/02/2020</td>
-                <td>12/02/2023</td>
-            </tr>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.URN</td>
+                    <td><a href="~/rfui/MethodsInGroup" class="w3-text-blue">@item.MethodsCount</a></td>
+                    <td><a href="~/rfui/MethodWaits" class="w3-text-blue">@item.ActiveWaits</a></td>
+                    <td><a href="~/rfui/MethodWaits" class="w3-text-blue">@item.CompletedWaits</a></td>
+                    <td><a href="~/rfui/MethodWaits" class="w3-text-blue">@item.CanceledWaits</a></td>
+                    <td>@item.Created</td>
+                </tr>
+            }
         </table>
     </div>
 </div>

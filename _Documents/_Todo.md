@@ -1,17 +1,5 @@
 ﻿# Todo
 
-
-## Prepare how to use?
-* Implement workflows in 
-	* https://tallyfy.com/workflow-examples/
-	* https://clickup.com/blog/workflow-examples/
-* Inter services waits documentation
-* Record videos
-* Enhance nuget package use
-	*  Add FodyWeavers.xml automatic
-	*  Why fody not work directlly
-
-
 ## UI project
 * Service Details Page
 	* Service Resumable Functions List
@@ -51,6 +39,19 @@
 				* Cancel
 				* Go Back (To,Before,After)
 		* Logs list from function state logs3
+
+## Prepare how to use?
+* Implement workflows in 
+	* https://tallyfy.com/workflow-examples/
+	* https://clickup.com/blog/workflow-examples/
+* Inter services waits documentation
+* Record videos
+* Enhance nuget package use
+	*  Add FodyWeavers.xml automatic
+	*  Why fody not work directlly
+
+
+
 
 
 

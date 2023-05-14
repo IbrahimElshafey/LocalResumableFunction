@@ -4,7 +4,6 @@ namespace ResumableFunctions.Handler.InOuts;
 
 public class ResumableFunctionIdentifier : MethodIdentifier
 {
-    public bool InErrorState { get; internal set; }
     public string RF_MethodUrn { get; internal set; }
     public List<Wait> WaitsCreatedByFunction { get; internal set; }
     public List<ResumableFunctionState> ActiveFunctionsStates { get; internal set; }

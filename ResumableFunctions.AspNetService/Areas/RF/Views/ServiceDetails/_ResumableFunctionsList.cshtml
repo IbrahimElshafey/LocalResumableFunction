@@ -14,9 +14,10 @@
                 <tr class="w3-indigo">
                     <th>Function URN</th>
                     <th>Function Name</th>
-                    <th>Instances In-progress</th>
-                    <th>Instances Failed</th>
-                    <th>Instnaces Completed</th>
+                    <th>First Wait</th>
+                    <th>In-progress</th>
+                    <th>Failed</th>
+                    <th>Completed</th>
                     <th>Created</th>
                     <th>Last Updated</th>
                 </tr>
@@ -28,6 +29,18 @@
                 <tr>
                     <td><a href="~/rf/ResumableFunctionInstances" class="w3-text-blue">@function.URN</a></td>
                     <td>@function.FullName</td>
+                    <td>
+                        @if (function.IsEntryPoint)
+                        {
+                            <span>@(function.FirstWait == null ?
+                                "<span class='w3-text-red'>No First Wait Exist</span>" :
+                                function.FirstWait)</span>
+                        }
+                        else
+                        {
+                            <span class="w3-text-blue-gray">Not an entry point</span>
+                        }
+                    </td>
                     <td>
                         @if (@function.InProgress != 0)
                         {
@@ -59,7 +72,17 @@
                         }
                     </td>
                     <td>@function.Created</td>
-                    <td>@function.LastUpdated</td>
+                    <td>
+                        @if (function.LastUpdated == DateTime.MinValue)
+                        {
+                            <span>Not Changed</span>
+                        }
+                        else
+                        {
+                            <span>@function.LastUpdated</span>
+                        }
+
+                    </td>
                 </tr>
             }
         </table>
