@@ -137,48 +137,12 @@ namespace ResumableFunctions.Handler.UiService
               .Include(x => x.ActiveFunctionsStates)
               .Include(x => x.WaitsCreatedByFunction)
               .Select(x => new FunctionInfo(
-                      x.Id,
-                      x.RF_MethodUrn,
-                      x.MethodName,
-                      x.Type == MethodType.ResumableFunctionEntryPoint,
+                      x,
                       x.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsNode).Name,
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InProgress),
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.Completed),
-                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.Error),
-                      x.Created,
-                      x.Modified))
+                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.Error)))
               .ToListAsync();
-            //var functionInfos =
-            //    await
-            //    _context
-            //    .FunctionStates
-            //    .Where(x => x.ServiceId == serviceId || serviceId == null)
-            //    .Include(x => x.ResumableFunctionIdentifier)
-            //    //.Include (x => x.Waits)
-            //    .GroupBy(x => x.ResumableFunctionIdentifierId)
-            //    .Select(group =>
-            //            new
-            //            {
-            //                FunctionId = group.Key,
-            //                FunctionDetails = group.First().ResumableFunctionIdentifier,
-            //                InProgress = group.Count(x => x.Status == FunctionStatus.InProgress),
-            //                Completed = group.Count(x => x.Status == FunctionStatus.Completed),
-            //                Failed = group.Count(x => x.Status == FunctionStatus.Error),
-            //            }
-            //    )
-            //    .ToListAsync();
-            //return functionInfos
-            //    .Select(x =>
-            //        new FunctionInfo(
-            //            x.FunctionId,
-            //            x.FunctionDetails.RF_MethodUrn,
-            //            x.FunctionDetails.MethodName,
-            //            x.InProgress,
-            //            x.Completed,
-            //            x.Failed,
-            //            x.FunctionDetails.Created,
-            //            x.FunctionDetails.Modified)).ToList();
-            //return await functionInfos.ToListAsync();
         }
 
         public async Task<List<MethodGroupInfo>> GetMethodsInfo(int? serviceId)

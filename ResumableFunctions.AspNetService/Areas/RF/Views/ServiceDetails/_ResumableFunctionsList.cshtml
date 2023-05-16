@@ -32,10 +32,9 @@
         <table class="w3-table-all">
             <thead>
                 <tr class="w3-indigo">
-                    <th>Function URN</th>
-                    <th>Function Name</th>
+                    <th>Function</th>
                     <th>First Wait</th>
-                    <th>In-progress</th>
+                    <th>InProgress</th>
                     <th>Failed</th>
                     <th>Completed</th>
                     <th>Created</th>
@@ -47,14 +46,22 @@
                 var function = Model[i];
 
                 <tr>
-                    <td><a href="~/rf/ResumableFunctionInstances" class="w3-text-blue">@function.URN</a></td>
-                    <td>@function.FullName</td>
                     <td>
-                        @if (function.IsEntryPoint)
+                        <ul>
+                            <li><a href="~/rf/ResumableFunctionInstances" class="w3-text-blue">@function.FunctionIdentifier.RF_MethodUrn</a></li>
+                            <li><b>Method Name: </b>@function.FunctionIdentifier.MethodName</li>
+                            <li><b>Class Name: </b>@function.FunctionIdentifier.ClassName</li>
+                            <li><b>Assembly Name: </b>@function.FunctionIdentifier.AssemblyName</li>
+                        </ul>
+                    </td>
+                    <td>
+                        @if (function.FunctionIdentifier.IsEntryPoint)
                         {
-                            <span>@(function.FirstWait == null ?
-                                "<span class='w3-text-red'>No First Wait Exist</span>" :
-                                function.FirstWait)</span>
+                            <span>
+                                @(function.FirstWait == null ?
+                                    "<span class='w3-text-red'>No First Wait Exist</span>" :
+                                    function.FirstWait)
+                            </span>
                         }
                         else
                         {
@@ -91,15 +98,15 @@
                             <span>0</span>
                         }
                     </td>
-                    <td>@function.Created</td>
+                    <td>@function.FunctionIdentifier.Created</td>
                     <td>
-                        @if (function.LastUpdated == DateTime.MinValue)
+                        @if (function.FunctionIdentifier.Modified == DateTime.MinValue)
                         {
                             <span>Not Changed</span>
                         }
                         else
                         {
-                            <span>@function.LastUpdated</span>
+                            <span>@function.FunctionIdentifier.Modified</span>
                         }
 
                     </td>

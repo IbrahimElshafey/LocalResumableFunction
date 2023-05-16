@@ -8,6 +8,8 @@ public class ResumableFunctionIdentifier : MethodIdentifier
     public List<Wait> WaitsCreatedByFunction { get; internal set; }
     public List<ResumableFunctionState> ActiveFunctionsStates { get; internal set; }
 
+
+    public bool IsEntryPoint => Type == MethodType.ResumableFunctionEntryPoint;
     internal override void FillFromMethodData(MethodData methodData)
     {
         RF_MethodUrn = methodData.MethodUrn;

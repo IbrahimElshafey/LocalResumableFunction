@@ -23,8 +23,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
     }
 
     public record ServiceStatistics(int Id, string ServiceName, int ErrorCounter, int FunctionsCount, int MethodsCount);
-    public record FunctionInfo(
-        int Id, string URN, string FullName,bool IsEntryPoint,string FirstWait, int InProgress, int Completed, int Failed, DateTime Created, DateTime LastUpdated);
+    public record FunctionInfo(ResumableFunctionIdentifier FunctionIdentifier,string FirstWait, int InProgress, int Completed, int Failed);
 
     public record MethodGroupInfo(
         int Id, string URN, int MethodsCount,int ActiveWaits,int CompletedWaits,int CanceledWaits,DateTime Created);

@@ -11,10 +11,10 @@
                 <tr class="w3-indigo">
                     <th>Service Name</th>
                     <th>Swagger</th>
+                    <th>Hangfire</th>
                     <th>Logs</th>
                     <th>Resumable</th>
                     <th>Methods</th>
-                    <th>Hangfire</th>
                     <th>DLLs</th>
                     <th>Registration</th>
                     <th>Last Scan</th>
@@ -35,6 +35,12 @@
                         }
                     </td>
                     <td>
+                        @if (!string.IsNullOrEmpty(hangfireUrl))
+                        {
+                            <a href="@hangfireUrl" class="w3-text-blue">Hangfire</a>
+                        }
+                    </td>
+                    <td>
                         <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=1" class="w3-text-@(service.LogErrors == 0 ? "green" :"red")">
                             @(service.LogErrors == 0 ? "No Errors" : $"{service.LogErrors} Error")
                         </a>
@@ -45,14 +51,9 @@
                     <td>
                         <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=3" class="w3-text-blue">@service.MethodsCount</a>
                     </td>
+                   
                     <td>
-                        @if (!string.IsNullOrEmpty(hangfireUrl))
-                        {
-                            <a href="@hangfireUrl" class="w3-text-blue">Hangfire</a>
-                        }
-                    </td>
-                    <td>
-                        @(service.Dlls?.Aggregate((x, y) => $"{x}, {y}"));
+                        @(service.Dlls?.Aggregate((x, y) => $"{x}, {y}"))
                     </td>
                     <td>
                         @service.Registration

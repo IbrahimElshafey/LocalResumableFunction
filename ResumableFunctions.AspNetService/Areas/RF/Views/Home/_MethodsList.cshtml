@@ -45,9 +45,36 @@
                 <tr>
                     <td>@item.URN</td>
                     <td><a href="~/rfui/MethodsInGroup" class="w3-text-blue">@item.MethodsCount</a></td>
-                    <td><a href="~/rfui/MethodWaits" class="w3-text-blue">@item.ActiveWaits</a></td>
-                    <td><a href="~/rfui/MethodWaits" class="w3-text-blue">@item.CompletedWaits</a></td>
-                    <td><a href="~/rfui/MethodWaits" class="w3-text-blue">@item.CanceledWaits</a></td>
+                    <td>
+                        @if (item.ActiveWaits == 0)
+                        {
+                            <span>0</span>
+                        }
+                        else
+                        {
+                            <a href="~/rfui/MethodWaits" class="w3-text-blue">@item.ActiveWaits</a>
+                        }
+                    </td>
+                    <td>
+                        @if (item.CompletedWaits == 0)
+                        {
+                            <span>0</span>
+                        }
+                        else
+                        {
+                            <a href="~/rfui/MethodWaits" class="w3-text-blue">@item.CompletedWaits</a>
+                        }
+                    </td>
+                    <td>
+                        @if (item.CanceledWaits==0)
+                        {
+                            <span>0</span>
+                        }
+                        else
+                        {
+                            <a href="~/rfui/MethodWaits" class="w3-text-blue">@item.CanceledWaits</a>
+                        }
+                    </td>
                     <td>@item.Created</td>
                 </tr>
             }
