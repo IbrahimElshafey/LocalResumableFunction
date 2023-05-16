@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ResumableFunctions.Handler.InOuts;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         int PushedCalls,
         int LatestLogErrors);
 
-    public record ServiceInfo(int Id, string Name, string Url)
+    public record ServiceInfo(int Id, string Name, string Url,string[] Dlls,DateTime Registration,DateTime LastScan)
     {
         public int LogErrors { get; set; }
         public int FunctionsCount { get; set; }
@@ -26,5 +27,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         int Id, string URN, string FullName,bool IsEntryPoint,string FirstWait, int InProgress, int Completed, int Failed, DateTime Created, DateTime LastUpdated);
 
     public record MethodGroupInfo(
-        int Id, string URN, int MethodsCount,int ActiveWaits,int CompletedWaits,int CanceledWaits,DateTime Created);
+        int Id, string URN, int MethodsCount,int ActiveWaits,int CompletedWaits,int CanceledWaits,DateTime LastWaitDate, DateTime Created);
+
+    public record PushedCallInfo(PushedCall PushedCall);
 }

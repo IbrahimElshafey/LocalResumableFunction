@@ -1809,10 +1809,14 @@
         function JsonObjectRender() {
             var nodes = document.querySelectorAll('.JsonObject');
             var items = [...nodes];
-            console.log(items);
+            
             items.forEach(item => {
-                item.innerHTML = library.json.prettyPrint(JSON.parse(item.innerHTML));
-                //console.log(library.json.prettyPrint());
+                try {
+                     console.log(item.innerHTML);
+                    item.innerHTML = library.json.prettyPrint(JSON.parse(item.innerHTML));
+                } catch (error) {
+                    console.error(error);
+                }
             });
         }
 

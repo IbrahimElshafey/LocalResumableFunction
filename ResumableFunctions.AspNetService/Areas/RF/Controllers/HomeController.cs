@@ -28,7 +28,9 @@ namespace MVC.Controllers
         [ActionName(HomePageModel.PartialNames.ServicesList)]
         public async Task<IActionResult> ServicesView()
         {
-            return PartialView(HomePageModel.PartialNames.ServicesList, new ServicesListModel(await _uiService.GetServicesList()));
+            return PartialView(
+                HomePageModel.PartialNames.ServicesList,
+                new ServicesListModel(await _uiService.GetServicesList()));
         }
 
         [ActionName(HomePageModel.PartialNames.ResumableFunctions)]
@@ -37,10 +39,10 @@ namespace MVC.Controllers
             return PartialView(HomePageModel.PartialNames.ResumableFunctions);
         }
 
-        [ActionName(HomePageModel.PartialNames.LatestCalls)]
-        public async Task<IActionResult> LatestCalls()
+        [ActionName(HomePageModel.PartialNames.PushedCalls)]
+        public async Task<IActionResult> PushedCalls()
         {
-            return PartialView(HomePageModel.PartialNames.LatestCalls);
+            return PartialView(HomePageModel.PartialNames.PushedCalls, await _uiService.GetPushedCalls(0));
         }
 
         [ActionName(HomePageModel.PartialNames.LatestLogs)]

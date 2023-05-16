@@ -68,7 +68,7 @@ namespace ResumableFunctions.Handler.UiService
                 .ToDictionaryAsync(x => x.ServiceId);
             foreach (var service in services)
             {
-                var item = new ServiceInfo(service.Id, service.AssemblyName, service.Url);
+                var item = new ServiceInfo(service.Id, service.AssemblyName, service.Url, service.ReferencedDlls, service.Created, service.Modified);
                 item.LogErrors = service.ErrorCounter;
                 if (childDllsErrors.ContainsKey(service.Id))
                     item.LogErrors += childDllsErrors[service.Id].ErrorsCount;
@@ -184,25 +184,76 @@ namespace ResumableFunctions.Handler.UiService
         public async Task<List<MethodGroupInfo>> GetMethodsInfo(int? serviceId)
         {
             // int Id, string URN, int MethodsCount,int ActiveWaits,int CompletedWaits,int CanceledWaits
-            var methodInfos =
-                await
-                _context
-                .MethodsGroups
-                //.Where(x => x.ServiceId == serviceId || serviceId == null)
-                .Include(x => x.WaitRequestsForGroup)
-                .Include(x => x.WaitMethodIdentifiers)
-                .Select(
-                    mg => new MethodGroupInfo(
-                        mg.Id,
-                        mg.MethodGroupUrn,
-                        mg.WaitMethodIdentifiers.Count(),
-                        mg.WaitRequestsForGroup.Count(x => x.Status == WaitStatus.Waiting),
-                        mg.WaitRequestsForGroup.Count(x => x.Status == WaitStatus.Completed),
-                        mg.WaitRequestsForGroup.Count(x => x.Status == WaitStatus.Canceled),
-                        mg.Created)
-                )
+            var waitsQuery = _context
+                .MethodWaits
+                .GroupBy(x => x.MethodGroupToWaitId)
+                .Select(x => new
+                {
+                    Waiting = x.Count(x => x.Status == WaitStatus.Waiting),
+                    Completed = x.Count(x => x.Status == WaitStatus.Completed),
+                    Canceled = x.Count(x => x.Status == WaitStatus.Canceled),
+                    LastWait = x.Max(x => x.Created),
+                    MethodGroupId = x.Key
+                });
+            //todo refine this query
+            var methodIdsQuery = _context
+                .WaitMethodIdentifiers
+                .GroupBy(x => x.ParentMethodGroupId)
+                .Select(x => new
+                {
+                    MethodGroupId = x.Key,
+                    MethodsCount = x.Count(),
+                    GroupCreated = x.First().ParentMethodGroup.Created,
+                    GroupUrn = x.First().ParentMethodGroup.MethodGroupUrn
+                });
+            var join = from wait in waitsQuery
+                       from methodId in methodIdsQuery
+                       where wait.MethodGroupId == methodId.MethodGroupId
+                       orderby wait.LastWait descending
+                       select new { wait, methodId };
+
+            return (await join.ToListAsync())
+                .Select(x => new MethodGroupInfo(
+                                     x.wait.MethodGroupId,
+                                     x.methodId.GroupUrn,
+                                     x.methodId.MethodsCount,
+                                     x.wait.Waiting,
+                                     x.wait.Completed,
+                                     x.wait.Canceled,
+                                     x.wait.LastWait,
+                                     x.methodId.GroupCreated))
+                .ToList();
+            //var query =
+            //                 _context
+            //                 .MethodsGroups
+            //                 //.Where(x => x.ServiceId == serviceId || serviceId == null)
+            //                 .Include(x => x.WaitMethodIdentifiers)
+            //                 .Select(
+            //                     mg => new MethodGroupInfo(
+            //                         mg.Id,
+            //                         mg.MethodGroupUrn,
+            //                         mg.WaitMethodIdentifiers.Count(),
+            //                         mg.WaitRequestsForGroup.Count(x => x.Status == WaitStatus.Waiting),
+            //                         mg.WaitRequestsForGroup.Count(x => x.Status == WaitStatus.Completed),
+            //                         mg.WaitRequestsForGroup.Count(x => x.Status == WaitStatus.Canceled),
+            //                         mg.WaitRequestsForGroup.Max(x => x.Created),
+            //                         mg.Created)
+            //                 );
+            //var methodInfos =
+            //    (await query.ToListAsync())
+            //    .OrderByDescending(x => x.LastWaitDate)
+            //    .ToList();
+            //return methodInfos;
+        }
+
+        public async Task<List<PushedCallInfo>> GetPushedCalls(int page)
+        {
+            return await _context
+                .PushedCalls
+                .Skip(page * 20)
+                .Take(20)
+                .Select(x => new PushedCallInfo(x))
                 .ToListAsync();
-            return methodInfos;
         }
     }
 }

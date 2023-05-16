@@ -1,4 +1,5 @@
-﻿@*Services*@
+﻿@using ResumableFunctions.AspNetService.DisplayObject;
+@*Services*@
 @model ServicesListModel
 <div class="w3-margin">
     <header class="w3-text-indigo">
@@ -10,10 +11,14 @@
                 <tr class="w3-indigo">
                     <th>Service Name</th>
                     <th>Swagger</th>
-                    <th>Scan Logs</th>
-                    <th>Resumable Functions</th>
+                    <th>Logs</th>
+                    <th>Resumable</th>
                     <th>Methods</th>
-                    <th>Hangfire Dashboard</th>
+                    <th>Hangfire</th>
+                    <th>DLLs</th>
+                    <th>Registration</th>
+                    <th>Last Scan</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             @for (int i = 0; i < Model.Services.Count; i++)
@@ -45,6 +50,22 @@
                         {
                             <a href="@hangfireUrl" class="w3-text-blue">Hangfire</a>
                         }
+                    </td>
+                    <td>
+                        @(service.Dlls?.Aggregate((x, y) => $"{x}, {y}"));
+                    </td>
+                    <td>
+                        @service.Registration
+                    </td>
+                    <td>
+                        @service.LastScan
+                    </td>
+                    <td>
+                        <div class="w3-row">
+                            <button class="w3-button w3-tiny w3-indigo">Re-Scan</button>
+                            <button class="w3-button w3-tiny w3-indigo">Verify Methods</button>
+                            <button class="w3-button w3-tiny w3-indigo">Verify Start Waits</button>
+                        </div>
                     </td>
                 </tr>
             }

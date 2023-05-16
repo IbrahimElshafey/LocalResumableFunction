@@ -8,8 +8,10 @@ namespace ResumableFunctions.AspNetService.DisplayObject
         {
             public const string ServicesList = "_Services";
             public const string ResumableFunctions = "_ResumableFunctionsList";
-            public const string LatestCalls = "_LatestCalls";
+            public const string PushedCalls = "_PushedCalls";
             public const string LatestLogs = "_LatestLogs";
+            public const string ResumabelFunctions = "_ResumableFunctionsList";
+            public const string MethodsList = "_MethodsList";
 
         }
         public MainMenuDisplay Menu { get; private set; }
@@ -25,12 +27,15 @@ namespace ResumableFunctions.AspNetService.DisplayObject
                             $"/RF/Home/{PartialNames.ServicesList}"),
                         new MainMenuItem(
                             $"Resumable Functions ({mainStatistics.ResumableFunctions}) & ({mainStatistics.ResumableFunctionsInstances}) Instances",
-                            $"/RF/Home/{PartialNames.ResumableFunctions}"),
+                             $"/RF/ServiceDetails/{PartialNames.ResumabelFunctions}"),
+                        new MainMenuItem(
+                            $"Methods ({mainStatistics.ResumableFunctions})",
+                            $"/RF/ServiceDetails/{PartialNames.MethodsList}"),
                         new MainMenuItem(
                             $"Pushed Calls ({mainStatistics.PushedCalls})",
-                            $"/RF/Home/{PartialNames.LatestCalls}"),
+                            $"/RF/Home/{PartialNames.PushedCalls}"),
                         new MainMenuItem(
-                            $"Latest Logs ({mainStatistics.LatestLogErrors} New Error)",
+                            $"Logs ({mainStatistics.LatestLogErrors} New Error)",
                             $"/RF/Home/{PartialNames.LatestLogs}"),
                 }
             };

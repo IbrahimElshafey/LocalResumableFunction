@@ -1,11 +1,12 @@
 ﻿# Todo
-
+* Add Scan Status for service
+* Same DLL in two services
 ## UI project
-* Service Details Page
-	* Service Resumable Functions List
-		* Resumable Function Active Instances
-			* RF Instance Details
-	* Service Method Wait List
+* Remove Service Details Page
+* Resumable Functions List
+* Resumable Function Active Instances
+* RF Instance Details
+* Method Waits List
 * Pushed Calls List
 	* Pushed Call Details
 * All Logs View
