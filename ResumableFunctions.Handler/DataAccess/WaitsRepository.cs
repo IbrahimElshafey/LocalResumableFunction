@@ -79,7 +79,13 @@ internal class WaitsRepository : RepositoryBase
                 _context.PushedCalls.Remove(pushedCall);
             }
             else
-                pushedCall.MatchedWaitsCount = matchedWaitsIds.Count;
+                pushedCall.WaitsForCall = matchedWaitsIds
+                    .Select(waitId =>
+                    new WaitForCall
+                    {
+                        PushedCallId = pushedCallId,
+                        WaitId = waitId.Id
+                    }).ToList();
 
             await _context.SaveChangesAsync();
             return matchedWaitsIds;
@@ -154,7 +160,7 @@ internal class WaitsRepository : RepositoryBase
 
             throw;
         }
-       
+
     }
 
 
@@ -180,7 +186,7 @@ internal class WaitsRepository : RepositoryBase
     private void CancelWait(Wait wait)
     {
         wait.Cancel();
-        if (wait is MethodWait mw&&
+        if (wait is MethodWait mw &&
             mw.Name == $"#{nameof(LocalRegisteredMethods.TimeWait)}#" &&
             mw.ExtraData is JObject waitDataJson)
         {

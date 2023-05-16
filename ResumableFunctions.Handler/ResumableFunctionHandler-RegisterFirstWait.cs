@@ -33,10 +33,10 @@ public partial class ResumableFunctionHandler
             await SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
-            currentMw.PushedCallId = firstMatchedMethodWait.PushedCallId;
             currentMw.Status = WaitStatus.Completed;
             currentMw.Input = firstMatchedMethodWait.Input;
             currentMw.Output = firstMatchedMethodWait.Output;
+           
             await _context.SaveChangesAsync();
             return currentMw;
         }

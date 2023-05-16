@@ -16,9 +16,10 @@
                     <th>Method</th>
                     <th>Input</th>
                     <th>Output</th>
-                    <th>Status</th>
+                    <th>Processing</th>
+                    <th>Expected Waits</th>
                     <th>Matched Waits</th>
-                    <th>Completed Waits</th>
+                    <th>Not Matched Waits</th>
                     <th>Date</th>
                 </tr>
             </thead>
@@ -37,9 +38,13 @@
                     </td>
                     <td class="JsonObject">@item.PushedCall.Input</td>
                     <td class="JsonObject">@item.PushedCall.Output</td>
-                    <td>@(item.PushedCall.IsFinished ? "Processing Finished" : "In Progress")</td>
-                    <td><a href="#completed" class="w3-text-blue">@item.PushedCall.MatchedWaitsCount</a></td>
-                    <td><a href="#completed" class="w3-text-blue">@item.PushedCall.CompletedWaitsCount</a></td>
+                    <td>
+                        @((item.MatchedCount+item.NotMatchedCount)==item.ExpectedMatchCount ?
+                        "Finished" : 
+                        "In Progress")</td>
+                    <td><a href="#completed" class="w3-text-blue">@item.ExpectedMatchCount</a></td>
+                    <td><a href="#completed" class="w3-text-blue">@item.MatchedCount</a></td>
+                    <td><a href="#completed" class="w3-text-blue">@item.NotMatchedCount</a></td>
                     <td>@item.PushedCall.Created</td>
                 </tr>
             }

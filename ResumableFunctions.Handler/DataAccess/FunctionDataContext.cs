@@ -55,6 +55,9 @@ public class FunctionDataContext : DbContext
     public DbSet<FunctionWait> FunctionWaits { get; set; }
 
     public DbSet<PushedCall> PushedCalls { get; set; }
+    public DbSet<WaitForCall> WaitsForCalls { get; set; }
+
+
     public DbSet<ServiceData> ServicesData { get; set; }
 
     public DbSet<LogRecord> Logs { get; set; }
@@ -115,6 +118,12 @@ public class FunctionDataContext : DbContext
            .HasConversion(
             v => JsonConvert.SerializeObject(v),
             v => JsonConvert.DeserializeObject<MethodData>(v));
+
+        entityTypeBuilder
+           .HasMany(x => x.WaitsForCall)
+           .WithOne(waitForCall => waitForCall.PushedCall)
+           .HasForeignKey(waitForCall => waitForCall.PushedCallId)
+           .HasConstraintName("FK_Waits_For_Call");
     }
 
     private void ConfigureWaits(ModelBuilder modelBuilder)

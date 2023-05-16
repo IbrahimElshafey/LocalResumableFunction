@@ -11,11 +11,8 @@ public class PushedCall : IEntityWithDelete
     public object Input { get; internal set; }
     public object Output { get; internal set; }
 
-    public int MatchedWaitsCount { get; internal set; }
-    public int CompletedWaitsCount { get; internal set; }
+    public List<WaitForCall> WaitsForCall { get; internal set; } = new();
 
-
-    public bool IsFinished => MatchedWaitsCount == CompletedWaitsCount;
     public string RefineMatchModifier
     {
         get

@@ -13,7 +13,6 @@ namespace ResumableFunctions.Handler.InOuts;
 
 public class MethodWait : Wait
 {
-    public int PushedCallId { get; internal set; }
     [NotMapped] public LambdaExpression SetDataExpression { get; internal set; }
 
     internal byte[] SetDataExpressionValue { get; set; }

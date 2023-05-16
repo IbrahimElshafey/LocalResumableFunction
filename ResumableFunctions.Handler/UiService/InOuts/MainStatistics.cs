@@ -27,7 +27,8 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         int Id, string URN, string FullName,bool IsEntryPoint,string FirstWait, int InProgress, int Completed, int Failed, DateTime Created, DateTime LastUpdated);
 
     public record MethodGroupInfo(
-        int Id, string URN, int MethodsCount,int ActiveWaits,int CompletedWaits,int CanceledWaits,DateTime LastWaitDate, DateTime Created);
+        int Id, string URN, int MethodsCount,int ActiveWaits,int CompletedWaits,int CanceledWaits,DateTime Created);
 
-    public record PushedCallInfo(PushedCall PushedCall);
+    public record PushedCallInfo
+        (PushedCall PushedCall,int ExpectedMatchCount,int MatchedCount,int NotMatchedCount);
 }

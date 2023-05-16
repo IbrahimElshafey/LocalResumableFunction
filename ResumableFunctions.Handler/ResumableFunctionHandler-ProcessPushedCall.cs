@@ -102,14 +102,14 @@ public partial class ResumableFunctionHandler
 
                 if (targetMethod == null)
                 {
-                    _logger.LogError($"No method exist that match ({pushedCall.MethodData}).");
+                    _logger.LogError($"No method like ({pushedCall.MethodData}) exist that match for pushed call `{pushedCallId}`.");
                     return;
                 }
 
                 methodWait.Input = pushedCall.Input;
                 methodWait.Output = pushedCall.Output;
 
-                await ProcessWait(methodWait, pushedCallId);
+                await ProcessWait(methodWait, pushedCall);
             }
         }
         catch (Exception ex)
@@ -150,38 +150,57 @@ public partial class ResumableFunctionHandler
 
     private async Task<bool> CheckIfMatch(MethodWait methodWait, int pushedCallId)
     {
-        var isMatch = false;
         try
         {
             methodWait.LoadExpressions();
-            isMatch = methodWait.IsMatched();
+            var isMatch = methodWait.IsMatched();
             if (isMatch)
+            {
                 methodWait.FunctionState.AddLog(
                     $"Wait matched [{methodWait.Name}] for [{methodWait.RequestedByFunction}].", LogType.Info);
+                await IncrementMatchedCounter(pushedCallId, methodWait.Id);
+            }
+            else
+            {
+                await IncrementNotMatchCounter(pushedCallId, methodWait.Id);
+            }
             return isMatch;
         }
         catch (Exception ex)
         {
-            if (isMatch)
-                methodWait.FunctionState.AddError(
-                    $"Error occured when evaluate match for [{methodWait.Name}] in [{methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].", ex);
+            methodWait.FunctionState.AddError(
+                $"Error occured when evaluate match for [{methodWait.Name}] in [{methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].", ex);
             return false;
-        }
-        finally
-        {
-            if (isMatch)
-                await IncrementCompletedCounter(pushedCallId);
         }
     }
 
-
-
-    private async Task ProcessWait(MethodWait methodWait, int pushedCallId)
+    private async Task IncrementNotMatchCounter(int pushedCallId, int waitId)
     {
         try
         {
+            var waitCall = await _context.WaitsForCalls
+                .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == waitId);
+            waitCall.Status = WaitForCallStatus.NotMatched;//todo:update concurrency may occure
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Failed to increment NotMatch counter for PushedCall:{pushedCallId} and Wait:{waitId}");
+        }
+    }
+
+    private async Task ProcessWait(MethodWait methodWait, PushedCall pushedCall)
+    {
+        try
+        {
+            var pushedCallId = pushedCall.Id;
             if (methodWait.IsFirst)
+            {
+                var waitCall = await _context.WaitsForCalls.FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == methodWait.Id);
                 methodWait = await CloneFirstWait(methodWait);
+                waitCall.WaitId = methodWait.Id;
+                await _context.SaveChangesAsync();
+            }
 
             //todo:log message `Wait is expected match`
             methodWait.FunctionState.AddLog(
@@ -214,7 +233,6 @@ public partial class ResumableFunctionHandler
                     methodWait.CurrentFunction.GetInstanceId(methodWait.RequestedByFunction.RF_MethodUrn);
                 try
                 {
-                    methodWait.PushedCallId = pushedCallId;
                     if (!methodWait.IsFirst)//save state changes if not first wait
                         await _context.SaveChangesAsync();
                 }
@@ -225,12 +243,12 @@ public partial class ResumableFunctionHandler
                             $"\nProcessing this wait will be scheduled.",
                             ex);
                     _backgroundJobClient.Schedule(
-                        () => ProcessExpectedWaitMatch(methodWait.Id, methodWait.PushedCallId), TimeSpan.FromMinutes(3));
+                        () => ProcessExpectedWaitMatch(methodWait.Id, pushedCallId), TimeSpan.FromMinutes(3));
                     return;
                 }
 
                 await ResumeExecution(methodWait);
-                await IncrementCompletedCounter(pushedCallId);
+                //await IncrementMatchedCounter(pushedCallId);
             }
             await _context.SaveChangesAsync();
         }
@@ -242,35 +260,19 @@ public partial class ResumableFunctionHandler
 
     }
 
-    private async Task IncrementCompletedCounter(int pushedCallId)
+    private async Task IncrementMatchedCounter(int pushedCallId, int waitId)
     {
 
         try
         {
-            var pushedCall = await _context.PushedCalls.FirstOrDefaultAsync(x => x.Id == pushedCallId);
-            pushedCall.CompletedWaitsCount++;
-            if (pushedCall.CompletedWaitsCount == pushedCall.MatchedWaitsCount)
-                _context.PushedCalls.Remove(pushedCall);
+            var waitCall = await _context.WaitsForCalls
+                 .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == waitId);
+            waitCall.Status = WaitForCallStatus.Matched;//todo:update concurrency may occure
             await _context.SaveChangesAsync();
-        }
-        catch (DbUpdateConcurrencyException ex)
-        {
-            foreach (var entry in ex.Entries)
-            {
-                if (entry.Entity is PushedCall call)
-                {
-                    await IncrementCompletedCounter(call.Id);
-                }
-                else
-                {
-                    _logger.LogError(ex, $"Failed to update {entry.Entity}");
-                    throw;
-                }
-            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Failed to increment completed counter for PushedCall:{pushedCallId}");
+            _logger.LogError(ex, $"Failed to increment completed counter for PushedCall:{pushedCallId} and Wait:{waitId}");
         }
     }
 

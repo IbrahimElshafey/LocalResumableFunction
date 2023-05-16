@@ -192,7 +192,7 @@ namespace ResumableFunctions.Handler.UiService
                     Waiting = x.Count(x => x.Status == WaitStatus.Waiting),
                     Completed = x.Count(x => x.Status == WaitStatus.Completed),
                     Canceled = x.Count(x => x.Status == WaitStatus.Canceled),
-                    LastWait = x.Max(x => x.Created),
+                    //LastWait = x.Max(x => x.Created),
                     MethodGroupId = x.Key
                 });
             //todo refine this query
@@ -209,7 +209,6 @@ namespace ResumableFunctions.Handler.UiService
             var join = from wait in waitsQuery
                        from methodId in methodIdsQuery
                        where wait.MethodGroupId == methodId.MethodGroupId
-                       orderby wait.LastWait descending
                        select new { wait, methodId };
 
             return (await join.ToListAsync())
@@ -220,39 +219,23 @@ namespace ResumableFunctions.Handler.UiService
                                      x.wait.Waiting,
                                      x.wait.Completed,
                                      x.wait.Canceled,
-                                     x.wait.LastWait,
                                      x.methodId.GroupCreated))
                 .ToList();
-            //var query =
-            //                 _context
-            //                 .MethodsGroups
-            //                 //.Where(x => x.ServiceId == serviceId || serviceId == null)
-            //                 .Include(x => x.WaitMethodIdentifiers)
-            //                 .Select(
-            //                     mg => new MethodGroupInfo(
-            //                         mg.Id,
-            //                         mg.MethodGroupUrn,
-            //                         mg.WaitMethodIdentifiers.Count(),
-            //                         mg.WaitRequestsForGroup.Count(x => x.Status == WaitStatus.Waiting),
-            //                         mg.WaitRequestsForGroup.Count(x => x.Status == WaitStatus.Completed),
-            //                         mg.WaitRequestsForGroup.Count(x => x.Status == WaitStatus.Canceled),
-            //                         mg.WaitRequestsForGroup.Max(x => x.Created),
-            //                         mg.Created)
-            //                 );
-            //var methodInfos =
-            //    (await query.ToListAsync())
-            //    .OrderByDescending(x => x.LastWaitDate)
-            //    .ToList();
-            //return methodInfos;
         }
 
         public async Task<List<PushedCallInfo>> GetPushedCalls(int page)
         {
             return await _context
                 .PushedCalls
+                .Include(x => x.WaitsForCall)
                 .Skip(page * 20)
                 .Take(20)
-                .Select(x => new PushedCallInfo(x))
+                .Select(x =>
+                new PushedCallInfo(x,
+                x.WaitsForCall.Count(),
+                x.WaitsForCall.Count(x => x.Status == WaitForCallStatus.Matched),
+                x.WaitsForCall.Count(x => x.Status == WaitForCallStatus.NotMatched)
+                ))
                 .ToListAsync();
         }
     }
