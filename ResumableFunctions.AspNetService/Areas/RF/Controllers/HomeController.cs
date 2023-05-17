@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.AspNetService;
 using ResumableFunctions.AspNetService.DisplayObject;
 using ResumableFunctions.Handler.UiService;
 using System.Diagnostics;
@@ -25,30 +26,30 @@ namespace MVC.Controllers
             return View(model);
         }
 
-        [ActionName(HomePageModel.PartialNames.ServicesList)]
+        [ActionName(PartialNames.ServicesList)]
         public async Task<IActionResult> ServicesView()
         {
             return PartialView(
-                HomePageModel.PartialNames.ServicesList,
+                PartialNames.ServicesList,
                 new ServicesListModel(await _uiService.GetServicesList()));
         }
 
-        [ActionName(HomePageModel.PartialNames.ResumableFunctions)]
+        [ActionName(PartialNames.ResumableFunctions)]
         public async Task<IActionResult> ResumableFunctions()
         {
-            return PartialView(HomePageModel.PartialNames.ResumableFunctions);
+            return PartialView(PartialNames.ResumableFunctions);
         }
 
-        [ActionName(HomePageModel.PartialNames.PushedCalls)]
+        [ActionName(PartialNames.PushedCalls)]
         public async Task<IActionResult> PushedCalls()
         {
-            return PartialView(HomePageModel.PartialNames.PushedCalls, await _uiService.GetPushedCalls(0));
+            return PartialView(PartialNames.PushedCalls, await _uiService.GetPushedCalls(0));
         }
 
-        [ActionName(HomePageModel.PartialNames.LatestLogs)]
+        [ActionName(PartialNames.LatestLogs)]
         public async Task<IActionResult> LatestLogs()
         {
-            return PartialView(HomePageModel.PartialNames.LatestLogs);
+            return PartialView(PartialNames.LatestLogs);
         }
     }
 }

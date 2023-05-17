@@ -1,6 +1,7 @@
 ﻿# Todo
 * Add Scan Status for service
 * Same DLL in two services
+* Instance in progress but not wait anything
 ## UI project
 * Remove Service Details Page
 * Resumable Functions List

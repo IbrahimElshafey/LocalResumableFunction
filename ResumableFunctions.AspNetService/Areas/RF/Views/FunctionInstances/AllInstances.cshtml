@@ -1,18 +1,19 @@
-﻿@*https://www.jqueryscript.net/other/jQuery-Plugin-For-Easily-Readable-JSON-Data-Viewer.html*@
+﻿@using ResumableFunctions.AspNetService.DisplayObject;
+@model FunctionInstancesModel
 <div class="w3-container w3-margin">
     <header class="w3-text-blue-gray">
         <h2 class="w3-margin-top">
             <b>
-                <span class="w3-text-indigo">ProjectApprovalExample.ProjectApprovalFlow</span> Instances
+                <span class="w3-text-indigo">@Model.FunctionName</span> Instances
             </b>
         </h2>
     </header>
     <p class="w3-col m6 l4">
         <select class="w3-select" name="option">
             <option value="" disabled selected>Choose a Status</option>
-            <option value="1">In Progress (10)</option>
-            <option value="2">Error (1)</option>
-            <option value="3">Completed (112)</option>
+            <option value="1">In Progress (@Model.InProgressCount)</option>
+            <option value="2">Error (@Model.FailedCount)</option>
+            <option value="3">Completed (@Model.CompletedCount)</option>
         </select>
     </p>
 
@@ -22,37 +23,28 @@
                 <th>ID</th>
                 <th>Status</th>
                 <th width="35%">Current State Object</th>
-                <th>Current Wait</th>
+                <th>Current Waiting For</th>
                 <th>History</th>
                 <th>Created</th>
                 <th>Updated</th>
             </tr>
         </thead>
-        <tr>
-            <td>12</td>
-            <td class="w3-text-green">Completed</td>
-            <td>
-                <span class="JsonObject" style=" word-wrap: break-word;">
-                    {"CurrentProject":{"Id":100,"Name":"string","Description":"string","IsResubmit":false},"ManagerOneApproval":true,"ManagerTwoApproval":false,"ManagerThreeApproval":false,"ManagerFourApproval":false,"ManagerFiveApproval":false,"ExternalMethodStatus":"Not matched yet."}
-                </span>
-            </td>
-            <td>No Wait (Completed)</td>
-            <td><a href="~/RF/FunctionInstances/FunctionInstance" class="w3-text-blue">8 Waits</a></td>
-            <td>12/02/2022</td>
-            <td>12/02/2023</td>
-        </tr>
-        <tr>
-            <td>14</td>
-            <td class="w3-text-orange">In Progress</td>
-            <td>
-                <span class="JsonObject" style=" word-wrap: break-word;">
-                    {"CurrentProject":{"Id":100,"Name":"string","Description":"string","IsResubmit":false},"ManagerOneApproval":true,"ManagerTwoApproval":false,"ManagerThreeApproval":false,"ManagerFourApproval":false,"ManagerFiveApproval":false,"ExternalMethodStatus":"Not matched yet."}
-                </span>
-            </td>
-            <td>Wait Manager Approval</td>
-            <td><a href="~/RF/FunctionInstances/FunctionInstance" class="w3-text-blue">4 Waits</a></td>
-            <td>12/02/2022</td>
-            <td>12/02/2023</td>
-        </tr>
+        @foreach (var instance in Model.Instances)
+        {
+            <tr>
+                <td>@instance.FunctionState.Id</td>
+                <td class="w3-text-@instance.StateColor">@instance.FunctionState.Status</td>
+                <td>
+                    <span class="JsonObject" style=" word-wrap: break-word;">
+                        @instance.FunctionState.StateObject
+                    </span>
+                </td>
+                <td>@instance.CurrentWait?.Name</td>
+                <td><a href="~/RF/FunctionInstances/FunctionInstance" class="w3-text-blue">@instance.WaitsCount Waits</a></td>
+                <td>@instance.FunctionState.Created</td>
+                <td>@instance.FunctionState.Modified</td>
+            </tr>
+        }
+        
     </table>
 </div>

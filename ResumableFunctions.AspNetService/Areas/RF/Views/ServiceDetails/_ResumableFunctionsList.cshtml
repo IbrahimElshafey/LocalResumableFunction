@@ -32,13 +32,13 @@
         <table class="w3-table-all">
             <thead>
                 <tr class="w3-indigo">
-                    <th>Function</th>
+                    <th width="45%">Function</th>
                     <th>First Wait</th>
                     <th>InProgress</th>
                     <th>Failed</th>
                     <th>Completed</th>
-                    <th>Created</th>
-                    <th>Last Updated</th>
+                    <th width="120">Created</th>
+                    <th width="120">Last Updated</th>
                 </tr>
             </thead>
             @for (int i = 0; i < Model.Count; i++)
@@ -48,18 +48,21 @@
                 <tr>
                     <td>
                         <ul>
-                            <li><a href="~/RF/FunctionInstances/AllInstances" class="w3-text-blue">@function.FunctionIdentifier.RF_MethodUrn</a></li>
+                            <li>
+                                <a href="~/RF/FunctionInstances/AllInstances?functionId=@function.FunctionIdentifier.Id&functionName=@function.FunctionIdentifier.MethodName"
+                                   class="w3-text-blue">@function.FunctionIdentifier.RF_MethodUrn</a>
+                            </li>
                             <li><b>Method Name: </b>@function.FunctionIdentifier.MethodName</li>
                             <li><b>Class Name: </b>@function.FunctionIdentifier.ClassName</li>
                             <li><b>Assembly Name: </b>@function.FunctionIdentifier.AssemblyName</li>
                             <li>
                                 @if (function.Failed == 0)
                                 {
-                                    <b class="w3-text-green">No Instances Errors</b>
+                                    <b class="w3-text-green">No Instances Failed</b>
                                 }
                                 else
                                 {
-                                    <b class="w3-text-Red">@(function.Failed) Instances Errors</b>
+                                    <b class="w3-text-Red">@(function.Failed) Instances Failed</b>
                                 }
                             </li>
                         </ul>
@@ -79,34 +82,13 @@
                         }
                     </td>
                     <td>
-                        @if (@function.InProgress != 0)
-                        {
-                            <a href="#completed" class="w3-text-blue">@function.InProgress</a>
-                        }
-                        else
-                        {
-                            <span>0</span>
-                        }
+                        @(function.InProgress == 0 ? "No" : function.InProgress.ToString())
                     </td>
                     <td>
-                        @if (@function.Failed != 0)
-                        {
-                            <a href="#completed" class="w3-text-blue">@function.Failed</a>
-                        }
-                        else
-                        {
-                            <span>0</span>
-                        }
+                        @(function.Failed == 0 ? "No" : function.Failed.ToString())
                     </td>
                     <td>
-                        @if (@function.Completed != 0)
-                        {
-                            <a href="#completed" class="w3-text-blue">@function.Completed</a>
-                        }
-                        else
-                        {
-                            <span>0</span>
-                        }
+                        @(function.Completed == 0 ? "No" : function.Completed.ToString())
                     </td>
                     <td>@function.FunctionIdentifier.Created</td>
                     <td>
@@ -123,6 +105,5 @@
                 </tr>
             }
         </table>
-        @*<button class="w3-button w3-indigo w3-margin-top">Show More...</button>*@
     </div>
 </div>

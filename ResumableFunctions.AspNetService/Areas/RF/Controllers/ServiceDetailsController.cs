@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.AspNetService;
 using ResumableFunctions.AspNetService.DisplayObject;
 using ResumableFunctions.Handler.UiService;
 using System.Diagnostics;
@@ -25,31 +26,31 @@ namespace MVC.Controllers
             return View(model);
         }
 
-        [ActionName(ServiceDetailsModel.PartialNames.ServiceDetails)]
+        [ActionName(PartialNames.ServiceDetails)]
         public async Task<IActionResult> ServiceInfoView(int serviceId)
         {
-            return PartialView(ServiceDetailsModel.PartialNames.ServiceDetails, await _uiService.GetServiceInfo(serviceId));
+            return PartialView(PartialNames.ServiceDetails, await _uiService.GetServiceInfo(serviceId));
         }
 
-        [ActionName(ServiceDetailsModel.PartialNames.ServiceLogs)]
+        [ActionName(PartialNames.ServiceLogs)]
         public async Task<IActionResult> GetLogs(int serviceId)
         {
-            return PartialView(ServiceDetailsModel.PartialNames.ServiceLogs, await _uiService.GetServiceLogs(serviceId));
+            return PartialView(PartialNames.ServiceLogs, await _uiService.GetServiceLogs(serviceId));
         }
 
-        [ActionName(ServiceDetailsModel.PartialNames.ResumabelFunctions)]
+        [ActionName(PartialNames.ResumabelFunctions)]
         public async Task<IActionResult> GetResumabelFunctionsAsync(int serviceId)
         {
             return PartialView(
-                ServiceDetailsModel.PartialNames.ResumabelFunctions,
+                PartialNames.ResumabelFunctions,
                 await _uiService.GetFunctionsInfo(serviceId));
         }
 
-        [ActionName(ServiceDetailsModel.PartialNames.MethodsList)]
+        [ActionName(PartialNames.MethodsList)]
         public async Task<IActionResult> GetMethodsListAsync(int serviceId)
         {
             return PartialView(
-                ServiceDetailsModel.PartialNames.MethodsList,
+                PartialNames.MethodsList,
                 await _uiService.GetMethodsInfo(serviceId));
         }
 

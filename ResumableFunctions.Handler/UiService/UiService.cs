@@ -136,6 +136,7 @@ namespace ResumableFunctions.Handler.UiService
             return await _context.ResumableFunctionIdentifiers
               .Include(x => x.ActiveFunctionsStates)
               .Include(x => x.WaitsCreatedByFunction)
+              .Where(x => x.Type == MethodType.ResumableFunctionEntryPoint)
               .Select(x => new FunctionInfo(
                       x,
                       x.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsNode).Name,
@@ -201,6 +202,19 @@ namespace ResumableFunctions.Handler.UiService
                 x.WaitsForCall.Count(x => x.Status == WaitForCallStatus.NotMatched)
                 ))
                 .ToListAsync();
+        }
+
+        public Task<List<FunctionInstanceInfo>> GetFunctionInstances(int functionId)
+        {
+            var query =
+                 _context.FunctionStates
+                 .Where(x => x.ResumableFunctionIdentifierId == functionId)
+                 .Include(x => x.Waits)
+                 .Select(functionState => new FunctionInstanceInfo(
+                     functionState,
+                     functionState.Waits.First(wait => wait.IsNode && wait.Status == WaitStatus.Waiting),
+                     functionState.Waits.Count()));
+            return query.ToListAsync();
         }
     }
 }

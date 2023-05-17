@@ -33,11 +33,12 @@ public partial class ResumableFunctionHandler
             await SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
-            currentMw.Status = WaitStatus.Completed;
+            currentMw.Status = WaitStatus.Waiting;
             currentMw.Input = firstMatchedMethodWait.Input;
             currentMw.Output = firstMatchedMethodWait.Output;
            
             await _context.SaveChangesAsync();
+            firstWaitClone.Status = WaitStatus.Waiting;
             return currentMw;
         }
         catch (Exception ex)

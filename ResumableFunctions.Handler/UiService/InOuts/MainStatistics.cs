@@ -30,4 +30,15 @@ namespace ResumableFunctions.Handler.UiService.InOuts
 
     public record PushedCallInfo
         (PushedCall PushedCall,int ExpectedMatchCount,int MatchedCount,int NotMatchedCount);
+
+    public record FunctionInstanceInfo(ResumableFunctionState FunctionState, Wait CurrentWait, int WaitsCount)
+    {
+        public string StateColor => FunctionState.Status switch
+        {
+            FunctionStatus.New => "black",
+            FunctionStatus.InProgress => "yellow",
+            FunctionStatus.Completed => "green",
+            FunctionStatus.Error => "red",
+        };
+    }
 }

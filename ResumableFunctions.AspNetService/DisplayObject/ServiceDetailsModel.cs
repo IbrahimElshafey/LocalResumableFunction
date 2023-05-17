@@ -4,13 +4,6 @@ namespace ResumableFunctions.AspNetService.DisplayObject
 {
     public class ServiceDetailsModel
     {
-        public class PartialNames
-        {
-            public const string ServiceDetails = "_ServiceInfo";
-            public const string ServiceLogs = "_ServiceLogs";
-            public const string ResumabelFunctions = "_ResumableFunctionsList";
-            public const string MethodsList = "_MethodsList";
-        }
         public int ServiceId { get; set; }
         public MainMenuDisplay Menu { get; private set; }
 
