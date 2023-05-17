@@ -1862,8 +1862,10 @@
 
         //document ready
         document.addEventListener("DOMContentLoaded", function () {
-            if (document.getElementById('is-menu-page').value)  
+            var isMenuElement = document.getElementById('is-menu-page');
+            if (isMenuElement && isMenuElement.value)  
                 openViewPart(hashParts().view);
+            JsonObjectRender();
         });
 
         function toggleShow(selector) {

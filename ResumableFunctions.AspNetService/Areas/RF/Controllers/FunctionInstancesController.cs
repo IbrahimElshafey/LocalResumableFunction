@@ -18,11 +18,13 @@ namespace MVC.Controllers
             this._uiService = uiService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> AllInstances()
         {
-            var model = new HomePageModel();
-            model.SetMenu(await _uiService.GetMainStatistics());
-            return View(model);
+            return View();
+        }
+        public async Task<IActionResult> FunctionInstance()
+        {
+            return View();
         }
 
     }

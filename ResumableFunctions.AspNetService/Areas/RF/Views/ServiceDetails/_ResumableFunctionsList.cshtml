@@ -48,10 +48,20 @@
                 <tr>
                     <td>
                         <ul>
-                            <li><a href="~/rf/ResumableFunctionInstances" class="w3-text-blue">@function.FunctionIdentifier.RF_MethodUrn</a></li>
+                            <li><a href="~/RF/FunctionInstances/AllInstances" class="w3-text-blue">@function.FunctionIdentifier.RF_MethodUrn</a></li>
                             <li><b>Method Name: </b>@function.FunctionIdentifier.MethodName</li>
                             <li><b>Class Name: </b>@function.FunctionIdentifier.ClassName</li>
                             <li><b>Assembly Name: </b>@function.FunctionIdentifier.AssemblyName</li>
+                            <li>
+                                @if (function.Failed == 0)
+                                {
+                                    <b class="w3-text-green">No Instances Errors</b>
+                                }
+                                else
+                                {
+                                    <b class="w3-text-Red">@(function.Failed) Instances Errors</b>
+                                }
+                            </li>
                         </ul>
                     </td>
                     <td>
