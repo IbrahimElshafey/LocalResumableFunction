@@ -21,9 +21,16 @@ namespace MVC.Controllers
 
         public async Task<IActionResult> Index()
         {
+            try
+        {
             var model = new HomePageModel();
             model.SetMenu(await _uiService.GetMainStatistics());
             return View(model);
+        }
+            catch (Exception ex)
+            {
+                return View("Error",ex);
+            }
         }
 
         [ActionName(PartialNames.ServicesList)]

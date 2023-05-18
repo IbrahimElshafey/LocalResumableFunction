@@ -1,5 +1,5 @@
 ﻿# Todo
-* Add Scan Status for service
+* Add Locks table for fix scan and processing problem
 * Same DLL in two services
 * Instance in progress but not wait anything
 ## UI project

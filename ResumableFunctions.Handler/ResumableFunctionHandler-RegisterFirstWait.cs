@@ -29,7 +29,7 @@ public partial class ResumableFunctionHandler
             //    $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.", LogType.Info);
 
             firstWaitClone.FunctionState.Status = FunctionStatus.InProgress;
-
+            firstWaitClone.FunctionState.Logs.AddRange(firstWaitClone.FunctionState.Logs);
             await SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
@@ -38,7 +38,7 @@ public partial class ResumableFunctionHandler
             currentMw.Output = firstMatchedMethodWait.Output;
            
             await _context.SaveChangesAsync();
-            firstWaitClone.Status = WaitStatus.Waiting;
+            //firstWaitClone.Status = WaitStatus.Waiting;
             return currentMw;
         }
         catch (Exception ex)

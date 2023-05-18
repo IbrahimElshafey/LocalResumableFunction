@@ -17,7 +17,7 @@
 * Diffrent services may try to add same MethodGroup at same time 
 	* uniqe index exception handel
 
-# Cross Services/Process Locking
+# Cross Services Locking
 * Table with Insert/Delete only (No Update)
 	* Indexed string column for entity name
 	* Intger column for entity ID
