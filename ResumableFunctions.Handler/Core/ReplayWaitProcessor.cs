@@ -3,9 +3,11 @@ using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.Handler.Data;
+using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.DataAccess;
 
-namespace ResumableFunctions.Handler;
+namespace ResumableFunctions.Handler.Core;
 
 
 internal class ReplayWaitProcessor : IReplayWaitProcessor
@@ -13,9 +15,10 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     private readonly ILogger<ReplayWaitProcessor> _logger;
     private readonly ISaveWaitHandler _saveWaitHandler;
     private readonly FunctionDataContext _context;
+    private readonly IWaitsRepository _waitsRepository;
 
     public ReplayWaitProcessor(
-        FunctionDataContext context, 
+        FunctionDataContext context,
         ILogger<ReplayWaitProcessor> logger,
         ISaveWaitHandler saveWaitHandler)
     {
@@ -26,7 +29,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     public async Task<(Wait Wait, bool ProceedExecution)> ReplayWait(ReplayRequest replayRequest)
     {
-        var waitToReplay = await _context.waitsRepository.GetOldWaitForReplay(replayRequest);
+        var waitToReplay = await _waitsRepository.GetOldWaitForReplay(replayRequest);
         if (waitToReplay == null)
         {
             string errorMsg = $"Replay failed because there is no wait to replay, replay request was ({replayRequest})";
@@ -37,16 +40,14 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         //todo:review CancelFunctionWaits is suffecient
         //Cancel wait and it's child
         waitToReplay.Status = waitToReplay.Status == WaitStatus.Waiting ? WaitStatus.Canceled : waitToReplay.Status;
-        await _context.waitsRepository.CancelSubWaits(waitToReplay.Id);
+        await _waitsRepository.CancelSubWaits(waitToReplay.Id);
         //skip active waits after replay
-        await _context.waitsRepository.CancelFunctionWaits(waitToReplay.RequestedByFunctionId, waitToReplay.FunctionStateId);
+        await _waitsRepository.CancelFunctionWaits(waitToReplay.RequestedByFunctionId, waitToReplay.FunctionStateId);
 
         switch (replayRequest.ReplayType)
         {
             case ReplayType.GoAfter:
                 return new(waitToReplay, true);
-            //await ProceedToNextWait(waitToReplay);
-            //break;
 
             case ReplayType.GoBefore:
                 return new(await ReplayGoBefore(waitToReplay), false);
@@ -201,17 +202,6 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             waitToReplay.IsReplay = true;
             waitToReplay.IsFirst = false;
         }
-
         return (runner, hasWait);
-    }
-
-    internal async Task<bool> IsExternal(string methodUrn)
-    {
-        return await _context
-            .MethodsGroups
-            .Include(x => x.WaitMethodIdentifiers)
-            .Where(x => x.MethodGroupUrn == methodUrn)
-            .SelectMany(x => x.WaitMethodIdentifiers)
-            .AnyAsync(x => x.CanPublishFromExternal);
     }
 }

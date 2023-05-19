@@ -1,5 +1,4 @@
-﻿using ResumableFunctions.Handler;
-using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts;
 
 namespace TestApi1.Examples;
 

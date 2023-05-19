@@ -1,30 +1,38 @@
 ﻿using System.Reflection;
-using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.DataAccess;
 
-namespace ResumableFunctions.Handler;
+namespace ResumableFunctions.Handler.Core;
 
 internal class FirstWaitProcessor : IFirstWaitProcessor
 {
     private readonly ILogger<FirstWaitProcessor> _logger;
     private readonly FunctionDataContext _context;
     private readonly ISaveWaitHandler _saveWaitHandler;
+    private readonly IMethodIdentifierRepository _methodIdentifierRepo;
+    private readonly IWaitsRepository _waitsRepository;
     private readonly IServiceProvider _serviceProvider;
 
-    public FirstWaitProcessor(ILogger<FirstWaitProcessor> logger, 
-        ISaveWaitHandler saveWaitHandler, 
+    public FirstWaitProcessor(ILogger<FirstWaitProcessor> logger,
+        ISaveWaitHandler saveWaitHandler,
         FunctionDataContext context,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        IMethodIdentifierRepository methodIdentifierRepo,
+        IWaitsRepository waitsRepository)
     {
         _logger = logger;
         _context = context;
         _saveWaitHandler = saveWaitHandler;
         _serviceProvider = serviceProvider;
+        _methodIdentifierRepo = methodIdentifierRepo;
+        _waitsRepository = waitsRepository;
     }
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
@@ -113,11 +121,11 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
             await functionRunner.MoveNextAsync();
             var firstWait = functionRunner.Current;
-            var methodId = await _context.methodIdentifierRepo.GetResumableFunction(new MethodData(resumableFunction));
+            var methodId = await _methodIdentifierRepo.GetResumableFunction(new MethodData(resumableFunction));
             if (removeIfExist)
             {
                 WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
-                await _context.waitsRepository.RemoveFirstWaitIfExist(firstWait, methodId);
+                await _waitsRepository.RemoveFirstWaitIfExist(firstWait, methodId);
             }
             var service = await _context.ServicesData.FirstAsync(x => x.AssemblyName == methodId.AssemblyName);
             var functionState = new ResumableFunctionState

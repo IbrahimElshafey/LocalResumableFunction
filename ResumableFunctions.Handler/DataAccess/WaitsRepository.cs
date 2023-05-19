@@ -10,20 +10,24 @@ using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Hangfire;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
 
-namespace ResumableFunctions.Handler.Data;
+namespace ResumableFunctions.Handler.DataAccess;
 
-internal class WaitsRepository : RepositoryBase
+internal class WaitsRepository : IWaitsRepository
 {
     private ILogger<WaitsRepository> _logger;
     private readonly IBackgroundJobClient backgroundJobClient;
+    private readonly FunctionDataContext _context;
 
     public WaitsRepository(
         ILogger<WaitsRepository> logger,
-        IBackgroundJobClient backgroundJobClient) : base()
+        IBackgroundJobClient backgroundJobClient,
+        FunctionDataContext context) : base()
     {
         _logger = logger;
         this.backgroundJobClient = backgroundJobClient;
+        _context = context;
     }
 
     public Task AddWait(Wait wait)
@@ -96,7 +100,7 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-    internal async Task<int> GetMethodGroupId(string methodUrn)
+    private async Task<int> GetMethodGroupId(string methodUrn)
     {
         var waitMethodIdentifier =
            await _context
@@ -121,7 +125,7 @@ internal class WaitsRepository : RepositoryBase
         return result!;
     }
 
-    internal IQueryable<Wait> GetFunctionInstanceWaits(int requestedByFunctionId, int functionStateId)
+    private IQueryable<Wait> GetFunctionInstanceWaits(int requestedByFunctionId, int functionStateId)
     {
         return _context.Waits
             .OrderByDescending(x => x.Id)
@@ -131,7 +135,7 @@ internal class WaitsRepository : RepositoryBase
                 x.FunctionStateId == functionStateId);
     }
 
-    internal async Task RemoveFirstWaitIfExist(Wait firstWait, MethodIdentifier methodIdentifier)
+    public async Task RemoveFirstWaitIfExist(Wait firstWait, MethodIdentifier methodIdentifier)
     {
         try
         {
@@ -209,11 +213,6 @@ internal class WaitsRepository : RepositoryBase
         return null;
     }
 
-    public async Task<T> ReloadChildWaits<T>(T wait) where T : Wait
-    {
-        wait.ChildWaits = await _context.Waits.Where(x => x.ParentWaitId == wait.Id).ToListAsync();
-        return wait;
-    }
 
     public async Task CancelOpenedWaitsForState(int stateId)
     {
@@ -239,7 +238,7 @@ internal class WaitsRepository : RepositoryBase
         }
     }
 
-    internal async Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait)
+    public async Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait)
     {
         var waitToReplay =
             await GetFunctionInstanceWaits(

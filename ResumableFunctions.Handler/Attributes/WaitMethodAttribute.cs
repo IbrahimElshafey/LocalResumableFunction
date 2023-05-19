@@ -1,10 +1,10 @@
 ﻿using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using MethodBoundaryAspect.Fody.Attributes;
-using ResumableFunctions.Handler;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
+using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.Attributes;
 
@@ -17,7 +17,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
 {
     internal static IServiceProvider ServiceProvider;
     private PushedCall _pushedCall;
-    private readonly ReplayWaitProcessor _functionHandler;
+    private readonly IPushedCallProcessor _pushedCallProcessor;
     private readonly ILogger<WaitMethodAttribute> _logger;
 
     public WaitMethodAttribute(string methodUrn, bool canPublishFromExternal = false)
@@ -25,8 +25,15 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
         MethodUrn = methodUrn;
         CanPublishFromExternal = canPublishFromExternal;
         if (ServiceProvider == null) return;
-        _functionHandler = ServiceProvider.GetService<ReplayWaitProcessor>();
         _logger = ServiceProvider.GetService<ILogger<WaitMethodAttribute>>();
+        try
+        {
+            _pushedCallProcessor = ServiceProvider.GetService<IPushedCallProcessor>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Can't initiate PushedCallProcessor.", ex);
+        }
     }
 
     /// <summary>
@@ -65,7 +72,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
             }
 
 
-            _functionHandler.QueuePushedCallProcessing(_pushedCall).Wait();
+            _pushedCallProcessor.QueuePushedCallProcessing(_pushedCall).Wait();
             args.MethodExecutionTag = true;
         }
         catch (Exception ex)

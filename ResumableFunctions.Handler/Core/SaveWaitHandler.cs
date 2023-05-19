@@ -4,17 +4,24 @@ using ResumableFunctions.Handler.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.Handler.Data;
+using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.DataAccess;
 
-namespace ResumableFunctions.Handler;
+namespace ResumableFunctions.Handler.Core;
 
 public class SaveWaitHandler : ISaveWaitHandler
 {
     private readonly ILogger<SaveWaitHandler> _logger;
     private readonly FunctionDataContext _context;
     private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IWaitsRepository _waitsRepository;
+    private readonly IMethodIdentifierRepository _methodIdentifierRepo;
 
-    public SaveWaitHandler(ILogger<SaveWaitHandler> logger, FunctionDataContext context, IBackgroundJobClient backgroundJobClient)
+    public SaveWaitHandler(
+        ILogger<SaveWaitHandler> logger,
+        FunctionDataContext context,
+        IBackgroundJobClient backgroundJobClient)
     {
         _logger = logger;
         _context = context;
@@ -44,9 +51,6 @@ public class SaveWaitHandler : ISaveWaitHandler
             case TimeWait timeWait:
                 await TimeWaitRequested(timeWait);
                 break;
-            case ReplayRequest replayWait:
-                await ReplayWait(replayWait);
-                break;
         }
 
         return false;
@@ -56,7 +60,7 @@ public class SaveWaitHandler : ISaveWaitHandler
 
     private async Task MethodWaitRequested(MethodWait methodWait)
     {
-        var methodToWait = await _context.methodIdentifierRepo.GetWaitMethod(methodWait);
+        var methodToWait = await _methodIdentifierRepo.GetWaitMethod(methodWait);
 
         methodWait.MethodToWait = methodToWait;
         methodWait.MethodToWaitId = methodToWait.Id;
@@ -64,7 +68,7 @@ public class SaveWaitHandler : ISaveWaitHandler
         methodWait.MethodGroupToWaitId = methodToWait.ParentMethodGroupId;
         methodWait.RewriteExpressions();
 
-        await _context.waitsRepository.AddWait(methodWait);
+        await _waitsRepository.AddWait(methodWait);
     }
 
     private async Task WaitsGroupRequested(WaitsGroup manyWaits)
@@ -80,12 +84,12 @@ public class SaveWaitHandler : ISaveWaitHandler
             await SaveWaitRequestToDb(waitGroupChild);//child wait in group
         }
 
-        await _context.waitsRepository.AddWait(manyWaits);
+        await _waitsRepository.AddWait(manyWaits);
     }
 
     private async Task FunctionWaitRequested(FunctionWait functionWait)
     {
-        await _context.waitsRepository.AddWait(functionWait);
+        await _waitsRepository.AddWait(functionWait);
 
         var functionRunner = new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
         var hasNext = await functionRunner.MoveNextAsync();
@@ -102,7 +106,7 @@ public class SaveWaitHandler : ISaveWaitHandler
         functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
         functionWait.FirstWait.ParentWait = functionWait;
         functionWait.FirstWait.ParentWaitId = functionWait.Id;
-        var methodId = await _context.methodIdentifierRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
+        var methodId = await _methodIdentifierRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
         functionWait.FirstWait.RequestedByFunction = methodId;
         functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
 

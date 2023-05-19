@@ -8,13 +8,15 @@ using Hangfire;
 using Microsoft.Extensions.Logging;
 using System;
 using Microsoft.Extensions.DependencyInjection;
-using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.Helpers;
 using Newtonsoft.Json.Linq;
 using static System.Formats.Asn1.AsnWriter;
 using Newtonsoft.Json;
+using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.DataAccess;
 
-namespace ResumableFunctions.Handler;
+namespace ResumableFunctions.Handler.Core;
 
 internal class PushedCallProcessor : IPushedCallProcessor
 {
@@ -23,22 +25,24 @@ internal class PushedCallProcessor : IPushedCallProcessor
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ReplayWaitProcessor> _logger;
-    private readonly IWaitProcessor waitProcessor;
+    private readonly IWaitProcessor _waitProcessor;
+    private readonly IWaitsRepository _waitsRepository;
 
     public PushedCallProcessor(
         IServiceProvider serviceProvider,
         ILogger<ReplayWaitProcessor> logger,
-        IWaitProcessor waitProcessor)
+        IWaitProcessor waitProcessor,
+        IWaitsRepository waitsRepository)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
-        this.waitProcessor = waitProcessor;
+        _waitProcessor = waitProcessor;
         _backgroundJobClient = serviceProvider.GetService<IBackgroundJobClient>();
+        _waitsRepository = waitsRepository;
     }
 
     public async Task<int> QueuePushedCallProcessing(PushedCall pushedCall)
     {
-        SetDependencies(_serviceProvider);
         _context.PushedCalls.Add(pushedCall);
         await _context.SaveChangesAsync();
         _backgroundJobClient.Enqueue(() => ProcessPushedCall(pushedCall.Id));
@@ -51,14 +55,13 @@ internal class PushedCallProcessor : IPushedCallProcessor
         {
             using (IServiceScope scope = _serviceProvider.CreateScope())
             {
-                SetDependencies(scope.ServiceProvider);
-                var waitsIds = await _context.waitsRepository.GetWaitsIdsForMethodCall(pushedCallId);
+                var waitsIds = await _waitsRepository.GetWaitsIdsForMethodCall(pushedCallId);
 
                 if (waitsIds != null)
                     foreach (var waitId in waitsIds)
                     {
                         if (IsLocalWait(waitId))
-                            _backgroundJobClient.Enqueue(() => waitProcessor.Run(waitId.Id, pushedCallId));
+                            _backgroundJobClient.Enqueue(() => _waitProcessor.RequestProcessing(waitId.Id, pushedCallId));
                         else
                             await CallOwnerService(waitId, pushedCallId);
                     }
@@ -102,8 +105,27 @@ internal class PushedCallProcessor : IPushedCallProcessor
         return File.Exists(ownerAssemblyPath);
     }
 
-    internal void SetDependencies(IServiceProvider serviceProvider)
+
+    public async Task<int> QueueExternalPushedCallProcessing(PushedCall pushedCall, string serviceName)
     {
-        _context = serviceProvider.GetService<FunctionDataContext>();
+        string methodUrn = pushedCall.MethodData.MethodUrn;
+        if (await IsExternal(methodUrn) is false)
+        {
+            string errorMsg =
+                $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}].";
+            _logger.LogError(errorMsg);
+            throw new Exception(errorMsg);
+        }
+        return await QueuePushedCallProcessing(pushedCall);
+    }
+
+    internal async Task<bool> IsExternal(string methodUrn)
+    {
+        return await _context
+            .MethodsGroups
+            .Include(x => x.WaitMethodIdentifiers)
+            .Where(x => x.MethodGroupUrn == methodUrn)
+            .SelectMany(x => x.WaitMethodIdentifiers)
+            .AnyAsync(x => x.CanPublishFromExternal);
     }
 }

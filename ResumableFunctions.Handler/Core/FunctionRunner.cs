@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using ResumableFunctions.Handler.InOuts;
 
-namespace ResumableFunctions.Handler;
+namespace ResumableFunctions.Handler.Core;
 
 internal class FunctionRunner : IAsyncEnumerator<Wait>
 {

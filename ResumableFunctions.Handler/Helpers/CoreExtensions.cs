@@ -9,7 +9,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Internal;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.Data;
+using ResumableFunctions.Handler.Core;
+using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService;
 using System.Diagnostics;
@@ -19,6 +22,7 @@ using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using static System.Formats.Asn1.AsnWriter;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
@@ -28,11 +32,24 @@ public static class CoreExtensions
     //internal static IServiceProvider GetServiceProvider() => _ServiceProvider;
     public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
     {
-        services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
-        services.AddTransient<ReplayWaitProcessor>();
-        services.AddTransient<Scanner>();
-        services.AddTransient<MethodIdentifierRepository>();
-        services.AddTransient<WaitsRepository>();
+        //services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
+        //services.AddTransient<ReplayWaitProcessor>();
+        //services.AddTransient<Scanner>();
+        //services.AddTransient<MethodIdentifierRepository>();
+        //services.AddTransient<WaitsRepository>();
+
+        services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig);
+        services.AddScoped<IMethodIdentifierRepository,MethodIdentifierRepository>();
+        services.AddScoped<IWaitsRepository,WaitsRepository>();
+
+        services.AddScoped<IFirstWaitProcessor,FirstWaitProcessor>();
+        services.AddScoped<IPushedCallProcessor,PushedCallProcessor>();
+        services.AddScoped<IRecycleBinService,RecycleBinService>();
+        services.AddScoped<IReplayWaitProcessor,ReplayWaitProcessor>();
+        services.AddScoped<ISaveWaitHandler,SaveWaitHandler>();
+        services.AddScoped<IWaitProcessor,WaitProcessor>();
+        services.AddScoped<Scanner>();
+
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
@@ -50,8 +67,10 @@ public static class CoreExtensions
         GlobalConfiguration.Configuration
           .UseActivator(new HangfireActivator());
 
-        var backgroundJobClient = app.Services.GetService<IBackgroundJobClient>();
-        var scanner = app.Services.GetService<Scanner>();
+
+        using var scope = app.Services.CreateScope();
+        var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundJobClient>();
+        var scanner = scope.ServiceProvider.GetService<Scanner>();
         backgroundJobClient.Enqueue(() => scanner.Start());
     }
     public static (bool IsFunctionData, MemberExpression NewExpression) GetDataParamterAccess(

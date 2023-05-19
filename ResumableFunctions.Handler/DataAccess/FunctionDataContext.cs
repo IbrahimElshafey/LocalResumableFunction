@@ -12,35 +12,32 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
+using Hangfire;
 
-namespace ResumableFunctions.Handler.Data;
-
+namespace ResumableFunctions.Handler.DataAccess;
 public class FunctionDataContext : DbContext
 {
-    internal readonly MethodIdentifierRepository methodIdentifierRepo;
-    internal readonly WaitsRepository waitsRepository;
-    private readonly ILogger<FunctionDataContext> logger;
+    private readonly ILogger<FunctionDataContext> _logger;
 
     public FunctionDataContext(
-        IServiceProvider serviceProvider,
         ILogger<FunctionDataContext> logger,
-        IResumableFunctionsSettings settings) : base(settings.WaitsDbConfig.Options)
+        IResumableFunctionsSettings settings,
+        IBackgroundJobClient backgroundJobClient) : base(settings.WaitsDbConfig.Options)
     {
+        _logger = logger;
         try
         {
-            Database.EnsureCreated();
-            methodIdentifierRepo = serviceProvider.GetService<MethodIdentifierRepository>();
-            waitsRepository = serviceProvider.GetService<WaitsRepository>();
-            methodIdentifierRepo._context = this;
-            waitsRepository._context = this;
+            CreateDb();
         }
         catch (Exception)
         {
-            //Task.Delay(TimeSpan.FromMinutes(3)).Wait();
-            Database.EnsureCreated();
+            backgroundJobClient.Schedule(() => CreateDb(), TimeSpan.FromMinutes(2));
         }
+    }
 
-        this.logger = logger;
+    public void CreateDb()
+    {
+        Database.EnsureCreated();
     }
 
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
@@ -230,7 +227,7 @@ public class FunctionDataContext : DbContext
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error when save changes.");
+            _logger.LogError(ex, "Error when save changes.");
             throw;
         }
 
@@ -259,7 +256,7 @@ public class FunctionDataContext : DbContext
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error when save entity logs.");
+            _logger.LogError(ex, "Error when save entity logs.");
         }
     }
 

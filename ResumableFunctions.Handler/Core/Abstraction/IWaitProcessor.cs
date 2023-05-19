@@ -1,7 +1,7 @@
-﻿namespace ResumableFunctions.Handler
+﻿namespace ResumableFunctions.Handler.Core.Abstraction
 {
     public interface IWaitProcessor
     {
-        Task Run(int mehtodWaitId, int pushedCallId);
+        Task RequestProcessing(int mehtodWaitId, int pushedCallId);
     }
 }

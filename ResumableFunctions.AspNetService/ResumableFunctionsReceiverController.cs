@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using ResumableFunctions.Handler;
+using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 using System.Text.Json;
 
@@ -13,57 +13,55 @@ namespace ResumableFunctions.AspNetService
     //[ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionsController : ControllerBase
     {
-        private readonly ReplayWaitProcessor _resumableFunctionHandler;
+        public readonly IWaitProcessor _waitProcessor;
+        public readonly IPushedCallProcessor _pushedCallProcessor;
         public readonly IBackgroundJobClient _backgroundJobClient;
         private readonly ILogger<ResumableFunctionsController> _logger;
 
         public ResumableFunctionsController(
-            ReplayWaitProcessor handler, 
             IBackgroundJobClient backgroundJobClient,
-            ILogger<ResumableFunctionsController> logger)
+            ILogger<ResumableFunctionsController> logger,
+            IPushedCallProcessor pushedCallProcessor)
         {
             _backgroundJobClient = backgroundJobClient;
             _logger = logger;
-            _resumableFunctionHandler = handler;
+            _pushedCallProcessor = pushedCallProcessor;
         }
 
 
         [HttpGet(nameof(ProcessMatchedWait))]
         public int ProcessMatchedWait(int waitId, int pushedCallId)
         {
-            _backgroundJobClient.Enqueue(() => _resumableFunctionHandler.ProcessExpectedWaitMatch(waitId, pushedCallId));
+            _backgroundJobClient.Enqueue(() => _waitProcessor.RequestProcessing(waitId, pushedCallId));
             return 0;
         }
 
         [HttpPost(nameof(ExternalCall))]
         //public async Task ExternalCall(ExternalCallArgs externalCall)
-        public async Task ExternalCall([FromBody]dynamic input)
+        public async Task ExternalCall([FromBody] dynamic input)
         {
             try
             {
                 var externalCall =
                     JsonConvert.DeserializeObject<ExternalCallArgs>((string)input.ToString());
-                if(externalCall == null) 
+                if (externalCall == null)
                     throw new ArgumentNullException(nameof(externalCall));
-                if (await _resumableFunctionHandler.IsExternal(externalCall.MethodUrn) is false)
-                    throw new Exception(
-                        $"There is no method with URN [{externalCall?.MethodUrn}] that can be called from external in service [{externalCall?.ServiceName}].");
-                await
-                    _resumableFunctionHandler.QueuePushedCallProcessing(new PushedCall
+                var pushedCall = new PushedCall
+                {
+                    MethodData = new MethodData
                     {
-                        MethodData = new MethodData
-                        {
-                            MethodUrn = externalCall.MethodUrn
-                        },
-                        Input = externalCall.Input,
-                        Output = externalCall.Output
-                    });
+                        MethodUrn = externalCall.MethodUrn
+                    },
+                    Input = externalCall.Input,
+                    Output = externalCall.Output
+                };
+                await _pushedCallProcessor.QueueExternalPushedCallProcessing(pushedCall, externalCall.ServiceName);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error when handle external method call.");
             }
-            
+
         }
 
         //todo:CheckMethod/s exist

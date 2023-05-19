@@ -1,13 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.Diagnostics;
-using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using ResumableFunctions.Handler;
-using ResumableFunctions.Handler.Data;
-using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.Core;
 using TestApi1.Examples;
 
 namespace Test;

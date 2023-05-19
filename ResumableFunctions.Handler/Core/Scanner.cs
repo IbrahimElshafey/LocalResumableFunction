@@ -10,25 +10,41 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualBasic;
 using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.Data;
+using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 
-namespace ResumableFunctions.Handler;
+namespace ResumableFunctions.Handler.Core;
 
 public class Scanner
 {
-    internal FunctionDataContext _context;
-    private IResumableFunctionsSettings _settings;
-    private ReplayWaitProcessor _handler;
-    private IServiceProvider _serviceProvider;
+    private readonly IServiceProvider _serviceProvider;
+
+    private readonly FunctionDataContext _context;
+    private readonly IResumableFunctionsSettings _settings;
     private readonly ILogger<Scanner> _logger;
+    private readonly IMethodIdentifierRepository _methodIdentifierRepo;
+    private readonly IFirstWaitProcessor _firstWaitProcessor;
+    private readonly IBackgroundJobClient _backgroundJobClient;
+        
     private readonly string Code = DateTime.Now.Ticks.ToString();
     private int currentServiceId = -1;
-    public Scanner(IServiceProvider serviceProvider, ILogger<Scanner> logger)
+    public Scanner(
+        IServiceProvider serviceProvider,
+        ILogger<Scanner> logger,
+        IMethodIdentifierRepository methodIdentifierRepo,
+        IFirstWaitProcessor firstWaitProcessor,
+        IResumableFunctionsSettings settings,
+        FunctionDataContext context)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+        _methodIdentifierRepo = methodIdentifierRepo;
+        _firstWaitProcessor = firstWaitProcessor;
+        _settings = settings;
+        _context = context;
     }
 
     static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
@@ -73,13 +89,9 @@ public class Scanner
 
     private void ScopeInit(IServiceScope scope)
     {
-        _settings = scope.ServiceProvider.GetService<IResumableFunctionsSettings>();
 #if DEBUG
         _settings.ForceRescan = true;
 #endif
-        _handler = scope.ServiceProvider.GetService<ReplayWaitProcessor>();
-        _handler.SetDependencies(scope.ServiceProvider);
-        _context = _handler._context;
     }
 
     private List<string> GetAssembliesToScan()
@@ -124,13 +136,12 @@ public class Scanner
             MethodType.ResumableFunctionEntryPoint :
             MethodType.SubResumableFunction;
         serviceData.AddLog($"Register resumable function [{resumableFunctionMinfo.GetFullName()}] of type [{methodType}]");
-        var mi = await _context.methodIdentifierRepo
+        var mi = await _methodIdentifierRepo
             .AddResumableFunctionIdentifier(new MethodData(resumableFunctionMinfo) { MethodType = methodType }, currentServiceId);
         await _context.SaveChangesAsync();
         if (isEntryPoint)
         {
-            var backgroundJobClient = _serviceProvider.GetService<IBackgroundJobClient>();
-            backgroundJobClient.Enqueue(() => RegisterResumableFunctionFirstWait(mi.Id));
+            _backgroundJobClient.Enqueue(() => RegisterResumableFunctionFirstWait(mi.Id));
         }
     }
 
@@ -141,12 +152,12 @@ public class Scanner
             using (var scope = _serviceProvider.CreateScope())
             {
                 ScopeInit(scope);
-                var mi = await _context.methodIdentifierRepo.GetResumableFunction(id);
+                var mi = await _methodIdentifierRepo.GetResumableFunction(id);
                 var resumableFunctionMethodInfo = mi.MethodInfo;
                 try
                 {
                     WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
-                    await _handler.RegisterFirstWait(resumableFunctionMethodInfo);
+                    await _firstWaitProcessor.RegisterFirstWait(resumableFunctionMethodInfo);
                 }
                 catch (Exception ex)
                 {
@@ -246,7 +257,7 @@ public class Scanner
                .Where(x => x.ParentId == serviceData.Id)
                .ExecuteDeleteAsync();
         }
-        
+
 
         var assembly = Assembly.LoadFile(assemblyPath);
         var isReferenceResumableFunction =
@@ -315,7 +326,7 @@ public class Scanner
                 if (ValidateMethodWait(method, serviceData))
                 {
                     var methodData = new MethodData(method) { MethodType = MethodType.MethodWait };
-                    await _context.methodIdentifierRepo.AddWaitMethodIdentifier(methodData, currentServiceId);
+                    await _methodIdentifierRepo.AddWaitMethodIdentifier(methodData, currentServiceId);
                     serviceData?.AddLog($"Adding method identifier {methodData}");
                 }
                 else

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ResumableFunctions.Handler.Data;
+using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
 using System;

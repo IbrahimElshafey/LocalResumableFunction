@@ -4,7 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.Data;
+using ResumableFunctions.Handler.DataAccess;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 using System;
 using System.Collections.Generic;
@@ -12,13 +13,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ResumableFunctions.Handler
+namespace ResumableFunctions.Handler.Core
 {
     internal class WaitProcessor : IWaitProcessor
     {
         private readonly IFirstWaitProcessor _firstWaitProcessor;
         private readonly ISaveWaitHandler _saveWaitHandler;
         private readonly IRecycleBinService _recycleBinService;
+        private readonly IReplayWaitProcessor _replayWaitProcessor;
+        private readonly IWaitsRepository _waitsRepository;
         private IServiceProvider _serviceProvider;
         private readonly ILogger<WaitProcessor> _logger;
         private IBackgroundJobClient _backgroundJobClient;
@@ -32,18 +35,20 @@ namespace ResumableFunctions.Handler
             ILogger<WaitProcessor> logger,
             ISaveWaitHandler saveWaitHandler,
             IFirstWaitProcessor firstWaitProcessor,
-            IRecycleBinService recycleBinService)
+            IRecycleBinService recycleBinService,
+            IWaitsRepository waitsRepository)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
             _saveWaitHandler = saveWaitHandler;
-            this._firstWaitProcessor = firstWaitProcessor;
+            _firstWaitProcessor = firstWaitProcessor;
             _recycleBinService = recycleBinService;
+            _waitsRepository = waitsRepository;
         }
 
 
 
-        public async Task Run(int mehtodWaitId, int pushedCallId)
+        public async Task RequestProcessing(int mehtodWaitId, int pushedCallId)
         {
             using IServiceScope scope = _serviceProvider.CreateScope();
             _serviceProvider = scope.ServiceProvider;
@@ -138,7 +143,7 @@ namespace ResumableFunctions.Handler
                         $"Concurrency Exception occured when process wait [{methodWait.Name}]." +
                         $"\nProcessing this wait will be scheduled.",
                         ex);
-                _backgroundJobClient.Schedule(() => Run(methodWait.Id, pushedCallId), TimeSpan.FromMinutes(3));
+                _backgroundJobClient.Schedule(() => RequestProcessing(methodWait.Id, pushedCallId), TimeSpan.FromMinutes(3));
                 return false;
             }
             return true;
@@ -149,7 +154,7 @@ namespace ResumableFunctions.Handler
             Wait currentWait = matchedMethodWait;
             do
             {
-                var parent = await _context.waitsRepository.GetWaitParent(currentWait);
+                var parent = await _waitsRepository.GetWaitParent(currentWait);
                 switch (currentWait)
                 {
                     case MethodWait methodWait:
@@ -164,7 +169,7 @@ namespace ResumableFunctions.Handler
                         {
                             currentWait.FunctionState.AddLog($"Wait `{currentWait.Name}` is completed.");
                             currentWait.Status = WaitStatus.Completed;
-                            await _context.waitsRepository.CancelSubWaits(currentWait.Id);
+                            await _waitsRepository.CancelSubWaits(currentWait.Id);
                             await GoNext(parent, currentWait);
                         }
                         else return true;
@@ -195,7 +200,7 @@ namespace ResumableFunctions.Handler
         {
             try
             {
-                //bug:may cause problem for go back after
+                //todo:bug:may cause problem for go back after
                 if (currentWait.ParentWait != null && currentWait.ParentWait.Status != WaitStatus.Waiting)
                 {
                     string errorMsg = $"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).";
@@ -220,8 +225,9 @@ namespace ResumableFunctions.Handler
                 nextWait.FunctionState = currentWait.FunctionState;
                 _context.Entry(nextWait.FunctionState).State = EntityState.Modified;
                 nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
-                await _saveWaitHandler.SaveWaitRequestToDb(nextWait);//next wait after resume function
-                await _context.SaveChangesAsync();
+
+                await SaveTheNewWait(nextWait);
+
             }
             catch (Exception ex)
             {
@@ -231,6 +237,19 @@ namespace ResumableFunctions.Handler
             }
         }
 
+        private async Task SaveTheNewWait(Wait nextWait)
+        {
+            if (nextWait is ReplayRequest replayRequest)
+            {
+                var replayResult = await _replayWaitProcessor.ReplayWait(replayRequest);
+                if (replayResult.ProceedExecution && replayResult.Wait != null)
+                    await ProceedToNextWait(replayResult.Wait);
+            }
+            else
+                await _saveWaitHandler.SaveWaitRequestToDb(nextWait);//next wait after resume function
+            await _context.SaveChangesAsync();
+        }
+
         private async Task FinalExit(Wait currentWait)
         {
             _logger.LogInformation($"Final exit for function instance `{currentWait.FunctionStateId}`");
@@ -238,7 +257,7 @@ namespace ResumableFunctions.Handler
             currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
             currentWait.FunctionState.AddLog("Function instance completed.", LogType.Info);
             currentWait.FunctionState.Status = FunctionStatus.Completed;
-            await _context.waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
+            await _waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
             await _recycleBinService.RecycleFunction(currentWait.FunctionStateId);
         }
 

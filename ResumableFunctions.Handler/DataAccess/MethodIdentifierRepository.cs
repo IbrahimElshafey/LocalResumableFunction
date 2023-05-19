@@ -5,21 +5,21 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
 
-namespace ResumableFunctions.Handler.Data;
+namespace ResumableFunctions.Handler.DataAccess;
 
-internal class MethodIdentifierRepository : RepositoryBase
+internal class MethodIdentifierRepository : IMethodIdentifierRepository
 {
     private ILogger<MethodIdentifierRepository> _logger;
-
-    public MethodIdentifierRepository(ILogger<MethodIdentifierRepository> logger) : base()
+    private readonly FunctionDataContext _context;
+    public MethodIdentifierRepository(ILogger<MethodIdentifierRepository> logger, FunctionDataContext context)
     {
         _logger = logger;
+        _context = context;
     }
 
-
-
-    internal async Task<ResumableFunctionIdentifier> GetResumableFunction(int id)
+    public async Task<ResumableFunctionIdentifier> GetResumableFunction(int id)
     {
         var resumableFunctionIdentifier =
            await _context
@@ -33,7 +33,7 @@ internal class MethodIdentifierRepository : RepositoryBase
             return null;
         }
     }
-    internal async Task<ResumableFunctionIdentifier> GetResumableFunction(MethodData methodData)
+    public async Task<ResumableFunctionIdentifier> GetResumableFunction(MethodData methodData)
     {
         methodData.Validate();
         var resumableFunctionIdentifier =
@@ -49,7 +49,7 @@ internal class MethodIdentifierRepository : RepositoryBase
         }
     }
 
-    internal async Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData, int? serviceId)
+    public async Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData, int? serviceId)
     {
         var inDb = await GetResumableFunction(methodData);
         if (inDb != null)
@@ -68,7 +68,7 @@ internal class MethodIdentifierRepository : RepositoryBase
         }
     }
 
-    internal async Task AddWaitMethodIdentifier(MethodData methodData,int service)
+    public async Task AddWaitMethodIdentifier(MethodData methodData, int service)
     {
         //todo:validate same signature for group methods
         var methodGroup =
@@ -115,7 +115,7 @@ internal class MethodIdentifierRepository : RepositoryBase
 
     }
 
-    internal async Task<WaitMethodIdentifier> GetWaitMethod(MethodWait methodWait)
+    public async Task<WaitMethodIdentifier> GetWaitMethod(MethodWait methodWait)
     {
         if (methodWait.MethodData == null)
             return

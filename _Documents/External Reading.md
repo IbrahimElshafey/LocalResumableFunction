@@ -1,3 +1,5 @@
+# Unit of Work
+* https://github.com/andreluizsecco/UnitOfWork.BookStore
 
 # Workflow Patterns
 * http://www.Functionpatterns.com/patterns/control/
@@ -9,6 +11,7 @@
 
 
 # Code generation
+* I plan to generate unit test code for resumable functions
 * https://github.com/Testura/Testura.Code
 
 

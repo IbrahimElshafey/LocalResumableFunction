@@ -1,7 +1,7 @@
 ﻿using ResumableFunctions.Handler.InOuts;
 using System.Reflection;
 
-namespace ResumableFunctions.Handler
+namespace ResumableFunctions.Handler.Core.Abstraction
 {
     public interface IFirstWaitProcessor
     {
