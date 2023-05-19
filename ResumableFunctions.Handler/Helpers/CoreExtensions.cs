@@ -29,7 +29,7 @@ public static class CoreExtensions
     public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
     {
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
-        services.AddTransient<ResumableFunctionHandler>();
+        services.AddTransient<ReplayWaitProcessor>();
         services.AddTransient<Scanner>();
         services.AddTransient<MethodIdentifierRepository>();
         services.AddTransient<WaitsRepository>();

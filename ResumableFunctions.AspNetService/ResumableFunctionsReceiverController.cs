@@ -13,12 +13,12 @@ namespace ResumableFunctions.AspNetService
     //[ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionsController : ControllerBase
     {
-        private readonly ResumableFunctionHandler _resumableFunctionHandler;
+        private readonly ReplayWaitProcessor _resumableFunctionHandler;
         public readonly IBackgroundJobClient _backgroundJobClient;
         private readonly ILogger<ResumableFunctionsController> _logger;
 
         public ResumableFunctionsController(
-            ResumableFunctionHandler handler, 
+            ReplayWaitProcessor handler, 
             IBackgroundJobClient backgroundJobClient,
             ILogger<ResumableFunctionsController> logger)
         {

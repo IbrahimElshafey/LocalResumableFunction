@@ -16,27 +16,33 @@ using Newtonsoft.Json;
 
 namespace ResumableFunctions.Handler;
 
-public partial class ResumableFunctionHandler
+internal class PushedCallProcessor : IPushedCallProcessor
 {
     internal FunctionDataContext _context;
 
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<ResumableFunctionHandler> _logger;
+    private readonly ILogger<ReplayWaitProcessor> _logger;
+    private readonly IWaitProcessor waitProcessor;
 
-    public ResumableFunctionHandler(IServiceProvider serviceProvider, ILogger<ResumableFunctionHandler> logger)
+    public PushedCallProcessor(
+        IServiceProvider serviceProvider,
+        ILogger<ReplayWaitProcessor> logger,
+        IWaitProcessor waitProcessor)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
+        this.waitProcessor = waitProcessor;
         _backgroundJobClient = serviceProvider.GetService<IBackgroundJobClient>();
     }
 
-    internal async Task QueuePushedCallProcessing(PushedCall pushedCall)
+    public async Task<int> QueuePushedCallProcessing(PushedCall pushedCall)
     {
         SetDependencies(_serviceProvider);
         _context.PushedCalls.Add(pushedCall);
         await _context.SaveChangesAsync();
         _backgroundJobClient.Enqueue(() => ProcessPushedCall(pushedCall.Id));
+        return pushedCall.Id;
     }
 
     public async Task ProcessPushedCall(int pushedCallId)
@@ -46,14 +52,13 @@ public partial class ResumableFunctionHandler
             using (IServiceScope scope = _serviceProvider.CreateScope())
             {
                 SetDependencies(scope.ServiceProvider);
-                Debugger.Launch();
                 var waitsIds = await _context.waitsRepository.GetWaitsIdsForMethodCall(pushedCallId);
 
                 if (waitsIds != null)
                     foreach (var waitId in waitsIds)
                     {
                         if (IsLocalWait(waitId))
-                            _backgroundJobClient.Enqueue(() => ProcessExpectedWaitMatch(waitId.Id, pushedCallId));
+                            _backgroundJobClient.Enqueue(() => waitProcessor.Run(waitId.Id, pushedCallId));
                         else
                             await CallOwnerService(waitId, pushedCallId);
                     }
@@ -65,7 +70,7 @@ public partial class ResumableFunctionHandler
         }
     }
 
-    
+
 
     private async Task CallOwnerService(WaitId wait, int pushedCallId)
     {
@@ -97,40 +102,6 @@ public partial class ResumableFunctionHandler
         return File.Exists(ownerAssemblyPath);
     }
 
-    
-   
-    private async Task ProcessWait(MethodWait methodWait, PushedCall pushedCall)
-    {
-        try
-        {
-            var pushedCallId = pushedCall.Id;
-
-            //todo:log message `Wait is expected match`
-            methodWait.FunctionState.AddLog(
-                   $"Wait `{methodWait.Name}` may be a match for pushed call `{pushedCallId}`");
-
-            await StopIfFalse(
-                methodWait, pushedCallId,
-                SetInputAndOutput,
-                CheckIfMatch,
-                CloneIfFirst,
-                UpdateFunctionData,
-                WakeUpInstanceAndResume);
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex,
-                $"Error when process matched wait for method [{methodWait.Name}] with id[{methodWait.Id}]");
-        }
-
-    }
-
-    
-    
-   
-   
-   
     internal void SetDependencies(IServiceProvider serviceProvider)
     {
         _context = serviceProvider.GetService<FunctionDataContext>();

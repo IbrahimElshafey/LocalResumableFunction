@@ -20,7 +20,7 @@ public class Scanner
 {
     internal FunctionDataContext _context;
     private IResumableFunctionsSettings _settings;
-    private ResumableFunctionHandler _handler;
+    private ReplayWaitProcessor _handler;
     private IServiceProvider _serviceProvider;
     private readonly ILogger<Scanner> _logger;
     private readonly string Code = DateTime.Now.Ticks.ToString();
@@ -77,7 +77,7 @@ public class Scanner
 #if DEBUG
         _settings.ForceRescan = true;
 #endif
-        _handler = scope.ServiceProvider.GetService<ResumableFunctionHandler>();
+        _handler = scope.ServiceProvider.GetService<ReplayWaitProcessor>();
         _handler.SetDependencies(scope.ServiceProvider);
         _context = _handler._context;
     }

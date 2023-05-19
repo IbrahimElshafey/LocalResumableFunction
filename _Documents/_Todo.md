@@ -2,6 +2,7 @@
 * Add Locks table for fix scan and processing problem
 * Same DLL in two services
 * Instance in progress but not wait anything
+* Test replay in sub functions
 ## UI project
 * Remove Service Details Page
 * Resumable Functions List

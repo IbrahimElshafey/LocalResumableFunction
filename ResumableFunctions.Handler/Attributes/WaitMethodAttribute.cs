@@ -17,7 +17,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
 {
     internal static IServiceProvider ServiceProvider;
     private PushedCall _pushedCall;
-    private readonly ResumableFunctionHandler _functionHandler;
+    private readonly ReplayWaitProcessor _functionHandler;
     private readonly ILogger<WaitMethodAttribute> _logger;
 
     public WaitMethodAttribute(string methodUrn, bool canPublishFromExternal = false)
@@ -25,7 +25,7 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
         MethodUrn = methodUrn;
         CanPublishFromExternal = canPublishFromExternal;
         if (ServiceProvider == null) return;
-        _functionHandler = ServiceProvider.GetService<ResumableFunctionHandler>();
+        _functionHandler = ServiceProvider.GetService<ReplayWaitProcessor>();
         _logger = ServiceProvider.GetService<ILogger<WaitMethodAttribute>>();
     }
 

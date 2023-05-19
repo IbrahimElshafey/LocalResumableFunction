@@ -4,16 +4,28 @@ using ResumableFunctions.Handler.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Hangfire;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Handler.Data;
 
 namespace ResumableFunctions.Handler;
 
-public partial class ResumableFunctionHandler
+public class SaveWaitHandler : ISaveWaitHandler
 {
-    internal async Task<bool> SaveWaitRequestToDb(Wait newWait)
+    private readonly ILogger<SaveWaitHandler> _logger;
+    private readonly FunctionDataContext _context;
+    private readonly IBackgroundJobClient _backgroundJobClient;
+
+    public SaveWaitHandler(ILogger<SaveWaitHandler> logger, FunctionDataContext context, IBackgroundJobClient backgroundJobClient)
+    {
+        _logger = logger;
+        _context = context;
+        _backgroundJobClient = backgroundJobClient;
+    }
+
+    public async Task<bool> SaveWaitRequestToDb(Wait newWait)
     {
         if (newWait.IsValidWaitRequest() is false)
         {
-            string message = 
+            string message =
                 $"Error when validate the requested wait [{newWait.Name}] " +
                 $"that requested by function [{newWait?.RequestedByFunction}].";
             _logger.LogError(message);
@@ -45,7 +57,7 @@ public partial class ResumableFunctionHandler
     private async Task MethodWaitRequested(MethodWait methodWait)
     {
         var methodToWait = await _context.methodIdentifierRepo.GetWaitMethod(methodWait);
-      
+
         methodWait.MethodToWait = methodToWait;
         methodWait.MethodToWaitId = methodToWait.Id;
         methodWait.MethodGroupToWait = methodToWait.ParentMethodGroup;

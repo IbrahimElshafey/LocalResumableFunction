@@ -9,10 +9,25 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler;
 
-public partial class ResumableFunctionHandler
+internal class FirstWaitProcessor : IFirstWaitProcessor
 {
+    private readonly ILogger<FirstWaitProcessor> _logger;
+    private readonly FunctionDataContext _context;
+    private readonly ISaveWaitHandler _saveWaitHandler;
+    private readonly IServiceProvider _serviceProvider;
 
-    internal async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
+    public FirstWaitProcessor(ILogger<FirstWaitProcessor> logger, 
+        ISaveWaitHandler saveWaitHandler, 
+        FunctionDataContext context,
+        IServiceProvider serviceProvider)
+    {
+        _logger = logger;
+        _context = context;
+        _saveWaitHandler = saveWaitHandler;
+        _serviceProvider = serviceProvider;
+    }
+
+    public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
     {
         var resumableFunction = firstMatchedMethodWait.RequestedByFunction.MethodInfo;
 
@@ -30,13 +45,13 @@ public partial class ResumableFunctionHandler
 
             firstWaitClone.FunctionState.Status = FunctionStatus.InProgress;
             firstWaitClone.FunctionState.Logs.AddRange(firstWaitClone.FunctionState.Logs);
-            await SaveWaitRequestToDb(firstWaitClone);//first wait clone
+            await _saveWaitHandler.SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
             currentMw.Status = WaitStatus.Waiting;
             currentMw.Input = firstMatchedMethodWait.Input;
             currentMw.Output = firstMatchedMethodWait.Output;
-           
+
             await _context.SaveChangesAsync();
             //firstWaitClone.Status = WaitStatus.Waiting;
             return currentMw;
@@ -48,7 +63,7 @@ public partial class ResumableFunctionHandler
         }
     }
 
-    internal async Task RegisterFirstWait(MethodInfo resumableFunction)
+    public async Task RegisterFirstWait(MethodInfo resumableFunction)
     {
 
         try
@@ -58,7 +73,7 @@ public partial class ResumableFunctionHandler
                 firstWait.FunctionState.AddLog(
                     $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.",
                     LogType.Info);
-            await SaveWaitRequestToDb(firstWait);//first wait when register function
+            await _saveWaitHandler.SaveWaitRequestToDb(firstWait);//first wait when register function
             WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
             await _context.SaveChangesAsync();
 
@@ -80,7 +95,7 @@ public partial class ResumableFunctionHandler
         await _context.SaveChangesAsync();
     }
 
-    private async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
+    public async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
         var classInstance = (ResumableFunction)
             (_serviceProvider.GetService(resumableFunction.DeclaringType) ??
@@ -128,21 +143,8 @@ public partial class ResumableFunctionHandler
         }
     }
 
-
-
     private void WriteMessage(string message)
     {
         _logger.LogInformation(message);
-    }
-
-
-
-    private async Task<bool> MoveFunctionToRecycleBin(int functionStateId)
-    {
-        //move function state
-        //it's logs
-        //it's waits
-        //to recycle bin;
-        return true;
     }
 }

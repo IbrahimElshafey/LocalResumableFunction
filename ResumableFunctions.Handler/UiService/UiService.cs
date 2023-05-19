@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace ResumableFunctions.Handler.UiService
 {
-    public class UiService : IUiService
+    internal class UiService : IUiService
     {
         private readonly FunctionDataContext _context;
 
