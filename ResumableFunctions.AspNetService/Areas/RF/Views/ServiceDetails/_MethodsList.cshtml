@@ -44,7 +44,12 @@
             {
                 <tr>
                     <td>
-                        @item.URN (<a href="~/RF/PushedCall" class="w3-text-blue">Waits</a>)
+                        <span> @item.URN</span>
+                        <span>
+                            <a href="~/RF/PushedCall" class="w3-text-blue">
+                                (@(item.ActiveWaits + item.CompletedWaits + item.CanceledWaits) Waits)
+                            </a>
+                        </span>
                     </td>
                     <td>
                         <a href="~/rfui/MethodsInGroup" class="w3-text-blue">@item.MethodsCount</a>

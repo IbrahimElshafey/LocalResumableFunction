@@ -4,26 +4,14 @@
 * Instance in progress but not wait anything
 * Test replay in sub functions
 ## UI project
-* Remove Service Details Page
-* Resumable Functions List
-* Resumable Function Active Instances
 * RF Instance Details
-* Method Waits List
-* Pushed Calls List
-	* Pushed Call Details
+* Method Waits
+* Pushed Calls Waits
 * All Logs View
-* Add UI Project
-	* Servcies Registered
 		* Verify Scanned Methods 
 		* Find methods not in code
 		* verify method signatures
 		* verify start waits exist in db for each RF
-	* Monitor active resumable functions
-		* It's props 
-			* Status
-			* CurrentStateObject
-			* Created
-			* LastUpdated
 		* Waits tree
 			* Wait Name
 			* Status
@@ -36,12 +24,9 @@
 			* Need Load Function Data for match
 			* Wait method
 			* Count Expression if group
-			* Actions on Method Wait 
-			* Actions on Group Wait 
-			* Actions on Function Wait 
+			* Actions on Wait 
 				* Cancel
 				* Go Back (To,Before,After)
-		* Logs list from function state logs3
 
 ## Prepare how to use?
 * Implement workflows in 
