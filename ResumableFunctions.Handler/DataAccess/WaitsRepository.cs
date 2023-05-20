@@ -161,8 +161,7 @@ internal class WaitsRepository : IWaitsRepository
         }
         catch (Exception ex)
         {
-
-            throw;
+            _logger.LogError($"Error when RemoveFirstWaitIfExist {firstWait}", ex);
         }
 
     }

@@ -28,7 +28,7 @@ public class Scanner
     private readonly IMethodIdentifierRepository _methodIdentifierRepo;
     private readonly IFirstWaitProcessor _firstWaitProcessor;
     private readonly IBackgroundJobClient _backgroundJobClient;
-        
+
     private readonly string Code = DateTime.Now.Ticks.ToString();
     private int currentServiceId = -1;
     public Scanner(
@@ -133,43 +133,28 @@ public class Scanner
 
     internal async Task RegisterResumableFunction(MethodInfo resumableFunctionMinfo, ServiceData serviceData)
     {
-        var isEntryPoint = IsEntryPoint(resumableFunctionMinfo);
-        var methodType = isEntryPoint ?
-            MethodType.ResumableFunctionEntryPoint :
-            MethodType.SubResumableFunction;
-        serviceData.AddLog($"Register resumable function [{resumableFunctionMinfo.GetFullName()}] of type [{methodType}]");
-        var mi = await _methodIdentifierRepo
-            .AddResumableFunctionIdentifier(new MethodData(resumableFunctionMinfo) { MethodType = methodType }, currentServiceId);
-        await _context.SaveChangesAsync();
-        if (isEntryPoint)
-        {
-            _backgroundJobClient.Enqueue(() => RegisterResumableFunctionFirstWait(mi.Id));
-        }
-    }
 
-    public async Task RegisterResumableFunctionFirstWait(int id)
-    {
-        try
-        {
-            using (var scope = _serviceProvider.CreateScope())
+        var entryPointCheck = EntryPointCheck(resumableFunctionMinfo);
+        var methodType = entryPointCheck.IsEntry ? MethodType.ResumableFunctionEntryPoint : MethodType.SubResumableFunction;
+        serviceData.AddLog($"Register resumable function [{resumableFunctionMinfo.GetFullName()}] of type [{methodType}]");
+
+        var mi = await _methodIdentifierRepo
+            .AddResumableFunctionIdentifier(
+            new MethodData(resumableFunctionMinfo)
             {
-                ScopeInit(scope);
-                var mi = await _methodIdentifierRepo.GetResumableFunction(id);
-                var resumableFunctionMethodInfo = mi.MethodInfo;
-                try
-                {
-                    WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
-                    await _firstWaitProcessor.RegisterFirstWait(resumableFunctionMethodInfo);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Error when register first wait for function [{resumableFunctionMethodInfo.GetFullName()}]");
-                }
-            }
-        }
-        catch (Exception ex)
+                MethodType = methodType,
+                IsActive = entryPointCheck.IsActive
+            }, currentServiceId);
+        await _context.SaveChangesAsync();
+
+
+        if (entryPointCheck.IsEntry && entryPointCheck.IsActive)
         {
-            _logger.LogError(ex, "Error when RegisterResumableFunctionFirstWait");
+            _backgroundJobClient.Enqueue(() => _firstWaitProcessor.RegisterFirstWait(mi.Id));
+        }
+        if (entryPointCheck.IsEntry && !entryPointCheck.IsActive)
+        {
+            _backgroundJobClient.Enqueue(() => _firstWaitProcessor.DeactivateFirstWait(mi.Id));
         }
     }
 
@@ -402,10 +387,12 @@ public class Scanner
     }
 
 
-    private bool IsEntryPoint(MethodInfo resumableFunction)
+    private (bool IsEntry, bool IsActive) EntryPointCheck(MethodInfo resumableFunction)
     {
-        return resumableFunction.GetCustomAttributes()
-            .Any(attribute => attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId);
+        var resumableFunctionAttribute =
+            (ResumableFunctionEntryPointAttribute)resumableFunction.GetCustomAttributes()
+            .FirstOrDefault(attribute => attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId);
+        return (resumableFunctionAttribute != null, resumableFunctionAttribute?.IsActive == true);
     }
 
     private bool ValidateResumableFunctionSignature(MethodInfo resumableFunction, ServiceData serviceData)

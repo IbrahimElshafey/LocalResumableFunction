@@ -26,7 +26,8 @@ namespace ResumableFunctions.Handler.InOuts
             string methodSignature,
             byte[] methodHash,
             string methodUrn,
-            bool canPublishFromExternal)
+            bool canPublishFromExternal,
+            bool isActive)
         {
             AssemblyName = assemblyName;
             ClassName = className;
@@ -35,6 +36,7 @@ namespace ResumableFunctions.Handler.InOuts
             MethodHash = methodHash;
             MethodUrn = methodUrn;
             CanPublishFromExternal = canPublishFromExternal;
+            IsActive = isActive;
         }
         public MethodData()
         {
@@ -97,6 +99,7 @@ namespace ResumableFunctions.Handler.InOuts
         public int MethodIdentifierId { get; internal set; }
         public MethodType MethodType { get; internal set; }
         public bool CanPublishFromExternal { get; internal set; }
+        public bool IsActive { get; internal set; } = true;
 
         internal static string CalcSignature(MethodBase value)
         {

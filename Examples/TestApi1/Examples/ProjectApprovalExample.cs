@@ -12,9 +12,9 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     public bool ManagerThreeApproval { get; set; }
     public bool ManagerFourApproval { get; set; }
     public bool ManagerFiveApproval { get; set; }
-    public string ExternalMethodStatus { get;  set; } = "Not matched yet.";
+    public string ExternalMethodStatus { get; set; } = "Not matched yet.";
 
-    [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow")]//Point 1
+    [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow", isActive: false)]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
     {
         //throw new NotImplementedException("Exception and no body.");
@@ -42,7 +42,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
             await InfromApplicantAboutApproval(CurrentProject.Id);
         }
         Success(nameof(ProjectApprovalFlow));
-        
+
     }
     public override string GetInstanceId(string functionUrn)
     {

@@ -40,70 +40,75 @@
                     <th width="120">Created</th>
                     <th width="120">Last Updated</th>
                 </tr>
-            </theadw>
-            @for (int i = 0; i < Model.Count; i++)
-            {
-                var function = Model[i];
+                </theadw>
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var function = Model[i];
 
-                <tr>
-                    <td>
-                        <ul>
-                            <li>
-                                <a href="~/RF/FunctionInstances/AllInstances?functionId=@function.FunctionIdentifier.Id&functionName=@function.FunctionIdentifier.MethodName"
-                                   class="w3-text-blue">@function.FunctionIdentifier.RF_MethodUrn</a>
-                            </li>
-                            <li><b>Method Name: </b>@function.FunctionIdentifier.MethodName</li>
-                            <li><b>Class Name: </b>@function.FunctionIdentifier.ClassName</li>
-                            <li><b>Assembly Name: </b>@function.FunctionIdentifier.AssemblyName</li>
-                            <li>
-                                @if (function.Failed == 0)
+                    <tr>
+                        <td>
+                            <ul>
+                                <li>
+                                    <a href="~/RF/FunctionInstances/AllInstances?functionId=@function.FunctionIdentifier.Id&functionName=@function.FunctionIdentifier.MethodName"
+                                       class="w3-text-blue">@function.FunctionIdentifier.RF_MethodUrn</a>
+                                </li>
+                                <li><b>Method Name: </b>@function.FunctionIdentifier.MethodName</li>
+                                <li><b>Class Name: </b>@function.FunctionIdentifier.ClassName</li>
+                                <li><b>Assembly Name: </b>@function.FunctionIdentifier.AssemblyName</li>
+                                <li><b>Assembly Name: </b>@function.FunctionIdentifier.IsActive</li>
+                                <li>
+                                    @if (function.Failed == 0)
+                                    {
+                                        <b class="w3-text-green">No Instances Failed</b>
+                                    }
+                                    else
+                                    {
+                                        <b class="w3-text-Red">@(function.Failed) Instances Failed</b>
+                                    }
+                                </li>
+                            </ul>
+                        </td>
+                        <td>
+                            @if (function.FunctionIdentifier.IsEntryPoint)
+                            {
+                                @if (function.FirstWait != null)
                                 {
-                                    <b class="w3-text-green">No Instances Failed</b>
+                                    <span>@function.FirstWait</span>
                                 }
                                 else
                                 {
-                                    <b class="w3-text-Red">@(function.Failed) Instances Failed</b>
+                                    <span class='w3-text-red'>No First Wait Exist</span>
                                 }
-                            </li>
-                        </ul>
-                    </td>
-                    <td>
-                        @if (function.FunctionIdentifier.IsEntryPoint)
-                        {
-                            <span>
-                                @(function.FirstWait == null ?
-                                    "<span class='w3-text-red'>No First Wait Exist</span>" :
-                                    function.FirstWait)
-                            </span>
-                        }
-                        else
-                        {
-                            <span class="w3-text-blue-gray">Not an entry point</span>
-                        }
-                    </td>
-                    <td>
-                        @(function.InProgress == 0 ? "No" : function.InProgress.ToString())
-                    </td>
-                    <td>
-                        @(function.Failed == 0 ? "No" : function.Failed.ToString())
-                    </td>
-                    <td>
-                        @(function.Completed == 0 ? "No" : function.Completed.ToString())
-                    </td>
-                    <td>@function.FunctionIdentifier.Created</td>
-                    <td>
-                        @if (function.FunctionIdentifier.Modified == DateTime.MinValue)
-                        {
-                            <span>Not Changed</span>
-                        }
-                        else
-                        {
-                            <span>@function.FunctionIdentifier.Modified</span>
-                        }
 
-                    </td>
-                </tr>
-            }
+                            }
+                            else
+                            {
+                                <span class="w3-text-blue-gray">Not an entry point</span>
+                            }
+                        </td>
+                        <td>
+                            @(function.InProgress == 0 ? "No" : function.InProgress.ToString())
+                        </td>
+                        <td>
+                            @(function.Failed == 0 ? "No" : function.Failed.ToString())
+                        </td>
+                        <td>
+                            @(function.Completed == 0 ? "No" : function.Completed.ToString())
+                        </td>
+                        <td>@function.FunctionIdentifier.Created</td>
+                        <td>
+                            @if (function.FunctionIdentifier.Modified == DateTime.MinValue)
+                            {
+                                <span>Not Changed</span>
+                            }
+                            else
+                            {
+                                <span>@function.FunctionIdentifier.Modified</span>
+                            }
+
+                        </td>
+                    </tr>
+                }
         </table>
     </div>
 </div>

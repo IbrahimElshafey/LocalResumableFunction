@@ -7,12 +7,14 @@ public class ResumableFunctionIdentifier : MethodIdentifier
     public string RF_MethodUrn { get; internal set; }
     public List<Wait> WaitsCreatedByFunction { get; internal set; }
     public List<ResumableFunctionState> ActiveFunctionsStates { get; internal set; }
+    public bool IsActive { get; internal set; } = true;
 
 
     public bool IsEntryPoint => Type == MethodType.ResumableFunctionEntryPoint;
     internal override void FillFromMethodData(MethodData methodData)
     {
         RF_MethodUrn = methodData.MethodUrn;
+        IsActive = methodData.IsActive;
         base.FillFromMethodData(methodData);
     }
 }

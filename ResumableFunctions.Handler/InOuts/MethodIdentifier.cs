@@ -17,8 +17,7 @@ public abstract class MethodIdentifier : IEntityWithUpdate
     public string MethodName { get; internal set; }
     public string MethodSignature { get; internal set; }
     public byte[] MethodHash { get; internal set; }
-    public MethodType Type { get; set; }
-    public bool CanPublishFromExternal { get; set; }
+    public MethodType Type { get; internal set; }
     internal MethodInfo MethodInfo
     {
         get
@@ -47,7 +46,6 @@ public abstract class MethodIdentifier : IEntityWithUpdate
         MethodName = methodData.MethodName;
         MethodSignature = methodData.MethodSignature;
         MethodHash = methodData.MethodHash;
-        CanPublishFromExternal = methodData.CanPublishFromExternal;
     }
 }
 

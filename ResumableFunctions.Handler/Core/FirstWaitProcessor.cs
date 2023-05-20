@@ -71,26 +71,32 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
     }
 
-    public async Task RegisterFirstWait(MethodInfo resumableFunction)
+    public async Task RegisterFirstWait(int functionId)
     {
-
+        MethodInfo resumableFunction = null;
         try
         {
-            var firstWait = await GetFirstWait(resumableFunction, true);
-            if (firstWait != null)
-                firstWait.FunctionState.AddLog(
-                    $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.",
-                    LogType.Info);
-            await _saveWaitHandler.SaveWaitRequestToDb(firstWait);//first wait when register function
-            WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
-            await _context.SaveChangesAsync();
-
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var mi = await _methodIdentifierRepo.GetResumableFunction(functionId);
+                resumableFunction = mi.MethodInfo;
+                WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
+                var firstWait = await GetFirstWait(resumableFunction, true);
+                if (firstWait != null)
+                    firstWait.FunctionState.AddLog(
+                        $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.",
+                        LogType.Info);
+                await _saveWaitHandler.SaveWaitRequestToDb(firstWait);//first wait when register function
+                WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
+                await _context.SaveChangesAsync();
+            }
         }
         catch (Exception ex)
         {
-            var errorMsg = $"Error when try to register first wait for function [{resumableFunction.GetFullName()}]";
+            var errorMsg = $"Error when try to register first wait for function [{functionId}]";
             _logger.LogError(ex, errorMsg);
-            await LogErrorToService(resumableFunction, ex, errorMsg);
+            if (resumableFunction != null)
+                await LogErrorToService(resumableFunction, ex, errorMsg);
         }
     }
 
@@ -99,8 +105,11 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _logger.LogError(ex, errorMsg);
         var assemblyName = resumableFunction.DeclaringType.Assembly.GetName().Name;
         var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assemblyName);
-        serviceData.AddError(errorMsg, ex);
-        await _context.SaveChangesAsync();
+        if(serviceData != null)
+        {
+            serviceData.AddError(errorMsg, ex);
+            await _context.SaveChangesAsync();
+        }
     }
 
     public async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
@@ -154,5 +163,33 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private void WriteMessage(string message)
     {
         _logger.LogInformation(message);
+    }
+
+    public async Task DeactivateFirstWait(int functionId)
+    {
+        try
+        {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var firstWait = await _context
+                    .Waits
+                    .FirstOrDefaultAsync(wait =>
+                            wait.IsNode &&
+                            wait.IsFirst &&
+                            wait.Status == WaitStatus.Waiting);
+                if (firstWait != default)
+                {
+                    firstWait.IsFirst = false;
+                    firstWait.Cancel();
+                    await _waitsRepository.CancelSubWaits(firstWait.Id);
+                    await _context.SaveChangesAsync();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            var errorMsg = $"Error when try to deactivate first wait for function [{functionId}]";
+            _logger.LogError(ex, errorMsg);
+        }
     }
 }

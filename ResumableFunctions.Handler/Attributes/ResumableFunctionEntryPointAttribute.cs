@@ -11,9 +11,11 @@ public sealed class ResumableFunctionEntryPointAttribute : Attribute, ITrackingI
     public const string AttributeId = nameof(ResumableFunctionEntryPointAttribute);
     public override object TypeId => AttributeId;
     public string MethodUrn { get; }
+    public bool IsActive { get; }
 
-    public ResumableFunctionEntryPointAttribute(string methodUrn)
+    public ResumableFunctionEntryPointAttribute(string methodUrn, bool isActive = true)
     {
         MethodUrn = methodUrn;
+        IsActive = isActive;
     }
 }
