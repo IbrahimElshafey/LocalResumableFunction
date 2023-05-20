@@ -135,6 +135,8 @@ internal class WaitsRepository : IWaitsRepository
                 x.FunctionStateId == functionStateId);
     }
 
+
+    //todo:fix this for group
     public async Task RemoveFirstWaitIfExist(Wait firstWait, MethodIdentifier methodIdentifier)
     {
         try
@@ -175,6 +177,7 @@ internal class WaitsRepository : IWaitsRepository
         {
             var waits = await _context
                 .Waits
+                .Include(x => x.FunctionState)
                 .Where(x => x.ParentWaitId == pId && x.Status == WaitStatus.Waiting)
                 .ToListAsync();
             foreach (var wait in waits)

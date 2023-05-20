@@ -152,7 +152,7 @@ public class Scanner
         {
             _backgroundJobClient.Enqueue(() => _firstWaitProcessor.RegisterFirstWait(mi.Id));
         }
-        if (entryPointCheck.IsEntry && !entryPointCheck.IsActive)
+        else if (entryPointCheck.IsEntry && !entryPointCheck.IsActive)
         {
             _backgroundJobClient.Enqueue(() => _firstWaitProcessor.DeactivateFirstWait(mi.Id));
         }
@@ -392,7 +392,8 @@ public class Scanner
         var resumableFunctionAttribute =
             (ResumableFunctionEntryPointAttribute)resumableFunction.GetCustomAttributes()
             .FirstOrDefault(attribute => attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId);
-        return (resumableFunctionAttribute != null, resumableFunctionAttribute?.IsActive == true);
+        bool isFunctionActive = (resumableFunctionAttribute != null && resumableFunctionAttribute.IsActive);
+        return (resumableFunctionAttribute != null, isFunctionActive);
     }
 
     private bool ValidateResumableFunctionSignature(MethodInfo resumableFunction, ServiceData serviceData)

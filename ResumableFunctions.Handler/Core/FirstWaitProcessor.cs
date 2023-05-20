@@ -105,7 +105,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _logger.LogError(ex, errorMsg);
         var assemblyName = resumableFunction.DeclaringType.Assembly.GetName().Name;
         var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assemblyName);
-        if(serviceData != null)
+        if (serviceData != null)
         {
             serviceData.AddError(errorMsg, ex);
             await _context.SaveChangesAsync();
@@ -173,6 +173,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             {
                 var firstWait = await _context
                     .Waits
+                    .Include(x => x.FunctionState)
                     .FirstOrDefaultAsync(wait =>
                             wait.IsNode &&
                             wait.IsFirst &&
@@ -182,6 +183,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     firstWait.IsFirst = false;
                     firstWait.Cancel();
                     await _waitsRepository.CancelSubWaits(firstWait.Id);
+                    _context.Waits.Remove(firstWait);
+                    _context.FunctionStates.Remove(firstWait.FunctionState);
                     await _context.SaveChangesAsync();
                 }
             }
