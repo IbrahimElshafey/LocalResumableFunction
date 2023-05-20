@@ -43,12 +43,15 @@ public static class CoreExtensions
         services.AddScoped<IWaitsRepository,WaitsRepository>();
 
         services.AddScoped<IFirstWaitProcessor,FirstWaitProcessor>();
-        services.AddScoped<IPushedCallProcessor,PushedCallProcessor>();
         services.AddScoped<IRecycleBinService,RecycleBinService>();
         services.AddScoped<IReplayWaitProcessor,ReplayWaitProcessor>();
         services.AddScoped<ISaveWaitHandler,SaveWaitHandler>();
         services.AddScoped<IWaitProcessor,WaitProcessor>();
         services.AddScoped<Scanner>();
+
+
+        services.AddScoped<IPushedCallProcessor, PushedCallProcessor>();
+
 
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();

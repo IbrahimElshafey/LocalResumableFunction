@@ -24,19 +24,23 @@ namespace ResumableFunctions.Handler.Core
         private readonly IWaitsRepository _waitsRepository;
         private IServiceProvider _serviceProvider;
         private readonly ILogger<WaitProcessor> _logger;
-        private IBackgroundJobClient _backgroundJobClient;
-        private FunctionDataContext _context;
-        private int methodWaitId;
-        private MethodWait methodWait;
-        private int pushedCallId;
-        private PushedCall pushedCall;
+        private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly FunctionDataContext _context;
+
+
+        private MethodWait _methodWait;
+        private int _pushedCallId;
+        private PushedCall _pushedCall;
         public WaitProcessor(
             IServiceProvider serviceProvider,
             ILogger<WaitProcessor> logger,
             ISaveWaitHandler saveWaitHandler,
             IFirstWaitProcessor firstWaitProcessor,
             IRecycleBinService recycleBinService,
-            IWaitsRepository waitsRepository)
+            IWaitsRepository waitsRepository,
+            IBackgroundJobClient backgroundJobClient,
+            FunctionDataContext context,
+            IReplayWaitProcessor replayWaitProcessor)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -44,6 +48,9 @@ namespace ResumableFunctions.Handler.Core
             _firstWaitProcessor = firstWaitProcessor;
             _recycleBinService = recycleBinService;
             _waitsRepository = waitsRepository;
+            _backgroundJobClient = backgroundJobClient;
+            _context = context;
+            _replayWaitProcessor = replayWaitProcessor;
         }
 
 
@@ -51,15 +58,14 @@ namespace ResumableFunctions.Handler.Core
         public async Task RequestProcessing(int mehtodWaitId, int pushedCallId)
         {
             using IServiceScope scope = _serviceProvider.CreateScope();
-            _serviceProvider = scope.ServiceProvider;
-            SetDependencies(scope.ServiceProvider);
+            _pushedCallId = pushedCallId;
             if (await LoadWaitAndPushedCall(mehtodWaitId, pushedCallId))
                 await Pipeline(
                     SetInputAndOutput,
                     CheckIfMatch,
                     CloneIfFirst,
                     UpdateFunctionData,
-                    WakeUpInstance,
+                    CreateFunctionInstance,
                     ResumeExecution);
             await _context.SaveChangesAsync();
         }
@@ -109,21 +115,24 @@ namespace ResumableFunctions.Handler.Core
                 var waitCall = await _context
                     .WaitsForCalls
                     .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == methodWait.Id);
-                methodWait = await _firstWaitProcessor.CloneFirstWait(methodWait);
-                waitCall.WaitId = methodWait.Id;
+                _methodWait = await _firstWaitProcessor.CloneFirstWait(methodWait);
+                waitCall.WaitId = _methodWait.Id;
                 await _context.SaveChangesAsync();
             }
             return true;
         }
 
 
-        private Task<bool> UpdateFunctionData(MethodWait methodWait, int pushedCallId)
+        private async Task<bool> UpdateFunctionData(MethodWait methodWait, int pushedCallId)
         {
-            return Task.FromResult(methodWait.UpdateFunctionData());
+            var result = methodWait.UpdateFunctionData();
+            await _context.SaveChangesAsync();
+            return result;
         }
 
-        private async Task<bool> WakeUpInstance(MethodWait methodWait, int pushedCallId)
+        private async Task<bool> CreateFunctionInstance(MethodWait methodWait, int pushedCallId)
         {
+            //todo: should I use scope 
             using var scope = _serviceProvider.CreateScope();
             var currentFunctionClassWithDi =
                 scope.ServiceProvider.GetService(methodWait.CurrentFunction.GetType()) ??
@@ -265,48 +274,43 @@ namespace ResumableFunctions.Handler.Core
         {
             try
             {
-                using (IServiceScope scope = _serviceProvider.CreateScope())
+                _methodWait = await _context
+                    .MethodWaits
+                    .Include(x => x.RequestedByFunction)
+                    .Include(x => x.MethodToWait)
+                    .Include(x => x.FunctionState)
+                    .Where(x => x.Status == WaitStatus.Waiting)
+                    .FirstOrDefaultAsync(x => x.Id == waitId);
+
+                if (_methodWait == null)
                 {
-                    SetDependencies(scope.ServiceProvider);
-
-                    methodWait = await _context
-                        .MethodWaits
-                        .Include(x => x.RequestedByFunction)
-                        .Include(x => x.MethodToWait)
-                        .Include(x => x.FunctionState)
-                        .Where(x => x.Status == WaitStatus.Waiting)
-                        .FirstOrDefaultAsync(x => x.Id == waitId);
-
-                    if (methodWait == null)
-                    {
-                        _logger.LogError($"No method wait exist with ID ({waitId}) and status ({WaitStatus.Waiting}).");
-                        return false;
-                    }
-
-                    pushedCall = await _context
-                       .PushedCalls
-                       .FirstOrDefaultAsync(x => x.Id == pushedCallId);
-                    if (pushedCall == null)
-                    {
-                        _logger.LogError($"No pushed method exist with ID ({pushedCallId}).");
-                        return false;
-                    }
-
-                    var targetMethod = await _context
-                           .WaitMethodIdentifiers
-                           .AnyAsync(x => x.Id == methodWait.MethodToWaitId);
-
-                    if (targetMethod == false)
-                    {
-                        _logger.LogError($"No method like ({pushedCall.MethodData}) exist that match for pushed call `{pushedCallId}`.");
-                        return false;
-                    }
-
-                    methodWait.Input = pushedCall.Input;
-                    methodWait.Output = pushedCall.Output;
-
-                    return true;
+                    _logger.LogError($"No method wait exist with ID ({waitId}) and status ({WaitStatus.Waiting}).");
+                    return false;
                 }
+
+                _pushedCall = await _context
+                   .PushedCalls
+                   .FirstOrDefaultAsync(x => x.Id == pushedCallId);
+                if (_pushedCall == null)
+                {
+                    _logger.LogError($"No pushed method exist with ID ({pushedCallId}).");
+                    return false;
+                }
+
+                var targetMethod = await _context
+                       .WaitMethodIdentifiers
+                       .AnyAsync(x => x.Id == _methodWait.MethodToWaitId);
+
+                if (targetMethod == false)
+                {
+                    _logger.LogError($"No method like ({_pushedCall.MethodData}) exist that match for pushed call `{pushedCallId}`.");
+                    return false;
+                }
+
+                _methodWait.Input = _pushedCall.Input;
+                _methodWait.Output = _pushedCall.Output;
+
+                return true;
             }
             catch (Exception ex)
             {
@@ -347,15 +351,9 @@ namespace ResumableFunctions.Handler.Core
         private async Task<bool> Pipeline(params Func<MethodWait, int, Task<bool>>[] actions)
         {
             foreach (var action in actions)
-                if (!await action(methodWait, pushedCallId))
+                if (!await action(_methodWait, _pushedCallId))
                     return false;
             return true;
-        }
-
-        private void SetDependencies(IServiceProvider serviceProvider)
-        {
-            _context = serviceProvider.GetService<FunctionDataContext>();
-            _backgroundJobClient = serviceProvider.GetService<IBackgroundJobClient>();
         }
     }
 

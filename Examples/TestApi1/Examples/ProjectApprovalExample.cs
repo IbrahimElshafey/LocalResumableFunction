@@ -12,7 +12,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     public bool ManagerThreeApproval { get; set; }
     public bool ManagerFourApproval { get; set; }
     public bool ManagerFiveApproval { get; set; }
-    public string ExternalMethodStatus { get; private set; } = "Not matched yet.";
+    public string ExternalMethodStatus { get;  set; } = "Not matched yet.";
 
     [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow")]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()

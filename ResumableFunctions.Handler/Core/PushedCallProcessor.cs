@@ -20,8 +20,7 @@ namespace ResumableFunctions.Handler.Core;
 
 internal class PushedCallProcessor : IPushedCallProcessor
 {
-    internal FunctionDataContext _context;
-
+    private readonly FunctionDataContext _context;
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ReplayWaitProcessor> _logger;
@@ -32,13 +31,15 @@ internal class PushedCallProcessor : IPushedCallProcessor
         IServiceProvider serviceProvider,
         ILogger<ReplayWaitProcessor> logger,
         IWaitProcessor waitProcessor,
-        IWaitsRepository waitsRepository)
+        IWaitsRepository waitsRepository,
+        FunctionDataContext context)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
         _waitProcessor = waitProcessor;
         _backgroundJobClient = serviceProvider.GetService<IBackgroundJobClient>();
         _waitsRepository = waitsRepository;
+        _context = context;
     }
 
     public async Task<int> QueuePushedCallProcessing(PushedCall pushedCall)

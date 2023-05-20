@@ -21,11 +21,13 @@ namespace ResumableFunctions.AspNetService
         public ResumableFunctionsController(
             IBackgroundJobClient backgroundJobClient,
             ILogger<ResumableFunctionsController> logger,
-            IPushedCallProcessor pushedCallProcessor)
+            IPushedCallProcessor pushedCallProcessor,
+            IWaitProcessor waitProcessor)
         {
             _backgroundJobClient = backgroundJobClient;
             _logger = logger;
             _pushedCallProcessor = pushedCallProcessor;
+            _waitProcessor = waitProcessor;
         }
 
 

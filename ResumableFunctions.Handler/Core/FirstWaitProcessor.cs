@@ -61,7 +61,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             currentMw.Output = firstMatchedMethodWait.Output;
 
             await _context.SaveChangesAsync();
-            //firstWaitClone.Status = WaitStatus.Waiting;
+            firstWaitClone.Status = WaitStatus.Waiting;
             return currentMw;
         }
         catch (Exception ex)

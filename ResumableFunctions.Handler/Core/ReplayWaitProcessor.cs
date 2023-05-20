@@ -20,11 +20,13 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     public ReplayWaitProcessor(
         FunctionDataContext context,
         ILogger<ReplayWaitProcessor> logger,
-        ISaveWaitHandler saveWaitHandler)
+        ISaveWaitHandler saveWaitHandler,
+        IWaitsRepository waitsRepository)
     {
         _context = context;
         _logger = logger;
         _saveWaitHandler = saveWaitHandler;
+        _waitsRepository = waitsRepository;
     }
 
     public async Task<(Wait Wait, bool ProceedExecution)> ReplayWait(ReplayRequest replayRequest)

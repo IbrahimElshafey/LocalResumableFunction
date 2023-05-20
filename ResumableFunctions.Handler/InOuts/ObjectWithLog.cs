@@ -1,10 +1,20 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using ResumableFunctions.Handler.Attributes;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
 
 public abstract class ObjectWithLog
 {
+    private readonly ILogger<ObjectWithLog> _logger;
+
+    //public ObjectWithLog()
+    //{
+    //    _logger = WaitMethodAttribute.ServiceProvider?.GetService<ILogger<ObjectWithLog>>();
+    //}
+
     [JsonIgnore]
     public int ErrorCounter { get; internal set; }
 
@@ -26,7 +36,7 @@ public abstract class ObjectWithLog
             Created = DateTime.Now,
         };
         Logs.Add(logRecord);
-        Console.WriteLine(logRecord);
+        //_logger.LogInformation(message, logRecord);
     }
     public virtual void AddError(string message, Exception ex = null, string code = "")
     {
@@ -45,7 +55,7 @@ public abstract class ObjectWithLog
             logRecord.Message += $"\n{ex.Message}";
             logRecord.Message += $"\n{ex.StackTrace}";
         }
-        Console.WriteLine(logRecord);
+        //_logger.LogError(message, logRecord, ex);
     }
 }
 

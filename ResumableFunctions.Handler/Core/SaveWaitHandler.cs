@@ -21,11 +21,15 @@ public class SaveWaitHandler : ISaveWaitHandler
     public SaveWaitHandler(
         ILogger<SaveWaitHandler> logger,
         FunctionDataContext context,
-        IBackgroundJobClient backgroundJobClient)
+        IBackgroundJobClient backgroundJobClient,
+        IWaitsRepository waitsRepository,
+        IMethodIdentifierRepository methodIdentifierRepo)
     {
         _logger = logger;
         _context = context;
         _backgroundJobClient = backgroundJobClient;
+        _waitsRepository = waitsRepository;
+        _methodIdentifierRepo = methodIdentifierRepo;
     }
 
     public async Task<bool> SaveWaitRequestToDb(Wait newWait)

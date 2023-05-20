@@ -265,13 +265,14 @@ public class FunctionDataContext : DbContext
         foreach (var entityEntry in ChangeTracker.Entries())
         {
             if (
-                entityEntry.State == EntityState.Modified &&
                 entityEntry.Entity is Wait wait &&
                 wait.IsFirst &&
                 wait.IsDeleted == false)
             {
-                entityEntry.State = EntityState.Unchanged;
-                Entry(wait.FunctionState).State = EntityState.Unchanged;
+                if (entityEntry.State == EntityState.Modified)
+                    entityEntry.State = EntityState.Unchanged;
+                if (Entry(wait.FunctionState).State == EntityState.Modified)
+                    Entry(wait.FunctionState).State = EntityState.Unchanged;
             }
         }
     }

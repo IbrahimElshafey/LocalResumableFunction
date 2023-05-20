@@ -14,16 +14,21 @@ public class LogRecord : IEntity
 
     public override string ToString()
     {
-        return $"{Type}: {Message}";
+        return $"Type: {Type},\n" +
+               $"Message: {Message}\n" +
+               $"EntityType: {EntityType}\n" +
+               $"EntityId: {EntityId}\n" +
+               $"Code: {Code}\n"
+               ;
     }
 
-    public (string Class,string Title) TypeClass()
+    public (string Class, string Title) TypeClass()
     {
         switch (Type)
         {
-            case LogType.Info:return ("w3-gray","Info");
-            case LogType.Error:return ("w3-deep-orange", "Error");
-            case LogType.Warning:return ("w3-amber", "Warning");
+            case LogType.Info: return ("w3-gray", "Info");
+            case LogType.Error: return ("w3-deep-orange", "Error");
+            case LogType.Warning: return ("w3-amber", "Warning");
         }
         return ("w3-gray", "Undefined");
     }

@@ -13,10 +13,11 @@ namespace ResumableFunctions.Handler.Attributes;
 /// </summary>
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 
-public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdetifier
+public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdetifier, IDisposable
 {
     internal static IServiceProvider ServiceProvider;
     private PushedCall _pushedCall;
+    private readonly IServiceScope _scope;
     private readonly IPushedCallProcessor _pushedCallProcessor;
     private readonly ILogger<WaitMethodAttribute> _logger;
 
@@ -28,7 +29,8 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
         _logger = ServiceProvider.GetService<ILogger<WaitMethodAttribute>>();
         try
         {
-            _pushedCallProcessor = ServiceProvider.GetService<IPushedCallProcessor>();
+            _scope = ServiceProvider.CreateScope();
+            _pushedCallProcessor = _scope.ServiceProvider.GetService<IPushedCallProcessor>();
         }
         catch (Exception ex)
         {
@@ -86,5 +88,10 @@ public sealed class WaitMethodAttribute : OnMethodBoundaryAspect, ITrackingIdeti
         if ((bool)args.MethodExecutionTag)
             return;
         Console.WriteLine("On exception");
+    }
+
+    public void Dispose()
+    {
+        _scope.Dispose();
     }
 }

@@ -37,7 +37,8 @@ public class Scanner
         IMethodIdentifierRepository methodIdentifierRepo,
         IFirstWaitProcessor firstWaitProcessor,
         IResumableFunctionsSettings settings,
-        FunctionDataContext context)
+        FunctionDataContext context,
+        IBackgroundJobClient backgroundJobClient)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -45,6 +46,7 @@ public class Scanner
         _firstWaitProcessor = firstWaitProcessor;
         _settings = settings;
         _context = context;
+        _backgroundJobClient = backgroundJobClient;
     }
 
     static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
