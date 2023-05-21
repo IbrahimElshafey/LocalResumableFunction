@@ -18,26 +18,25 @@ namespace ResumableFunctions.Handler.DataAccess;
 public class FunctionDataContext : DbContext
 {
     private readonly ILogger<FunctionDataContext> _logger;
-
+    private static Mutex mut = new Mutex(false, "FunctionDataContext_Mutex");
     public FunctionDataContext(
         ILogger<FunctionDataContext> logger,
-        IResumableFunctionsSettings settings,
-        IBackgroundJobClient backgroundJobClient) : base(settings.WaitsDbConfig.Options)
+        IResumableFunctionsSettings settings) : base(settings.WaitsDbConfig.Options)
     {
         _logger = logger;
         try
         {
-            CreateDb();
+            mut.WaitOne();
+            Database.EnsureCreated();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            backgroundJobClient.Schedule(() => CreateDb(), TimeSpan.FromMinutes(2));
+            _logger.LogError("Error when call `Database.EnsureCreated()` for `FunctionDataContext`", ex);
         }
-    }
-
-    public void CreateDb()
-    {
-        Database.EnsureCreated();
+        finally
+        {
+            mut.ReleaseMutex();
+        }
     }
 
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
@@ -222,6 +221,7 @@ public class FunctionDataContext : DbContext
             HandleSoftDelete();
             ExcludeFalseAddEntries();
             var result = await base.SaveChangesAsync(cancellationToken);
+            await SetWaitsPaths(cancellationToken);
             await SaveEntitiesLogs(cancellationToken);
             return result;
         }
@@ -231,6 +231,39 @@ public class FunctionDataContext : DbContext
             throw;
         }
 
+    }
+
+    private async Task SetWaitsPaths(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var waits =
+                ChangeTracker
+                .Entries()
+                    .Where(x => x.Entity is Wait)
+                    .Select(x => (Wait)x.Entity)
+                    .ToList();
+            foreach (var wait in waits)
+            {
+                wait.Path = GetWaitPath(wait);
+            }
+            await base.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error when set waits paths.");
+        }
+
+        string GetWaitPath(Wait wait)
+        {
+            var path = $"/{wait.Id}";
+            while (wait?.ParentWait != null)
+            {
+                path = $"/{wait.ParentWaitId}" + path;
+                wait = wait.ParentWait;
+            }
+            return path;
+        }
     }
 
     private async Task SaveEntitiesLogs(CancellationToken cancellationToken)

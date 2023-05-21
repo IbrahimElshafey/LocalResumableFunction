@@ -43,7 +43,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         {
             var firstWaitClone = await GetFirstWait(resumableFunction, false);
             firstWaitClone.Status = WaitStatus.Temp;
-            firstWaitClone.CascadeAction(x =>
+            firstWaitClone.ActionOnWaitsTree(x =>
             {
                 x.IsFirst = false;
                 x.FunctionState.StateObject = firstMatchedMethodWait?.FunctionState?.StateObject;
@@ -134,7 +134,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             if (removeIfExist)
             {
                 WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
-                await _waitsRepository.RemoveFirstWaitIfExist(firstWait, methodId);
+                await _waitsRepository.RemoveFirstWaitIfExist(methodId);
             }
             var service = await _context.ServicesData.FirstAsync(x => x.AssemblyName == methodId.AssemblyName);
             var functionState = new ResumableFunctionState
@@ -143,7 +143,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 StateObject = classInstance,
                 ServiceId = service.GetRootServiceId()
             };
-            firstWait.CascadeAction(x =>
+            firstWait.ActionOnWaitsTree(x =>
             {
                 x.RequestedByFunction = methodId;
                 x.RequestedByFunctionId = methodId.Id;
@@ -175,6 +175,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     .Waits
                     .Include(x => x.FunctionState)
                     .FirstOrDefaultAsync(wait =>
+                            wait.RequestedByFunctionId == functionId &&
                             wait.IsNode &&
                             wait.IsFirst &&
                             wait.Status == WaitStatus.Waiting);

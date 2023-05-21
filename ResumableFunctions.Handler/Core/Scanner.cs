@@ -138,7 +138,7 @@ public class Scanner
         var methodType = entryPointCheck.IsEntry ? MethodType.ResumableFunctionEntryPoint : MethodType.SubResumableFunction;
         serviceData.AddLog($"Register resumable function [{resumableFunctionMinfo.GetFullName()}] of type [{methodType}]");
 
-        var mi = await _methodIdentifierRepo
+        var resumableFunctionIdentifier = await _methodIdentifierRepo
             .AddResumableFunctionIdentifier(
             new MethodData(resumableFunctionMinfo)
             {
@@ -150,11 +150,11 @@ public class Scanner
 
         if (entryPointCheck.IsEntry && entryPointCheck.IsActive)
         {
-            _backgroundJobClient.Enqueue(() => _firstWaitProcessor.RegisterFirstWait(mi.Id));
+            _backgroundJobClient.Enqueue(() => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
         }
         else if (entryPointCheck.IsEntry && !entryPointCheck.IsActive)
         {
-            _backgroundJobClient.Enqueue(() => _firstWaitProcessor.DeactivateFirstWait(mi.Id));
+            _backgroundJobClient.Enqueue(() => _firstWaitProcessor.DeactivateFirstWait(resumableFunctionIdentifier.Id));
         }
     }
 

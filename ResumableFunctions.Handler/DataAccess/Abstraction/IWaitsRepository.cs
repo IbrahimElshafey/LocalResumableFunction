@@ -1,4 +1,5 @@
 ﻿using ResumableFunctions.Handler.InOuts;
+using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
@@ -12,6 +13,8 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
         Task<Wait> GetWaitGroup(int? parentGroupId);
         Task<Wait> GetWaitParent(Wait wait);
         Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId);
-        Task RemoveFirstWaitIfExist(Wait firstWait, MethodIdentifier methodIdentifier);
+        Task RemoveFirstWaitIfExist(MethodIdentifier methodIdentifier);
+
+        Task<Wait> LoadWaitTree(Expression<Func<Wait,bool>> expression);
     }
 }

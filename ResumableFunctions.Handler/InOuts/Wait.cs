@@ -53,6 +53,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
     internal List<Wait> ChildWaits { get; set; } = new();
 
     internal int? ParentWaitId { get; set; }
+    public string Path { get; internal set; }
 
     private ResumableFunction _currentFunction;
     [NotMapped]
@@ -219,12 +220,12 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
     }
 
 
-    internal void CascadeAction(Action<Wait> action)
+    internal void ActionOnWaitsTree(Action<Wait> action)
     {
         action(this);
         if (ChildWaits != null)
             foreach (var item in ChildWaits)
-                item.CascadeAction(action);
+                item.ActionOnWaitsTree(action);
     }
 
     internal MethodWait GetChildMethodWait(string name)

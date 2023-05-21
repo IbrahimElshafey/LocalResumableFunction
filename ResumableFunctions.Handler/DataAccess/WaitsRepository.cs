@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Hangfire;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
+using System.Linq.Expressions;
+using System;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -137,22 +139,22 @@ internal class WaitsRepository : IWaitsRepository
 
 
     //todo:fix this for group
-    public async Task RemoveFirstWaitIfExist(Wait firstWait, MethodIdentifier methodIdentifier)
+    public async Task RemoveFirstWaitIfExist(MethodIdentifier methodIdentifier)
     {
         try
         {
             var firstWaitInDb =
-           await _context.Waits
+           await _context
+           .Waits
+           .Include(x => x.ChildWaits)//todo:get the full tree
            .FirstOrDefaultAsync(x =>
                    x.IsFirst &&
                    x.RequestedByFunctionId == methodIdentifier.Id &&
-                   x.Name == firstWait.Name &&
                    x.Status == WaitStatus.Waiting);
 
             if (firstWaitInDb != null)
             {
-                _context.Waits.Remove(firstWaitInDb);
-                firstWaitInDb.CascadeAction(x => _context.Waits.Remove(x));
+                firstWaitInDb.ActionOnWaitsTree(childWait => _context.Waits.Remove(childWait));
                 //load entity to delete it , concurrency controltoken and FKs
                 var functionState = await _context
                     .FunctionStates
@@ -163,7 +165,7 @@ internal class WaitsRepository : IWaitsRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error when RemoveFirstWaitIfExist {firstWait}", ex);
+            _logger.LogError($"Error when RemoveFirstWaitIfExist for function `{methodIdentifier.MethodName}`", ex);
         }
 
     }
@@ -256,5 +258,26 @@ internal class WaitsRepository : IWaitsRepository
         }
         await _context.SaveChangesAsync();
         return waitToReplay;
+    }
+
+    public async Task<Wait> LoadWaitTree(Expression<Func<Wait, bool>> expression)
+    {
+        var rootId =
+            await _context
+            .Waits
+            .Where(expression)
+            .Select(x => x.Id)
+            .FirstOrDefaultAsync();
+
+        if (rootId != default)
+        {
+            var waits =
+                await _context
+                .Waits
+                .Where(x => x.Path.StartsWith($"/{rootId}"))
+                .ToListAsync();
+                return waits.First(x => x.Id == rootId);
+        }
+        return null;
     }
 }

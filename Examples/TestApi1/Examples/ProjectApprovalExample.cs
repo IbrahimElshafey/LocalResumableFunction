@@ -14,9 +14,15 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     public bool ManagerFiveApproval { get; set; }
     public string ExternalMethodStatus { get; set; } = "Not matched yet.";
 
-    [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow", isActive: false)]//Point 1
+    [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow", isActive: true)]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
     {
+        //yield return
+        //     Wait<object, int>(
+        //         "Wait external method 1",
+        //     new ExternalServiceClass().ExternalMethodTest)
+        //         .MatchIf((input, output) => output % 2 == 0)
+        //         .SetData((input, output) => ExternalMethodStatus == "ExternalMethodTest Matched.");
         //throw new NotImplementedException("Exception and no body.");
         yield return
          Wait<Project, bool>("Project Submitted", ProjectSubmitted)//Point 2
