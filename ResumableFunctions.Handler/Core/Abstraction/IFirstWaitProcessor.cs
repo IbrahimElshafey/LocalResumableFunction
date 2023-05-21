@@ -8,6 +8,6 @@ namespace ResumableFunctions.Handler.Core.Abstraction
         Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait);
         Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist);
         Task RegisterFirstWait(int functionId);
-        Task DeactivateFirstWait(int functionId);
+        //Task DeactivateFirstWait(int functionId);
     }
 }

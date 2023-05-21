@@ -139,22 +139,19 @@ internal class WaitsRepository : IWaitsRepository
 
 
     //todo:fix this for group
-    public async Task RemoveFirstWaitIfExist(MethodIdentifier methodIdentifier)
+    public async Task RemoveFirstWaitIfExist(int methodIdentifierId)
     {
         try
         {
-            var firstWaitInDb =
-           await _context
-           .Waits
-           .Include(x => x.ChildWaits)//todo:get the full tree
-           .FirstOrDefaultAsync(x =>
+            var firstWaitInDb = await LoadWaitTree(
+                x =>
                    x.IsFirst &&
-                   x.RequestedByFunctionId == methodIdentifier.Id &&
+                   x.RequestedByFunctionId == methodIdentifierId &&
                    x.Status == WaitStatus.Waiting);
 
             if (firstWaitInDb != null)
             {
-                firstWaitInDb.ActionOnWaitsTree(childWait => _context.Waits.Remove(childWait));
+                firstWaitInDb.ActionOnWaitsTree(wait => wait.IsDeleted = true);
                 //load entity to delete it , concurrency controltoken and FKs
                 var functionState = await _context
                     .FunctionStates
@@ -165,7 +162,7 @@ internal class WaitsRepository : IWaitsRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error when RemoveFirstWaitIfExist for function `{methodIdentifier.MethodName}`", ex);
+            _logger.LogError($"Error when RemoveFirstWaitIfExist for function `{methodIdentifierId}`", ex);
         }
 
     }
@@ -276,7 +273,7 @@ internal class WaitsRepository : IWaitsRepository
                 .Waits
                 .Where(x => x.Path.StartsWith($"/{rootId}"))
                 .ToListAsync();
-                return waits.First(x => x.Id == rootId);
+            return waits.First(x => x.Id == rootId);
         }
         return null;
     }

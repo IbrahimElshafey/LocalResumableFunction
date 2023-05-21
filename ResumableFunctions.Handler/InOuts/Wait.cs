@@ -101,12 +101,6 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
         try
         {
             var waitExist = await functionRunner.MoveNextAsync();
-            CurrentFunction.Logs.ForEach(log =>
-            {
-                log.IsCustom = true;
-                log.EntityType = nameof(ResumableFunctionState);
-            });
-            FunctionState.Logs.AddRange(CurrentFunction.Logs);
             if (waitExist)
             {
                 Console.WriteLine($"Get next wait [{functionRunner.Current.Name}] after [{Name}]");
@@ -119,8 +113,21 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
         {
             FunctionState.AddError(
                 $"An error occurred after resuming execution after wait `{this}`.", ex);
-            Debug.Write(ex);
+            FunctionState.Status = FunctionStatus.Error;
             throw;
+        }
+        finally
+        {
+            CurrentFunction.Logs.ForEach(log =>
+            {
+                log.IsCustom = true;
+                log.EntityType = nameof(ResumableFunctionState);
+            });
+            FunctionState.Logs.AddRange(CurrentFunction.Logs);
+            FunctionState.Status =
+              CurrentFunction.HasError || FunctionState.HasError ?
+              FunctionStatus.Error :
+              FunctionStatus.InProgress;
         }
     }
 

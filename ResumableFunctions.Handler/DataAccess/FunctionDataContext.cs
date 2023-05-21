@@ -280,7 +280,7 @@ public class FunctionDataContext : DbContext
             {
                 entity.Logs.ForEach(logRecord =>
                 {
-                    if (logRecord.EntityId <= 0)
+                    if (logRecord.EntityId <= 0 || logRecord.EntityId == null)
                         logRecord.EntityId = ((IEntity)entity).Id;
                 });
                 Logs.AddRange(entity.Logs.Where(x => x.Id == 0));

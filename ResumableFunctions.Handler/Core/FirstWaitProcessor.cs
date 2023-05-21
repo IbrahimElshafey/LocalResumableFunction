@@ -51,8 +51,11 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             //firstWaitClone.FunctionState.AddLog(
             //    $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.", LogType.Info);
 
-            firstWaitClone.FunctionState.Status = FunctionStatus.InProgress;
             firstWaitClone.FunctionState.Logs.AddRange(firstWaitClone.FunctionState.Logs);
+            firstWaitClone.FunctionState.Status =
+                firstWaitClone.FunctionState.HasError ?
+                FunctionStatus.Error :
+                FunctionStatus.InProgress;
             await _saveWaitHandler.SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
@@ -97,6 +100,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             _logger.LogError(ex, errorMsg);
             if (resumableFunction != null)
                 await LogErrorToService(resumableFunction, ex, errorMsg);
+            await _waitsRepository.RemoveFirstWaitIfExist(functionId);
         }
     }
 
@@ -134,7 +138,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             if (removeIfExist)
             {
                 WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
-                await _waitsRepository.RemoveFirstWaitIfExist(methodId);
+                await _waitsRepository.RemoveFirstWaitIfExist(methodId.Id);
             }
             var service = await _context.ServicesData.FirstAsync(x => x.AssemblyName == methodId.AssemblyName);
             var functionState = new ResumableFunctionState

@@ -26,6 +26,7 @@ public class Scanner
     private readonly IResumableFunctionsSettings _settings;
     private readonly ILogger<Scanner> _logger;
     private readonly IMethodIdentifierRepository _methodIdentifierRepo;
+    private readonly IWaitsRepository _waitsRepository;
     private readonly IFirstWaitProcessor _firstWaitProcessor;
     private readonly IBackgroundJobClient _backgroundJobClient;
 
@@ -38,7 +39,8 @@ public class Scanner
         IFirstWaitProcessor firstWaitProcessor,
         IResumableFunctionsSettings settings,
         FunctionDataContext context,
-        IBackgroundJobClient backgroundJobClient)
+        IBackgroundJobClient backgroundJobClient,
+        IWaitsRepository waitsRepository)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -47,6 +49,7 @@ public class Scanner
         _settings = settings;
         _context = context;
         _backgroundJobClient = backgroundJobClient;
+        _waitsRepository = waitsRepository;
     }
 
     static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
@@ -154,7 +157,7 @@ public class Scanner
         }
         else if (entryPointCheck.IsEntry && !entryPointCheck.IsActive)
         {
-            _backgroundJobClient.Enqueue(() => _firstWaitProcessor.DeactivateFirstWait(resumableFunctionIdentifier.Id));
+            _backgroundJobClient.Enqueue(() => _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id));
         }
     }
 
