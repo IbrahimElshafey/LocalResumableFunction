@@ -37,6 +37,8 @@
 	* Verify that fody MethodBoundaryAspect is active
 	* Validate URN duplication when scan if diffrent method signature
 	* Wait methods in same method group must have the same signature
+	* Rerun faild isntance
+	* Stop resumable function new instances
 
 ## Prepare how to use?
 * Implement workflows in 
