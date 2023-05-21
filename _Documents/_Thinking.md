@@ -1,23 +1,34 @@
-﻿
+﻿# Aggregate Column Feature
+* Create table `AggregateDefinition` with columns
+	* EntityName (sush as Orders)
+	* AggregateName (such as FailedOrdersCount,TotalPayments)
+	* AggregateFunction (such as SUM, COUNT, AVG, LAST,...) or user defined
+	* ResetValue (such as -100 default null)
+* Create table `AggregateValues` with columns 'No update just insersion and delete'
+	* AggregateDefinitionId
+	* Number Value
+* The call `DefineAggregate(forTable: typeof(Post),name: "LikesCount",aggregateFunction: "SUM")`
+* The call `post.AddAggregateValue("LikesCount",1)`
+* The call `post.ResetAggregate("LikesCount")`
 
-# Scenarios
+# Synchronization Scenarios
 * Two waits trying update same FunctionState 
 	* [Done with no test]
 * First wait closed but new request come before create new one
 	* Dont update the first wait , clone it [done]
 * Update pushed calls counter 
-	* [Done with no test]
+	* Seprate table and one record for each match[Done]
 * Database.EnsureCreated(); in same time from multiple services
-	* [Scan on second process will be failed and retried by hangfire]
-	* We can use global lock service
+	* We should use inter services lock
+	* We should use inter processes lock
 * Multiple scan process in same time
 	* Raised in same service [done]
 	* Raised in same service another instance when using load balancer 
-		* Exception will throw and hangfire will retry
-* Diffrent services may try to add same MethodGroup at same time 
-	* uniqe index exception handel
+		* Use inter services lock
+* Different services may try to add same MethodGroup at same time 
+	* Uniqe index exception handel
 
-# Cross Services/Process Locking
+# Synchronization Cross Services on different servers
 * Table with Insert/Delete only (No Update)
 	* Indexed string column for entity name
 	* Intger column for entity ID
@@ -27,10 +38,14 @@
 * If no row exist then process can start
 * After process finished the row will be deleted
 * Background process to delete dead locks
+* Can I use https://github.com/madelson/DistributedLock
 
-# Reading
-* lock in async method https://blog.cdemi.io/async-waiting-inside-c-sharp-locks/
-
+# Synchronization cross processes on same servers or same process tasks
+* Overview of synchronization primitives 
+	* https://learn.microsoft.com/en-us/dotnet/standard/threading/overview-of-synchronization-primitives
+* SemaphoreSlim is a lightweight alternative to Semaphore and can be used only for synchronization within a single process boundary.
+* On Windows, you can use Semaphore for the inter-process synchronization. 
+* Named Mutexes can be used in Window ,Linux ,and Mac.
 
 # Read
 * EF core Handling Concurrency Conflicts
@@ -39,11 +54,13 @@
 	https://codereview.stackexchange.com/questions/105523/item-level-locks-for-a-large-number-of-items
 
 
-1 - For methods in the same service
-2 - For methods in different services
-3 - Database locks
-ImmutableList<T> Class
-ConcurrentBag<T> Class
+* What is System.Collections.Concurrent Namespace
+	* ImmutableList<T> Class
+	* ConcurrentBag<T> Class
 
 https://stackoverflow.com/questions/45943048/ef-core-fluent-api-set-all-column-types-of-interface
 https://stackoverflow.com/questions/51763168/common-configurations-for-entities-implementing-an-interface
+
+# Fixed Width Table File Log
+* This will be a separate test project to know more about reading/writing to files
+* How database ACID work
