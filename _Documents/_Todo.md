@@ -1,8 +1,11 @@
 ﻿# Todo
+
+## Near
 * Deactivate a resumable function
-* Validate URN duplication when scan if diffrent method signature
-* Detect deleted methods
-* Wait methods in same method group must have the same signature
+* Add Locks table for fix scan and processing problem
+* Same DLL in two services
+* Test replay in sub functions
+
 ## UI project
 * RF Instance Details
 	* Waits tree
@@ -14,14 +17,14 @@
 		* Created
 		* If match --> Pushed method input & output
 		* Expressions if method wait
-		* Need Load Function Data for match
-		* Wait method
+		* Remove Need Load Function Data for match
 		* Count Expression if group
 		* Actions on Wait 
-			* Cancel
-			* Go Back (To,Before,After)
-					
-
+			* Cancel (If Waiting)
+			* Wait Again (If Completed/Canceled)
+			* Wait Again and Execute Code before (If Completed/Canceled)
+			* Wait Next Wait (If Completed/Canceled)
+			* Set Matched (If Waiting)
 * Method Waits
 * Pushed Calls Waits
 * All Logs View
@@ -34,12 +37,6 @@
 	* Verify that fody MethodBoundaryAspect is active
 	* Validate URN duplication when scan if diffrent method signature
 	* Wait methods in same method group must have the same signature
-				
-## Near
-* Add Locks table for fix scan and processing problem
-* Same DLL in two services
-* Test replay in sub functions
-
 
 ## Prepare how to use?
 * Implement workflows in 
@@ -52,7 +49,7 @@
 	*  Why fody not work directlly
 
 ## Enhancements
-* Write unit testing
+* Write unit testing for core functionallity
 * Write Roslyn analyzer to force the right use for the library
 * Disable processing if there is a scan process in progress
 * Refactor many long methods
@@ -77,10 +74,6 @@
 	* https://github.com/pamidur/aspect-injector
 * Speed up waits query
 
-
-
-
-
 ## Publisher Project
 * Scan and send scan result to service owner to verify signatures
 * Use PeriodicTimer to handle background tasks
@@ -103,20 +96,12 @@
 * How to migrate resumable function database from development to production??
 * What about HangfireDb
 
-
 ## How to Test resumable function?
 * How to unit test a resumable functions
-	* Generate unit test code for resumable function
-		
+	* Generate unit test code for resumable function (I plan to be an automatic integration testing)
 
-
-
-# External Waits (Will be seprate projects)
+# External Waits (Will be separate projects)
 * Monitor network requests using reverse proxy and push MethodCalls [TCP Listener]
 	* https://github.com/microsoft/reverse-proxy
 * RabbitMQ or any service bus [Subscribe to event]
 * File/Folder Changes [File Watcher]
-
-
-
-

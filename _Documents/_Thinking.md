@@ -7,12 +7,14 @@
 * Create table `AggregateValues` with columns 'No update just insersion and delete'
 	* AggregateDefinitionId
 	* Number Value
-* The call `DefineAggregate(forTable: typeof(Post),name: "LikesCount",aggregateFunction: "SUM")`
-* The call `post.AddAggregateValue("LikesCount",1)`
-* The call `post.ResetAggregate("LikesCount")`
+## Example
+	* Define Aggregate `DefineAggregate(forTable: "Post",name: "LikesCount",aggregateFunction: "SUM")`
+	* Use when like button click `post.AddAggregateValue("LikesCount",1)`
+	* Use when unlike button clicked `post.AddAggregateValue("LikesCount",-1)`
+	* When user totally chnaged the content of the post `post.ResetAggregate("LikesCount")`
 
 # Synchronization Scenarios
-* Two waits trying update same FunctionState 
+* Two waits trying update same FunctionState
 	* [Done with no test]
 * First wait closed but new request come before create new one
 	* Dont update the first wait , clone it [done]
@@ -48,11 +50,10 @@
 * Named Mutexes can be used in Window ,Linux ,and Mac.
 
 # Read
-* EF core Handling Concurrency Conflicts
-	https://learn.microsoft.com/en-us/ef/core/saving/concurrency?tabs=fluent-api#native-database-generated-concurrency-tokens
+* EF core Handling Concurrency Conflicts 		
+	* https://learn.microsoft.com/en-us/ef/core/saving/concurrency?tabs=fluent-api#native-database-generated-concurrency-tokens
 * Item-level locks for a large number of items
-	https://codereview.stackexchange.com/questions/105523/item-level-locks-for-a-large-number-of-items
-
+	* https://codereview.stackexchange.com/questions/105523/item-level-locks-for-a-large-number-of-items
 
 * What is System.Collections.Concurrent Namespace
 	* ImmutableList<T> Class
