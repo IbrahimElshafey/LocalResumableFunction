@@ -27,7 +27,7 @@ namespace ResumableFunctions.Publisher
 
         public static void UseResumableFunctionsPublisher(this IHost app)
         {
-            PublishMethodAttribute.ServiceProvider = app.Services;
+            PublishMethodAspect.ServiceProvider = app.Services;
         }
 
         public static bool IsAsyncMethod(this MethodBase method)

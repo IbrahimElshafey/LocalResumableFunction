@@ -66,6 +66,6 @@
 https://stackoverflow.com/questions/45943048/ef-core-fluent-api-set-all-column-types-of-interface
 https://stackoverflow.com/questions/51763168/common-configurations-for-entities-implementing-an-interface
 
-# Fixed Width Table File Log
+# Table File Log
 * This will be a separate test project to know more about reading/writing to files
 * How database ACID work

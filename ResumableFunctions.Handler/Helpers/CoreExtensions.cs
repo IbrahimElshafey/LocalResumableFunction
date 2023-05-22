@@ -1,13 +1,8 @@
 ﻿using Hangfire;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.Internal;
-using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
@@ -15,14 +10,9 @@ using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService;
-using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Text;
-using static System.Formats.Asn1.AsnWriter;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
@@ -64,7 +54,7 @@ public static class CoreExtensions
     }
     public static void UseResumableFunctions(this IHost app)
     {
-        WaitMethodAttribute.ServiceProvider = app.Services;
+        WaitMethodAspect.ServiceProvider = app.Services;
         HangfireActivator.ServiceProvider = app.Services;
         GlobalConfiguration.Configuration
           .UseActivator(new HangfireActivator());

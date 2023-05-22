@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using ResumableFunctions.Handler.InOuts;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Helpers;
