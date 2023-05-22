@@ -1,9 +1,8 @@
 ﻿# Todo
 
 ## Near
-* Use AspectInjector instead of Fody 
-	* https://github.com/pamidur/aspect-injector
-* schedule processing if there is a scan process in progress
+* Work on UI project
+* Schedule processing if there is a scan process in progress
 * Remove direct use for DbContext
 * Same DLL in two services
 * Test replay in sub functions
