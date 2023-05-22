@@ -9,8 +9,6 @@ namespace Aspects.PushResult
     [Aspect(Scope.Global)]
     public class PushResultAspect
     {
-        private static readonly object NullMarker = new { __is_null = "$_is_null" };
-
         [Advice(Kind.Before)]
         public void OnEntry(
             [Argument(Source.Name)] string name,
@@ -21,7 +19,7 @@ namespace Aspects.PushResult
             [Argument(Source.Triggers)] Attribute[] triggers
             )
         {
-            var pushResultAttribute = triggers.OfType<PushResultAttribute>().First();
+            var pushResultAttribute = triggers.OfType<PushToResumableFunctionEngineAttribute>().First();
            
             Console.WriteLine($"Before executing method `{name}` with input `{args.Aggregate((x,y)=>$"{x},{y}")}` and attribute `{pushResultAttribute}`");
             Console.WriteLine($"Instance is: `{instance}`");

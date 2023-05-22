@@ -10,10 +10,10 @@ namespace Aspects.PushResult
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     [Injection(typeof(PushResultAspect), Inherited = true)]
-    public class PushResultAttribute : Attribute
+    public class PushToResumableFunctionEngineAttribute : Attribute
     {
 
-        public PushResultAttribute(string methodUrn, bool canPublishFromExternal = false)
+        public PushToResumableFunctionEngineAttribute(string methodUrn, bool canPublishFromExternal = false)
         {
             MethodUrn = methodUrn;
             CanPublishFromExternal = canPublishFromExternal;
@@ -25,7 +25,7 @@ namespace Aspects.PushResult
         public string MethodUrn { get; }
         public bool CanPublishFromExternal { get; }
 
-        public const string AttributeId = nameof(PushResultAttribute) + "1f220128-d0f7-4dac-ad81-ff942d68942c";
+        public const string AttributeId = nameof(PushToResumableFunctionEngineAttribute) + "1f220128-d0f7-4dac-ad81-ff942d68942c";
         public override object TypeId => AttributeId;
 
         public override string ToString()

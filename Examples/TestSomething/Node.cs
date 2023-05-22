@@ -24,13 +24,13 @@ public class Node
                 item.CascadeFunc(func);
     }
 
-    [PushResult("URN:bghjhjkolk", true)]
+    [PushToResumableFunctionEngine("URN:bghjhjkolk", true)]
     internal int MethodWithPushAspectApplied(string input)
     {
         return Random.Shared.Next() - input.Length;
     }
 
-    [PushResult("URN:bghjhjkolk-Async", true)]
+    [PushToResumableFunctionEngine("URN:bghjhjkolk-Async", true)]
     internal async Task<int> MethodWithPushAspectAppliedAsync(string input)
     {
         throw new Exception("Error happened");
