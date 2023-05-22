@@ -45,7 +45,6 @@ public static class CoreExtensions
         services.AddScoped<IFirstWaitProcessor,FirstWaitProcessor>();
         services.AddScoped<IRecycleBinService,RecycleBinService>();
         services.AddScoped<IReplayWaitProcessor,ReplayWaitProcessor>();
-        services.AddScoped<ISaveWaitHandler,SaveWaitHandler>();
         services.AddScoped<IWaitProcessor,WaitProcessor>();
         services.AddScoped<Scanner>();
 

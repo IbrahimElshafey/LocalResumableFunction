@@ -13,19 +13,16 @@ namespace ResumableFunctions.Handler.Core;
 internal class ReplayWaitProcessor : IReplayWaitProcessor
 {
     private readonly ILogger<ReplayWaitProcessor> _logger;
-    private readonly ISaveWaitHandler _saveWaitHandler;
     private readonly FunctionDataContext _context;
     private readonly IWaitsRepository _waitsRepository;
 
     public ReplayWaitProcessor(
         FunctionDataContext context,
         ILogger<ReplayWaitProcessor> logger,
-        ISaveWaitHandler saveWaitHandler,
         IWaitsRepository waitsRepository)
     {
         _context = context;
         _logger = logger;
-        _saveWaitHandler = saveWaitHandler;
         _waitsRepository = waitsRepository;
     }
 
@@ -87,7 +84,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             duplicateWait.IsReplay = true;
             duplicateWait.IsFirst = false;
             duplicateWait.MatchIfExpression = replayRequest.MatchExpression;
-            await _saveWaitHandler.SaveWaitRequestToDb(duplicateWait);
+            await _waitsRepository.SaveWaitRequestToDb(duplicateWait);
             return duplicateWait;// when replay goto with new match
         }
         else
@@ -115,7 +112,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
         duplicateWait.IsReplay = true;
         duplicateWait.IsFirst = false;
-        await _saveWaitHandler.SaveWaitRequestToDb(duplicateWait);
+        await _waitsRepository.SaveWaitRequestToDb(duplicateWait);
         return duplicateWait;
     }
 
@@ -135,7 +132,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         {
             var nextWaitAfterReplay = goBefore.Runner.Current;
             nextWaitAfterReplay.CopyFromOld(oldCompletedWait);
-            await _saveWaitHandler.SaveWaitRequestToDb(nextWaitAfterReplay);
+            await _waitsRepository.SaveWaitRequestToDb(nextWaitAfterReplay);
             return nextWaitAfterReplay;//when replay go before
         }
         else
@@ -162,7 +159,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 mw.RequestedByFunction = waitToReplay.RequestedByFunction;
                 mw.RequestedByFunctionId = waitToReplay.RequestedByFunctionId;
                 mw.ParentWaitId = waitToReplay.ParentWaitId;
-                await _saveWaitHandler.SaveWaitRequestToDb(mw);
+                await _waitsRepository.SaveWaitRequestToDb(mw);
                 return mw;
             }
             else

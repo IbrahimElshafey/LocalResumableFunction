@@ -16,5 +16,7 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
         Task RemoveFirstWaitIfExist(int methodIdentifierId);
 
         Task<Wait> LoadWaitTree(Expression<Func<Wait,bool>> expression);
+
+        Task<bool> SaveWaitRequestToDb(Wait newWait);
     }
 }

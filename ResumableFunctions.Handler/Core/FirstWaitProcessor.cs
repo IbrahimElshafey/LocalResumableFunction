@@ -15,13 +15,11 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 {
     private readonly ILogger<FirstWaitProcessor> _logger;
     private readonly FunctionDataContext _context;
-    private readonly ISaveWaitHandler _saveWaitHandler;
     private readonly IMethodIdentifierRepository _methodIdentifierRepo;
     private readonly IWaitsRepository _waitsRepository;
     private readonly IServiceProvider _serviceProvider;
 
     public FirstWaitProcessor(ILogger<FirstWaitProcessor> logger,
-        ISaveWaitHandler saveWaitHandler,
         FunctionDataContext context,
         IServiceProvider serviceProvider,
         IMethodIdentifierRepository methodIdentifierRepo,
@@ -29,7 +27,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     {
         _logger = logger;
         _context = context;
-        _saveWaitHandler = saveWaitHandler;
         _serviceProvider = serviceProvider;
         _methodIdentifierRepo = methodIdentifierRepo;
         _waitsRepository = waitsRepository;
@@ -56,7 +53,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 firstWaitClone.FunctionState.HasError ?
                 FunctionStatus.Error :
                 FunctionStatus.InProgress;
-            await _saveWaitHandler.SaveWaitRequestToDb(firstWaitClone);//first wait clone
+            await _waitsRepository.SaveWaitRequestToDb(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
             currentMw.Status = WaitStatus.Waiting;
@@ -89,7 +86,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     firstWait.FunctionState.AddLog(
                         $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.",
                         LogType.Info);
-                await _saveWaitHandler.SaveWaitRequestToDb(firstWait);//first wait when register function
+                await _waitsRepository.SaveWaitRequestToDb(firstWait);//first wait when register function
                 WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
                 await _context.SaveChangesAsync();
             }

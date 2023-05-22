@@ -18,7 +18,6 @@ namespace ResumableFunctions.Handler.Core
     internal class WaitProcessor : IWaitProcessor
     {
         private readonly IFirstWaitProcessor _firstWaitProcessor;
-        private readonly ISaveWaitHandler _saveWaitHandler;
         private readonly IRecycleBinService _recycleBinService;
         private readonly IReplayWaitProcessor _replayWaitProcessor;
         private readonly IWaitsRepository _waitsRepository;
@@ -34,7 +33,6 @@ namespace ResumableFunctions.Handler.Core
         public WaitProcessor(
             IServiceProvider serviceProvider,
             ILogger<WaitProcessor> logger,
-            ISaveWaitHandler saveWaitHandler,
             IFirstWaitProcessor firstWaitProcessor,
             IRecycleBinService recycleBinService,
             IWaitsRepository waitsRepository,
@@ -44,7 +42,6 @@ namespace ResumableFunctions.Handler.Core
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
-            _saveWaitHandler = saveWaitHandler;
             _firstWaitProcessor = firstWaitProcessor;
             _recycleBinService = recycleBinService;
             _waitsRepository = waitsRepository;
@@ -255,7 +252,7 @@ namespace ResumableFunctions.Handler.Core
                     await ProceedToNextWait(replayResult.Wait);
             }
             else
-                await _saveWaitHandler.SaveWaitRequestToDb(nextWait);//next wait after resume function
+                await _waitsRepository.SaveWaitRequestToDb(nextWait);//next wait after resume function
             await _context.SaveChangesAsync();
         }
 

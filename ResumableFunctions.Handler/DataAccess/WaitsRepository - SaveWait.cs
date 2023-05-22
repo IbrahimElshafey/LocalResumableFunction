@@ -1,37 +1,24 @@
-﻿using System.Linq.Expressions;
-using ResumableFunctions.Handler.Helpers;
+﻿using System.Diagnostics;
+using System.Linq;
+using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
 using Microsoft.EntityFrameworkCore;
-using Hangfire;
+using Microsoft.EntityFrameworkCore.Query;
+using Newtonsoft.Json.Linq;
+using ResumableFunctions.Handler.Helpers;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.Handler.Core.Abstraction;
+using Microsoft.Extensions.DependencyInjection;
+using Hangfire;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
-using ResumableFunctions.Handler.DataAccess;
+using System.Linq.Expressions;
+using System;
+using ResumableFunctions.Handler.Core;
 
-namespace ResumableFunctions.Handler.Core;
+namespace ResumableFunctions.Handler.DataAccess;
 
-public class SaveWaitHandler : ISaveWaitHandler
+internal partial class WaitsRepository : IWaitsRepository
 {
-    private readonly ILogger<SaveWaitHandler> _logger;
-    private readonly FunctionDataContext _context;
-    private readonly IBackgroundJobClient _backgroundJobClient;
-    private readonly IWaitsRepository _waitsRepository;
-    private readonly IMethodIdentifierRepository _methodIdentifierRepo;
-
-    public SaveWaitHandler(
-        ILogger<SaveWaitHandler> logger,
-        FunctionDataContext context,
-        IBackgroundJobClient backgroundJobClient,
-        IWaitsRepository waitsRepository,
-        IMethodIdentifierRepository methodIdentifierRepo)
-    {
-        _logger = logger;
-        _context = context;
-        _backgroundJobClient = backgroundJobClient;
-        _waitsRepository = waitsRepository;
-        _methodIdentifierRepo = methodIdentifierRepo;
-    }
-
     public async Task<bool> SaveWaitRequestToDb(Wait newWait)
     {
         if (newWait.IsValidWaitRequest() is false)
@@ -72,7 +59,7 @@ public class SaveWaitHandler : ISaveWaitHandler
         methodWait.MethodGroupToWaitId = methodToWait.ParentMethodGroupId;
         methodWait.RewriteExpressions();
 
-        await _waitsRepository.AddWait(methodWait);
+        await AddWait(methodWait);
     }
 
     private async Task WaitsGroupRequested(WaitsGroup manyWaits)
@@ -88,12 +75,12 @@ public class SaveWaitHandler : ISaveWaitHandler
             await SaveWaitRequestToDb(waitGroupChild);//child wait in group
         }
 
-        await _waitsRepository.AddWait(manyWaits);
+        await AddWait(manyWaits);
     }
 
     private async Task FunctionWaitRequested(FunctionWait functionWait)
     {
-        await _waitsRepository.AddWait(functionWait);
+        await AddWait(functionWait);
 
         var functionRunner = new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
         var hasNext = await functionRunner.MoveNextAsync();
@@ -161,5 +148,25 @@ public class SaveWaitHandler : ISaveWaitHandler
             };
         timeWaitMethod.RefineMatchModifier = timeWait.UniqueMatchId;
         await MethodWaitRequested(timeWaitMethod);
+    }
+
+    public Task AddWait(Wait wait)
+    {
+        var isExistLocal = _context.Waits.Local.Contains(wait);
+        var notAddStatus = _context.Entry(wait).State != EntityState.Added;
+        if (isExistLocal || !notAddStatus) return Task.CompletedTask;
+
+        Console.WriteLine($"==> Add Wait [{wait.Name}] with type [{wait.WaitType}]");
+        if (wait is WaitsGroup waitGroup)
+        {
+            waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
+        }
+        if (wait is MethodWait { MethodToWaitId: > 0 } methodWait)
+        {
+            //does this may cause a problem
+            methodWait.MethodToWait = null;
+        }
+        _context.Waits.Add(wait);
+        return Task.CompletedTask;
     }
 }

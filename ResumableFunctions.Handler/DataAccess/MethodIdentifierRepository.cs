@@ -13,7 +13,9 @@ internal class MethodIdentifierRepository : IMethodIdentifierRepository
 {
     private ILogger<MethodIdentifierRepository> _logger;
     private readonly FunctionDataContext _context;
-    public MethodIdentifierRepository(ILogger<MethodIdentifierRepository> logger, FunctionDataContext context)
+    public MethodIdentifierRepository(
+        ILogger<MethodIdentifierRepository> logger, 
+        FunctionDataContext context)
     {
         _logger = logger;
         _context = context;

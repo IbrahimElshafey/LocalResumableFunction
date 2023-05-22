@@ -1,7 +1,6 @@
 ﻿# Todo
 
 ## Near
-* Deactivate a resumable function
 * Add Locks table for fix scan and processing problem
 * Same DLL in two services
 * Test replay in sub functions

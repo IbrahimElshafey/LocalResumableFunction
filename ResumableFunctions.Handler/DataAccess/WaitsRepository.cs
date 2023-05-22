@@ -16,41 +16,27 @@ using System;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal class WaitsRepository : IWaitsRepository
+internal partial class WaitsRepository : IWaitsRepository
 {
     private ILogger<WaitsRepository> _logger;
     private readonly IBackgroundJobClient backgroundJobClient;
     private readonly FunctionDataContext _context;
-
+    private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IMethodIdentifierRepository _methodIdentifierRepo;
     public WaitsRepository(
         ILogger<WaitsRepository> logger,
         IBackgroundJobClient backgroundJobClient,
-        FunctionDataContext context) : base()
+        FunctionDataContext context, IBackgroundJobClient backgroundJobClient2,
+        IMethodIdentifierRepository methodIdentifierRepo)
     {
         _logger = logger;
         this.backgroundJobClient = backgroundJobClient;
         _context = context;
+        _backgroundJobClient = backgroundJobClient2;
+        _methodIdentifierRepo = methodIdentifierRepo;
     }
 
-    public Task AddWait(Wait wait)
-    {
-        var isExistLocal = _context.Waits.Local.Contains(wait);
-        var notAddStatus = _context.Entry(wait).State != EntityState.Added;
-        if (isExistLocal || !notAddStatus) return Task.CompletedTask;
-
-        Console.WriteLine($"==> Add Wait [{wait.Name}] with type [{wait.WaitType}]");
-        if (wait is WaitsGroup waitGroup)
-        {
-            waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
-        }
-        if (wait is MethodWait { MethodToWaitId: > 0 } methodWait)
-        {
-            //does this may cause a problem
-            methodWait.MethodToWait = null;
-        }
-        _context.Waits.Add(wait);
-        return Task.CompletedTask;
-    }
+    
 
     public async Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId)
     {
