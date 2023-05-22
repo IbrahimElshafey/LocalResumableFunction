@@ -1,7 +1,9 @@
 ﻿# Todo
 
 ## Near
-* Disable processing if there is a scan process in progress
+* Use AspectInjector instead of Fody 
+	* https://github.com/pamidur/aspect-injector
+* schedule processing if there is a scan process in progress
 * Remove direct use for DbContext
 * Same DLL in two services
 * Test replay in sub functions
@@ -51,11 +53,9 @@
 	*  Why fody not work directlly
 
 ## Enhancements
-* Use AspectInjector instead of Fody
 * Write unit testing for core functionallity
 * Write Roslyn analyzer to force the right use for the library
-* Disable processing if there is a scan process in progress
-* Refactor many long methods
+* Refactor long methods
 * Encrypt sensitive data
 	* Function state
 	* Match and SetData Expressions
@@ -79,8 +79,9 @@
 * Speed up waits query
 
 ## Publisher Project
+* Use AspectInjector instead of Fody 
 * Scan and send scan result to service owner to verify signatures
-* Use PeriodicTimer to handle background tasks
+* Use PeriodicTimer/Hangfire to handle background tasks
 	* Send failed requests to servies
 	* Scan Dlls
 * DB
