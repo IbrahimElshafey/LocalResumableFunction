@@ -23,10 +23,10 @@ namespace Aspects.PushResult
         {
             var pushResultAttribute = triggers.OfType<PushResultAttribute>().First();
            
-            Console.WriteLine($"Before executing method `{name}` with input `{args}` and attribute `{pushResultAttribute}`");
+            Console.WriteLine($"Before executing method `{name}` with input `{args.Aggregate((x,y)=>$"{x},{y}")}` and attribute `{pushResultAttribute}`");
             Console.WriteLine($"Instance is: `{instance}`");
             Console.WriteLine($"Return type is: `{retType.FullName}`");
-            Console.WriteLine($"Meadatt is: `{metadata.Name}`");
+            Console.WriteLine($"Metadata is: `{metadata.Name}` of type `{metadata.GetType().Name}`");
         }
 
         [Advice(Kind.After)]

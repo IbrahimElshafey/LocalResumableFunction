@@ -8,9 +8,20 @@
 
     private static async Task TestAspectInjectorAsync()
     {
-        //new Node().MethodWithPushAspectApplied("Hello");
-        await new Node().MethodWithPushAspectAppliedAsync("Hello from async");
-        Console.ReadLine();
+        try
+        {
+            //new Node().MethodWithPushAspectApplied("Hello");
+            await new Node().MethodWithPushAspectAppliedAsync("Hello from async");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        finally
+        {
+            Console.ReadLine();
+        }
+       
     }
 
     private static void TestTreeCascadeAction()

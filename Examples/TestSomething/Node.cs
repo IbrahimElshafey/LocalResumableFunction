@@ -33,7 +33,9 @@ public class Node
     [PushResult("URN:bghjhjkolk-Async", true)]
     internal async Task<int> MethodWithPushAspectAppliedAsync(string input)
     {
-        await Task.Delay(1000);
+        throw new Exception("Error happened");
+        Console.WriteLine("Wait three second.");
+        await Task.Delay(3000);
         return Random.Shared.Next() - input.Length;
     }
 }
