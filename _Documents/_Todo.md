@@ -35,7 +35,6 @@
 	* verify start waits exist in db for each RF
 	* Verify Scanned Methods 
 	* Instance in progress but not wait anything check
-	* Verify that fody MethodBoundaryAspect is active
 	* Validate URN duplication when scan if diffrent method signature
 	* Wait methods in same method group must have the same signature
 	* Rerun faild isntance
@@ -47,20 +46,17 @@
 	* https://clickup.com/blog/workflow-examples/
 * Inter services waits documentation
 * Record videos
-* Enhance nuget package use
-	*  Add FodyWeavers.xml automatic
-	*  Why fody not work directlly
 
 ## Enhancements
-* Write unit testing for core functionallity
-* Write Roslyn analyzer to force the right use for the library
 * Refactor long methods
 * Encrypt sensitive data
 	* Function state
 	* Match and SetData Expressions
+* Write unit testing for core functionallity
 * Find fast and best object serializer
 	* Save function state all fields [public and non public]
 	* https://github.com/quozd/awesome-dotnet#serialization
+* Write Roslyn analyzer to force the right use for the library
 * Parameter check lib use
 * Performance Analysis
 * Enable support for other store options
@@ -71,10 +67,6 @@
 * Resumable function hooks
 	* After Resumed
 	* On Error Occurred
-* Find Fody Alternative
-	* https://github.com/dotnetcore/AspectCore-Framework
-	* https://github.com/pamidur/aspect-injector
-	* Castle DynamicProxy https://github.com/castleproject/Core/blob/master/docs/dynamicproxy.md
 * Speed up waits query
 
 ## Publisher Project
