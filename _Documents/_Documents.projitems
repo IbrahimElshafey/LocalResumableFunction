@@ -11,6 +11,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Commands.md" />
     <None Include="$(MSBuildThisFileDirectory)External Reading.md" />
+    <None Include="$(MSBuildThisFileDirectory)LongMethods.xlsx" />
     <None Include="$(MSBuildThisFileDirectory)Test Scenarios.md" />
     <None Include="$(MSBuildThisFileDirectory)MVC_Use.md" />
     <None Include="$(MSBuildThisFileDirectory)_Thinking.md" />

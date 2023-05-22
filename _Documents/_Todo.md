@@ -1,7 +1,7 @@
 ﻿# Todo
 
 ## Near
-* Add Locks table for fix scan and processing problem
+* Remove direct use for DbContext
 * Same DLL in two services
 * Test replay in sub functions
 
