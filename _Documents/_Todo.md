@@ -1,6 +1,7 @@
 ﻿# Todo
 
 ## Near
+* Disable processing if there is a scan process in progress
 * Remove direct use for DbContext
 * Same DLL in two services
 * Test replay in sub functions
@@ -73,6 +74,7 @@
 * Find Fody Alternative
 	* https://github.com/dotnetcore/AspectCore-Framework
 	* https://github.com/pamidur/aspect-injector
+	* Castle DynamicProxy https://github.com/castleproject/Core/blob/master/docs/dynamicproxy.md
 * Speed up waits query
 
 ## Publisher Project

@@ -23,7 +23,7 @@ namespace ResumableFunctions.AspNetService
         }
 
 
-        public static void ScanCurrentService(this WebApplication app)
+        public static void RegisterCurrentService(this WebApplication app)
         {
             app.UseResumableFunctions();
             app.UseHangfireDashboard();

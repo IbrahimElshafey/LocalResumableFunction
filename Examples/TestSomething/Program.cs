@@ -1,9 +1,24 @@
-﻿// See https://aka.ms/new-console-template for more information
-Console.WriteLine("Hello, World!");
-var node = new Node
+﻿internal class Program
 {
-    Id = 1,
-    Childs = new List<Node>
+    private static void Main(string[] args)
+    {
+        //TestTreeCascadeAction();
+        TestAspectInjector();
+    }
+
+    private static void TestAspectInjector()
+    {
+        new Node().MethodWithPushAspectApplied("Hello");
+        Console.ReadLine();
+    }
+
+    private static void TestTreeCascadeAction()
+    {
+        Console.WriteLine("Hello, World!");
+        var node = new Node
+        {
+            Id = 1,
+            Childs = new List<Node>
     {
         new Node {
             Id=2,
@@ -17,15 +32,16 @@ var node = new Node
             }},
         new Node { Id=5,}
     }
-};
+        };
 
-node.CascadeAction(x =>
-{
-    x.Id2 = x.Id * 10;
-    Console.WriteLine($"Node:{x.Id},{x.Id2}");
-});
-foreach (var item in node.CascadeFunc(x => x))
-{
-    Console.WriteLine($"Node Id:{item.Id}");
+        node.CascadeAction(x =>
+        {
+            x.Id2 = x.Id * 10;
+            Console.WriteLine($"Node:{x.Id},{x.Id2}");
+        });
+        foreach (var item in node.CascadeFunc(x => x))
+        {
+            Console.WriteLine($"Node Id:{item.Id}");
+        }
+    }
 }
-

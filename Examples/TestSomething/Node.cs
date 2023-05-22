@@ -1,4 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using Aspects.PushResult;
+
 public class Node
 {
     public int Id { get; set; }
@@ -14,12 +16,17 @@ public class Node
             foreach (var item in Childs)
                 item.CascadeAction(action);
     }
-    public IEnumerable<T> CascadeFunc<T>(Func<Node,T> func)
+    public IEnumerable<T> CascadeFunc<T>(Func<Node, T> func)
     {
-       yield return func(this);
+        yield return func(this);
         if (Childs != null)
             foreach (var item in Childs)
                 item.CascadeFunc(func);
     }
 
+    [PushResult("URN:bghjhjkolk", true)]
+    internal int MethodWithPushAspectApplied(string input)
+    {
+        return Random.Shared.Next() - input.Length;
+    }
 }

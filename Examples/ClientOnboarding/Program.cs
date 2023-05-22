@@ -18,7 +18,7 @@ builder.Services.AddTransient<IClientOnboardingService, ClientOnboardingService>
 //builder.Services.AddScoped<ClientOnboardingWorkflow>();
 
 var app = builder.Build();
-app.ScanCurrentService();
+app.RegisterCurrentService();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

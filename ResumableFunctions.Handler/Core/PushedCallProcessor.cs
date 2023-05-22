@@ -26,20 +26,24 @@ internal class PushedCallProcessor : IPushedCallProcessor
     private readonly ILogger<ReplayWaitProcessor> _logger;
     private readonly IWaitProcessor _waitProcessor;
     private readonly IWaitsRepository _waitsRepository;
+    private readonly HangFireHttpClient _hangFireHttpClient;
 
     public PushedCallProcessor(
         IServiceProvider serviceProvider,
         ILogger<ReplayWaitProcessor> logger,
         IWaitProcessor waitProcessor,
         IWaitsRepository waitsRepository,
-        FunctionDataContext context)
+        FunctionDataContext context,
+        IBackgroundJobClient backgroundJobClient,
+        HangFireHttpClient hangFireHttpClient)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
         _waitProcessor = waitProcessor;
-        _backgroundJobClient = serviceProvider.GetService<IBackgroundJobClient>();
         _waitsRepository = waitsRepository;
         _context = context;
+        _backgroundJobClient = backgroundJobClient;
+        _hangFireHttpClient = hangFireHttpClient;
     }
 
     public async Task<int> QueuePushedCallProcessing(PushedCall pushedCall)
@@ -90,8 +94,7 @@ internal class PushedCallProcessor : IPushedCallProcessor
 
             var actionUrl =
                 $"{ownerServiceUrl}api/ResumableFunctions/ProcessMatchedWait?waitId={wait.Id}&pushedCallId={pushedCallId}";
-            var hangFireHttpClient = _serviceProvider.GetService<HangFireHttpClient>();
-            await hangFireHttpClient.EnqueueGetRequestIfFail(actionUrl);
+            await _hangFireHttpClient.EnqueueGetRequestIfFail(actionUrl);
         }
         catch (Exception ex)
         {
@@ -99,9 +102,9 @@ internal class PushedCallProcessor : IPushedCallProcessor
         }
     }
 
-    private bool IsLocalWait(WaitId methodWait)
+    private bool IsLocalWait(WaitId waitId)
     {
-        var ownerAssemblyName = methodWait.RequestedByAssembly;
+        var ownerAssemblyName = waitId.RequestedByAssembly;
         string ownerAssemblyPath = $"{AppContext.BaseDirectory}{ownerAssemblyName}.dll";
         return File.Exists(ownerAssemblyPath);
     }

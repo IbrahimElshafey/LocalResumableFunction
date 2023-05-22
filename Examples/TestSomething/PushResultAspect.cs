@@ -1,0 +1,43 @@
+﻿using AspectInjector.Broker;
+using System.Diagnostics;
+using System.Reflection;
+
+
+
+namespace Aspects.PushResult
+{
+    [Aspect(Scope.Global)]
+    public class PushResultAspect
+    {
+        private static readonly object NullMarker = new { __is_null = "$_is_null" };
+
+        [Advice(Kind.Before)]
+        public void OnEntry(
+            [Argument(Source.Name)] string name,
+            [Argument(Source.Arguments)] object[] args,
+            [Argument(Source.Instance)] object instance,
+            [Argument(Source.ReturnType)] Type retType,
+            [Argument(Source.Metadata)] MethodBase metadata,
+            [Argument(Source.Triggers)] Attribute[] triggers
+            )
+        {
+            var pushResultAttribute = triggers.OfType<PushResultAttribute>().First();
+           
+            Console.WriteLine($"Before executing method `{name}` with input `{args}` and attribute `{pushResultAttribute}`");
+            Console.WriteLine($"Instance is: `{instance}`");
+            Console.WriteLine($"Return type is: `{retType.FullName}`");
+            Console.WriteLine($"Meadatt is: `{metadata.Name}`");
+        }
+
+        [Advice(Kind.After)]
+        public void OnExit(
+           [Argument(Source.Name)] string name,
+           [Argument(Source.ReturnValue)] object result
+           )
+        {
+            Console.WriteLine($"Method `{name}` executed and result is `{result}`");
+        }
+
+        
+    }
+}
