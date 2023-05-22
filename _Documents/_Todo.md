@@ -51,6 +51,7 @@
 	*  Why fody not work directlly
 
 ## Enhancements
+* Use AspectInjector instead of Fody
 * Write unit testing for core functionallity
 * Write Roslyn analyzer to force the right use for the library
 * Disable processing if there is a scan process in progress

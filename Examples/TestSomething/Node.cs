@@ -29,4 +29,11 @@ public class Node
     {
         return Random.Shared.Next() - input.Length;
     }
+
+    [PushResult("URN:bghjhjkolk-Async", true)]
+    internal async Task<int> MethodWithPushAspectAppliedAsync(string input)
+    {
+        await Task.Delay(1000);
+        return Random.Shared.Next() - input.Length;
+    }
 }

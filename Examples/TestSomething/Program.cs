@@ -1,14 +1,15 @@
 ﻿internal class Program
 {
-    private static void Main(string[] args)
+    private static async Task Main(string[] args)
     {
         //TestTreeCascadeAction();
-        TestAspectInjector();
+        await TestAspectInjectorAsync();
     }
 
-    private static void TestAspectInjector()
+    private static async Task TestAspectInjectorAsync()
     {
-        new Node().MethodWithPushAspectApplied("Hello");
+        //new Node().MethodWithPushAspectApplied("Hello");
+        await new Node().MethodWithPushAspectAppliedAsync("Hello from async");
         Console.ReadLine();
     }
 
