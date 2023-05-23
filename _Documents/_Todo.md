@@ -1,6 +1,13 @@
 ﻿# Todo
 
 ## Near
+* Cross services lock
+	* Create Hangfire DB
+	* Scanner_StartServiceScanning_{ServiceName}
+	* FirstWaitProcessor_RegisterFirstWait_{functionId}
+	* FirstWaitProcessor_DeactivateFirstWait_{functionId}
+	* PushedCallProcessor_ProcessPushedCall_{pushedCallId}
+	* WaitProcessor_RequestProcessing_{mehtodWaitId_pushedCallId}
 * Work on UI project
 * Schedule processing if there is a scan process in progress
 * Remove direct use for DbContext

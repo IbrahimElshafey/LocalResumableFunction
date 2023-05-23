@@ -14,10 +14,6 @@ public class ServiceData : ObjectWithLog, IEntityWithUpdate
     public int ParentId { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
 
-    public void StartScan()
-    {
-
-    }
     public override void AddError(string message, Exception ex = null, string code = "")
     {
         base.AddError(message, ex, code);

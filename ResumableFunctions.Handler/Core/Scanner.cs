@@ -58,7 +58,7 @@ public class Scanner
         {
             //prevent concurrent scan in same service
             await semaphoreSlim.WaitAsync();
-            await StartScanService();
+            await StartServiceScanning();
         }
         catch (Exception ex)
         {
@@ -71,7 +71,7 @@ public class Scanner
         }
     }
 
-    private async Task StartScanService()
+    private async Task StartServiceScanning()
     {
         using var scope = _serviceProvider.CreateScope();
         ScopeInit(scope);

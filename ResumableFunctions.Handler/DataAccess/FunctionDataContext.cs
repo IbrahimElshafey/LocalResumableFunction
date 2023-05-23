@@ -12,29 +12,28 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using Hangfire;
+using Medallion.Threading;
 
 namespace ResumableFunctions.Handler.DataAccess;
 public class FunctionDataContext : DbContext
 {
     private readonly ILogger<FunctionDataContext> _logger;
-    private static Mutex mut = new Mutex(false, "FunctionDataContext_Mutex");
     public FunctionDataContext(
         ILogger<FunctionDataContext> logger,
-        IResumableFunctionsSettings settings) : base(settings.WaitsDbConfig.Options)
+        IResumableFunctionsSettings settings,
+        IDistributedLockProvider lockProvider) : base(settings.WaitsDbConfig.Options)
     {
         _logger = logger;
         try
         {
-            mut.WaitOne();
-            Database.EnsureCreated();
+            using (lockProvider.AcquireLock(Database.GetDbConnection().Database))
+            {
+                Database.EnsureCreated();
+            }
         }
         catch (Exception ex)
         {
             _logger.LogError("Error when call `Database.EnsureCreated()` for `FunctionDataContext`", ex);
-        }
-        finally
-        {
-            mut.ReleaseMutex();
         }
     }
 

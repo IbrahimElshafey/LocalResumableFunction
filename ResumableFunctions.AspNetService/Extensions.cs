@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Medallion.Threading;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +9,7 @@ using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using System;
+using System.Reflection;
 
 namespace ResumableFunctions.AspNetService
 {
@@ -20,9 +22,10 @@ namespace ResumableFunctions.AspNetService
                 .AddControllersAsServices();
             mvcBuilder.Services.AddRazorPages();
             mvcBuilder.Services.AddResumableFunctionsCore(settings);
+            //CreateHangfireDb(mvcBuilder, settings);
         }
 
-
+        
         public static void RegisterCurrentService(this WebApplication app)
         {
             app.UseResumableFunctions();
@@ -30,6 +33,8 @@ namespace ResumableFunctions.AspNetService
             app.MapRazorPages();
             app.UseStaticFiles();
 
+
+            //todo:set `settings.CurrentServiceUrl` here if null
 
             app.UseRouting();
 
@@ -40,6 +45,7 @@ namespace ResumableFunctions.AspNetService
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
         }
 
         public static T ToObject<T>(this Stream stream)

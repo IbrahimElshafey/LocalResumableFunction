@@ -1,4 +1,9 @@
 ﻿using Hangfire;
+using Hangfire.Logging;
+using Hangfire.SqlServer;
+using Medallion.Threading;
+using Medallion.Threading.SqlServer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,20 +27,16 @@ public static class CoreExtensions
     //internal static IServiceProvider GetServiceProvider() => _ServiceProvider;
     public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
     {
-        //services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
-        //services.AddTransient<ReplayWaitProcessor>();
-        //services.AddTransient<Scanner>();
-        //services.AddTransient<MethodIdentifierRepository>();
-        //services.AddTransient<WaitsRepository>();
+
 
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig);
-        services.AddScoped<IMethodIdentifierRepository,MethodIdentifierRepository>();
-        services.AddScoped<IWaitsRepository,WaitsRepository>();
+        services.AddScoped<IMethodIdentifierRepository, MethodIdentifierRepository>();
+        services.AddScoped<IWaitsRepository, WaitsRepository>();
 
-        services.AddScoped<IFirstWaitProcessor,FirstWaitProcessor>();
-        services.AddScoped<IRecycleBinService,RecycleBinService>();
-        services.AddScoped<IReplayWaitProcessor,ReplayWaitProcessor>();
-        services.AddScoped<IWaitProcessor,WaitProcessor>();
+        services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
+        services.AddScoped<IRecycleBinService, RecycleBinService>();
+        services.AddScoped<IReplayWaitProcessor, ReplayWaitProcessor>();
+        services.AddScoped<IWaitProcessor, WaitProcessor>();
         services.AddScoped<Scanner>();
 
 
@@ -45,6 +46,9 @@ public static class CoreExtensions
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
+        services.AddSingleton<IDistributedLockProvider>(_ => new SqlDistributedSynchronizationProvider(settings.SyncServerConnection));
+
+
         services.AddScoped<IUiService, UiService.UiService>();
         if (settings.HangFireConfig != null)
         {
@@ -52,6 +56,7 @@ public static class CoreExtensions
             services.AddHangfireServer();
         }
     }
+
     public static void UseResumableFunctions(this IHost app)
     {
         WaitMethodAspect.ServiceProvider = app.Services;
@@ -59,12 +64,19 @@ public static class CoreExtensions
         GlobalConfiguration.Configuration
           .UseActivator(new HangfireActivator());
 
+        EnqueueScanProcess(app);
+    }
 
+   
+    private static void EnqueueScanProcess(IHost app)
+    {
         using var scope = app.Services.CreateScope();
         var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundJobClient>();
         var scanner = scope.ServiceProvider.GetService<Scanner>();
         backgroundJobClient.Enqueue(() => scanner.Start());
     }
+
+
     public static (bool IsFunctionData, MemberExpression NewExpression) GetDataParamterAccess(
         this MemberExpression node,
         ParameterExpression functionInstanceArg)

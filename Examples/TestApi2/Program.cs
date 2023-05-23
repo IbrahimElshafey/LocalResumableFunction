@@ -10,8 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
-        new ResumableFunctionsSettings()
-        .UseSqlServer()
+        new SqlServerResumableFunctionsSettings()
         .SetCurrentServiceUrl("https://localhost:7099/")
         .SetDllsToScan("ReferenceLibrary"));
 
