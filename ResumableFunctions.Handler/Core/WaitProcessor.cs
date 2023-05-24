@@ -157,7 +157,7 @@ namespace ResumableFunctions.Handler.Core
                         $"Concurrency Exception occured when process wait [{methodWait.Name}]." +
                         $"\nProcessing this wait will be scheduled.",
                         ex);
-                _backgroundJobClient.Schedule(() => RequestProcessing(methodWait.Id, pushedCallId), TimeSpan.FromMinutes(3));
+                _backgroundJobClient.Schedule(() => RequestProcessing(methodWait.Id, pushedCallId), TimeSpan.FromSeconds(2.5));
                 return false;
             }
             return true;
