@@ -28,8 +28,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly ILogger<WaitProcessor> _logger;
         private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly FunctionDataContext _context;
-
-
+        private readonly BackgroundJobExecutor _backgroundJobExecutor;
         private MethodWait _methodWait;
         private int _pushedCallId;
         private PushedCall _pushedCall;
@@ -42,7 +41,8 @@ namespace ResumableFunctions.Handler.Core
             IWaitsRepository waitsRepository,
             IBackgroundJobClient backgroundJobClient,
             FunctionDataContext context,
-            IReplayWaitProcessor replayWaitProcessor)
+            IReplayWaitProcessor replayWaitProcessor,
+            BackgroundJobExecutor backgroundJobExecutor)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -52,11 +52,12 @@ namespace ResumableFunctions.Handler.Core
             _backgroundJobClient = backgroundJobClient;
             _context = context;
             _replayWaitProcessor = replayWaitProcessor;
+            _backgroundJobExecutor = backgroundJobExecutor;
         }
 
         public async Task RequestProcessing(int mehtodWaitId, int pushedCallId)
         {
-            await BackgroundJobExecutor.Execute(
+            await _backgroundJobExecutor.Execute(
                 $"WaitProcessor_RequestProcessing_{mehtodWaitId}_{pushedCallId}",
                 async () =>
                 {

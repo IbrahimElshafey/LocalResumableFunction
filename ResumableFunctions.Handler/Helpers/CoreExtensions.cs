@@ -43,6 +43,7 @@ public static class CoreExtensions
         services.AddScoped<IPushedCallProcessor, PushedCallProcessor>();
 
 
+        services.AddSingleton<BackgroundJobExecutor>();
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
@@ -59,11 +60,10 @@ public static class CoreExtensions
 
     public static void UseResumableFunctions(this IHost app)
     {
-        WaitMethodAspect.ServiceProvider = app.Services;
-        HangfireActivator.ServiceProvider = app.Services;
-        GlobalConfiguration.Configuration
-          .UseActivator(new HangfireActivator());
-
+        //WaitMethodAspect.ServiceProvider = app.Services;
+        //HangfireActivator.ServiceProvider = app.Services;
+        GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(app.Services));
+        
         EnqueueScanProcess(app);
     }
 

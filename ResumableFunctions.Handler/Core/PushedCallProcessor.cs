@@ -24,28 +24,28 @@ internal class PushedCallProcessor : IPushedCallProcessor
 {
     private readonly FunctionDataContext _context;
     private readonly IBackgroundJobClient _backgroundJobClient;
-    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ReplayWaitProcessor> _logger;
     private readonly IWaitProcessor _waitProcessor;
     private readonly IWaitsRepository _waitsRepository;
     private readonly HangFireHttpClient _hangFireHttpClient;
+    private readonly BackgroundJobExecutor _backgroundJobExecutor;
 
     public PushedCallProcessor(
-        IServiceProvider serviceProvider,
         ILogger<ReplayWaitProcessor> logger,
         IWaitProcessor waitProcessor,
         IWaitsRepository waitsRepository,
         FunctionDataContext context,
         IBackgroundJobClient backgroundJobClient,
-        HangFireHttpClient hangFireHttpClient)
+        HangFireHttpClient hangFireHttpClient,
+        BackgroundJobExecutor backgroundJobExecutor)
     {
-        _serviceProvider = serviceProvider;
         _logger = logger;
         _waitProcessor = waitProcessor;
         _waitsRepository = waitsRepository;
         _context = context;
         _backgroundJobClient = backgroundJobClient;
         _hangFireHttpClient = hangFireHttpClient;
+        _backgroundJobExecutor = backgroundJobExecutor;
     }
 
     public async Task<int> QueuePushedCallProcessing(PushedCall pushedCall)
@@ -58,7 +58,7 @@ internal class PushedCallProcessor : IPushedCallProcessor
 
     public async Task ProcessPushedCall(int pushedCallId)
     {
-        await BackgroundJobExecutor.Execute(
+        await _backgroundJobExecutor.Execute(
             $"PushedCallProcessor_ProcessPushedCall_{pushedCallId}",
             async () =>
             {

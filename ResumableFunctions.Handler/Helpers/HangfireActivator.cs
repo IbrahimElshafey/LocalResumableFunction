@@ -5,11 +5,20 @@ namespace ResumableFunctions.Handler.Helpers;
 
 public class HangfireActivator : JobActivator
 {
-    internal static IServiceProvider ServiceProvider;
-
+    private static IServiceProvider serviceProvider;
+    public HangfireActivator(IServiceProvider serviceProvider)
+    {
+        HangfireActivator.serviceProvider = serviceProvider;
+    }
     public override object ActivateJob(Type type)
     {
-        return ServiceProvider.CreateScope().ServiceProvider.GetService(type) ?? 
-            ActivatorUtilities.CreateInstance(ServiceProvider, type);
+        return GetInstance(type);
+    }
+
+    public static object GetInstance(Type type)
+    {
+        var newServiceProvider = serviceProvider.CreateScope().ServiceProvider;
+        return newServiceProvider.GetService(type) ??
+            ActivatorUtilities.CreateInstance(newServiceProvider, type);
     }
 }

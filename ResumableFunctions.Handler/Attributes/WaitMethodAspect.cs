@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using System.Diagnostics;
 using System.Reflection;
@@ -11,17 +12,18 @@ using System.Reflection;
 namespace ResumableFunctions.Handler.Attributes
 {
 
-    [Aspect(Scope.Global)]
-    public class WaitMethodAspect : IDisposable
+
+    [Aspect(Scope.Global, Factory = typeof(HangfireActivator))]
+    public class WaitMethodAspect
     {
-        internal static IServiceProvider ServiceProvider;
         private PushedCall _pushedCall;
-        private IServiceScope _scope;
-        private IPushedCallProcessor _pushedCallProcessor;
-        private ILogger<WaitMethodAspect> _logger;
-
-        
-
+        private readonly IPushedCallProcessor _pushedCallProcessor;
+        private readonly ILogger<WaitMethodAspect> _logger;
+        public WaitMethodAspect(IPushedCallProcessor pushedCallProcessor, ILogger<WaitMethodAspect> logger)
+        {
+            _pushedCallProcessor = pushedCallProcessor;
+            _logger = logger;
+        }
         [Advice(Kind.Before)]
         public void OnEntry(
             //[Argument(Source.Name)] string name,
@@ -32,7 +34,6 @@ namespace ResumableFunctions.Handler.Attributes
             [Argument(Source.Triggers)] Attribute[] triggers
             )
         {
-            InitDepends();
             var pushResultAttribute = triggers.OfType<WaitMethodAttribute>().First();
 
             _pushedCall = new PushedCall
@@ -69,25 +70,6 @@ namespace ResumableFunctions.Handler.Attributes
                 _logger.LogError(ex, $"Error when try to pushe method call for method [{name}]");
             }
             //Console.WriteLine($"Method `{name}` executed and result is `{result}`");
-        }
-
-        public void Dispose()
-        {
-            _scope.Dispose();
-        }
-
-        private void InitDepends()
-        {
-            _logger = ServiceProvider.GetService<ILogger<WaitMethodAspect>>();
-            try
-            {
-                _scope = ServiceProvider.CreateScope();
-                _pushedCallProcessor = _scope.ServiceProvider.GetService<IPushedCallProcessor>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Can't initiate PushedCallProcessor.", ex);
-            }
         }
     }
 }

@@ -9,7 +9,20 @@ namespace ResumableFunctions.Handler.Helpers
 {
     public class BackgroundJobExecutor
     {
-        public static async Task Execute(
+        private readonly IDistributedLockProvider _lockProvider;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ILogger<BackgroundJobExecutor> _logger;
+
+        public BackgroundJobExecutor(
+            IServiceProvider serviceProvider,
+            IDistributedLockProvider lockProvider,
+            ILogger<BackgroundJobExecutor> logger)
+        {
+            _serviceProvider = serviceProvider;
+            _lockProvider = lockProvider;
+            _logger = logger;
+        }
+        public async Task Execute(
             string lockName,
             Func<Task> backgroundTask,
             string errorMessage = null,
@@ -17,15 +30,13 @@ namespace ResumableFunctions.Handler.Helpers
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            var _lockProvider = WaitMethodAspect.ServiceProvider.GetService<IDistributedLockProvider>();
-            var _logger = WaitMethodAspect.ServiceProvider.GetService<ILogger<BackgroundJobExecutor>>();
             try
             {
                 using (var handle = await _lockProvider.TryAcquireLockAsync(lockName))
                 {
                     if (handle is null) return;
 
-                    using IServiceScope scope = WaitMethodAspect.ServiceProvider.CreateScope();
+                    using IServiceScope scope = _serviceProvider.CreateScope();
                     await backgroundTask();
                 }
             }

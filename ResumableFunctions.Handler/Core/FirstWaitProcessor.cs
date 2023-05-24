@@ -18,6 +18,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private readonly IMethodIdentifierRepository _methodIdentifierRepo;
     private readonly IWaitsRepository _waitsRepository;
     private readonly IServiceProvider _serviceProvider;
+    private readonly BackgroundJobExecutor _backgroundJobExecutor;
 
     public FirstWaitProcessor(
         ILogger<FirstWaitProcessor> logger,
@@ -25,13 +26,15 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         IServiceProvider serviceProvider,
         IMethodIdentifierRepository methodIdentifierRepo,
         IWaitsRepository waitsRepository
-        )
+,
+        BackgroundJobExecutor backgroundJobExecutor)
     {
         _logger = logger;
         _context = context;
         _serviceProvider = serviceProvider;
         _methodIdentifierRepo = methodIdentifierRepo;
         _waitsRepository = waitsRepository;
+        _backgroundJobExecutor = backgroundJobExecutor;
     }
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
@@ -77,7 +80,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     {
         MethodInfo resumableFunction = null;
         string errorMsg = $"Error when try to register first wait for function [{functionId}]";
-        await BackgroundJobExecutor.Execute(
+        await _backgroundJobExecutor.Execute(
             $"FirstWaitProcessor_RegisterFirstWait_{functionId}",
             async () =>
             {
@@ -173,7 +176,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
     public async Task DeactivateFirstWait(int functionId)
     {
-        await BackgroundJobExecutor.Execute(
+        await _backgroundJobExecutor.Execute(
             $"FirstWaitProcessor_DeactivateFirstWait_{functionId}",
             async () =>
             {

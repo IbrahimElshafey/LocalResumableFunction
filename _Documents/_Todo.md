@@ -1,12 +1,12 @@
 ﻿# Todo
 
 ## Near
+* Remove public static `WaitMethodAspect.ServiceProvider`
 * Re-Schedule processing if there is a scan process in progress
 * RF Instance Details
 * Remove direct use for DbContext
 * Same DLL in two services
 * Test replay in sub functions
-* Add BackgroundTaskAspect
 
 ## UI project
 * RF Instance Details

@@ -30,19 +30,19 @@ public class Scanner
     private readonly IFirstWaitProcessor _firstWaitProcessor;
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly string _currentServiceName;
-
+    private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private int currentServiceId = -1;
 
     public Scanner(
-        IServiceProvider serviceProvider
-        , ILogger<Scanner> logger
-        , IMethodIdentifierRepository methodIdentifierRepo
-        , IFirstWaitProcessor firstWaitProcessor
-        , IResumableFunctionsSettings settings
-        , FunctionDataContext context
-        , IBackgroundJobClient backgroundJobClient
-        , IWaitsRepository waitsRepository
-        )
+        IServiceProvider serviceProvider,
+        ILogger<Scanner> logger,
+        IMethodIdentifierRepository methodIdentifierRepo,
+        IFirstWaitProcessor firstWaitProcessor,
+        IResumableFunctionsSettings settings,
+        FunctionDataContext context,
+        IBackgroundJobClient backgroundJobClient,
+        IWaitsRepository waitsRepository,
+        BackgroundJobExecutor backgroundJobExecutor)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -53,11 +53,12 @@ public class Scanner
         _backgroundJobClient = backgroundJobClient;
         _waitsRepository = waitsRepository;
         _currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
+        _backgroundJobExecutor = backgroundJobExecutor;
     }
 
     public async Task Start()
     {
-        await BackgroundJobExecutor.Execute(
+        await _backgroundJobExecutor.Execute(
             $"Scanner_StartServiceScanning_{_currentServiceName}",
             async () =>
             {
