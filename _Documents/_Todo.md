@@ -1,16 +1,7 @@
 ﻿# Todo
 
 ## Near
-* Cross services lock
-	* Create Hangfire DB
-	* Scanner_StartServiceScanning_{ServiceName}
-	* FirstWaitProcessor_RegisterFirstWait_{functionId}
-	* FirstWaitProcessor_DeactivateFirstWait_{functionId}
-	* PushedCallProcessor_ProcessPushedCall_{pushedCallId}
-	* WaitProcessor_RequestProcessing_{mehtodWaitId_pushedCallId}
-	,
-    IDistributedLockProvider lockProvider
-* Work on UI project
+* RF Instance Details
 * Schedule processing if there is a scan process in progress
 * Remove direct use for DbContext
 * Same DLL in two services
@@ -51,7 +42,7 @@
 	* Stop resumable function new instances
 
 ## Prepare how to use?
-* Implement workflows in 
+* Examples 
 	* https://tallyfy.com/workflow-examples/
 	* https://clickup.com/blog/workflow-examples/
 * Inter services waits documentation
