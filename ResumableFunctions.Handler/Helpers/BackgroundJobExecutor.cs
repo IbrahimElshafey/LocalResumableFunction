@@ -42,13 +42,15 @@ namespace ResumableFunctions.Handler.Helpers
             }
             catch (Exception ex)
             {
-                var codeInfo = $"Source File Path: {sourceFilePath}\n" +
-                        $"Line Number: {sourceLineNumber}\n";
+                var codeInfo = $"\nSource File Path: {sourceFilePath}\n" +
+                        $"Line Number: {sourceLineNumber}";
                 if (errorMessage == null)
                     _logger.LogError(ex,
                         $"Error when execute `{methodName}`\n{codeInfo}");
                 else
                     _logger.LogError(ex, errorMessage + codeInfo);
+
+                throw;
             }
         }
     }

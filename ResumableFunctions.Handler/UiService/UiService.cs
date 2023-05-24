@@ -188,20 +188,35 @@ namespace ResumableFunctions.Handler.UiService
                 .ToList();
         }
 
-        public async Task<List<PushedCallInfo>> GetPushedCalls(int page)
+        public async Task<List<PushedCallInfo>> GetPushedCalls(int page = 0)
         {
-            return await _context
-                .PushedCalls
-                .Include(x => x.WaitsForCall)
-                .Skip(page * 20)
-                .Take(20)
-                .Select(x =>
-                new PushedCallInfo(x,
-                x.WaitsForCall.Count(),
-                x.WaitsForCall.Count(x => x.Status == WaitForCallStatus.Matched),
-                x.WaitsForCall.Count(x => x.Status == WaitForCallStatus.NotMatched)
-                ))
-                .ToListAsync();
+            //x.WaitsForCall.Count(),
+            //x.WaitsForCall.Count(x => x.Status == WaitForCallStatus.Matched),
+            //x.WaitsForCall.Count(x => x.Status == WaitForCallStatus.NotMatched)
+            var counts =
+                _context
+                .WaitsForCalls
+                .GroupBy(x => x.PushedCallId)
+                .Select(x => new
+                {
+                    CallId = x.Key,
+                    All = x.Count(),
+                    Matched = x.Count(x => x.Status == WaitForCallStatus.Matched),
+                    NotMatched = x.Count(x => x.Status == WaitForCallStatus.NotMatched),
+                });
+            var query = _context.PushedCalls
+                .Join(counts,
+                call => call.Id,
+                counter => counter.CallId,
+                (call, counter) =>
+                new PushedCallInfo(
+                    call,
+                    counter.All,
+                    counter.Matched,
+                    counter.Matched
+                ));
+          
+            return await query.ToListAsync();
         }
 
         public Task<List<FunctionInstanceInfo>> GetFunctionInstances(int functionId)

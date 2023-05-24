@@ -8,6 +8,7 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
         Task AddWaitMethodIdentifier(MethodData methodData, int service);
         Task<ResumableFunctionIdentifier> GetResumableFunction(int id);
         Task<ResumableFunctionIdentifier> GetResumableFunction(MethodData methodData);
+        Task<ResumableFunctionIdentifier> TryGetResumableFunction(MethodData methodData);
         Task<WaitMethodIdentifier> GetWaitMethod(MethodWait methodWait);
     }
 }

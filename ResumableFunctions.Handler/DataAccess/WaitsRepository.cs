@@ -37,7 +37,7 @@ internal partial class WaitsRepository : IWaitsRepository
     }
 
     
-
+    //todo:critical this method must be optimized
     public async Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId)
     {
 
@@ -68,7 +68,7 @@ internal partial class WaitsRepository : IWaitsRepository
             if (noMatchedWaits)
             {
                 _logger.LogWarning($"No waits matched for pushed method [{pushedCallId}]");
-                _context.PushedCalls.Remove(pushedCall);
+                //_context.PushedCalls.Remove(pushedCall);
             }
             else
                 pushedCall.WaitsForCall = matchedWaitsIds

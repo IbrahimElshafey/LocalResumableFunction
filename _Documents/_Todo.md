@@ -1,10 +1,17 @@
 ﻿# Todo
 
-## Near
+## Core functions
+* Speed up find matched waits query
+	* JSON columns
 * Re-Schedule processing if there is a scan process in progress
-* RF Instance Details
 * Remove direct use for DbContext
 * Same DLL in two services
+* Review all places where database update occurs
+* Find fast and best object serializer
+	* Save function state all fields [public and non public]
+	* https://github.com/quozd/awesome-dotnet#serialization
+
+* Back to UI coding
 * Test replay in sub functions
 
 ## UI project
@@ -48,15 +55,11 @@
 * Record videos
 
 ## Enhancements
-* Review all places where database update occurs
 * Refactor long methods
 * Encrypt sensitive data
 	* Function state
 	* Match and SetData Expressions
 * Write unit testing for core functionallity
-* Find fast and best object serializer
-	* Save function state all fields [public and non public]
-	* https://github.com/quozd/awesome-dotnet#serialization
 * Write Roslyn analyzer to force the right use for the library
 * Parameter check lib use
 * Performance Analysis
@@ -68,10 +71,10 @@
 * Resumable function hooks
 	* After Resumed
 	* On Error Occurred
-* Speed up waits query
+
 
 ## Publisher Project
-* Use AspectInjector instead of Fody 
+* [Test] AspectInjector instead of Fody 
 * Scan and send scan result to service owner to verify signatures
 * Use PeriodicTimer/Hangfire to handle background tasks
 	* Send failed requests to servies
