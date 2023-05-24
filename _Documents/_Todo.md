@@ -1,8 +1,8 @@
 ﻿# Todo
 
 ## Near
-* RF Instance Details
 * Schedule processing if there is a scan process in progress
+* RF Instance Details
 * Remove direct use for DbContext
 * Same DLL in two services
 * Test replay in sub functions

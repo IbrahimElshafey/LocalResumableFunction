@@ -10,6 +10,7 @@ using System.Reflection;
 
 namespace ResumableFunctions.Handler.Attributes
 {
+
     [Aspect(Scope.Global)]
     public class WaitMethodAspect : IDisposable
     {
@@ -19,23 +20,7 @@ namespace ResumableFunctions.Handler.Attributes
         private IPushedCallProcessor _pushedCallProcessor;
         private ILogger<WaitMethodAspect> _logger;
 
-        public WaitMethodAspect()
-        {           
-        }
-
-        void InitDepends()
-        {
-            _logger = ServiceProvider.GetService<ILogger<WaitMethodAspect>>();
-            try
-            {
-                _scope = ServiceProvider.CreateScope();
-                _pushedCallProcessor = _scope.ServiceProvider.GetService<IPushedCallProcessor>();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Can't initiate PushedCallProcessor.", ex);
-            }
-        }
+        
 
         [Advice(Kind.Before)]
         public void OnEntry(
@@ -89,6 +74,20 @@ namespace ResumableFunctions.Handler.Attributes
         public void Dispose()
         {
             _scope.Dispose();
+        }
+
+        private void InitDepends()
+        {
+            _logger = ServiceProvider.GetService<ILogger<WaitMethodAspect>>();
+            try
+            {
+                _scope = ServiceProvider.CreateScope();
+                _pushedCallProcessor = _scope.ServiceProvider.GetService<IPushedCallProcessor>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Can't initiate PushedCallProcessor.", ex);
+            }
         }
     }
 }

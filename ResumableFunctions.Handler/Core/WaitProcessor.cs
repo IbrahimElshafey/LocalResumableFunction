@@ -56,8 +56,6 @@ namespace ResumableFunctions.Handler.Core
             _lockProvider = lockProvider;
         }
 
-
-
         public async Task RequestProcessing(int mehtodWaitId, int pushedCallId)
         {
             try
