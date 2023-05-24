@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.Core
 {
@@ -30,6 +32,8 @@ namespace ResumableFunctions.Handler.Core
         private MethodWait _methodWait;
         private int _pushedCallId;
         private PushedCall _pushedCall;
+        private readonly IDistributedLockProvider _lockProvider;
+
         public WaitProcessor(
             IServiceProvider serviceProvider,
             ILogger<WaitProcessor> logger,
@@ -38,7 +42,8 @@ namespace ResumableFunctions.Handler.Core
             IWaitsRepository waitsRepository,
             IBackgroundJobClient backgroundJobClient,
             FunctionDataContext context,
-            IReplayWaitProcessor replayWaitProcessor)
+            IReplayWaitProcessor replayWaitProcessor,
+            IDistributedLockProvider lockProvider)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -48,23 +53,36 @@ namespace ResumableFunctions.Handler.Core
             _backgroundJobClient = backgroundJobClient;
             _context = context;
             _replayWaitProcessor = replayWaitProcessor;
+            _lockProvider = lockProvider;
         }
 
 
 
         public async Task RequestProcessing(int mehtodWaitId, int pushedCallId)
         {
-            using IServiceScope scope = _serviceProvider.CreateScope();
-            _pushedCallId = pushedCallId;
-            if (await LoadWaitAndPushedCall(mehtodWaitId, pushedCallId))
-                await Pipeline(
-                    SetInputAndOutput,
-                    CheckIfMatch,
-                    CloneIfFirst,
-                    UpdateFunctionData,
-                    CreateFunctionInstance,
-                    ResumeExecution);
-            await _context.SaveChangesAsync();
+            try
+            {
+                using (var handle = await _lockProvider.TryAcquireLockAsync($"WaitProcessor_RequestProcessing_{mehtodWaitId}_{pushedCallId}"))
+                {
+                    if (handle is null) return;
+
+                    using IServiceScope scope = _serviceProvider.CreateScope();
+                    _pushedCallId = pushedCallId;
+                    if (await LoadWaitAndPushedCall(mehtodWaitId, pushedCallId))
+                        await Pipeline(
+                            SetInputAndOutput,
+                            CheckIfMatch,
+                            CloneIfFirst,
+                            UpdateFunctionData,
+                            CreateFunctionInstance,
+                            ResumeExecution);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error when process wait `{mehtodWaitId}` that may be a match for pushed call `{pushedCallId}`");
+            }
         }
 
         private Task<bool> SetInputAndOutput(MethodWait methodWait, int pushedCallId)

@@ -8,11 +8,14 @@
 	* FirstWaitProcessor_DeactivateFirstWait_{functionId}
 	* PushedCallProcessor_ProcessPushedCall_{pushedCallId}
 	* WaitProcessor_RequestProcessing_{mehtodWaitId_pushedCallId}
+	,
+    IDistributedLockProvider lockProvider
 * Work on UI project
 * Schedule processing if there is a scan process in progress
 * Remove direct use for DbContext
 * Same DLL in two services
 * Test replay in sub functions
+* Add BackgroundTaskAspect
 
 ## UI project
 * RF Instance Details
@@ -55,6 +58,7 @@
 * Record videos
 
 ## Enhancements
+* Review all places where database update occurs
 * Refactor long methods
 * Encrypt sensitive data
 	* Function state

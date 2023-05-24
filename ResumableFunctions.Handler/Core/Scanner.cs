@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using Hangfire;
+using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -28,18 +29,22 @@ public class Scanner
     private readonly IWaitsRepository _waitsRepository;
     private readonly IFirstWaitProcessor _firstWaitProcessor;
     private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IDistributedLockProvider _lockProvider;
+    private readonly string _currentServiceName;
 
-    private readonly string Code = DateTime.Now.Ticks.ToString();
     private int currentServiceId = -1;
+
     public Scanner(
-        IServiceProvider serviceProvider,
-        ILogger<Scanner> logger,
-        IMethodIdentifierRepository methodIdentifierRepo,
-        IFirstWaitProcessor firstWaitProcessor,
-        IResumableFunctionsSettings settings,
-        FunctionDataContext context,
-        IBackgroundJobClient backgroundJobClient,
-        IWaitsRepository waitsRepository)
+        IServiceProvider serviceProvider
+        , ILogger<Scanner> logger
+        , IMethodIdentifierRepository methodIdentifierRepo
+        , IFirstWaitProcessor firstWaitProcessor
+        , IResumableFunctionsSettings settings
+        , FunctionDataContext context
+        , IBackgroundJobClient backgroundJobClient
+        , IWaitsRepository waitsRepository
+        , IDistributedLockProvider lockProvider
+        )
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -49,47 +54,44 @@ public class Scanner
         _context = context;
         _backgroundJobClient = backgroundJobClient;
         _waitsRepository = waitsRepository;
+        _lockProvider = lockProvider;
+        _currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
     }
 
-    static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
     public async Task Start()
     {
         try
         {
-            //prevent concurrent scan in same service
-            await semaphoreSlim.WaitAsync();
-            await StartServiceScanning();
+            //prevent concurrent scan on same service
+            using (var handle = await _lockProvider.TryAcquireLockAsync($"Scanner_StartServiceScanning_{_currentServiceName}"))
+            {
+                if (handle is null) return;
+
+                using var scope = _serviceProvider.CreateScope();
+                ScopeInit(scope);
+
+                WriteMessage("Start register method waits.");
+                await RegisterMethods(GetAssembliesToScan());
+
+
+
+
+                WriteMessage("Register local methods");
+                await RegisterMethodWaitsInType(typeof(LocalRegisteredMethods), null);
+
+                await _context.SaveChangesAsync();
+
+                WriteMessage("Close with no errors.");
+                await _context.DisposeAsync();
+            }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error when scan [{Assembly.GetEntryAssembly().GetName().Name}]");
+            _logger.LogError(ex, $"Error when scan [{_currentServiceName}]");
             throw;
         }
-        finally
-        {
-            semaphoreSlim.Release();
-        }
     }
 
-    private async Task StartServiceScanning()
-    {
-        using var scope = _serviceProvider.CreateScope();
-        ScopeInit(scope);
-
-        WriteMessage("Start register method waits.");
-        await RegisterMethods(GetAssembliesToScan());
-
-
-
-
-        WriteMessage("Register local methods");
-        await RegisterMethodWaitsInType(typeof(LocalRegisteredMethods), null);
-
-        await _context.SaveChangesAsync();
-
-        WriteMessage("Close with no errors.");
-        await _context.DisposeAsync();
-    }
 
     private void ScopeInit(IServiceScope scope)
     {
@@ -100,14 +102,13 @@ public class Scanner
 
     private List<string> GetAssembliesToScan()
     {
-        var currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
         var currentFolder = AppContext.BaseDirectory;
 
         WriteMessage($"Get assemblies to scan in directory [{currentFolder}].");
         //var assemblyPaths = Directory.EnumerateFiles(_currentFolder, "*.dll").Where(IsIncludedInScan).ToList();
         var assemblyPaths = new List<string>
             {
-                $"{currentFolder}{currentServiceName}.dll"
+                $"{currentFolder}{_currentServiceName}.dll"
             };
         if (_settings.DllsToScan != null)
             assemblyPaths.AddRange(
@@ -204,10 +205,9 @@ public class Scanner
 
     private async Task DeleteOldScanData(DateTime dateBeforeScan)
     {
-        var currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
         var currentService = await _context
             .ServicesData
-            .FirstAsync(x => x.AssemblyName == currentServiceName);
+            .FirstAsync(x => x.AssemblyName == _currentServiceName);
         await _context
             .Logs
             .Where(x =>
@@ -288,15 +288,13 @@ public class Scanner
 
         async Task<int> GetParentServiceId(string currentAssemblyName)
         {
-            var entryAssemblyName = Assembly.GetEntryAssembly().GetName().Name;
-            var parentId =
-                entryAssemblyName == currentAssemblyName ?
+            return
+                _currentServiceName == currentAssemblyName ?
                 -1 :
                 await _context.ServicesData
-                .Where(x => x.AssemblyName == entryAssemblyName)
+                .Where(x => x.AssemblyName == _currentServiceName)
                 .Select(x => x.Id)
                 .FirstOrDefaultAsync();
-            return parentId;
         }
     }
 

@@ -7,6 +7,7 @@ using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
+using Medallion.Threading;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -17,18 +18,23 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private readonly IMethodIdentifierRepository _methodIdentifierRepo;
     private readonly IWaitsRepository _waitsRepository;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IDistributedLockProvider _lockProvider;
 
-    public FirstWaitProcessor(ILogger<FirstWaitProcessor> logger,
+    public FirstWaitProcessor(
+        ILogger<FirstWaitProcessor> logger,
         FunctionDataContext context,
         IServiceProvider serviceProvider,
         IMethodIdentifierRepository methodIdentifierRepo,
-        IWaitsRepository waitsRepository)
+        IWaitsRepository waitsRepository,
+        IDistributedLockProvider lockProvider
+        )
     {
         _logger = logger;
         _context = context;
         _serviceProvider = serviceProvider;
         _methodIdentifierRepo = methodIdentifierRepo;
         _waitsRepository = waitsRepository;
+        _lockProvider = lockProvider;
     }
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
@@ -75,20 +81,26 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         MethodInfo resumableFunction = null;
         try
         {
-            using (var scope = _serviceProvider.CreateScope())
+            using (var handle = await _lockProvider.TryAcquireLockAsync($"FirstWaitProcessor_RegisterFirstWait_{functionId}"))
             {
-                var mi = await _methodIdentifierRepo.GetResumableFunction(functionId);
-                resumableFunction = mi.MethodInfo;
-                WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
-                var firstWait = await GetFirstWait(resumableFunction, true);
-                if (firstWait != null)
-                    firstWait.FunctionState.AddLog(
-                        $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.",
-                        LogType.Info);
-                await _waitsRepository.SaveWaitRequestToDb(firstWait);//first wait when register function
-                WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
-                await _context.SaveChangesAsync();
+                if (handle is null) return;
+
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var mi = await _methodIdentifierRepo.GetResumableFunction(functionId);
+                    resumableFunction = mi.MethodInfo;
+                    WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
+                    var firstWait = await GetFirstWait(resumableFunction, true);
+                    if (firstWait != null)
+                        firstWait.FunctionState.AddLog(
+                            $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.",
+                            LogType.Info);
+                    await _waitsRepository.SaveWaitRequestToDb(firstWait);//first wait when register function
+                    WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
+                    await _context.SaveChangesAsync();
+                }
             }
+            
         }
         catch (Exception ex)
         {
