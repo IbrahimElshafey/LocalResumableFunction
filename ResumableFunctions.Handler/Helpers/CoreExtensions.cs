@@ -50,9 +50,9 @@ public static class CoreExtensions
 
 
         services.AddScoped<IUiService, UiService.UiService>();
-        if (settings.HangFireConfig != null)
+        if (settings.HangfireConfig != null)
         {
-            services.AddHangfire(x => x = settings.HangFireConfig);
+            services.AddHangfire(x => x = settings.HangfireConfig);
             services.AddHangfireServer();
         }
     }

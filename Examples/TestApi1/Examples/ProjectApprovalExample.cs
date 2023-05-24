@@ -23,7 +23,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
              .MatchIf((project, output) => output && !project.IsResubmit)//Point 3
              .SetData((project, output) => CurrentProject == project);//Point 4
         AddLog("###After Project Submitted");
-        throw new NotImplementedException("Exception after first wait match.");
+        //throw new NotImplementedException("Exception after first wait match.");
         await AskManagerToApprove("Manager One", CurrentProject.Id);
         //throw new Exception("Critical exception aftrer AskManagerToApprove");
         yield return

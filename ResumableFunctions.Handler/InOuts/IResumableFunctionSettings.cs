@@ -5,7 +5,7 @@ namespace ResumableFunctions.Handler.InOuts
 {
     public interface IResumableFunctionsSettings
     {
-        public IGlobalConfiguration HangFireConfig { get; }
+        public IGlobalConfiguration HangfireConfig { get; }
         public DbContextOptionsBuilder WaitsDbConfig { get; }
         public string CurrentServiceUrl { get; }
         public string SyncServerConnection { get; }

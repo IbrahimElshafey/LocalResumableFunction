@@ -100,7 +100,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     await _context.SaveChangesAsync();
                 }
             }
-            
+
         }
         catch (Exception ex)
         {
@@ -181,24 +181,29 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     {
         try
         {
-            using (var scope = _serviceProvider.CreateScope())
+            using (var handle = await _lockProvider.TryAcquireLockAsync($"FirstWaitProcessor_DeactivateFirstWait_{functionId}"))
             {
-                var firstWait = await _context
-                    .Waits
-                    .Include(x => x.FunctionState)
-                    .FirstOrDefaultAsync(wait =>
-                            wait.RequestedByFunctionId == functionId &&
-                            wait.IsNode &&
-                            wait.IsFirst &&
-                            wait.Status == WaitStatus.Waiting);
-                if (firstWait != default)
+                if (handle is null) return;
+
+                using (var scope = _serviceProvider.CreateScope())
                 {
-                    firstWait.IsFirst = false;
-                    firstWait.Cancel();
-                    await _waitsRepository.CancelSubWaits(firstWait.Id);
-                    _context.Waits.Remove(firstWait);
-                    _context.FunctionStates.Remove(firstWait.FunctionState);
-                    await _context.SaveChangesAsync();
+                    var firstWait = await _context
+                        .Waits
+                        .Include(x => x.FunctionState)
+                        .FirstOrDefaultAsync(wait =>
+                                wait.RequestedByFunctionId == functionId &&
+                                wait.IsNode &&
+                                wait.IsFirst &&
+                                wait.Status == WaitStatus.Waiting);
+                    if (firstWait != default)
+                    {
+                        firstWait.IsFirst = false;
+                        firstWait.Cancel();
+                        await _waitsRepository.CancelSubWaits(firstWait.Id);
+                        _context.Waits.Remove(firstWait);
+                        _context.FunctionStates.Remove(firstWait.FunctionState);
+                        await _context.SaveChangesAsync();
+                    }
                 }
             }
         }

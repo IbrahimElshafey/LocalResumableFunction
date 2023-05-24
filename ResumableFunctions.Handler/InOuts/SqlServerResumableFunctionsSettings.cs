@@ -8,9 +8,9 @@ namespace ResumableFunctions.Handler.InOuts
 {
     public class SqlServerResumableFunctionsSettings : IResumableFunctionsSettings
     {
-        public string ServerName { get; private set; } = "(localdb)\\MSSQLLocalDB;";
-        public IGlobalConfiguration HangFireConfig { get; private set; }
-        public DbContextOptionsBuilder WaitsDbConfig { get; private set; }
+        public string ServerName { get; } = "(localdb)\\MSSQLLocalDB;";
+        public IGlobalConfiguration HangfireConfig { get; }
+        public DbContextOptionsBuilder WaitsDbConfig { get; }
 
         public string CurrentServiceUrl { get; private set; }
         public string[] DllsToScan { get; private set; }
@@ -25,14 +25,14 @@ namespace ResumableFunctions.Handler.InOuts
             if (waitsDbName == null)
                 waitsDbName = "ResumableFunctionsData";
             CreateHangfireDb();
-            HangFireConfig = GlobalConfiguration
+            HangfireConfig = GlobalConfiguration
                 .Configuration
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseSqlServerStorage(
                     $"Server={ServerName}" +
-                    $"Database={Assembly.GetEntryAssembly().GetName().Name}_HangfireDb;",
+                    $"Database={HangfireDbName};",
                     new SqlServerStorageOptions
                     {
                         CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
@@ -57,12 +57,11 @@ namespace ResumableFunctions.Handler.InOuts
             return this;
         }
 
-
+        private string HangfireDbName => $"{Assembly.GetEntryAssembly().GetName().Name}_HangfireDb".Replace(".", "_");
         private void CreateHangfireDb()
         {
-            var hangFireDbName = $"{Assembly.GetEntryAssembly().GetName().Name}_HangfireDb";
             var dbConfig = new DbContextOptionsBuilder()
-              .UseSqlServer($"Server={ServerName};Database={hangFireDbName};");
+              .UseSqlServer($"Server={ServerName};Database={HangfireDbName};");
             var context = new DbContext(dbConfig.Options);
             try
             {
