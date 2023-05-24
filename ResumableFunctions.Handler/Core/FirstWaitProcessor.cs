@@ -18,15 +18,13 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private readonly IMethodIdentifierRepository _methodIdentifierRepo;
     private readonly IWaitsRepository _waitsRepository;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IDistributedLockProvider _lockProvider;
 
     public FirstWaitProcessor(
         ILogger<FirstWaitProcessor> logger,
         FunctionDataContext context,
         IServiceProvider serviceProvider,
         IMethodIdentifierRepository methodIdentifierRepo,
-        IWaitsRepository waitsRepository,
-        IDistributedLockProvider lockProvider
+        IWaitsRepository waitsRepository
         )
     {
         _logger = logger;
@@ -34,7 +32,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _serviceProvider = serviceProvider;
         _methodIdentifierRepo = methodIdentifierRepo;
         _waitsRepository = waitsRepository;
-        _lockProvider = lockProvider;
     }
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
@@ -79,13 +76,12 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     public async Task RegisterFirstWait(int functionId)
     {
         MethodInfo resumableFunction = null;
-        try
-        {
-            using (var handle = await _lockProvider.TryAcquireLockAsync($"FirstWaitProcessor_RegisterFirstWait_{functionId}"))
+        string errorMsg = $"Error when try to register first wait for function [{functionId}]";
+        await BackgroundJobExecutor.Execute(
+            $"FirstWaitProcessor_RegisterFirstWait_{functionId}",
+            async () =>
             {
-                if (handle is null) return;
-
-                using (var scope = _serviceProvider.CreateScope())
+                try
                 {
                     var mi = await _methodIdentifierRepo.GetResumableFunction(functionId);
                     resumableFunction = mi.MethodInfo;
@@ -99,17 +95,15 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
                     await _context.SaveChangesAsync();
                 }
-            }
+                catch (Exception ex)
+                {
+                    if (resumableFunction != null)
+                        await LogErrorToService(resumableFunction, ex, errorMsg);
+                    await _waitsRepository.RemoveFirstWaitIfExist(functionId);
+                }
 
-        }
-        catch (Exception ex)
-        {
-            var errorMsg = $"Error when try to register first wait for function [{functionId}]";
-            _logger.LogError(ex, errorMsg);
-            if (resumableFunction != null)
-                await LogErrorToService(resumableFunction, ex, errorMsg);
-            await _waitsRepository.RemoveFirstWaitIfExist(functionId);
-        }
+            },
+            errorMsg);
     }
 
     private async Task LogErrorToService(MethodInfo resumableFunction, Exception ex, string errorMsg)
@@ -179,15 +173,11 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
     public async Task DeactivateFirstWait(int functionId)
     {
-        try
-        {
-            using (var handle = await _lockProvider.TryAcquireLockAsync($"FirstWaitProcessor_DeactivateFirstWait_{functionId}"))
+        await BackgroundJobExecutor.Execute(
+            $"FirstWaitProcessor_DeactivateFirstWait_{functionId}",
+            async () =>
             {
-                if (handle is null) return;
-
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var firstWait = await _context
+                var firstWait = await _context
                         .Waits
                         .Include(x => x.FunctionState)
                         .FirstOrDefaultAsync(wait =>
@@ -195,22 +185,16 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                                 wait.IsNode &&
                                 wait.IsFirst &&
                                 wait.Status == WaitStatus.Waiting);
-                    if (firstWait != default)
-                    {
-                        firstWait.IsFirst = false;
-                        firstWait.Cancel();
-                        await _waitsRepository.CancelSubWaits(firstWait.Id);
-                        _context.Waits.Remove(firstWait);
-                        _context.FunctionStates.Remove(firstWait.FunctionState);
-                        await _context.SaveChangesAsync();
-                    }
+                if (firstWait != default)
+                {
+                    firstWait.IsFirst = false;
+                    firstWait.Cancel();
+                    await _waitsRepository.CancelSubWaits(firstWait.Id);
+                    _context.Waits.Remove(firstWait);
+                    _context.FunctionStates.Remove(firstWait.FunctionState);
+                    await _context.SaveChangesAsync();
                 }
-            }
-        }
-        catch (Exception ex)
-        {
-            var errorMsg = $"Error when try to deactivate first wait for function [{functionId}]";
-            _logger.LogError(ex, errorMsg);
-        }
+            },
+            $"Error when try to deactivate first wait for function [{functionId}]");
     }
 }

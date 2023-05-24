@@ -29,7 +29,6 @@ internal class PushedCallProcessor : IPushedCallProcessor
     private readonly IWaitProcessor _waitProcessor;
     private readonly IWaitsRepository _waitsRepository;
     private readonly HangFireHttpClient _hangFireHttpClient;
-    private readonly IDistributedLockProvider _lockProvider;
 
     public PushedCallProcessor(
         IServiceProvider serviceProvider,
@@ -38,8 +37,7 @@ internal class PushedCallProcessor : IPushedCallProcessor
         IWaitsRepository waitsRepository,
         FunctionDataContext context,
         IBackgroundJobClient backgroundJobClient,
-        HangFireHttpClient hangFireHttpClient,
-        IDistributedLockProvider lockProvider)
+        HangFireHttpClient hangFireHttpClient)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
@@ -48,7 +46,6 @@ internal class PushedCallProcessor : IPushedCallProcessor
         _context = context;
         _backgroundJobClient = backgroundJobClient;
         _hangFireHttpClient = hangFireHttpClient;
-        _lockProvider = lockProvider;
     }
 
     public async Task<int> QueuePushedCallProcessing(PushedCall pushedCall)
@@ -61,31 +58,22 @@ internal class PushedCallProcessor : IPushedCallProcessor
 
     public async Task ProcessPushedCall(int pushedCallId)
     {
-        try
-        {
-            using (var handle = await _lockProvider.TryAcquireLockAsync($"PushedCallProcessor_ProcessPushedCall_{pushedCallId}"))
+        await BackgroundJobExecutor.Execute(
+            $"PushedCallProcessor_ProcessPushedCall_{pushedCallId}",
+            async () =>
             {
-                if (handle is null) return;
+                var waitsIds = await _waitsRepository.GetWaitsIdsForMethodCall(pushedCallId);
 
-                using (IServiceScope scope = _serviceProvider.CreateScope())
-                {
-                    var waitsIds = await _waitsRepository.GetWaitsIdsForMethodCall(pushedCallId);
-
-                    if (waitsIds != null)
-                        foreach (var waitId in waitsIds)
-                        {
-                            if (IsLocalWait(waitId))
-                                _backgroundJobClient.Enqueue(() => _waitProcessor.RequestProcessing(waitId.Id, pushedCallId));
-                            else
-                                await CallOwnerService(waitId, pushedCallId);
-                        }
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error when process pushed method [{pushedCallId}]");
-        }
+                if (waitsIds != null)
+                    foreach (var waitId in waitsIds)
+                    {
+                        if (IsLocalWait(waitId))
+                            _backgroundJobClient.Enqueue(() => _waitProcessor.RequestProcessing(waitId.Id, pushedCallId));
+                        else
+                            await CallOwnerService(waitId, pushedCallId);
+                    }
+            },
+            $"Error when process pushed method [{pushedCallId}]");
     }
 
 

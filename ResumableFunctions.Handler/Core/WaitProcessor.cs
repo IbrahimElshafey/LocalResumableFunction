@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,6 @@ namespace ResumableFunctions.Handler.Core
         private MethodWait _methodWait;
         private int _pushedCallId;
         private PushedCall _pushedCall;
-        private readonly IDistributedLockProvider _lockProvider;
 
         public WaitProcessor(
             IServiceProvider serviceProvider,
@@ -42,8 +42,7 @@ namespace ResumableFunctions.Handler.Core
             IWaitsRepository waitsRepository,
             IBackgroundJobClient backgroundJobClient,
             FunctionDataContext context,
-            IReplayWaitProcessor replayWaitProcessor,
-            IDistributedLockProvider lockProvider)
+            IReplayWaitProcessor replayWaitProcessor)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -53,18 +52,14 @@ namespace ResumableFunctions.Handler.Core
             _backgroundJobClient = backgroundJobClient;
             _context = context;
             _replayWaitProcessor = replayWaitProcessor;
-            _lockProvider = lockProvider;
         }
 
         public async Task RequestProcessing(int mehtodWaitId, int pushedCallId)
         {
-            try
-            {
-                using (var handle = await _lockProvider.TryAcquireLockAsync($"WaitProcessor_RequestProcessing_{mehtodWaitId}_{pushedCallId}"))
+            await BackgroundJobExecutor.Execute(
+                $"WaitProcessor_RequestProcessing_{mehtodWaitId}_{pushedCallId}",
+                async () =>
                 {
-                    if (handle is null) return;
-
-                    using IServiceScope scope = _serviceProvider.CreateScope();
                     _pushedCallId = pushedCallId;
                     if (await LoadWaitAndPushedCall(mehtodWaitId, pushedCallId))
                         await Pipeline(
@@ -75,12 +70,8 @@ namespace ResumableFunctions.Handler.Core
                             CreateFunctionInstance,
                             ResumeExecution);
                     await _context.SaveChangesAsync();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error when process wait `{mehtodWaitId}` that may be a match for pushed call `{pushedCallId}`");
-            }
+                },
+                $"Error when process wait `{mehtodWaitId}` that may be a match for pushed call `{pushedCallId}`");
         }
 
         private Task<bool> SetInputAndOutput(MethodWait methodWait, int pushedCallId)

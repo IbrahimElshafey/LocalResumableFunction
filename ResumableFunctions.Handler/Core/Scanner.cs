@@ -29,7 +29,6 @@ public class Scanner
     private readonly IWaitsRepository _waitsRepository;
     private readonly IFirstWaitProcessor _firstWaitProcessor;
     private readonly IBackgroundJobClient _backgroundJobClient;
-    private readonly IDistributedLockProvider _lockProvider;
     private readonly string _currentServiceName;
 
     private int currentServiceId = -1;
@@ -43,7 +42,6 @@ public class Scanner
         , FunctionDataContext context
         , IBackgroundJobClient backgroundJobClient
         , IWaitsRepository waitsRepository
-        , IDistributedLockProvider lockProvider
         )
     {
         _serviceProvider = serviceProvider;
@@ -54,27 +52,17 @@ public class Scanner
         _context = context;
         _backgroundJobClient = backgroundJobClient;
         _waitsRepository = waitsRepository;
-        _lockProvider = lockProvider;
         _currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
     }
 
     public async Task Start()
     {
-        try
-        {
-            //prevent concurrent scan on same service
-            using (var handle = await _lockProvider.TryAcquireLockAsync($"Scanner_StartServiceScanning_{_currentServiceName}"))
+        await BackgroundJobExecutor.Execute(
+            $"Scanner_StartServiceScanning_{_currentServiceName}",
+            async () =>
             {
-                if (handle is null) return;
-
-                using var scope = _serviceProvider.CreateScope();
-                ScopeInit(scope);
-
                 WriteMessage("Start register method waits.");
                 await RegisterMethods(GetAssembliesToScan());
-
-
-
 
                 WriteMessage("Register local methods");
                 await RegisterMethodWaitsInType(typeof(LocalRegisteredMethods), null);
@@ -83,13 +71,9 @@ public class Scanner
 
                 WriteMessage("Close with no errors.");
                 await _context.DisposeAsync();
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error when scan [{_currentServiceName}]");
-            throw;
-        }
+            },
+            $"Error when scan [{_currentServiceName}]");
+
     }
 
 
