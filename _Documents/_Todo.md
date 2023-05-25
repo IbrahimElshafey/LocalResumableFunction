@@ -67,10 +67,11 @@
 * Write Roslyn analyzer to force the right use for the library
 * Parameter check lib use
 * Performance Analysis
-* Enable support for other store options
-	* MongoDb,Tarantool or Couchbase Server
-	* Kafka,RbbittMQ or ActiveMQ 
-		* will be applicable for waits queuing but not states so it will be an option with use a DB
+* Store options
+	* Use NoSql databases to store states
+		* MongoDb,Tarantool or Couchbase Server
+	* Use Queue Service to Handle Pushed Calls
+		* Kafka,RbbittMQ or ActiveMQ
 * What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 * Resumable function hooks
 	* After Resumed
