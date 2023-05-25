@@ -29,6 +29,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly FunctionDataContext _context;
         private readonly BackgroundJobExecutor _backgroundJobExecutor;
+        private readonly IDistributedLockProvider _lockProvider;
         private MethodWait _methodWait;
         private int _pushedCallId;
         private PushedCall _pushedCall;
@@ -42,7 +43,8 @@ namespace ResumableFunctions.Handler.Core
             IBackgroundJobClient backgroundJobClient,
             FunctionDataContext context,
             IReplayWaitProcessor replayWaitProcessor,
-            BackgroundJobExecutor backgroundJobExecutor)
+            BackgroundJobExecutor backgroundJobExecutor,
+            IDistributedLockProvider lockProvider)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -53,6 +55,7 @@ namespace ResumableFunctions.Handler.Core
             _context = context;
             _replayWaitProcessor = replayWaitProcessor;
             _backgroundJobExecutor = backgroundJobExecutor;
+            _lockProvider = lockProvider;
         }
 
         public async Task RequestProcessing(int mehtodWaitId, int pushedCallId)
@@ -68,7 +71,7 @@ namespace ResumableFunctions.Handler.Core
                             CheckIfMatch,
                             CloneIfFirst,
                             UpdateFunctionData,
-                            CreateFunctionInstance,
+                            ActivateFunctionInstance,
                             ResumeExecution);
                     await _context.SaveChangesAsync();
                 },
@@ -130,12 +133,15 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> UpdateFunctionData(MethodWait methodWait, int pushedCallId)
         {
-            var result = methodWait.UpdateFunctionData();
-            await _context.SaveChangesAsync();
-            return result;
+            using (await _lockProvider.AcquireLockAsync($"FunctionState_{methodWait.FunctionStateId}"))
+            {
+                var result = methodWait.UpdateFunctionData();
+                await _context.SaveChangesAsync();
+                return result;
+            }
         }
 
-        private async Task<bool> CreateFunctionInstance(MethodWait methodWait, int pushedCallId)
+        private async Task<bool> ActivateFunctionInstance(MethodWait methodWait, int pushedCallId)
         {
             //todo: should I use scope 
             using var scope = _serviceProvider.CreateScope();

@@ -1,8 +1,11 @@
 ﻿# Todo
 
 ## Core functions
+* MethodId duplication
 * Speed up find matched waits query
 	* JSON columns
+	* InstanceId special prop
+* Pushed method shoud activate only on instance per function
 * Re-Schedule processing if there is a scan process in progress
 * Remove direct use for DbContext
 * Same DLL in two services
