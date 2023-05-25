@@ -1,4 +1,33 @@
-﻿
+﻿# Optimize wait matching
+* Query to SQL
+	* https://learn.microsoft.com/en-us/dotnet/api/system.data.linq.datacontext.getcommand?view=netframework-4.8.1
+* After wait requested 
+* Translate match expression to SQL query
+* Use NoSql databases to store states
+* Can I use https://github.com/sebastienros/yessql to store states
+* We can create table/database for each resumable function
+
+## In current
+* Use Instance ID match
+* Use https://github.com/dadhi/FastExpressionCompiler to fast compile match and set data expression
+* Fast serialization and deserialization for
+	* StateObject https://github.com/rikimaru0345/Ceras
+	* Wait ExtraData
+	* Expressions
+* String to query expression
+	* https://github.com/zzzprojects/System.Linq.Dynamic.Core
+* Fast Lightweight Expression Evaluator
+	* https://github.com/mparlak/Flee
+* Expression Serialization
+	* https://github.com/reaqtive/reaqtor/tree/main/Nuqleon/Core/LINQ/Nuqleon.Linq.Expressions.Bonsai.Serialization
+* Project that serialize expression trees
+	* https://reaqtive.net/blog/2021/05/sequences-linq-rx-reaqtor-part-05-remotable-expressions
+* Back to method compile ans save solution
+	
+	
+	
+	
+	
 # Synchronization Scenarios
 * Two waits trying update same FunctionState [done]
 	* Using distributed lock for Update Function Data method
