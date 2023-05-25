@@ -1,7 +1,8 @@
 ﻿# Todo
 
 ## Core functions
-* MethodId duplication
+* Best options for expression tree serialization
+* Best options for data serialization
 * Speed up find matched waits query
 	* JSON columns
 	* InstanceId special prop
