@@ -43,23 +43,25 @@ namespace ClientOnboarding.Workflow
         {
             return Wait<RegistrationForm, RegistrationResult>("Wait User Registration", service.ClientFillsForm)
                             .MatchIf((regForm, regResult) => regResult.FormId > 0)
-                            .SetData((regForm, regResult) => RegistrationForm == regForm && RegistrationResult == regResult);
+                            .SetData((regForm, regResult) =>
+                            RegistrationForm == regForm &&
+                            RegistrationResult == regResult);
         }
 
         private MethodWait<OwnerApproveClientInput, OwnerApproveClientResult> WaitOwnerApproveClient()
         {
             return Wait<OwnerApproveClientInput, OwnerApproveClientResult>("Wait Owner Approve Client", service.OwnerApproveClient)
                             .MatchIf((approveClientInput, approveResult) => approveClientInput.TaskId == OwnerTaskId.Id)
-                            .SetData((approveClientInput, approveResult) => 
-                                OwnerTaskResult == approveResult && 
+                            .SetData((approveClientInput, approveResult) =>
+                                OwnerTaskResult == approveResult &&
                                 OwnerApprovalInput == approveClientInput);
         }
 
         private MethodWait<int, MeetingResult> WaitMeetingResult()
         {
             return Wait<int, MeetingResult>("Wait Meeting Result", service.SendMeetingResult)
-                               .MatchIf((mmetingId, meetingResult) => mmetingId == ClientMeetingId.MeetingId)
-                               .SetData((mmetingId, meetingResult) => MeetingResult == meetingResult);
+                               .MatchIf((meetingId, meetingResult) => meetingId == ClientMeetingId.MeetingId)
+                               .SetData((meetingId, meetingResult) => MeetingResult == meetingResult);
         }
 
         public RegistrationForm RegistrationForm { get; set; }
