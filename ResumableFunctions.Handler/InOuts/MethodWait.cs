@@ -43,6 +43,7 @@ public class MethodWait : Wait
     [NotMapped]
     public object Output { get; set; }
 
+    public object PartialMatchValue { get; internal set; }
     //todo:bug
     private Assembly FunctionAssembly =>
         MethodToWait?.MethodInfo?.DeclaringType.Assembly ??

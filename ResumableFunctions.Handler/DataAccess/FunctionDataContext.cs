@@ -133,6 +133,10 @@ public class FunctionDataContext : DbContext
             .HasConversion<ObjectToJsonConverter>();
 
         modelBuilder.Entity<MethodWait>()
+            .Property(x => x.PartialMatchValue)
+            .HasConversion<ObjectToJsonConverter>();
+
+        modelBuilder.Entity<MethodWait>()
           .Property(mw => mw.MatchIfExpressionValue)
           .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
 

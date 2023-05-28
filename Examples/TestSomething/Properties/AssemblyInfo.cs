@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // In SDK-style projects such as this one, several assembly attributes that were historically
@@ -15,6 +14,4 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM.
 
-[assembly: Guid("6d8d5159-e480-4f1c-ab61-e5e72f60b13e")]
-[assembly: InternalsVisibleTo("TestSomething")]
-[assembly: InternalsVisibleTo("ResumableFunctions.AspNetService")]
+[assembly: Guid("deafbf76-fbb1-471d-bc3a-e49be3fe7c00")]

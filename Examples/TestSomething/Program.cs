@@ -1,12 +1,14 @@
 ﻿using System.Linq.Expressions;
+using TestSomething;
 
 internal class Program
 {
     private static async Task Main(string[] args)
     {
-      
+
         //TestTreeCascadeAction();
-        await TestAspectInjectorAsync();
+        //await TestAspectInjectorAsync();
+        new TestRewriteMatch().Test();
     }
 
     private static async Task TestAspectInjectorAsync()

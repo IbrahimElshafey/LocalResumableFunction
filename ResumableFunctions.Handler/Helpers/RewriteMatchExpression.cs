@@ -1,12 +1,17 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
+using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.InOuts;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
 
+
 public class RewriteMatchExpression : ExpressionVisitor
 {
     private readonly ParameterExpression _functionInstanceArg;
+    private readonly ParameterExpression _inputArg;
+    private readonly ParameterExpression _outputArg;
     private readonly MethodWait _wait;
 
     public RewriteMatchExpression(MethodWait wait)
@@ -21,7 +26,10 @@ public class RewriteMatchExpression : ExpressionVisitor
         //  .If((input, output) => output == true)
         //   return (bool)check.DynamicInvoke(pushedCall.Input, pushedCall.Output, methodWait.CurrentFunction);
         _wait = wait;
+        var expression = wait.MatchIfExpression;
         _functionInstanceArg = Parameter(wait.CurrentFunction.GetType(), "functionInstance");
+        _inputArg = Parameter(expression.Parameters[0].Type, "input");
+        _outputArg = Parameter(expression.Parameters[1].Type, "output");
 
         var updatedBoy = (LambdaExpression)Visit(wait.MatchIfExpression);
         var functionType = typeof(Func<,,,>)
@@ -33,13 +41,30 @@ public class RewriteMatchExpression : ExpressionVisitor
         Result = Lambda(
             functionType,
             updatedBoy.Body,
-            updatedBoy.Parameters[0],
-            updatedBoy.Parameters[1],
+            _inputArg,
+            _outputArg,
             _functionInstanceArg);
-        //Result = (LambdaExpression)Visit(Result);
+        wait.PartialMatchValue = new WaitMatchValueGetter(Result).Result;
     }
 
     public LambdaExpression Result { get; protected set; }
+    public override Expression Visit(Expression node)
+    {
+        return base.Visit(node);
+    }
+
+    protected override Expression VisitParameter(ParameterExpression node)
+    {
+
+
+        var isOutput = node == _wait.MatchIfExpression.Parameters[1];
+        if (isOutput) return _outputArg;
+
+        var isInput = node == _wait.MatchIfExpression.Parameters[0];
+        if (isInput) return _inputArg;
+
+        return base.VisitParameter(node);
+    }
 
     protected override Expression VisitMember(MemberExpression node)
     {
@@ -57,10 +82,26 @@ public class RewriteMatchExpression : ExpressionVisitor
             _wait.NeedFunctionStateForMatch = true;
             return x.NewExpression;
         }
+        else if (IsParamterAccess(node))
+        {
+            return base.VisitMember(node);
+        }
+        else
+            throw new NotSupportedException(
+                $"It's not support to access `{node}`," +
+                $"only input, output, and resumable function isntance are allowed to be use in match expression.");
 
         return base.VisitMember(node);
     }
 
+    private bool IsParamterAccess(MemberExpression memberExpression)
+    {
+        while (memberExpression != null && memberExpression.Expression is MemberExpression me)
+        {
+            memberExpression = me;
+        }
+        return memberExpression.Expression is ParameterExpression;
+    }
 
     protected bool IsBasicType(Type type)
     {
@@ -80,6 +121,26 @@ public class RewriteMatchExpression : ExpressionVisitor
         {
             //expected to be not null
             return null;
+        }
+    }
+
+    private class WaitMatchValueGetter : ExpressionVisitor
+    {
+        public JObject Result { get; } = new JObject();
+        public WaitMatchValueGetter(LambdaExpression matchExpression)
+        {
+            Visit(matchExpression);
+        }
+        protected override Expression VisitBinary(BinaryExpression node)
+        {
+            if (node.NodeType == ExpressionType.Equal)
+            {
+                if (node.Left is ConstantExpression ce)
+                    Result[node.Right.ToString()] = JToken.FromObject(ce.Value);
+                if (node.Right is ConstantExpression constantExpression)
+                    Result[node.Left.ToString()] = JToken.FromObject(constantExpression.Value);
+            }
+            return base.VisitBinary(node);
         }
     }
 }
