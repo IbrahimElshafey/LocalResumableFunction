@@ -1,5 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
+using System.Xml.Linq;
+using Microsoft.AspNetCore.Rewrite;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.InOuts;
 using static System.Linq.Expressions.Expression;
@@ -13,7 +16,6 @@ public class RewriteMatchExpression : ExpressionVisitor
     private readonly ParameterExpression _inputArg;
     private readonly ParameterExpression _outputArg;
     private readonly MethodWait _wait;
-
     public RewriteMatchExpression(MethodWait wait)
     {
         if (wait?.MatchIfExpression == null)
@@ -44,10 +46,14 @@ public class RewriteMatchExpression : ExpressionVisitor
             _inputArg,
             _outputArg,
             _functionInstanceArg);
-        wait.PartialMatchValue = new WaitMatchValueGetter(Result).Result;
+        Result = new TranslateConstantsVistor(Result, wait.CurrentFunction).Result;
+        wait.PartialMatchValue = new WaitMatchValueVisitor(Result).Result;
+        WaitMatchValue = (JObject)wait.PartialMatchValue;
     }
 
     public LambdaExpression Result { get; protected set; }
+    internal JObject WaitMatchValue { get; }
+
     public override Expression Visit(Expression node)
     {
         return base.Visit(node);
@@ -55,8 +61,6 @@ public class RewriteMatchExpression : ExpressionVisitor
 
     protected override Expression VisitParameter(ParameterExpression node)
     {
-
-
         var isOutput = node == _wait.MatchIfExpression.Parameters[1];
         if (isOutput) return _outputArg;
 
@@ -66,69 +70,88 @@ public class RewriteMatchExpression : ExpressionVisitor
         return base.VisitParameter(node);
     }
 
-    protected override Expression VisitMember(MemberExpression node)
+    private class TranslateConstantsVistor : ExpressionVisitor
     {
-        //replace [FunctionClass].Data.Prop with [_dataParamter.Prop] or constant value
-        var x = node.GetDataParamterAccess(_functionInstanceArg);
-        if (x.IsFunctionData)
+        private readonly LambdaExpression matchExpression;
+        private readonly object functionInstance;
+
+        public LambdaExpression Result { get; }
+
+        public TranslateConstantsVistor(LambdaExpression matchExpression, object functionInstance)
         {
-            if (IsBasicType(node.Type))
+            this.matchExpression = matchExpression;
+            this.functionInstance = functionInstance;
+            Result = (LambdaExpression)Visit(matchExpression);
+        }
+
+
+        protected override Expression VisitBinary(BinaryExpression node)
+        {
+            var left = CompilePart(node.Left);
+            var right = CompilePart(node.Right);
+            return base.VisitBinary(MakeBinary(node.NodeType, left, right));
+        }
+
+        private Expression CompilePart(Expression expression)
+        {
+            if (expression is BinaryExpression) return expression;
+            if (IsParamterAccess(expression)) return expression;
+
+            var functionType =
+                typeof(Func<,,,>)
+                .MakeGenericType(
+                    matchExpression.Parameters[0].Type,
+                    matchExpression.Parameters[1].Type,
+                    matchExpression.Parameters[2].Type,
+                    typeof(object));
+            object result = null;
+            var getExp = Lambda(
+                functionType,
+                Convert(expression, typeof(object)),
+                  matchExpression.Parameters[0],
+                  matchExpression.Parameters[1],
+                  matchExpression.Parameters[2]).Compile();
+            try
             {
-                var value = GetValue(x.NewExpression);
-                if (value != null)
-                    return Constant(value, node.Type);
+                result = getExp.DynamicInvoke(null, null, functionInstance);
+                if (IsBasicType(result))
+                {
+                    return Constant(result);
+                }
+                else
+                {
+                    //todo:throw
+                    return expression;
+                }
+
             }
-
-            _wait.NeedFunctionStateForMatch = true;
-            return x.NewExpression;
+            catch
+            {
+                throw new NotSupportedException($"Can't translate `{expression.ToString()}` to constant value. ");
+            }
         }
-        else if (IsParamterAccess(node))
+        private bool IsParamterAccess(Expression expression)
         {
-            return base.VisitMember(node);
+            var memberExpression = expression as MemberExpression;
+            while (memberExpression != null && memberExpression.Expression is MemberExpression me)
+            {
+                memberExpression = me;
+            }
+            return expression is ParameterExpression || memberExpression?.Expression is ParameterExpression;
         }
-        else
-            throw new NotSupportedException(
-                $"It's not support to access `{node}`," +
-                $"only input, output, and resumable function isntance are allowed to be use in match expression.");
-
-        return base.VisitMember(node);
-    }
-
-    private bool IsParamterAccess(MemberExpression memberExpression)
-    {
-        while (memberExpression != null && memberExpression.Expression is MemberExpression me)
+        protected bool IsBasicType(object result)
         {
-            memberExpression = me;
-        }
-        return memberExpression.Expression is ParameterExpression;
-    }
-
-    protected bool IsBasicType(Type type)
-    {
-        return type.IsPrimitive || type == typeof(string);
-    }
-
-
-    protected object GetValue(MemberExpression node)
-    {
-        try
-        {
-            var getterLambda = Lambda(node, _functionInstanceArg);
-            var getter = getterLambda.Compile();
-            return getter?.DynamicInvoke(_wait.CurrentFunction);
-        }
-        catch (Exception)
-        {
-            //expected to be not null
-            return null;
+            return result != null && (result.GetType().IsValueType || result.GetType() == typeof(string));
         }
     }
-
-    private class WaitMatchValueGetter : ExpressionVisitor
+    private class WaitMatchValueVisitor : ExpressionVisitor
     {
+        private readonly LambdaExpression matchExpression;
+
         public JObject Result { get; } = new JObject();
-        public WaitMatchValueGetter(LambdaExpression matchExpression)
+        public WaitMatchValueVisitor(LambdaExpression matchExpression)
         {
+            this.matchExpression = matchExpression;
             Visit(matchExpression);
         }
         protected override Expression VisitBinary(BinaryExpression node)

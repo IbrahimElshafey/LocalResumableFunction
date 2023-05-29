@@ -26,7 +26,7 @@ namespace TestSomething
         public MethodWait WaitMethodOne()
         {
             var methodWait = new MethodWait<string, int>(TestMethodOne)
-                        .MatchIf((x, y) => y == InstanceId && x == "12345" && y < Math.Max(10, 100))
+                        .MatchIf((x, y) => y == InstanceId && x == (InstanceId + 10).ToString() && y < Math.Max(10, 100))
                         .SetData((input, output) => InstanceId == output);
             methodWait.CurrentFunction = this;
             return methodWait;
@@ -53,20 +53,30 @@ namespace TestSomething
 
             var pushedCall = JsonConvert.DeserializeObject<JObject>("""
                 {
-                    "input":"123456",
+                    "input":{"ID":"123456"},
                     "output":5
                 }
                 """);
-            //var a = matchRewrite.WaitMatchValue;
-            //foreach (var item in a.Children())
-            //{
-            //    if (item is JProperty property)
-            //    {
-            //        Console.WriteLine(pushedCall.SelectToken(property.Name));
-            //        Console.WriteLine(property.Value);
-            //        Console.WriteLine(JToken.DeepEquals(pushedCall.SelectToken(property.Name), property.Value));
-            //    }
-            //}
+            foreach (var item in pushedCall.Children())
+            {
+                if (item is JProperty property)
+                {
+                    Console.WriteLine(property.Path);
+                    Console.WriteLine(property.Name);
+                    Console.WriteLine(property.Value);
+                }
+            }
+
+            var a = matchRewrite.WaitMatchValue;
+            foreach (var item in a.Children())
+            {
+                if (item is JProperty property)
+                {
+                    Console.WriteLine(pushedCall.SelectToken(property.Name));
+                    Console.WriteLine(property.Value);
+                    Console.WriteLine(JToken.DeepEquals(pushedCall.SelectToken(property.Name), property.Value));
+                }
+            }
             //todo:query Jobject list
             //Match expression will be rewritten to use pushed call class
             //we will extract parts where == opertor used

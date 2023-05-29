@@ -5,14 +5,8 @@
 	* Add bool ActivateOneInstance to method wait
 
 # Instance Id
-* Instance Id will be calculated automatic after wait matched and new wait requested
-* It will be calculated form match expression for the new wait
-* After first match instance Id will be set
-* Instance Id is unique for same function
-* Instance Id can be changed later
-* Match expression for next waits may use instance Id prop
-* The path to prop that must match instance Id will be extracted and saved with the wait
-* Will be linked to method group 
+
+
 * When method group matched the paths will be evaluated and expected instance Ids will be extracted
 * The waits search will be done like this:
 	* MethodGroup == PushedCall.MethodGroup
@@ -20,7 +14,7 @@
 	* InstanceId in (PushedCall.ExpectedInstanceIds)
 	* Use function Id also
 	* 
-*Mehtod wait will have a prop for `InstanceId Path` that filled after evaluating SetData expression
+* Mehtod wait will have a prop for `InstanceId Path` that filled after evaluating SetData expression
 
 
 * When rewrite match expression you will generate InstanceId like `#input.ProjectId==190#`
