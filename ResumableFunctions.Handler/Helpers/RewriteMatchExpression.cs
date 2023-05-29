@@ -25,8 +25,6 @@ public class RewriteMatchExpression : ExpressionVisitor
             Result = wait.MatchIfExpression;
             return;
         }
-        //  .If((input, output) => output == true)
-        //   return (bool)check.DynamicInvoke(pushedCall.Input, pushedCall.Output, methodWait.CurrentFunction);
         _wait = wait;
         var expression = wait.MatchIfExpression;
         _functionInstanceArg = Parameter(wait.CurrentFunction.GetType(), "functionInstance");
@@ -87,15 +85,15 @@ public class RewriteMatchExpression : ExpressionVisitor
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
-            var left = CompilePart(node.Left);
-            var right = CompilePart(node.Right);
+            var left = TryTranslateToConstant(node.Left);
+            var right = TryTranslateToConstant(node.Right);
             return base.VisitBinary(MakeBinary(node.NodeType, left, right));
         }
 
-        private Expression CompilePart(Expression expression)
+        private Expression TryTranslateToConstant(Expression expression)
         {
-            if (expression is BinaryExpression) return expression;
-            if (IsParamterAccess(expression)) return expression;
+            if (new UseParamterVisitor(expression).Result) return expression;
+
 
             var functionType =
                 typeof(Func<,,,>)
@@ -121,27 +119,38 @@ public class RewriteMatchExpression : ExpressionVisitor
                 else
                 {
                     //todo:throw
-                    return expression;
+                    throw new NotSupportedException($"Can't translate `{expression}` to constant value. ");
                 }
 
             }
             catch
             {
-                throw new NotSupportedException($"Can't translate `{expression.ToString()}` to constant value. ");
+                throw new NotSupportedException(message: $"Can't translate `{expression.ToString()}` to constant value. ");
             }
         }
-        private bool IsParamterAccess(Expression expression)
-        {
-            var memberExpression = expression as MemberExpression;
-            while (memberExpression != null && memberExpression.Expression is MemberExpression me)
-            {
-                memberExpression = me;
-            }
-            return expression is ParameterExpression || memberExpression?.Expression is ParameterExpression;
-        }
+
+
+
         protected bool IsBasicType(object result)
         {
             return result != null && (result.GetType().IsValueType || result.GetType() == typeof(string));
+        }
+    }
+    private class UseParamterVisitor : ExpressionVisitor
+    {
+        public bool Result { get; private set; } = false;
+        public UseParamterVisitor(Expression expression)
+        {
+            Visit(expression);
+        }
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            if (Result == false)
+            {
+                Result = true;
+                return node;
+            }
+            return base.VisitParameter(node);
         }
     }
     private class WaitMatchValueVisitor : ExpressionVisitor
