@@ -106,7 +106,12 @@ public class RewriteMatchExpression : ExpressionVisitor
              */
             var isOutput = node == expression.Parameters[1];
             var isInput = node == expression.Parameters[0];
-
+            return Convert(
+                    Property(_pushedCall,
+                        typeof(JObject).GetProperty("Item", new[] { typeof(string) }),
+                        Constant("output")
+                    ),
+                    node.Type)
             return base.VisitParameter(node);
         }
 
