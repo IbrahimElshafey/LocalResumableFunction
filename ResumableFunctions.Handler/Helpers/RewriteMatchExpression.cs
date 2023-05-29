@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Xml.Linq;
+using FastExpressionCompiler;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Newtonsoft.Json.Linq;
@@ -108,7 +109,7 @@ public class RewriteMatchExpression : ExpressionVisitor
                 Convert(expression, typeof(object)),
                   matchExpression.Parameters[0],
                   matchExpression.Parameters[1],
-                  matchExpression.Parameters[2]).Compile();
+                  matchExpression.Parameters[2]).CompileFast();
             try
             {
                 result = getExp.DynamicInvoke(null, null, functionInstance);

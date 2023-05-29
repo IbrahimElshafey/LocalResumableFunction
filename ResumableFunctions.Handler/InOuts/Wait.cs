@@ -183,7 +183,6 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
     {
         to.SetDataExpressionValue = from.SetDataExpressionValue;
         to.MatchIfExpressionValue = from.MatchIfExpressionValue;
-        to.NeedFunctionStateForMatch = from.NeedFunctionStateForMatch;
         to.MethodToWaitId = from.MethodToWaitId;
         to.MethodToWait = from.MethodToWait;
         to.LoadExpressions();

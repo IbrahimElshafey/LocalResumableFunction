@@ -213,7 +213,7 @@ namespace ResumableFunctions.Handler.UiService
                     call,
                     counter.All,
                     counter.Matched,
-                    counter.Matched
+                    counter.NotMatched
                 ));
           
             return await query.ToListAsync();

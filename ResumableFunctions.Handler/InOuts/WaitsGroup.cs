@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
+using FastExpressionCompiler;
 using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
@@ -31,16 +32,17 @@ public class WaitsGroup : Wait
             case WaitType.GroupWaitAll:
                 isFinished = ChildWaits?.All(x => x.Status == WaitStatus.Completed) is true;
                 break;
+
             case WaitType.GroupWaitFirst:
                 isFinished = ChildWaits?.Any(x => x.Status == WaitStatus.Completed) is true;
                 break;
+
             case WaitType.GroupWaitWithExpression when GroupMatchExpression != null:
-                {
-                    var matchCompiled = (Func<WaitsGroup, bool>)GroupMatchExpression.Compile();
-                    var isCompleted = matchCompiled(this);
-                    Status = isCompleted ? WaitStatus.Completed : Status;
-                    return isCompleted;
-                }
+                var matchCompiled = (Func<WaitsGroup, bool>)GroupMatchExpression.CompileFast();
+                var isCompleted = matchCompiled(this);
+                Status = isCompleted ? WaitStatus.Completed : Status;
+                return isCompleted;
+
             case WaitType.GroupWaitWithExpression:
                 isFinished = ChildWaits?.Any(x => x.Status == WaitStatus.Waiting) is false;
                 break;

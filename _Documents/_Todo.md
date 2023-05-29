@@ -1,13 +1,16 @@
 ﻿# Todo
 
 ## Core functions
+* Process same service waits in bulk
+	* Add `ServiceId` to `PushedCallWaits` table
+* Wait default behavior is to activate one instance of function type
+	* Add bool ActivateOneInstance to method wait
+* Delay processing if the scan is in progress
 * Best options for expression tree serialization
 * Best options for data serialization
 * Speed up find matched waits query
 	* JSON columns
 	* InstanceId special prop
-* Pushed method shoud activate only on instance per function
-* Re-Schedule processing if there is a scan process in progress
 * Remove direct use for DbContext
 * Same DLL in two services
 * Review all places where database update occurs

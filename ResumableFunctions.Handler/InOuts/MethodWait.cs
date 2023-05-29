@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
+using FastExpressionCompiler;
 using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
@@ -20,7 +21,6 @@ public class MethodWait : Wait
 
     internal byte[] MatchIfExpressionValue { get; set; }
 
-    public bool NeedFunctionStateForMatch { get; internal set; } = false;
 
     public string RefineMatchModifier { get; internal set; }
 
@@ -90,7 +90,7 @@ public class MethodWait : Wait
     {
         try
         {
-            var setDataExpression = SetDataExpression.Compile();
+            var setDataExpression = SetDataExpression.CompileFast();
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog(
@@ -114,7 +114,7 @@ public class MethodWait : Wait
         {
             if (IsFirst && MatchIfExpressionValue == null)
                 return true;
-            var check = MatchIfExpression.Compile();
+            var check = MatchIfExpression.CompileFast();
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction);
         }
         catch (Exception ex)
