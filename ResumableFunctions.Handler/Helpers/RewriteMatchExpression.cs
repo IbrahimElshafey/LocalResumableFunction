@@ -48,15 +48,13 @@ public class RewriteMatchExpression : ExpressionVisitor
         Result = new TranslateConstantsVistor(Result, wait.CurrentFunction).Result;
         wait.PartialMatchValue = new WaitMatchValueVisitor(Result).Result;
         WaitMatchValue = (JObject)wait.PartialMatchValue;
+        JsonResult = new UseJObjectVisitor(Result).Result;
     }
 
     public LambdaExpression Result { get; protected set; }
+    public LambdaExpression JsonResult { get; protected set; }
     internal JObject WaitMatchValue { get; }
 
-    public override Expression Visit(Expression node)
-    {
-        return base.Visit(node);
-    }
 
     protected override Expression VisitParameter(ParameterExpression node)
     {
@@ -69,6 +67,50 @@ public class RewriteMatchExpression : ExpressionVisitor
         return base.VisitParameter(node);
     }
 
+    private class UseJObjectVisitor : ExpressionVisitor
+    {
+        private LambdaExpression expression;
+        private readonly ParameterExpression _pushedCall;
+
+        public LambdaExpression Result { get; internal set; }
+
+        public UseJObjectVisitor(LambdaExpression expression)
+        {
+            this.expression = expression;
+            _pushedCall = Parameter(typeof(JObject), "pushedCall");
+           
+
+            var updatedBoy = (LambdaExpression)Visit(expression);
+            var functionType = typeof(Func<,>)
+                .MakeGenericType(
+                    typeof(JObject),
+                    typeof(bool));
+
+            Result = Lambda(
+                functionType,
+                updatedBoy.Body,
+                _pushedCall);
+        }
+
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            /*
+                Convert(
+                    Property(pushedCall,
+                        typeof(JObject).GetProperty("Item", new[] { typeof(string) }),
+                        Constant("output")
+                    ),
+                    typeof(int),
+                    typeof(JToken).GetMethod("op_Explicit", new[] { typeof(JToken) })
+                )
+             */
+            var isOutput = node == expression.Parameters[1];
+            var isInput = node == expression.Parameters[0];
+
+            return base.VisitParameter(node);
+        }
+
+    }
     private class TranslateConstantsVistor : ExpressionVisitor
     {
         private readonly LambdaExpression matchExpression;
@@ -146,7 +188,7 @@ public class RewriteMatchExpression : ExpressionVisitor
         }
         protected override Expression VisitParameter(ParameterExpression node)
         {
-            if (Result == false)
+            if (!Result)
             {
                 Result = true;
                 return node;

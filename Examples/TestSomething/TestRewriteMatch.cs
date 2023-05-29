@@ -44,35 +44,30 @@ namespace TestSomething
 
         public void Test()
         {
-            var wait = WaitMethodTwo();
-            var matchRewrite = new RewriteMatchExpression(wait);
-            var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.Result.Compile();
+            //var wait = WaitMethodTwo();
+            //var matchRewrite = new RewriteMatchExpression(wait);
+            //var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.Result.Compile();
 
 
-            var wait1 = WaitMethodOne();
-            var matchRewrite1 = new RewriteMatchExpression(wait1);
-            var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.Result.Compile();
-            var exprssionAsString1 = matchRewrite1.Result.ToString();
-            var result = method1.Invoke("12345", 5, this);
-            result = method1.Invoke("123456", 6, this);
+            //var wait1 = WaitMethodOne();
+            //var matchRewrite1 = new RewriteMatchExpression(wait1);
+            //var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.Result.Compile();
+            //var exprssionAsString1 = matchRewrite1.Result.ToString();
+            //var result = method1.Invoke("12345", 5, this);
+            //result = method1.Invoke("123456", 6, this);
 
 
-            //var pushedCall = JsonConvert.DeserializeObject<JObject>("""
-            //    {
-            //        "input":{"ID":"123456"},
-            //        "output":5
-            //    }
-            //    """);
-            //foreach (var item in pushedCall.Children())
-            //{
-            //    if (item is JProperty property)
-            //    {
-            //        Console.WriteLine(property.Path);
-            //        Console.WriteLine(property.Name);
-            //        Console.WriteLine(property.Value);
-            //    }
-            //}
+            var pushedCall = JsonConvert.DeserializeObject<JObject>("""
+                {
+                    "input":"123456",
+                    "output":6
+                }
+                """);
 
+            //y == InstanceId || x == (InstanceId + 10).ToString() && y <= Math.Max(10, 100)
+            Expression<Func<JObject, bool>> matchJson = pushedCall =>
+                (int)pushedCall["output"] == InstanceId;
+            var x = matchJson.Compile().Invoke(pushedCall);
             //var a = matchRewrite.WaitMatchValue;
             //foreach (var item in a.Children())
             //{
