@@ -78,9 +78,9 @@ public class RewriteMatchExpression : ExpressionVisitor
         {
             this.expression = expression;
             _pushedCall = Parameter(typeof(JObject), "pushedCall");
-           
 
-            var updatedBoy = (LambdaExpression)Visit(expression);
+
+            var updatedBoy = Visit(expression.Body);
             var functionType = typeof(Func<,>)
                 .MakeGenericType(
                     typeof(JObject),
@@ -88,30 +88,23 @@ public class RewriteMatchExpression : ExpressionVisitor
 
             Result = Lambda(
                 functionType,
-                updatedBoy.Body,
+                updatedBoy,
                 _pushedCall);
         }
 
         protected override Expression VisitParameter(ParameterExpression node)
         {
-            /*
-                Convert(
-                    Property(pushedCall,
-                        typeof(JObject).GetProperty("Item", new[] { typeof(string) }),
-                        Constant("output")
-                    ),
-                    typeof(int),
-                    typeof(JToken).GetMethod("op_Explicit", new[] { typeof(JToken) })
-                )
-             */
             var isOutput = node == expression.Parameters[1];
-            var isInput = node == expression.Parameters[0];
+            var castMethod = typeof(JToken).GetMethods().First(x => x.Name == "op_Explicit" && x.ReturnType == node.Type);
             return Convert(
                     Property(_pushedCall,
                         typeof(JObject).GetProperty("Item", new[] { typeof(string) }),
-                        Constant("output")
+                        Constant(isOutput ? "output" : "input")
                     ),
-                    node.Type)
+                    node.Type,
+                    castMethod);
+
+          
             return base.VisitParameter(node);
         }
 
@@ -160,29 +153,28 @@ public class RewriteMatchExpression : ExpressionVisitor
             try
             {
                 result = getExp.DynamicInvoke(null, null, functionInstance);
-                if (IsBasicType(result))
+                //todo:Must Handle cases enum,datetime,byte array,guid,or contract type in shared Dll
+                //may use json serialization if type in shared Dll
+                if (result.CanBeConstant())
                 {
                     return Constant(result);
                 }
                 else
                 {
                     //todo:throw
-                    throw new NotSupportedException($"Can't translate `{expression}` to constant value. ");
+                    throw new NotSupportedException($"Can't use expression `{expression}` in match. ");
                 }
 
             }
             catch
             {
-                throw new NotSupportedException(message: $"Can't translate `{expression.ToString()}` to constant value. ");
+                throw new NotSupportedException(message: $"Can't use expression `{expression}` in match. ");
             }
         }
 
 
 
-        protected bool IsBasicType(object result)
-        {
-            return result != null && (result.GetType().IsValueType || result.GetType() == typeof(string));
-        }
+      
     }
     private class UseParamterVisitor : ExpressionVisitor
     {

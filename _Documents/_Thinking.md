@@ -89,6 +89,7 @@ https://stackoverflow.com/questions/51763168/common-configurations-for-entities-
 	* Number Value
 	* CreationDate
 	* IsAggregation (boolean)
+
 ## Example
 * Define Aggregate `DefineAggregate(forTable: "Post",name: "LikesCount",aggregateFunction: "SUM")`
 * Use when like button click `post.AddAggregateValue("LikesCount",1)`

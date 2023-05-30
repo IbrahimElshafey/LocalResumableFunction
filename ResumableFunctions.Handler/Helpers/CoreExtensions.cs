@@ -63,11 +63,11 @@ public static class CoreExtensions
         //WaitMethodAspect.ServiceProvider = app.Services;
         //HangfireActivator.ServiceProvider = app.Services;
         GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(app.Services));
-        
+
         EnqueueScanProcess(app);
     }
 
-   
+
     private static void EnqueueScanProcess(IHost app)
     {
         using var scope = app.Services.CreateScope();
@@ -254,4 +254,17 @@ public static class CoreExtensions
         //}
         return null;
     }
+
+
+    //https://www.newtonsoft.com/json/help/html/serializationguide.htm
+    //https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/built-in-types
+    //https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/constants
+    public static bool IsConstantType(this Type type)
+    {
+        var types = new[] { typeof(bool), typeof(byte), typeof(sbyte), typeof(char), typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(nint), typeof(nuint), typeof(long), typeof(ulong), typeof(short), typeof(ushort), typeof(string) };
+        return types.Contains(type);
+    }
+
+    public static bool CanBeConstant(this object ob)=>
+        ob != null && ob.GetType().IsConstantType();
 }

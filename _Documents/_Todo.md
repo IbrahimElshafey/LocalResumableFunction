@@ -7,10 +7,9 @@
 	* Add bool ActivateOneInstance to method wait
 * Delay processing if the scan is in progress
 * Best options for expression tree serialization
-* Best options for data serialization
+* Best options for data serialization (How to make Json faster and smaller)
 * Speed up find matched waits query
-	* JSON columns
-	* InstanceId special prop
+	* JSON columns (query state in Db)
 * Remove direct use for DbContext
 * Same DLL in two services
 * Review all places where database update occurs
@@ -19,7 +18,7 @@
 	* https://github.com/quozd/awesome-dotnet#serialization
 
 * Back to UI coding
-* Test replay in sub functions
+
 
 ## UI project
 * RF Instance Details
@@ -113,3 +112,10 @@
 	* https://github.com/microsoft/reverse-proxy
 * RabbitMQ or any service bus [Subscribe to event]
 * File/Folder Changes [File Watcher]
+
+# Testing
+* Replay in sub functions
+* Multiple sub functions
+* 1 Million active wait test
+* 1000 resumable function test
+* 1000 pushed call per second test
