@@ -8,7 +8,8 @@ internal class Program
 
         //TestTreeCascadeAction();
         //await TestAspectInjectorAsync();
-        new TestRewriteMatch().Test();
+        //new TestRewriteMatch().Test();
+        new MessagePackTest().Test();
     }
 
     private static async Task TestAspectInjectorAsync()

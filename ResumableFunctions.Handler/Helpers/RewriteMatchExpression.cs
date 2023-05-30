@@ -46,7 +46,7 @@ public class RewriteMatchExpression : ExpressionVisitor
             _outputArg,
             _functionInstanceArg);
         Result = new TranslateConstantsVistor(Result, wait.CurrentFunction).Result;
-        wait.PartialMatchValue = new WaitMatchValueVisitor(Result).Result;
+        wait.PartialMatchValue = new IdsObjectVisitor(Result).Result;
         WaitMatchValue = (JObject)wait.PartialMatchValue;
         JsonResult = new UseJObjectVisitor(Result).Result;
     }
@@ -94,17 +94,18 @@ public class RewriteMatchExpression : ExpressionVisitor
 
         protected override Expression VisitParameter(ParameterExpression node)
         {
-            var isOutput = node == expression.Parameters[1];
-            var castMethod = typeof(JToken).GetMethods().First(x => x.Name == "op_Explicit" && x.ReturnType == node.Type);
-            return Convert(
-                    Property(_pushedCall,
-                        typeof(JObject).GetProperty("Item", new[] { typeof(string) }),
-                        Constant(isOutput ? "output" : "input")
-                    ),
-                    node.Type,
-                    castMethod);
-
-          
+            if (node.Type.IsConstantType())
+            {
+                var isOutput = node == expression.Parameters[1];
+                var castMethod = typeof(JToken).GetMethods().First(x => x.Name == "op_Explicit" && x.ReturnType == node.Type);
+                return
+                    Convert(
+                            Property(_pushedCall, typeof(JObject).GetProperty("Item", new[] { typeof(string) }),
+                            Constant(isOutput ? "output" : "input")
+                        ),
+                        node.Type,
+                        castMethod);
+            }
             return base.VisitParameter(node);
         }
 
@@ -155,16 +156,18 @@ public class RewriteMatchExpression : ExpressionVisitor
                 result = getExp.DynamicInvoke(null, null, functionInstance);
                 //todo:Must Handle cases enum,datetime,byte array,guid,or contract type in shared Dll
                 //may use json serialization if type in shared Dll
-                if (result.CanBeConstant())
+                if (result != null)
                 {
-                    return Constant(result);
+                    if (result.GetType().IsConstantType())
+                    {
+                        return Constant(result);
+                    }
+                    else if (result is DateTime date)
+                    {
+                        return New(typeof(DateTime).GetConstructor(new[] { typeof(long) }),Constant(date.Ticks));
+                    }
                 }
-                else
-                {
-                    //todo:throw
-                    throw new NotSupportedException($"Can't use expression `{expression}` in match. ");
-                }
-
+                throw new NotSupportedException($"Can't use expression `{expression}` in match. ");
             }
             catch
             {
@@ -174,7 +177,7 @@ public class RewriteMatchExpression : ExpressionVisitor
 
 
 
-      
+
     }
     private class UseParamterVisitor : ExpressionVisitor
     {
@@ -193,14 +196,11 @@ public class RewriteMatchExpression : ExpressionVisitor
             return base.VisitParameter(node);
         }
     }
-    private class WaitMatchValueVisitor : ExpressionVisitor
+    private class IdsObjectVisitor : ExpressionVisitor
     {
-        private readonly LambdaExpression matchExpression;
-
         public JObject Result { get; } = new JObject();
-        public WaitMatchValueVisitor(LambdaExpression matchExpression)
+        public IdsObjectVisitor(LambdaExpression matchExpression)
         {
-            this.matchExpression = matchExpression;
             Visit(matchExpression);
         }
         protected override Expression VisitBinary(BinaryExpression node)

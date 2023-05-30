@@ -37,7 +37,7 @@ namespace TestSomething
         {
             var localVariable = "kjlklk";
             var methodWait = new MethodWait<MethodInput, MethodOutput>(TestMethodTwo)
-                       .MatchIf((x, y) => y.TaskId == InstanceId + 10 || x.Id == InstanceId + 20 && localVariable == y.TaskId.ToString() && !x.IsMan)
+                       .MatchIf((x, y) => y.TaskId == InstanceId + 10 || x.Id == InstanceId + 20 && y.DateProp == DateTime.Today && !x.IsMan)
                        .SetData((input, output) => InstanceId == output.TaskId);
             methodWait.CurrentFunction = this;
             return methodWait;
@@ -55,6 +55,7 @@ namespace TestSomething
 
         private void TestWithComplexTypes()
         {
+            Expression date = () => new DateTime(1235666);
             var wait = WaitMethodTwo();
             var matchRewrite = new RewriteMatchExpression(wait);
             var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.Result.Compile();
@@ -98,5 +99,7 @@ namespace TestSomething
     public class MethodOutput
     {
         public int TaskId { get; set; }
+        public Guid GuidProp { get; set; }
+        public DateTime DateProp { get; set; }
     }
 }
