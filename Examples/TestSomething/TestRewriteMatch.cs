@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,11 +34,22 @@ namespace TestSomething
             return methodWait;
         }
 
+        private int[] IntArrayMethod() => new int[] { 12, 13, 14, 15, };
         public MethodWait WaitMethodTwo()
         {
             var localVariable = "kjlklk";
             var methodWait = new MethodWait<MethodInput, MethodOutput>(TestMethodTwo)
-                       .MatchIf((x, y) => y.TaskId == InstanceId + 10 || x.Id == InstanceId + 20 && y.DateProp == DateTime.Today && !x.IsMan)
+                       .MatchIf((x, y) =>
+                       //y.TaskId == InstanceId + 10 ||
+                       //x.Id == InstanceId + 20 &&
+                       //y.DateProp == DateTime.Today &&
+                       //y.ByteArray == new byte[] { 12, 13, 14, 15, } ||
+                       y.IntArray[0] == IntArrayMethod()[2] ||
+                       y.IntArray == IntArrayMethod() &&
+                       //y.GuidProp == new Guid("ab62534b-2229-4f42-8f4e-c287c82ec760") &&
+                       //y.EnumProp == (StackBehaviour.Pop1 | StackBehaviour.Pop1_pop1) &&
+                       !x.IsMan
+                       )
                        .SetData((input, output) => InstanceId == output.TaskId);
             methodWait.CurrentFunction = this;
             return methodWait;
@@ -55,7 +67,7 @@ namespace TestSomething
 
         private void TestWithComplexTypes()
         {
-            Expression date = () => new DateTime(1235666);
+
             var wait = WaitMethodTwo();
             var matchRewrite = new RewriteMatchExpression(wait);
             var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.Result.Compile();
@@ -101,5 +113,9 @@ namespace TestSomething
         public int TaskId { get; set; }
         public Guid GuidProp { get; set; }
         public DateTime DateProp { get; set; }
+
+        public byte[] ByteArray { get; set; }
+        public int[] IntArray { get; set; }
+        public StackBehaviour EnumProp { get; set; }
     }
 }

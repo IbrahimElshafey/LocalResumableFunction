@@ -4,6 +4,7 @@ using System.Xml.Linq;
 using FastExpressionCompiler;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.InOuts;
 using static System.Linq.Expressions.Expression;
@@ -144,7 +145,6 @@ public class RewriteMatchExpression : ExpressionVisitor
                     matchExpression.Parameters[1].Type,
                     matchExpression.Parameters[2].Type,
                     typeof(object));
-            object result = null;
             var getExp = Lambda(
                 functionType,
                 Convert(expression, typeof(object)),
@@ -153,25 +153,44 @@ public class RewriteMatchExpression : ExpressionVisitor
                   matchExpression.Parameters[2]).CompileFast();
             try
             {
-                result = getExp.DynamicInvoke(null, null, functionInstance);
-                //todo:Must Handle cases enum,datetime,byte array,guid,or contract type in shared Dll
-                //may use json serialization if type in shared Dll
+                object result = getExp.DynamicInvoke(null, null, functionInstance);
                 if (result != null)
                 {
                     if (result.GetType().IsConstantType())
                     {
                         return Constant(result);
                     }
+                    else if (expression.NodeType == ExpressionType.New)
+                        return expression;
                     else if (result is DateTime date)
                     {
-                        return New(typeof(DateTime).GetConstructor(new[] { typeof(long) }),Constant(date.Ticks));
+                        return New(typeof(DateTime).GetConstructor(new[] { typeof(long) }), Constant(date.Ticks));
+                    }
+                    else if (result is Guid guid)
+                    {
+                        return New(
+                            typeof(Guid).GetConstructor(new[] { typeof(string) }),
+                            Constant(guid.ToString()));
+                    }
+                    else if (JsonConvert.SerializeObject(result) is string json)
+                    {
+                        return Convert(
+                            Call(
+                                typeof(JsonConvert).GetMethod("DeserializeObject", 0, new[] { typeof(string), typeof(Type) }),
+                                Constant(json),
+                                Constant(result.GetType(), typeof(Type))
+                            ),
+                            result.GetType()
+                        );
                     }
                 }
                 throw new NotSupportedException($"Can't use expression `{expression}` in match. ");
             }
-            catch
+            catch(Exception ex)
             {
-                throw new NotSupportedException(message: $"Can't use expression `{expression}` in match. ");
+                throw new NotSupportedException(message:
+                    $"Can't use expression `{expression}` in match.\n" +
+                    $"Exception: {ex}");
             }
         }
 
