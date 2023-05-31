@@ -47,7 +47,8 @@ namespace TestSomething
                        y.IntArray[0] == IntArrayMethod()[2] ||
                        y.IntArray == IntArrayMethod() &&
                        //y.GuidProp == new Guid("ab62534b-2229-4f42-8f4e-c287c82ec760") &&
-                       //y.EnumProp == (StackBehaviour.Pop1 | StackBehaviour.Pop1_pop1) &&
+                       y.EnumProp == (StackBehaviour.Pop1 | StackBehaviour.Pop1_pop1) ||
+                       y.EnumProp == StackBehaviour.Popi_popi_popi &&
                        !x.IsMan
                        )
                        .SetData((input, output) => InstanceId == output.TaskId);
@@ -67,18 +68,17 @@ namespace TestSomething
 
         private void TestWithComplexTypes()
         {
-
             var wait = WaitMethodTwo();
             var matchRewrite = new RewriteMatchExpression(wait);
-            var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.Result.Compile();
+            var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.MatchExpression.CompileFast();
         }
 
         private void TestWithBasicTypes()
         {
             var wait1 = WaitMethodOne();
             var matchRewrite1 = new RewriteMatchExpression(wait1);
-            var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.Result.CompileFast();
-            var exprssionAsString1 = matchRewrite1.Result.ToString();
+            var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.MatchExpression.CompileFast();
+            var exprssionAsString1 = matchRewrite1.MatchExpression.ToString();
             var result = method1.Invoke("12345", 5, this);
             result = method1.Invoke("123456", 6, this);
 
@@ -95,7 +95,7 @@ namespace TestSomething
                     "output":6
                 }
                 """);
-            var jsonCompiled = (Func<JObject, bool>)matchRewrite1.JsonResult.CompileFast();
+            var jsonCompiled = (Func<JObject, bool>)matchRewrite1.MatchExpressionWithJson.CompileFast();
             result = jsonCompiled.Invoke(pushedCall1);
             result = jsonCompiled.Invoke(pushedCall2);
         }

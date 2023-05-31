@@ -24,7 +24,7 @@ public class RewriteMatchExpression : ExpressionVisitor
             return;
         if (wait.MatchIfExpression?.Parameters.Count == 3)
         {
-            Result = wait.MatchIfExpression;
+            MatchExpression = wait.MatchIfExpression;
             return;
         }
         _wait = wait;
@@ -40,21 +40,21 @@ public class RewriteMatchExpression : ExpressionVisitor
                 updatedBoy.Parameters[1].Type,
                 wait.CurrentFunction.GetType(),
                 typeof(bool));
-        Result = Lambda(
+        MatchExpression = Lambda(
             functionType,
             updatedBoy.Body,
             _inputArg,
             _outputArg,
             _functionInstanceArg);
-        Result = new TranslateConstantsVistor(Result, wait.CurrentFunction).Result;
-        wait.PartialMatchValue = new IdsObjectVisitor(Result).Result;
-        WaitMatchValue = (JObject)wait.PartialMatchValue;
-        JsonResult = new UseJObjectVisitor(Result).Result;
+        MatchExpression = new TranslateConstantsVistor(MatchExpression, wait.CurrentFunction).Result;
+        //wait.IdsObjectValue = new IdsObjectVisitor(Result).Result;
+        //WaitMatchValue = (JObject)wait.IdsObjectValue;
+        //MatchExpressionWithJson = new MatchUsingJsonVisitor(MatchExpression).Result;
     }
 
-    public LambdaExpression Result { get; protected set; }
-    public LambdaExpression JsonResult { get; protected set; }
-    internal JObject WaitMatchValue { get; }
+    public LambdaExpression MatchExpression { get; protected set; }
+    //public LambdaExpression MatchExpressionWithJson { get; protected set; }
+    //internal JObject WaitMatchValue { get; }
 
 
     protected override Expression VisitParameter(ParameterExpression node)
@@ -68,14 +68,14 @@ public class RewriteMatchExpression : ExpressionVisitor
         return base.VisitParameter(node);
     }
 
-    private class UseJObjectVisitor : ExpressionVisitor
+    private class MatchUsingJsonVisitor : ExpressionVisitor
     {
         private LambdaExpression expression;
         private readonly ParameterExpression _pushedCall;
 
         public LambdaExpression Result { get; internal set; }
 
-        public UseJObjectVisitor(LambdaExpression expression)
+        public MatchUsingJsonVisitor(LambdaExpression expression)
         {
             this.expression = expression;
             _pushedCall = Parameter(typeof(JObject), "pushedCall");
@@ -135,7 +135,7 @@ public class RewriteMatchExpression : ExpressionVisitor
 
         private Expression TryTranslateToConstant(Expression expression)
         {
-            if (new UseParamterVisitor(expression).Result) return expression;
+            if (new UseParamterVisitor(expression).IsParameterUsed) return expression;
 
 
             var functionType =
@@ -145,7 +145,8 @@ public class RewriteMatchExpression : ExpressionVisitor
                     matchExpression.Parameters[1].Type,
                     matchExpression.Parameters[2].Type,
                     typeof(object));
-            var getExp = Lambda(
+
+            var getExpValue = Lambda(
                 functionType,
                 Convert(expression, typeof(object)),
                   matchExpression.Parameters[0],
@@ -153,15 +154,15 @@ public class RewriteMatchExpression : ExpressionVisitor
                   matchExpression.Parameters[2]).CompileFast();
             try
             {
-                object result = getExp.DynamicInvoke(null, null, functionInstance);
+                object result = getExpValue.DynamicInvoke(null, null, functionInstance);
                 if (result != null)
                 {
                     if (result.GetType().IsConstantType())
                     {
                         return Constant(result);
                     }
-                    else if (expression.NodeType == ExpressionType.New)
-                        return expression;
+                    //else if (expression.NodeType == ExpressionType.New)
+                    //    return expression;
                     else if (result is DateTime date)
                     {
                         return New(typeof(DateTime).GetConstructor(new[] { typeof(long) }), Constant(date.Ticks));
@@ -194,22 +195,20 @@ public class RewriteMatchExpression : ExpressionVisitor
             }
         }
 
-
-
-
     }
+
     private class UseParamterVisitor : ExpressionVisitor
     {
-        public bool Result { get; private set; } = false;
+        public bool IsParameterUsed { get; private set; }
         public UseParamterVisitor(Expression expression)
         {
             Visit(expression);
         }
         protected override Expression VisitParameter(ParameterExpression node)
         {
-            if (!Result)
+            if (!IsParameterUsed)
             {
-                Result = true;
+                IsParameterUsed = true;
                 return node;
             }
             return base.VisitParameter(node);

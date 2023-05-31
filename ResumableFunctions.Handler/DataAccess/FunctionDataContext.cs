@@ -133,7 +133,7 @@ public class FunctionDataContext : DbContext
             .HasConversion<ObjectToJsonConverter>();
 
         modelBuilder.Entity<MethodWait>()
-            .Property(x => x.PartialMatchValue)
+            .Property(x => x.IdsObjectValue)
             .HasConversion<ObjectToJsonConverter>();
 
         modelBuilder.Entity<MethodWait>()
