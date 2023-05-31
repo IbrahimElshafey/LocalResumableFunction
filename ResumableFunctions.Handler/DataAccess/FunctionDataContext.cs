@@ -95,6 +95,12 @@ public class FunctionDataContext : DbContext
     {
         //entityTypeBuilder.Property(x => x.Modified).HasDefaultValue(DateTime.MinValue);
         entityTypeBuilder.HasIndex(x => x.AssemblyName);
+
+        entityTypeBuilder
+            .HasMany(x => x.Waits)
+            .WithOne(wait => wait.Service)
+            .HasForeignKey(x => x.ServiceId)
+            .HasConstraintName("FK_Waits_For_Service");
     }
 
     private void ConfigurePushedCalls(EntityTypeBuilder<PushedCall> entityTypeBuilder)

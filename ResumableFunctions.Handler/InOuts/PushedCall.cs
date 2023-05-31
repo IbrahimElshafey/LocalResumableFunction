@@ -13,6 +13,7 @@ public class PushedCall : IEntityWithDelete
 
     public List<WaitForCall> WaitsForCall { get; internal set; } = new();
 
+    //todo: will be deleted or used by external calls only
     public string RefineMatchModifier
     {
         get

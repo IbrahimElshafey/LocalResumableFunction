@@ -13,6 +13,7 @@ public class ServiceData : ObjectWithLog, IEntityWithUpdate
     public DateTime Modified { get; internal set; }
     public int ParentId { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
+    public List<Wait> Waits { get; internal set; }
 
     public override void AddError(string message, Exception ex = null, string code = "")
     {

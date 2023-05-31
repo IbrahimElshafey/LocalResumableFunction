@@ -1,4 +1,5 @@
-﻿# Optimize wait matching
+﻿
+# Optimize wait matching
 * Query to SQL
 	* https://learn.microsoft.com/en-us/dotnet/api/system.data.linq.datacontext.getcommand?view=netframework-4.8.1
 * After wait requested 

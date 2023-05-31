@@ -58,6 +58,9 @@ namespace ResumableFunctions.Handler.InOuts
         }
 
         private string HangfireDbName => $"{Assembly.GetEntryAssembly().GetName().Name}_HangfireDb".Replace(".", "_");
+
+        public int CurrentServiceId { get; set; }
+
         private void CreateHangfireDb()
         {
             var dbConfig = new DbContextOptionsBuilder()

@@ -7,6 +7,8 @@ public class WaitForCall : IEntity
     public PushedCall PushedCall { get; internal set; }
     public int PushedCallId { get; internal set; }
     public int WaitId { get; internal set; }
+    public int ServiceId { get; internal set; }
+    public int FunctionId { get; internal set; }
     public WaitForCallStatus Status { get; internal set; }
     public DateTime Created { get; internal set; }
 

@@ -21,6 +21,7 @@ internal partial class WaitsRepository : IWaitsRepository
 {
     public async Task<bool> SaveWaitRequestToDb(Wait newWait)
     {
+        newWait.ServiceId = _settings.CurrentServiceId;
         if (newWait.IsValidWaitRequest() is false)
         {
             string message =
@@ -54,6 +55,7 @@ internal partial class WaitsRepository : IWaitsRepository
         var methodToWait = await _methodIdentifierRepo.GetWaitMethod(methodWait);
 
         methodWait.MethodToWait = methodToWait;
+        methodWait.ServiceId = _settings.CurrentServiceId; ;
         methodWait.MethodToWaitId = methodToWait.Id;
         methodWait.MethodGroupToWait = methodToWait.ParentMethodGroup;
         methodWait.MethodGroupToWaitId = methodToWait.ParentMethodGroupId;
@@ -66,13 +68,14 @@ internal partial class WaitsRepository : IWaitsRepository
     {
         for (var index = 0; index < manyWaits.ChildWaits.Count; index++)
         {
-            var waitGroupChild = manyWaits.ChildWaits[index];
-            waitGroupChild.FunctionState = manyWaits.FunctionState;
-            waitGroupChild.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
-            waitGroupChild.RequestedByFunction = manyWaits.RequestedByFunction;
-            waitGroupChild.StateAfterWait = manyWaits.StateAfterWait;
-            waitGroupChild.ParentWait = manyWaits;
-            await SaveWaitRequestToDb(waitGroupChild);//child wait in group
+            var childWait = manyWaits.ChildWaits[index];
+            childWait.FunctionState = manyWaits.FunctionState;
+            childWait.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
+            childWait.RequestedByFunction = manyWaits.RequestedByFunction;
+            childWait.StateAfterWait = manyWaits.StateAfterWait;
+            childWait.ParentWait = manyWaits;
+            childWait.ServiceId = _settings.CurrentServiceId;
+            await SaveWaitRequestToDb(childWait);//child wait in group
         }
 
         await AddWait(manyWaits);
@@ -97,6 +100,7 @@ internal partial class WaitsRepository : IWaitsRepository
         functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
         functionWait.FirstWait.ParentWait = functionWait;
         functionWait.FirstWait.ParentWaitId = functionWait.Id;
+        functionWait.FirstWait.ServiceId = _settings.CurrentServiceId;
         var methodId = await _methodIdentifierRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
         functionWait.FirstWait.RequestedByFunction = methodId;
         functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
@@ -118,6 +122,7 @@ internal partial class WaitsRepository : IWaitsRepository
                 typeof(string),
                 typeof(string),
                 typeof(bool));
+        //todo: revisit after ComputedInstanceId done, no need for 
         var inputParameter = Expression.Parameter(typeof(string), "input");
         var outputParameter = Expression.Parameter(typeof(string), "output");
         timeWaitMethod.SetDataExpression = Expression.Lambda(

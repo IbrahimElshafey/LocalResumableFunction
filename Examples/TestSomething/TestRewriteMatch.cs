@@ -95,9 +95,9 @@ namespace TestSomething
                     "output":6
                 }
                 """);
-            var jsonCompiled = (Func<JObject, bool>)matchRewrite1.MatchExpressionWithJson.CompileFast();
-            result = jsonCompiled.Invoke(pushedCall1);
-            result = jsonCompiled.Invoke(pushedCall2);
+            //var jsonCompiled = (Func<JObject, bool>)matchRewrite1.MatchExpressionWithJson.CompileFast();
+            //result = jsonCompiled.Invoke(pushedCall1);
+            //result = jsonCompiled.Invoke(pushedCall2);
         }
     }
 

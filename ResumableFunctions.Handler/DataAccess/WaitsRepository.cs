@@ -23,17 +23,21 @@ internal partial class WaitsRepository : IWaitsRepository
     private readonly FunctionDataContext _context;
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly IMethodIdentifierRepository _methodIdentifierRepo;
+    private readonly IResumableFunctionsSettings _settings;
+
     public WaitsRepository(
         ILogger<WaitsRepository> logger,
         IBackgroundJobClient backgroundJobClient,
         FunctionDataContext context, IBackgroundJobClient backgroundJobClient2,
-        IMethodIdentifierRepository methodIdentifierRepo)
+        IMethodIdentifierRepository methodIdentifierRepo,
+        IResumableFunctionsSettings settings)
     {
         _logger = logger;
         this.backgroundJobClient = backgroundJobClient;
         _context = context;
         _backgroundJobClient = backgroundJobClient2;
         _methodIdentifierRepo = methodIdentifierRepo;
+        _settings = settings;
     }
 
     

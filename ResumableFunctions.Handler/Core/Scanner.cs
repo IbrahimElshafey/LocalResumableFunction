@@ -31,7 +31,6 @@ public class Scanner
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly string _currentServiceName;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
-    private int currentServiceId = -1;
 
     public Scanner(
         IServiceProvider serviceProvider,
@@ -132,7 +131,7 @@ public class Scanner
             {
                 MethodType = methodType,
                 IsActive = entryPointCheck.IsActive
-            }, currentServiceId);
+            }, _settings.CurrentServiceId);
         await _context.SaveChangesAsync();
 
 
@@ -210,7 +209,7 @@ public class Scanner
         if (serviceData == null)
         {
             serviceData = await AddNewServiceData(serviceUrl, currentAssemblyName);
-            currentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
+            _settings.CurrentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
         }
 
         if (File.Exists(assemblyPath) is false)
@@ -222,7 +221,7 @@ public class Scanner
         }
 
         serviceData.ErrorCounter = 0;
-        currentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
+        _settings.CurrentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
 
         if (serviceData.ParentId == -1)
         {
@@ -298,11 +297,12 @@ public class Scanner
                 if (ValidateMethodWait(method, serviceData))
                 {
                     var methodData = new MethodData(method) { MethodType = MethodType.MethodWait };
-                    await _methodIdentifierRepo.AddWaitMethodIdentifier(methodData, currentServiceId);
+                    await _methodIdentifierRepo.AddWaitMethodIdentifier(methodData, _settings.CurrentServiceId);
                     serviceData?.AddLog($"Adding method identifier {methodData}");
                 }
                 else
-                    serviceData?.AddLog($"Can't add method identifier `{method.GetFullName()}` since it does not match the criteria.");
+                    serviceData?.AddLog(
+                        $"Can't add method identifier `{method.GetFullName()}` since it does not match the criteria.");
             }
         }
         catch (Exception ex)

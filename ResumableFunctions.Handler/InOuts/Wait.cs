@@ -36,6 +36,10 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
 
     internal int FunctionStateId { get; set; }
 
+    internal ServiceData Service { get; set; }
+
+    internal int? ServiceId { get; set; }
+
 
     /// <summary>
     ///     The resumable function that initiated/created/requested the wait.

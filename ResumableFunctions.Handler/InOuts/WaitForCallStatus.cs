@@ -3,6 +3,10 @@
 public enum WaitForCallStatus
 {
     ExpectedMatch,
+    PartiallyMatched,
     Matched,
-    NotMatched
+    NotMatched,
+    ProcessingSucceed,
+    ProcessingFailed,
+    DuplicationCanceled
 }
