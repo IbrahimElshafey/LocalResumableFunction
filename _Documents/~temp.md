@@ -1,14 +1,15 @@
-﻿# Keywords
-* Engine: component responsible for running and resume function execution.
-* Event Provider: is a component that push events to the engine.
-* Queung service: is a way to separate engine and providers.
-* Event: Plain object but contains a property for it's provider.
+﻿# Query State Not Waits
+* Pushed call received 
+* Method group matched 
+* Find queries linked to the group 
+* Find waits that wait for the group 
+* Find states of waits 
+* Apply quires to these states and return succeeded matches
 
-
-
-# What are the expected types and resources for events?
-* Any implementation for `IEventProvider` interface that push events to the engine such as:
-* A WEB proxy listen to server in outs HTTP calls.
-* File watcher.
-* Long pooling service that monitor a database table.
-* Timer service.
+# States Store Service
+* Save function states to no-sql separate DB
+* Operations
+	* Save State
+	* Update State
+	* Delete State
+	* Query State

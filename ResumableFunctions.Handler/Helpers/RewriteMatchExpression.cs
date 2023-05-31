@@ -47,7 +47,7 @@ public class RewriteMatchExpression : ExpressionVisitor
             _outputArg,
             _functionInstanceArg);
         MatchExpression = new TranslateConstantsVistor(MatchExpression, wait.CurrentFunction).Result;
-        //wait.IdsObjectValue = new IdsObjectVisitor(Result).Result;
+        //wait.IdsObjectValue = new IdsObjectVisitor(MatchExpression).Result;
         //WaitMatchValue = (JObject)wait.IdsObjectValue;
         //MatchExpressionWithJson = new MatchUsingJsonVisitor(MatchExpression).Result;
     }
@@ -59,9 +59,11 @@ public class RewriteMatchExpression : ExpressionVisitor
 
     protected override Expression VisitParameter(ParameterExpression node)
     {
+        //rename output
         var isOutput = node == _wait.MatchIfExpression.Parameters[1];
         if (isOutput) return _outputArg;
-
+        
+        //rename input
         var isInput = node == _wait.MatchIfExpression.Parameters[0];
         if (isInput) return _inputArg;
 
