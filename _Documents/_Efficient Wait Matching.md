@@ -24,10 +24,14 @@ public int FunctionId { get; internal set; }
 * Evaluate match does not need data load
 * Serialize pushed call once for same group methods
 
+# Serialization
 * Fast serialization and deserialization for [Use MessagePack] 
 	* StateObject https://github.com/rikimaru0345/Ceras
 	* Wait ExtraData
-	* Expressions
+
+# Expression Serialization
+	* https://github.com/reaqtive/reaqtor/tree/main/Nuqleon/Core/LINQ/Nuqleon.Linq.Expressions.Bonsai
+
 # Separate store for state objects
 * Use NoSql databases to store states
 
@@ -35,8 +39,6 @@ public int FunctionId { get; internal set; }
 	* StateObject https://github.com/rikimaru0345/Ceras
 	* Wait ExtraData
 	* Expressions
-
-
 
 
 * Evaluate expression tree as where clause
