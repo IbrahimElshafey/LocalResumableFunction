@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace TestSomething
             Console.WriteLine(m["DT"]);
             Console.WriteLine(m["Point.X"]);
             Console.WriteLine(m["Comp.Po.X"]);
-
+          
             m["Point.X"] = 1000;
             m["Comp.Po.X"] = 2000;
             Console.WriteLine(m["Point.X"]);
@@ -56,11 +57,15 @@ namespace TestSomething
             Console.WriteLine(result);
         }
 
-
+        private Expression<Func<bool>> GetQuery()
+        {
+            return () => DateTime.Today.Day > 7;
+        }
     }
 
     public class ExpandoAccessor
     {
+        //todo: handle array item access
         public object this[string index]
         {
             get

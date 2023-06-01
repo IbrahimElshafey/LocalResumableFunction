@@ -11,13 +11,15 @@ using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
 
-
+//todo: refactor this class
 public class RewriteMatchExpression : ExpressionVisitor
 {
     private readonly ParameterExpression _functionInstanceArg;
     private readonly ParameterExpression _inputArg;
     private readonly ParameterExpression _outputArg;
     private readonly MethodWait _wait;
+    public LambdaExpression MatchExpression { get; protected set; }
+
     public RewriteMatchExpression(MethodWait wait)
     {
         if (wait?.MatchIfExpression == null)
@@ -46,13 +48,15 @@ public class RewriteMatchExpression : ExpressionVisitor
             _inputArg,
             _outputArg,
             _functionInstanceArg);
-        MatchExpression = new TranslateConstantsVistor(MatchExpression, wait.CurrentFunction).Result;
-        //wait.IdsObjectValue = new IdsObjectVisitor(MatchExpression).Result;
+        var translateConstantsVistor = new TranslateConstantsVistor(MatchExpression, wait.CurrentFunction);
+        MatchExpression = translateConstantsVistor.Result;
+        wait.IdsObjectValue = new IdsObjectVisitor(MatchExpression, translateConstantsVistor.ConstantParts).Result;
         //WaitMatchValue = (JObject)wait.IdsObjectValue;
         //MatchExpressionWithJson = new MatchUsingJsonVisitor(MatchExpression).Result;
     }
 
-    public LambdaExpression MatchExpression { get; protected set; }
+
+
     //public LambdaExpression MatchExpressionWithJson { get; protected set; }
     //internal JObject WaitMatchValue { get; }
 
@@ -62,7 +66,7 @@ public class RewriteMatchExpression : ExpressionVisitor
         //rename output
         var isOutput = node == _wait.MatchIfExpression.Parameters[1];
         if (isOutput) return _outputArg;
-        
+
         //rename input
         var isInput = node == _wait.MatchIfExpression.Parameters[0];
         if (isInput) return _inputArg;
@@ -117,7 +121,7 @@ public class RewriteMatchExpression : ExpressionVisitor
     {
         private readonly LambdaExpression matchExpression;
         private readonly object functionInstance;
-
+        internal List<(Expression CallProp, Expression Calculated)> ConstantParts { get; } = new();
         public LambdaExpression Result { get; }
 
         public TranslateConstantsVistor(LambdaExpression matchExpression, object functionInstance)
@@ -132,12 +136,17 @@ public class RewriteMatchExpression : ExpressionVisitor
         {
             var left = TryTranslateToConstant(node.Left);
             var right = TryTranslateToConstant(node.Right);
-            return base.VisitBinary(MakeBinary(node.NodeType, left, right));
+            if (left.IsCalculated && right.IsCalculated) ;//ignore
+            else if (left.IsCalculated)
+                ConstantParts.Add((right.Result, left.Result));
+            else if (right.IsCalculated)
+                ConstantParts.Add((left.Result, right.Result));
+            return base.VisitBinary(MakeBinary(node.NodeType, left.Result, right.Result));
         }
 
-        private Expression TryTranslateToConstant(Expression expression)
+        private (Expression Result, bool IsCalculated) TryTranslateToConstant(Expression expression)
         {
-            if (new UseParamterVisitor(expression).IsParameterUsed) return expression;
+            if (new UseParamterVisitor(expression).IsParameterUsed) return (expression, false);
 
 
             var functionType =
@@ -161,35 +170,35 @@ public class RewriteMatchExpression : ExpressionVisitor
                 {
                     if (result.GetType().IsConstantType())
                     {
-                        return Constant(result);
+                        return (Constant(result), true);
                     }
                     //else if (expression.NodeType == ExpressionType.New)
                     //    return expression;
                     else if (result is DateTime date)
                     {
-                        return New(typeof(DateTime).GetConstructor(new[] { typeof(long) }), Constant(date.Ticks));
+                        return (New(typeof(DateTime).GetConstructor(new[] { typeof(long) }), Constant(date.Ticks)), true);
                     }
                     else if (result is Guid guid)
                     {
-                        return New(
+                        return (New(
                             typeof(Guid).GetConstructor(new[] { typeof(string) }),
-                            Constant(guid.ToString()));
+                            Constant(guid.ToString())), true);
                     }
                     else if (JsonConvert.SerializeObject(result) is string json)
                     {
-                        return Convert(
+                        return (Convert(
                             Call(
                                 typeof(JsonConvert).GetMethod("DeserializeObject", 0, new[] { typeof(string), typeof(Type) }),
                                 Constant(json),
                                 Constant(result.GetType(), typeof(Type))
                             ),
                             result.GetType()
-                        );
+                        ), true);
                     }
                 }
                 throw new NotSupportedException($"Can't use expression `{expression}` in match. ");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new NotSupportedException(message:
                     $"Can't use expression `{expression}` in match.\n" +
@@ -216,23 +225,94 @@ public class RewriteMatchExpression : ExpressionVisitor
             return base.VisitParameter(node);
         }
     }
+
     private class IdsObjectVisitor : ExpressionVisitor
     {
+        private readonly LambdaExpression _matchExpression;
+        public List<(Expression CallProp, Expression Calculated)> ConstantParts { get; }
+
         public JObject Result { get; } = new JObject();
-        public IdsObjectVisitor(LambdaExpression matchExpression)
+        public IdsObjectVisitor(LambdaExpression matchExpression, List<(Expression CallProp, Expression Calculated)> parts)
         {
+            _matchExpression = matchExpression;
+            ConstantParts = parts;
             Visit(matchExpression);
         }
         protected override Expression VisitBinary(BinaryExpression node)
         {
             if (node.NodeType == ExpressionType.Equal)
             {
-                if (node.Left is ConstantExpression ce)
-                    Result[node.Right.ToString()] = JToken.FromObject(ce.Value);
-                if (node.Right is ConstantExpression constantExpression)
-                    Result[node.Left.ToString()] = JToken.FromObject(constantExpression.Value);
+
+                if (ConstantParts.Any(x => x.Calculated == node.Left))
+                {
+                    bool isMandatory = new CheckMandatoryVistor(_matchExpression, ConstantParts, node.Right).IsMandatory;
+                    if (isMandatory)
+                        Result[node.Right.ToString()] = JToken.FromObject(GetNodeValue(node.Left));
+                }
+
+                if (ConstantParts.Any(x => x.Calculated == node.Right))
+                {
+                    var isMandatory = new CheckMandatoryVistor(_matchExpression, ConstantParts, node.Left).IsMandatory;
+                    if (isMandatory)
+                        Result[node.Left.ToString()] = JToken.FromObject(GetNodeValue(node.Right));
+                }
+
             }
             return base.VisitBinary(node);
         }
+        private object GetNodeValue(Expression expression)
+        {
+            if (expression is ConstantExpression constantExpression)
+                return constantExpression.Value;
+        }
+    }
+
+    private class CheckMandatoryVistor : ExpressionVisitor
+    {
+        private LambdaExpression _matchExpression;
+        private readonly List<(Expression CallProp, Expression Calculated)> _parts;
+        private Expression _partToCheck;
+        public bool IsMandatory { get; internal set; }
+
+        public CheckMandatoryVistor(
+            LambdaExpression matchExpression,
+            List<(Expression CallProp, Expression Calculated)> parts,
+            Expression partToCheck)
+        {
+            //var x = Constant(15) == partToCheck;
+            //x = Constant(19) == partToCheck;
+            if (partToCheck.NodeType == ExpressionType.Parameter || partToCheck.NodeType == ExpressionType.MemberAccess)
+            {
+                _matchExpression = matchExpression;
+                this._parts = parts;
+                _partToCheck = partToCheck;
+                var expression = Visit(matchExpression.Body);
+                var compiled = Lambda<Func<bool>>(expression).CompileFast();
+                IsMandatory = !compiled();
+            }
+        }
+        protected override Expression VisitBinary(BinaryExpression node)
+        {
+            if (node.NodeType == ExpressionType.Equal && (node.Left == _partToCheck || node.Right == _partToCheck))
+                return Constant(false);
+            var canBeTranslated = _parts.Any(x => x.Calculated == node.Left || x.Calculated == node.Right);
+            if (canBeTranslated) return Constant(true);
+            return base.VisitBinary(node);
+        }
+
+        protected override Expression VisitUnary(UnaryExpression node)
+        {
+            if (node.NodeType == ExpressionType.Not)
+                return Constant(true);
+            return base.VisitUnary(node);
+        }
+    }
+
+
+    private class ConstantPart
+    {
+        public Expression PropPathExpression { get; set; }
+        public Expression ConstantExpression { get; set; }
+        public object ConstantValue { get; set; }
     }
 }
