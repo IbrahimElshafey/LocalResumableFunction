@@ -70,6 +70,7 @@ namespace TestSomething
         private void TestWithComplexTypes()
         {
             var wait = WaitMethodTwo();
+            var matchRewrite1 = new MatchNewVisitor(wait.MatchIfExpression, this);
             var matchRewrite = new RewriteMatchExpression(wait);
             var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.MatchExpression.CompileFast();
         }
