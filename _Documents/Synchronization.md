@@ -1,35 +1,4 @@
-﻿
-# Optimize wait matching
-* Query to SQL
-	* https://learn.microsoft.com/en-us/dotnet/api/system.data.linq.datacontext.getcommand?view=netframework-4.8.1
-* After wait requested 
-* Translate match expression to SQL query
-* Use NoSql databases to store states
-* Can I use https://github.com/sebastienros/yessql to store states
-* We can create table/database for each resumable function
-
-## In current
-* Use Instance ID match
-* Use https://github.com/dadhi/FastExpressionCompiler to fast compile match and set data expression
-* Fast serialization and deserialization for
-	* StateObject https://github.com/rikimaru0345/Ceras
-	* Wait ExtraData
-	* Expressions
-* String to query expression
-	* https://github.com/zzzprojects/System.Linq.Dynamic.Core
-* Fast Lightweight Expression Evaluator
-	* https://github.com/mparlak/Flee
-* Expression Serialization
-	* https://github.com/reaqtive/reaqtor/tree/main/Nuqleon/Core/LINQ/Nuqleon.Linq.Expressions.Bonsai.Serialization
-* Project that serialize expression trees
-	* https://reaqtive.net/blog/2021/05/sequences-linq-rx-reaqtor-part-05-remotable-expressions
-* Back to method compile ans save solution
-	
-	
-	
-	
-	
-# Synchronization Scenarios
+﻿# Synchronization Scenarios
 * Two waits trying update same FunctionState [done]
 	* Using distributed lock for Update Function Data method
 	* Optimistic concurrency token will be validated and exception will be throw and hangfire will replay the task
@@ -73,31 +42,6 @@
 	* ImmutableList<T> Class
 	* ConcurrentBag<T> Class
 
+* Confuigure Interfaces In EF
 https://stackoverflow.com/questions/45943048/ef-core-fluent-api-set-all-column-types-of-interface
 https://stackoverflow.com/questions/51763168/common-configurations-for-entities-implementing-an-interface
-
-
-
-# Aggregate Column Feature (will be separate project)
-* Create table `AggregateDefinition` with columns
-	* EntityName (sush as Orders)
-	* AggregateName (such as FailedOrdersCount,TotalPayments)
-	* AggregateFunction (such as SUM, COUNT, AVG, LAST,...) or user defined
-	* ResetValue (such as -100 default null)
-	* KeepValuesAfterAggregation (true or false)
-* Create table `AggregateValues` with columns 'No update just insersion and delete'
-	* AggregateDefinitionId
-	* Number Value
-	* CreationDate
-	* IsAggregation (boolean)
-
-## Example
-* Define Aggregate `DefineAggregate(forTable: "Post",name: "LikesCount",aggregateFunction: "SUM")`
-* Use when like button click `post.AddAggregateValue("LikesCount",1)`
-* Use when unlike button clicked `post.AddAggregateValue("LikesCount",-1)`
-* When user totally chnaged the content of the post `post.ResetAggregate("LikesCount")`
-* When you wanty to display like counts `post.GetAggregate("LikesCount")`
-
-# Table File Log
-* This will be a separate test project to know more about reading/writing to files
-* How database ACID work

@@ -12,10 +12,11 @@
     <None Include="$(MSBuildThisFileDirectory)Commands.md" />
     <None Include="$(MSBuildThisFileDirectory)External Reading.md" />
     <None Include="$(MSBuildThisFileDirectory)LongMethods.xlsx" />
+    <None Include="$(MSBuildThisFileDirectory)Aggregate Column Idea.md" />
     <None Include="$(MSBuildThisFileDirectory)Test Scenarios.md" />
     <None Include="$(MSBuildThisFileDirectory)MVC_Use.md" />
     <None Include="$(MSBuildThisFileDirectory)_Efficient Wait Matching.md" />
-    <None Include="$(MSBuildThisFileDirectory)_Thinking.md" />
+    <None Include="$(MSBuildThisFileDirectory)Synchronization.md" />
     <None Include="$(MSBuildThisFileDirectory)_Todo.md" />
     <None Include="$(MSBuildThisFileDirectory)~temp.md" />
   </ItemGroup>

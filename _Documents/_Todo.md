@@ -1,22 +1,15 @@
 ﻿# Todo
 
 ## Core functions
-* Process same service waits in bulk
-	* Add `ServiceId` to `PushedCallWaits` table
-* Wait default behavior is to activate one instance of function type
-	* Add bool ActivateOneInstance to method wait
 * Delay processing if the scan is in progress
-* Best options for expression tree serialization
-* Best options for data serialization (How to make Json faster and smaller)
-* Speed up find matched waits query
-	* JSON columns (query state in Db)
 * Remove direct use for DbContext
 * Same DLL in two services
+* Add IStateStore Service
+	* Save State
+	* Update State
+	* Delete State
+	* Query State
 * Review all places where database update occurs
-* Find fast and best object serializer
-	* Save function state all fields [public and non public]
-	* https://github.com/quozd/awesome-dotnet#serialization
-
 * Back to UI coding
 
 
@@ -78,26 +71,6 @@
 * Resumable function hooks
 	* After Resumed
 	* On Error Occurred
-
-
-## Publisher Project
-* [Test] AspectInjector instead of Fody 
-* Scan and send scan result to service owner to verify signatures
-* Use PeriodicTimer/Hangfire to handle background tasks
-	* Send failed requests to servies
-	* Scan Dlls
-* DB
-	* Use LiteDb to save scan Data and requests
-	* Or https://github.com/hhblaze/DBreeze
-
-## Background Cleaning Job
-* Move completed/cancled function instance to Recycle Bin
-	* It's logs
-	* Waits
-* Move completed pushed methods
-* Move inactive methods identifier
-* Move old logs for scan sessions
-* Move soft deleted rows to recyle bin DB
 
 ## Migrate Resumable Function DB
 * How to migrate resumable function database from development to production??
