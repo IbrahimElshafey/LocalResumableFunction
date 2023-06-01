@@ -55,9 +55,11 @@ public class MethodWait : Wait
         //Rewrite Match Expression
         try
         {
-            MatchIfExpression = new RewriteMatchExpression(this).MatchExpression;
+            var matchNewVisitor = new MatchNewVisitor(MatchIfExpression, CurrentFunction);
+            MatchIfExpression = matchNewVisitor.MatchExpression;
             MatchIfExpressionValue =
                 TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, FunctionAssembly));
+            RefineMatchModifier = matchNewVisitor.RefineMatchModifier;
 
             //Rewrite SetData Expression
             SetDataExpression = new RewriteSetDataExpression(this).Result;

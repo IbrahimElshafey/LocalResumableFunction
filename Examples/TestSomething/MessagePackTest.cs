@@ -104,7 +104,7 @@ namespace TestSomething
         private readonly IDictionary<string, object> _dictionary;
         public ExpandoAccessor(ExpandoObject expandoObject)
         {
-            _dictionary = (IDictionary<string, object>)expandoObject;
+            _dictionary = expandoObject;
         }
     }
 }

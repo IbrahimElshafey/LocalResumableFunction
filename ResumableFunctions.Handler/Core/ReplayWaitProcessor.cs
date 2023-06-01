@@ -75,7 +75,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             mw.LoadExpressions();
             var oldMatchExpression = mw.MatchIfExpression;
             mw.MatchIfExpression = replayRequest.MatchExpression;
-            replayRequest.MatchExpression = new RewriteMatchExpression(mw).MatchExpression;
+            var rewriteMatchExpression = new MatchNewVisitor(mw.MatchIfExpression,mw.CurrentFunction);
+            replayRequest.MatchExpression = rewriteMatchExpression.MatchExpression;
             mw.MatchIfExpression = oldMatchExpression;
             CheckReplayMatchExpression(replayRequest, mw);
 
@@ -84,6 +85,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             duplicateWait.IsReplay = true;
             duplicateWait.IsFirst = false;
             duplicateWait.MatchIfExpression = replayRequest.MatchExpression;
+            duplicateWait.RefineMatchModifier = rewriteMatchExpression.RefineMatchModifier;
             await _waitsRepository.SaveWaitRequestToDb(duplicateWait);
             return duplicateWait;// when replay goto with new match
         }

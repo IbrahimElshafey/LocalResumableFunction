@@ -85,18 +85,8 @@ public class RewriteMatchExpression : ExpressionVisitor
         {
             this.expression = expression;
             _pushedCall = Parameter(typeof(JObject), "pushedCall");
-
-
             var updatedBoy = Visit(expression.Body);
-            var functionType = typeof(Func<,>)
-                .MakeGenericType(
-                    typeof(JObject),
-                    typeof(bool));
-
-            Result = Lambda(
-                functionType,
-                updatedBoy,
-                _pushedCall);
+            Result = Lambda<Func<JObject,bool>>(updatedBoy,_pushedCall);
         }
 
         protected override Expression VisitParameter(ParameterExpression node)
@@ -309,107 +299,4 @@ public class RewriteMatchExpression : ExpressionVisitor
             return base.VisitUnary(node);
         }
     }
-
-
-    private class ConstantPart
-    {
-        public Expression PropPathExpression { get; set; }
-        public Expression ConstantExpression { get; set; }
-        public object ConstantValue { get; set; }
-    }
-}
-
-public class GenericVisitor : ExpressionVisitor
-{
-    private List<VisitNodeFunction> _visitors = new();
-    public void AddVisitor(
-        Func<Expression, bool> visitCondition,
-        Func<Expression, Expression> visitFunction)
-    {
-        _visitors.Add(new VisitNodeFunction(visitCondition, visitFunction));
-    }
-
-    public void ClearVisitors() => _visitors.Clear();
-
-    public override Expression Visit(Expression node)
-    {
-        foreach (var visitor in _visitors)
-        {
-            if (visitor.VisitCondition(node))
-                return base.Visit(visitor.VisitFunction(node));
-        }
-        return base.Visit(node);
-    }
-    private class VisitNodeFunction
-    {
-        public VisitNodeFunction(Func<Expression, bool> visitCondition, Func<Expression, Expression> visitFunction)
-        {
-            VisitCondition = visitCondition;
-            VisitFunction = visitFunction;
-        }
-        public Func<Expression, bool> VisitCondition { get; }
-        public Func<Expression, Expression> VisitFunction { get; }
-    }
-}
-
-public class MatchNewVisitor : GenericVisitor
-{
-    public LambdaExpression MatchExpression { get; private set; }
-    private ParameterExpression _functionInstanceArg;
-    private ParameterExpression _inputArg;
-    private ParameterExpression _outputArg;
-    private object _currentFunctionInstance;
-
-    public MatchNewVisitor(LambdaExpression matchExpression, object instance)
-    {
-        MatchExpression = matchExpression;
-        if (MatchExpression == null)
-            return;
-        if (MatchExpression?.Parameters.Count == 3)
-        {
-            MatchExpression = MatchExpression;
-            return;
-        }
-        _currentFunctionInstance = instance;
-        ChangeInputOutputParamsNames();
-    }
-
-    private void ChangeInputOutputParamsNames()
-    {
-        var expression = MatchExpression;
-        _functionInstanceArg = Parameter(_currentFunctionInstance.GetType(), "functionInstance");
-        _inputArg = Parameter(expression.Parameters[0].Type, "input");
-        _outputArg = Parameter(expression.Parameters[1].Type, "output");
-        AddVisitor((expression) => expression is ParameterExpression, ChangeParameters);
-        var updatedBoy = (LambdaExpression)Visit(MatchExpression);
-        var functionType = typeof(Func<,,,>)
-            .MakeGenericType(
-                updatedBoy.Parameters[0].Type,
-                updatedBoy.Parameters[1].Type,
-                _currentFunctionInstance.GetType(),
-                typeof(bool));
-
-        MatchExpression = Lambda(
-            functionType,
-            updatedBoy.Body,
-            _inputArg,
-            _outputArg,
-            _functionInstanceArg);
-    }
-
-    protected Expression ChangeParameters(Expression expression)
-    {
-        if (expression is ParameterExpression node)
-        {
-            var isOutput = node == MatchExpression.Parameters[1];
-            if (isOutput) return _outputArg;
-
-            //rename input
-            var isInput = node == MatchExpression.Parameters[0];
-            if (isInput) return _inputArg;
-
-        }
-        return base.Visit(expression);
-    }
-
 }
