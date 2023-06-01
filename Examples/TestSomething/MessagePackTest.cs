@@ -1,4 +1,5 @@
-﻿using MessagePack;
+﻿using FastExpressionCompiler;
+using MessagePack;
 using MessagePack.Resolvers;
 using Newtonsoft.Json.Linq;
 using System;
@@ -44,8 +45,13 @@ namespace TestSomething
             Console.WriteLine(m["Point.X"]);
             Console.WriteLine(m["Comp.Po.X"]);
 
-            Expression<Func<ExpandoAccessor, bool>> exp = x => Convert.ToInt32(x["Point.X"]) == 100;
-            var compiledExp = exp.Compile();
+            m["Point.X"] = 1000;
+            m["Comp.Po.X"] = 2000;
+            Console.WriteLine(m["Point.X"]);
+            Console.WriteLine(m["Comp.Po.X"]);
+
+            Expression<Func<ExpandoAccessor, bool>> exp = x => Convert.ToInt32(x["Point.X"]) + 90 == 190;
+            var compiledExp = exp.CompileFast();
             var result = compiledExp.Invoke(m);
             Console.WriteLine(result);
         }
@@ -59,7 +65,6 @@ namespace TestSomething
         {
             get
             {
-
                 var parts = index.Split('.');
                 object? result = _dictionary[parts[0]];
                 var parent = parts.Length > 1 ? (IDictionary<object, object>)_dictionary[parts[0]] : null;
@@ -72,7 +77,24 @@ namespace TestSomething
                 return result;
             }
 
-            set => _dictionary[index] = value;
+            set
+            {
+                var parts = index.Split('.');
+                if (parts.Length == 1)
+                    _dictionary[index] = value;
+                else
+                {
+                    var parent = (IDictionary<object, object>)_dictionary[parts[0]];
+                    for (int i = 1; i < parts.Length; i++)
+                    {
+                        var currentProp = parts[i];
+                        if (i == parts.Length - 1)
+                            parent[currentProp] = value;
+                        parent = parent[currentProp] as IDictionary<object, object>;
+                    }
+                }
+
+            }
         }
         private readonly IDictionary<string, object> _dictionary;
         public ExpandoAccessor(ExpandoObject expandoObject)

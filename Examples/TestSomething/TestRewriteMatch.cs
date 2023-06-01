@@ -40,13 +40,13 @@ namespace TestSomething
             var localVariable = "kjlklk";
             var methodWait = new MethodWait<MethodInput, MethodOutput>(TestMethodTwo)
                        .MatchIf((x, y) =>
-                       //y.TaskId == InstanceId + 10 ||
+                       y.TaskId + 5 == InstanceId + 10 ||
                        //x.Id == InstanceId + 20 &&
                        //y.DateProp == DateTime.Today &&
                        //y.ByteArray == new byte[] { 12, 13, 14, 15, } ||
-                       y.IntArray[0] == IntArrayMethod()[2] ||
-                       y.IntArray == IntArrayMethod() &&
-                       11 + 1 == 12 &&
+                       //y.IntArray[0] == IntArrayMethod()[2] ||
+                       //y.IntArray == IntArrayMethod() &&
+                       //11 + 1 == 12 &&
                        //y.GuidProp == new Guid("ab62534b-2229-4f42-8f4e-c287c82ec760") &&
                        y.EnumProp == (StackBehaviour.Pop1 | StackBehaviour.Pop1_pop1) ||
                        y.EnumProp == StackBehaviour.Popi_popi_popi &&
