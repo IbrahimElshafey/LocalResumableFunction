@@ -45,8 +45,7 @@ public int FunctionId { get; internal set; }
 	* Translate expression tree to Mongo query
 	* https://stackoverflow.com/questions/7391450/simple-where-clause-in-expression-tree
 
-* Expresssion Tree To readable string
-	* https://agileobjects.co.uk/readable-expression-trees-debug-visualizer
+
 
 
 
@@ -55,8 +54,6 @@ public int FunctionId { get; internal set; }
 	* https://github.com/reaqtive/reaqtor/tree/main/Nuqleon/Core/LINQ/Nuqleon.Linq.Expressions.Bonsai.Serialization
 * Expression Trees Serialization
 	* https://github.com/esskar/Serialize.Linq/blob/master/src/Serialize.Linq.Tests/ExpressionSerializerTests.cs
-* Project that serialize expression trees
-	* https://reaqtive.net/blog/2021/05/sequences-linq-rx-reaqtor-part-05-remotable-expressions
 
 * Query to SQL 'DataContext.GetCommand(IQueryable)'
 	* https://learn.microsoft.com/en-us/dotnet/api/system.data.linq.datacontext.getcommand?view=netframework-4.8.1

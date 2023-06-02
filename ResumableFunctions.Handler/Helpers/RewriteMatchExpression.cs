@@ -22,6 +22,11 @@ public class RewriteMatchExpression : ExpressionVisitor
 
     public RewriteMatchExpression(MethodWait wait)
     {
+        for (int i = 0; i < 100; i++)
+        {
+            if (i % 10 == 5) break;
+            Console.WriteLine(i);
+        }
         if (wait?.MatchIfExpression == null)
             return;
         if (wait.MatchIfExpression?.Parameters.Count == 3)

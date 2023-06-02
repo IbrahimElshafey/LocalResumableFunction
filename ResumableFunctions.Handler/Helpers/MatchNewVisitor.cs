@@ -16,6 +16,7 @@ public class MatchNewVisitor : ExpressionVisitor
     public LambdaExpression MatchExpressionWithoutConstants { get; private set; }
     public Expression<Func<JObject, bool>> JObjectMatchExpression { get; private set; }
     public string RefineMatchModifier { get; private set; }
+    public Expression<Func<JObject, string>> ManadatoryPartsExpression { get; private set; }
 
     private ParameterExpression _functionInstanceArg;
     private ParameterExpression _inputArg;
@@ -38,12 +39,14 @@ public class MatchNewVisitor : ExpressionVisitor
         CalcConstantInExpression();
         //GenerateMatchUsingJson();
         MarkMandatoryConstants();
-        //GenerateIdExtractorExpression();
+
         RefineMatchModifier = _constantParts
             .Where(x => x.IsMandatory)
             .OrderBy(x => x.PropPathExpression.ToString())
             .Select(x => x.Value.ToString())
             .Aggregate((x, y) => $"{x}#{y}");
+
+        GenerateManadatoryPartsExpression();
     }
 
     private void ChangeInputOutputParamsNames()
@@ -247,10 +250,10 @@ public class MatchNewVisitor : ExpressionVisitor
     {
         var _pushedCall = Parameter(typeof(JObject), "pushedCall");
         var usePushedCall = new GenericVisitor();
-        usePushedCall.OnVisitParamter(VisitParameterq);
+        usePushedCall.OnVisitParamter(VisitParameter);
         var updatedBoy = usePushedCall.Visit(MatchExpression.Body);
         JObjectMatchExpression = Lambda<Func<JObject, bool>>(updatedBoy, _pushedCall);
-        Expression VisitParameterq(ParameterExpression node)
+        Expression VisitParameter(ParameterExpression node)
         {
             if (node.Type.IsConstantType())
             {
@@ -267,6 +270,95 @@ public class MatchNewVisitor : ExpressionVisitor
             return base.VisitParameter(node);
         }
     }
+
+    private void GenerateManadatoryPartsExpression()
+    {
+        var pushedCall = Parameter(typeof(JObject), "pushedCall");
+
+        var parts = _constantParts
+            .Where(x => x.IsMandatory)
+            .OrderBy(x => x.PropPathExpression.ToString())
+            .ToArray();
+        if (parts.Any())
+        {
+            ManadatoryPartsExpression = Lambda<Func<JObject,string>>(
+                Call(
+                    typeof(string).GetMethod("Join", 0, new[] { typeof(string), typeof(string[]) }),
+                    Constant("#"),
+                    NewArrayInit(
+                        typeof(string),
+                        TranslateParts(parts)
+                    )
+                ),
+                pushedCall
+            );
+        }
+
+        IEnumerable<Expression> TranslateParts(ConstantPart[] parts)
+        {
+            foreach (var part in parts)
+            {
+                var usingJobject = AccesUsingJToken(part.PropPathExpression, pushedCall);
+                yield return Call(usingJobject, typeof(object).GetMethod("ToString"));
+            }
+        }
+
+
+    }
+    private Expression AccesUsingJToken(Expression propPathExpression, ParameterExpression pushedCall)
+    {
+        var useJobject = new GenericVisitor();
+        //useJobject.OnVisitParamter(VisitParameter);
+        //useJobject.OnVisitMember(VisitMember);
+        useJobject.AddVisitor(x => x is ParameterExpression || x is MemberExpression, VisitParameterOrMember);
+        return useJobject.Visit(propPathExpression);
+
+        Expression VisitParameterOrMember(Expression node)
+        {
+            var check = IsInputOrOutput(node);
+            if (check.IsInput || check.IsOutput)
+                return
+                Convert(
+                    Call(
+                        Call(
+                            pushedCall,
+                            typeof(JToken).GetMethod("SelectToken", new[] { typeof(string) }),
+                            Constant(node.ToString())
+                        ),
+                        typeof(JToken).GetMethod("ToObject", 0, new[] { typeof(Type) }),
+                        Constant(
+                            node.Type,
+                            typeof(Type)
+                        )
+                    ),
+                    node.Type
+                );
+            return base.Visit(node);
+
+            //Call(
+            //           typeof(JsonConvert).GetMethod("DeserializeObject", 0, new[] { typeof(string), typeof(Type) }),
+            //           Constant(json),
+            //           Constant(result.GetType(), typeof(Type))
+            //)
+        }
+
+        (bool IsInput, bool IsOutput) IsInputOrOutput(Expression expression)
+        {
+            var checkUseParamter = new GenericVisitor();
+            var isInput = false;
+            var isOutput = false;
+            checkUseParamter.OnVisitParamter(param =>
+            {
+                isInput = param == MatchExpression.Parameters[0] || isInput;
+                isOutput = param == MatchExpression.Parameters[1] || isOutput;
+                return param;
+            });
+            checkUseParamter.Visit(expression);
+            return (isInput, isOutput);
+        }
+    }
+
+
 
     private class ConstantPart
     {

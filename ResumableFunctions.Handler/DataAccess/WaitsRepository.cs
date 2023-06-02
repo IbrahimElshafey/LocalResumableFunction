@@ -61,8 +61,9 @@ internal partial class WaitsRepository : IWaitsRepository
                             //.Include(x => x.MethodToWait)
                             .Where(x =>
                                 x.MethodGroupToWaitId == methodGroupId &&
-                                x.Status == WaitStatus.Waiting &&
-                                x.RefineMatchModifier == pushedCall.RefineMatchModifier)
+                                x.Status == WaitStatus.Waiting //&&
+                                //x.RefineMatchModifier == pushedCall.RefineMatchModifier
+                                )
                             .Select(x => new WaitId(x.Id, x.RequestedByFunction.AssemblyName))
                             .ToListAsync();
 

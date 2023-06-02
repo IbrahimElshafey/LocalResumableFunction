@@ -11,6 +11,8 @@ internal class Program
         new TestRewriteMatch().Run();
         //new MessagePackTest().Test();
         //new MemoryPackTest().Run();
+        //new CerasTest().Run();
+        //new SerializeExpression().Run();
     }
 
     private static async Task TestAspectInjectorAsync()

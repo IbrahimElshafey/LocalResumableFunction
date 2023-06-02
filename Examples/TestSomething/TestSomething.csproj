@@ -4,14 +4,17 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <!--<Nullable>enable</Nullable>-->
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AspectInjector" Version="2.8.1" />
+    <PackageReference Include="Ceras" Version="4.1.7" />
     <PackageReference Include="MemoryPack" Version="1.9.14" />
     <PackageReference Include="MessagePack" Version="2.5.108" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Serialize.Linq" Version="2.0.0" />
+    <PackageReference Include="SerializeLinqExpressions" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

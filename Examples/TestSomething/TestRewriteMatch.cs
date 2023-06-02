@@ -7,8 +7,10 @@ using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
@@ -41,7 +43,7 @@ namespace TestSomething
             var methodWait = new MethodWait<MethodInput, MethodOutput>(TestMethodTwo)
                        .MatchIf((x, y) =>
                        !(y.TaskId == InstanceId + 10 &&
-                       x.Id > 12 )&&
+                       x.Id > 12) &&
                        //x.Id == InstanceId + 20 &&
                        //y.DateProp == DateTime.Today &&
                        //y.ByteArray == new byte[] { 12, 13, 14, 15, } ||
@@ -60,14 +62,37 @@ namespace TestSomething
 
         public void Run()
         {
+            //var aggregateMethod = typeof(Enumerable).GetMethod("Aggregate");
+            var pushedCall = JsonConvert.DeserializeObject<JObject>("""
+                {
+                    "input":"12345",
+                    "output":{"X":254,"Z":255}
+                }
+                """);
+          
+
             TestWithComplexTypes();
             //TestWithBasicTypes();
+
             //Expression<Func<JObject, bool>> matchJson = pushedCall =>
             //    (int)pushedCall["output"] == InstanceId;
             //var x = matchJson.Compile().Invoke(pushedCall);
 
-        }
+            Expression point = () => (PointXY)pushedCall.SelectToken("output").ToObject(typeof(PointXY));
+            Expression<Func<JObject, string>> GetIds =
+                (jobject) => string.Join("#", new[]
+                {
+                    pushedCall.SelectToken("input").ToString(),
+                    pushedCall.SelectToken("output.X").ToString()
+                });
+            var id = GetIds.CompileFast()(pushedCall);
 
+        }
+        class PointXY
+        {
+            public int X { get; set; }
+            public int Y { get; set; }
+        }
         private void TestWithComplexTypes()
         {
             var wait = WaitMethodTwo();
