@@ -97,8 +97,25 @@ namespace TestSomething
         {
             var wait = WaitMethodTwo();
             var matchRewrite1 = new MatchNewVisitor(wait.MatchIfExpression, this);
-            var matchRewrite = new RewriteMatchExpression(wait);
-            var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.MatchExpression.CompileFast();
+
+            var pushedCall = JsonConvert.DeserializeObject<JObject>("""
+                {
+                    "input":{"Id":12,"Name":"Hello","IsMan":true},
+                    "output":{
+                        "TaskId":20,
+                        "GuidProp":"7ec03d6d-64e3-4240-bbdc-a143e327a3fc",
+                        "DateProp":"",
+                        "ByteArray":"",
+                        "IntArray":"",
+                        "EnumProp":7,
+                    }
+                }
+                """);
+            var getId = matchRewrite1.ManadatoryPartsExpression;
+            var compile = getId.Compile();
+            var value = compile.Invoke(pushedCall);
+            //var matchRewrite = new RewriteMatchExpression(wait);
+            //var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.MatchExpression.CompileFast();
         }
 
         private void TestWithBasicTypes()
