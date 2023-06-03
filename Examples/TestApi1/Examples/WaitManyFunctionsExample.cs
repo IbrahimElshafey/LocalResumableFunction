@@ -3,7 +3,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace TestApi1.Examples;
 
-internal class WaitManyFunctionsExample : ProjectApprovalExample
+public class WaitManyFunctionsExample : ProjectApprovalExample
 {
     public async IAsyncEnumerable<Wait> WaitManyFunctions()
     {

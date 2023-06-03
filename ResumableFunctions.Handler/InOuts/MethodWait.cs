@@ -43,7 +43,6 @@ public class MethodWait : Wait
     [NotMapped]
     public object Output { get; set; }
 
-    public object IdsObjectValue { get; internal set; }
     //todo:bug
     private Assembly FunctionAssembly =>
         MethodToWait?.MethodInfo?.DeclaringType.Assembly ??

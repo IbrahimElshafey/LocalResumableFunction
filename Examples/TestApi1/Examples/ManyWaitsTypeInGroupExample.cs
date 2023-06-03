@@ -3,7 +3,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace TestApi1.Examples;
 
-internal class ManyWaitsTypeInGroupExample : ProjectApprovalExample
+public class ManyWaitsTypeInGroupExample : ProjectApprovalExample
 {
     public async IAsyncEnumerable<Wait> ManyWaitsTypeInGroup()
     {

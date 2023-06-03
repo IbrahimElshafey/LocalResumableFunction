@@ -2,7 +2,7 @@
 
 namespace TestApi1.Examples;
 
-internal class WaitSameEventAgain : ProjectApprovalExample
+public class WaitSameEventAgain : ProjectApprovalExample
 {
     private const string ProjectSumbitted = "Project Sumbitted";
 

@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace TestSomething
 {
-    internal class TestRewriteMatch : ResumableFunction
+    public class TestRewriteMatch : ResumableFunction
     {
         public int InstanceId { get; set; } = 5;
 
@@ -121,7 +121,7 @@ namespace TestSomething
         private void TestWithBasicTypes()
         {
             var wait1 = WaitMethodOne();
-            var matchRewrite1 = new RewriteMatchExpression(wait1);
+            var matchRewrite1 = new MatchNewVisitor(wait1.MatchIfExpression, this);
             var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.MatchExpression.CompileFast();
             var exprssionAsString1 = matchRewrite1.MatchExpression.ToString();
             var result = method1.Invoke("12345", 5, this);

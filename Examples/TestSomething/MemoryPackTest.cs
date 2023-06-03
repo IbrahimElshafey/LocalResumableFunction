@@ -17,7 +17,9 @@ public class MemoryPackTest
             Name = "John Doe",
             Age = 30
         };
-        var bin = MemoryPackSerializer.Serialize<dynamic>(myObject);
+        var bin = MemoryPackSerializer.Serialize(myObject);
         var val = MemoryPackSerializer.Deserialize<MyObject>(bin);
+        var newObj = new MyObject();
+        var val2= MemoryPackSerializer.Deserialize(bin,ref newObj);
     }
 }

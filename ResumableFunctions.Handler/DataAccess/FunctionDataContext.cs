@@ -18,12 +18,16 @@ namespace ResumableFunctions.Handler.DataAccess;
 public class FunctionDataContext : DbContext
 {
     private readonly ILogger<FunctionDataContext> _logger;
+    private readonly IBinaryToObjectConverter binaryToObjectConverter;
+
     public FunctionDataContext(
         ILogger<FunctionDataContext> logger,
         IResumableFunctionsSettings settings,
-        IDistributedLockProvider lockProvider) : base(settings.WaitsDbConfig.Options)
+        IDistributedLockProvider lockProvider,
+        IBinaryToObjectConverter binaryToObjectConverter) : base(settings.WaitsDbConfig.Options)
     {
         _logger = logger;
+        this.binaryToObjectConverter = binaryToObjectConverter;
         try
         {
             using (lockProvider.AcquireLock(Database.GetDbConnection().Database))
@@ -107,11 +111,11 @@ public class FunctionDataContext : DbContext
     {
         entityTypeBuilder
           .Property(x => x.Input)
-          .HasConversion<ObjectToJsonConverter>();
+          .HasConversion(binaryToObjectConverter.ToBinary, binaryToObjectConverter.ToObject);
 
         entityTypeBuilder
             .Property(x => x.Output)
-            .HasConversion<ObjectToJsonConverter>();
+            .HasConversion(binaryToObjectConverter.ToBinary, binaryToObjectConverter.ToObject);
 
         entityTypeBuilder
            .Property(x => x.MethodData)
@@ -136,11 +140,7 @@ public class FunctionDataContext : DbContext
 
         modelBuilder.Entity<Wait>()
             .Property(x => x.ExtraData)
-            .HasConversion<ObjectToJsonConverter>();
-
-        modelBuilder.Entity<MethodWait>()
-            .Property(x => x.IdsObjectValue)
-            .HasConversion<ObjectToJsonConverter>();
+            .HasConversion(binaryToObjectConverter.ToBinary, binaryToObjectConverter.ToObject);
 
         modelBuilder.Entity<MethodWait>()
           .Property(mw => mw.MatchIfExpressionValue)
@@ -208,9 +208,13 @@ public class FunctionDataContext : DbContext
             .HasForeignKey(x => x.FunctionStateId)
             .HasConstraintName("FK_Waits_For_FunctionState");
 
+        //entityTypeBuilder
+        //   .Property(x => x.StateObject)
+        //   .HasConversion<BinaryToObjectConverter>();
+
         entityTypeBuilder
            .Property(x => x.StateObject)
-           .HasConversion<ObjectToJsonConverter>();
+           .HasConversion(binaryToObjectConverter.ToBinary, binaryToObjectConverter.ToObject);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

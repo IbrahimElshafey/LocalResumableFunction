@@ -3,7 +3,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace TestApi1.Examples;
 
-internal class TestWaitManyExample : ProjectApprovalExample
+public class TestWaitManyExample : ProjectApprovalExample
 {
     [ResumableFunctionEntryPoint("TestWaitManyExample.WaitThreeMethodAtStart")]
     public async IAsyncEnumerable<Wait> WaitThreeMethodAtStart()

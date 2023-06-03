@@ -5,14 +5,28 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-
-        //TestTreeCascadeAction();
-        //await TestAspectInjectorAsync();
-        new TestRewriteMatch().Run();
-        //new MessagePackTest().Test();
-        //new MemoryPackTest().Run();
-        //new CerasTest().Run();
-        //new SerializeExpression().Run();
+        var activate = 8;
+        switch (activate)
+        {
+            case 1:
+                TestTreeCascadeAction();break;
+            case 2:
+                await TestAspectInjectorAsync();break;
+            case 3:
+                new TestRewriteMatch().Run();break;
+            case 4:
+                new MessagePackTest().Test();break;
+            case 5:
+                new MemoryPackTest().Run();break;
+            case 6:
+                new CerasTest().Run();break;
+            case 7:
+                new SerializeExpression().Run();
+                break;
+            case 8:
+                new BinaryPackTest().Run();
+                break;
+        }
     }
 
     private static async Task TestAspectInjectorAsync()
