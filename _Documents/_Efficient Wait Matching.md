@@ -1,6 +1,4 @@
-﻿# WaitForCall
-public int ServiceId { get; internal set; }
-public int FunctionId { get; internal set; }
+﻿
 
 # Efficient Wait Matching
 * MatchKeys not duplicate for same (MethodGroupId,FunctionId)

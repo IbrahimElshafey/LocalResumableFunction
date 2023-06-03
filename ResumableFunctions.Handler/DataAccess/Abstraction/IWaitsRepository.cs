@@ -12,7 +12,8 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
         Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait);
         Task<Wait> GetWaitGroup(int? parentGroupId);
         Task<Wait> GetWaitParent(Wait wait);
-        Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId);
+        Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId,string methodUrn);
+        Task<List<ServiceData>> GetServicesForMethodCall(string methodUrn);
         Task RemoveFirstWaitIfExist(int methodIdentifierId);
 
         Task<Wait> LoadWaitTree(Expression<Func<Wait,bool>> expression);

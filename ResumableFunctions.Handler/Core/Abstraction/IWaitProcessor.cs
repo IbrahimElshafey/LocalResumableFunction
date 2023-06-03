@@ -2,6 +2,6 @@
 {
     public interface IWaitProcessor
     {
-        Task RequestProcessing(int mehtodWaitId, int pushedCallId);
+        Task ProcessWait(int mehtodWaitId, int pushedCallId);
     }
 }

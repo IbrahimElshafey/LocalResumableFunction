@@ -177,24 +177,28 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     public async Task DeactivateFirstWait(int functionId)
     {
         await _backgroundJobExecutor.Execute(
-            $"FirstWaitProcessor_DeactivateFirstWait_{functionId}",
+            $"DeactivateFirstWait_{functionId}",
             async () =>
             {
-                var firstWait = await _context
+                var firstWaits = await _context
                         .Waits
                         .Include(x => x.FunctionState)
-                        .FirstOrDefaultAsync(wait =>
+                        .Where(wait =>
                                 wait.RequestedByFunctionId == functionId &&
-                                wait.IsNode &&
                                 wait.IsFirst &&
-                                wait.Status == WaitStatus.Waiting);
-                if (firstWait != default)
+                                wait.Status == WaitStatus.Waiting)
+                        .ToListAsync();
+
+                if (firstWaits == null) return;
+                foreach (var firstWait in firstWaits)
                 {
-                    firstWait.IsFirst = false;
-                    firstWait.Cancel();
-                    await _waitsRepository.CancelSubWaits(firstWait.Id);
-                    _context.Waits.Remove(firstWait);
-                    _context.FunctionStates.Remove(firstWait.FunctionState);
+                    if (firstWait != default)
+                    {
+                        firstWait.IsFirst = false;
+                        firstWait.Cancel();
+                        _context.Waits.Remove(firstWait);
+                        _context.FunctionStates.Remove(firstWait.FunctionState);
+                    }
                     await _context.SaveChangesAsync();
                 }
             },

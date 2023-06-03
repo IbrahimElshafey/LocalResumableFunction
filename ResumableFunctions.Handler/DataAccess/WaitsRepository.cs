@@ -41,29 +41,46 @@ internal partial class WaitsRepository : IWaitsRepository
         _settings = settings;
     }
 
+    public async Task<List<ServiceData>> GetServicesForMethodCall(string methodUrn)
+    {
+        try
+        {
+            var methodGroupId = await GetMethodGroupId(methodUrn);
+            var servicesQurey = _context
+                .ServicesData
+                .Include(x => x.Waits)
+                .Where(x => x.Waits.Any(x => (x as MethodWait).MethodGroupToWaitId == methodGroupId))
+                .Select(x => new ServiceData { Id = x.Id, Url = x.Url });
 
+            return await servicesQurey.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                $"Error when GetServicesForMethodCall(methodUrn:{methodUrn})", ex);
+            throw;
+        }
+    }
     //todo:critical this method must be optimized
-    public async Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId)
+    public async Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId, string methodUrn)
     {
 
         try
         {
-            var pushedCall = await _context.PushedCalls.FindAsync(pushedCallId);
-            if (pushedCall == null)
+            var pushedCallExist = await _context.PushedCalls.AnyAsync(x => x.Id == pushedCallId);
+            if (pushedCallExist is false)
                 throw new NullReferenceException($"No pushed method with ID [{pushedCallId}] exist in DB.");
 
-            var methodGroupId =
-                await GetMethodGroupId(pushedCall.MethodData.MethodUrn);
+            var methodGroupId = await GetMethodGroupId(methodUrn);
 
 
             var matchedWaitsIds = await _context
                             .MethodWaits
                             .Include(x => x.RequestedByFunction)
-                            //.Include(x => x.MethodToWait)
                             .Where(x =>
                                 x.MethodGroupToWaitId == methodGroupId &&
-                                x.Status == WaitStatus.Waiting //&&
-                                                               //x.RefineMatchModifier == pushedCall.RefineMatchModifier
+                                x.Status == WaitStatus.Waiting &&
+                                x.ServiceId == _settings.CurrentServiceId
                                 )
                             .Select(x =>
                                 new WaitId(x.Id, x.RequestedByFunctionId, x.RequestedByFunction.AssemblyName))
@@ -78,7 +95,8 @@ internal partial class WaitsRepository : IWaitsRepository
                 //_context.PushedCalls.Remove(pushedCall);
             }
             else
-                pushedCall.WaitsForCall = matchedWaitsIds
+            {
+                var waitsForCall = matchedWaitsIds
                     .Select(waitId =>
                     new WaitForCall
                     {
@@ -87,26 +105,30 @@ internal partial class WaitsRepository : IWaitsRepository
                         ServiceId = _settings.CurrentServiceId,
                         FunctionId = waitId.FunctionId
                     }).ToList();
+                _context.WaitsForCalls.AddRange(waitsForCall);
+            }
 
             await _context.SaveChangesAsync();
             return matchedWaitsIds;
         }
         catch (Exception ex)
         {
+            _logger.LogError(
+                $"Error when GetWaitsIdsForMethodCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})", ex);
             throw;
         }
     }
 
     private async Task<int> GetMethodGroupId(string methodUrn)
     {
-        var waitMethodIdentifier =
+        var methodGroup =
            await _context
                .MethodsGroups
                .Where(x => x.MethodGroupUrn == methodUrn)
                .Select(x => x.Id)
                .FirstOrDefaultAsync();
-        if (waitMethodIdentifier != default)
-            return waitMethodIdentifier;
+        if (methodGroup != default)
+            return methodGroup;
         else
         {
             _logger.LogWarning($"Method [{methodUrn}] is not registered in current database as [WaitMethod].");

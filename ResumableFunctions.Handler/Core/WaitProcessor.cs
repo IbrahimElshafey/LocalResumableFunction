@@ -58,22 +58,29 @@ namespace ResumableFunctions.Handler.Core
             _lockProvider = lockProvider;
         }
 
-        public async Task RequestProcessing(int mehtodWaitId, int pushedCallId)
+        public async Task ProcessWait(int mehtodWaitId, int pushedCallId)
         {
             await _backgroundJobExecutor.Execute(
-                $"WaitProcessor_RequestProcessing_{mehtodWaitId}_{pushedCallId}",
+                $"ProcessWait_{mehtodWaitId}_{pushedCallId}",
                 async () =>
                 {
                     _pushedCallId = pushedCallId;
                     if (await LoadWaitAndPushedCall(mehtodWaitId, pushedCallId))
-                        await Pipeline(
+                    {
+                        var isSuccess = await Pipeline(
                             SetInputAndOutput,
                             CheckIfMatch,
                             CloneIfFirst,
                             UpdateFunctionData,
                             ActivateFunctionInstance,
                             ResumeExecution);
-                    await _context.SaveChangesAsync();
+
+                        if (isSuccess)
+                        {
+                            //todo:this must be the one call here
+                            await _context.SaveChangesAsync();
+                        }
+                    }
                 },
                 $"Error when process wait `{mehtodWaitId}` that may be a match for pushed call `{pushedCallId}`");
         }
@@ -104,7 +111,7 @@ namespace ResumableFunctions.Handler.Core
                 }
                 else
                 {
-                    await UpdateWaitToNotMatched(pushedCallId, methodWait.Id);
+                    await UpdateWaitToUnmatched(pushedCallId, methodWait.Id);
                 }
                 return isMatch;
             }
@@ -163,7 +170,7 @@ namespace ResumableFunctions.Handler.Core
                         $"Concurrency Exception occured when process wait [{methodWait.Name}]." +
                         $"\nProcessing this wait will be scheduled.",
                         ex);
-                _backgroundJobClient.Schedule(() => RequestProcessing(methodWait.Id, pushedCallId), TimeSpan.FromSeconds(2.5));
+                _backgroundJobClient.Schedule(() => ProcessWait(methodWait.Id, pushedCallId), TimeSpan.FromSeconds(2.5));
                 return false;
             }
             return true;
@@ -336,26 +343,26 @@ namespace ResumableFunctions.Handler.Core
             {
                 var waitCall = await _context.WaitsForCalls
                      .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == waitId);
-                waitCall.Status = WaitForCallStatus.Matched;//todo:update concurrency may occure
+                waitCall.Status = WaitForCallStatus.Matched;
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to increment completed counter for PushedCall:{pushedCallId} and Wait:{waitId}");
+                _logger.LogError(ex, $"Failed to UpdateWaitToMatched(pushedCallId:{pushedCallId}, waitId:{waitId})");
             }
         }
-        private async Task UpdateWaitToNotMatched(int pushedCallId, int waitId)
+        private async Task UpdateWaitToUnmatched(int pushedCallId, int waitId)
         {
             try
             {
                 var waitCall = await _context.WaitsForCalls
                     .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == waitId);
-                waitCall.Status = WaitForCallStatus.NotMatched;//todo:update concurrency may occure
+                waitCall.Status = WaitForCallStatus.NotMatched;
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Failed to increment NotMatch counter for PushedCall:{pushedCallId} and Wait:{waitId}");
+                _logger.LogError(ex, $"Failed to UpdateWaitToUnmatched(pushedCallId:{pushedCallId}, waitId:{waitId})");
             }
         }
 

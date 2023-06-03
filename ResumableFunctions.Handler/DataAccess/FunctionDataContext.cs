@@ -66,7 +66,7 @@ public class FunctionDataContext : DbContext
     {
         ConfigureResumableFunctionState(modelBuilder.Entity<ResumableFunctionState>());
         ConfigureMethodIdentifier(modelBuilder);
-        ConfigurePushedCalls(modelBuilder.Entity<PushedCall>());
+        ConfigurePushedCalls(modelBuilder);
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
         ConfigureWaits(modelBuilder);
         ConfigurConcurrencyToken(modelBuilder);
@@ -108,26 +108,30 @@ public class FunctionDataContext : DbContext
             .HasConstraintName("FK_Waits_For_Service");
     }
 
-    private void ConfigurePushedCalls(EntityTypeBuilder<PushedCall> entityTypeBuilder)
+    private void ConfigurePushedCalls(ModelBuilder modelBuilder)
     {
-
-        entityTypeBuilder
+        var pushedCallBuilder = modelBuilder.Entity<PushedCall>();
+        pushedCallBuilder
             .Property(x => x.Data)
             .HasConversion(
             obj => binaryToObjectConverter.ConvertToBinary(obj),
             bytes => binaryToObjectConverter.ConvertToObject<InputOutput>(bytes));
 
-        entityTypeBuilder
+        pushedCallBuilder
            .Property(x => x.MethodData)
            .HasConversion(
             obj => binaryToObjectConverter.ConvertToBinary(obj),
             bytes => binaryToObjectConverter.ConvertToObject<MethodData>(bytes));
 
-        entityTypeBuilder
+        pushedCallBuilder
            .HasMany(x => x.WaitsForCall)
            .WithOne(waitForCall => waitForCall.PushedCall)
            .HasForeignKey(waitForCall => waitForCall.PushedCallId)
            .HasConstraintName("FK_Waits_For_Call");
+
+        var waitForCallBuilder = modelBuilder.Entity<WaitForCall>();
+        waitForCallBuilder.HasIndex(x => x.ServiceId, "WaitForCall_ServiceId_Idx");
+        waitForCallBuilder.HasIndex(x => x.FunctionId, "WaitForCall_FunctionId_Idx");
     }
 
     private void ConfigureWaits(ModelBuilder modelBuilder)

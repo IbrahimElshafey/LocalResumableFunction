@@ -29,6 +29,7 @@ internal class PushedCallProcessor : IPushedCallProcessor
     private readonly IWaitsRepository _waitsRepository;
     private readonly HangFireHttpClient _hangFireHttpClient;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
+    private readonly IResumableFunctionsSettings _settings;
 
     public PushedCallProcessor(
         ILogger<ReplayWaitProcessor> logger,
@@ -37,7 +38,8 @@ internal class PushedCallProcessor : IPushedCallProcessor
         FunctionDataContext context,
         IBackgroundJobClient backgroundJobClient,
         HangFireHttpClient hangFireHttpClient,
-        BackgroundJobExecutor backgroundJobExecutor)
+        BackgroundJobExecutor backgroundJobExecutor,
+        IResumableFunctionsSettings settings)
     {
         _logger = logger;
         _waitProcessor = waitProcessor;
@@ -46,57 +48,71 @@ internal class PushedCallProcessor : IPushedCallProcessor
         _backgroundJobClient = backgroundJobClient;
         _hangFireHttpClient = hangFireHttpClient;
         _backgroundJobExecutor = backgroundJobExecutor;
+        _settings = settings;
     }
 
     public async Task<int> QueuePushedCallProcessing(PushedCall pushedCall)
     {
         _context.PushedCalls.Add(pushedCall);
         await _context.SaveChangesAsync();
-        _backgroundJobClient.Enqueue(() => ProcessPushedCall(pushedCall.Id));
+        _backgroundJobClient.Enqueue(() => InitialProcessPushedCall(pushedCall.Id, pushedCall.MethodData.MethodUrn));
         return pushedCall.Id;
     }
 
-    public async Task ProcessPushedCall(int pushedCallId)
+    public async Task InitialProcessPushedCall(int pushedCallId, string methodUrn)
     {
         await _backgroundJobExecutor.Execute(
-            $"PushedCallProcessor_ProcessPushedCall_{pushedCallId}",
+            $"InitialProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
             async () =>
             {
-                var waitsIds = await _waitsRepository.GetWaitsIdsForMethodCall(pushedCallId);
+                var services = await _waitsRepository.GetServicesForMethodCall(methodUrn);
+                if (services == null||services.Any() is false) return;
 
-                if (waitsIds != null)
-                    foreach (var waitId in waitsIds)
+                foreach (var service in services)
+                {
+                    if (service.Id == _settings.CurrentServiceId)
                     {
-                        if (IsLocalWait(waitId))
-                            _backgroundJobClient.Enqueue(() => _waitProcessor.RequestProcessing(waitId.Id, pushedCallId));
-                        else
-                            await CallOwnerService(waitId, pushedCallId);
+                        var waitsIds = await _waitsRepository.GetWaitsIdsForMethodCall(pushedCallId, methodUrn);
+                        foreach (var waitId in waitsIds)
+                        {
+                            _backgroundJobClient.Enqueue(() => _waitProcessor.ProcessWait(waitId.Id, pushedCallId));
+                        }
                     }
+                    else
+                    {
+                        await CallOwnerService(service, pushedCallId);
+                    }
+                }
             },
-            $"Error when process pushed method [{pushedCallId}]");
+            $"Error when call `InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
+    }
+    public async Task ServiceProcessPushedCall(int pushedCallId, string methodUrn)
+    {
+        await _backgroundJobExecutor.Execute(
+            $"ServiceProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
+            async () =>
+            {
+                var waitsIds = await _waitsRepository.GetWaitsIdsForMethodCall(pushedCallId, methodUrn);
+                foreach (var waitId in waitsIds)
+                {
+                    _backgroundJobClient.Enqueue(() => _waitProcessor.ProcessWait(waitId.Id, pushedCallId));
+                }
+            },
+            $"Error when call `ServiceProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
     }
 
 
-
-    private async Task CallOwnerService(WaitId wait, int pushedCallId)
+    private async Task CallOwnerService(ServiceData service, int pushedCallId)
     {
         try
         {
-            var ownerAssemblyName = wait.RequestedByAssembly;
-            var ownerServiceUrl =
-                await _context
-                .ServicesData
-                .Where(x => x.AssemblyName == ownerAssemblyName)
-                .Select(x => x.Url)
-                .FirstOrDefaultAsync();
-
             var actionUrl =
-                $"{ownerServiceUrl}api/ResumableFunctions/ProcessMatchedWait?waitId={wait.Id}&pushedCallId={pushedCallId}";
+                $"{service.Url}api/ResumableFunctions/ServiceProcessPushedCall?pushedCallId={pushedCallId}";
             await _hangFireHttpClient.EnqueueGetRequestIfFail(actionUrl);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error when try to call owner service for wait ({wait}).");
+            _logger.LogError(ex, $"Error when try to call owner service for pushed call ({pushedCallId}).");
         }
     }
 
@@ -130,4 +146,5 @@ internal class PushedCallProcessor : IPushedCallProcessor
             .SelectMany(x => x.WaitMethodIdentifiers)
             .AnyAsync(x => x.CanPublishFromExternal);
     }
+
 }

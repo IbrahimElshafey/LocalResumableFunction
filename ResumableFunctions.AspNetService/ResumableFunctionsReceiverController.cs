@@ -13,33 +13,26 @@ namespace ResumableFunctions.AspNetService
     //[ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionsController : ControllerBase
     {
-        public readonly IWaitProcessor _waitProcessor;
         public readonly IPushedCallProcessor _pushedCallProcessor;
-        public readonly IBackgroundJobClient _backgroundJobClient;
         private readonly ILogger<ResumableFunctionsController> _logger;
 
         public ResumableFunctionsController(
-            IBackgroundJobClient backgroundJobClient,
             ILogger<ResumableFunctionsController> logger,
-            IPushedCallProcessor pushedCallProcessor,
-            IWaitProcessor waitProcessor)
+            IPushedCallProcessor pushedCallProcessor)
         {
-            _backgroundJobClient = backgroundJobClient;
             _logger = logger;
             _pushedCallProcessor = pushedCallProcessor;
-            _waitProcessor = waitProcessor;
         }
 
 
-        [HttpGet(nameof(ProcessMatchedWait))]
-        public int ProcessMatchedWait(int waitId, int pushedCallId)
+        [HttpGet(nameof(ServiceProcessPushedCallAsync))]
+        public async Task<int> ServiceProcessPushedCallAsync(int pushedCallId, string methodUrn)
         {
-            _backgroundJobClient.Enqueue(() => _waitProcessor.RequestProcessing(waitId, pushedCallId));
+            await _pushedCallProcessor.ServiceProcessPushedCall(pushedCallId, methodUrn);
             return 0;
         }
 
         [HttpPost(nameof(ExternalCall))]
-        //public async Task ExternalCall(ExternalCallArgs externalCall)
         public async Task ExternalCall([FromBody] dynamic input)
         {
             try
@@ -66,7 +59,6 @@ namespace ResumableFunctions.AspNetService
             {
                 _logger.LogError(ex, "Error when handle external method call.");
             }
-
         }
 
         //todo:CheckMethod/s exist
