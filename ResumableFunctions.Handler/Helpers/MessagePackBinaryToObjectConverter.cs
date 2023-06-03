@@ -5,7 +5,6 @@ using System.Dynamic;
 using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.Helpers;
-
 internal class MessagePackBinaryToObjectConverter : IBinaryToObjectConverter
 {
     private readonly ILogger<MessagePackBinaryToObjectConverter> _logger;

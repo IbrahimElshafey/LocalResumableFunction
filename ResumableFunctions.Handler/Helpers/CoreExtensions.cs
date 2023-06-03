@@ -43,7 +43,8 @@ public static class CoreExtensions
         services.AddScoped<IPushedCallProcessor, PushedCallProcessor>();
 
 
-        services.AddSingleton<IBinaryToObjectConverter,MessagePackBinaryToObjectConverter>();
+        services.AddSingleton<IBinaryToObjectConverter, NewtonsoftBinaryToObjectConverter>();
+        //services.AddSingleton<IBinaryToObjectConverter,MessagePackBinaryToObjectConverter>();
         services.AddSingleton<BackgroundJobExecutor>();
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();

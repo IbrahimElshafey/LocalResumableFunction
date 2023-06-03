@@ -42,6 +42,7 @@
 		<PackageReference Include="Hangfire" Version="1.8.*" />
 		<PackageReference Include="Hangfire.Core" Version="1.8.*" />
 		<PackageReference Include="Hangfire.SqlServer" Version="1.8.*" />
+		<PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
 	</ItemGroup>
 
 </Project>
