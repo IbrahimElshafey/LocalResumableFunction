@@ -5,7 +5,7 @@ using System.Dynamic;
 using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.Helpers;
-internal class MessagePackBinaryToObjectConverter : IBinaryToObjectConverter
+internal class MessagePackBinaryToObjectConverter : BinaryToObjectConverter
 {
     private readonly ILogger<MessagePackBinaryToObjectConverter> _logger;
 
@@ -13,27 +13,8 @@ internal class MessagePackBinaryToObjectConverter : IBinaryToObjectConverter
     {
         _logger = logger;
     }
-    public Expression<Func<object, byte[]>> ToBinary => o => ObjectToBinary(o);
 
-    public Expression<Func<byte[], object>> ToObject => b => BinaryToObject(b);
-
-    internal object BinaryToObject(byte[] binary)
-    {
-        try
-        {
-            return MessagePackSerializer.Deserialize<ExpandoObject>(
-              binary, ContractlessStandardResolver.Options);
-
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"Error when convert bytes to ExpandoObject", ex);
-            throw;
-        }
-
-    }
-
-    internal byte[] ObjectToBinary(object obj)
+    public override byte[] ConvertToBinary(object obj)
     {
         try
         {
@@ -44,6 +25,36 @@ internal class MessagePackBinaryToObjectConverter : IBinaryToObjectConverter
         catch (Exception ex)
         {
             _logger.LogError($"Error when convert object of type `{obj?.GetType().FullName}` to binary", ex);
+            throw;
+        }
+    }
+
+    public override object ConvertToObject(byte[] bytes)
+    {
+        try
+        {
+            return MessagePackSerializer.Deserialize<ExpandoObject>(
+              bytes, ContractlessStandardResolver.Options);
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error when convert bytes to ExpandoObject", ex);
+            throw;
+        }
+    }
+
+    public override T ConvertToObject<T>(byte[] bytes)
+    {
+        try
+        {
+            return MessagePackSerializer.Deserialize<T>(
+              bytes, ContractlessStandardResolver.Options);
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"Error when convert bytes to `{typeof(T)}`", ex);
             throw;
         }
     }

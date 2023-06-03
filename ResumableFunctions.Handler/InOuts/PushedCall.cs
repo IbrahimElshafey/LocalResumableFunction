@@ -8,8 +8,7 @@ public class PushedCall : IEntityWithDelete
 {
     public int Id { get; internal set; }
     public MethodData MethodData { get; internal set; }
-    public object Input { get; internal set; }
-    public object Output { get; internal set; }
+    public InputOutput Data { get; internal set; } = new();
 
     public List<WaitForCall> WaitsForCall { get; internal set; } = new();
 
@@ -19,13 +18,13 @@ public class PushedCall : IEntityWithDelete
         get
         {
             var name = nameof(MethodWait.RefineMatchModifier);
-            if (Input is string s && s.StartsWith(name))
+            if (Data.Input is string s && s.StartsWith(name))
                 return s.Substring(name.Length);
-            if (Output is string output && output.StartsWith(name))
+            if (Data.Output is string output && output.StartsWith(name))
                 return output.Substring(name.Length);
-            if (Input is JObject inputJson && inputJson[name] != null)
+            if (Data.Input is JObject inputJson && inputJson[name] != null)
                 return inputJson[name].ToString();
-            if (Output is JObject outputJson && outputJson[name] != null)
+            if (Data.Output is JObject outputJson && outputJson[name] != null)
                 return outputJson[name].ToString();
             return null;
         }
@@ -34,4 +33,10 @@ public class PushedCall : IEntityWithDelete
     public DateTime Created { get; internal set; }
 
     public bool IsDeleted { get; internal set; }
+}
+
+public class InputOutput
+{
+    public object Input { get; set; }
+    public object Output { get; set; }
 }

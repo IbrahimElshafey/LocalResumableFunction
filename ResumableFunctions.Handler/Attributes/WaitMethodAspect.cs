@@ -45,7 +45,7 @@ namespace ResumableFunctions.Handler.Attributes
                 },
             };
             if (args.Length > 0)
-                _pushedCall.Input = args[0];
+                _pushedCall.Data.Input = args[0];
 
             //Console.WriteLine($"Before executing method `{name}` with input `{args.Aggregate((x,y)=>$"{x},{y}")}` and attribute `{pushResultAttribute}`");
             //Console.WriteLine($"Instance is: `{instance}`");
@@ -62,7 +62,7 @@ namespace ResumableFunctions.Handler.Attributes
         {
             try
             {
-                _pushedCall.Output = result;
+                _pushedCall.Data.Output = result;
                 _pushedCallProcessor.QueuePushedCallProcessing(_pushedCall).Wait();
             }
             catch (Exception ex)

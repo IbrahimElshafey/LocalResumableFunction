@@ -13,6 +13,7 @@ using Hangfire;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using System.Linq.Expressions;
 using System;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -40,7 +41,7 @@ internal partial class WaitsRepository : IWaitsRepository
         _settings = settings;
     }
 
-    
+
     //todo:critical this method must be optimized
     public async Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId)
     {
@@ -62,9 +63,10 @@ internal partial class WaitsRepository : IWaitsRepository
                             .Where(x =>
                                 x.MethodGroupToWaitId == methodGroupId &&
                                 x.Status == WaitStatus.Waiting //&&
-                                //x.RefineMatchModifier == pushedCall.RefineMatchModifier
+                                                               //x.RefineMatchModifier == pushedCall.RefineMatchModifier
                                 )
-                            .Select(x => new WaitId(x.Id, x.RequestedByFunction.AssemblyName))
+                            .Select(x =>
+                                new WaitId(x.Id, x.RequestedByFunctionId, x.RequestedByFunction.AssemblyName))
                             .ToListAsync();
 
 
@@ -81,7 +83,9 @@ internal partial class WaitsRepository : IWaitsRepository
                     new WaitForCall
                     {
                         PushedCallId = pushedCallId,
-                        WaitId = waitId.Id
+                        WaitId = waitId.Id,
+                        ServiceId = _settings.CurrentServiceId,
+                        FunctionId = waitId.FunctionId
                     }).ToList();
 
             await _context.SaveChangesAsync();
@@ -183,11 +187,9 @@ internal partial class WaitsRepository : IWaitsRepository
     {
         wait.Cancel();
         if (wait is MethodWait mw &&
-            mw.Name == $"#{nameof(LocalRegisteredMethods.TimeWait)}#" &&
-            mw.ExtraData is JObject waitDataJson)
+            mw.Name == $"#{nameof(LocalRegisteredMethods.TimeWait)}#")
         {
-            var waitData = waitDataJson.ToObject<TimeWaitData>();
-            backgroundJobClient.Delete(waitData.JobId);
+            backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
         wait.FunctionState.AddLog($"Wait `{wait.Name}` canceled.");
     }

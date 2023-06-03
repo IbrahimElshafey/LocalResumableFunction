@@ -40,13 +40,16 @@ public class MatchNewVisitor : ExpressionVisitor
         //GenerateMatchUsingJson();
         MarkMandatoryConstants();
 
-        RefineMatchModifier = _constantParts
-            .Where(x => x.IsMandatory)
-            .OrderBy(x => x.PropPathExpression.ToString())
-            .Select(x => x.Value.ToString())
-            .Aggregate((x, y) => $"{x}#{y}");
+        if (_constantParts.Any(x => x.IsMandatory))
+        {
+            RefineMatchModifier = _constantParts
+                .Where(x => x.IsMandatory)
+                .OrderBy(x => x.PropPathExpression.ToString())
+                .Select(x => x.Value.ToString())
+                .Aggregate((x, y) => $"{x}#{y}");
 
-        GenerateManadatoryPartsExpression();
+            GenerateManadatoryPartsExpression();
+        }
     }
 
     private void ChangeInputOutputParamsNames()
@@ -281,7 +284,7 @@ public class MatchNewVisitor : ExpressionVisitor
             .ToArray();
         if (parts.Any())
         {
-            ManadatoryPartsExpression = Lambda<Func<JObject,string>>(
+            ManadatoryPartsExpression = Lambda<Func<JObject, string>>(
                 Call(
                     typeof(string).GetMethod("Join", 0, new[] { typeof(string), typeof(string[]) }),
                     Constant("#"),

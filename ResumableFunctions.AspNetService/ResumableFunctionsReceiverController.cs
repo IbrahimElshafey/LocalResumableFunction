@@ -54,8 +54,11 @@ namespace ResumableFunctions.AspNetService
                     {
                         MethodUrn = externalCall.MethodUrn
                     },
-                    Input = externalCall.Input,
-                    Output = externalCall.Output
+                    Data = new()
+                    {
+                        Input = externalCall.Input,
+                        Output = externalCall.Output
+                    }
                 };
                 await _pushedCallProcessor.QueueExternalPushedCallProcessing(pushedCall, externalCall.ServiceName);
             }

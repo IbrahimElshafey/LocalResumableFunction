@@ -25,7 +25,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
     public int StateAfterWait { get; internal set; }
     public bool IsNode { get; internal set; }
     public bool IsReplay { get; internal set; }
-    public object ExtraData { get; internal set; }
+    public WaitExtraData ExtraData { get; internal set; }
 
     public WaitType WaitType { get; internal set; }
     public DateTime Modified { get; internal set; }

@@ -13,18 +13,19 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using Hangfire;
 using Medallion.Threading;
+using Newtonsoft.Json.Linq;
 
 namespace ResumableFunctions.Handler.DataAccess;
 public class FunctionDataContext : DbContext
 {
     private readonly ILogger<FunctionDataContext> _logger;
-    private readonly IBinaryToObjectConverter binaryToObjectConverter;
+    private readonly BinaryToObjectConverter binaryToObjectConverter;
 
     public FunctionDataContext(
         ILogger<FunctionDataContext> logger,
         IResumableFunctionsSettings settings,
         IDistributedLockProvider lockProvider,
-        IBinaryToObjectConverter binaryToObjectConverter) : base(settings.WaitsDbConfig.Options)
+        BinaryToObjectConverter binaryToObjectConverter) : base(settings.WaitsDbConfig.Options)
     {
         _logger = logger;
         this.binaryToObjectConverter = binaryToObjectConverter;
@@ -109,19 +110,18 @@ public class FunctionDataContext : DbContext
 
     private void ConfigurePushedCalls(EntityTypeBuilder<PushedCall> entityTypeBuilder)
     {
-        entityTypeBuilder
-          .Property(x => x.Input)
-          .HasConversion(binaryToObjectConverter.ToBinary, binaryToObjectConverter.ToObject);
 
         entityTypeBuilder
-            .Property(x => x.Output)
-            .HasConversion(binaryToObjectConverter.ToBinary, binaryToObjectConverter.ToObject);
+            .Property(x => x.Data)
+            .HasConversion(
+            obj => binaryToObjectConverter.ConvertToBinary(obj),
+            bytes => binaryToObjectConverter.ConvertToObject<InputOutput>(bytes));
 
         entityTypeBuilder
            .Property(x => x.MethodData)
            .HasConversion(
-            v => JsonConvert.SerializeObject(v),
-            v => JsonConvert.DeserializeObject<MethodData>(v));
+            obj => binaryToObjectConverter.ConvertToBinary(obj),
+            bytes => binaryToObjectConverter.ConvertToObject<MethodData>(bytes));
 
         entityTypeBuilder
            .HasMany(x => x.WaitsForCall)
@@ -140,7 +140,9 @@ public class FunctionDataContext : DbContext
 
         modelBuilder.Entity<Wait>()
             .Property(x => x.ExtraData)
-            .HasConversion(binaryToObjectConverter.ToBinary, binaryToObjectConverter.ToObject);
+            .HasConversion(
+            obj => binaryToObjectConverter.ConvertToBinary(obj),
+            bytes => binaryToObjectConverter.ConvertToObject<WaitExtraData>(bytes));
 
         modelBuilder.Entity<MethodWait>()
           .Property(mw => mw.MatchIfExpressionValue)
@@ -205,16 +207,13 @@ public class FunctionDataContext : DbContext
         entityTypeBuilder
             .HasMany(x => x.Waits)
             .WithOne(wait => wait.FunctionState)
-            .HasForeignKey(x => x.FunctionStateId)
-            .HasConstraintName("FK_Waits_For_FunctionState");
-
-        //entityTypeBuilder
-        //   .Property(x => x.StateObject)
-        //   .HasConversion<BinaryToObjectConverter>();
+            .HasForeignKey(x => x.FunctionStateId);
 
         entityTypeBuilder
            .Property(x => x.StateObject)
-           .HasConversion(binaryToObjectConverter.ToBinary, binaryToObjectConverter.ToObject);
+           .HasConversion(
+            binaryToObjectConverter.ToBinary,
+            binaryToObjectConverter.ToObject);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

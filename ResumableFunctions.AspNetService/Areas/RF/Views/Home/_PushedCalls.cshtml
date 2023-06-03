@@ -39,8 +39,8 @@
                                 <li><b>Assembly: </b>@item.PushedCall.MethodData.AssemblyName</li>
                             </ul>
                         </td>
-                        <td class="JsonObject">@item.PushedCall.Input</td>
-                        <td class="JsonObject">@item.PushedCall.Output</td>
+                        <td class="JsonObject">@item.PushedCall.Data.Input</td>
+                        <td class="JsonObject">@item.PushedCall.Data.Output</td>
                         <td>
                             @((item.MatchedCount + item.NotMatchedCount) == item.ExpectedMatchCount ?
                                 "Finished" :

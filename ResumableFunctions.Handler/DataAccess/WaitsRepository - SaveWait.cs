@@ -145,7 +145,7 @@ internal partial class WaitsRepository : IWaitsRepository
         timeWaitMethod.StateBeforeWait = timeWait.StateBeforeWait;
         timeWaitMethod.StateAfterWait = timeWait.StateAfterWait;
         timeWaitMethod.ExtraData =
-            new TimeWaitData
+            new WaitExtraData
             {
                 TimeToWait = timeWait.TimeToWait,
                 UniqueMatchId = timeWait.UniqueMatchId,

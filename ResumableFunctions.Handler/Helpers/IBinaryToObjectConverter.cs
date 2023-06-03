@@ -2,8 +2,12 @@
 
 namespace ResumableFunctions.Handler.Helpers;
 
-public interface IBinaryToObjectConverter
+public abstract class BinaryToObjectConverter
 {
-    Expression<Func<object, byte[]>> ToBinary { get; }
-    Expression<Func<byte[],object>> ToObject { get; }
+    public virtual Expression<Func<object, byte[]>> ToBinary => ob => ConvertToBinary(ob);
+    public virtual Expression<Func<byte[], object>> ToObject => bytes => ConvertToObject(bytes);
+
+    public abstract byte[] ConvertToBinary(object ob);
+    public abstract object ConvertToObject(byte[] bytes);
+    public abstract T ConvertToObject<T>(byte[] bytes);
 }

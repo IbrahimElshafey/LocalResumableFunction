@@ -318,8 +318,8 @@ namespace ResumableFunctions.Handler.Core
                     return false;
                 }
 
-                _methodWait.Input = _pushedCall.Input;
-                _methodWait.Output = _pushedCall.Output;
+                _methodWait.Input = _pushedCall.Data.Input;
+                _methodWait.Output = _pushedCall.Data.Output;
 
                 return true;
             }
