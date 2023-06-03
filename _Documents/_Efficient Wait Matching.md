@@ -1,21 +1,18 @@
 ﻿
 
 # Efficient Wait Matching
-* MatchKeys not duplicate for same (MethodGroupId,FunctionId)
-* One Call for Service (No use `ProcessMatchedWait(int waitId, int pushedCallId)` but `ProcessCall(int pushedCallId)`
-	* Query waits to get which services will be called
-	* Call `ProcessCall(int pushedCallId)` for each service
-	* The service will evaluate match and set data if matched for each wait
-	* For waits that use the same input/output types the deserialization will made once
-	* Keep in mind that "One wait match per call per function
+* Create table wait template
+* The service will evaluate match and set data if matched for each wait
+* For waits that use the same input/output types the deserialization will made once
+* Keep in mind that "One wait match per call per function
 * Evaluate match does not need data load
 * Serialize pushed call once for same group methods
 
 # Serialization
-* Fast serialization and deserialization for [Use MessagePack] 
+* Fast serialization and deserialization for [Use MessagePack/BinaryPack] 
 	* StateObject https://github.com/rikimaru0345/Ceras
 	* Wait ExtraData
-	* Pushed Calls
+	* Pushed Call [Info/Data]
 
 # Expression Serialization
 	* https://github.com/reaqtive/reaqtor/tree/main/Nuqleon/Core/LINQ/Nuqleon.Linq.Expressions.Bonsai

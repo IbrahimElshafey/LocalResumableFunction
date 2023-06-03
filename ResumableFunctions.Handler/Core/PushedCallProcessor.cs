@@ -66,7 +66,7 @@ internal class PushedCallProcessor : IPushedCallProcessor
             async () =>
             {
                 var services = await _waitsRepository.GetServicesForMethodCall(methodUrn);
-                if (services == null||services.Any() is false) return;
+                if (services == null || services.Any() is false) return;
 
                 foreach (var service in services)
                 {
@@ -80,7 +80,7 @@ internal class PushedCallProcessor : IPushedCallProcessor
                     }
                     else
                     {
-                        await CallOwnerService(service, pushedCallId);
+                        await CallOwnerService(service, pushedCallId, methodUrn);
                     }
                 }
             },
@@ -102,12 +102,12 @@ internal class PushedCallProcessor : IPushedCallProcessor
     }
 
 
-    private async Task CallOwnerService(ServiceData service, int pushedCallId)
+    private async Task CallOwnerService(ServiceData service, int pushedCallId, string methodUrn)
     {
         try
         {
             var actionUrl =
-                $"{service.Url}api/ResumableFunctions/ServiceProcessPushedCall?pushedCallId={pushedCallId}";
+                $"{service.Url}api/ResumableFunctions/ServiceProcessPushedCall?pushedCallId={pushedCallId}&methodUrn={methodUrn}";
             await _hangFireHttpClient.EnqueueGetRequestIfFail(actionUrl);
         }
         catch (Exception ex)

@@ -231,10 +231,11 @@ public class FunctionDataContext : DbContext
     {
         try
         {
-            SetDates();
-            NeverUpdateFirstWait();
-            HandleSoftDelete();
-            ExcludeFalseAddEntries();
+            var entries = ChangeTracker.Entries().ToList();
+            SetDates(entries);
+            NeverUpdateFirstWait(entries);
+            HandleSoftDelete(entries);
+            ExcludeFalseAddEntries(entries);
             var result = await base.SaveChangesAsync(cancellationToken);
             await SetWaitsPaths(cancellationToken);
             await SaveEntitiesLogs(cancellationToken);
@@ -308,26 +309,27 @@ public class FunctionDataContext : DbContext
         }
     }
 
-    private void NeverUpdateFirstWait()
+    private void NeverUpdateFirstWait(List<EntityEntry> entries)
     {
-        foreach (var entityEntry in ChangeTracker.Entries())
-        {
-            if (
-                entityEntry.Entity is Wait wait &&
+        var waitEntries = entries
+            .Where(x =>
+                x.Entity is Wait wait &&
                 wait.IsFirst &&
-                wait.IsDeleted == false)
-            {
-                if (entityEntry.State == EntityState.Modified)
-                    entityEntry.State = EntityState.Unchanged;
-                if (Entry(wait.FunctionState).State == EntityState.Modified)
-                    Entry(wait.FunctionState).State = EntityState.Unchanged;
-            }
+                wait.IsDeleted == false);
+        foreach (var entityEntry in waitEntries)
+        {
+            if (entityEntry.State == EntityState.Modified)
+                entityEntry.State = EntityState.Unchanged;
+            var wait = entityEntry.Entity as Wait;
+            if (Entry(wait.FunctionState).State == EntityState.Modified)
+                Entry(wait.FunctionState).State = EntityState.Unchanged;
         }
+
     }
 
-    private void HandleSoftDelete()
+    private void HandleSoftDelete(List<EntityEntry> entries)
     {
-        foreach (var entityEntry in ChangeTracker.Entries())
+        foreach (var entityEntry in entries)
         {
             switch (entityEntry.State)
             {
@@ -339,9 +341,9 @@ public class FunctionDataContext : DbContext
         }
     }
 
-    private void SetDates()
+    private void SetDates(List<EntityEntry> entries)
     {
-        foreach (var entityEntry in ChangeTracker.Entries())
+        foreach (var entityEntry in entries)
         {
             switch (entityEntry.State)
             {
@@ -360,15 +362,11 @@ public class FunctionDataContext : DbContext
         }
     }
 
-    private void ExcludeFalseAddEntries()
+    private void ExcludeFalseAddEntries(List<EntityEntry> entries)
     {
-        var falseAddEntries =
-                    ChangeTracker
-                    .Entries()
-                    .Where(x => x.State == EntityState.Added && x.IsKeySet)
-                    .ToList();
-
-        falseAddEntries
+        entries
+            .Where(x => x.State == EntityState.Added && x.IsKeySet)
+            .ToList()
             .ForEach(x => x.State = EntityState.Unchanged);
     }
 }
