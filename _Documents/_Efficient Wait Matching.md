@@ -1,45 +1,51 @@
-﻿
+﻿* Dont use converters for serialization
+	* Shadow property and set/get on demand
+	* https://learn.microsoft.com/en-us/dotnet/api/microsoft.entityframeworkcore.diagnostics.imaterializationinterceptor?view=efcore-7.0
+
+# WaitTemplate
+* Match Expression (Need load state)
+* Set Data Expression (Need load state)
+* Hash for (Match Expression & Set Data Expression)
+* Extract Mandatory Part Expression
+* Function Id
+* MethodGroupId Id
+
+# When process call
+* Get MethodGroupId
+* Get Mandatory Part Expressions
+	* Will return WaitTemplate
+	* WaitTemplate.Where(x => x.MethodGroupId = MethodGroupId)
+* Apply expression to pushed call
+	* Will return condition parts (Mandatory part string,Function Id)
+* Will query waits to get
+	* WHEN MandatoryPartValue & FunctionId & MethodGroupId
+* Will group waits by FunctionId
+* For each group one match must be success
+* For each group 
+	* Deserialize pushed call once for same group methods
+	* The state object will be deserialized to class type
+	* The match expression will be evaluated to fiund the first match
+	* The other will be marked as unmateched
+	* The set data will be called
+	* Continue processing the wait ...
 
 # Efficient Wait Matching
-* Create table wait template
-* The service will evaluate match and set data if matched for each wait
-* For waits that use the same input/output types the deserialization will made once
-* Keep in mind that "One wait match per call per function
 * Evaluate match does not need data load
-* Serialize pushed call once for same group methods
+
 
 # Serialization
-* Fast serialization and deserialization for [Use MessagePack/BinaryPack] 
+* Fast serialization and deserialization for [Use MessagePack] 
 	* StateObject https://github.com/rikimaru0345/Ceras
 	* Wait ExtraData
 	* Pushed Call [Info/Data]
+* Mandatory part extractor will need to be updated
 
-# Expression Serialization
+* Warning if wait template not have mandatory part
+* Warning if pushed call mandatory part missing
+
+# Expression Serialization [Will be separate project]
 	* https://github.com/reaqtive/reaqtor/tree/main/Nuqleon/Core/LINQ/Nuqleon.Linq.Expressions.Bonsai
-
-# Separate store for state objects
-* Use NoSql databases to store states
-
-* Fast JSON serialization and deserialization for
-	* StateObject https://github.com/rikimaru0345/Ceras
-	* Wait ExtraData
-	* Expressions
-
-
-* Evaluate expression tree as where clause
-	* Translate expression tree to Mongo query
-	* https://stackoverflow.com/questions/7391450/simple-where-clause-in-expression-tree
-
-
-
-
-
-## In current
-* Expression Serialization
-	* https://github.com/reaqtive/reaqtor/tree/main/Nuqleon/Core/LINQ/Nuqleon.Linq.Expressions.Bonsai.Serialization
-* Expression Trees Serialization
-	* https://github.com/esskar/Serialize.Linq/blob/master/src/Serialize.Linq.Tests/ExpressionSerializerTests.cs
-
-* Query to SQL 'DataContext.GetCommand(IQueryable)'
-	* https://learn.microsoft.com/en-us/dotnet/api/system.data.linq.datacontext.getcommand?view=netframework-4.8.1
+	* NodesStack: Node types as array int/byte
+	* Varaibels array:Varaibels as array object
+	* Varaibels references stack int array
 

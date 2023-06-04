@@ -5,8 +5,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        var activate = 8;
-        switch (activate)
+        switch (4)
         {
             case 1:
                 TestTreeCascadeAction();break;
