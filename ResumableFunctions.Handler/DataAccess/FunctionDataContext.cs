@@ -19,16 +19,16 @@ namespace ResumableFunctions.Handler.DataAccess;
 public class FunctionDataContext : DbContext
 {
     private readonly ILogger<FunctionDataContext> _logger;
-    private readonly BinaryToObjectConverter binaryToObjectConverter;
+    private readonly BinaryToObjectConverter _binarytConverter;
 
     public FunctionDataContext(
         ILogger<FunctionDataContext> logger,
         IResumableFunctionsSettings settings,
         IDistributedLockProvider lockProvider,
-        BinaryToObjectConverter binaryToObjectConverter) : base(settings.WaitsDbConfig.Options)
+        BinaryToObjectConverter binarytConverter) : base(settings.WaitsDbConfig.Options)
     {
         _logger = logger;
-        this.binaryToObjectConverter = binaryToObjectConverter;
+        _binarytConverter = binarytConverter;
         try
         {
             using (lockProvider.AcquireLock(Database.GetDbConnection().Database))
@@ -114,14 +114,14 @@ public class FunctionDataContext : DbContext
         pushedCallBuilder
             .Property(x => x.Data)
             .HasConversion(
-            obj => binaryToObjectConverter.ConvertToBinary(obj),
-            bytes => binaryToObjectConverter.ConvertToObject<InputOutput>(bytes));
+            obj => _binarytConverter.ConvertToBinary(obj),
+            bytes => _binarytConverter.ConvertToObject<InputOutput>(bytes));
 
         pushedCallBuilder
            .Property(x => x.MethodData)
            .HasConversion(
-            obj => binaryToObjectConverter.ConvertToBinary(obj),
-            bytes => binaryToObjectConverter.ConvertToObject<MethodData>(bytes));
+            obj => _binarytConverter.ConvertToBinary(obj),
+            bytes => _binarytConverter.ConvertToObject<MethodData>(bytes));
 
         pushedCallBuilder
            .HasMany(x => x.WaitsForCall)
@@ -145,8 +145,8 @@ public class FunctionDataContext : DbContext
         modelBuilder.Entity<Wait>()
             .Property(x => x.ExtraData)
             .HasConversion(
-            obj => binaryToObjectConverter.ConvertToBinary(obj),
-            bytes => binaryToObjectConverter.ConvertToObject<WaitExtraData>(bytes));
+            obj => _binarytConverter.ConvertToBinary(obj),
+            bytes => _binarytConverter.ConvertToObject<WaitExtraData>(bytes));
 
         modelBuilder.Entity<MethodWait>()
           .Property(mw => mw.MatchIfExpressionValue)
@@ -216,8 +216,8 @@ public class FunctionDataContext : DbContext
         entityTypeBuilder
            .Property(x => x.StateObject)
            .HasConversion(
-            binaryToObjectConverter.ToBinary,
-            binaryToObjectConverter.ToObject);
+            _binarytConverter.ToBinary,
+            _binarytConverter.ToObject);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

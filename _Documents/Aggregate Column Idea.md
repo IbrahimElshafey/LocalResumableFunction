@@ -15,7 +15,7 @@
 * Define Aggregate `DefineAggregate(forTable: "Post",name: "LikesCount",aggregateFunction: "SUM")`
 * Use when like button click `post.AddAggregateValue("LikesCount",1)`
 * Use when unlike button clicked `post.AddAggregateValue("LikesCount",-1)`
-* When user totally chnaged the content of the post `post.ResetAggregate("LikesCount")`
+* When user change the content of the post `post.ResetAggregate("LikesCount")`
 * When you wanty to display like counts `post.GetAggregate("LikesCount")`
 
 # Table File Log

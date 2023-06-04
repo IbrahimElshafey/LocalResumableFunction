@@ -8,5 +8,6 @@ public enum WaitForCallStatus
     NotMatched,
     ProcessingSucceed,
     ProcessingFailed,
-    DuplicationCanceled
+    DuplicationCanceled,
+    DataUpdated,
 }

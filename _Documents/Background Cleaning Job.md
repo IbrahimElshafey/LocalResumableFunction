@@ -1,8 +1,8 @@
 ﻿# Background Cleaning Job
-* Move completed/cancled function instance to Recycle Bin
+* Delete completed/cancled function instance from DB
 	* It's logs
 	* Waits
-* Move completed pushed methods
-* Move inactive methods identifier
+* Move completed pushed call and it's waits for call records
 * Move old logs for scan sessions
-* Move soft deleted rows to recyle bin DB
+* Delete soft deleted rows
+* Delete Inactive WaitTemplates

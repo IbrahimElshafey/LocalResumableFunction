@@ -1,15 +1,12 @@
 ﻿# Todo
 
 ## Core functions
-* Delay processing if the scan is in progress
+* Delay processing wait if the scan is in progress
 * Remove direct use for DbContext
 * Same DLL in two services
-* Add IStateStore Service
-	* Save State
-	* Update State
-	* Delete State
-	* Query State
 * Review all places where database update occurs
+* Function priority
+	* How hangfire handle priority
 * Back to UI coding
 
 
@@ -55,22 +52,20 @@
 
 ## Enhancements
 * Refactor long methods
-* Encrypt sensitive data
-	* Function state
-	* Match and SetData Expressions
 * Write unit testing for core functionallity
 * Write Roslyn analyzer to force the right use for the library
 * Parameter check lib use
 * Performance Analysis
 * Store options
-	* Use NoSql databases to store states
-		* MongoDb,Tarantool or Couchbase Server
 	* Use Queue Service to Handle Pushed Calls
 		* Kafka,RbbittMQ or ActiveMQ
 * What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 * Resumable function hooks
 	* After Resumed
 	* On Error Occurred
+* Encryption option sensitive data
+	* Function state
+	* Match and SetData Expressions
 
 ## Migrate Resumable Function DB
 * How to migrate resumable function database from development to production??
@@ -78,17 +73,10 @@
 
 ## How to Test resumable function?
 * How to unit test a resumable functions
-	* Generate unit test code for resumable function (I plan to be an automatic integration testing)
+	* Generate unit test code for resumable function (I plan to auto-generate code for integration test by simulating waits in function)
 
 # External Waits (Will be separate projects)
 * Monitor network requests using reverse proxy and push MethodCalls [TCP Listener]
 	* https://github.com/microsoft/reverse-proxy
-* RabbitMQ or any service bus [Subscribe to event]
 * File/Folder Changes [File Watcher]
-
-# Testing
-* Replay in sub functions
-* Multiple sub functions
-* 1 Million active wait test
-* 1000 resumable function test
-* 1000 pushed call per second test
+* RabbitMQ or any service bus [Subscribe to event]
