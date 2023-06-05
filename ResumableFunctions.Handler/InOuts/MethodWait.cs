@@ -9,7 +9,6 @@ using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
-
 public class MethodWait : Wait
 {
     [NotMapped] public LambdaExpression SetDataExpression { get; internal set; }
