@@ -21,4 +21,5 @@
 # Table File Log
 * This will be a separate test project to know more about reading/writing to files
 * How database ACID work
-* Use BinaryPack to save record
+* Use GroBuf to serialize object
+	* GroBuf https://github.com/skbkontur/GroBuf

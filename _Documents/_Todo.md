@@ -43,13 +43,6 @@
 	* Rerun faild isntance
 	* Stop resumable function new instances
 
-## Prepare how to use?
-* Examples 
-	* https://tallyfy.com/workflow-examples/
-	* https://clickup.com/blog/workflow-examples/
-* Inter services waits documentation
-* Record videos
-
 ## Enhancements
 * Refactor long methods
 * Write unit testing for core functionallity
@@ -67,9 +60,7 @@
 	* Function state
 	* Match and SetData Expressions
 
-## Migrate Resumable Function DB
-* How to migrate resumable function database from development to production??
-* What about HangfireDb
+
 
 ## How to Test resumable function?
 * How to unit test a resumable functions
