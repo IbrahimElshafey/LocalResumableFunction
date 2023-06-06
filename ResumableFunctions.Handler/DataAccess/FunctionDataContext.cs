@@ -50,7 +50,7 @@ public class FunctionDataContext : DbContext
 
     public DbSet<Wait> Waits { get; set; }
     public DbSet<MethodWait> MethodWaits { get; set; }
-    public DbSet<MethodWaitTemplate> MethodWaitTemplates { get; set; }
+    //public DbSet<MethodWaitTemplate> MethodWaitTemplates { get; set; }
     public DbSet<MethodsGroup> MethodsGroups { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
 
