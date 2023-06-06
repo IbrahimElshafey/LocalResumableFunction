@@ -78,12 +78,11 @@ internal partial class WaitsRepository : IWaitsRepository
                             .MethodWaits
                             .Include(x => x.RequestedByFunction)
                             .Where(x =>
-                                x.MethodGroupToWaitId == methodGroupId &&
-                                x.Status == WaitStatus.Waiting &&
-                                x.ServiceId == _settings.CurrentServiceId
+                                    x.MethodGroupToWaitId == methodGroupId &&
+                                    x.Status == WaitStatus.Waiting &&
+                                    x.ServiceId == _settings.CurrentServiceId
                                 )
-                            .Select(x =>
-                                new WaitId(x.Id, x.RequestedByFunctionId, x.RequestedByFunction.AssemblyName))
+                            .Select(x => new WaitId(x.Id, x.RequestedByFunctionId, x.RequestedByFunction.AssemblyName))
                             .ToListAsync();
 
 

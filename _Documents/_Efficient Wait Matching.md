@@ -4,23 +4,7 @@
 	* StateObject
 	* Wait ExtraData
 	* Pushed Call [Info/Data]
-* May I use MemoryPack https://github.com/Cysharp/MemoryPack
 
-
-# WaitTemplates Table
-* FunctionId
-* MethodGroupId Id (Index)
-* WaitTemplate Hash(Match Expression & Set Data Expression hashing)
-* Match Expression (Need load state)
-* Set Data Expression (Need load state)
-* Extract Mandatory Part From Pushed Call Expression (Work on dynamic pushed call)
-	* Return string array
-* Extract Mandatory Part From Function Instance Expression (Work on dynamic pushed call)
-	* Return string with '#' separator
-* Dynamic Match Expression (Work on dynamic objects pushed call dynamic,state object dynamic)
-	* `bool: Func(ExpandoAccessor instance,ExpandoAccessor pushedCall)`
-* Dynamic Set Data Expression (Work on dynamic objects pushed call dynamic,state object dynamic)
-	* `void: Action(ExpandoAccessor instance,ExpandoAccessor pushedCall)`
 
 # When Wait Requested
 * Calc WaitTemplate Hash(Match Expression & Set Data Expression HASH)
