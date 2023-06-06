@@ -4,7 +4,18 @@
 	* StateObject
 	* Wait ExtraData
 	* Pushed Call [Info/Data]
-
+* Test if mandatory expression make full match
+	* Translate every mandatory part to true
+	* Other parts to false
+	* If result is true the full match
+	* if else the partial match
+* Match vistor will return
+	* MatchExpression
+	* MatchExpressionDynamic
+	* MandatoryPartExtractorExpression
+	* WaitMandatoryPartExpression
+	* Current Mandatory Part
+	* Mandatory is partial or full
 
 # When Wait Requested
 * Calc WaitTemplate Hash(Match Expression & Set Data Expression HASH)
@@ -40,14 +51,14 @@
 	* Find first match
 	* If match found and set data using dynamic expression not null >> set data
 		* If the value that will be set is null >> throw exception
-	* The other not matched will be marked as cancled
+	* The other not matched will be marked as canceled
 * Static evalution for each group
 	* Deserialize pushed call to `InputOutput` strong type
 	* For each Wait deserialize state object to `FunctionContainerClass` strong type
 	* Check waits against static match expression if exist
 	* Find first match
 	* If match found >> set data using set data expression
-	* The other not matched will be marked as cancled
+	* The other not matched will be marked as canceled
 * Continue processing matched wait
 
 # Expression Serialization [Will be separate project]
