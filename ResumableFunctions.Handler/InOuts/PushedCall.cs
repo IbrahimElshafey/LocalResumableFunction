@@ -4,12 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts;
-public class PushedCall : IEntityWithDelete
+public class PushedCall : IEntityWithDelete, IEntityInService
 {
     public int Id { get; internal set; }
     public MethodData MethodData { get; internal set; }
     public InputOutput Data { get; internal set; } = new();
-
+    public int? ServiceId { get; set; }
     public List<WaitForCall> WaitsForCall { get; internal set; } = new();
 
     //todo: will be deleted or used by external calls only

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete
+public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete, IEntityInService
 {
     [JsonIgnore]
     public int ErrorCounter { get; set; }
@@ -13,7 +13,7 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
     [NotMapped]
     public List<LogRecord> Logs { get; } = new();
     public int Id { get; internal set; }
-    public int ServiceId { get; internal set; }
+    public int? ServiceId { get; set; }
     public string UserDefinedId { get; internal set; }
     public DateTime Created { get; internal set; }
     /// <summary>

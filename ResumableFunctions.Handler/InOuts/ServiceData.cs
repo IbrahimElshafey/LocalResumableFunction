@@ -20,7 +20,6 @@ public class ServiceData : IObjectWithLog, IEntityWithUpdate
     public DateTime Modified { get; internal set; }
     public int ParentId { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
-    public List<Wait> Waits { get; internal set; }
 
     public void AddError(string message, Exception ex = null, string code = "")
     {

@@ -65,23 +65,16 @@ internal class PushedCallProcessor : IPushedCallProcessor
             $"InitialProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
             async () =>
             {
-                var services = await _waitsRepository.GetServicesForMethodCall(methodUrn);
+                var services = await _waitsRepository.GetAffectedServicesForCall(methodUrn);
                 if (services == null || services.Any() is false) return;
 
                 foreach (var service in services)
                 {
-                    if (service.Id == _settings.CurrentServiceId)
-                    {
-                        var waitsIds = await _waitsRepository.GetWaitsIdsForMethodCall(pushedCallId, methodUrn);
-                        foreach (var waitId in waitsIds)
-                        {
-                            _backgroundJobClient.Enqueue(() => _waitProcessor.ProcessWait(waitId.Id, pushedCallId));
-                        }
-                    }
+                    var isLocal = service.Id == _settings.CurrentServiceId;
+                    if (isLocal)
+                        await ServiceProcessPushedCall(pushedCallId, methodUrn);
                     else
-                    {
                         await CallOwnerService(service, pushedCallId, methodUrn);
-                    }
                 }
             },
             $"Error when call `InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");

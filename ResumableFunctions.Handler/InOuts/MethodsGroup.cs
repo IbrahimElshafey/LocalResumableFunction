@@ -1,6 +1,6 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
-public class MethodsGroup: IEntity
+public class MethodsGroup : IEntity, IEntityInService
 {
     public int Id { get; internal set; }
     public string MethodGroupUrn { get; internal set; }
@@ -8,5 +8,6 @@ public class MethodsGroup: IEntity
     public List<MethodWait> WaitRequestsForGroup { get; internal set; }
 
     public DateTime Created { get; internal set; }
+    public int? ServiceId { get; set; }
 }
 

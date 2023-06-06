@@ -13,7 +13,7 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
         Task<Wait> GetWaitGroup(int? parentGroupId);
         Task<Wait> GetWaitParent(Wait wait);
         Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId,string methodUrn);
-        Task<List<ServiceData>> GetServicesForMethodCall(string methodUrn);
+        Task<List<ServiceData>> GetAffectedServicesForCall(string methodUrn);
         Task RemoveFirstWaitIfExist(int methodIdentifierId);
 
         Task<Wait> LoadWaitTree(Expression<Func<Wait,bool>> expression);

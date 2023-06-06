@@ -20,6 +20,7 @@ public class FunctionDataContext : DbContext
 {
     private readonly ILogger<FunctionDataContext> _logger;
     private readonly BinaryToObjectConverter _binarytConverter;
+    private readonly IResumableFunctionsSettings _settings;
 
     public FunctionDataContext(
         ILogger<FunctionDataContext> logger,
@@ -29,6 +30,7 @@ public class FunctionDataContext : DbContext
     {
         _logger = logger;
         _binarytConverter = binarytConverter;
+        _settings = settings;
         try
         {
             using (lockProvider.AcquireLock(Database.GetDbConnection().Database))
@@ -102,11 +104,11 @@ public class FunctionDataContext : DbContext
         //entityTypeBuilder.Property(x => x.Modified).HasDefaultValue(DateTime.MinValue);
         entityTypeBuilder.HasIndex(x => x.AssemblyName);
 
-        entityTypeBuilder
-            .HasMany(x => x.Waits)
-            .WithOne(wait => wait.Service)
-            .HasForeignKey(x => x.ServiceId)
-            .HasConstraintName("FK_Waits_For_Service");
+        //entityTypeBuilder
+        //    .HasMany(x => x.Waits)
+        //    .WithOne(wait => wait.Service)
+        //    .HasForeignKey(x => x.ServiceId)
+        //    .HasConstraintName("FK_Waits_For_Service");
     }
 
     private void ConfigurePushedCalls(ModelBuilder modelBuilder)
@@ -232,11 +234,7 @@ public class FunctionDataContext : DbContext
     {
         try
         {
-            var entries = ChangeTracker.Entries().ToList();
-            SetDates(entries);
-            NeverUpdateFirstWait(entries);
-            HandleSoftDelete(entries);
-            ExcludeFalseAddEntries(entries);
+            BeforeSaveData();
             var result = await base.SaveChangesAsync(cancellationToken);
             await SetWaitsPaths(cancellationToken);
             await SaveEntitiesLogs(cancellationToken);
@@ -248,6 +246,25 @@ public class FunctionDataContext : DbContext
             throw;
         }
 
+    }
+
+    private void BeforeSaveData()
+    {
+        var entries = ChangeTracker.Entries().ToList();
+        foreach (var entry in entries)
+        {
+            SetDates(entry);
+            SetServiceId(entry);
+            NeverUpdateFirstWait(entry);
+            HandleSoftDelete(entry);
+            ExcludeFalseAddEntries(entry);
+        }
+    }
+
+    private void SetServiceId(EntityEntry entry)
+    {
+        if (entry.Entity is IEntityInService entityInService)
+            entityInService.ServiceId = _settings.CurrentServiceId;
     }
 
     private async Task SetWaitsPaths(CancellationToken cancellationToken)
@@ -299,6 +316,7 @@ public class FunctionDataContext : DbContext
                 {
                     if (logRecord.EntityId <= 0 || logRecord.EntityId == null)
                         logRecord.EntityId = ((IEntity)entity).Id;
+                    logRecord.ServiceId = _settings.CurrentServiceId;
                 });
                 Logs.AddRange(entity.Logs.Where(x => x.Id == 0));
             }
@@ -310,64 +328,51 @@ public class FunctionDataContext : DbContext
         }
     }
 
-    private void NeverUpdateFirstWait(List<EntityEntry> entries)
+    private void NeverUpdateFirstWait(EntityEntry entityEntry)
     {
-        var waitEntries = entries
-            .Where(x =>
-                x.Entity is Wait wait &&
+       if(entityEntry.Entity is Wait wait &&
                 wait.IsFirst &&
-                wait.IsDeleted == false);
-        foreach (var entityEntry in waitEntries)
+                wait.IsDeleted == false)
         {
             if (entityEntry.State == EntityState.Modified)
                 entityEntry.State = EntityState.Unchanged;
-            var wait = entityEntry.Entity as Wait;
             if (Entry(wait.FunctionState).State == EntityState.Modified)
                 Entry(wait.FunctionState).State = EntityState.Unchanged;
         }
-
     }
 
-    private void HandleSoftDelete(List<EntityEntry> entries)
+    private void HandleSoftDelete(EntityEntry entityEntry)
     {
-        foreach (var entityEntry in entries)
+        switch (entityEntry.State)
         {
-            switch (entityEntry.State)
-            {
-                case EntityState.Deleted when entityEntry.Entity is IEntityWithDelete:
-                    entityEntry.Property(nameof(IEntityWithDelete.IsDeleted)).CurrentValue = true;
-                    entityEntry.State = EntityState.Modified;
-                    break;
-            }
+            case EntityState.Deleted when entityEntry.Entity is IEntityWithDelete:
+                entityEntry.Property(nameof(IEntityWithDelete.IsDeleted)).CurrentValue = true;
+                entityEntry.State = EntityState.Modified;
+                break;
         }
     }
 
-    private void SetDates(List<EntityEntry> entries)
+    private void SetDates(EntityEntry entityEntry)
     {
-        foreach (var entityEntry in entries)
+        switch (entityEntry.State)
         {
-            switch (entityEntry.State)
-            {
-                case EntityState.Modified when entityEntry.Entity is IEntityWithUpdate:
-                    entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.Now;
-                    entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
-                    break;
-                case EntityState.Added when entityEntry.Entity is IEntityWithUpdate:
-                    entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
-                    entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
-                    break;
-                case EntityState.Added when entityEntry.Entity is IEntity:
-                    entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
-                    break;
-            }
+            case EntityState.Modified when entityEntry.Entity is IEntityWithUpdate:
+                entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.Now;
+                entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
+                break;
+            case EntityState.Added when entityEntry.Entity is IEntityWithUpdate:
+                entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
+                entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
+                break;
+            case EntityState.Added when entityEntry.Entity is IEntity:
+                entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
+                break;
         }
     }
 
-    private void ExcludeFalseAddEntries(List<EntityEntry> entries)
+    private void ExcludeFalseAddEntries(EntityEntry entry)
     {
-        entries
-            .Where(x => x.State == EntityState.Added && x.IsKeySet)
-            .ToList()
-            .ForEach(x => x.State = EntityState.Unchanged);
+        if (entry.State == EntityState.Added && entry.IsKeySet)
+            entry.State = EntityState.Unchanged;
     }
 }

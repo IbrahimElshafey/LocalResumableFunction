@@ -41,18 +41,25 @@ internal partial class WaitsRepository : IWaitsRepository
         _settings = settings;
     }
 
-    public async Task<List<ServiceData>> GetServicesForMethodCall(string methodUrn)
+    public async Task<List<ServiceData>> GetAffectedServicesForCall(string methodUrn)
     {
         try
         {
             var methodGroupId = await GetMethodGroupId(methodUrn);
-            var servicesQurey = _context
-                .ServicesData
-                .Include(x => x.Waits)
-                .Where(x => x.Waits.Any(x => (x as MethodWait).MethodGroupToWaitId == methodGroupId))
-                .Select(x => new ServiceData { Id = x.Id, Url = x.Url });
+            var serviceIds =
+                  await _context
+                  .MethodWaits
+                  .Where(x => x.MethodGroupToWaitId == methodGroupId)
+                  .GroupBy(x => x.ServiceId)
+                  .Select(x => x.Key)
+                  .ToListAsync();
 
-            return await servicesQurey.ToListAsync();
+            return await _context
+                .ServicesData
+                .Where(x => serviceIds.Contains(x.Id))
+                .Select(x => new ServiceData { Url = x.Url, Id = x.Id })
+                .AsNoTracking()
+                .ToListAsync();
         }
         catch (Exception ex)
         {

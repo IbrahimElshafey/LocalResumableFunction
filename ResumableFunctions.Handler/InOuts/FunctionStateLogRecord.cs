@@ -1,7 +1,7 @@
 ﻿
 namespace ResumableFunctions.Handler.InOuts;
 
-public class LogRecord : IEntity
+public class LogRecord : IEntity, IEntityInService
 {
     public int Id { get; internal set; }
     public int? EntityId { get; internal set; }
@@ -11,6 +11,7 @@ public class LogRecord : IEntity
     public bool IsCustom { get; internal set; }
     public DateTime Created { get; internal set; }
     public string Code { get; internal set; }
+    public int? ServiceId { get; set; }
 
     public override string ToString()
     {

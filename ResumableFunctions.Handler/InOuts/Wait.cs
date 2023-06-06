@@ -14,7 +14,7 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
+public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInService
 {
     public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
@@ -26,6 +26,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
     public bool IsNode { get; internal set; }
     public bool IsReplay { get; internal set; }
     public WaitExtraData ExtraData { get; internal set; }
+    public int? ServiceId { get; set; }
 
     public WaitType WaitType { get; internal set; }
     public DateTime Modified { get; internal set; }
@@ -35,10 +36,6 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
     internal ResumableFunctionState FunctionState { get; set; }
 
     internal int FunctionStateId { get; set; }
-
-    internal ServiceData Service { get; set; }
-
-    internal int? ServiceId { get; set; }
 
 
     /// <summary>

@@ -1,4 +1,5 @@
 ﻿# Efficient Wait Matching
+* Use Method Wait Template Table
 * Don't use converters for serialization/deserialization
 * Use MessagePack for fast serialization and deserialization of:
 	* StateObject
@@ -16,7 +17,7 @@
 	* WaitMandatoryPartExpression
 	* Current Mandatory Part
 	* Mandatory is partial or full
-
+* Optimize wait table indexes to enable fast wait insertion
 # When Wait Requested
 * Calc WaitTemplate Hash(Match Expression & Set Data Expression HASH)
 * Search if template is exist ,Where(FunctionId, MethodGroupId)

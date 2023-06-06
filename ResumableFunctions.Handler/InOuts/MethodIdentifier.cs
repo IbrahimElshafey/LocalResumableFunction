@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class MethodIdentifier : IEntityWithUpdate
+public abstract class MethodIdentifier : IEntityWithUpdate, IEntityInService
 {
     private MethodInfo _methodInfo;
 
@@ -27,7 +27,7 @@ public abstract class MethodIdentifier : IEntityWithUpdate
             return _methodInfo;
         }
     }
-    public int? ServiceId { get; internal set; }
+    public int? ServiceId { get; set; }
 
     public DateTime Modified { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
