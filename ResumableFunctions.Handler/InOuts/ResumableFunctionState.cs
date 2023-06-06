@@ -1,10 +1,17 @@
 ﻿
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public class ResumableFunctionState : ObjectWithLog, IEntityWithUpdate, IEntityWithDelete
+public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete
 {
+    [JsonIgnore]
+    public int ErrorCounter { get; set; }
+
+    [JsonIgnore]
+    [NotMapped]
+    public List<LogRecord> Logs { get; } = new();
     public int Id { get; internal set; }
     public int ServiceId { get; internal set; }
     public string UserDefinedId { get; internal set; }

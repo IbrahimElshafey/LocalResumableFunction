@@ -1,12 +1,20 @@
-﻿using System.Linq.Expressions;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
 
-public abstract partial class ResumableFunction : ObjectWithLog
+public abstract partial class ResumableFunction : IObjectWithLog
 {
+    [JsonIgnore]
+    public int ErrorCounter { get; set; }
+
+    [JsonIgnore]
+    [NotMapped]
+    public List<LogRecord> Logs { get; } = new();
     public virtual string GetInstanceId(string functionUrn)
     {
         return default;

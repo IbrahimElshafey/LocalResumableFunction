@@ -129,7 +129,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
             });
             FunctionState.Logs.AddRange(CurrentFunction.Logs);
             FunctionState.Status =
-              CurrentFunction.HasError || FunctionState.HasError ?
+              CurrentFunction.HasErrors() || FunctionState.HasErrors() ?
               FunctionStatus.Error :
               FunctionStatus.InProgress;
         }
@@ -226,7 +226,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name",
                 LogType.Warning);
         }
-        return FunctionState.HasError is false;
+        return FunctionState.HasErrors() is false;
     }
 
 

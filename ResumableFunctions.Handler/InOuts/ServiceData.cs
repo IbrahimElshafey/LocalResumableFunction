@@ -1,8 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
-public class ServiceData : ObjectWithLog, IEntityWithUpdate
+public class ServiceData : IObjectWithLog, IEntityWithUpdate
 {
+    [JsonIgnore]
+    public int ErrorCounter { get; set; }
+
+    [JsonIgnore]
+    [NotMapped]
+    public List<LogRecord> Logs { get; } = new();
     public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
     public string AssemblyName { get; internal set; }
@@ -15,16 +22,16 @@ public class ServiceData : ObjectWithLog, IEntityWithUpdate
     public string ConcurrencyToken { get; internal set; }
     public List<Wait> Waits { get; internal set; }
 
-    public override void AddError(string message, Exception ex = null, string code = "")
+    public void AddError(string message, Exception ex = null, string code = "")
     {
-        base.AddError(message, ex, code);
+        (this as IObjectWithLog).AddError(message, ex, code);
         //refernce dlls logs to main
         Logs.Last().EntityId = ParentId == -1 ? Id : ParentId;
     }
 
-    public override void AddLog(string message, LogType logType = LogType.Info, string code = "")
+    public void AddLog(string message, LogType logType = LogType.Info, string code = "")
     {
-        base.AddLog(message, logType, code);
+        (this as IObjectWithLog).AddLog(message, logType, code);
         Logs.Last().EntityId = ParentId == -1 ? Id : ParentId;
     }
 

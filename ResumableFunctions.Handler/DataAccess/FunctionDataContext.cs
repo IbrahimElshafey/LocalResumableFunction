@@ -290,8 +290,8 @@ public class FunctionDataContext : DbContext
             var entitiesWithLog =
                 ChangeTracker
                 .Entries()
-                    .Where(x => x.Entity is ObjectWithLog entityWithLog && entityWithLog.Logs.Any())
-                    .Select(x => (ObjectWithLog)x.Entity)
+                    .Where(x => x.Entity is IObjectWithLog entityWithLog && entityWithLog.Logs.Any())
+                    .Select(x => (IObjectWithLog)x.Entity)
                     .ToList();
             foreach (var entity in entitiesWithLog)
             {

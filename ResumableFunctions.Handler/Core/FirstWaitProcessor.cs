@@ -25,8 +25,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         FunctionDataContext context,
         IServiceProvider serviceProvider,
         IMethodIdentifierRepository methodIdentifierRepo,
-        IWaitsRepository waitsRepository
-,
+        IWaitsRepository waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor)
     {
         _logger = logger;
@@ -55,7 +54,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
             firstWaitClone.FunctionState.Logs.AddRange(firstWaitClone.FunctionState.Logs);
             firstWaitClone.FunctionState.Status =
-                firstWaitClone.FunctionState.HasError ?
+                firstWaitClone.FunctionState.HasErrors() ?
                 FunctionStatus.Error :
                 FunctionStatus.InProgress;
             await _waitsRepository.SaveWaitRequestToDb(firstWaitClone);//first wait clone

@@ -6,50 +6,47 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class ObjectWithLog
+//mixin
+public interface IObjectWithLog
 {
-    private readonly ILogger<ObjectWithLog> _logger;
-
-    //public ObjectWithLog()
-    //{
-    //    _logger = WaitMethodAttribute.ServiceProvider?.GetService<ILogger<ObjectWithLog>>();
-    //}
 
     [JsonIgnore]
     public int ErrorCounter { get; internal set; }
 
     [JsonIgnore]
     [NotMapped]
-    public List<LogRecord> Logs { get; } = new();
+    public List<LogRecord> Logs { get; }
+}
 
-    [JsonIgnore]
-    public bool HasError => Logs.Any(x => x.Type == LogType.Error);
+public static class ObjectWithLogBehavior
+{
+    public static bool HasErrors(this IObjectWithLog _this) => _this.Logs.Any(x => x.Type == LogType.Error);
 
-    public virtual void AddLog(string message, LogType logType = LogType.Info, string code = "")
+    public static void AddLog(this IObjectWithLog _this, string message, LogType logType = LogType.Info, string code = "")
     {
         var logRecord = new LogRecord
         {
-            EntityType = GetType().Name,
+            EntityType = _this.GetType().Name,
             Type = logType,
             Message = message,
             Code = code,
             Created = DateTime.Now,
         };
-        Logs.Add(logRecord);
+        _this.Logs.Add(logRecord);
         //_logger.LogInformation(message, logRecord);
     }
-    public virtual void AddError(string message, Exception ex = null, string code = "")
+    public static void AddError(this IObjectWithLog _this, string message, Exception ex = null, string code = "")
     {
         var logRecord = new LogRecord
         {
-            EntityType = GetType().Name,
+            EntityType = _this.GetType().Name,
             Type = LogType.Error,
             Message = message,
             Code = code,
             Created = DateTime.Now,
         };
-        Logs.Add(logRecord);
-        ErrorCounter++;
+        _this.Logs.Add(logRecord);
+        _this.ErrorCounter++;
         if (ex != null)
         {
             logRecord.Message += $"\n{ex.Message}";
