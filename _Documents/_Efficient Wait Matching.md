@@ -18,6 +18,11 @@
 	* Current Mandatory Part
 	* Mandatory is partial or full
 * Optimize wait table indexes to enable fast wait insertion
+* Filterd index on status column for waits
+	* https://learn.microsoft.com/en-us/ef/core/modeling/indexes?tabs=data-annotations
+* Remove index 
+	* [MethodToWaitId] in [dbo].[Waits]
+	* [ParentWaitId] in [dbo].[Waits]
 # When Wait Requested
 * Calc WaitTemplate Hash(Match Expression & Set Data Expression HASH)
 * Search if template is exist ,Where(FunctionId, MethodGroupId)
