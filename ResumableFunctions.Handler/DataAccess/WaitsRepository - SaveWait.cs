@@ -57,8 +57,8 @@ internal partial class WaitsRepository : IWaitsRepository
         methodWait.MethodToWait = methodToWait;
         methodWait.ServiceId = _settings.CurrentServiceId;
         methodWait.MethodToWaitId = methodToWait.Id;
-        methodWait.MethodGroupToWait = methodToWait.ParentMethodGroup;
         methodWait.MethodGroupToWaitId = methodToWait.ParentMethodGroupId;
+        methodWait.MethodGroupToWait = methodToWait.ParentMethodGroupId;
         methodWait.RewriteExpressions();
 
         await AddWait(methodWait);
