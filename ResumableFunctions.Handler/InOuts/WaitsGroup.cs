@@ -20,7 +20,7 @@ public class WaitsGroup : Wait
         get => _countExpression ?? GetGroupMatchExpression();
         internal set => _countExpression = value;
     }
-    internal byte[] GroupMatchExpressionValue { get; set; }
+    internal string GroupMatchExpressionValue { get; set; }
     public int CompletedCount => ChildWaits?.Count(x => x.Status == WaitStatus.Completed) ?? 0;
 
     public override bool IsCompleted()
@@ -59,9 +59,10 @@ public class WaitsGroup : Wait
             RequestedByFunction.MethodInfo.DeclaringType.Assembly ??
             Assembly.GetEntryAssembly();
         if (GroupMatchExpressionValue != null)
-            return (LambdaExpression)
-                ExpressionToJsonConverter.JsonToExpression(
-                    TextCompressor.DecompressString(GroupMatchExpressionValue), assembly);
+        {
+            var serializer = new ExpressionSerializer();
+            return (LambdaExpression)serializer.Deserialize(GroupMatchExpressionValue).ToExpression();
+        }
         return null;
     }
 
@@ -71,10 +72,9 @@ public class WaitsGroup : Wait
         var assembly = CurrentFunction?.GetType().Assembly;
         if (assembly != null)
         {
+            var serializer = new ExpressionSerializer();
             GroupMatchExpression = matchCountFilter;
-            GroupMatchExpressionValue =
-                TextCompressor.CompressString(
-                    ExpressionToJsonConverter.ExpressionToJson(GroupMatchExpression, assembly));
+            GroupMatchExpressionValue = serializer.Serialize(GroupMatchExpression.ToExpressionSlim());
         }
 
         return this;

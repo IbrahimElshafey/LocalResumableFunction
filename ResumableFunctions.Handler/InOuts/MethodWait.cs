@@ -16,12 +16,12 @@ public class MethodWait : Wait
 
     [NotMapped] public LambdaExpression SetDataExpression { get; internal set; }
 
-    internal byte[] SetDataExpressionValue { get; set; }
+    internal string SetDataExpressionValue { get; set; }
 
     [NotMapped]
     public LambdaExpression MatchIfExpression { get; internal set; }
 
-    internal byte[] MatchIfExpressionValue { get; set; }
+    internal string MatchIfExpressionValue { get; set; }
 
 
     public string RefineMatchModifier { get; internal set; }
@@ -57,14 +57,14 @@ public class MethodWait : Wait
         {
             var matchNewVisitor = new MatchNewVisitor(MatchIfExpression, CurrentFunction);
             MatchIfExpression = matchNewVisitor.MatchExpressionWithConstants;
-            MatchIfExpressionValue =
-                TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, FunctionAssembly));
+
+            var serializer = new ExpressionSerializer();
+            MatchIfExpressionValue = serializer.Serialize(MatchIfExpression.ToExpressionSlim());
             RefineMatchModifier = matchNewVisitor.RefineMatchModifier;
 
             //Rewrite SetData Expression
             SetDataExpression = new RewriteSetDataExpression(this).Result;
-            SetDataExpressionValue =
-                TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(SetDataExpression, FunctionAssembly));
+            SetDataExpressionValue = serializer.Serialize(SetDataExpression.ToExpressionSlim());
         }
         catch (Exception ex)
         {
@@ -80,12 +80,9 @@ public class MethodWait : Wait
 
     internal void LoadExpressions()
     {
-        MatchIfExpression = (LambdaExpression)
-            ExpressionToJsonConverter.JsonToExpression(
-                TextCompressor.DecompressString(MatchIfExpressionValue), FunctionAssembly);
-        SetDataExpression = (LambdaExpression)
-            ExpressionToJsonConverter.JsonToExpression(
-                TextCompressor.DecompressString(SetDataExpressionValue), FunctionAssembly);
+        var serializer = new ExpressionSerializer();
+        MatchIfExpression = (LambdaExpression)serializer.Deserialize(MatchIfExpressionValue).ToExpression();
+        SetDataExpression = (LambdaExpression)serializer.Deserialize(SetDataExpressionValue).ToExpression();
     }
 
     public bool UpdateFunctionData()

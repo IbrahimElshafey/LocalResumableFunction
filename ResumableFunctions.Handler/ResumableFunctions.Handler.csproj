@@ -19,12 +19,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aq.ExpressionJsonSerializer" Version="0.18.0" />
 		<PackageReference Include="AspectInjector" Version="2.8.1" />
 		<PackageReference Include="DistributedLock.Core" Version="1.0.5" />
 		<PackageReference Include="DistributedLock.SqlServer" Version="1.0.2" />
 		<PackageReference Include="FastExpressionCompiler" Version="3.3.4" />
-		<PackageReference Include="MessagePack" Version="2.5.108" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.5" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.5">
 			<PrivateAssets>all</PrivateAssets>
@@ -43,6 +41,7 @@
 		<PackageReference Include="Hangfire.Core" Version="1.8.*" />
 		<PackageReference Include="Hangfire.SqlServer" Version="1.8.*" />
 		<PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
+		<PackageReference Include="Nuqleon.Linq.Expressions.Bonsai.Serialization" Version="1.0.0-beta.24" />
 	</ItemGroup>
 
 </Project>

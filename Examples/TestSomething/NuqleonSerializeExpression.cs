@@ -30,7 +30,7 @@ namespace TestSomething
                 obj.GetJsonDeserializer,
                 new Version("0.9"));
             var expSlim = exp.ToExpressionSlim();
-            var testSerializer = new TestSerializer();
+            var testSerializer = new ExpressionSerializer();
             var serailzed = testSerializer.Serialize(expSlim);
             var back = testSerializer.Deserialize(serailzed);
 
@@ -56,7 +56,7 @@ namespace TestSomething
         public string Name { get; set; }
     }
 
-    public sealed class TestSerializer : BonsaiExpressionSerializer
+    public sealed class ExpressionSerializer : BonsaiExpressionSerializer
     {
         protected override Func<object, Json.Expression> GetConstantSerializer(Type type)
         {
