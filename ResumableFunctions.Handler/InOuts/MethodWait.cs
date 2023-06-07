@@ -56,7 +56,7 @@ public class MethodWait : Wait
         try
         {
             var matchNewVisitor = new MatchNewVisitor(MatchIfExpression, CurrentFunction);
-            MatchIfExpression = matchNewVisitor.MatchExpression;
+            MatchIfExpression = matchNewVisitor.MatchExpressionWithConstants;
             MatchIfExpressionValue =
                 TextCompressor.CompressString(ExpressionToJsonConverter.ExpressionToJson(MatchIfExpression, FunctionAssembly));
             RefineMatchModifier = matchNewVisitor.RefineMatchModifier;

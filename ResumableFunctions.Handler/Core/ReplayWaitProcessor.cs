@@ -76,7 +76,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             var oldMatchExpression = mw.MatchIfExpression;
             mw.MatchIfExpression = replayRequest.MatchExpression;
             var rewriteMatchExpression = new MatchNewVisitor(mw.MatchIfExpression,mw.CurrentFunction);
-            replayRequest.MatchExpression = rewriteMatchExpression.MatchExpression;
+            replayRequest.MatchExpression = rewriteMatchExpression.MatchExpressionWithConstants;
             mw.MatchIfExpression = oldMatchExpression;
             CheckReplayMatchExpression(replayRequest, mw);
 

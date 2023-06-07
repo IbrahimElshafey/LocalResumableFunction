@@ -20,21 +20,32 @@ public class MethodWaitTemplate : IEntity
 
     private byte[] _matchExpression;
     private byte[] _matchExpressionDynamic;
-    private byte[] _mandatoryPartExtractorExpression;
+    private byte[] _callMandatoryPartExpression;
     private byte[] _waitMandatoryPartExpression;
     private byte[] _setDataExpression;
     private byte[] _setDataExpressionDynamic;
 
     [NotMapped]
     public LambdaExpression MatchExpression { get; internal set; }
+    
     [NotMapped]
     public Expression<Func<ExpandoAccessor, ExpandoAccessor, bool>> MatchExpressionDynamic { get; internal set; }
+    
     [NotMapped]
-    public Expression<Func<ExpandoAccessor, string[]>> MandatoryPartExtractorExpression { get; internal set; }
+    public Expression<Func<ExpandoAccessor, string[]>> CallMandatoryPartExpressionDynamic { get; internal set; }
+    
     [NotMapped]
-    public Expression<Func<ExpandoAccessor, string>> WaitMandatoryPartExpression { get; internal set; }
+    public LambdaExpression CallMandatoryPartExpression { get; internal set; }
+    
+    [NotMapped]
+    public Expression<Func<ExpandoAccessor, string>> WaitMandatoryPartExpressionDynamic { get; internal set; }
+    
+    [NotMapped]
+    public LambdaExpression WaitMandatoryPartExpression { get; internal set; }
+    
     [NotMapped]
     public LambdaExpression SetDataExpression { get; internal set; }
+    
     [NotMapped]
     public Expression<Action<ExpandoAccessor, ExpandoAccessor>> SetDataExpressionDynamic { get; internal set; }
 

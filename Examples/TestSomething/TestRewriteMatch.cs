@@ -122,8 +122,8 @@ namespace TestSomething
         {
             var wait1 = WaitMethodOne();
             var matchRewrite1 = new MatchNewVisitor(wait1.MatchIfExpression, this);
-            var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.MatchExpression.CompileFast();
-            var exprssionAsString1 = matchRewrite1.MatchExpression.ToString();
+            var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.MatchExpressionWithConstants.CompileFast();
+            var exprssionAsString1 = matchRewrite1.MatchExpressionWithConstants.ToString();
             var result = method1.Invoke("12345", 5, this);
             result = method1.Invoke("123456", 6, this);
 

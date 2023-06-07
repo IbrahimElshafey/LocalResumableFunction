@@ -39,6 +39,13 @@ public class GenericVisitor : ExpressionVisitor
                 ex => ex is ParameterExpression,
                 (ex) => parameterVisitFunc((ParameterExpression)ex)));
     }
+    internal void OnVisitConstant(Func<ConstantExpression, Expression> constantVisitFunc)
+    {
+        _visitors.Add(
+            new VisitNodeFunction(
+                ex => ex is ConstantExpression,
+                (ex) => constantVisitFunc((ConstantExpression)ex)));
+    }
 
     internal void OnVisitUnary(Func<UnaryExpression, Expression> visitUnary)
     {
