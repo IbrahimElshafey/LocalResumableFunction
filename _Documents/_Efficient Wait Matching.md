@@ -1,4 +1,5 @@
-﻿* Use Nuqleon experssion serialization
+﻿* Remove NewtonSoft and use MessagePack
+	* Hangfire core use it
 
 # When Wait Requested
 * Calc WaitTemplate Hash(Match Expression & Set Data Expression HASH)
@@ -62,19 +63,15 @@
 	* MatchExpression
 	* MatchExpressionDynamic
 	* CallMandatoryPartExpression
+	* CallMandatoryPartExpressionDynamic
 	* WaitMandatoryPartExpression
+	* WaitMandatoryPartExpressionDynamic
 	* Current Mandatory Part
 	* Mandatory is partial or full
 * Optimize wait table indexes to enable fast wait insertion
-* Filterd index on status column for waits
-	* https://learn.microsoft.com/en-us/ef/core/modeling/indexes?tabs=data-annotations
-* Remove index 
-	* [MethodToWaitId] in [dbo].[Waits]
-	* [ParentWaitId] in [dbo].[Waits]
+	* Remove index 
+		* [ParentWaitId] in [dbo].[Waits]
 
-# Expression Serialization [Will be separate project]
+# Expression Serialization
 * https://github.com/reaqtive/reaqtor/tree/main/Nuqleon/Core/LINQ/Nuqleon.Linq.Expressions.Bonsai
-* NodesStack: Node types as array int/byte
-* Varaibels array:Varaibels as array object
-* Varaibels references stack int array
 
