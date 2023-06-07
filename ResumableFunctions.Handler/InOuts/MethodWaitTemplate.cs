@@ -65,8 +65,8 @@ public class MethodWaitTemplate : IEntity
 
     public static byte[] CalcHash(LambdaExpression matchExpression, LambdaExpression setDataExpression, Assembly assembly)
     {
-        var matchBytes = Encoding.ASCII.GetBytes(ExpressionToJsonConverter.ExpressionToJson(matchExpression, assembly));
-        var setDataBytes = Encoding.ASCII.GetBytes(ExpressionToJsonConverter.ExpressionToJson(setDataExpression, assembly));
+        var matchBytes = Encoding.UTF8.GetBytes(ExpressionToJsonConverter.ExpressionToJson(matchExpression, assembly));
+        var setDataBytes = Encoding.UTF8.GetBytes(ExpressionToJsonConverter.ExpressionToJson(setDataExpression, assembly));
         using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
         {
             var mergedHash = new byte[matchBytes.Length + setDataBytes.Length];

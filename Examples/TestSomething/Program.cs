@@ -5,7 +5,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        switch (3)
+        switch (7)
         {
             case 1:
                 TestTreeCascadeAction();break;
@@ -20,7 +20,7 @@ internal class Program
             case 6:
                 new CerasTest().Run();break;
             case 7:
-                new SerializeExpression().Run();
+                new NuqleonSerializeExpression().Run();
                 break;
             case 8:
                 new BinaryPackTest().Run();

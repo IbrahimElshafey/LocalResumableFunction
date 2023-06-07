@@ -1,4 +1,6 @@
-﻿# When Wait Requested
+﻿* Use Nuqleon experssion serialization
+
+# When Wait Requested
 * Calc WaitTemplate Hash(Match Expression & Set Data Expression HASH)
 * Search if template is exist
 	* MethodWaitTemplates.Where(Hash, FunctionId, MethodGroupId)
