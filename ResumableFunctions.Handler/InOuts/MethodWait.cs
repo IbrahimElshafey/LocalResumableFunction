@@ -6,11 +6,14 @@ using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 public class MethodWait : Wait
 {
+   
+
     [NotMapped] public LambdaExpression SetDataExpression { get; internal set; }
 
     internal byte[] SetDataExpressionValue { get; set; }
@@ -24,11 +27,10 @@ public class MethodWait : Wait
     public string RefineMatchModifier { get; internal set; }
 
 
-    /// <summary>
-    ///     The method that we wait to resume resumable function
-    /// </summary>
+    [NotMapped]
     internal WaitMethodIdentifier MethodToWait { get; set; }
-    internal int MethodToWaitId { get; set; }
+   
+    internal int? MethodToWaitId { get; set; }
 
     internal MethodsGroup MethodGroupToWait { get; set; }
     internal int MethodGroupToWaitId { get; set; }

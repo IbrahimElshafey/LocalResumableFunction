@@ -47,12 +47,12 @@ internal partial class WaitsRepository : IWaitsRepository
         {
             var methodGroupId = await GetMethodGroupId(methodUrn);
             var serviceIds =
-                   _context
-                  .MethodWaits
-                  .Select(x => new { x.MethodGroupToWaitId,x.ServiceId })
-                  .Where(x => x.MethodGroupToWaitId == methodGroupId)
-                  .Distinct()
-                  .Select(x => x.ServiceId);
+                    _context
+                   .MethodWaits
+                   .Select(x => new { x.MethodGroupToWaitId, x.ServiceId })
+                   .Where(x => x.MethodGroupToWaitId == methodGroupId)
+                   .Distinct()
+                   .Select(x => x.ServiceId);
 
             return await _context
                 .ServicesData

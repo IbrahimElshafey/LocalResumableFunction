@@ -127,15 +127,16 @@ internal class MethodIdentifierRepository : IMethodIdentifierRepository
 
     public async Task<WaitMethodIdentifier> GetWaitMethod(MethodWait methodWait)
     {
-        if (methodWait.MethodData == null)
+        if (methodWait.MethodData == null && methodWait.MethodToWaitId != default)
             return
                 await _context
                 .WaitMethodIdentifiers
-                .Include(x => x.ParentMethodGroup)
+                //.Include(x => x.ParentMethodGroup)
                 .FirstOrDefaultAsync(x => x.Id == methodWait.MethodToWaitId);
 
         var methodData = methodWait.MethodData;
         methodData.Validate();
+        //todo:refine this query
         var methodGroup =
             await _context
                 .MethodsGroups

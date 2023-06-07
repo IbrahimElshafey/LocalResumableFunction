@@ -295,10 +295,15 @@ namespace ResumableFunctions.Handler.Core
                 _methodWait = await _context
                     .MethodWaits
                     .Include(x => x.RequestedByFunction)
-                    .Include(x => x.MethodToWait)
+                    //.Include(x => x.MethodToWait)
                     .Include(x => x.FunctionState)
                     .Where(x => x.Status == WaitStatus.Waiting)
                     .FirstOrDefaultAsync(x => x.Id == waitId);
+                
+                _methodWait.MethodToWait = await 
+                    _context
+                    .WaitMethodIdentifiers
+                    .FindAsync(_methodWait.MethodToWaitId);
 
                 if (_methodWait == null)
                 {

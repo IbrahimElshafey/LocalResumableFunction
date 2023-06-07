@@ -19,6 +19,8 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
     public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
     public string Name { get; internal set; }
+    
+    //Todo:create filtered index on status column
     public WaitStatus Status { get; internal set; } = WaitStatus.Waiting;
     public bool IsFirst { get; internal set; }
     public int StateBeforeWait { get; internal set; }
@@ -185,7 +187,6 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
         to.SetDataExpressionValue = from.SetDataExpressionValue;
         to.MatchIfExpressionValue = from.MatchIfExpressionValue;
         to.MethodToWaitId = from.MethodToWaitId;
-        to.MethodToWait = from.MethodToWait;
         to.LoadExpressions();
     }
 

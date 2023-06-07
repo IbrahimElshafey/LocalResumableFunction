@@ -54,11 +54,10 @@ internal partial class WaitsRepository : IWaitsRepository
     {
         var methodToWait = await _methodIdentifierRepo.GetWaitMethod(methodWait);
 
-        methodWait.MethodToWait = methodToWait;
         methodWait.ServiceId = _settings.CurrentServiceId;
         methodWait.MethodToWaitId = methodToWait.Id;
         methodWait.MethodGroupToWaitId = methodToWait.ParentMethodGroupId;
-        methodWait.MethodGroupToWait = methodToWait.ParentMethodGroupId;
+        methodWait.MethodGroupToWait = methodToWait.ParentMethodGroup;
         methodWait.RewriteExpressions();
 
         await AddWait(methodWait);
@@ -166,11 +165,11 @@ internal partial class WaitsRepository : IWaitsRepository
         {
             waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
         }
-        if (wait is MethodWait { MethodToWaitId: > 0 } methodWait)
-        {
-            //does this may cause a problem
-            methodWait.MethodToWait = null;
-        }
+        //if (wait is MethodWait { MethodToWaitId: > 0 } methodWait)
+        //{
+        //    //Bug:does this may cause a problem
+        //    methodWait.MethodToWait = null;
+        //}
         _context.Waits.Add(wait);
         return Task.CompletedTask;
     }

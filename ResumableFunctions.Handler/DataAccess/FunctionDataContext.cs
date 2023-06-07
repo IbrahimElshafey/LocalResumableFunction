@@ -139,23 +139,34 @@ public class FunctionDataContext : DbContext
 
     private void ConfigureWaits(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Wait>()
+        EntityTypeBuilder<Wait> waitBuilder = modelBuilder.Entity<Wait>();
+        waitBuilder
             .HasMany(x => x.ChildWaits)
             .WithOne(wait => wait.ParentWait)
             .HasForeignKey(x => x.ParentWaitId)
             .HasConstraintName("FK_ChildWaits_For_Wait");
 
-        modelBuilder.Entity<Wait>()
+        waitBuilder
             .Property(x => x.ExtraData)
             .HasConversion(
             obj => _binarytConverter.ConvertToBinary(obj),
             bytes => _binarytConverter.ConvertToObject<WaitExtraData>(bytes));
 
-        modelBuilder.Entity<MethodWait>()
+        waitBuilder
+            .HasIndex(x => x.Status)
+            .HasFilter($"Status = {(int)WaitStatus.Waiting}")
+            .HasDatabaseName("Index_ActiveWaits");
+
+        var methodWaitBuilder = modelBuilder.Entity<MethodWait>();
+        methodWaitBuilder
+          .Property(x => x.MethodToWaitId)
+          .HasColumnName(nameof(MethodWait.MethodToWaitId));
+
+        methodWaitBuilder
           .Property(mw => mw.MatchIfExpressionValue)
           .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
 
-        modelBuilder.Entity<MethodWait>()
+        methodWaitBuilder
             .Property(mw => mw.SetDataExpressionValue)
             .HasColumnName(nameof(MethodWait.SetDataExpressionValue));
 
@@ -196,12 +207,13 @@ public class FunctionDataContext : DbContext
           .HasForeignKey(x => x.ParentMethodGroupId)
           .HasConstraintName("FK_Group_WaitMethodIdentifiers");
 
-        modelBuilder.Entity<WaitMethodIdentifier>()
-        .HasMany(x => x.WaitsRequestsForMethod)
-        .WithOne(mw => mw.MethodToWait)
-        .OnDelete(DeleteBehavior.Restrict)
-        .HasForeignKey(x => x.MethodToWaitId)
-        .HasConstraintName("FK_WaitsRequestsForMethod");
+
+        //modelBuilder.Entity<WaitMethodIdentifier>()
+        //.HasMany(x => x.WaitsRequestsForMethod)
+        //.WithOne(mw => mw.MethodToWait)
+        //.OnDelete(DeleteBehavior.Restrict)
+        //.HasForeignKey(x => x.MethodToWaitId)
+        //.HasConstraintName("FK_WaitsRequestsForMethod");
 
         modelBuilder.Entity<MethodsGroup>()
            .HasIndex(x => x.MethodGroupUrn)
@@ -214,7 +226,8 @@ public class FunctionDataContext : DbContext
         entityTypeBuilder
             .HasMany(x => x.Waits)
             .WithOne(wait => wait.FunctionState)
-            .HasForeignKey(x => x.FunctionStateId);
+            .HasForeignKey(x => x.FunctionStateId)
+            .HasConstraintName("FK_WaitsForFunctionState");
 
         entityTypeBuilder
            .Property(x => x.StateObject)
@@ -330,9 +343,9 @@ public class FunctionDataContext : DbContext
 
     private void NeverUpdateFirstWait(EntityEntry entityEntry)
     {
-       if(entityEntry.Entity is Wait wait &&
-                wait.IsFirst &&
-                wait.IsDeleted == false)
+        if (entityEntry.Entity is Wait wait &&
+                 wait.IsFirst &&
+                 wait.IsDeleted == false)
         {
             if (entityEntry.State == EntityState.Modified)
                 entityEntry.State = EntityState.Unchanged;
