@@ -14,12 +14,12 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInService
+public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInService, IOnSaveEntity, ILoadUnMapped
 {
     public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
     public string Name { get; internal set; }
-    
+
     //Todo:create filtered index on status column
     public WaitStatus Status { get; internal set; } = WaitStatus.Waiting;
     public bool IsFirst { get; internal set; }
@@ -27,7 +27,10 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
     public int StateAfterWait { get; internal set; }
     public bool IsNode { get; internal set; }
     public bool IsReplay { get; internal set; }
-    public WaitExtraData ExtraData { get; internal set; }
+
+    [NotMapped]
+    public WaitExtraData ExtraDatan { get; internal set; }
+    public byte[] ExtraDataValue { get; internal set; }
     public int? ServiceId { get; set; }
 
     public WaitType WaitType { get; internal set; }
@@ -249,5 +252,17 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
     public override string ToString()
     {
         return $"Name:{Name}, Type:{WaitType}, Id:{Id}";
+    }
+
+    public void OnSave()
+    {
+        var converter = new NewtonsoftBinaryToObjectConverter();
+        ExtraDataValue = converter.ConvertToBinary(ExtraDatan);
+    }
+
+    public void LoadUnmappedProps(params object[] args)
+    {
+        var converter = new NewtonsoftBinaryToObjectConverter();
+        ExtraDatan = converter.ConvertToObject<WaitExtraData>(ExtraDataValue);
     }
 }

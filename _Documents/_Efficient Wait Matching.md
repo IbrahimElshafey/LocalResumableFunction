@@ -1,4 +1,5 @@
-﻿* Remove NewtonSoft and use MessagePack
+﻿* Remove use of value converters
+* Remove NewtonSoft and use MessagePack
 	* [Yes] Can deserialize data to dynamic object
 	* [Yes] Can convert dynamic object to object back
 	* [Yes] Does not need attributes

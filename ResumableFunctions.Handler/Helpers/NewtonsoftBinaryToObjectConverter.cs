@@ -4,16 +4,13 @@ using Newtonsoft.Json.Bson;
 using Newtonsoft.Json.Linq;
 using System.Collections;
 using System.Linq.Expressions;
+using System.Runtime.ExceptionServices;
 
 namespace ResumableFunctions.Handler.Helpers;
 
 internal class NewtonsoftBinaryToObjectConverter : BinaryToObjectConverter
 {
-    private readonly ILogger<NewtonsoftBinaryToObjectConverter> _logger;
-    public NewtonsoftBinaryToObjectConverter(ILogger<NewtonsoftBinaryToObjectConverter> logger)
-    {
-        _logger = logger;
-    }
+
     public override byte[] ConvertToBinary(object obj)
     {
         try
@@ -26,12 +23,25 @@ internal class NewtonsoftBinaryToObjectConverter : BinaryToObjectConverter
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error when convert object of type `{obj?.GetType().FullName}` to binary", ex);
-            throw;
+            throw new Exception($"Error when convert object of type `{obj?.GetType().FullName}` to binary", ex);
         }
-       
+
     }
 
+    public object ConvertToObject(byte[] b, Type type)
+    {
+        try
+        {
+            MemoryStream ms = new MemoryStream(b);
+            using BsonDataReader reader = new BsonDataReader(ms);
+            var serializer = new JsonSerializer();
+            return serializer.Deserialize(reader, type);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error when convert bytes to JObject", ex);
+        }
+    }
     public override object ConvertToObject(byte[] b)
     {
         try
@@ -43,10 +53,9 @@ internal class NewtonsoftBinaryToObjectConverter : BinaryToObjectConverter
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error when convert bytes to JObject", ex);
-            throw;
+            throw new Exception($"Error when convert bytes to JObject", ex);
         }
-       
+
     }
 
     public override T ConvertToObject<T>(byte[] bytes)
@@ -60,8 +69,7 @@ internal class NewtonsoftBinaryToObjectConverter : BinaryToObjectConverter
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error when convert bytes to `{typeof(T)}`", ex);
-            throw;
+            throw new Exception($"Error when convert bytes to `{typeof(T)}`", ex);
         }
     }
 }

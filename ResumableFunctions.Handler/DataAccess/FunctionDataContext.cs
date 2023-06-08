@@ -19,7 +19,7 @@ namespace ResumableFunctions.Handler.DataAccess;
 public class FunctionDataContext : DbContext
 {
     private readonly ILogger<FunctionDataContext> _logger;
-    private readonly BinaryToObjectConverter _binarytConverter;
+    //private readonly BinaryToObjectConverter _binarytConverter;
     private readonly IResumableFunctionsSettings _settings;
 
     public FunctionDataContext(
@@ -29,7 +29,7 @@ public class FunctionDataContext : DbContext
         BinaryToObjectConverter binarytConverter) : base(settings.WaitsDbConfig.Options)
     {
         _logger = logger;
-        _binarytConverter = binarytConverter;
+        //_binarytConverter = binarytConverter;
         _settings = settings;
         try
         {
@@ -114,17 +114,17 @@ public class FunctionDataContext : DbContext
     private void ConfigurePushedCalls(ModelBuilder modelBuilder)
     {
         var pushedCallBuilder = modelBuilder.Entity<PushedCall>();
-        pushedCallBuilder
-            .Property(x => x.Data)
-            .HasConversion(
-            obj => _binarytConverter.ConvertToBinary(obj),
-            bytes => _binarytConverter.ConvertToObject<InputOutput>(bytes));
+        //pushedCallBuilder
+        //    .Property(x => x.Data)
+        //    .HasConversion(
+        //    obj => _binarytConverter.ConvertToBinary(obj),
+        //    bytes => _binarytConverter.ConvertToObject<InputOutput>(bytes));
 
-        pushedCallBuilder
-           .Property(x => x.MethodData)
-           .HasConversion(
-            obj => _binarytConverter.ConvertToBinary(obj),
-            bytes => _binarytConverter.ConvertToObject<MethodData>(bytes));
+        //pushedCallBuilder
+        //   .Property(x => x.MethodData)
+        //   .HasConversion(
+        //    obj => _binarytConverter.ConvertToBinary(obj),
+        //    bytes => _binarytConverter.ConvertToObject<MethodData>(bytes));
 
         pushedCallBuilder
            .HasMany(x => x.WaitsForCall)
@@ -146,11 +146,11 @@ public class FunctionDataContext : DbContext
             .HasForeignKey(x => x.ParentWaitId)
             .HasConstraintName("FK_ChildWaits_For_Wait");
 
-        waitBuilder
-            .Property(x => x.ExtraData)
-            .HasConversion(
-            obj => _binarytConverter.ConvertToBinary(obj),
-            bytes => _binarytConverter.ConvertToObject<WaitExtraData>(bytes));
+        //waitBuilder
+        //    .Property(x => x.ExtraData)
+        //    .HasConversion(
+        //    obj => _binarytConverter.ConvertToBinary(obj),
+        //    bytes => _binarytConverter.ConvertToObject<WaitExtraData>(bytes));
 
         waitBuilder
             .HasIndex(x => x.Status)
@@ -229,11 +229,11 @@ public class FunctionDataContext : DbContext
             .HasForeignKey(x => x.FunctionStateId)
             .HasConstraintName("FK_WaitsForFunctionState");
 
-        entityTypeBuilder
-           .Property(x => x.StateObject)
-           .HasConversion(
-            _binarytConverter.ToBinary,
-            _binarytConverter.ToObject);
+        //entityTypeBuilder
+        //   .Property(x => x.StateObject)
+        //   .HasConversion(
+        //    _binarytConverter.ToBinary,
+        //    _binarytConverter.ToObject);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -271,7 +271,16 @@ public class FunctionDataContext : DbContext
             NeverUpdateFirstWait(entry);
             HandleSoftDelete(entry);
             ExcludeFalseAddEntries(entry);
+            OnSaveEntity(entry);
         }
+    }
+
+    private void OnSaveEntity(EntityEntry entry)
+    {
+        if (entry.Entity is IOnSaveEntity saveEntity)
+            if (entry.State == EntityState.Modified || entry.State == EntityState.Added)
+                saveEntity.OnSave();
+
     }
 
     private void SetServiceId(EntityEntry entry)

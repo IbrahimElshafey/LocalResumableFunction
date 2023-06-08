@@ -1,10 +1,12 @@
 ﻿
 using Newtonsoft.Json;
+using ResumableFunctions.Handler.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete, IEntityInService
+public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete, IEntityInService, IOnSaveEntity,ILoadUnMapped
 {
     [JsonIgnore]
     public int ErrorCounter { get; set; }
@@ -19,7 +21,9 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
     /// <summary>
     /// Serailized class instance that contain the resumable function instance data
     /// </summary>
-    public object StateObject { get; internal set; }
+    [NotMapped]
+    public object StateObjectn { get; internal set; }
+    public byte[] StateObjectValue { get; internal set; }
 
     public List<Wait> Waits { get; internal set; } = new();
 
@@ -31,4 +35,19 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
     public string ConcurrencyToken { get; internal set; }
 
     public bool IsDeleted { get; internal set; }
+
+    public void OnSave()
+    {
+        var converter = new NewtonsoftBinaryToObjectConverter();
+        StateObjectValue = converter.ConvertToBinary(StateObjectn);
+    }
+
+    public void LoadUnmappedProps(params object[] args)
+    {
+        var converter = new NewtonsoftBinaryToObjectConverter();
+        if (args != null && args[0] != null)
+            StateObjectn = converter.ConvertToObject(StateObjectValue, (Type)args[0]);
+        else
+            StateObjectn = converter.ConvertToObject(StateObjectValue);
+    }
 }

@@ -4,11 +4,15 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts;
-public class PushedCall : IEntityWithDelete, IEntityInService
+public class PushedCall : IEntityWithDelete, IEntityInService, IOnSaveEntity, ILoadUnMapped
 {
     public int Id { get; internal set; }
-    public MethodData MethodData { get; internal set; }
-    public InputOutput Data { get; internal set; } = new();
+    [NotMapped]
+    public MethodData MethodDatan { get; internal set; }
+    public byte[] MethodDataValue { get; internal set; }
+    [NotMapped]
+    public InputOutput Datan { get; internal set; } = new();
+    public byte[] DataValue { get; internal set; }
     public int? ServiceId { get; set; }
     public List<WaitForCall> WaitsForCall { get; internal set; } = new();
 
@@ -33,6 +37,20 @@ public class PushedCall : IEntityWithDelete, IEntityInService
     public DateTime Created { get; internal set; }
 
     public bool IsDeleted { get; internal set; }
+
+    public void OnSave()
+    {
+        var converter = new NewtonsoftBinaryToObjectConverter();
+        DataValue = converter.ConvertToBinary(Datan);
+        MethodDataValue = converter.ConvertToBinary(MethodDatan);
+    }
+
+    public void LoadUnmappedProps(params object[] args)
+    {
+        var converter = new NewtonsoftBinaryToObjectConverter();
+        Datan = converter.ConvertToObject<InputOutput>(DataValue);
+        MethodDatan = converter.ConvertToObject<MethodData>(MethodDataValue);
+    }
 }
 
 public class InputOutput

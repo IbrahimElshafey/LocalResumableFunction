@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using TestSomething;
 
 internal class SetDepsTest
@@ -7,10 +8,17 @@ internal class SetDepsTest
     {
         var type = typeof(MyClass);
         var instance = RuntimeHelpers.GetUninitializedObject(type);
-        var setDepsMi = type.GetMethod("SetDeps");
+        var setDepsMi = type.GetMethod("SetDeps", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (setDepsMi == null)
+        {
+            Console.WriteLine("Warn: No set deps method found that match the criteria.");
+            return;
+        }
+
         var parameters = setDepsMi.GetParameters();
         var inputs = new object[parameters.Count()];
-        if (setDepsMi.ReturnType == typeof(void) && parameters.Count() >= 1)
+        if (setDepsMi.ReturnType == typeof(void) &&
+            parameters.Count() >= 1)
         {
             for (int i = 0; i < parameters.Length; i++)
             {
@@ -21,6 +29,10 @@ internal class SetDepsTest
                     inputs[i] = Random.Shared.NextDouble().ToString();
             }
         }
+        else
+        {
+            Console.WriteLine("Warn: No set deps method found that match the criteria.");
+        }
         setDepsMi.Invoke(instance, inputs);
     }
 }
@@ -30,7 +42,7 @@ public class MyClass
     private int x;
     private string y;
 
-    public void SetDeps(int x, string y)
+    private void SetDeps(int x, string y)
     {
         this.x = x;
         this.y = y;
