@@ -1,12 +1,12 @@
-﻿
-* Clear Hangfire jobs table in debug on start
-* Remove NewtonSoft and use MessagePack
+﻿* Remove NewtonSoft and use MessagePack
 	* [Yes] Can deserialize data to dynamic object
 	* [Yes] Can convert dynamic object to object back
 	* [Yes] Does not need attributes
 	* Does not need constructor constrains
 	* [Yes] Can be shown as Json
 	* Can use existing object and fill it
+* Clear Hangfire jobs table in debug on start
+
 # When Wait Requested
 * Calc WaitTemplate Hash(Match Expression & Set Data Expression HASH)
 * Search if template is exist
@@ -74,5 +74,3 @@
 
 # Expression Serialization
 * https://github.com/reaqtive/reaqtor/tree/main/Nuqleon/Core/LINQ/Nuqleon.Linq.Expressions.Bonsai
-
-[SerializationConstructor]
