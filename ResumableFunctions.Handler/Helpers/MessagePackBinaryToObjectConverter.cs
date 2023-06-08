@@ -1,61 +1,61 @@
-﻿//using MessagePack;
-//using MessagePack.Resolvers;
-//using Microsoft.Extensions.Logging;
-//using System.Dynamic;
-//using System.Linq.Expressions;
+﻿using MessagePack;
+using MessagePack.Resolvers;
+using Microsoft.Extensions.Logging;
+using System.Dynamic;
+using System.Linq.CompilerServices.TypeSystem;
+using System.Linq.Expressions;
 
-//namespace ResumableFunctions.Handler.Helpers;
-//internal class MessagePackBinaryToObjectConverter : BinaryToObjectConverter
-//{
-//    private readonly ILogger<MessagePackBinaryToObjectConverter> _logger;
+namespace ResumableFunctions.Handler.Helpers;
+internal class MessagePackBinaryToObjectConverter : BinaryToObjectConverter
+{
 
-//    public MessagePackBinaryToObjectConverter(ILogger<MessagePackBinaryToObjectConverter> logger)
-//    {
-//        _logger = logger;
-//    }
+    public override byte[] ConvertToBinary(object obj)
+    {
+        try
+        {
+            //return MessagePackSerializer.Serialize(obj, ContractlessStandardResolver.Options);
+            return MessagePackSerializer.Serialize(obj, ContractlessStandardResolver.Options);
 
-//    public override byte[] ConvertToBinary(object obj)
-//    {
-//        try
-//        {
-//            //return MessagePackSerializer.Serialize(obj, ContractlessStandardResolver.Options);
-//            return MessagePackSerializer.Serialize(obj, ContractlessStandardResolver.Options);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error when convert object of type `{obj?.GetType().FullName}` to binary", ex);
+        }
+    }
 
-//        }
-//        catch (Exception ex)
-//        {
-//            _logger.LogError($"Error when convert object of type `{obj?.GetType().FullName}` to binary", ex);
-//            throw;
-//        }
-//    }
+    public override object ConvertToObject(byte[] bytes)
+    {
+        try
+        {
+            return MessagePackSerializer.Deserialize<ExpandoObject>(bytes, ContractlessStandardResolver.Options);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error when convert bytes to ExpandoObject", ex);
+        }
+    }
 
-//    public override object ConvertToObject(byte[] bytes)
-//    {
-//        try
-//        {
-//            return MessagePackSerializer.Deserialize<ExpandoObject>(
-//              bytes, ContractlessStandardResolver.Options);
+    public override T ConvertToObject<T>(byte[] bytes)
+    {
+        try
+        {
+            return MessagePackSerializer.Deserialize<T>(bytes, ContractlessStandardResolver.Options);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error when convert bytes to `{typeof(T)}`", ex);
+        }
+    }
 
-//        }
-//        catch (Exception ex)
-//        {
-//            _logger.LogError($"Error when convert bytes to ExpandoObject", ex);
-//            throw;
-//        }
-//    }
-
-//    public override T ConvertToObject<T>(byte[] bytes)
-//    {
-//        try
-//        {
-//            return MessagePackSerializer.Deserialize<T>(
-//              bytes, ContractlessStandardResolver.Options);
-
-//        }
-//        catch (Exception ex)
-//        {
-//            _logger.LogError($"Error when convert bytes to `{typeof(T)}`", ex);
-//            throw;
-//        }
-//    }
-//}
+    public override object ConvertToObject(byte[] bytes, Type type)
+    {
+        try
+        {
+            return MessagePackSerializer.Deserialize(type, bytes, ContractlessStandardResolver.Options);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error when convert bytes to `{typeof(T)}`", ex);
+        }
+    }
+}

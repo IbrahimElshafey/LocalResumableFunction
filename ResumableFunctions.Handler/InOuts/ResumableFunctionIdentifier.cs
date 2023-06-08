@@ -1,4 +1,5 @@
 ﻿using System.Net.NetworkInformation;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts;
 
@@ -11,6 +12,21 @@ public class ResumableFunctionIdentifier : MethodIdentifier
 
 
     public bool IsEntryPoint => Type == MethodType.ResumableFunctionEntryPoint;
+
+    private Type _classType;
+    public Type InClassType
+    {
+        get
+        {
+            if (_classType == null)
+            {
+                _classType = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
+                   .GetType(ClassName);
+            }
+            return _classType;
+        }
+    }
+
     internal override void FillFromMethodData(MethodData methodData)
     {
         RF_MethodUrn = methodData.MethodUrn;

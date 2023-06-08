@@ -29,7 +29,7 @@ internal class NewtonsoftBinaryToObjectConverter : BinaryToObjectConverter
 
     }
 
-    public object ConvertToObject(byte[] bytes, Type type)
+    public override object ConvertToObject(byte[] bytes, Type type)
     {
         try
         {

@@ -62,7 +62,7 @@ public class InputOutput
     }
 }
 
-public class GInputOutput<I, O>
+internal class GInputOutput<I, O>
 {
     public I Input { get; set; }
     public O Output { get; set; }

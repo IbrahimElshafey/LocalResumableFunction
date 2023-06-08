@@ -140,7 +140,7 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> UpdateFunctionData(MethodWait methodWait, int pushedCallId)
         {
-            methodWait.FunctionState.LoadUnmappedProps();
+            methodWait.FunctionState.LoadUnmappedProps(methodWait.RequestedByFunction.InClassType);
             using (await _lockProvider.AcquireLockAsync($"FunctionState_{methodWait.FunctionStateId}"))
             {
                 var result = methodWait.UpdateFunctionData();
@@ -296,7 +296,6 @@ namespace ResumableFunctions.Handler.Core
                 _methodWait = await _context
                     .MethodWaits
                     .Include(x => x.RequestedByFunction)
-                    //.Include(x => x.MethodToWait)
                     .Include(x => x.FunctionState)
                     .Where(x => x.Status == WaitStatus.Waiting)
                     .FirstOrDefaultAsync(x => x.Id == waitId);
@@ -341,8 +340,7 @@ namespace ResumableFunctions.Handler.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error when process pushed method [{pushedCallId}] and wait [{waitId}].");
-                return false;
+                throw new Exception($"Error when process pushed method [{pushedCallId}] and wait [{waitId}].", ex);
             }
         }
         private async Task UpdateWaitToMatched(int pushedCallId, int waitId)
