@@ -215,11 +215,13 @@ namespace ResumableFunctions.Handler.UiService
                     counter.Matched,
                     counter.NotMatched
                 ));
-          
-            return await query.ToListAsync();
+
+            var result = await query.ToListAsync();
+            result.ForEach(x => x.PushedCall.LoadUnmappedProps());
+            return result;
         }
 
-        public Task<List<FunctionInstanceInfo>> GetFunctionInstances(int functionId)
+        public async Task<List<FunctionInstanceInfo>> GetFunctionInstances(int functionId)
         {
             var query =
                  _context.FunctionStates
@@ -229,7 +231,9 @@ namespace ResumableFunctions.Handler.UiService
                      functionState,
                      functionState.Waits.First(wait => wait.IsNode && wait.Status == WaitStatus.Waiting),
                      functionState.Waits.Count()));
-            return query.ToListAsync();
+            var result = await query.ToListAsync();
+            result.ForEach(x => x.FunctionState.LoadUnmappedProps());
+            return result;
         }
     }
 }

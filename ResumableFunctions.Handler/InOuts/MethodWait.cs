@@ -148,44 +148,44 @@ public class MethodWait : Wait
         return base.IsValidWaitRequest();
     }
 
-    internal (bool Result, Exception ex) SetInputAndOutput()
-    {
-        var methodInfo = MethodToWait.MethodInfo;
-        try
-        {
-            var inputType = methodInfo.GetParameters()[0].ParameterType;
-            if (Input is JObject inputJson)
-            {
-                Input = inputJson.ToObject(inputType);
-            }
-            else
-                Input = Convert.ChangeType(Input.ToString(), inputType);
-        }
-        catch (Exception ex)
-        {
-            return (false, ex);
-        }
+    //internal (bool Result, Exception ex) SetInputAndOutput()
+    //{
+    //    var methodInfo = MethodToWait.MethodInfo;
+    //    try
+    //    {
+    //        var inputType = methodInfo.GetParameters()[0].ParameterType;
+    //        if (Input is JObject inputJson)
+    //        {
+    //            Input = inputJson.ToObject(inputType);
+    //        }
+    //        else
+    //            Input = Convert.ChangeType(Input.ToString(), inputType);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return (false, ex);
+    //    }
 
-        try
-        {
-            if (Output is JObject outputJson)
-            {
-                if (methodInfo.IsAsyncMethod())
-                    Output = outputJson.ToObject(methodInfo.ReturnType.GetGenericArguments()[0]);
-                else
-                    Output = outputJson.ToObject(methodInfo.ReturnType);
-            }
-            else if (methodInfo.IsAsyncMethod())
-                Output = Convert.ChangeType(Output.ToString(), methodInfo.ReturnType.GetGenericArguments()[0]);
-            else
-                Output = Convert.ChangeType(Output.ToString(), methodInfo.ReturnType);
-        }
-        catch (Exception ex)
-        {
-            return (false, ex);
-        }
-        return (true,null);
-    }
+    //    try
+    //    {
+    //        if (Output is JObject outputJson)
+    //        {
+    //            if (methodInfo.IsAsyncMethod())
+    //                Output = outputJson.ToObject(methodInfo.ReturnType.GetGenericArguments()[0]);
+    //            else
+    //                Output = outputJson.ToObject(methodInfo.ReturnType);
+    //        }
+    //        else if (methodInfo.IsAsyncMethod())
+    //            Output = Convert.ChangeType(Output.ToString(), methodInfo.ReturnType.GetGenericArguments()[0]);
+    //        else
+    //            Output = Convert.ChangeType(Output.ToString(), methodInfo.ReturnType);
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        return (false, ex);
+    //    }
+    //    return (true,null);
+    //}
 }
 
 public class MethodWait<TInput, TOutput> : MethodWait

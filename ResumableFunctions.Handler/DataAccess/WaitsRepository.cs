@@ -213,6 +213,7 @@ internal partial class WaitsRepository : IWaitsRepository
 
     private void CancelWait(Wait wait)
     {
+        wait.LoadUnmappedProps();
         wait.Cancel();
         if (wait is MethodWait mw &&
             mw.Name == $"#{nameof(LocalRegisteredMethods.TimeWait)}#")

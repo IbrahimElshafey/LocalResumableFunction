@@ -87,13 +87,13 @@ namespace ResumableFunctions.Handler.Core
 
         private Task<bool> SetInputAndOutput(MethodWait methodWait, int pushedCallId)
         {
-            var setInputOutputResult = methodWait.SetInputAndOutput();
-            if (setInputOutputResult.Result is false)
-            {
-                methodWait.FunctionState.AddError(
-                    $"Error occured when deserialize `Input or Output` for wait `{methodWait.Name}`,Pushed call id was `{pushedCallId}`");
-                return Task.FromResult(false);
-            }
+            //var setInputOutputResult = methodWait.SetInputAndOutput();
+            //if (setInputOutputResult.Result is false)
+            //{
+            //    methodWait.FunctionState.AddError(
+            //        $"Error occured when deserialize `Input or Output` for wait `{methodWait.Name}`,Pushed call id was `{pushedCallId}`");
+            //    return Task.FromResult(false);
+            //}
             return Task.FromResult(true);
         }
 
@@ -140,6 +140,7 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> UpdateFunctionData(MethodWait methodWait, int pushedCallId)
         {
+            methodWait.FunctionState.LoadUnmappedProps();
             using (await _lockProvider.AcquireLockAsync($"FunctionState_{methodWait.FunctionStateId}"))
             {
                 var result = methodWait.UpdateFunctionData();
@@ -299,8 +300,8 @@ namespace ResumableFunctions.Handler.Core
                     .Include(x => x.FunctionState)
                     .Where(x => x.Status == WaitStatus.Waiting)
                     .FirstOrDefaultAsync(x => x.Id == waitId);
-                
-                _methodWait.MethodToWait = await 
+
+                _methodWait.MethodToWait = await
                     _context
                     .WaitMethodIdentifiers
                     .FindAsync(_methodWait.MethodToWaitId);
@@ -330,6 +331,9 @@ namespace ResumableFunctions.Handler.Core
                     return false;
                 }
 
+                //todo:load strong types
+                _pushedCall.LoadUnmappedProps(_methodWait.MethodToWait.MethodInfo);
+                _methodWait.LoadUnmappedProps();
                 _methodWait.Input = _pushedCall.Data.Input;
                 _methodWait.Output = _pushedCall.Data.Output;
 

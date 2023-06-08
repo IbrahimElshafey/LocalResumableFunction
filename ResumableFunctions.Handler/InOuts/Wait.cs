@@ -14,7 +14,7 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInService, IOnSaveEntity, ILoadUnMapped
+public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInService, IOnSaveEntity
 {
     public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
@@ -29,7 +29,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
     public bool IsReplay { get; internal set; }
 
     [NotMapped]
-    public WaitExtraData ExtraDatan { get; internal set; }
+    public WaitExtraData ExtraData { get; internal set; }
     public byte[] ExtraDataValue { get; internal set; }
     public int? ServiceId { get; set; }
 
@@ -257,12 +257,12 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
     public void OnSave()
     {
         var converter = new NewtonsoftBinaryToObjectConverter();
-        ExtraDataValue = converter.ConvertToBinary(ExtraDatan);
+        ExtraDataValue = converter.ConvertToBinary(ExtraData);
     }
 
-    public void LoadUnmappedProps(params object[] args)
+    public void LoadUnmappedProps()
     {
         var converter = new NewtonsoftBinaryToObjectConverter();
-        ExtraDatan = converter.ConvertToObject<WaitExtraData>(ExtraDataValue);
+        ExtraData = converter.ConvertToObject<WaitExtraData>(ExtraDataValue);
     }
 }

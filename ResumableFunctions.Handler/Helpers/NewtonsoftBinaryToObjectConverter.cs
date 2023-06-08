@@ -15,6 +15,7 @@ internal class NewtonsoftBinaryToObjectConverter : BinaryToObjectConverter
     {
         try
         {
+            if (obj == null) return null;
             MemoryStream ms = new MemoryStream();
             using var writer = new BsonDataWriter(ms);
             var serializer = new JsonSerializer();
@@ -28,11 +29,12 @@ internal class NewtonsoftBinaryToObjectConverter : BinaryToObjectConverter
 
     }
 
-    public object ConvertToObject(byte[] b, Type type)
+    public object ConvertToObject(byte[] bytes, Type type)
     {
         try
         {
-            MemoryStream ms = new MemoryStream(b);
+            if (bytes == null) return null;
+            MemoryStream ms = new MemoryStream(bytes);
             using BsonDataReader reader = new BsonDataReader(ms);
             var serializer = new JsonSerializer();
             return serializer.Deserialize(reader, type);
@@ -42,11 +44,12 @@ internal class NewtonsoftBinaryToObjectConverter : BinaryToObjectConverter
             throw new Exception($"Error when convert bytes to JObject", ex);
         }
     }
-    public override object ConvertToObject(byte[] b)
+    public override object ConvertToObject(byte[] bytes)
     {
         try
         {
-            MemoryStream ms = new MemoryStream(b);
+            if (bytes == null) return null;
+            MemoryStream ms = new MemoryStream(bytes);
             using BsonDataReader reader = new BsonDataReader(ms);
             var serializer = new JsonSerializer();
             return serializer.Deserialize<JObject>(reader);
@@ -62,6 +65,7 @@ internal class NewtonsoftBinaryToObjectConverter : BinaryToObjectConverter
     {
         try
         {
+            if (bytes == null) return default;
             MemoryStream ms = new MemoryStream(bytes);
             using BsonDataReader reader = new BsonDataReader(ms);
             var serializer = new JsonSerializer();

@@ -6,7 +6,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete, IEntityInService, IOnSaveEntity,ILoadUnMapped
+public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete, IEntityInService, IOnSaveEntity
 {
     [JsonIgnore]
     public int ErrorCounter { get; set; }
@@ -22,7 +22,7 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
     /// Serailized class instance that contain the resumable function instance data
     /// </summary>
     [NotMapped]
-    public object StateObjectn { get; internal set; }
+    public object StateObject { get; internal set; }
     public byte[] StateObjectValue { get; internal set; }
 
     public List<Wait> Waits { get; internal set; } = new();
@@ -30,7 +30,7 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
 
     public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; set; }
     public int ResumableFunctionIdentifierId { get; set; }
-    public FunctionStatus Status { get; set; }//todo:reset before scan
+    public FunctionStatus Status { get; set; } //todo:reset before scan
     public DateTime Modified { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
 
@@ -39,15 +39,15 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
     public void OnSave()
     {
         var converter = new NewtonsoftBinaryToObjectConverter();
-        StateObjectValue = converter.ConvertToBinary(StateObjectn);
+        StateObjectValue = converter.ConvertToBinary(StateObject);
     }
 
-    public void LoadUnmappedProps(params object[] args)
+    public void LoadUnmappedProps(Type stateObjectType = null)
     {
         var converter = new NewtonsoftBinaryToObjectConverter();
-        if (args != null && args[0] != null)
-            StateObjectn = converter.ConvertToObject(StateObjectValue, (Type)args[0]);
+        if (stateObjectType != null)
+            StateObject = converter.ConvertToObject(StateObjectValue, stateObjectType);
         else
-            StateObjectn = converter.ConvertToObject(StateObjectValue);
+            StateObject = converter.ConvertToObject(StateObjectValue);
     }
 }

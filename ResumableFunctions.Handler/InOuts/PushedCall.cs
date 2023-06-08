@@ -4,35 +4,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts;
-public class PushedCall : IEntityWithDelete, IEntityInService, IOnSaveEntity, ILoadUnMapped
+public class PushedCall : IEntityWithDelete, IEntityInService, IOnSaveEntity
 {
     public int Id { get; internal set; }
     [NotMapped]
-    public MethodData MethodDatan { get; internal set; }
+    public MethodData MethodData { get; internal set; }
     public byte[] MethodDataValue { get; internal set; }
     [NotMapped]
-    public InputOutput Datan { get; internal set; } = new();
+    public InputOutput Data { get; internal set; } = new();
     public byte[] DataValue { get; internal set; }
     public int? ServiceId { get; set; }
     public List<WaitForCall> WaitsForCall { get; internal set; } = new();
-
-    //todo: will be deleted or used by external calls only
-    public string RefineMatchModifier
-    {
-        get
-        {
-            var name = nameof(MethodWait.RefineMatchModifier);
-            if (Data.Input is string s && s.StartsWith(name))
-                return s.Substring(name.Length);
-            if (Data.Output is string output && output.StartsWith(name))
-                return output.Substring(name.Length);
-            if (Data.Input is JObject inputJson && inputJson[name] != null)
-                return inputJson[name].ToString();
-            if (Data.Output is JObject outputJson && outputJson[name] != null)
-                return outputJson[name].ToString();
-            return null;
-        }
-    }
 
     public DateTime Created { get; internal set; }
 
@@ -41,15 +23,27 @@ public class PushedCall : IEntityWithDelete, IEntityInService, IOnSaveEntity, IL
     public void OnSave()
     {
         var converter = new NewtonsoftBinaryToObjectConverter();
-        DataValue = converter.ConvertToBinary(Datan);
-        MethodDataValue = converter.ConvertToBinary(MethodDatan);
+        DataValue = converter.ConvertToBinary(Data);
+        MethodDataValue = converter.ConvertToBinary(MethodData);
     }
 
-    public void LoadUnmappedProps(params object[] args)
+    public void LoadUnmappedProps(MethodInfo methodInfo = null)
     {
         var converter = new NewtonsoftBinaryToObjectConverter();
-        Datan = converter.ConvertToObject<InputOutput>(DataValue);
-        MethodDatan = converter.ConvertToObject<MethodData>(MethodDataValue);
+        if (methodInfo == null)
+            Data = converter.ConvertToObject<InputOutput>(DataValue);
+        else
+        {
+            var inputType = methodInfo.GetParameters()[0].ParameterType;
+            var outputType = methodInfo.IsAsyncMethod() ?
+                methodInfo.ReturnType.GetGenericArguments()[0] :
+                methodInfo.ReturnType;
+            var t = typeof(GInputOutput<,>).MakeGenericType(new[] { inputType, outputType });
+            dynamic data = converter.ConvertToObject(DataValue, t);
+            Data = InputOutput.FromGeneric(data);
+        }
+        MethodData = converter.ConvertToObject<MethodData>(MethodDataValue);
+
     }
 }
 
@@ -57,4 +51,19 @@ public class InputOutput
 {
     public object Input { get; set; }
     public object Output { get; set; }
+
+    public static InputOutput FromGeneric(dynamic value)
+    {
+        return new InputOutput
+        {
+            Input = value.Input,
+            Output = value.Output
+        };
+    }
+}
+
+public class GInputOutput<I, O>
+{
+    public I Input { get; set; }
+    public O Output { get; set; }
 }

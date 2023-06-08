@@ -1,4 +1,5 @@
-﻿* Remove use of value converters
+﻿
+* Clear Hangfire jobs table in debug on start
 * Remove NewtonSoft and use MessagePack
 	* [Yes] Can deserialize data to dynamic object
 	* [Yes] Can convert dynamic object to object back
