@@ -2,7 +2,6 @@
 using BinaryPack;
 using System.Dynamic;
 using System.Reflection;
-
 internal class BinaryPackTest
 {
     internal void Run()

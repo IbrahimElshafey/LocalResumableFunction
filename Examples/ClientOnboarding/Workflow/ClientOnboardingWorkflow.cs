@@ -16,6 +16,7 @@ namespace ClientOnboarding.Workflow
             this.service = service;
         }
 
+
         [ResumableFunctionEntryPoint("ClientOnboardingWorkflow.StartClientOnboardingWorkflow")]
         internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
         {

@@ -60,7 +60,7 @@ public class MethodWait : Wait
 
             var serializer = new ExpressionSerializer();
             MatchIfExpressionValue = serializer.Serialize(MatchIfExpression.ToExpressionSlim());
-            RefineMatchModifier = matchNewVisitor.RefineMatchModifier;
+            RefineMatchModifier = matchNewVisitor.MandatoryPart;
 
             //Rewrite SetData Expression
             SetDataExpression = new RewriteSetDataExpression(this).Result;

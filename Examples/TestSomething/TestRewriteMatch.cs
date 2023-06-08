@@ -111,7 +111,7 @@ namespace TestSomething
                     }
                 }
                 """);
-            var getId = matchRewrite1.ManadatoryPartsExpression;
+            var getId = matchRewrite1.CallMandatoryPartExpressionDynamic;
             var compile = getId.Compile();
             var value = compile.Invoke(pushedCall);
             //var matchRewrite = new RewriteMatchExpression(wait);

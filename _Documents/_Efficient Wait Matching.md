@@ -1,6 +1,10 @@
 ﻿* Remove NewtonSoft and use MessagePack
-	* Hangfire core use it
-
+	* [Yes] Can deserialize data to dynamic object
+	* [Yes] Can convert dynamic object to object back
+	* [Yes] Does not need attributes
+	* Does not need constructor constrains
+	* [Yes] Can be shown as Json
+	* Can use existing object and fill it
 # When Wait Requested
 * Calc WaitTemplate Hash(Match Expression & Set Data Expression HASH)
 * Search if template is exist
@@ -32,13 +36,7 @@
 	* Waits result will be marked as partial matches or full match based on template `IsMandatoryFullMatch` prop
 * Will group waits by FunctionId
 * For each group one match must be success
-* Dynamic evalution for each group (If dymaic match != null)
-	* Check waits against dynamic match expression if exist
-	* Find first match
-	* If match found and set data using dynamic expression not null >> set data
-		* If the value that will be set is null >> throw exception
-	* The other not matched will be marked as canceled
-* Static evalution for each group
+* Match evalution for each group
 	* Deserialize pushed call to `InputOutput` strong type
 	* For each Wait deserialize state object to `FunctionContainerClass` strong type
 	* Check waits against static match expression if exist
@@ -59,15 +57,15 @@
 	* Other parts to false
 	* If result is true the full match
 	* if else the partial match
+
 * Match vistor will return
 	* MatchExpression
-	* MatchExpressionDynamic
-	* CallMandatoryPartExpression
-	* CallMandatoryPartExpressionDynamic
-	* WaitMandatoryPartExpression
-	* WaitMandatoryPartExpressionDynamic
-	* Current Mandatory Part
+	* CallMandatoryPartExpression (Dynamic pushed call JObject)
+	* InstanceMandatoryPartExtarctorExpression (Intance Class)
+	* Current Mandatory Part 
+		* After applying `InstanceMandatoryPartExtarctorExpression` to current instance
 	* Mandatory is partial or full
+
 * Optimize wait table indexes to enable fast wait insertion
 	* Remove index 
 		* [ParentWaitId] in [dbo].[Waits]
@@ -75,3 +73,4 @@
 # Expression Serialization
 * https://github.com/reaqtive/reaqtor/tree/main/Nuqleon/Core/LINQ/Nuqleon.Linq.Expressions.Bonsai
 
+[SerializationConstructor]

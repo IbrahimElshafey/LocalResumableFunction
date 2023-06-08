@@ -15,19 +15,15 @@ public class MatchNewVisitor : ExpressionVisitor
 {
     public LambdaExpression MatchExpressionWithConstants { get; private set; }
     public LambdaExpression MatchExpressionWithoutConstants { get; private set; }
-    
-    // NEW expressions
-    public Expression<Func<ExpandoAccessor, ExpandoAccessor, bool>> MatchExpressionDynamic { get; internal set; }
-    public LambdaExpression CallMandatoryPartExpression { get; internal set; }
-    public Expression<Func<ExpandoAccessor, object[]>> CallMandatoryPartExpressionDynamic { get; internal set; }
-    public LambdaExpression WaitMandatoryPartExpression { get; internal set; }
-    public Expression<Func<ExpandoAccessor, string>> WaitMandatoryPartExpressionDynamic { get; internal set; }
-    // END new expression
-    
-    public string RefineMatchModifier { get; private set; }
 
-    //todo:change to CallMandatoryPartExpression
-    public Expression<Func<JObject, string>> ManadatoryPartsExpression { get; private set; }
+    // NEW expressions
+    public Expression<Func<JObject, string>> CallMandatoryPartExpressionDynamic { get; private set; }
+    public LambdaExpression InstanceMandatoryPartExtarctorExpression { get; internal set; }
+
+    public string MandatoryPart { get; private set; }
+    public string IsMandatoryPartFullMatch { get; private set; }
+
+    // END new expression
 
     private ParameterExpression _functionInstanceArg;
     private ParameterExpression _inputArg;
@@ -53,7 +49,7 @@ public class MatchNewVisitor : ExpressionVisitor
 
         if (_constantParts.Any(x => x.IsMandatory))
         {
-            RefineMatchModifier = _constantParts
+            MandatoryPart = _constantParts
                 .Where(x => x.IsMandatory)
                 .OrderBy(x => x.PropPathExpression.ToString())
                 .Select(x => x.Value.ToString())
@@ -310,7 +306,7 @@ public class MatchNewVisitor : ExpressionVisitor
             .ToArray();
         if (parts.Any())
         {
-            ManadatoryPartsExpression = Lambda<Func<JObject, string>>(
+            CallMandatoryPartExpressionDynamic = Lambda<Func<JObject, string>>(
                 Call(
                     typeof(string).GetMethod("Join", 0, new[] { typeof(string), typeof(string[]) }),
                     Constant("#"),

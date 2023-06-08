@@ -5,25 +5,28 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        switch (7)
+        switch (9)
         {
             case 1:
-                TestTreeCascadeAction();break;
+                TestTreeCascadeAction(); break;
             case 2:
-                await TestAspectInjectorAsync();break;
+                await TestAspectInjectorAsync(); break;
             case 3:
-                new TestRewriteMatch().Run();break;
+                new TestRewriteMatch().Run(); break;
             case 4:
-                new MessagePackTest().Test();break;
+                new MessagePackTest().Test(); break;
             case 5:
-                new MemoryPackTest().Run();break;
+                new MemoryPackTest().Run(); break;
             case 6:
-                new CerasTest().Run();break;
+                new CerasTest().Run(); break;
             case 7:
                 new NuqleonSerializeExpression().Run();
                 break;
             case 8:
                 new BinaryPackTest().Run();
+                break;
+            case 9:
+                new SetDepsTest().Run();
                 break;
         }
     }

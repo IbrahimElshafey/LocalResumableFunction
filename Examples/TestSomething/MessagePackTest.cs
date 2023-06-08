@@ -20,7 +20,7 @@ namespace TestSomething
         public void Test()
         {
             // Sample blob.
-            var model = new
+            var model = new Model(4)
             {
                 Name = "foobar",
                 Items = new[] { 1, 10, 100, 1000 },
@@ -29,7 +29,8 @@ namespace TestSomething
                 Point = new Point { X = 100, Y = 200 },
                 Comp = new { Po = new Point { X = 300, Y = 400 } }
             };
-            var blob = MessagePackSerializer.Serialize(model, ContractlessStandardResolver.Options);
+            
+            var blob = MessagePackSerializer.Serialize<dynamic>(model, ContractlessStandardResolver.Options);
             var json = MessagePackSerializer.ConvertToJson(blob);
             // Dynamic ("untyped")
             var dynamicModel = MessagePackSerializer.Deserialize<ExpandoObject>(blob, ContractlessStandardResolver.Options);
@@ -106,5 +107,19 @@ namespace TestSomething
         {
             _dictionary = expandoObject;
         }
+    }
+
+    public class Model
+    {
+        public Model(int x)
+        {
+
+        }
+        public string Name { get;  set; }
+        public int[] Items { get;  set; }
+        public byte BB { get;  set; }
+        public DateTime DT { get;  set; }
+        public Point Point { get;  set; }
+        public object Comp { get; set; }
     }
 }

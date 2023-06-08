@@ -9,6 +9,7 @@ namespace ResumableFunctions.Handler;
 
 public abstract partial class ResumableFunction : IObjectWithLog
 {
+
     [JsonIgnore]
     public int ErrorCounter { get; set; }
 

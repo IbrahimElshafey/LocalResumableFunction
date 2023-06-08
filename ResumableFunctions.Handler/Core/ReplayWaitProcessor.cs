@@ -85,7 +85,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             duplicateWait.IsReplay = true;
             duplicateWait.IsFirst = false;
             duplicateWait.MatchIfExpression = replayRequest.MatchExpression;
-            duplicateWait.RefineMatchModifier = rewriteMatchExpression.RefineMatchModifier;
+            duplicateWait.RefineMatchModifier = rewriteMatchExpression.MandatoryPart;
             await _waitsRepository.SaveWaitRequestToDb(duplicateWait);
             return duplicateWait;// when replay goto with new match
         }
