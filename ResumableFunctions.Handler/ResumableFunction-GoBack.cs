@@ -16,10 +16,6 @@ public abstract partial class ResumableFunction : IObjectWithLog
     [JsonIgnore]
     [NotMapped]
     public List<LogRecord> Logs { get; } = new();
-    public virtual string GetInstanceId(string functionUrn)
-    {
-        return default;
-    }
 
     /// <summary>
     ///     Go back to code after the wait.

@@ -68,11 +68,9 @@ namespace ResumableFunctions.Handler.Core
                     if (await LoadWaitAndPushedCall(mehtodWaitId, pushedCallId))
                     {
                         var isSuccess = await Pipeline(
-                            SetInputAndOutput,
                             CheckIfMatch,
                             CloneIfFirst,
                             UpdateFunctionData,
-                            ActivateFunctionInstance,
                             ResumeExecution);
 
                         if (isSuccess)
@@ -85,17 +83,7 @@ namespace ResumableFunctions.Handler.Core
                 $"Error when process wait `{mehtodWaitId}` that may be a match for pushed call `{pushedCallId}`");
         }
 
-        private Task<bool> SetInputAndOutput(MethodWait methodWait, int pushedCallId)
-        {
-            //var setInputOutputResult = methodWait.SetInputAndOutput();
-            //if (setInputOutputResult.Result is false)
-            //{
-            //    methodWait.FunctionState.AddError(
-            //        $"Error occured when deserialize `Input or Output` for wait `{methodWait.Name}`,Pushed call id was `{pushedCallId}`");
-            //    return Task.FromResult(false);
-            //}
-            return Task.FromResult(true);
-        }
+ 
 
         private async Task<bool> CheckIfMatch(MethodWait methodWait, int pushedCallId)
         {
@@ -140,30 +128,18 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> UpdateFunctionData(MethodWait methodWait, int pushedCallId)
         {
-            methodWait.FunctionState.LoadUnmappedProps(methodWait.RequestedByFunction.InClassType);
-            using (await _lockProvider.AcquireLockAsync($"FunctionState_{methodWait.FunctionStateId}"))
-            {
-                var result = methodWait.UpdateFunctionData();
-                await _context.SaveChangesAsync();
-                return result;
-            }
-        }
-
-        private async Task<bool> ActivateFunctionInstance(MethodWait methodWait, int pushedCallId)
-        {
-            //todo: should I use scope 
-            using var scope = _serviceProvider.CreateScope();
-            var currentFunctionClassWithDi =
-                scope.ServiceProvider.GetService(methodWait.CurrentFunction.GetType()) ??
-                ActivatorUtilities.CreateInstance(_serviceProvider, methodWait.CurrentFunction.GetType());
-            JsonConvert.PopulateObject(
-                JsonConvert.SerializeObject(methodWait.CurrentFunction), currentFunctionClassWithDi);
-            methodWait.CurrentFunction = (ResumableFunction)currentFunctionClassWithDi;
-            methodWait.FunctionState.UserDefinedId =
-                methodWait.CurrentFunction.GetInstanceId(methodWait.RequestedByFunction.RF_MethodUrn);
             try
             {
-                await _context.SaveChangesAsync();
+                methodWait.FunctionState.LoadUnmappedProps(methodWait.RequestedByFunction.InClassType);
+                using (await _lockProvider.AcquireLockAsync($"UpdateFunctionState_{methodWait.FunctionStateId}"))
+                {
+                    if (methodWait.UpdateFunctionData())
+                        await _context.SaveChangesAsync();
+                    else
+                        throw new Exception(
+                            $"Can't update function state `{methodWait.FunctionStateId}` after method wait `{methodWait}` matched.");
+                }
+                methodWait.CurrentFunction.SetDependencies(_serviceProvider);
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -175,6 +151,7 @@ namespace ResumableFunctions.Handler.Core
                 return false;
             }
             return true;
+           
         }
 
         private async Task<bool> ResumeExecution(MethodWait matchedMethodWait, int pushedCallId)

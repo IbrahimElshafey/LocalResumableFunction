@@ -5,7 +5,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        switch (9)
+        switch (4)
         {
             case 1:
                 TestTreeCascadeAction(); break;

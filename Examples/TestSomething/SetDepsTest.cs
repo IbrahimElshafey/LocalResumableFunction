@@ -6,13 +6,18 @@ internal class SetDepsTest
 {
     public void Run()
     {
-        var type = typeof(MyClass);
+        var instance = SetDepsAndGetInstance(typeof(MyClass));
+    }
+
+    private object SetDepsAndGetInstance(Type type, string setDepsMethodName = "SetDeps")
+    {
         var instance = RuntimeHelpers.GetUninitializedObject(type);
-        var setDepsMi = type.GetMethod("SetDeps", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        var setDepsMi = type.GetMethod(
+            setDepsMethodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
         if (setDepsMi == null)
         {
             Console.WriteLine("Warn: No set deps method found that match the criteria.");
-            return;
+            return null;
         }
 
         var parameters = setDepsMi.GetParameters();
@@ -34,6 +39,7 @@ internal class SetDepsTest
             Console.WriteLine("Warn: No set deps method found that match the criteria.");
         }
         setDepsMi.Invoke(instance, inputs);
+        return instance;
     }
 }
 

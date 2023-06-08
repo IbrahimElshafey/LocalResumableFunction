@@ -1,9 +1,11 @@
-﻿* New Scan should not delete existing method wait and groups if exist
+﻿# Work On
+* New Scan should not delete existing method wait and groups if exist
 * Remove NewtonSoft and use MessagePack
 	* [Yes] Can deserialize data to dynamic object
 	* [Yes] Can convert dynamic object to object back
 	* [Yes] Does not need attributes
 	* Does not need constructor constrains
+		* This is not applicable but I will create method `SetDeps`
 	* [Yes] Can be shown as Json
 	* Can use existing object and fill it
 * Clear Hangfire jobs table in debug on start

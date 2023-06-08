@@ -1,4 +1,6 @@
-﻿using ResumableFunctions.Handler.InOuts;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ResumableFunctions.Handler.InOuts;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler;
 
@@ -37,5 +39,41 @@ public abstract partial class ResumableFunction
         }
 
         return result;
+    }
+
+    internal void SetDependencies(IServiceProvider serviceProvider)
+    {
+        //todo:should I create new scope??
+        var setDepsMi = GetType().GetMethod(
+            "SetDeps", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (setDepsMi == null)
+            setDepsMi = GetType().GetMethod(
+            "SetDependencies", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (setDepsMi == null)
+            setDepsMi = GetType().GetMethod(
+            "Dependencies", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+        if (setDepsMi == null)
+        {
+            this.AddLog("No set dependencies method found that match the criteria.", LogType.Warning);
+            return;
+        }
+
+        var parameters = setDepsMi.GetParameters();
+        var inputs = new object[parameters.Count()];
+        if (setDepsMi.ReturnType == typeof(void) &&
+            parameters.Count() >= 1)
+        {
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                inputs[i] =
+                    serviceProvider.GetService(parameters[i].ParameterType) ??
+                    ActivatorUtilities.CreateInstance(serviceProvider, parameters[i].ParameterType);
+            }
+        }
+        else
+        {
+            this.AddLog("No set dependencies method found that match the criteria.", LogType.Warning);
+        }
+        setDepsMi.Invoke(this, inputs);
     }
 }

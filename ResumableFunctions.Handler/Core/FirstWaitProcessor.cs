@@ -8,6 +8,7 @@ using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
 using Medallion.Threading;
+using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -122,9 +123,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
     public async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
-        var classInstance = (ResumableFunction)
-            (_serviceProvider.GetService(resumableFunction.DeclaringType) ??
-            ActivatorUtilities.CreateInstance(_serviceProvider, resumableFunction.DeclaringType));
+        var classInstance = (ResumableFunction)Activator.CreateInstance(resumableFunction.DeclaringType);
+        classInstance.SetDependencies(_serviceProvider);
         if (classInstance != null)
         {
             classInstance.CurrentResumableFunction = resumableFunction;
