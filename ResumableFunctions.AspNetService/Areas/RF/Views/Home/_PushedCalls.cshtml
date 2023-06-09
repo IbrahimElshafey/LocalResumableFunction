@@ -1,4 +1,5 @@
-﻿@using ResumableFunctions.Handler.UiService.InOuts;
+﻿@using MessagePack;
+@using ResumableFunctions.Handler.UiService.InOuts;
 @model List<PushedCallInfo>
 <div class="w3-margin">
 
@@ -17,8 +18,7 @@
                 <thead>
                     <tr class="w3-indigo">
                         <th>Method</th>
-                        <th>Input</th>
-                        <th>Output</th>
+                        <th>Input & Output</th>
                         <th>Processing</th>
                         <th>Expected</th>
                         <th>Matched</th>
@@ -39,8 +39,7 @@
                                 <li><b>Assembly: </b>@item.PushedCall.MethodData.AssemblyName</li>
                             </ul>
                         </td>
-                        <td class="JsonObject">@item.PushedCall.Data.Input</td>
-                        <td class="JsonObject">@item.PushedCall.Data.Output</td>
+                        <td class="JsonObject">@MessagePackSerializer.ConvertToJson(item.PushedCall.DataValue)</td>
                         <td>
                             @((item.MatchedCount + item.NotMatchedCount) == item.ExpectedMatchCount ?
                                 "Finished" :

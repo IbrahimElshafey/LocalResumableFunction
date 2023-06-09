@@ -22,14 +22,14 @@ public class PushedCall : IEntityWithDelete, IEntityInService, IOnSaveEntity
 
     public void OnSave()
     {
-        var converter = new NewtonsoftBinaryToObjectConverter();
+        var converter = new BinaryToObjectConverter();
         DataValue = converter.ConvertToBinary(Data);
         MethodDataValue = converter.ConvertToBinary(MethodData);
     }
 
     public void LoadUnmappedProps(MethodInfo methodInfo = null)
     {
-        var converter = new NewtonsoftBinaryToObjectConverter();
+        var converter = new BinaryToObjectConverter();
         if (methodInfo == null)
             Data = converter.ConvertToObject<InputOutput>(DataValue);
         else
@@ -62,7 +62,7 @@ public class InputOutput
     }
 }
 
-internal class GInputOutput<I, O>
+public class GInputOutput<I, O>
 {
     public I Input { get; set; }
     public O Output { get; set; }

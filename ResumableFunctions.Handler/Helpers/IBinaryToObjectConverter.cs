@@ -2,7 +2,7 @@
 
 namespace ResumableFunctions.Handler.Helpers;
 
-public abstract class BinaryToObjectConverter
+public abstract class BinaryToObjectConverterAbstract
 {
     public abstract byte[] ConvertToBinary(object ob);
     public abstract object ConvertToObject(byte[] bytes);

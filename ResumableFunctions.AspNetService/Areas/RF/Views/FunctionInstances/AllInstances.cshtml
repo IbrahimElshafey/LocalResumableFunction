@@ -1,4 +1,5 @@
-﻿@using ResumableFunctions.AspNetService.DisplayObject;
+﻿@using MessagePack;
+@using ResumableFunctions.AspNetService.DisplayObject;
 @model FunctionInstancesModel
 <div class="w3-container w3-margin">
     <header class="w3-text-blue-gray">
@@ -36,7 +37,7 @@
                 <td class="w3-text-@instance.StateColor">@instance.FunctionState.Status</td>
                 <td>
                     <span class="JsonObject" style=" word-wrap: break-word;">
-                        @instance.FunctionState.StateObject
+                        @MessagePackSerializer.ConvertToJson(instance.FunctionState.StateObjectValue)
                     </span>
                 </td>
                 <td>@instance.CurrentWait?.Name</td>

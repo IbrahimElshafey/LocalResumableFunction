@@ -256,13 +256,13 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
 
     public void OnSave()
     {
-        var converter = new NewtonsoftBinaryToObjectConverter();
+        var converter = new BinaryToObjectConverter();
         ExtraDataValue = converter.ConvertToBinary(ExtraData);
     }
 
     public void LoadUnmappedProps()
     {
-        var converter = new NewtonsoftBinaryToObjectConverter();
+        var converter = new BinaryToObjectConverter();
         ExtraData = converter.ConvertToObject<WaitExtraData>(ExtraDataValue);
     }
 }

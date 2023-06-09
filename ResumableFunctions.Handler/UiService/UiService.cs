@@ -21,7 +21,7 @@ namespace ResumableFunctions.Handler.UiService
             var services =
                 await _context.ServicesData.CountAsync(x => x.ParentId == -1);
             var resumableFunction =
-                await _context.ResumableFunctionIdentifiers.CountAsync(x => x.Type == Handler.InOuts.MethodType.ResumableFunctionEntryPoint);
+                await _context.ResumableFunctionIdentifiers.CountAsync(x => x.Type == MethodType.ResumableFunctionEntryPoint);
             var resumableFunctionsInstances = await _context.FunctionStates.CountAsync();
             var methods = await _context.WaitMethodIdentifiers.CountAsync();
             var pushedCalls = await _context.PushedCalls.CountAsync();
@@ -31,7 +31,7 @@ namespace ResumableFunctions.Handler.UiService
                 .Logs
                 .OrderByDescending(x => x.Id)
                 .Take(20)
-                .CountAsync(x => x.Type == Handler.InOuts.LogType.Error);
+                .CountAsync(x => x.Type == LogType.Error);
             return new MainStatistics(
                 services,
                 resumableFunction,
@@ -93,8 +93,8 @@ namespace ResumableFunctions.Handler.UiService
                .GroupBy(x => x.ServiceId)
                .Select(x => new
                {
-                   FunctionsCount = x.Count(x => x.Type == Handler.InOuts.MethodType.ResumableFunctionEntryPoint),
-                   MethodsCount = x.Count(x => x.Type == Handler.InOuts.MethodType.MethodWait),
+                   FunctionsCount = x.Count(x => x.Type == MethodType.ResumableFunctionEntryPoint),
+                   MethodsCount = x.Count(x => x.Type == MethodType.MethodWait),
                    Id = x.Key
                })
                .FirstOrDefaultAsync();
@@ -232,7 +232,7 @@ namespace ResumableFunctions.Handler.UiService
                      functionState.Waits.First(wait => wait.IsNode && wait.Status == WaitStatus.Waiting),
                      functionState.Waits.Count()));
             var result = await query.ToListAsync();
-            result.ForEach(x => x.FunctionState.LoadUnmappedProps());
+            //result.ForEach(x => x.FunctionState.LoadUnmappedProps());
             return result;
         }
     }

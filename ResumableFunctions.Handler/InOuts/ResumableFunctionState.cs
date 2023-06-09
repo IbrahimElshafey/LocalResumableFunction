@@ -38,13 +38,13 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
 
     public void OnSave()
     {
-        var converter = new NewtonsoftBinaryToObjectConverter();
+        var converter = new BinaryToObjectConverter();
         StateObjectValue = converter.ConvertToBinary(StateObject);
     }
 
     public void LoadUnmappedProps(Type stateObjectType = null)
     {
-        var converter = new NewtonsoftBinaryToObjectConverter();
+        var converter = new BinaryToObjectConverter();
         if (stateObjectType != null)
             StateObject = converter.ConvertToObject(StateObjectValue, stateObjectType);
         else

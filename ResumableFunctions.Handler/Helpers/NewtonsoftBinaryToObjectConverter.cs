@@ -8,7 +8,7 @@ using System.Runtime.ExceptionServices;
 
 namespace ResumableFunctions.Handler.Helpers;
 
-internal class NewtonsoftBinaryToObjectConverter : BinaryToObjectConverter
+internal class BinaryToObjectConverter1 : BinaryToObjectConverterAbstract
 {
 
     public override byte[] ConvertToBinary(object obj)

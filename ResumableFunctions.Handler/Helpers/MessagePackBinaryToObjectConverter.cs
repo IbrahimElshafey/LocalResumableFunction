@@ -6,7 +6,7 @@ using System.Linq.CompilerServices.TypeSystem;
 using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.Helpers;
-internal class MessagePackBinaryToObjectConverter : BinaryToObjectConverter
+internal class BinaryToObjectConverter : BinaryToObjectConverterAbstract
 {
 
     public override byte[] ConvertToBinary(object obj)

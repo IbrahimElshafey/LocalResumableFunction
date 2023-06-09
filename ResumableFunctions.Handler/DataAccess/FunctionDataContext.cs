@@ -26,7 +26,7 @@ public class FunctionDataContext : DbContext
         ILogger<FunctionDataContext> logger,
         IResumableFunctionsSettings settings,
         IDistributedLockProvider lockProvider,
-        BinaryToObjectConverter binarytConverter) : base(settings.WaitsDbConfig.Options)
+        BinaryToObjectConverterAbstract binarytConverter) : base(settings.WaitsDbConfig.Options)
     {
         _logger = logger;
         //_binarytConverter = binarytConverter;
@@ -114,17 +114,6 @@ public class FunctionDataContext : DbContext
     private void ConfigurePushedCalls(ModelBuilder modelBuilder)
     {
         var pushedCallBuilder = modelBuilder.Entity<PushedCall>();
-        //pushedCallBuilder
-        //    .Property(x => x.Data)
-        //    .HasConversion(
-        //    obj => _binarytConverter.ConvertToBinary(obj),
-        //    bytes => _binarytConverter.ConvertToObject<InputOutput>(bytes));
-
-        //pushedCallBuilder
-        //   .Property(x => x.MethodData)
-        //   .HasConversion(
-        //    obj => _binarytConverter.ConvertToBinary(obj),
-        //    bytes => _binarytConverter.ConvertToObject<MethodData>(bytes));
 
         pushedCallBuilder
            .HasMany(x => x.WaitsForCall)
@@ -145,12 +134,6 @@ public class FunctionDataContext : DbContext
             .WithOne(wait => wait.ParentWait)
             .HasForeignKey(x => x.ParentWaitId)
             .HasConstraintName("FK_ChildWaits_For_Wait");
-
-        //waitBuilder
-        //    .Property(x => x.ExtraData)
-        //    .HasConversion(
-        //    obj => _binarytConverter.ConvertToBinary(obj),
-        //    bytes => _binarytConverter.ConvertToObject<WaitExtraData>(bytes));
 
         waitBuilder
             .HasIndex(x => x.Status)
@@ -228,12 +211,6 @@ public class FunctionDataContext : DbContext
             .WithOne(wait => wait.FunctionState)
             .HasForeignKey(x => x.FunctionStateId)
             .HasConstraintName("FK_WaitsForFunctionState");
-
-        //entityTypeBuilder
-        //   .Property(x => x.StateObject)
-        //   .HasConversion(
-        //    _binarytConverter.ToBinary,
-        //    _binarytConverter.ToObject);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
