@@ -193,27 +193,6 @@ public static class CoreExtensions
         return _methodInfo;
     }
 
-    //from:https://haacked.com/archive/2019/07/29/query-filter-by-interface/
-    public static void AppendQueryFilter<T>(
-                this EntityTypeBuilder<T> entityTypeBuilder, Expression<Func<T, bool>> expression) where T : class
-    {
-        var parameterType = Parameter(entityTypeBuilder.Metadata.ClrType);
-
-        var expressionFilter = ReplacingExpressionVisitor.Replace(
-            expression.Parameters.Single(), parameterType, expression.Body);
-
-        if (entityTypeBuilder.Metadata.GetQueryFilter() != null)
-        {
-            var currentQueryFilter = entityTypeBuilder.Metadata.GetQueryFilter();
-            var currentExpressionFilter = ReplacingExpressionVisitor.Replace(
-                currentQueryFilter.Parameters.Single(), parameterType, currentQueryFilter.Body);
-            expressionFilter = AndAlso(currentExpressionFilter, expressionFilter);
-        }
-
-        var lambdaExpression = Lambda(expressionFilter, parameterType);
-        entityTypeBuilder.HasQueryFilter(lambdaExpression);
-    }
-
     public static IEnumerable<T> Flatten<T>(
            this IEnumerable<T> e,
            Func<T, IEnumerable<T>> f) =>

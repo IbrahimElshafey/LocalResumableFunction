@@ -1,4 +1,5 @@
 ﻿
+using MessagePack;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,10 +9,10 @@ namespace ResumableFunctions.Handler.InOuts;
 
 public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete, IEntityInService, IOnSaveEntity
 {
-    [JsonIgnore]
+    [IgnoreMember]
     public int ErrorCounter { get; set; }
 
-    [JsonIgnore]
+    [IgnoreMember]
     [NotMapped]
     public List<LogRecord> Logs { get; } = new();
     public int Id { get; internal set; }

@@ -17,6 +17,10 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
+internal partial class WaitTemplatesRepository : IWaitTemplatesRepository
+{
+
+}
 internal partial class WaitsRepository : IWaitsRepository
 {
     private ILogger<WaitsRepository> _logger;

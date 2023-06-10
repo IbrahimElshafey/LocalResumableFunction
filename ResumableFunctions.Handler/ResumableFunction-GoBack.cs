@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
+using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler.Attributes;
@@ -10,10 +11,10 @@ namespace ResumableFunctions.Handler;
 public abstract partial class ResumableFunction : IObjectWithLog
 {
 
-    [JsonIgnore]
+    [IgnoreMember]
     public int ErrorCounter { get; set; }
 
-    [JsonIgnore]
+    [IgnoreMember]
     [NotMapped]
     public List<LogRecord> Logs { get; } = new();
 

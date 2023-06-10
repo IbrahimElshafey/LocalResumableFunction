@@ -3,15 +3,14 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using ResumableFunctions.Handler.InOuts;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Xml.Linq;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
-
-public class MatchNewVisitor : ExpressionVisitor
+public class MatchWriter : ExpressionVisitor
 {
     public LambdaExpression MatchExpressionWithConstants { get; private set; }
     public LambdaExpression MatchExpressionWithoutConstants { get; private set; }
@@ -31,7 +30,7 @@ public class MatchNewVisitor : ExpressionVisitor
     private object _currentFunctionInstance;
     private List<ConstantPart> _constantParts = new();
 
-    public MatchNewVisitor(LambdaExpression matchExpression, object instance)
+    public MatchWriter(LambdaExpression matchExpression, object instance)
     {
         MatchExpressionWithConstants = matchExpression;
         if (MatchExpressionWithConstants == null)

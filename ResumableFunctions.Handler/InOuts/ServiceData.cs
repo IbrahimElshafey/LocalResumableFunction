@@ -1,13 +1,14 @@
-﻿using Newtonsoft.Json;
+﻿using MessagePack;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
 public class ServiceData : IObjectWithLog, IEntityWithUpdate
 {
-    [JsonIgnore]
+    [IgnoreMember]
     public int ErrorCounter { get; set; }
 
-    [JsonIgnore]
+    [IgnoreMember]
     [NotMapped]
     public List<LogRecord> Logs { get; } = new();
     public int Id { get; internal set; }

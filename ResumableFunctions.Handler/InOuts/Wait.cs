@@ -188,7 +188,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
     private void CopyMethod(MethodWait from, MethodWait to)
     {
         to.SetDataExpressionValue = from.SetDataExpressionValue;
-        to.MatchIfExpressionValue = from.MatchIfExpressionValue;
+        to.MatchExpressionValue = from.MatchExpressionValue;
         to.MethodToWaitId = from.MethodToWaitId;
         to.LoadExpressions();
     }

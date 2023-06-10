@@ -3,6 +3,7 @@ using Medallion.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.InOuts;
 using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler.Helpers
@@ -12,15 +13,18 @@ namespace ResumableFunctions.Handler.Helpers
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<BackgroundJobExecutor> _logger;
+        private readonly IResumableFunctionsSettings _settings;
 
         public BackgroundJobExecutor(
             IServiceProvider serviceProvider,
             IDistributedLockProvider lockProvider,
-            ILogger<BackgroundJobExecutor> logger)
+            ILogger<BackgroundJobExecutor> logger,
+            IResumableFunctionsSettings settings)
         {
             _serviceProvider = serviceProvider;
             _lockProvider = lockProvider;
             _logger = logger;
+            _settings = settings;
         }
         public async Task Execute(
             string lockName,
@@ -32,7 +36,7 @@ namespace ResumableFunctions.Handler.Helpers
         {
             try
             {
-                using (var handle = await _lockProvider.TryAcquireLockAsync(lockName))
+                using (var handle = await _lockProvider.TryAcquireLockAsync(_settings.CurrentDbName + lockName))
                 {
                     if (handle is null) return;
 

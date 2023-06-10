@@ -10,8 +10,18 @@ namespace ResumableFunctions.Handler.InOuts;
 public class MethodWaitTemplate : IEntity
 {
 
+    internal class FieldsNames
+    {
+        public const string MatchExpression = nameof(_matchExpression);
+        public const string MatchExpressionDynamic = nameof(_matchExpressionDynamic);
+        public const string CallMandatoryPartExpression = nameof(_callMandatoryPartExpression);
+        public const string WaitMandatoryPartExpression = nameof(_waitMandatoryPartExpression);
+        public const string SetDataExpression = nameof(_setDataExpression);
+        public const string SetDataExpressionDynamic = nameof(_setDataExpressionDynamic);
+    }
     public int Id { get; internal set; }
     public int FunctionId { get; internal set; }
+    public int MethodId { get; internal set; }
     public int MethodGroupId { get; internal set; }
     public string AssemblyName { get; internal set; }
     public MethodsGroup MethodGroup { get; internal set; }

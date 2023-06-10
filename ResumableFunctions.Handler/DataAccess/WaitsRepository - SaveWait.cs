@@ -52,16 +52,26 @@ internal partial class WaitsRepository : IWaitsRepository
 
     private async Task MethodWaitRequested(MethodWait methodWait)
     {
+        await GetMethodWaitTemplateId(methodWait);
         var methodToWait = await _methodIdentifierRepo.GetWaitMethod(methodWait);
 
         methodWait.ServiceId = _settings.CurrentServiceId;
         methodWait.MethodToWaitId = methodToWait.Id;
-        methodWait.MethodGroupToWaitId = methodToWait.ParentMethodGroupId;
-        methodWait.MethodGroupToWait = methodToWait.ParentMethodGroup;
+        methodWait.MethodGroupToWaitId = methodToWait.MethodGroupId;
+        methodWait.MethodGroupToWait = methodToWait.MethodGroup;
         methodWait.RewriteExpressions();
 
         await AddWait(methodWait);
     }
+
+    private async Task GetMethodWaitTemplateId(MethodWait methodWait)
+    {
+        var methodId = await _methodIdentifierRepo.GetId(methodWait);
+        var funcId = methodWait.RequestedByFunctionId;
+        var hash = new WaitExpressionsHash(methodWait).Hash;
+        var template = await _waitTemplateRepo.CheckTemplateExist(hash, funcId, methodId.GroupId);
+    }
+
 
     private async Task WaitsGroupRequested(WaitsGroup manyWaits)
     {
@@ -129,7 +139,7 @@ internal partial class WaitsRepository : IWaitsRepository
             timeWait.SetDataExpression.Body,
             inputParameter,
             outputParameter);
-        timeWaitMethod.MatchIfExpression = Expression.Lambda(
+        timeWaitMethod.MatchExpression = Expression.Lambda(
             functionType,
             Expression.Equal(inputParameter, Expression.Constant(timeWait.UniqueMatchId)),
             inputParameter,

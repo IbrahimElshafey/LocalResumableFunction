@@ -163,13 +163,13 @@ namespace ResumableFunctions.Handler.UiService
             //todo refine this query
             var methodIdsQuery = _context
                 .WaitMethodIdentifiers
-                .GroupBy(x => x.ParentMethodGroupId)
+                .GroupBy(x => x.MethodGroupId)
                 .Select(x => new
                 {
                     MethodGroupId = x.Key,
                     MethodsCount = x.Count(),
-                    GroupCreated = x.First().ParentMethodGroup.Created,
-                    GroupUrn = x.First().ParentMethodGroup.MethodGroupUrn
+                    GroupCreated = x.First().MethodGroup.Created,
+                    GroupUrn = x.First().MethodGroup.MethodGroupUrn
                 });
             var join = from wait in waitsQuery
                        from methodId in methodIdsQuery

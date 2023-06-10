@@ -139,7 +139,7 @@ namespace ResumableFunctions.Handler.Core
                         throw new Exception(
                             $"Can't update function state `{methodWait.FunctionStateId}` after method wait `{methodWait}` matched.");
                 }
-                methodWait.CurrentFunction.SetDependencies(_serviceProvider);
+                methodWait.CurrentFunction.InitializeDependencies(_serviceProvider);
             }
             catch (DbUpdateConcurrencyException ex)
             {
@@ -307,7 +307,7 @@ namespace ResumableFunctions.Handler.Core
                     return false;
                 }
 
-                //todo:load strong types
+                //todo:MethodToWait.MethodInfo may be method in another service
                 _pushedCall.LoadUnmappedProps(_methodWait.MethodToWait.MethodInfo);
                 _methodWait.LoadUnmappedProps();
                 _methodWait.Input = _pushedCall.Data.Input;

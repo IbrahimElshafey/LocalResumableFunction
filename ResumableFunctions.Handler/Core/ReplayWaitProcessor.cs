@@ -73,18 +73,18 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         if (waitToReplay is MethodWait mw)
         {
             mw.LoadExpressions();
-            var oldMatchExpression = mw.MatchIfExpression;
-            mw.MatchIfExpression = replayRequest.MatchExpression;
-            var rewriteMatchExpression = new MatchNewVisitor(mw.MatchIfExpression,mw.CurrentFunction);
+            var oldMatchExpression = mw.MatchExpression;
+            mw.MatchExpression = replayRequest.MatchExpression;
+            var rewriteMatchExpression = new MatchWriter(mw.MatchExpression,mw.CurrentFunction);
             replayRequest.MatchExpression = rewriteMatchExpression.MatchExpressionWithConstants;
-            mw.MatchIfExpression = oldMatchExpression;
+            mw.MatchExpression = oldMatchExpression;
             CheckReplayMatchExpression(replayRequest, mw);
 
             var duplicateWait = waitToReplay.DuplicateWait() as MethodWait;
             duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
             duplicateWait.IsReplay = true;
             duplicateWait.IsFirst = false;
-            duplicateWait.MatchIfExpression = replayRequest.MatchExpression;
+            duplicateWait.MatchExpression = replayRequest.MatchExpression;
             duplicateWait.RefineMatchModifier = rewriteMatchExpression.MandatoryPart;
             await _waitsRepository.SaveWaitRequestToDb(duplicateWait);
             return duplicateWait;// when replay goto with new match
@@ -155,7 +155,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             {
                 CheckReplayMatchExpression(replayWait, mw);
 
-                mw.MatchIfExpression = replayWait.MatchExpression;
+                mw.MatchExpression = replayWait.MatchExpression;
                 mw.FunctionState = replayWait.FunctionState;
                 mw.FunctionStateId = replayWait.FunctionStateId;
                 mw.RequestedByFunction = waitToReplay.RequestedByFunction;
@@ -185,7 +185,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     private void CheckReplayMatchExpression(ReplayRequest replayWait, MethodWait mw)
     {
         var isSameSignature =
-            CoreExtensions.SameMatchSignature(replayWait.MatchExpression, mw.MatchIfExpression);
+            CoreExtensions.SameMatchSignature(replayWait.MatchExpression, mw.MatchExpression);
         if (isSameSignature is false)
             throw new Exception("Replay match expression method must have same signature as " +
                                 "the wait that will replayed.");

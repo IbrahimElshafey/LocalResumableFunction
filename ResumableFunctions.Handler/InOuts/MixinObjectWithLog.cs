@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using MessagePack;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler.Attributes;
@@ -10,10 +11,10 @@ namespace ResumableFunctions.Handler.InOuts;
 public interface IObjectWithLog
 {
 
-    [JsonIgnore]
+    [IgnoreMember]
     public int ErrorCounter { get; internal set; }
 
-    [JsonIgnore]
+    [IgnoreMember]
     [NotMapped]
     public List<LogRecord> Logs { get; }
 }

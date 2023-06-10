@@ -3,6 +3,10 @@ using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
+    public interface IWaitTemplatesRepository
+    {
+
+    }
     public interface IWaitsRepository
     {
         Task AddWait(Wait wait);

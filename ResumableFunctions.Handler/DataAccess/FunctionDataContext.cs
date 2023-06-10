@@ -19,21 +19,20 @@ namespace ResumableFunctions.Handler.DataAccess;
 public class FunctionDataContext : DbContext
 {
     private readonly ILogger<FunctionDataContext> _logger;
-    //private readonly BinaryToObjectConverter _binarytConverter;
     private readonly IResumableFunctionsSettings _settings;
 
     public FunctionDataContext(
         ILogger<FunctionDataContext> logger,
         IResumableFunctionsSettings settings,
-        IDistributedLockProvider lockProvider,
-        BinaryToObjectConverterAbstract binarytConverter) : base(settings.WaitsDbConfig.Options)
+        IDistributedLockProvider lockProvider) : base(settings.WaitsDbConfig.Options)
     {
         _logger = logger;
-        //_binarytConverter = binarytConverter;
         _settings = settings;
         try
         {
-            using (lockProvider.AcquireLock(Database.GetDbConnection().Database))
+            var database = Database.GetDbConnection().Database;
+            settings.CurrentDbName = database;
+            using (lockProvider.AcquireLock(database))
             {
                 Database.EnsureCreated();
             }
@@ -52,7 +51,7 @@ public class FunctionDataContext : DbContext
 
     public DbSet<Wait> Waits { get; set; }
     public DbSet<MethodWait> MethodWaits { get; set; }
-    //public DbSet<MethodWaitTemplate> MethodWaitTemplates { get; set; }
+    public DbSet<MethodWaitTemplate> MethodWaitTemplates { get; set; }
     public DbSet<MethodsGroup> MethodsGroups { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
 
@@ -72,10 +71,13 @@ public class FunctionDataContext : DbContext
         ConfigurePushedCalls(modelBuilder);
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
         ConfigureWaits(modelBuilder);
+        ConfigureMethodWaitTemplate(modelBuilder);
         ConfigurConcurrencyToken(modelBuilder);
         ConfigurSoftDeleteFilter(modelBuilder);
         base.OnModelCreating(modelBuilder);
     }
+
+    
 
     private void ConfigurSoftDeleteFilter(ModelBuilder modelBuilder)
     {
@@ -146,8 +148,8 @@ public class FunctionDataContext : DbContext
           .HasColumnName(nameof(MethodWait.MethodToWaitId));
 
         methodWaitBuilder
-          .Property(mw => mw.MatchIfExpressionValue)
-          .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
+          .Property(mw => mw.MatchExpressionValue)
+          .HasColumnName(nameof(MethodWait.MatchExpressionValue));
 
         methodWaitBuilder
             .Property(mw => mw.SetDataExpressionValue)
@@ -159,6 +161,22 @@ public class FunctionDataContext : DbContext
 
         modelBuilder.Ignore<ReplayRequest>();
         modelBuilder.Ignore<TimeWait>();
+    }
+
+    private void ConfigureMethodWaitTemplate(ModelBuilder modelBuilder)
+    {
+        var entityBuilder = modelBuilder.Entity<MethodWaitTemplate>();
+        entityBuilder.Property(MethodWaitTemplate.FieldsNames.MatchExpression);
+        entityBuilder.Property(MethodWaitTemplate.FieldsNames.MatchExpressionDynamic);
+        entityBuilder.Property(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpression);
+        entityBuilder.Property(MethodWaitTemplate.FieldsNames.WaitMandatoryPartExpression);
+        entityBuilder.Property(MethodWaitTemplate.FieldsNames.SetDataExpression);
+        entityBuilder.Property(MethodWaitTemplate.FieldsNames.SetDataExpressionDynamic);
+        modelBuilder.Entity<MethodsGroup>()
+            .HasMany(x => x.WaitTemplates)
+            .WithOne(x => x.MethodGroup)
+            .HasForeignKey(x => x.MethodGroupId)
+            .HasConstraintName("WaitTemplates_ForMethodGroup");
     }
 
     private void ConfigureMethodIdentifier(ModelBuilder modelBuilder)
@@ -185,9 +203,9 @@ public class FunctionDataContext : DbContext
 
         modelBuilder.Entity<MethodsGroup>()
           .HasMany(x => x.WaitMethodIdentifiers)
-          .WithOne(waitMid => waitMid.ParentMethodGroup)
+          .WithOne(waitMid => waitMid.MethodGroup)
           .OnDelete(DeleteBehavior.Restrict)
-          .HasForeignKey(x => x.ParentMethodGroupId)
+          .HasForeignKey(x => x.MethodGroupId)
           .HasConstraintName("FK_Group_WaitMethodIdentifiers");
 
 

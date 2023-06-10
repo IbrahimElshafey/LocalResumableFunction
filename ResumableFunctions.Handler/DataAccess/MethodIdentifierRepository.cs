@@ -131,7 +131,6 @@ internal class MethodIdentifierRepository : IMethodIdentifierRepository
             return
                 await _context
                 .WaitMethodIdentifiers
-                //.Include(x => x.ParentMethodGroup)
                 .FirstOrDefaultAsync(x => x.Id == methodWait.MethodToWaitId);
 
         var methodData = methodWait.MethodData;
@@ -152,5 +151,26 @@ internal class MethodIdentifierRepository : IMethodIdentifierRepository
         }
         else
             throw new NullReferenceException($"Can't find wait method ({methodData}) in database.");
+    }
+
+    public async Task<(int MethodId, int GroupId)> GetId(MethodWait methodWait)
+    {
+
+        var methodData = methodWait.MethodData;
+        methodData.Validate();
+        var groupIdQuery = _context
+            .MethodsGroups
+            .Where(x => x.MethodGroupUrn == methodData.MethodUrn)
+            .Select(x => x.Id);
+        var methodIdQry = _context
+            .WaitMethodIdentifiers
+            .Where(x =>
+            groupIdQuery.Contains(x.MethodGroupId) &&
+            x.MethodName == methodData.MethodName &&
+            x.ClassName == methodData.ClassName &&
+            x.AssemblyName == methodData.AssemblyName)
+            .Select(x => new { x.Id, x.MethodGroupId });
+        var methodId = await methodIdQry.FirstAsync();
+        return (methodId.Id, methodId.MethodGroupId);
     }
 }

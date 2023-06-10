@@ -19,12 +19,13 @@ public class MethodWait : Wait
     internal string SetDataExpressionValue { get; set; }
 
     [NotMapped]
-    public LambdaExpression MatchIfExpression { get; internal set; }
+    public LambdaExpression MatchExpression { get; internal set; }
 
-    internal string MatchIfExpressionValue { get; set; }
+    internal string MatchExpressionValue { get; set; }
 
 
     public string RefineMatchModifier { get; internal set; }
+    public int TemplateId { get; internal set; }
 
 
     [NotMapped]
@@ -55,11 +56,11 @@ public class MethodWait : Wait
         //Rewrite Match Expression
         try
         {
-            var matchNewVisitor = new MatchNewVisitor(MatchIfExpression, CurrentFunction);
-            MatchIfExpression = matchNewVisitor.MatchExpressionWithConstants;
+            var matchNewVisitor = new MatchWriter(MatchExpression, CurrentFunction);
+            MatchExpression = matchNewVisitor.MatchExpressionWithConstants;
 
             var serializer = new ExpressionSerializer();
-            MatchIfExpressionValue = serializer.Serialize(MatchIfExpression.ToExpressionSlim());
+            MatchExpressionValue = serializer.Serialize(MatchExpression.ToExpressionSlim());
             RefineMatchModifier = matchNewVisitor.MandatoryPart;
 
             //Rewrite SetData Expression
@@ -81,7 +82,7 @@ public class MethodWait : Wait
     internal void LoadExpressions()
     {
         var serializer = new ExpressionSerializer();
-        MatchIfExpression = (LambdaExpression)serializer.Deserialize(MatchIfExpressionValue).ToExpression();
+        MatchExpression = (LambdaExpression)serializer.Deserialize(MatchExpressionValue).ToExpression();
         SetDataExpression = (LambdaExpression)serializer.Deserialize(SetDataExpressionValue).ToExpression();
     }
 
@@ -111,9 +112,9 @@ public class MethodWait : Wait
     {
         try
         {
-            if (IsFirst && MatchIfExpressionValue == null)
+            if (IsFirst && MatchExpressionValue == null)
                 return true;
-            var check = MatchIfExpression.CompileFast();
+            var check = MatchExpression.CompileFast();
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction);
         }
         catch (Exception ex)
@@ -129,13 +130,13 @@ public class MethodWait : Wait
     internal override bool IsValidWaitRequest()
     {
         //Todo:validate type serialization
-        if (!IsFirst && MatchIfExpression == null)
+        if (!IsFirst && MatchExpression == null)
             FunctionState.AddError(
                 $"You didn't set the `MatchIfExpression` for wait [{Name}] that is not a first wait," +
                 $"This will lead to no match for all calls," +
                 $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchIfExpression`," +
                 $"or use MatchAll() method.");
-        if (IsFirst && MatchIfExpression == null)
+        if (IsFirst && MatchExpression == null)
             FunctionState.AddLog(
                 $"You didn't set the `MatchIfExpression` for first wait [{Name}]," +
                 $"This will lead to all calls will be matched.",
@@ -219,13 +220,13 @@ public class MethodWait<TInput, TOutput> : MethodWait
 
     public MethodWait<TInput, TOutput> MatchIf(Expression<Func<TInput, TOutput, bool>> value)
     {
-        MatchIfExpression = value;
+        MatchExpression = value;
         return this;
     }
 
     public MethodWait<TInput, TOutput> MatchAll()
     {
-        MatchIfExpression = (Expression<Func<TInput, TOutput, bool>>)((x, y) => true);
+        MatchExpression = (Expression<Func<TInput, TOutput, bool>>)((x, y) => true);
         return this;
     }
 
