@@ -23,7 +23,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IFirstWaitProcessor _firstWaitProcessor;
         private readonly IRecycleBinService _recycleBinService;
         private readonly IReplayWaitProcessor _replayWaitProcessor;
-        private readonly IWaitsRepository _waitsRepository;
+        private readonly IWaitsService _waitsRepository;
         private IServiceProvider _serviceProvider;
         private readonly ILogger<WaitProcessor> _logger;
         private readonly IBackgroundJobClient _backgroundJobClient;
@@ -39,7 +39,7 @@ namespace ResumableFunctions.Handler.Core
             ILogger<WaitProcessor> logger,
             IFirstWaitProcessor firstWaitProcessor,
             IRecycleBinService recycleBinService,
-            IWaitsRepository waitsRepository,
+            IWaitsService waitsRepository,
             IBackgroundJobClient backgroundJobClient,
             FunctionDataContext context,
             IReplayWaitProcessor replayWaitProcessor,
@@ -83,13 +83,12 @@ namespace ResumableFunctions.Handler.Core
                 $"Error when process wait `{mehtodWaitId}` that may be a match for pushed call `{pushedCallId}`");
         }
 
- 
+
 
         private async Task<bool> CheckIfMatch(MethodWait methodWait, int pushedCallId)
         {
             try
             {
-                methodWait.LoadExpressions();
                 var isMatch = methodWait.IsMatched();
                 if (isMatch)
                 {
@@ -130,7 +129,6 @@ namespace ResumableFunctions.Handler.Core
         {
             try
             {
-                methodWait.FunctionState.LoadUnmappedProps(methodWait.RequestedByFunction.InClassType);
                 using (await _lockProvider.AcquireLockAsync($"UpdateFunctionState_{methodWait.FunctionStateId}"))
                 {
                     if (methodWait.UpdateFunctionData())
@@ -151,7 +149,7 @@ namespace ResumableFunctions.Handler.Core
                 return false;
             }
             return true;
-           
+
         }
 
         private async Task<bool> ResumeExecution(MethodWait matchedMethodWait, int pushedCallId)
@@ -277,11 +275,19 @@ namespace ResumableFunctions.Handler.Core
                     .Where(x => x.Status == WaitStatus.Waiting)
                     .FirstOrDefaultAsync(x => x.Id == waitId);
 
+
                 _methodWait.MethodToWait = await
                     _context
                     .WaitMethodIdentifiers
                     .FindAsync(_methodWait.MethodToWaitId);
 
+                _methodWait.Template = await
+                   _context
+                   .MethodWaitTemplates
+                   .Select(MethodWaitTemplate.BasicProps)
+                   .FirstAsync(x => x.Id == _methodWait.TemplateId);
+
+               
                 if (_methodWait == null)
                 {
                     _logger.LogError($"No method wait exist with ID ({waitId}) and status ({WaitStatus.Waiting}).");
@@ -309,6 +315,7 @@ namespace ResumableFunctions.Handler.Core
 
                 //todo:MethodToWait.MethodInfo may be method in another service
                 _pushedCall.LoadUnmappedProps(_methodWait.MethodToWait.MethodInfo);
+                _methodWait.FunctionState.LoadUnmappedProps(_methodWait.RequestedByFunction.InClassType);
                 _methodWait.LoadUnmappedProps();
                 _methodWait.Input = _pushedCall.Data.Input;
                 _methodWait.Output = _pushedCall.Data.Output;

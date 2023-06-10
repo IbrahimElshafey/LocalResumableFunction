@@ -20,8 +20,7 @@ public class ResumableFunctionIdentifier : MethodIdentifier
         {
             if (_classType == null)
             {
-                _classType = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName)
-                   .GetType(ClassName);
+                _classType = Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName).GetType(ClassName);
             }
             return _classType;
         }

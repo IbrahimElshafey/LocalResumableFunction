@@ -16,33 +16,29 @@ using System;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.DataAccess;
-
-internal partial class WaitTemplatesRepository : IWaitTemplatesRepository
+internal partial class WaitsService : IWaitsService
 {
-
-}
-internal partial class WaitsRepository : IWaitsRepository
-{
-    private ILogger<WaitsRepository> _logger;
-    private readonly IBackgroundJobClient backgroundJobClient;
+    private readonly ILogger<WaitsService> _logger;
     private readonly FunctionDataContext _context;
     private readonly IBackgroundJobClient _backgroundJobClient;
-    private readonly IMethodIdentifierRepository _methodIdentifierRepo;
+    private readonly IMethodIdentifierService _methodIdentifierService;
     private readonly IResumableFunctionsSettings _settings;
+    private readonly IWaitTemplatesService _waitTemplatesService;
 
-    public WaitsRepository(
-        ILogger<WaitsRepository> logger,
+    public WaitsService(
+        ILogger<WaitsService> logger,
         IBackgroundJobClient backgroundJobClient,
-        FunctionDataContext context, IBackgroundJobClient backgroundJobClient2,
-        IMethodIdentifierRepository methodIdentifierRepo,
-        IResumableFunctionsSettings settings)
+        FunctionDataContext context,
+        IMethodIdentifierService methodIdentifierRepo,
+        IResumableFunctionsSettings settings,
+        IWaitTemplatesService waitTemplatesService)
     {
         _logger = logger;
-        this.backgroundJobClient = backgroundJobClient;
         _context = context;
-        _backgroundJobClient = backgroundJobClient2;
-        _methodIdentifierRepo = methodIdentifierRepo;
+        _backgroundJobClient = backgroundJobClient;
+        _methodIdentifierService = methodIdentifierRepo;
         _settings = settings;
+        _waitTemplatesService = waitTemplatesService;
     }
 
     public async Task<List<ServiceData>> GetAffectedServicesForCall(string methodUrn)
@@ -222,7 +218,7 @@ internal partial class WaitsRepository : IWaitsRepository
         if (wait is MethodWait mw &&
             mw.Name == $"#{nameof(LocalRegisteredMethods.TimeWait)}#")
         {
-            backgroundJobClient.Delete(wait.ExtraData.JobId);
+            _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
         wait.FunctionState.AddLog($"Wait `{wait.Name}` canceled.");
     }

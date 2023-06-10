@@ -26,7 +26,7 @@ internal class PushedCallProcessor : IPushedCallProcessor
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly ILogger<ReplayWaitProcessor> _logger;
     private readonly IWaitProcessor _waitProcessor;
-    private readonly IWaitsRepository _waitsRepository;
+    private readonly IWaitsService _waitsRepository;
     private readonly HangFireHttpClient _hangFireHttpClient;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IResumableFunctionsSettings _settings;
@@ -34,7 +34,7 @@ internal class PushedCallProcessor : IPushedCallProcessor
     public PushedCallProcessor(
         ILogger<ReplayWaitProcessor> logger,
         IWaitProcessor waitProcessor,
-        IWaitsRepository waitsRepository,
+        IWaitsService waitsRepository,
         FunctionDataContext context,
         IBackgroundJobClient backgroundJobClient,
         HangFireHttpClient hangFireHttpClient,

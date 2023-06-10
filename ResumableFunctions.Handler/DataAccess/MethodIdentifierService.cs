@@ -10,14 +10,14 @@ using Medallion.Threading;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal class MethodIdentifierRepository : IMethodIdentifierRepository
+internal class MethodIdentifierService : IMethodIdentifierService
 {
-    private ILogger<MethodIdentifierRepository> _logger;
+    private readonly ILogger<MethodIdentifierService> _logger;
     private readonly FunctionDataContext _context;
     private readonly IDistributedLockProvider _lockProvider;
 
-    public MethodIdentifierRepository(
-        ILogger<MethodIdentifierRepository> logger,
+    public MethodIdentifierService(
+        ILogger<MethodIdentifierService> logger,
         FunctionDataContext context,
         IDistributedLockProvider lockProvider)
     {

@@ -1,4 +1,5 @@
 ﻿# Work On
+* Review test scenarios after wait template 
 * New Scan should not delete existing method wait and groups if exist
 * Remove NewtonSoft and use MessagePack
 	* [Yes] Can deserialize data to dynamic object

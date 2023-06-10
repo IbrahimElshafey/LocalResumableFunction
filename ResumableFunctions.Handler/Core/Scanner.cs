@@ -25,8 +25,8 @@ public class Scanner
     private readonly FunctionDataContext _context;
     private readonly IResumableFunctionsSettings _settings;
     private readonly ILogger<Scanner> _logger;
-    private readonly IMethodIdentifierRepository _methodIdentifierRepo;
-    private readonly IWaitsRepository _waitsRepository;
+    private readonly IMethodIdentifierService _methodIdentifierRepo;
+    private readonly IWaitsService _waitsRepository;
     private readonly IFirstWaitProcessor _firstWaitProcessor;
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly string _currentServiceName;
@@ -35,12 +35,12 @@ public class Scanner
     public Scanner(
         IServiceProvider serviceProvider,
         ILogger<Scanner> logger,
-        IMethodIdentifierRepository methodIdentifierRepo,
+        IMethodIdentifierService methodIdentifierRepo,
         IFirstWaitProcessor firstWaitProcessor,
         IResumableFunctionsSettings settings,
         FunctionDataContext context,
         IBackgroundJobClient backgroundJobClient,
-        IWaitsRepository waitsRepository,
+        IWaitsService waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor)
     {
         _serviceProvider = serviceProvider;
@@ -61,15 +61,12 @@ public class Scanner
             $"Scanner_StartServiceScanning_{_currentServiceName}",
             async () =>
             {
-                WriteMessage("Start register method waits.");
                 await RegisterMethods(GetAssembliesToScan());
 
-                WriteMessage("Register local methods");
-                await RegisterMethodWaitsInType(typeof(LocalRegisteredMethods), null);
+                await RegisterMethods(typeof(LocalRegisteredMethods), null);
 
                 await _context.SaveChangesAsync();
 
-                WriteMessage("Close with no errors.");
                 await _context.DisposeAsync();
             },
             $"Error when scan [{_currentServiceName}]");
@@ -164,7 +161,7 @@ public class Scanner
 
                 foreach (var type in assembly.GetTypes())
                 {
-                    await RegisterMethodWaitsInType(type, serviceData);
+                    await RegisterMethods(type, serviceData);
                     //await RegisterExternalMethods(type);
                     if (type.IsSubclassOf(typeof(ResumableFunction)))
                         resumableFunctionClasses.Add(type);
@@ -283,7 +280,7 @@ public class Scanner
     }
 
 
-    private async Task RegisterMethodWaitsInType(Type type, ServiceData serviceData)
+    private async Task RegisterMethods(Type type, ServiceData serviceData)
     {
         try
         {
@@ -294,7 +291,7 @@ public class Scanner
                         method.GetCustomAttributes().Any(x => x.TypeId == WaitMethodAttribute.AttributeId));
             foreach (var method in methodWaits)
             {
-                if (ValidateMethodWait(method, serviceData))
+                if (ValidateMethod(method, serviceData))
                 {
                     var methodData = new MethodData(method) { MethodType = MethodType.MethodWait };
                     await _methodIdentifierRepo.AddWaitMethodIdentifier(methodData, _settings.CurrentServiceId);
@@ -315,7 +312,7 @@ public class Scanner
 
     }
 
-    private bool ValidateMethodWait(MethodInfo method, ServiceData serviceData)
+    private bool ValidateMethod(MethodInfo method, ServiceData serviceData)
     {
         var result = true;
         if (method.IsGenericMethod)

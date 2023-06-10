@@ -13,7 +13,7 @@ namespace ResumableFunctions.Handler.Helpers
         [WaitMethod("LocalRegisteredMethods.TimeWait")]
         public string TimeWait(string timeWaitId)
         {
-            return nameof(MethodWait.RefineMatchModifier) + timeWaitId;
+            return nameof(MethodWait.MandatoryPart) + timeWaitId;
         }
     }
 }

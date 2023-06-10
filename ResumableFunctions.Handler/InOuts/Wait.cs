@@ -61,34 +61,8 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
     internal int? ParentWaitId { get; set; }
     public string Path { get; internal set; }
 
-    private ResumableFunction _currentFunction;
     [NotMapped]
-    internal ResumableFunction CurrentFunction
-    {
-        get
-        {
-            if (
-                FunctionState is not null &&
-                FunctionState.StateObject is JObject stateAsJson)
-            {
-                var type = Assembly.LoadFrom(AppContext.BaseDirectory + RequestedByFunction.AssemblyName)
-                    .GetType(RequestedByFunction.ClassName);
-
-                var result = (ResumableFunction)stateAsJson.ToObject(type);
-
-                FunctionState.StateObject = result;
-                _currentFunction = result;
-            }
-
-            return (ResumableFunction)FunctionState?.StateObject ?? _currentFunction;
-        }
-        set
-        {
-            _currentFunction = value;
-            if (FunctionState is not null)
-                FunctionState.StateObject = value;
-        }
-    }
+    internal ResumableFunction CurrentFunction { get; set; }
 
     internal bool CanBeParent => this is FunctionWait || this is WaitsGroup;
 
@@ -141,7 +115,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
 
 
 
-    public void CopyFromOld(Wait oldWait)
+    public virtual void CopyCommonIds(Wait oldWait)
     {
         FunctionState = oldWait.FunctionState;
         FunctionStateId = oldWait.FunctionStateId;
@@ -155,8 +129,11 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
         switch (this)
         {
             case MethodWait methodWait:
-                result = new MethodWait();
-                result.CopyMethod(methodWait, (MethodWait)result);
+                result = new MethodWait()
+                {
+                    TemplateId = methodWait.TemplateId,
+                    MethodGroupToWaitId = methodWait.MethodGroupToWaitId,
+                };
                 break;
             case FunctionWait:
                 result = new FunctionWait();
@@ -184,13 +161,6 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
             if (childWait.CanBeParent)
                 CopyChildTree(childWait, duplicateWait);
         }
-    }
-    private void CopyMethod(MethodWait from, MethodWait to)
-    {
-        to.SetDataExpressionValue = from.SetDataExpressionValue;
-        to.MatchExpressionValue = from.MatchExpressionValue;
-        to.MethodToWaitId = from.MethodToWaitId;
-        to.LoadExpressions();
     }
 
     private void CopyCommon(Wait fromWait)
@@ -257,12 +227,16 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
     public void OnSave()
     {
         var converter = new BinaryToObjectConverter();
-        ExtraDataValue = converter.ConvertToBinary(ExtraData);
+        if (ExtraData != null)
+            ExtraDataValue = converter.ConvertToBinary(ExtraData);
     }
 
     public void LoadUnmappedProps()
     {
         var converter = new BinaryToObjectConverter();
-        ExtraData = converter.ConvertToObject<WaitExtraData>(ExtraDataValue);
+        if (ExtraDataValue != null)
+            ExtraData = converter.ConvertToObject<WaitExtraData>(ExtraDataValue);
+        if (FunctionState?.StateObject != null && CurrentFunction == null)
+            CurrentFunction = (ResumableFunction)FunctionState.StateObject;
     }
 }

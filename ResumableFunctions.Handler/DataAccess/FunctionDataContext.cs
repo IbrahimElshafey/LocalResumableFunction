@@ -77,7 +77,7 @@ public class FunctionDataContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
-    
+
 
     private void ConfigurSoftDeleteFilter(ModelBuilder modelBuilder)
     {
@@ -147,14 +147,6 @@ public class FunctionDataContext : DbContext
           .Property(x => x.MethodToWaitId)
           .HasColumnName(nameof(MethodWait.MethodToWaitId));
 
-        methodWaitBuilder
-          .Property(mw => mw.MatchExpressionValue)
-          .HasColumnName(nameof(MethodWait.MatchExpressionValue));
-
-        methodWaitBuilder
-            .Property(mw => mw.SetDataExpressionValue)
-            .HasColumnName(nameof(MethodWait.SetDataExpressionValue));
-
         modelBuilder.Entity<WaitsGroup>()
            .Property(mw => mw.GroupMatchExpressionValue)
            .HasColumnName(nameof(WaitsGroup.GroupMatchExpressionValue));
@@ -169,7 +161,9 @@ public class FunctionDataContext : DbContext
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.MatchExpression);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.MatchExpressionDynamic);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpression);
-        entityBuilder.Property(MethodWaitTemplate.FieldsNames.WaitMandatoryPartExpression);
+        entityBuilder.Property(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpressionDynamic);
+        entityBuilder.Property(MethodWaitTemplate.FieldsNames.InstanceMandatoryPartExpression);
+        entityBuilder.Property(MethodWaitTemplate.FieldsNames.InstanceMandatoryPartExpressionDynamic);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.SetDataExpression);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.SetDataExpressionDynamic);
         modelBuilder.Entity<MethodsGroup>()

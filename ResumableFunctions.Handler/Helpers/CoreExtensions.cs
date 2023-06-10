@@ -30,8 +30,9 @@ public static class CoreExtensions
 
 
         services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig);
-        services.AddScoped<IMethodIdentifierRepository, MethodIdentifierRepository>();
-        services.AddScoped<IWaitsRepository, WaitsRepository>();
+        services.AddScoped<IMethodIdentifierService, MethodIdentifierService>();
+        services.AddScoped<IWaitsService, WaitsService>();
+        services.AddScoped<IWaitTemplatesService, WaitTemplatesService>();
 
         services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
         services.AddScoped<IRecycleBinService, RecycleBinService>();

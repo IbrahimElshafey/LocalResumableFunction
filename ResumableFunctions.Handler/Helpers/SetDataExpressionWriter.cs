@@ -4,41 +4,37 @@ using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
 
-public class RewriteSetDataExpression : ExpressionVisitor
+public class SetDataExpressionWriter : ExpressionVisitor
 {
     private readonly ParameterExpression _functionInstanceArg;
-    private readonly MethodWait _wait;
     private readonly List<Expression> setValuesExpressions = new();
 
-    public RewriteSetDataExpression(MethodWait wait)
+    public SetDataExpressionWriter(LambdaExpression setDataExpression,Type funcType)
     {
-        if (wait?.SetDataExpression == null)
+        if (setDataExpression == null)
             return;
-        if (wait?.SetDataExpression?.Parameters.Count == 3)
+        if (setDataExpression?.Parameters.Count == 3)
         {
-            Result = wait.SetDataExpression;
             return;
         }
-        //  .SetData((input, output) => Result == output);
-        //   setDataExpression.DynamicInvoke(pushedCall.Input, pushedCall.Output, currentWait.CurrentFunction);
-        _wait = wait;
-        _functionInstanceArg = Parameter(wait.CurrentFunction.GetType(), "functionInstance");
+
+        _functionInstanceArg = Parameter(funcType, "functionInstance");
       
-        var updatedBoy = (LambdaExpression)Visit(wait.SetDataExpression);
+        var updatedBoy = (LambdaExpression)Visit(setDataExpression);
         for (var i = 0; i < setValuesExpressions.Count; i++)
         {
             var setValue = setValuesExpressions[i];
-            setValuesExpressions[i] = ChangeDataAccess(setValue);
+            setValuesExpressions[i] = SwapAssignParts(setValue);
         }
 
         var functionType = typeof(Action<,,>)
             .MakeGenericType(
                 updatedBoy.Parameters[0].Type,
                 updatedBoy.Parameters[1].Type,
-                wait.CurrentFunction.GetType());
+                funcType);
         setValuesExpressions.Add(Empty());
         var block = Block(setValuesExpressions);
-        Result = Lambda(
+        SetDataExpression = Lambda(
             functionType,
             block,
             updatedBoy.Parameters[0],
@@ -46,7 +42,7 @@ public class RewriteSetDataExpression : ExpressionVisitor
             _functionInstanceArg);
     }
 
-    public LambdaExpression Result { get; protected set; }
+    public LambdaExpression SetDataExpression { get; protected set; }
 
     protected override Expression VisitBinary(BinaryExpression node)
     {
@@ -59,7 +55,7 @@ public class RewriteSetDataExpression : ExpressionVisitor
         return base.VisitBinary(node);
     }
 
-    protected Expression ChangeDataAccess(Expression node)
+    protected Expression SwapAssignParts(Expression node)
     {
         if (node is BinaryExpression binaryExpression)
         {

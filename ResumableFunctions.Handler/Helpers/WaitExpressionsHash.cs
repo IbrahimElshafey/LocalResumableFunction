@@ -11,31 +11,36 @@ namespace ResumableFunctions.Handler.Helpers;
 public class WaitExpressionsHash : System.Linq.Expressions.ExpressionVisitor
 {
     public byte[] Hash { get; internal set; }
+    public LambdaExpression MatchExpression { get; internal set; }
+    public LambdaExpression SetDataExpression { get; internal set; }
 
-    public WaitExpressionsHash(MethodWait methodWait)
+    public WaitExpressionsHash(LambdaExpression matchExpression, LambdaExpression setDataExpression)
     {
         var serializer = new ExpressionSerializer();
         var sb = new StringBuilder();
-        if (methodWait.MatchExpression != null)
+        if (matchExpression != null)
         {
-            ChangeInputAndOutputNames(methodWait.MatchExpression);
-            sb.Append(serializer.Serialize(methodWait.MatchExpression.ToExpressionSlim()));
+            MatchExpression =
+                (LambdaExpression)ChangeInputAndOutputNames(matchExpression);
+            sb.Append(serializer.Serialize(matchExpression.ToExpressionSlim()));
         }
-        if (methodWait.SetDataExpression != null)
+        if (setDataExpression != null)
         {
-            ChangeInputAndOutputNames(methodWait.SetDataExpression);
-            sb.Append(serializer.Serialize(methodWait.SetDataExpression.ToExpressionSlim()));
+            SetDataExpression =
+               (LambdaExpression)ChangeInputAndOutputNames(matchExpression);
+            sb.Append(serializer.Serialize(matchExpression.ToExpressionSlim()));
         }
         var data = Encoding.Unicode.GetBytes(sb.ToString());
         Hash = MD5.HashData(data);
     }
 
-    private void ChangeInputAndOutputNames(LambdaExpression expression)
+    private System.Linq.Expressions.Expression ChangeInputAndOutputNames(LambdaExpression expression)
     {
         var changeParametersVisitor = new GenericVisitor();
         var inputArg = Parameter(expression.Parameters[0].Type, "input");
         var outputArg = Parameter(expression.Parameters[1].Type, "output");
         changeParametersVisitor.OnVisitParamter(ChangeParameterName);
+        return changeParametersVisitor.Visit(expression);
         System.Linq.Expressions.Expression ChangeParameterName(ParameterExpression node)
         {
             //rename output

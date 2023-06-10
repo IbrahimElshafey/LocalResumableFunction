@@ -10,10 +10,10 @@ using System.Xml.Linq;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
-public class MatchWriter : ExpressionVisitor
+public class MatchExpressionWriter : ExpressionVisitor
 {
     public LambdaExpression MatchExpressionWithConstants { get; private set; }
-    public LambdaExpression MatchExpressionWithoutConstants { get; private set; }
+    public LambdaExpression MatchExpression { get; private set; }
 
     // NEW expressions
     public Expression<Func<JObject, string>> CallMandatoryPartExpressionDynamic { get; private set; }
@@ -30,7 +30,7 @@ public class MatchWriter : ExpressionVisitor
     private object _currentFunctionInstance;
     private List<ConstantPart> _constantParts = new();
 
-    public MatchWriter(LambdaExpression matchExpression, object instance)
+    public MatchExpressionWriter(LambdaExpression matchExpression, object instance)
     {
         MatchExpressionWithConstants = matchExpression;
         if (MatchExpressionWithConstants == null)
@@ -105,7 +105,7 @@ public class MatchWriter : ExpressionVisitor
 
     private void CalcConstantInExpression()
     {
-        MatchExpressionWithoutConstants = MatchExpressionWithConstants;
+        MatchExpression = MatchExpressionWithConstants;
         var constantTranslationVisior = new GenericVisitor();
         constantTranslationVisior.OnVisitBinary(TryEvaluateBinaryParts);
         constantTranslationVisior.OnVisitUnary(VisitNotEqual);

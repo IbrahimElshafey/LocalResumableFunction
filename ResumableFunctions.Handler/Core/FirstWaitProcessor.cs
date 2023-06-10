@@ -16,8 +16,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 {
     private readonly ILogger<FirstWaitProcessor> _logger;
     private readonly FunctionDataContext _context;
-    private readonly IMethodIdentifierRepository _methodIdentifierRepo;
-    private readonly IWaitsRepository _waitsRepository;
+    private readonly IMethodIdentifierService _methodIdentifierRepo;
+    private readonly IWaitsService _waitsRepository;
     private readonly IServiceProvider _serviceProvider;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
 
@@ -25,8 +25,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         ILogger<FirstWaitProcessor> logger,
         FunctionDataContext context,
         IServiceProvider serviceProvider,
-        IMethodIdentifierRepository methodIdentifierRepo,
-        IWaitsRepository waitsRepository,
+        IMethodIdentifierService methodIdentifierRepo,
+        IWaitsService waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor)
     {
         _logger = logger;

@@ -12,25 +12,21 @@ using ResumableFunctions.Handler.Helpers;
 namespace ResumableFunctions.Handler.InOuts;
 public class MethodWait : Wait
 {
-   
-
-    [NotMapped] public LambdaExpression SetDataExpression { get; internal set; }
-
-    internal string SetDataExpressionValue { get; set; }
+    [NotMapped]
+    public LambdaExpression SetDataExpression { get; protected set; }
 
     [NotMapped]
-    public LambdaExpression MatchExpression { get; internal set; }
+    public LambdaExpression MatchExpression { get; protected set; }
 
-    internal string MatchExpressionValue { get; set; }
+    public string MandatoryPart { get; internal set; }
 
-
-    public string RefineMatchModifier { get; internal set; }
+    [NotMapped]
+    internal MethodWaitTemplate Template { get; set; }
     public int TemplateId { get; internal set; }
-
 
     [NotMapped]
     internal WaitMethodIdentifier MethodToWait { get; set; }
-   
+
     internal int? MethodToWaitId { get; set; }
 
     internal MethodsGroup MethodGroupToWait { get; set; }
@@ -51,45 +47,11 @@ public class MethodWait : Wait
         RequestedByFunction?.MethodInfo?.DeclaringType.Assembly ??
         Assembly.GetEntryAssembly();
 
-    internal void RewriteExpressions()
-    {
-        //Rewrite Match Expression
-        try
-        {
-            var matchNewVisitor = new MatchWriter(MatchExpression, CurrentFunction);
-            MatchExpression = matchNewVisitor.MatchExpressionWithConstants;
-
-            var serializer = new ExpressionSerializer();
-            MatchExpressionValue = serializer.Serialize(MatchExpression.ToExpressionSlim());
-            RefineMatchModifier = matchNewVisitor.MandatoryPart;
-
-            //Rewrite SetData Expression
-            SetDataExpression = new RewriteSetDataExpression(this).Result;
-            SetDataExpressionValue = serializer.Serialize(SetDataExpression.ToExpressionSlim());
-        }
-        catch (Exception ex)
-        {
-            FunctionState.AddLog(
-                $"Error happened when rewrite expressions for method wait [{Name}].\n" +
-                 $"{ex.Message}\n" +
-                 $"{ex.StackTrace}",
-                 LogType.Warning);
-        }
-    }
-
-
-
-    internal void LoadExpressions()
-    {
-        var serializer = new ExpressionSerializer();
-        MatchExpression = (LambdaExpression)serializer.Deserialize(MatchExpressionValue).ToExpression();
-        SetDataExpression = (LambdaExpression)serializer.Deserialize(SetDataExpressionValue).ToExpression();
-    }
-
     public bool UpdateFunctionData()
     {
         try
         {
+            LoadExpressions();
             var setDataExpression = SetDataExpression.CompileFast();
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             FunctionState.StateObject = CurrentFunction;
@@ -112,7 +74,8 @@ public class MethodWait : Wait
     {
         try
         {
-            if (IsFirst && MatchExpressionValue == null)
+            LoadExpressions();
+            if (IsFirst && MatchExpression == null)
                 return true;
             var check = MatchExpression.CompileFast();
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction);
@@ -149,44 +112,25 @@ public class MethodWait : Wait
         return base.IsValidWaitRequest();
     }
 
-    //internal (bool Result, Exception ex) SetInputAndOutput()
-    //{
-    //    var methodInfo = MethodToWait.MethodInfo;
-    //    try
-    //    {
-    //        var inputType = methodInfo.GetParameters()[0].ParameterType;
-    //        if (Input is JObject inputJson)
-    //        {
-    //            Input = inputJson.ToObject(inputType);
-    //        }
-    //        else
-    //            Input = Convert.ChangeType(Input.ToString(), inputType);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        return (false, ex);
-    //    }
+    internal void LoadExpressions()
+    {
+        if (Template == null) return;
+        Template.LoadExpressions();
+        MatchExpression = Template.MatchExpression;
+        SetDataExpression = Template.SetDataExpression;
+        CurrentFunction = (ResumableFunction)FunctionState.StateObject;
+    }
 
-    //    try
-    //    {
-    //        if (Output is JObject outputJson)
-    //        {
-    //            if (methodInfo.IsAsyncMethod())
-    //                Output = outputJson.ToObject(methodInfo.ReturnType.GetGenericArguments()[0]);
-    //            else
-    //                Output = outputJson.ToObject(methodInfo.ReturnType);
-    //        }
-    //        else if (methodInfo.IsAsyncMethod())
-    //            Output = Convert.ChangeType(Output.ToString(), methodInfo.ReturnType.GetGenericArguments()[0]);
-    //        else
-    //            Output = Convert.ChangeType(Output.ToString(), methodInfo.ReturnType);
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        return (false, ex);
-    //    }
-    //    return (true,null);
-    //}
+    public override void CopyCommonIds(Wait oldWait)
+    {
+        base.CopyCommonIds(oldWait);
+        if (oldWait is MethodWait mw)
+        {
+            TemplateId = mw.TemplateId;
+            MethodToWaitId = mw.MethodToWaitId;
+        }
+
+    }
 }
 
 public class MethodWait<TInput, TOutput> : MethodWait

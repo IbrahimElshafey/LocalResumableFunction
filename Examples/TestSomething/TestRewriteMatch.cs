@@ -96,7 +96,7 @@ namespace TestSomething
         private void TestWithComplexTypes()
         {
             var wait = WaitMethodTwo();
-            var matchRewrite1 = new MatchWriter(wait.MatchExpression, this);
+            var matchRewrite1 = new MatchExpressionWriter(wait.MatchExpression, this);
 
             var pushedCall = JsonConvert.DeserializeObject<JObject>("""
                 {
@@ -121,7 +121,7 @@ namespace TestSomething
         private void TestWithBasicTypes()
         {
             var wait1 = WaitMethodOne();
-            var matchRewrite1 = new MatchWriter(wait1.MatchExpression, this);
+            var matchRewrite1 = new MatchExpressionWriter(wait1.MatchExpression, this);
             var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.MatchExpressionWithConstants.CompileFast();
             var exprssionAsString1 = matchRewrite1.MatchExpressionWithConstants.ToString();
             var result = method1.Invoke("12345", 5, this);
