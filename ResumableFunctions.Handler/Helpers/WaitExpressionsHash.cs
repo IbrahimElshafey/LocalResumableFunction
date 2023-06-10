@@ -27,8 +27,8 @@ public class WaitExpressionsHash : System.Linq.Expressions.ExpressionVisitor
         if (setDataExpression != null)
         {
             SetDataExpression =
-               (LambdaExpression)ChangeInputAndOutputNames(matchExpression);
-            sb.Append(serializer.Serialize(matchExpression.ToExpressionSlim()));
+               (LambdaExpression)ChangeInputAndOutputNames(setDataExpression);
+            sb.Append(serializer.Serialize(setDataExpression.ToExpressionSlim()));
         }
         var data = Encoding.Unicode.GetBytes(sb.ToString());
         Hash = MD5.HashData(data);
