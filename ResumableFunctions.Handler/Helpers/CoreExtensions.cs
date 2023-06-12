@@ -67,11 +67,11 @@ public static class CoreExtensions
         //HangfireActivator.ServiceProvider = app.Services;
         GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(app.Services));
 
-        EnqueueScanProcess(app);
+        StartScanProcess(app);
     }
 
 
-    private static void EnqueueScanProcess(IHost app)
+    private static void StartScanProcess(IHost app)
     {
         using var scope = app.Services.CreateScope();
         var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundJobClient>();
@@ -249,4 +249,52 @@ public static class CoreExtensions
 
     public static bool CanBeConstant(this object ob)=>
         ob != null && ob.GetType().IsConstantType();
+
+    public static (MethodInfo MethodInfo, Type OwnerType) GetMethodInfo<T>(Expression<Func<T, object>> methodSelector)
+    {
+        MethodInfo mi = null;
+        Type ownerType = null;
+        var visitor = new GenericVisitor();
+        visitor.OnVisitCall(VisitMethod);
+        visitor.OnVisitConstant(VisitConstant);
+        visitor.Visit(methodSelector);
+        return (mi, ownerType);
+
+        Expression VisitMethod(MethodCallExpression node)
+        {
+            if (IsInCurrentType(node.Method))
+                mi = node.Method;
+            return node;
+        }
+        Expression VisitConstant(ConstantExpression node)
+        {
+            if (node.Value is MethodInfo info && IsInCurrentType(info))
+                mi = info;
+            return node;
+        }
+
+        bool IsInCurrentType(MethodInfo methodInfo)
+        {
+            bool isExtension = methodInfo.IsDefined(typeof(ExtensionAttribute), true);
+            if (isExtension)
+            {
+                var extensionOnType = methodInfo.GetParameters()[0].ParameterType;
+                var canBeAppliedToCurrent = extensionOnType.IsAssignableFrom(typeof(T));
+                if (canBeAppliedToCurrent)
+                {
+                    ownerType = extensionOnType;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            bool inCurrentType = methodInfo.ReflectedType.IsAssignableFrom(typeof(T));
+            if (inCurrentType)
+                ownerType = methodInfo.ReflectedType;
+            return inCurrentType;
+        }
+    }
 }

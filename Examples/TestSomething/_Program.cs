@@ -5,7 +5,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        switch (7)
+        switch (10)
         {
             case 1:
                 TestTreeCascadeAction(); break;
@@ -27,6 +27,9 @@ internal class Program
                 break;
             case 9:
                 new SetDepsTest().Run();
+                break;
+            case 10:
+                new GetMethodInfoTest().Run();
                 break;
         }
     }

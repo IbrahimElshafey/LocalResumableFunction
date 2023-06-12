@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
 using TestSomething;
-
 internal class SetDepsTest
 {
     public void Run()

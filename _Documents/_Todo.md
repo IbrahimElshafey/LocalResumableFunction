@@ -10,6 +10,7 @@
 	* How hangfire handle priority
 * Back to UI coding
 * Can I use .net standard
+* Add pull mode to get pushed calls from a bus
 
 
 ## UI project

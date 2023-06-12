@@ -4,6 +4,7 @@ namespace ResumableFunctions.Handler.Helpers;
 
 public class GenericVisitor : ExpressionVisitor
 {
+    //todo:enhance this class by override it's methods 
     private List<VisitNodeFunction> _visitors = new();
     public void AddVisitor(
         Func<Expression, bool> whenExpressionMatch,
@@ -23,7 +24,7 @@ public class GenericVisitor : ExpressionVisitor
         }
         return base.Visit(node);
     }
-
+    
     internal void OnVisitBinary(Func<BinaryExpression, Expression> binaryVisitFunc)
     {
         _visitors.Add(
@@ -61,6 +62,14 @@ public class GenericVisitor : ExpressionVisitor
           new VisitNodeFunction(
              ex => ex is MemberExpression,
               (ex) => visitMember((MemberExpression)ex)));
+    }
+    
+    internal void OnVisitCall(Func<MethodCallExpression, Expression> visitCall)
+    {
+        _visitors.Add(
+          new VisitNodeFunction(
+             ex => ex is MethodCallExpression,
+              (ex) => visitCall((MethodCallExpression)ex)));
     }
 
     private class VisitNodeFunction
