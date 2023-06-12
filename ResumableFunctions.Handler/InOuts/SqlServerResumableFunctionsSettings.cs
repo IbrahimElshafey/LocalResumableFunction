@@ -1,5 +1,7 @@
 ﻿using Hangfire;
 using Hangfire.SqlServer;
+using Medallion.Threading;
+using Medallion.Threading.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Reflection;
@@ -17,7 +19,6 @@ namespace ResumableFunctions.Handler.InOuts
         public bool ForceRescan { get; set; }
 
         //;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False
-        public string SyncServerConnection => $"Data Source={ServerName};Initial Catalog=master;Integrated Security=True";
         public SqlServerResumableFunctionsSettings(string server = null, string waitsDbName = null)
         {
             if (server != null)
@@ -61,6 +62,9 @@ namespace ResumableFunctions.Handler.InOuts
 
         public int CurrentServiceId { get; set; }
         public string CurrentDbName { get ; set; }
+
+        public IDistributedLockProvider DistributedLockProvider => 
+            new SqlDistributedSynchronizationProvider($"Data Source={ServerName};Initial Catalog=master;Integrated Security=True");
 
         private void CreateHangfireDb()
         {

@@ -13,11 +13,6 @@ namespace ResumableFunctions.Publisher
 {
     public static class Extensions
     {
-        //private static IServiceProvider _ServiceProvider;
-        //public static IServiceProvider GetServiceProvider() => _ServiceProvider;
-        //public static void SetServiceProvider(IServiceProvider provider) => _ServiceProvider = provider;
-
-
         public static void AddResumableFunctionsPublisher(this IServiceCollection services, IPublisherSettings settings)
         {
             services.AddSingleton(typeof(IPublisherSettings), settings);
@@ -37,13 +32,13 @@ namespace ResumableFunctions.Publisher
             // Obtain the custom attribute for the method. 
             // The value returned contains the StateMachineType property. 
             // Null is returned if the attribute isn't present for the method. 
-            var attrib = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
+            var asyncAttr = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
 
 
-            if (attrib == null)
+            if (asyncAttr == null)
             {
                 return
-                  attrib == null &&
+                  asyncAttr == null &&
                   method is MethodInfo mi &&
                   mi != null &&
                   mi.ReturnType.IsGenericType &&

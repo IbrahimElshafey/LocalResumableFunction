@@ -51,7 +51,7 @@ public static class CoreExtensions
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangFireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
-        services.AddSingleton<IDistributedLockProvider>(_ => new SqlDistributedSynchronizationProvider(settings.SyncServerConnection));
+        services.AddSingleton(settings.DistributedLockProvider);
 
 
         services.AddScoped<IUiService, UiService.UiService>();
