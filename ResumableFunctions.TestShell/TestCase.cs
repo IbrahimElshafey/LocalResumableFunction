@@ -22,30 +22,40 @@ namespace ResumableFunctions.TestShell
 {
     public class TestCase
     {
-        private IHost _app;
+        public IHost CurrentApp { get; private set; }
         private readonly HostApplicationBuilder _builder;
         private readonly Type[] _types;
         private readonly string _testName;
+        private readonly InMemorySettings _settings;
 
         public TestCase(string testName, params Type[] types)
         {
             _builder = Host.CreateApplicationBuilder();
-            _builder.Services.AddResumableFunctionsCore(new InMemorySettings());
+            _builder.Services.AddSingleton(new BackgroundJobServerOptions()
+            {
+                //you can change your options here
+                Queues = new[] { "default", "etl" }
+            });
+
+            _settings = new InMemorySettings(testName);
+            _builder.Services.AddResumableFunctionsCore(_settings);
             _types = types;
             _testName = testName;
         }
 
-        public async Task Initialize()
+        public IServiceCollection RegisteredServices => _builder.Services;
+
+        public async Task Start()
         {
-            _app = _builder.Build();
-            GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(_app.Services));
+            CurrentApp = _builder.Build();
+            GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(CurrentApp.Services));
             await ScanTypes();
-            //_app.Run();
+            //CurrentApp.Run();
         }
 
         private async Task ScanTypes()
         {
-            using var scope = _app.Services.CreateScope();
+            using var scope = CurrentApp.Services.CreateScope();
             var context = scope.ServiceProvider.GetService<FunctionDataContext>();
             var serviceData = new ServiceData
             {
@@ -54,6 +64,7 @@ namespace ResumableFunctions.TestShell
             };
             context.ServicesData.Add(serviceData);
             context.SaveChanges();
+            _settings.CurrentServiceId = serviceData.Id;
             var scanner = scope.ServiceProvider.GetService<Scanner>();
             foreach (var type in _types)
                 await scanner.RegisterMethods(type, serviceData);
@@ -68,7 +79,7 @@ namespace ResumableFunctions.TestShell
             Output outPut)
         {
             var methodInfo = CoreExtensions.GetMethodInfo(methodSelector).MethodInfo;
-            var pusher = _app.Services.GetService<ICallPusher>();
+            var pusher = CurrentApp.Services.GetService<ICallPusher>();
             var pushResultAttribute = methodInfo.GetCustomAttribute<PushCallAttribute>();
             await pusher.PushCall(
                 new PushedCall
