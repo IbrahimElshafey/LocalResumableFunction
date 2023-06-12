@@ -1,6 +1,7 @@
 ﻿# Todo
 
 ## Core functions
+* Local variables when evaluating expression constants
 * Delay processing wait if the scan is in progress
 * Remove direct use for DbContext
 * Same DLL in two services
@@ -8,6 +9,7 @@
 * Function priority
 	* How hangfire handle priority
 * Back to UI coding
+* Can I use .net standard
 
 
 ## UI project
