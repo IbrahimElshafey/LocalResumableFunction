@@ -11,7 +11,7 @@
 * Back to UI coding
 * Can I use .net standard
 * Add pull mode to get pushed calls from a bus
-
+* Replace HttpHangfire with abstraction to enable queue based communication
 
 ## UI project
 * RF Instance Details

@@ -2,11 +2,9 @@
 
 namespace ResumableFunctions.Handler.Core.Abstraction
 {
-    public interface IPushedCallProcessor
+    public interface ICallProcessor
     {
         Task InitialProcessPushedCall(int pushedCallId,string methodUrn);
-        Task<int> QueuePushedCallProcessing(PushedCall pushedCall);
-        Task<int> QueueExternalPushedCallProcessing(PushedCall pushedCall, string serviceName);
         Task ServiceProcessPushedCall(int pushedCallId, string methodUrn);
     }
 }

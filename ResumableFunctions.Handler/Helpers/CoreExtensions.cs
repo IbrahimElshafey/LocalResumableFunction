@@ -38,10 +38,11 @@ public static class CoreExtensions
         services.AddScoped<IRecycleBinService, RecycleBinService>();
         services.AddScoped<IReplayWaitProcessor, ReplayWaitProcessor>();
         services.AddScoped<IWaitProcessor, WaitProcessor>();
+        services.AddScoped<ICallProcessor, CallProcessor>();
+        services.AddScoped<ICallPusher, CallPusher>();
         services.AddScoped<Scanner>();
 
 
-        services.AddScoped<IPushedCallProcessor, PushedCallProcessor>();
 
 
         services.AddSingleton<BinaryToObjectConverterAbstract, BinaryToObjectConverter>();

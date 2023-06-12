@@ -17,11 +17,11 @@ namespace ResumableFunctions.Handler.Attributes
     public class WaitMethodAspect
     {
         private PushedCall _pushedCall;
-        private readonly IPushedCallProcessor _pushedCallProcessor;
+        private readonly ICallPusher _callPusher;
         private readonly ILogger<WaitMethodAspect> _logger;
-        public WaitMethodAspect(IPushedCallProcessor pushedCallProcessor, ILogger<WaitMethodAspect> logger)
+        public WaitMethodAspect(ICallPusher callPusher, ILogger<WaitMethodAspect> logger)
         {
-            _pushedCallProcessor = pushedCallProcessor;
+            _callPusher = callPusher;
             _logger = logger;
         }
         [Advice(Kind.Before)]
@@ -63,7 +63,7 @@ namespace ResumableFunctions.Handler.Attributes
             try
             {
                 _pushedCall.Data.Output = result;
-                _pushedCallProcessor.QueuePushedCallProcessing(_pushedCall).Wait();
+                _callPusher.PushCall(_pushedCall).Wait();
             }
             catch (Exception ex)
             {

@@ -20,9 +20,8 @@ using Medallion.Threading;
 
 namespace ResumableFunctions.Handler.Core;
 
-internal class PushedCallProcessor : IPushedCallProcessor
+internal class CallProcessor : ICallProcessor
 {
-    private readonly FunctionDataContext _context;
     private readonly IBackgroundJobClient _backgroundJobClient;
     private readonly ILogger<ReplayWaitProcessor> _logger;
     private readonly IWaitProcessor _waitProcessor;
@@ -31,11 +30,10 @@ internal class PushedCallProcessor : IPushedCallProcessor
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IResumableFunctionsSettings _settings;
 
-    public PushedCallProcessor(
+    public CallProcessor(
         ILogger<ReplayWaitProcessor> logger,
         IWaitProcessor waitProcessor,
         IWaitsService waitsRepository,
-        FunctionDataContext context,
         IBackgroundJobClient backgroundJobClient,
         HangFireHttpClient hangFireHttpClient,
         BackgroundJobExecutor backgroundJobExecutor,
@@ -44,19 +42,10 @@ internal class PushedCallProcessor : IPushedCallProcessor
         _logger = logger;
         _waitProcessor = waitProcessor;
         _waitsRepository = waitsRepository;
-        _context = context;
         _backgroundJobClient = backgroundJobClient;
         _hangFireHttpClient = hangFireHttpClient;
         _backgroundJobExecutor = backgroundJobExecutor;
         _settings = settings;
-    }
-
-    public async Task<int> QueuePushedCallProcessing(PushedCall pushedCall)
-    {
-        _context.PushedCalls.Add(pushedCall);
-        await _context.SaveChangesAsync();
-        _backgroundJobClient.Enqueue(() => InitialProcessPushedCall(pushedCall.Id, pushedCall.MethodData.MethodUrn));
-        return pushedCall.Id;
     }
 
     public async Task InitialProcessPushedCall(int pushedCallId, string methodUrn)
@@ -79,6 +68,7 @@ internal class PushedCallProcessor : IPushedCallProcessor
             },
             $"Error when call `InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
     }
+
     public async Task ServiceProcessPushedCall(int pushedCallId, string methodUrn)
     {
         await _backgroundJobExecutor.Execute(
@@ -108,36 +98,4 @@ internal class PushedCallProcessor : IPushedCallProcessor
             _logger.LogError(ex, $"Error when try to call owner service for pushed call ({pushedCallId}).");
         }
     }
-
-    private bool IsLocalWait(WaitId waitId)
-    {
-        var ownerAssemblyName = waitId.RequestedByAssembly;
-        string ownerAssemblyPath = $"{AppContext.BaseDirectory}{ownerAssemblyName}.dll";
-        return File.Exists(ownerAssemblyPath);
-    }
-
-
-    public async Task<int> QueueExternalPushedCallProcessing(PushedCall pushedCall, string serviceName)
-    {
-        string methodUrn = pushedCall.MethodData.MethodUrn;
-        if (await IsExternal(methodUrn) is false)
-        {
-            string errorMsg =
-                $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}].";
-            _logger.LogError(errorMsg);
-            throw new Exception(errorMsg);
-        }
-        return await QueuePushedCallProcessing(pushedCall);
-    }
-
-    internal async Task<bool> IsExternal(string methodUrn)
-    {
-        return await _context
-            .MethodsGroups
-            .Include(x => x.WaitMethodIdentifiers)
-            .Where(x => x.MethodGroupUrn == methodUrn)
-            .SelectMany(x => x.WaitMethodIdentifiers)
-            .AnyAsync(x => x.CanPublishFromExternal);
-    }
-
 }

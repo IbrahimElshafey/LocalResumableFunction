@@ -13,22 +13,25 @@ namespace ResumableFunctions.AspNetService
     //[ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionsController : ControllerBase
     {
-        public readonly IPushedCallProcessor _pushedCallProcessor;
+        public readonly ICallPusher _callPusher;
+        public readonly ICallProcessor _callProcessor;
         private readonly ILogger<ResumableFunctionsController> _logger;
 
         public ResumableFunctionsController(
             ILogger<ResumableFunctionsController> logger,
-            IPushedCallProcessor pushedCallProcessor)
+            ICallPusher callPusher,
+            ICallProcessor callProcessor)
         {
             _logger = logger;
-            _pushedCallProcessor = pushedCallProcessor;
+            _callPusher = callPusher;
+            _callProcessor = callProcessor;
         }
 
 
         [HttpGet(nameof(ServiceProcessPushedCall))]
         public async Task<int> ServiceProcessPushedCall(int pushedCallId, string methodUrn)
         {
-            await _pushedCallProcessor.ServiceProcessPushedCall(pushedCallId, methodUrn);
+            await _callProcessor.ServiceProcessPushedCall(pushedCallId, methodUrn);
             return 0;
         }
 
@@ -53,7 +56,7 @@ namespace ResumableFunctions.AspNetService
                         Output = externalCall.Output
                     }
                 };
-                await _pushedCallProcessor.QueueExternalPushedCallProcessing(pushedCall, externalCall.ServiceName);
+                await _callPusher.PushExternalCall(pushedCall, externalCall.ServiceName);
             }
             catch (Exception ex)
             {
