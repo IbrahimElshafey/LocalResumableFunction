@@ -32,13 +32,13 @@ namespace ReferenceLibrary
             Console.WriteLine("Done");
         }
 
-        [WaitMethod("CodeInDllTest.SayHello")]
+        [PushCall("CodeInDllTest.SayHello")]
         public string SayHello(string userName)
         {
             return $"Hello, {userName}.";
         }
 
-        [WaitMethod("CodeInDllTest.SayGoodby")]
+        [PushCall("CodeInDllTest.SayGoodby")]
         public string SayGoodby(string userName)
         {
             return $"Goodby, {userName}.";

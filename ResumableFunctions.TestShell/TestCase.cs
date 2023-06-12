@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
@@ -40,16 +41,18 @@ namespace ResumableFunctions.TestShell
 
         private async Task ScanTypes()
         {
-            //should not create new scope
-            using var scope = app.Services.CreateScope();
-            var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundJobClient>();
-            var scanner = scope.ServiceProvider.GetService<Scanner>();
-            backgroundJobClient.Enqueue(() => scanner.Start());
+            var backgroundJobClient = app.Services.GetService<IBackgroundJobClient>();
+            var scanner = app.Services.GetService<Scanner>();
+            foreach (var type in _types)
+                await scanner.RegisterMethods(type, serviceData);
+            foreach (var type in _types)
+                if (type.IsSubclassOf(typeof(ResumableFunction)))
+                    await scanner.RegisterResumableFunctionsInClass(type);
         }
 
         public async Task SimulateMethodCall<ClassType, Input, Output>(
             Expression<Func<ClassType, object>> methodSelector,
-            Input input, 
+            Input input,
             Output outPut)
         {
             var methodInfo = CoreExtensions.GetMethodInfo(methodSelector);

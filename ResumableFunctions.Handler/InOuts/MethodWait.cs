@@ -147,7 +147,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
     private void Initiate(MethodInfo method)
     {
         var methodAttribute =
-            method.GetCustomAttribute(typeof(WaitMethodAttribute));
+            method.GetCustomAttribute(typeof(PushCallAttribute));
         if (methodAttribute == null)
             throw new Exception(
                 $"You must add attribute [WaitMethod , WaitMethodImplementation or ExternalWaitMethod] to method {method.GetFullName()}");

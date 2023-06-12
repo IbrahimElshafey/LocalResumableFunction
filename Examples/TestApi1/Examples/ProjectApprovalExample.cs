@@ -169,14 +169,14 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         WriteMessage("One of two waits matched");
     }
 
-    [WaitMethod("ProjectApprovalExample.PrivateMethod")]
+    [PushCall("ProjectApprovalExample.PrivateMethod")]
     internal bool PrivateMethod(Project project)
     {
         WriteMessage("Project Submitted");
         return true;
     }
 
-    [WaitMethod("ProjectApprovalExample.ProjectSubmitted")]
+    [PushCall("ProjectApprovalExample.ProjectSubmitted")]
     internal async Task<bool> ProjectSubmitted(Project project)
     {
         //await Task.Delay(100);
@@ -184,21 +184,21 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         return true;
     }
 
-    [WaitMethod("ProjectApprovalExample.ManagerOneApproveProject")]
+    [PushCall("ProjectApprovalExample.ManagerOneApproveProject")]
     public bool ManagerOneApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager One Approve Project with decision ({args.Decision})");
         return args.Decision;
     }
 
-    [WaitMethod("ProjectApprovalExample.ManagerTwoApproveProject")]
+    [PushCall("ProjectApprovalExample.ManagerTwoApproveProject")]
     public bool ManagerTwoApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Two Approve Project with decision ({args.Decision})");
         return args.Decision;
     }
 
-    [WaitMethod("ProjectApprovalExample.ManagerThreeApproveProject")]
+    [PushCall("ProjectApprovalExample.ManagerThreeApproveProject")]
     public bool ManagerThreeApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Three Approve Project with decision ({args.Decision})");
@@ -206,7 +206,7 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     }
 
 
-    [WaitMethod("ProjectApprovalExample.ManagerFourApproveProject")]
+    [PushCall("ProjectApprovalExample.ManagerFourApproveProject")]
     public bool ManagerFourApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");
@@ -244,7 +244,7 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Console.ForegroundColor = ConsoleColor.White;
     }
 
-    [WaitMethod("IManagerFiveApproval.ManagerFiveApproveProject")]
+    [PushCall("IManagerFiveApproval.ManagerFiveApproveProject")]
     public bool ManagerFiveApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");

@@ -9,14 +9,14 @@ namespace TestApi2.Controllers
     public class TestController : ControllerBase
     {
         [HttpPost(nameof(ExternalMethodTest))]
-        [WaitMethod("TestController.ExternalMethodTest")]
+        [PushCall("TestController.ExternalMethodTest")]
         public int ExternalMethodTest(object o)
         {
            return Random.Shared.Next();
         }
 
         [HttpPost(nameof(ExternalMethodTest2))]
-        [WaitMethod("TestController.ExternalMethodTest2")]
+        [PushCall("TestController.ExternalMethodTest2")]
         public int ExternalMethodTest2(string o)
         {
             return Random.Shared.Next();

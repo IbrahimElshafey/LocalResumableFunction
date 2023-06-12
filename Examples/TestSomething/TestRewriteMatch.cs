@@ -21,10 +21,10 @@ namespace TestSomething
     {
         public int InstanceId { get; set; } = 5;
 
-        [WaitMethod("TestMethodOne")]
+        [PushCall("TestMethodOne")]
         public int TestMethodOne(string input) => input.Length;
 
-        [WaitMethod("TestMethodTwo")]
+        [PushCall("TestMethodTwo")]
         public MethodOutput TestMethodTwo(MethodInput input) => new MethodOutput { TaskId = input.Id };
 
         public MethodWait WaitMethodOne()

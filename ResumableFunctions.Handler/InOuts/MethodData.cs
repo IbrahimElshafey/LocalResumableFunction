@@ -59,8 +59,8 @@ namespace ResumableFunctions.Handler.InOuts
             var wma = methodInfo
               .GetCustomAttributes()
               .FirstOrDefault(
-              attribute => attribute.TypeId == WaitMethodAttribute.AttributeId
-              ) as WaitMethodAttribute;
+              attribute => attribute.TypeId == PushCallAttribute.AttributeId
+              ) as PushCallAttribute;
 
             return wma?.CanPublishFromExternal ?? false;
         }
@@ -79,7 +79,7 @@ namespace ResumableFunctions.Handler.InOuts
                 attribute =>
                     attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId ||
                     attribute.TypeId == ResumableFunctionAttribute.AttributeId ||
-                    attribute.TypeId == WaitMethodAttribute.AttributeId
+                    attribute.TypeId == PushCallAttribute.AttributeId
                 );
 
             return (trackId as ITrackingIdetifier)?.MethodUrn;

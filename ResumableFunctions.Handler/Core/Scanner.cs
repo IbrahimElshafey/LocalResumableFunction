@@ -18,7 +18,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Core;
 
-public class Scanner
+internal class Scanner
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -280,7 +280,7 @@ public class Scanner
     }
 
 
-    private async Task RegisterMethods(Type type, ServiceData serviceData)
+    internal async Task RegisterMethods(Type type, ServiceData serviceData)
     {
         try
         {
@@ -288,7 +288,7 @@ public class Scanner
             var methodWaits = type
                 .GetMethods(GetBindingFlags())
                 .Where(method =>
-                        method.GetCustomAttributes().Any(x => x.TypeId == WaitMethodAttribute.AttributeId));
+                        method.GetCustomAttributes().Any(x => x.TypeId == PushCallAttribute.AttributeId));
             foreach (var method in methodWaits)
             {
                 if (ValidateMethod(method, serviceData))
@@ -343,7 +343,7 @@ public class Scanner
         return result;
     }
 
-    private async Task RegisterResumableFunctionsInClass(Type type)
+    internal async Task RegisterResumableFunctionsInClass(Type type)
     {
         var currentAssemblyName = type.Assembly.GetName().Name;
         var serviceData = await _context

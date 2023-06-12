@@ -3,10 +3,10 @@
 namespace ResumableFunctions.Handler.Attributes
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-    [Injection(typeof(WaitMethodAspect), Inherited = true)]
-    public class WaitMethodAttribute : Attribute, ITrackingIdetifier
+    [Injection(typeof(PushCallAspect), Inherited = true)]
+    public class PushCallAttribute : Attribute, ITrackingIdetifier
     {
-        public WaitMethodAttribute(string methodUrn, bool canPublishFromExternal = false)
+        public PushCallAttribute(string methodUrn, bool canPublishFromExternal = false)
         {
             MethodUrn = methodUrn;
             CanPublishFromExternal = canPublishFromExternal;
@@ -18,7 +18,7 @@ namespace ResumableFunctions.Handler.Attributes
         public string MethodUrn { get; }
         public bool CanPublishFromExternal { get; }
 
-        public const string AttributeId = nameof(WaitMethodAttribute) + "1f220128-d0f7-4dac-ad81-ff942d68942c";
+        public const string AttributeId = nameof(PushCallAttribute) + "1f220128-d0f7-4dac-ad81-ff942d68942c";
         public override object TypeId => AttributeId;
 
         public override string ToString()

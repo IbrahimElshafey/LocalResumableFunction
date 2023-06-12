@@ -10,7 +10,7 @@ namespace ResumableFunctions.Handler.Helpers
 {
     public class LocalRegisteredMethods
     {
-        [WaitMethod("LocalRegisteredMethods.TimeWait")]
+        [PushCall("LocalRegisteredMethods.TimeWait")]
         public string TimeWait(string timeWaitId)
         {
             return nameof(MethodWait.MandatoryPart) + timeWaitId;

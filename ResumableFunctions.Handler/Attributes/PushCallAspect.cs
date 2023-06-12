@@ -14,12 +14,12 @@ namespace ResumableFunctions.Handler.Attributes
 
 
     [Aspect(Scope.Global, Factory = typeof(HangfireActivator))]
-    public class WaitMethodAspect
+    public class PushCallAspect
     {
         private PushedCall _pushedCall;
         private readonly ICallPusher _callPusher;
-        private readonly ILogger<WaitMethodAspect> _logger;
-        public WaitMethodAspect(ICallPusher callPusher, ILogger<WaitMethodAspect> logger)
+        private readonly ILogger<PushCallAspect> _logger;
+        public PushCallAspect(ICallPusher callPusher, ILogger<PushCallAspect> logger)
         {
             _callPusher = callPusher;
             _logger = logger;
@@ -34,7 +34,7 @@ namespace ResumableFunctions.Handler.Attributes
             [Argument(Source.Triggers)] Attribute[] triggers
             )
         {
-            var pushResultAttribute = triggers.OfType<WaitMethodAttribute>().First();
+            var pushResultAttribute = triggers.OfType<PushCallAttribute>().First();
 
             _pushedCall = new PushedCall
             {
