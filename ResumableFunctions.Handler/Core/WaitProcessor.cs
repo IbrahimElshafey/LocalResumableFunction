@@ -25,14 +25,15 @@ namespace ResumableFunctions.Handler.Core
         private readonly IReplayWaitProcessor _replayWaitProcessor;
         private readonly IWaitsService _waitsRepository;
         private IServiceProvider _serviceProvider;
+        private MethodWait _methodWait;
+        private PushedCall _pushedCall;
         private readonly ILogger<WaitProcessor> _logger;
         private readonly IBackgroundProcess _backgroundJobClient;
         private readonly FunctionDataContext _context;
         private readonly BackgroundJobExecutor _backgroundJobExecutor;
         private readonly IDistributedLockProvider _lockProvider;
-        private MethodWait _methodWait;
-        private int _pushedCallId;
-        private PushedCall _pushedCall;
+        //private MethodWait _methodWait;
+        //private PushedCall _pushedCall;
 
         public WaitProcessor(
             IServiceProvider serviceProvider,
@@ -64,10 +65,12 @@ namespace ResumableFunctions.Handler.Core
                 $"ProcessWait_{mehtodWaitId}_{pushedCallId}",
                 async () =>
                 {
-                    _pushedCallId = pushedCallId;
-                    if (await LoadWaitAndPushedCall(mehtodWaitId, pushedCallId))
+                    _methodWait = await LoadWait(mehtodWaitId);
+                    _pushedCall = await LoadPushedCall(pushedCallId);
+                    if (_methodWait != null && _pushedCall != null)
                     {
                         var isSuccess = await Pipeline(
+                            SetData,
                             CheckIfMatch,
                             CloneIfFirst,
                             UpdateFunctionData,
@@ -85,39 +88,48 @@ namespace ResumableFunctions.Handler.Core
 
 
 
-        private async Task<bool> CheckIfMatch(MethodWait methodWait, int pushedCallId)
+        private Task<bool> SetData()
         {
+            _pushedCall.LoadUnmappedProps(_methodWait.MethodToWait.MethodInfo);
+            _methodWait.Input = _pushedCall.Data.Input;
+            _methodWait.Output = _pushedCall.Data.Output;
+            return Task.FromResult(true);
+        }
+        private async Task<bool> CheckIfMatch()
+        {
+            var pushedCallId = _pushedCall.Id;
             try
             {
-                var isMatch = methodWait.IsMatched();
+                var isMatch = _methodWait.IsMatched();
                 if (isMatch)
                 {
-                    methodWait.FunctionState.AddLog(
-                        $"Wait matched [{methodWait.Name}] for [{methodWait.RequestedByFunction}].", LogType.Info);
-                    await UpdateWaitToMatched(pushedCallId, methodWait.Id);
+                    _methodWait.FunctionState.AddLog(
+                        $"Wait matched [{_methodWait.Name}] for [{_methodWait.RequestedByFunction}].", LogType.Info);
+                    await UpdateWaitToMatched(pushedCallId, _methodWait.Id);
                 }
                 else
                 {
-                    await UpdateWaitToUnmatched(pushedCallId, methodWait.Id);
+                    await UpdateWaitToUnmatched(pushedCallId, _methodWait.Id);
                 }
                 return isMatch;
             }
             catch (Exception ex)
             {
-                methodWait.FunctionState.AddError(
-                    $"Error occured when evaluate match for [{methodWait.Name}] in [{methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].", ex);
+                _methodWait.FunctionState.AddError(
+                    $"Error occured when evaluate match for [{_methodWait.Name}] in [{_methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].", ex);
                 return false;
             }
         }
 
-        private async Task<bool> CloneIfFirst(MethodWait methodWait, int pushedCallId)
+        private async Task<bool> CloneIfFirst()
         {
-            if (methodWait.IsFirst)
+            var pushedCallId = _pushedCall.Id;
+            if (_methodWait.IsFirst)
             {
                 var waitCall = await _context
                     .WaitsForCalls
-                    .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == methodWait.Id);
-                _methodWait = await _firstWaitProcessor.CloneFirstWait(methodWait);
+                    .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == _methodWait.Id);
+                _methodWait = await _firstWaitProcessor.CloneFirstWait(_methodWait);
                 waitCall.WaitId = _methodWait.Id;
                 await _context.SaveChangesAsync();
             }
@@ -125,36 +137,36 @@ namespace ResumableFunctions.Handler.Core
         }
 
 
-        private async Task<bool> UpdateFunctionData(MethodWait methodWait, int pushedCallId)
+        private async Task<bool> UpdateFunctionData()
         {
+            var pushedCallId = _pushedCall.Id;
             try
             {
-                using (await _lockProvider.AcquireLockAsync($"UpdateFunctionState_{methodWait.FunctionStateId}"))
+                using (await _lockProvider.AcquireLockAsync($"UpdateFunctionState_{_methodWait.FunctionStateId}"))
                 {
-                    if (methodWait.UpdateFunctionData())
+                    if (_methodWait.UpdateFunctionData())
                         await _context.SaveChangesAsync();
                     else
                         throw new Exception(
-                            $"Can't update function state `{methodWait.FunctionStateId}` after method wait `{methodWait}` matched.");
+                            $"Can't update function state `{_methodWait.FunctionStateId}` after method wait `{_methodWait}` matched.");
                 }
-                methodWait.CurrentFunction.InitializeDependencies(_serviceProvider);
+                _methodWait.CurrentFunction.InitializeDependencies(_serviceProvider);
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                methodWait.FunctionState.AddError(
-                        $"Concurrency Exception occured when process wait [{methodWait.Name}]." +
+                _methodWait.FunctionState.AddError(
+                        $"Concurrency Exception occured when process wait [{_methodWait.Name}]." +
                         $"\nProcessing this wait will be scheduled.",
                         ex);
-                _backgroundJobClient.Schedule(() => ProcessWait(methodWait.Id, pushedCallId), TimeSpan.FromSeconds(2.5));
+                _backgroundJobClient.Schedule(() => ProcessWait(_methodWait.Id, pushedCallId), TimeSpan.FromSeconds(2.5));
                 return false;
             }
             return true;
-
         }
 
-        private async Task<bool> ResumeExecution(MethodWait matchedMethodWait, int pushedCallId)
+        private async Task<bool> ResumeExecution()
         {
-            Wait currentWait = matchedMethodWait;
+            Wait currentWait = _methodWait;
             do
             {
                 var parent = await _waitsRepository.GetWaitParent(currentWait);
@@ -264,67 +276,69 @@ namespace ResumableFunctions.Handler.Core
             await _recycleBinService.RecycleFunction(currentWait.FunctionStateId);
         }
 
-        private async Task<bool> LoadWaitAndPushedCall(int waitId, int pushedCallId)
+        private async Task<MethodWait> LoadWait(int waitId)
         {
-            try
-            {
-                _methodWait = await _context
+            var methodWait = await _context
                     .MethodWaits
                     .Include(x => x.RequestedByFunction)
                     .Include(x => x.FunctionState)
                     .Where(x => x.Status == WaitStatus.Waiting)
                     .FirstOrDefaultAsync(x => x.Id == waitId);
 
+            if (methodWait == null)
+            {
+                var error = $"No method wait exist with ID ({waitId}) and status ({WaitStatus.Waiting}).";
+                _logger.LogError(error);
+                throw new Exception(error);
+            }
 
-                _methodWait.MethodToWait = await
-                    _context
-                    .WaitMethodIdentifiers
-                    .FindAsync(_methodWait.MethodToWaitId);
+            methodWait.MethodToWait = await
+                _context
+                .WaitMethodIdentifiers
+                .FindAsync(methodWait.MethodToWaitId);
 
-                _methodWait.Template = await
-                   _context
-                   .MethodWaitTemplates
-                   .Select(MethodWaitTemplate.BasicProps)
-                   .FirstAsync(x => x.Id == _methodWait.TemplateId);
+            if (methodWait.MethodToWait == null)
+            {
+                var error = $"No method exist that linked to wait `{waitId}`.";
+                _logger.LogError(error);
+                throw new Exception(error);
+            }
 
-               
-                if (_methodWait == null)
-                {
-                    _logger.LogError($"No method wait exist with ID ({waitId}) and status ({WaitStatus.Waiting}).");
-                    return false;
-                }
+            methodWait.Template = await
+               _context
+               .MethodWaitTemplates
+               .Select(MethodWaitTemplate.BasicProps)
+               .FirstAsync(x => x.Id == methodWait.TemplateId);
+            if (methodWait.Template == null)
+            {
+                var error = $"No wait template exist for wait `{waitId}`.";
+                _logger.LogError(error);
+                throw new Exception(error);
+            }
 
-                _pushedCall = await _context
+            methodWait.FunctionState.LoadUnmappedProps(methodWait.RequestedByFunction.InClassType);
+            methodWait.LoadUnmappedProps();
+            return methodWait;
+        }
+
+        private async Task<PushedCall> LoadPushedCall(int pushedCallId)
+        {
+            try
+            {
+                var pushedCall = await _context
                    .PushedCalls
                    .FirstOrDefaultAsync(x => x.Id == pushedCallId);
-                if (_pushedCall == null)
+                if (pushedCall == null)
                 {
-                    _logger.LogError($"No pushed method exist with ID ({pushedCallId}).");
-                    return false;
+                    var error = $"No pushed method exist with ID ({pushedCallId}).";
+                    _logger.LogError(error);
+                    throw new Exception(error);
                 }
-
-                var targetMethod = await _context
-                       .WaitMethodIdentifiers
-                       .AnyAsync(x => x.Id == _methodWait.MethodToWaitId);
-
-                if (targetMethod == false)
-                {
-                    _logger.LogError($"No method like ({_pushedCall.MethodData}) exist that match for pushed call `{pushedCallId}`.");
-                    return false;
-                }
-
-                //todo:MethodToWait.MethodInfo may be method in another service
-                _pushedCall.LoadUnmappedProps(_methodWait.MethodToWait.MethodInfo);
-                _methodWait.FunctionState.LoadUnmappedProps(_methodWait.RequestedByFunction.InClassType);
-                _methodWait.LoadUnmappedProps();
-                _methodWait.Input = _pushedCall.Data.Input;
-                _methodWait.Output = _pushedCall.Data.Output;
-
-                return true;
+                return pushedCall;
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error when process pushed method [{pushedCallId}] and wait [{waitId}].", ex);
+                throw new Exception($"Error when process pushed method [{pushedCallId}] and wait [{_methodWait.Id}].", ex);
             }
         }
         private async Task UpdateWaitToMatched(int pushedCallId, int waitId)
@@ -357,10 +371,10 @@ namespace ResumableFunctions.Handler.Core
             }
         }
 
-        private async Task<bool> Pipeline(params Func<MethodWait, int, Task<bool>>[] actions)
+        private async Task<bool> Pipeline(params Func<Task<bool>>[] actions)
         {
             foreach (var action in actions)
-                if (!await action(_methodWait, _pushedCallId))
+                if (!await action())
                     return false;
             return true;
         }

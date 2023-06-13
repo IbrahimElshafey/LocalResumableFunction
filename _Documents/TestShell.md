@@ -13,7 +13,5 @@
 * Query Hangfire DB
      * Get Jobs
 
-# Critical problems
-* How to know that hangfire background job finished
-    * Check the JobStorage.Current.GetMonitoringApi()//https://discuss.hangfire.io/t/checking-for-a-job-state/57/7
-* 
+# Generate test code for resumable function
+* I plan to auto-generate code for test

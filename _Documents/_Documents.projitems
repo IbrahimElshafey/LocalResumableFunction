@@ -22,6 +22,7 @@
     <None Include="$(MSBuildThisFileDirectory)_Efficient Wait Matching.md" />
     <None Include="$(MSBuildThisFileDirectory)Synchronization.md" />
     <None Include="$(MSBuildThisFileDirectory)TestShell.md" />
+    <None Include="$(MSBuildThisFileDirectory)UI.md" />
     <None Include="$(MSBuildThisFileDirectory)_Todo.md" />
     <None Include="$(MSBuildThisFileDirectory)~temp.md" />
   </ItemGroup>
