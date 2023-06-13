@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace ResumableFunctions.AspNetService.DisplayObject
 {
-    public record MainMenuItem(string DisplayName,string PartialViewUrl);
     public class MainMenuDisplay
     {
         public MainMenuItem[] Items { get; set; }

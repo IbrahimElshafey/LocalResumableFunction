@@ -46,24 +46,3 @@ public class PushedCall : IEntityWithDelete, IEntityInService, IOnSaveEntity
 
     }
 }
-
-public class InputOutput
-{
-    public object Input { get; set; }
-    public object Output { get; set; }
-
-    public static InputOutput FromGeneric(dynamic value)
-    {
-        return new InputOutput
-        {
-            Input = value.Input,
-            Output = value.Output
-        };
-    }
-}
-
-public class GInputOutput<I, O>
-{
-    public I Input { get; set; }
-    public O Output { get; set; }
-}

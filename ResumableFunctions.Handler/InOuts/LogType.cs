@@ -6,11 +6,3 @@ public enum LogType
     Warning,
     Error
 }
-
-public enum FunctionStatus
-{
-    New,
-    InProgress,
-    Completed,
-    Error
-}

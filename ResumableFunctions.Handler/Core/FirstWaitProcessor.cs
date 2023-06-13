@@ -130,9 +130,10 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     public async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
         var classInstance = (ResumableFunction)Activator.CreateInstance(resumableFunction.DeclaringType);
-        classInstance.InitializeDependencies(_serviceProvider);
+        
         if (classInstance != null)
         {
+            classInstance.InitializeDependencies(_serviceProvider);
             classInstance.CurrentResumableFunction = resumableFunction;
             var functionRunner = new FunctionRunner(classInstance, resumableFunction);
             if (functionRunner.ResumableFunctionExistInCode is false)
@@ -166,12 +167,10 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             });
             return firstWait;
         }
-        else
-        {
-            var errorMsg = $"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]";
-            await LogErrorToService(resumableFunction, null, errorMsg);
-            throw new NullReferenceException(errorMsg);
-        }
+
+        var errorMsg = $"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]";
+        await LogErrorToService(resumableFunction, null, errorMsg);
+        throw new NullReferenceException(errorMsg);
     }
 
     private void WriteMessage(string message)

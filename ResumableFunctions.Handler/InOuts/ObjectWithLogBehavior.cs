@@ -1,23 +1,11 @@
-﻿using MessagePack;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler.Attributes;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
 
 //mixin
-public interface IObjectWithLog
-{
-
-    [IgnoreMember]
-    public int ErrorCounter { get; internal set; }
-
-    [IgnoreMember]
-    [NotMapped]
-    public List<LogRecord> Logs { get; }
-}
 
 public static class ObjectWithLogBehavior
 {

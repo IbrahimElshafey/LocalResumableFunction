@@ -9,15 +9,6 @@ using System.Threading.Tasks;
 
 namespace TestSomething
 {
-    class Person
-    {
-        public Person(int x)
-        {
-
-        }
-        public string Name;
-        public int Age;
-    }
     internal class CerasTest
     {
         public void Run()
