@@ -149,7 +149,7 @@ namespace ResumableFunctions.TestShell
 
         public async Task<List<Wait>> GetWaits(int? instanceId = null)
         {
-            var query = _context.Waits.AsQueryable();
+            var query = _context.Waits.Where(x => !x.IsFirst);
             if (instanceId != null)
                 query = query.Where(x => x.FunctionStateId == instanceId);
             return await query.OrderBy(x => x.Id).ToListAsync();
