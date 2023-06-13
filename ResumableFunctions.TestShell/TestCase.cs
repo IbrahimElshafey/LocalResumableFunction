@@ -47,7 +47,7 @@ namespace ResumableFunctions.TestShell
         {
             foreach (var process in Process.GetProcessesByName("DB Browser for SQLite"))
             {
-                 process.Kill(true);
+                process.Kill(true);
             }
         }
 
@@ -92,13 +92,12 @@ namespace ResumableFunctions.TestShell
 
 
 
-        public async Task<int> SimulateMethodCall<ClassType, Input, Output>(
+        public async Task<int> SimulateMethodCall<ClassType>(
             Expression<Func<ClassType, object>> methodSelector,
-            Input input,
-            Output outPut)
+            object input,
+            object outPut)
         {
             var methodInfo = CoreExtensions.GetMethodInfo(methodSelector).MethodInfo;
-            //todo:check input and output match method signature
             var pusher = CurrentApp.Services.GetService<ICallPusher>();
             var pushResultAttribute = methodInfo.GetCustomAttribute<PushCallAttribute>();
             var pushedCallId = await pusher.PushCall(
@@ -153,7 +152,7 @@ namespace ResumableFunctions.TestShell
             var query = _context.Waits.AsQueryable();
             if (instanceId != null)
                 query = query.Where(x => x.FunctionStateId == instanceId);
-            return await query.ToListAsync();
+            return await query.OrderBy(x => x.Id).ToListAsync();
         }
     }
 }

@@ -29,9 +29,9 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
     public List<Wait> Waits { get; internal set; } = new();
 
 
-    public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; set; }
-    public int ResumableFunctionIdentifierId { get; set; }
-    public FunctionStatus Status { get; set; } //todo:reset before scan
+    public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; internal set; }
+    public int ResumableFunctionIdentifierId { get; internal set; }
+    public FunctionStatus Status { get; internal set; } //todo:reset before scan
     public DateTime Modified { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
 
