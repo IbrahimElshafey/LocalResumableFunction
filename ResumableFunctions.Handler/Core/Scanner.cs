@@ -28,7 +28,7 @@ internal class Scanner
     private readonly IMethodIdentifierService _methodIdentifierRepo;
     private readonly IWaitsService _waitsRepository;
     private readonly IFirstWaitProcessor _firstWaitProcessor;
-    private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IBackgroundProcess _backgroundJobClient;
     private readonly string _currentServiceName;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
 
@@ -39,7 +39,7 @@ internal class Scanner
         IFirstWaitProcessor firstWaitProcessor,
         IResumableFunctionsSettings settings,
         FunctionDataContext context,
-        IBackgroundJobClient backgroundJobClient,
+        IBackgroundProcess backgroundJobClient,
         IWaitsService waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor)
     {

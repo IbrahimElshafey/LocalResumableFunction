@@ -19,10 +19,9 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Medallion.Threading;
 
 namespace ResumableFunctions.Handler.Core;
-
 internal class CallProcessor : ICallProcessor
 {
-    private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IBackgroundProcess _backgroundJobClient;
     private readonly ILogger<ReplayWaitProcessor> _logger;
     private readonly IWaitProcessor _waitProcessor;
     private readonly IWaitsService _waitsRepository;
@@ -34,7 +33,7 @@ internal class CallProcessor : ICallProcessor
         ILogger<ReplayWaitProcessor> logger,
         IWaitProcessor waitProcessor,
         IWaitsService waitsRepository,
-        IBackgroundJobClient backgroundJobClient,
+        IBackgroundProcess backgroundJobClient,
         HangFireHttpClient hangFireHttpClient,
         BackgroundJobExecutor backgroundJobExecutor,
         IResumableFunctionsSettings settings)

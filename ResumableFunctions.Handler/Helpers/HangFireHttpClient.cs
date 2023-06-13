@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using ResumableFunctions.Handler.Core.Abstraction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,10 @@ namespace ResumableFunctions.Handler.Helpers
 {
     public class HangFireHttpClient
     {
-        private readonly IBackgroundJobClient backgroundJobClient;
+        private readonly IBackgroundProcess backgroundJobClient;
         private readonly HttpClient client;
 
-        public HangFireHttpClient(IBackgroundJobClient backgroundJobClient, HttpClient client)
+        public HangFireHttpClient(IBackgroundProcess backgroundJobClient, HttpClient client)
         {
             this.backgroundJobClient = backgroundJobClient;
             this.client = client;

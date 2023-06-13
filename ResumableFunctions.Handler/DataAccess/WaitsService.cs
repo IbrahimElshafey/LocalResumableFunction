@@ -14,20 +14,21 @@ using ResumableFunctions.Handler.DataAccess.Abstraction;
 using System.Linq.Expressions;
 using System;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal partial class WaitsService : IWaitsService
 {
     private readonly ILogger<WaitsService> _logger;
     private readonly FunctionDataContext _context;
-    private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IBackgroundProcess _backgroundJobClient;
     private readonly IMethodIdentifierService _methodIdentifierService;
     private readonly IResumableFunctionsSettings _settings;
     private readonly IWaitTemplatesService _waitTemplatesService;
 
     public WaitsService(
         ILogger<WaitsService> logger,
-        IBackgroundJobClient backgroundJobClient,
+        IBackgroundProcess backgroundJobClient,
         FunctionDataContext context,
         IMethodIdentifierService methodIdentifierRepo,
         IResumableFunctionsSettings settings,

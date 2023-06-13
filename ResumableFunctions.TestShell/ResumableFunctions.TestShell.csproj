@@ -8,7 +8,6 @@
 
   <ItemGroup>
 	  <PackageReference Include="DistributedLock.WaitHandles" Version="1.0.1" />
-    <PackageReference Include="Hangfire.Storage.SQLite" Version="0.3.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.5" />
   </ItemGroup>
 

@@ -26,7 +26,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IWaitsService _waitsRepository;
         private IServiceProvider _serviceProvider;
         private readonly ILogger<WaitProcessor> _logger;
-        private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly IBackgroundProcess _backgroundJobClient;
         private readonly FunctionDataContext _context;
         private readonly BackgroundJobExecutor _backgroundJobExecutor;
         private readonly IDistributedLockProvider _lockProvider;
@@ -40,7 +40,7 @@ namespace ResumableFunctions.Handler.Core
             IFirstWaitProcessor firstWaitProcessor,
             IRecycleBinService recycleBinService,
             IWaitsService waitsRepository,
-            IBackgroundJobClient backgroundJobClient,
+            IBackgroundProcess backgroundJobClient,
             FunctionDataContext context,
             IReplayWaitProcessor replayWaitProcessor,
             BackgroundJobExecutor backgroundJobExecutor,

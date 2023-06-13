@@ -221,7 +221,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
 
     public override string ToString()
     {
-        return $"Name:{Name}, Type:{WaitType}, Id:{Id}";
+        return $"Name:{Name}, Type:{WaitType}, Id:{Id}, Status:{Status}";
     }
 
     public void OnSave()

@@ -1,5 +1,4 @@
 ﻿using Hangfire;
-using Hangfire.Storage.SQLite;
 using Medallion.Threading;
 using Medallion.Threading.WaitHandles;
 using Microsoft.Data.Sqlite;
@@ -10,27 +9,16 @@ namespace ResumableFunctions.TestShell
 {
     internal class InMemorySettings : IResumableFunctionsSettings
     {
-        
+
         private readonly string _testName;
+
         public InMemorySettings(string testName)
         {
             _testName = testName;
         }
-        public IGlobalConfiguration HangfireConfig
-        {
-            get
-            {
-                return GlobalConfiguration.Configuration.UseSQLiteStorage($"{_testName}_Hangfire.db");
-            }
-        }
+        public IGlobalConfiguration HangfireConfig => null;
 
-        public DbContextOptionsBuilder WaitsDbConfig
-        {
-            get
-            {
-                return new DbContextOptionsBuilder().UseSqlite($"DataSource={_testName}_Waits.db");
-            }
-        }
+        public DbContextOptionsBuilder WaitsDbConfig => new DbContextOptionsBuilder().UseSqlite($"DataSource={_testName}_Waits.db");
 
         public string CurrentServiceUrl => null;
 

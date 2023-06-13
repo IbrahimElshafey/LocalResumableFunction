@@ -58,8 +58,11 @@ public static class CoreExtensions
         if (settings.HangfireConfig != null)
         {
             services.AddHangfire(x => x = settings.HangfireConfig);
+            services.AddSingleton<IBackgroundProcess, HangfireBackgroundProcess>();
             services.AddHangfireServer();
         }
+        else
+            services.AddSingleton<IBackgroundProcess, NoBackgroundProcess>();
     }
 
     public static void UseResumableFunctions(this IHost app)
@@ -75,7 +78,7 @@ public static class CoreExtensions
     private static void StartScanProcess(IHost app)
     {
         using var scope = app.Services.CreateScope();
-        var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundJobClient>();
+        var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundProcess>();
         var scanner = scope.ServiceProvider.GetService<Scanner>();
         backgroundJobClient.Enqueue(() => scanner.Start());
     }

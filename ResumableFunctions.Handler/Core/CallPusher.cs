@@ -10,13 +10,13 @@ namespace ResumableFunctions.Handler.Core
     internal class CallPusher : ICallPusher
     {
         private readonly FunctionDataContext _context;
-        private readonly IBackgroundJobClient _backgroundJobClient;
+        private readonly IBackgroundProcess _backgroundJobClient;
         private readonly ICallProcessor _processor;
         private readonly ILogger<CallPusher> _logger;
 
         public CallPusher(
             FunctionDataContext context,
-            IBackgroundJobClient backgroundJobClient,
+            IBackgroundProcess backgroundJobClient,
             ICallProcessor processor, ILogger<CallPusher> logger)
         {
             _context = context;
