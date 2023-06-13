@@ -13,7 +13,6 @@ internal class BinaryToObjectConverter : BinaryToObjectConverterAbstract
     {
         try
         {
-            //return MessagePackSerializer.Serialize(obj, ContractlessStandardResolver.Options);
             return MessagePackSerializer.Serialize(obj, ContractlessStandardResolver.Options);
 
         }

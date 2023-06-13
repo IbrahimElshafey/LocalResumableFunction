@@ -1,10 +1,7 @@
-﻿using AspectInjector.Broker;
-using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
+using AspectInjector.Broker;
 
-
-
-namespace Aspects.PushResult
+namespace TestSomething
 {
     [Aspect(Scope.Global)]
     public class PushResultAspect

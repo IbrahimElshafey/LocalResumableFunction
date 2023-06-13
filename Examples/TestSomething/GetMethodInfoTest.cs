@@ -1,8 +1,10 @@
-﻿using ResumableFunctions.Handler.Core;
-using ResumableFunctions.Handler.Helpers;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using ResumableFunctions.Handler.Core;
+using ResumableFunctions.Handler.Helpers;
+
+namespace TestSomething;
 
 internal class GetMethodInfoTest
 {

@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.AspNetService.DisplayObject;
-using System.Diagnostics;
 
-namespace MVC.Controllers
+namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
 {
     [Area("RF")]
     public class PushedCallController : Controller

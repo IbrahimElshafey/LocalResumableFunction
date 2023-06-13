@@ -1,4 +1,6 @@
-﻿public class MyClass
+﻿namespace TestSomething;
+
+public class MyClass
 {
     private int x;
     private string y;

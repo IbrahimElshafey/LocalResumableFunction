@@ -1,12 +1,6 @@
 ﻿using AspectInjector.Broker;
-using System;
-using System.Text.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 
-namespace Aspects.PushResult
+namespace TestSomething
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     [Injection(typeof(PushResultAspect), Inherited = true)]

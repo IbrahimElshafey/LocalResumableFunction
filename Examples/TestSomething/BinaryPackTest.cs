@@ -1,7 +1,8 @@
-﻿
+﻿using System.Reflection;
 using BinaryPack;
-using System.Dynamic;
-using System.Reflection;
+
+namespace TestSomething;
+
 internal class BinaryPackTest
 {
     internal void Run()

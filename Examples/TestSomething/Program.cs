@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-using TestSomething;
+﻿namespace TestSomething;
 
 internal class Program
 {
@@ -59,19 +58,19 @@ internal class Program
         {
             Id = 1,
             Childs = new List<Node>
-    {
-        new Node {
-            Id=2,
-            Childs=new List<Node> {
+            {
                 new Node {
-                    Id=3, Childs=new List<Node>
-                    {
-                    new Node { Id=4,}
-                }
-                }
-            }},
-        new Node { Id=5,}
-    }
+                    Id=2,
+                    Childs=new List<Node> {
+                        new Node {
+                            Id=3, Childs=new List<Node>
+                            {
+                                new Node { Id=4,}
+                            }
+                        }
+                    }},
+                new Node { Id=5,}
+            }
         };
 
         node.CascadeAction(x =>

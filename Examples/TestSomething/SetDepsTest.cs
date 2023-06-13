@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
-using TestSomething;
+
+namespace TestSomething;
+
 internal class SetDepsTest
 {
     public void Run()

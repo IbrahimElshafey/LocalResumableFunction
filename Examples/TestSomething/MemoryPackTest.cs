@@ -1,6 +1,7 @@
 ﻿using MemoryPack;
-using System;
-using static BinaryPackTest;
+using static TestSomething.BinaryPackTest;
+
+namespace TestSomething;
 
 public class MemoryPackTest
 {
