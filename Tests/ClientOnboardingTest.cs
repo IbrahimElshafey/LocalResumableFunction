@@ -17,16 +17,19 @@ namespace Tests
                 typeof(ClientOnboardingService),
                 typeof(ClientOnboardingWorkflow));
             test.RegisteredServices.AddScoped<IClientOnboardingService, ClientOnboardingService>();
-            await test.Start();
+            await test.ScanTypes();
 
             var appRun = test.CurrentApp.RunAsync();
-            
+
             await test.SimulateMethodCall<ClientOnboardingService, RegistrationForm, RegistrationResult>(
                 x => x.ClientFillsForm,
                 new RegistrationForm { FormData = "Form data", UserId = 1000 },
                 new RegistrationResult { FormId = 5000 });
+            await test.SimulateMethodCall<ClientOnboardingService, OwnerApproveClientInput, OwnerApproveClientResult>(
+                x => x.OwnerApproveClient,
+                new OwnerApproveClientInput { TaskId = 5000 },
+                new OwnerApproveClientResult { OwnerApprovalId = 9000 });
             await appRun;
-            Assert.True(10 == 5 + 5);
         }
     }
 }

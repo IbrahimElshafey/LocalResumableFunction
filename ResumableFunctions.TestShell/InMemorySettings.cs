@@ -10,7 +10,7 @@ namespace ResumableFunctions.TestShell
 {
     internal class InMemorySettings : IResumableFunctionsSettings
     {
-        private SqliteConnection _waitsConnection = new("DataSource=:memory:");
+        
         private readonly string _testName;
         public InMemorySettings(string testName)
         {
@@ -20,20 +20,15 @@ namespace ResumableFunctions.TestShell
         {
             get
             {
-                return GlobalConfiguration.Configuration.UseInMemoryStorage();
-                return GlobalConfiguration.Configuration.UseSQLiteStorage($"DataSource={_testName}.db");
+                return GlobalConfiguration.Configuration.UseSQLiteStorage($"{_testName}_Hangfire.db");
             }
         }
-
-
-       
 
         public DbContextOptionsBuilder WaitsDbConfig
         {
             get
             {
-                _waitsConnection.Open();
-                return new DbContextOptionsBuilder().UseSqlite(_waitsConnection);
+                return new DbContextOptionsBuilder().UseSqlite($"DataSource={_testName}_Waits.db");
             }
         }
 
@@ -45,7 +40,7 @@ namespace ResumableFunctions.TestShell
         public string CurrentDbName { get; set; }
         public int CurrentServiceId { get; set; }
 
-        public IDistributedLockProvider DistributedLockProvider => 
+        public IDistributedLockProvider DistributedLockProvider =>
             new WaitHandleDistributedSynchronizationProvider();
     }
 }

@@ -30,31 +30,34 @@ namespace ResumableFunctions.TestShell
 
         public TestCase(string testName, params Type[] types)
         {
+            _testName = testName;
             _builder = Host.CreateApplicationBuilder();
-            _builder.Services.AddSingleton(new BackgroundJobServerOptions()
+            _builder.Services.AddSingleton(new BackgroundJobServerOptions
             {
-                //you can change your options here
-                Queues = new[] { "default", "etl" }
+                WorkerCount = 1,
+                TaskScheduler = TaskScheduler.Current
             });
-
+            DeleteDbs();
             _settings = new InMemorySettings(testName);
             _builder.Services.AddResumableFunctionsCore(_settings);
             _types = types;
-            _testName = testName;
+        }
+
+        private void DeleteDbs()
+        {
+            if (File.Exists($"{_testName}_Hangfire.db"))
+                File.Delete($"{_testName}_Hangfire.db");
+            if (File.Exists($"{_testName}_Waits.db"))
+                File.Delete($"{_testName}_Waits.db");
         }
 
         public IServiceCollection RegisteredServices => _builder.Services;
 
-        public async Task Start()
+        public async Task ScanTypes()
         {
             CurrentApp = _builder.Build();
             GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(CurrentApp.Services));
-            await ScanTypes();
-            //CurrentApp.Run();
-        }
-
-        private async Task ScanTypes()
-        {
+           
             using var scope = CurrentApp.Services.CreateScope();
             var context = scope.ServiceProvider.GetService<FunctionDataContext>();
             var serviceData = new ServiceData
@@ -79,6 +82,7 @@ namespace ResumableFunctions.TestShell
             Output outPut)
         {
             var methodInfo = CoreExtensions.GetMethodInfo(methodSelector).MethodInfo;
+            //todo:check input and output match method signature
             var pusher = CurrentApp.Services.GetService<ICallPusher>();
             var pushResultAttribute = methodInfo.GetCustomAttribute<PushCallAttribute>();
             await pusher.PushCall(
@@ -96,6 +100,7 @@ namespace ResumableFunctions.TestShell
                     },
                 });
         }
+
     }
 
 

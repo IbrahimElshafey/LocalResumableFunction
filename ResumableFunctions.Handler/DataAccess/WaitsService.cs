@@ -52,7 +52,9 @@ internal partial class WaitsService : IWaitsService
                    .Select(x => new { x.MethodGroupToWaitId, x.ServiceId })
                    .Where(x => x.MethodGroupToWaitId == methodGroupId)
                    .Distinct()
-                   .Select(x => x.ServiceId);
+                   .Select(x => x.ServiceId)
+                   //.ToList()//sqlite does not translate if query 
+                   ;
 
             return await _context
                 .ServicesData
