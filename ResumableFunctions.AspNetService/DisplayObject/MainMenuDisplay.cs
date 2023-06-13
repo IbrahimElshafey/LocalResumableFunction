@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ResumableFunctions.AspNetService.DisplayObject
+﻿namespace ResumableFunctions.AspNetService.DisplayObject
 {
     public class MainMenuDisplay
     {

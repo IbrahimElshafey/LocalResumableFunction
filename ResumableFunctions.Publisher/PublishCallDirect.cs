@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
 using System.Net.Http.Json;
 
 namespace ResumableFunctions.Publisher

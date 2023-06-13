@@ -1,12 +1,9 @@
-﻿using System.Diagnostics;
-using ResumableFunctions.Handler.Helpers;
+﻿using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
-using System;
 using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.Core;

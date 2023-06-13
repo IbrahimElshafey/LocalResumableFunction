@@ -1,13 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Diagnostics;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Text;
-using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Publisher
 {

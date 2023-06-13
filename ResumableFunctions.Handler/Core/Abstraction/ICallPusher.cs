@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Core.Abstraction
 {

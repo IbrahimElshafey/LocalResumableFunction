@@ -1,10 +1,8 @@
 ﻿using AspectInjector.Broker;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using System.Diagnostics;
 using System.Reflection;
 
 

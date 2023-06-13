@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-
-namespace ResumableFunctions.Handler.Helpers;
+﻿namespace ResumableFunctions.Handler.Helpers;
 
 public abstract class BinaryToObjectConverterAbstract
 {

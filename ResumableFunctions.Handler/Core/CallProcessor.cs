@@ -1,22 +1,8 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Reflection;
-using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.InOuts;
-using Microsoft.EntityFrameworkCore;
-using Hangfire;
+﻿using ResumableFunctions.Handler.InOuts;
 using Microsoft.Extensions.Logging;
-using System;
-using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.Helpers;
-using Newtonsoft.Json.Linq;
-using static System.Formats.Asn1.AsnWriter;
-using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
-using ResumableFunctions.Handler.DataAccess;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Medallion.Threading;
 
 namespace ResumableFunctions.Handler.Core;
 internal class CallProcessor : ICallProcessor

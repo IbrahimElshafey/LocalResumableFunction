@@ -1,25 +1,4 @@
-﻿using Hangfire;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using ResumableFunctions.Handler;
-using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.Core;
-using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.DataAccess;
-using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.InOuts;
-using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ResumableFunctions.TestShell
+﻿namespace ResumableFunctions.TestShell
 {
 
     // Provides a task scheduler that ensures a maximum concurrency level while

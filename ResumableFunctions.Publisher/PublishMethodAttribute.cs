@@ -1,8 +1,4 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
-using AspectInjector.Broker;
+﻿using AspectInjector.Broker;
 
 namespace ResumableFunctions.Publisher;
 

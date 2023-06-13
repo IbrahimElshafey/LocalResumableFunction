@@ -3,7 +3,6 @@ using Hangfire.SqlServer;
 using Medallion.Threading;
 using Medallion.Threading.SqlServer;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts

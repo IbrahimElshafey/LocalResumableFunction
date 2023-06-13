@@ -1,9 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using ResumableFunctions.Handler.Attributes;
-
-namespace ResumableFunctions.Handler.InOuts;
+﻿namespace ResumableFunctions.Handler.InOuts;
 
 //mixin
 

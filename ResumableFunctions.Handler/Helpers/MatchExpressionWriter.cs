@@ -1,12 +1,7 @@
 ﻿using FastExpressionCompiler;
-using Microsoft.EntityFrameworkCore.Internal;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
-using System.Xml.Linq;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;

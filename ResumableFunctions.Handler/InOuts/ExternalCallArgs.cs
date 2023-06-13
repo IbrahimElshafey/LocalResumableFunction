@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-
-namespace ResumableFunctions.Handler.InOuts;
+﻿namespace ResumableFunctions.Handler.InOuts;
 
 public class ExternalCallArgs
 {

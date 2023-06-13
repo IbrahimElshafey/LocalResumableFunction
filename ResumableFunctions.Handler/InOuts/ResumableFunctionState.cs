@@ -1,9 +1,7 @@
 ﻿
 using MessagePack;
-using Newtonsoft.Json;
 using ResumableFunctions.Handler.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.InOuts;
 

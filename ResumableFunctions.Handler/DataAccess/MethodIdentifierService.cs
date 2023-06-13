@@ -1,10 +1,6 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.Handler.Helpers;
-using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using Medallion.Threading;
 

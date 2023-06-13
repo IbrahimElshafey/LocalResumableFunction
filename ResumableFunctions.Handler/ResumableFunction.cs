@@ -1,9 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using MessagePack;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
-using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;

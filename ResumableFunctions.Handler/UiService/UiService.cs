@@ -2,8 +2,6 @@
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
-using System;
-using System.Linq;
 
 namespace ResumableFunctions.Handler.UiService
 {

@@ -1,9 +1,7 @@
 ﻿using MessagePack;
 using MessagePack.Resolvers;
-using Microsoft.Extensions.Logging;
 using System.Dynamic;
 using System.Linq.CompilerServices.TypeSystem;
-using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.Helpers;
 internal class BinaryToObjectConverter : BinaryToObjectConverterAbstract

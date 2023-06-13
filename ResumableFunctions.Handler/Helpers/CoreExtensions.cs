@@ -1,14 +1,6 @@
 ﻿using Hangfire;
-using Hangfire.Logging;
-using Hangfire.SqlServer;
-using Medallion.Threading;
-using Medallion.Threading.SqlServer;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;

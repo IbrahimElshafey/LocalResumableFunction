@@ -1,6 +1,4 @@
-﻿using ResumableFunctions.Handler.InOuts;
-
-namespace ResumableFunctions.Handler.Core.Abstraction
+﻿namespace ResumableFunctions.Handler.Core.Abstraction
 {
     public interface ICallProcessor
     {

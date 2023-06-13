@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using ResumableFunctions.Handler.Helpers;
+﻿using ResumableFunctions.Handler.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 

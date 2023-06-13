@@ -1,14 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Xml.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using ResumableFunctions.Handler;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Helpers;
 

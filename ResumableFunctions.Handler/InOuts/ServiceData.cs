@@ -1,5 +1,4 @@
 ﻿using MessagePack;
-using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;

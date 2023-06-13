@@ -1,15 +1,9 @@
 ﻿using Hangfire;
-using Medallion.Threading;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using System;
-using System.Reflection;
 
 namespace ResumableFunctions.AspNetService
 {

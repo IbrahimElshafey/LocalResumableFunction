@@ -2,7 +2,6 @@ using ClientOnboarding.InOuts;
 using ClientOnboarding.Services;
 using ClientOnboarding.Workflow;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.TestShell;
 
