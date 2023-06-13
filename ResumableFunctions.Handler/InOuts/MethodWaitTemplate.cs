@@ -1,5 +1,6 @@
 ﻿using ResumableFunctions.Handler.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Dynamic;
 using System.Linq.Expressions;
 using System.Text;
 namespace ResumableFunctions.Handler.InOuts;
@@ -50,27 +51,25 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
     public LambdaExpression MatchExpression { get; internal set; }
 
     [NotMapped]
-    public Expression<Func<ExpandoAccessor, ExpandoAccessor, bool>> MatchExpressionDynamic { get; internal set; }
+    public Expression<Func<ExpandoObject, ExpandoObject, bool>> MatchExpressionDynamic { get; internal set; }
 
     [NotMapped]
-    public Expression<Func<ExpandoAccessor, string[]>> CallMandatoryPartExpressionDynamic { get; internal set; }
+    public Expression<Func<ExpandoObject, string[]>> CallMandatoryPartExpressionDynamic { get; internal set; }
 
     [NotMapped]
     public LambdaExpression CallMandatoryPartExpression { get; internal set; }
-
-
 
     [NotMapped]
     public LambdaExpression InstanceMandatoryPartExpression { get; internal set; }
 
     [NotMapped]
-    public Expression<Func<ExpandoAccessor, string[]>> InstanceMandatoryPartExpressionDynamic { get; internal set; }
+    public Expression<Func<ExpandoObject, string[]>> InstanceMandatoryPartExpressionDynamic { get; internal set; }
 
     [NotMapped]
     public LambdaExpression SetDataExpression { get; internal set; }
 
     [NotMapped]
-    public Expression<Action<ExpandoAccessor, ExpandoAccessor>> SetDataExpressionDynamic { get; internal set; }
+    public Expression<Action<ExpandoObject, ExpandoObject>> SetDataExpressionDynamic { get; internal set; }
 
 
     bool expressionsLoaded = false;
