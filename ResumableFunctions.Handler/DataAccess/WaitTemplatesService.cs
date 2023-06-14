@@ -45,10 +45,10 @@ internal class WaitTemplatesService : IWaitTemplatesService
         return waitTemplate;
     }
 
-    public Task<MethodWaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
+    public async Task<MethodWaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
     {
         return
-             _context
+             await _context
              .MethodWaitTemplates
              .FirstOrDefaultAsync(x => x.Hash == hash && x.MethodGroupId == groupId && x.FunctionId == funcId);
     }

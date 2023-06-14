@@ -9,6 +9,7 @@ public class WaitForCall : IEntity, IEntityInService
     public int WaitId { get; internal set; }
     public int? ServiceId { get; set; }
     public int FunctionId { get; internal set; }
+    public int StateId { get; internal set; }
     public WaitForCallStatus Status { get; internal set; }
     public DateTime Created { get; internal set; }
 

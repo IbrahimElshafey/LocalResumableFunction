@@ -1,8 +1,10 @@
 ﻿# Todo
 
 ## Core functions
-* Props in expressions must be public and have getter and setter
-* Write test cases for expressions rewrite
+* New Scan should not delete existing method wait and groups if exist
+* Clear Hangfire jobs table in debug on start
+* Props used in Match and SetData expressions must be public and have getter and setter
+* Write test cases for expressions rewrite because it's critical part
 * Local variables when evaluating expression constants
 * Delay processing wait if the scan is in progress
 * Remove direct use for DbContext

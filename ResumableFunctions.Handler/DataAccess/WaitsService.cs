@@ -61,6 +61,7 @@ internal partial class WaitsService : IWaitsService
             throw;
         }
     }
+
     //todo:critical this method must be optimized
     public async Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId, string methodUrn)
     {
@@ -73,16 +74,15 @@ internal partial class WaitsService : IWaitsService
 
             var methodGroupId = await GetMethodGroupId(methodUrn);
 
-
+            //should I lock based on methodGroupId for cross services, may be no because it's used inside lock!!!
             var matchedWaitsIds = await _context
                             .MethodWaits
-                            .Include(x => x.RequestedByFunction)
                             .Where(x =>
                                     x.MethodGroupToWaitId == methodGroupId &&
                                     x.Status == WaitStatus.Waiting &&
                                     x.ServiceId == _settings.CurrentServiceId
                                 )
-                            .Select(x => new WaitId(x.Id, x.RequestedByFunctionId, x.RequestedByFunction.AssemblyName))
+                            .Select(x => new WaitId(x.Id, x.RequestedByFunctionId, x.FunctionStateId))
                             .ToListAsync();
 
 
@@ -102,7 +102,8 @@ internal partial class WaitsService : IWaitsService
                         PushedCallId = pushedCallId,
                         WaitId = waitId.Id,
                         ServiceId = _settings.CurrentServiceId,
-                        FunctionId = waitId.FunctionId
+                        FunctionId = waitId.FunctionId,
+                        StateId = waitId.StateId,
                     }).ToList();
                 _context.WaitsForCalls.AddRange(waitsForCall);
             }

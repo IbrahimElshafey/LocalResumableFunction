@@ -1,24 +1,19 @@
 ﻿# Work On
-* Test if mandatory expression make full match
-	* Translate every mandatory part to true
-	* Other parts to false
-	* If result is true the full match
-	* if else the partial match
 * Write unit test for all waiting scenarios
-* New Scan should not delete existing method wait and groups if exist
-* Clear Hangfire jobs table in debug on start
 
-# When process pushed call received for service
+
+# When process pushed call received for service (Each service process it's waits)
+* This will be in `WaitsService.GetWaitsIdsForMethodCall`
 * Get MethodGroupId by MethodUrn
 * Get Wait templates for method group
 	* MethodWaitTemplates.Where(x => x.MethodGroupId)
 	* Will return WaitTemplate list
-* Apply CallMandatoryPartExpression extractor expression to pushed call
+* Apply CallMandatoryPartExpressionDynamic extractor expression to pushed call
 	* Will return mandatory part (Mandatory part string,Function Id)
 	* If mandatory part is null or contains null it will be ignored
 * Query waits table
-	* Where (MandatoryPartValue & FunctionId & MethodGroupId)
-	* Waits result will be marked as partial matches or full match based on template `IsMandatoryFullMatch` prop
+	* Where (MandatoryPartValue & FunctionId & MethodGroupId) pairs
+	* Waits result will be marked as partial matches or full match based on template `IsMandatoryPartFullMatch` prop
 * Will group waits by `WaitTemplateId`
 * For each group one match must be success
 * Match evalution for each group
