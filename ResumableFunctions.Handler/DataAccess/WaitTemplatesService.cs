@@ -34,6 +34,7 @@ internal class WaitTemplatesService : IWaitTemplatesService
         waitTemplate.CallMandatoryPartExpression = matchWriter.CallMandatoryPartExpression;
         waitTemplate.CallMandatoryPartExpressionDynamic = matchWriter.CallMandatoryPartExpressionDynamic;
         waitTemplate.InstanceMandatoryPartExpression = matchWriter.InstanceMandatoryPartExpression;
+        waitTemplate.IsMandatoryPartFullMatch = matchWriter.IsMandatoryPartFullMatch;
         
         
         var setDataWriter = new SetDataExpressionWriter(hashResult.SetDataExpression, currentFunctionInstance.GetType());

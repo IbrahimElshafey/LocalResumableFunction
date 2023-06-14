@@ -24,7 +24,7 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
     public MethodsGroup MethodGroup { get; internal set; }
     public byte[] Hash { get; internal set; }
     public DateTime Created { get; internal set; }
-    public string IsMandatoryPartFullMatch { get; private set; }
+    public bool IsMandatoryPartFullMatch { get; internal set; }
 
     private string _matchExpression;
     private string _callMandatoryPartExpression;

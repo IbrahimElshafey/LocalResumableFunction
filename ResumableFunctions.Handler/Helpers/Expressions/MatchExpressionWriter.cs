@@ -19,7 +19,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
     public LambdaExpression CallMandatoryPartExpression { get; private set; }
     public Expression<Func<ExpandoObject, string[]>> CallMandatoryPartExpressionDynamic { get; private set; }
     public LambdaExpression InstanceMandatoryPartExpression { get; private set; }
-    public string IsMandatoryPartFullMatch { get; private set; }
+    public bool IsMandatoryPartFullMatch { get; private set; }
 
     /* NEW expressions
     - MatchExpressionDynamic
@@ -51,6 +51,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             CallMandatoryPartExpression = mandatoryPartVistor.CallMandatoryPartExpression;
             CallMandatoryPartExpressionDynamic = mandatoryPartVistor.CallMandatoryPartExpressionDynamic;
             InstanceMandatoryPartExpression = mandatoryPartVistor.InstanceMandatoryPartExpression;
+            SetIsMandatoryPartFullMatchValue();
         }
     }
 
@@ -230,9 +231,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         var changeToBools = new GenericVisitor();
         Expression partToCheck = null;
         changeToBools.OnVisitBinary(VisitBinary);
-        //changeToBools.OnVisitUnary(VisitUnary);
-        //changeToBools.OnVisitMember(VisitMember);
-        //changeToBools.OnVisitParamter(VisitParameters);
+
         foreach (var constPart in _constantParts)
         {
             if (constPart.IsMandatory || constPart.Operator != ExpressionType.Equal) continue;
@@ -251,19 +250,26 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             if (canBeTranslated) return Constant(true);
             return base.VisitBinary(node);
         }
+    }
 
-        //Expression VisitMember(MemberExpression memberExpression)
-        //{
-        //    if (memberExpression.Type == typeof(bool))
-        //        return Constant(true);
-        //    return base.VisitMember(memberExpression);
-        //}
-        //Expression VisitParameter(ParameterExpression parameterExpression)
-        //{
-        //    if (parameterExpression.Type == typeof(bool))
-        //        return Constant(true);
-        //    return base.VisitParameter(parameterExpression);
-        //}
+    private void SetIsMandatoryPartFullMatchValue()
+    {
+        var changeToBools = new GenericVisitor();
+        changeToBools.OnVisitBinary(VisitBinary);
+        var exp = changeToBools.Visit(_matchExpression.Body);
+        var compiled = Lambda<Func<bool>>(exp).CompileFast();
+        IsMandatoryPartFullMatch = compiled();
+        Expression VisitBinary(BinaryExpression node)
+        {
+            var isMandatory =
+                node.NodeType == ExpressionType.Equal &&
+                _constantParts.Any(x => x.IsMandatory && (x.PropPathExpression == node.Left || x.PropPathExpression == node.Right));
+            if (isMandatory)
+                return Constant(true);
+            var canBeTranslated = _constantParts.Any(x => x.ConstantExpression == node.Left || x.ConstantExpression == node.Right);
+            if (canBeTranslated) return Constant(false);
+            return base.VisitBinary(node);
+        }
     }
 
     private void GenerateMatchUsingJson()
