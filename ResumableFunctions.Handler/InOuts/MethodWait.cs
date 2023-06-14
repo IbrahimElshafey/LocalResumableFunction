@@ -131,14 +131,9 @@ public class MethodWait : Wait
 
 public class MethodWait<TInput, TOutput> : MethodWait
 {
-    public MethodWait(Func<TInput, Task<TOutput>> method)
-    {
-        Initiate(method.Method);
-    }
-    public MethodWait(Func<TInput, TOutput> method)
-    {
-        Initiate(method.Method);
-    }
+    public MethodWait(Func<TInput, Task<TOutput>> method) => Initiate(method.Method);
+    public MethodWait(Func<TInput, TOutput> method) => Initiate(method.Method);
+    public MethodWait(MethodInfo methodInfo) => Initiate(methodInfo);
 
     private void Initiate(MethodInfo method)
     {

@@ -17,11 +17,6 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
         public LambdaExpression InstanceMandatoryPartExpression { get; internal set; }
         public MandatoryPartVistor(LambdaExpression matchExpression, List<ConstantPart> constantParts)
         {
-            //MandatoryPart = _constantParts
-            //  .Where(x => x.IsMandatory)
-            //  .OrderBy(x => x.PropPathExpression.ToString())
-            //  .Select(x => x.Value.ToString())
-            //  .Aggregate((x, y) => $"{x}#{y}");
             _matchExpression = matchExpression;
             _mandatoryParts =
                constantParts

@@ -40,11 +40,11 @@ internal partial class WaitsService : IWaitsService
             var serviceIds =
                     _context
                    .MethodWaits
-                   .Select(x => new { x.MethodGroupToWaitId, x.ServiceId })
-                   .Where(x => x.MethodGroupToWaitId == methodGroupId)
+                   .Select(x => new { x.MethodGroupToWaitId, x.ServiceId, x.Status })
+                   .Where(x => x.MethodGroupToWaitId == methodGroupId && x.Status == WaitStatus.Waiting)
                    .Distinct()
                    .Select(x => x.ServiceId)
-                   //.ToList()//sqlite does not translate if query 
+                   //.ToList()//sqlite does not translate if in memory 
                    ;
 
             return await _context
@@ -68,8 +68,12 @@ internal partial class WaitsService : IWaitsService
 
         try
         {
-            var pushedCallExist = await _context.PushedCalls.AnyAsync(x => x.Id == pushedCallId);
-            if (pushedCallExist is false)
+            var pushedCall = await _context
+                .PushedCalls
+                .Select(x => new PushedCall { Id = x.Id, Data = x.Data })
+                .FirstOrDefaultAsync(x => x.Id == pushedCallId);
+
+            if (pushedCall is null)
                 throw new NullReferenceException($"No pushed method with ID [{pushedCallId}] exist in DB.");
 
             var methodGroupId = await GetMethodGroupId(methodUrn);
@@ -131,8 +135,9 @@ internal partial class WaitsService : IWaitsService
             return methodGroup;
         else
         {
-            _logger.LogWarning($"Method [{methodUrn}] is not registered in current database as [WaitMethod].");
-            return default;
+            var error = $"Method [{methodUrn}] is not registered in current database as [WaitMethod]."
+            _logger.LogWarning(error);
+            throw new Exception(error);
         }
     }
 
