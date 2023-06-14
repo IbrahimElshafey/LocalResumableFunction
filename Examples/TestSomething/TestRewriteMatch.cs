@@ -49,7 +49,7 @@ namespace TestSomething
                        //y.EnumProp == (StackBehaviour.Pop1 | StackBehaviour.Pop1_pop1) ||
                        y.EnumProp == StackBehaviour.Popi_popi_popi &&
                        x.IsMan &&
-                       x.Name == localVariable
+                       x.Name == "Mohamed"
                        )
                        .SetData((input, output) => InstanceId == output.TaskId);
             methodWait.CurrentFunction = this;
@@ -75,16 +75,13 @@ namespace TestSomething
 
         private void TestWithComplexTypes()
         {
-            var wait = WaitMethodTwo();
-            var matchRewriter = new MatchExpressionWriter(wait.MatchExpression, this);
-
             var pushedCall = new InputOutput
             {
                 Input = new MethodInput
                 {
-                    Id = 1,
-                    Name = "Hello",
-                    IsMan = true
+                    Id = 25,//25
+                    Name = "Mohamed",//"Mohamed"
+                    IsMan = true//true
                 },
                 Output = new MethodOutput
                 {
@@ -93,16 +90,31 @@ namespace TestSomething
                     DateProp = new DateTime(1999, 12, 2),
                     ByteArray = new byte[] { 22, 34, 45 },
                     IntArray = new int[] { 22, 34, 45 },
-                    EnumProp = StackBehaviour.Pop0,
+                    EnumProp = StackBehaviour.Popi_popi_popi,//StackBehaviour.Popi_popi_popi
                 }
             };
+            var instanceDynamic = this.ToExpando();
+            var dynamicPushedCall = pushedCall.ToExpando();
+            //input.Id == InstanceId + 20 && output.EnumProp == StackBehaviour.Popi_popi_popi && input.IsMan && input.Name == localVariable
+            var wait = WaitMethodTwo();
+            var matchRewriter = new MatchExpressionWriter(wait.MatchExpression, this);
+            //Expression<Func<ExpandoObject, ExpandoObject, bool>> matchDynamic = (inputOutput, instance) =>
+            //inputOutput.Get<int>("input.Id") == instance.Get<int>("InstanceId") + 20 && (bool)instance.Get("uuu");
+            //var matchDynamic = matchRewriter.MatchExpressionDynamic;
+            //var matchDynComp = matchDynamic.CompileFast();
+            //var resu = matchDynComp.Invoke(dynamicPushedCall, instanceDynamic);
 
+          
+            MandatoryPartExpression(matchRewriter, dynamicPushedCall, pushedCall);
+        }
+
+        private void MandatoryPartExpression(MatchExpressionWriter matchRewriter, ExpandoObject dynamicPushedCall, InputOutput pushedCall)
+        {
             var callMandatoryPartExpression = matchRewriter.CallMandatoryPartExpression;
             var compiled = callMandatoryPartExpression.CompileFast();
             var result = compiled.DynamicInvoke(pushedCall.Input, pushedCall.Output);
 
             //new[] { ((int)output.EnumProp).ToString(), input.Id.ToString(), input.IsMan.ToString() }
-            var dynamicPushedCall = pushedCall.ToExpando();
             var mandatoryDynExps = matchRewriter.CallMandatoryPartExpressionDynamic;
             var mandatoryDynExpsCompiled = mandatoryDynExps.CompileFast();
             var dynresult2 = mandatoryDynExpsCompiled.DynamicInvoke(dynamicPushedCall);
@@ -111,11 +123,6 @@ namespace TestSomething
             var instanceMandexpComp = instanceMandexp.CompileFast();
             var dynresult3 = (string[])instanceMandexpComp.DynamicInvoke(this);
             var id = string.Join("#", dynresult3);
-            //var getId = matchRewrite1.CallMandatoryPartExpressionDynamic;
-            //var compile = getId.Compile();
-            //var value = compile.Invoke(pushedCall);
-            //var matchRewrite = new RewriteMatchExpression(wait);
-            //var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.MatchExpression.CompileFast();
         }
 
         private void TestWithBasicTypes()

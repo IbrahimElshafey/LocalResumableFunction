@@ -1,6 +1,8 @@
 ﻿# Todo
 
 ## Core functions
+* Props in expressions must be public and have getter and setter
+* Write test cases for expressions rewrite
 * Local variables when evaluating expression constants
 * Delay processing wait if the scan is in progress
 * Remove direct use for DbContext

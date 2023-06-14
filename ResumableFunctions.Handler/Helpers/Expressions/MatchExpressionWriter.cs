@@ -16,9 +16,8 @@ public partial class MatchExpressionWriter : ExpressionVisitor
     private List<ConstantPart> _constantParts = new();
 
     public LambdaExpression MatchExpression { get; private set; }
-    public LambdaExpression MatchExpressionDynamic { get; private set; }//wo
     public LambdaExpression CallMandatoryPartExpression { get; private set; }
-    public LambdaExpression CallMandatoryPartExpressionDynamic { get; private set; }
+    public Expression<Func<ExpandoObject, string[]>> CallMandatoryPartExpressionDynamic { get; private set; }
     public LambdaExpression InstanceMandatoryPartExpression { get; private set; }
     public string IsMandatoryPartFullMatch { get; private set; }
 
@@ -48,7 +47,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
 
         if (_constantParts.Any(x => x.IsMandatory))
         {
-            var mandatoryPartVistor = new MandatoryPartVistor(_matchExpression,_constantParts);
+            var mandatoryPartVistor = new MandatoryPartVistor(_matchExpression, _constantParts);
             CallMandatoryPartExpression = mandatoryPartVistor.CallMandatoryPartExpression;
             CallMandatoryPartExpressionDynamic = mandatoryPartVistor.CallMandatoryPartExpressionDynamic;
             InstanceMandatoryPartExpression = mandatoryPartVistor.InstanceMandatoryPartExpression;
@@ -292,7 +291,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         //}
     }
 
-    
+
     private Expression AccesUsingJToken(Expression propPathExpression, ParameterExpression pushedCall)
     {
         var useJobject = new GenericVisitor();

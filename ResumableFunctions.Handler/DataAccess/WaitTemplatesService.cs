@@ -21,7 +21,7 @@ internal class WaitTemplatesService : IWaitTemplatesService
         int groupId,
         int methodId)
     {
-        var toAdd = new MethodWaitTemplate
+        var waitTemplate = new MethodWaitTemplate
         {
             MethodId = methodId,
             FunctionId = funcId,
@@ -30,14 +30,18 @@ internal class WaitTemplatesService : IWaitTemplatesService
         };
         //todo:Rewrite expressions
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
-        toAdd.MatchExpression = matchWriter.MatchExpression;
+        waitTemplate.MatchExpression = matchWriter.MatchExpression;
+        waitTemplate.CallMandatoryPartExpression = matchWriter.CallMandatoryPartExpression;
+        waitTemplate.CallMandatoryPartExpressionDynamic = matchWriter.CallMandatoryPartExpressionDynamic;
+        waitTemplate.InstanceMandatoryPartExpression = matchWriter.InstanceMandatoryPartExpression;
+        
         
         var setDataWriter = new SetDataExpressionWriter(hashResult.SetDataExpression, currentFunctionInstance.GetType());
-        toAdd.SetDataExpression = setDataWriter.SetDataExpression;
+        waitTemplate.SetDataExpression = setDataWriter.SetDataExpression;
 
-        _context.MethodWaitTemplates.Add(toAdd);
+        _context.MethodWaitTemplates.Add(waitTemplate);
         await _context.SaveChangesAsync();
-        return toAdd;
+        return waitTemplate;
     }
 
     public Task<MethodWaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)

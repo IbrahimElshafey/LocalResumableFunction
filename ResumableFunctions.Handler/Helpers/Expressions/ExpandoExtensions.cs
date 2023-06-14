@@ -7,6 +7,11 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
 {
     public static class ExpandoExtensions
     {
+        public static T Get<T>(this ExpandoObject _this, string path)
+        {
+            var result = Get(_this, path);
+            return (T)Convert.ChangeType(result, typeof(T));
+        }
         public static object Get(this ExpandoObject _this, string path)
         {
             var comparer = StringComparer.OrdinalIgnoreCase;

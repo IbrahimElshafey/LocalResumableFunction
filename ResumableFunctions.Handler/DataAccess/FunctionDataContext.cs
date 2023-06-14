@@ -150,12 +150,10 @@ public class FunctionDataContext : DbContext
     {
         var entityBuilder = modelBuilder.Entity<MethodWaitTemplate>();
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.MatchExpression);
-        entityBuilder.Property(MethodWaitTemplate.FieldsNames.MatchExpressionDynamic);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpression);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpressionDynamic);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.InstanceMandatoryPartExpression);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.SetDataExpression);
-        entityBuilder.Property(MethodWaitTemplate.FieldsNames.SetDataExpressionDynamic);
         modelBuilder.Entity<MethodsGroup>()
             .HasMany(x => x.WaitTemplates)
             .WithOne(x => x.MethodGroup)

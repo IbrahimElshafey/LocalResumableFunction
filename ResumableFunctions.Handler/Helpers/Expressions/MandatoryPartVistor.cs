@@ -13,7 +13,7 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
         private List<ConstantPart> _mandatoryParts;
         private LambdaExpression _matchExpression;
         public LambdaExpression CallMandatoryPartExpression { get; internal set; }
-        public LambdaExpression CallMandatoryPartExpressionDynamic { get; internal set; }
+        public Expression<Func<ExpandoObject, string[]>> CallMandatoryPartExpressionDynamic { get; internal set; }
         public LambdaExpression InstanceMandatoryPartExpression { get; internal set; }
         public MandatoryPartVistor(LambdaExpression matchExpression, List<ConstantPart> constantParts)
         {
@@ -49,12 +49,12 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
             }
         }
 
-        private LambdaExpression GetCallMandatoryPartExpressionDynamic()
+        private Expression<Func<ExpandoObject, string[]>> GetCallMandatoryPartExpressionDynamic()
         {
             var call = Parameter(typeof(ExpandoObject), "call");
             var parts = TranslateParts()?.ToList();
             if (parts != null && parts.Count == _mandatoryParts.Count)
-                return Lambda(NewArrayInit(typeof(string), parts), call);
+                return Lambda<Func<ExpandoObject, string[]>>(NewArrayInit(typeof(string), parts), call);
             return null;
 
             IEnumerable<Expression> TranslateParts()
@@ -69,7 +69,7 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
                     yield return
                         Call(
                             Call(
-                                typeof(ExpandoExtensions).GetMethod("Get"),
+                                typeof(ExpandoExtensions).GetMethod("Get", 0, new[] { typeof(ExpandoObject), typeof(string) }),
                                 call,
                                 Constant(exp.ToString())
                             ),

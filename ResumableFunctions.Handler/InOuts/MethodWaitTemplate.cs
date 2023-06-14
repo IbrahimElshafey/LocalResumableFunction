@@ -12,12 +12,10 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
     internal static class FieldsNames
     {
         public const string MatchExpression = nameof(_matchExpression);
-        public const string MatchExpressionDynamic = nameof(_matchExpressionDynamic);
         public const string CallMandatoryPartExpression = nameof(_callMandatoryPartExpression);
         public const string CallMandatoryPartExpressionDynamic = nameof(_callMandatoryPartExpressionDynamic);
         public const string InstanceMandatoryPartExpression = nameof(_instanceMandatoryPartExpression);
         public const string SetDataExpression = nameof(_setDataExpression);
-        public const string SetDataExpressionDynamic = nameof(_setDataExpressionDynamic);
     }
     public int Id { get; internal set; }
     public int FunctionId { get; internal set; }
@@ -29,12 +27,10 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
     public string IsMandatoryPartFullMatch { get; private set; }
 
     private string _matchExpression;
-    private string _matchExpressionDynamic;
     private string _callMandatoryPartExpression;
     private string _callMandatoryPartExpressionDynamic;
     private string _instanceMandatoryPartExpression;
     private string _setDataExpression;
-    private string _setDataExpressionDynamic;
 
 
     public static Expression<Func<MethodWaitTemplate, MethodWaitTemplate>> BasicMatchSelector =>
@@ -63,8 +59,6 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
     [NotMapped]
     public LambdaExpression MatchExpression { get; internal set; }
 
-    [NotMapped]
-    public Expression<Func<ExpandoObject, ExpandoObject, bool>> MatchExpressionDynamic { get; internal set; }
 
     [NotMapped]
     public Expression<Func<ExpandoObject, string[]>> CallMandatoryPartExpressionDynamic { get; internal set; }
@@ -88,12 +82,19 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
     internal void LoadExpressions(bool forceReload = false)
     {
         var serializer = new ExpressionSerializer();
-        if (expressionsLoaded && forceReload == false) return;
+        if (expressionsLoaded && !forceReload) return;
 
         if (_matchExpression != null)
             MatchExpression = (LambdaExpression)serializer.Deserialize(_matchExpression).ToExpression();
-        if (_setDataExpression != null && (SetDataExpression == null))
+        if (_setDataExpression != null)
             SetDataExpression = (LambdaExpression)serializer.Deserialize(_setDataExpression).ToExpression();
+        if (_callMandatoryPartExpression != null)
+            CallMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(_callMandatoryPartExpression).ToExpression();
+        if (_instanceMandatoryPartExpression != null)
+            InstanceMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(_instanceMandatoryPartExpression).ToExpression();
+        if (_callMandatoryPartExpressionDynamic != null)
+            CallMandatoryPartExpressionDynamic = (Expression<Func<ExpandoObject, string[]>>)
+                serializer.Deserialize(_callMandatoryPartExpressionDynamic).ToExpression();
 
         expressionsLoaded = true;
     }
@@ -120,5 +121,11 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
             _matchExpression = serializer.Serialize(MatchExpression.ToExpressionSlim());
         if (SetDataExpression != null)
             _setDataExpression = serializer.Serialize(SetDataExpression.ToExpressionSlim());
+        if (CallMandatoryPartExpressionDynamic != null)
+            _callMandatoryPartExpressionDynamic = serializer.Serialize(CallMandatoryPartExpressionDynamic.ToExpressionSlim());
+        if (CallMandatoryPartExpression != null)
+            _callMandatoryPartExpression = serializer.Serialize(CallMandatoryPartExpression.ToExpressionSlim());
+        if (InstanceMandatoryPartExpression != null)
+            _instanceMandatoryPartExpression = serializer.Serialize(InstanceMandatoryPartExpression.ToExpressionSlim());
     }
 }
