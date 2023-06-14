@@ -298,7 +298,7 @@ namespace ResumableFunctions.Handler.Core
             methodWait.Template = await
                _context
                .MethodWaitTemplates
-               .Select(MethodWaitTemplate.BasicProps)
+               .Select(MethodWaitTemplate.BasicMatchSelector)
                .FirstAsync(x => x.Id == methodWait.TemplateId);
             if (methodWait.Template == null)
             {

@@ -40,7 +40,7 @@
 * Query waits table
 	* Where (MandatoryPartValue & FunctionId & MethodGroupId)
 	* Waits result will be marked as partial matches or full match based on template `IsMandatoryFullMatch` prop
-* Will group waits by FunctionId
+* Will group waits by `WaitTemplateId`
 * For each group one match must be success
 * Match evalution for each group
 	* Deserialize pushed call to `InputOutput` strong type
@@ -48,7 +48,7 @@
 	* Check waits against static match expression if exist
 	* Find first match
 	* If match found >> set data using set data expression
-	* The other not matched will be marked as canceled
+	* The other not matched will be marked as canceled in same GroupId
 * Continue processing matched wait
 
 # Efficient Wait Matching

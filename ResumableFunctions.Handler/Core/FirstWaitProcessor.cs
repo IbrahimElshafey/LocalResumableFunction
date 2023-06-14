@@ -63,7 +63,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             currentMw.Output = firstMatchedMethodWait.Output;
             var waitTemplate = await _context
                 .MethodWaitTemplates
-                .Select(MethodWaitTemplate.BasicProps)
+                .Select(MethodWaitTemplate.BasicMatchSelector)
                 .FirstAsync(x => x.Id == firstMatchedMethodWait.TemplateId);
             currentMw.TemplateId = waitTemplate.Id;
             currentMw.Template = waitTemplate;

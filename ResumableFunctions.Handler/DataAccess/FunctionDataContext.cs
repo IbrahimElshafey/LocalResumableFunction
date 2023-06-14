@@ -154,7 +154,6 @@ public class FunctionDataContext : DbContext
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpression);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpressionDynamic);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.InstanceMandatoryPartExpression);
-        entityBuilder.Property(MethodWaitTemplate.FieldsNames.InstanceMandatoryPartExpressionDynamic);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.SetDataExpression);
         entityBuilder.Property(MethodWaitTemplate.FieldsNames.SetDataExpressionDynamic);
         modelBuilder.Entity<MethodsGroup>()

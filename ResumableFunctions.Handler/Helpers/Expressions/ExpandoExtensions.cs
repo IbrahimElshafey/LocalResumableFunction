@@ -1,6 +1,7 @@
 ﻿using MessagePack.Resolvers;
 using MessagePack;
 using System.Dynamic;
+using FastExpressionCompiler;
 
 namespace ResumableFunctions.Handler.Helpers.Expressions
 {
@@ -8,7 +9,8 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
     {
         public static object Get(this ExpandoObject _this, string path)
         {
-            var root = (IDictionary<string, object>)_this;
+            var comparer = StringComparer.OrdinalIgnoreCase;
+            var root = new Dictionary<string, object>(_this, comparer);
             var parts = path.Split('.');
             object result = root[parts[0]];
             var parent = parts.Length > 1 ? (IDictionary<object, object>)root[parts[0]] : null;
@@ -50,6 +52,12 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
         {
             var blob = MessagePackSerializer.Serialize(_this, ContractlessStandardResolver.Options);
             return MessagePackSerializer.Deserialize(type, blob, ContractlessStandardResolver.Options);
+        }
+
+        public static ExpandoObject ToExpando(this object _this)
+        {
+            var blob = MessagePackSerializer.Serialize(_this, ContractlessStandardResolver.Options);
+            return MessagePackSerializer.Deserialize<ExpandoObject>(blob, ContractlessStandardResolver.Options);
         }
     }
 }

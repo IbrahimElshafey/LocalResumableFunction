@@ -6,6 +6,7 @@ using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
+using System.Dynamic;
 using System.Linq.Expressions;
 using System.Reflection.Emit;
 
@@ -33,12 +34,12 @@ namespace TestSomething
         private int[] IntArrayMethod() => new int[] { 12, 13, 14, 15, };
         public MethodWait WaitMethodTwo()
         {
-            var localVariable = "kjlklk";
+            var localVariable = GetString();
             var methodWait = new MethodWait<MethodInput, MethodOutput>(TestMethodTwo)
                        .MatchIf((x, y) =>
-                       !(y.TaskId == InstanceId + 10 &&
-                       x.Id > 12) &&
-                       //x.Id == InstanceId + 20 &&
+                       //!(y.TaskId == InstanceId + 10 &&
+                       //x.Id > 12) &&
+                       x.Id == InstanceId + 20 &&
                        //y.DateProp == DateTime.Today &&
                        //y.ByteArray == new byte[] { 12, 13, 14, 15, } ||
                        //y.IntArray[0] == IntArrayMethod()[2] ||
@@ -47,11 +48,17 @@ namespace TestSomething
                        //y.GuidProp == new Guid("ab62534b-2229-4f42-8f4e-c287c82ec760") &&
                        //y.EnumProp == (StackBehaviour.Pop1 | StackBehaviour.Pop1_pop1) ||
                        y.EnumProp == StackBehaviour.Popi_popi_popi &&
-                       x.IsMan
+                       x.IsMan &&
+                       x.Name == localVariable
                        )
                        .SetData((input, output) => InstanceId == output.TaskId);
             methodWait.CurrentFunction = this;
             return methodWait;
+        }
+
+        private object GetString()
+        {
+            return "kjlklk";
         }
 
         public void Run()
@@ -69,24 +76,44 @@ namespace TestSomething
         private void TestWithComplexTypes()
         {
             var wait = WaitMethodTwo();
-            var matchRewrite1 = new MatchExpressionWriter(wait.MatchExpression, this);
+            var matchRewriter = new MatchExpressionWriter(wait.MatchExpression, this);
 
-            var pushedCall = JsonConvert.DeserializeObject<JObject>("""
+            var pushedCall = new InputOutput
+            {
+                Input = new MethodInput
                 {
-                    "input":{"Id":12,"Name":"Hello","IsMan":true},
-                    "output":{
-                        "TaskId":20,
-                        "GuidProp":"7ec03d6d-64e3-4240-bbdc-a143e327a3fc",
-                        "DateProp":"",
-                        "ByteArray":"",
-                        "IntArray":"",
-                        "EnumProp":7,
-                    }
+                    Id = 1,
+                    Name = "Hello",
+                    IsMan = true
+                },
+                Output = new MethodOutput
+                {
+                    TaskId = 20,
+                    GuidProp = new Guid("7ec03d6d-64e3-4240-bbdc-a143e327a3fc"),
+                    DateProp = new DateTime(1999, 12, 2),
+                    ByteArray = new byte[] { 22, 34, 45 },
+                    IntArray = new int[] { 22, 34, 45 },
+                    EnumProp = StackBehaviour.Pop0,
                 }
-                """);
-            var getId = matchRewrite1.CallMandatoryPartExpressionDynamic;
-            var compile = getId.Compile();
-            var value = compile.Invoke(pushedCall);
+            };
+
+            var callMandatoryPartExpression = matchRewriter.CallMandatoryPartExpression;
+            var compiled = callMandatoryPartExpression.CompileFast();
+            var result = compiled.DynamicInvoke(pushedCall.Input, pushedCall.Output);
+
+            //new[] { ((int)output.EnumProp).ToString(), input.Id.ToString(), input.IsMan.ToString() }
+            var dynamicPushedCall = pushedCall.ToExpando();
+            var mandatoryDynExps = matchRewriter.CallMandatoryPartExpressionDynamic;
+            var mandatoryDynExpsCompiled = mandatoryDynExps.CompileFast();
+            var dynresult2 = mandatoryDynExpsCompiled.DynamicInvoke(dynamicPushedCall);
+
+            var instanceMandexp = matchRewriter.InstanceMandatoryPartExpression;
+            var instanceMandexpComp = instanceMandexp.CompileFast();
+            var dynresult3 = (string[])instanceMandexpComp.DynamicInvoke(this);
+            var id = string.Join("#", dynresult3);
+            //var getId = matchRewrite1.CallMandatoryPartExpressionDynamic;
+            //var compile = getId.Compile();
+            //var value = compile.Invoke(pushedCall);
             //var matchRewrite = new RewriteMatchExpression(wait);
             //var method = (Func<MethodInput, MethodOutput, TestRewriteMatch, bool>)matchRewrite.MatchExpression.CompileFast();
         }

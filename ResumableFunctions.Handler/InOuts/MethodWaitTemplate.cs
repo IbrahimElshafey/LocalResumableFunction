@@ -16,7 +16,6 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
         public const string CallMandatoryPartExpression = nameof(_callMandatoryPartExpression);
         public const string CallMandatoryPartExpressionDynamic = nameof(_callMandatoryPartExpressionDynamic);
         public const string InstanceMandatoryPartExpression = nameof(_instanceMandatoryPartExpression);
-        public const string InstanceMandatoryPartExpressionDynamic = nameof(_instanceMandatoryPartExpressionDynamic);
         public const string SetDataExpression = nameof(_setDataExpression);
         public const string SetDataExpressionDynamic = nameof(_setDataExpressionDynamic);
     }
@@ -27,18 +26,18 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
     public MethodsGroup MethodGroup { get; internal set; }
     public byte[] Hash { get; internal set; }
     public DateTime Created { get; internal set; }
+    public string IsMandatoryPartFullMatch { get; private set; }
 
     private string _matchExpression;
     private string _matchExpressionDynamic;
     private string _callMandatoryPartExpression;
     private string _callMandatoryPartExpressionDynamic;
     private string _instanceMandatoryPartExpression;
-    private string _instanceMandatoryPartExpressionDynamic;
     private string _setDataExpression;
     private string _setDataExpressionDynamic;
 
 
-    public static Expression<Func<MethodWaitTemplate, MethodWaitTemplate>> BasicProps =>
+    public static Expression<Func<MethodWaitTemplate, MethodWaitTemplate>> BasicMatchSelector =>
         waitTemplate => new MethodWaitTemplate
         {
             _matchExpression = waitTemplate._matchExpression,
@@ -48,6 +47,19 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
             MethodId = waitTemplate.MethodId,
             MethodGroupId = waitTemplate.MethodGroupId,
         };
+
+    public static Expression<Func<MethodWaitTemplate, MethodWaitTemplate>> CallMandatoryPartSelector =>
+        waitTemplate => new MethodWaitTemplate
+        {
+            _callMandatoryPartExpression = waitTemplate._callMandatoryPartExpression,
+            _callMandatoryPartExpressionDynamic = waitTemplate._callMandatoryPartExpressionDynamic,
+            Id = waitTemplate.Id,
+            FunctionId = waitTemplate.FunctionId,
+            MethodId = waitTemplate.MethodId,
+            MethodGroupId = waitTemplate.MethodGroupId,
+            IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
+        };
+
     [NotMapped]
     public LambdaExpression MatchExpression { get; internal set; }
 
@@ -63,14 +75,13 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
     [NotMapped]
     public LambdaExpression InstanceMandatoryPartExpression { get; internal set; }
 
-    [NotMapped]
-    public Expression<Func<ExpandoObject, string[]>> InstanceMandatoryPartExpressionDynamic { get; internal set; }
+
 
     [NotMapped]
     public LambdaExpression SetDataExpression { get; internal set; }
 
     [NotMapped]
-    public Expression<Action<ExpandoObject, ExpandoObject>> SetDataExpressionDynamic { get; internal set; }
+    public LambdaExpression SetDataExpressionDynamic { get; internal set; }
 
 
     bool expressionsLoaded;

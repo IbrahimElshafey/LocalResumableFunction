@@ -1,38 +1,43 @@
 ﻿using FastExpressionCompiler;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Dynamic;
 using System.Linq.Expressions;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers.Expressions;
-public class MatchExpressionWriter : ExpressionVisitor
+public partial class MatchExpressionWriter : ExpressionVisitor
 {
-    private LambdaExpression _matchExpressionWithConstants;
-    public LambdaExpression MatchExpression { get; private set; }
-
-    // NEW expressions
-    public Expression<Func<JObject, string>> CallMandatoryPartExpressionDynamic { get; private set; }
-    public LambdaExpression InstanceMandatoryPartExtarctorExpression { get; internal set; }
-
-    public string MandatoryPart { get; private set; }
-    public string IsMandatoryPartFullMatch { get; private set; }
-
-    // END new expression
-
+    private LambdaExpression _matchExpression;
     private ParameterExpression _functionInstanceArg;
     private ParameterExpression _inputArg;
     private ParameterExpression _outputArg;
     private object _currentFunctionInstance;
     private List<ConstantPart> _constantParts = new();
 
+    public LambdaExpression MatchExpression { get; private set; }
+    public LambdaExpression MatchExpressionDynamic { get; private set; }//wo
+    public LambdaExpression CallMandatoryPartExpression { get; private set; }
+    public LambdaExpression CallMandatoryPartExpressionDynamic { get; private set; }
+    public LambdaExpression InstanceMandatoryPartExpression { get; private set; }
+    public string IsMandatoryPartFullMatch { get; private set; }
+
+    /* NEW expressions
+    - MatchExpressionDynamic
+    - CallMandatoryPartExpression
+    - CallMandatoryPartExpressionDynamic
+    - InstanceMandatoryPartExpression
+    - InstanceMandatoryPartExpressionDynamic
+    */
+
     public MatchExpressionWriter(LambdaExpression matchExpression, object instance)
     {
-        _matchExpressionWithConstants = matchExpression;
-        if (_matchExpressionWithConstants == null)
+        _matchExpression = matchExpression;
+        if (_matchExpression == null)
             return;
-        if (_matchExpressionWithConstants?.Parameters.Count == 3)
+        if (_matchExpression?.Parameters.Count == 3)
         {
-            MatchExpression = _matchExpressionWithConstants;
+            MatchExpression = _matchExpression;
             return;
         }
         _currentFunctionInstance = instance;
@@ -43,26 +48,23 @@ public class MatchExpressionWriter : ExpressionVisitor
 
         if (_constantParts.Any(x => x.IsMandatory))
         {
-            MandatoryPart = _constantParts
-                .Where(x => x.IsMandatory)
-                .OrderBy(x => x.PropPathExpression.ToString())
-                .Select(x => x.Value.ToString())
-                .Aggregate((x, y) => $"{x}#{y}");
-
-            GenerateManadatoryPartsExpression();
+            var mandatoryPartVistor = new MandatoryPartVistor(_matchExpression,_constantParts);
+            CallMandatoryPartExpression = mandatoryPartVistor.CallMandatoryPartExpression;
+            CallMandatoryPartExpressionDynamic = mandatoryPartVistor.CallMandatoryPartExpressionDynamic;
+            InstanceMandatoryPartExpression = mandatoryPartVistor.InstanceMandatoryPartExpression;
         }
     }
 
     private void ChangeInputOutputParamsNames()
     {
-        var expression = _matchExpressionWithConstants;
+        var expression = _matchExpression;
         _functionInstanceArg = Parameter(_currentFunctionInstance.GetType(), "functionInstance");
         _inputArg = Parameter(expression.Parameters[0].Type, "input");
         _outputArg = Parameter(expression.Parameters[1].Type, "output");
         var changeParameterVistor = new GenericVisitor();
         changeParameterVistor.OnVisitParamter(ChangeParameters);
         changeParameterVistor.OnVisitConstant(OnVisitFunctionInstance);
-        var updatedBoy = (LambdaExpression)changeParameterVistor.Visit(_matchExpressionWithConstants);
+        var updatedBoy = (LambdaExpression)changeParameterVistor.Visit(_matchExpression);
         var functionType = typeof(Func<,,,>)
             .MakeGenericType(
                 updatedBoy.Parameters[0].Type,
@@ -70,7 +72,7 @@ public class MatchExpressionWriter : ExpressionVisitor
                 _currentFunctionInstance.GetType(),
                 typeof(bool));
 
-        _matchExpressionWithConstants = Lambda(
+        _matchExpression = Lambda(
             functionType,
             updatedBoy.Body,
             _inputArg,
@@ -80,11 +82,11 @@ public class MatchExpressionWriter : ExpressionVisitor
         Expression ChangeParameters(ParameterExpression node)
         {
             //rename output
-            var isOutput = node == _matchExpressionWithConstants.Parameters[1];
+            var isOutput = node == _matchExpression.Parameters[1];
             if (isOutput) return _outputArg;
 
             //rename input
-            var isInput = node == _matchExpressionWithConstants.Parameters[0];
+            var isInput = node == _matchExpression.Parameters[0];
             if (isInput) return _inputArg;
 
             return base.VisitParameter(node);
@@ -100,12 +102,12 @@ public class MatchExpressionWriter : ExpressionVisitor
 
     private void CalcConstantInExpression()
     {
-        MatchExpression = _matchExpressionWithConstants;
+        MatchExpression = _matchExpression;
         var constantTranslationVisior = new GenericVisitor();
         constantTranslationVisior.OnVisitBinary(TryEvaluateBinaryParts);
         constantTranslationVisior.OnVisitUnary(VisitNotEqual);
         //aaa
-        _matchExpressionWithConstants = (LambdaExpression)constantTranslationVisior.Visit(_matchExpressionWithConstants);
+        _matchExpression = (LambdaExpression)constantTranslationVisior.Visit(_matchExpression);
 
         Expression TryEvaluateBinaryParts(BinaryExpression node)
         {
@@ -177,8 +179,8 @@ public class MatchExpressionWriter : ExpressionVisitor
         {
             try
             {
-                var functionType = typeof(Func<,>).MakeGenericType(_matchExpressionWithConstants.Parameters[2].Type, typeof(object));
-                var getExpValue = Lambda(functionType, Convert(expression, typeof(object)), _matchExpressionWithConstants.Parameters[2]).CompileFast();
+                var functionType = typeof(Func<,>).MakeGenericType(_matchExpression.Parameters[2].Type, typeof(object));
+                var getExpValue = Lambda(functionType, Convert(expression, typeof(object)), _matchExpression.Parameters[2]).CompileFast();
                 return getExpValue.DynamicInvoke(_currentFunctionInstance);
             }
             catch (Exception ex)
@@ -237,7 +239,7 @@ public class MatchExpressionWriter : ExpressionVisitor
             if (constPart.IsMandatory || constPart.Operator != ExpressionType.Equal) continue;
 
             partToCheck = constPart.ConstantExpression;
-            var expression = changeToBools.Visit(_matchExpressionWithConstants.Body);
+            var expression = changeToBools.Visit(_matchExpression.Body);
             var compiled = Lambda<Func<bool>>(expression).CompileFast();
             constPart.IsMandatory = !compiled();
         }
@@ -290,40 +292,7 @@ public class MatchExpressionWriter : ExpressionVisitor
         //}
     }
 
-    private void GenerateManadatoryPartsExpression()
-    {
-        var pushedCall = Parameter(typeof(JObject), "pushedCall");
-
-        var parts = _constantParts
-            .Where(x => x.IsMandatory)
-            .OrderBy(x => x.PropPathExpression.ToString())
-            .ToArray();
-        if (parts.Any())
-        {
-            CallMandatoryPartExpressionDynamic = Lambda<Func<JObject, string>>(
-                Call(
-                    typeof(string).GetMethod("Join", 0, new[] { typeof(string), typeof(string[]) }),
-                    Constant("#"),
-                    NewArrayInit(
-                        typeof(string),
-                        TranslateParts(parts)
-                    )
-                ),
-                pushedCall
-            );
-        }
-
-        IEnumerable<Expression> TranslateParts(ConstantPart[] parts)
-        {
-            foreach (var part in parts)
-            {
-                var usingJobject = AccesUsingJToken(part.PropPathExpression, pushedCall);
-                yield return Call(usingJobject, typeof(object).GetMethod("ToString"));
-            }
-        }
-
-
-    }
+    
     private Expression AccesUsingJToken(Expression propPathExpression, ParameterExpression pushedCall)
     {
         var useJobject = new GenericVisitor();
@@ -368,38 +337,12 @@ public class MatchExpressionWriter : ExpressionVisitor
             var isOutput = false;
             checkUseParamter.OnVisitParamter(param =>
             {
-                isInput = param == _matchExpressionWithConstants.Parameters[0] || isInput;
-                isOutput = param == _matchExpressionWithConstants.Parameters[1] || isOutput;
+                isInput = param == _matchExpression.Parameters[0] || isInput;
+                isOutput = param == _matchExpression.Parameters[1] || isOutput;
                 return param;
             });
             checkUseParamter.Visit(expression);
             return (isInput, isOutput);
         }
-    }
-
-
-
-    private class ConstantPart
-    {
-        public ConstantPart(
-            ExpressionType op,
-            Expression propPathExpression,
-            Expression constantExpression,
-            object value,
-            Expression constantOriginalExpression)
-        {
-            PropPathExpression = propPathExpression;
-            ConstantExpression = constantExpression;
-            ConstantOriginalExpression = constantOriginalExpression;
-            Value = value;
-            Operator = op;
-        }
-
-        public Expression PropPathExpression { get; set; }
-        public Expression ConstantExpression { get; set; }
-        public Expression ConstantOriginalExpression { get; set; }
-        public ExpressionType Operator { get; set; }
-        public object Value { get; set; }
-        public bool IsMandatory { get; set; }
     }
 }
