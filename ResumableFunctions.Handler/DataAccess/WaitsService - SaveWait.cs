@@ -6,6 +6,7 @@ using ResumableFunctions.Handler.DataAccess.Abstraction;
 using System.Linq.Expressions;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Helpers.Expressions;
+using FastExpressionCompiler;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -56,6 +57,13 @@ internal partial class WaitsService : IWaitsService
         methodWait.MethodToWaitId = methodId.MethodId;
         methodWait.MethodGroupToWaitId = methodId.GroupId;
         methodWait.TemplateId = waitTemplate.Id;
+        if (waitTemplate.InstanceMandatoryPartExpression != null)
+        {
+            var partIdFunc = waitTemplate.InstanceMandatoryPartExpression.CompileFast();
+            var parts = (string[])partIdFunc.DynamicInvoke(methodWait.CurrentFunction);
+            if (parts?.Any() == true)
+                methodWait.MandatoryPart = string.Join("#", parts);
+        }
         await AddWait(methodWait);
     }
 
@@ -153,7 +161,6 @@ internal partial class WaitsService : IWaitsService
                 UniqueMatchId = timeWait.UniqueMatchId,
                 JobId = jobId,
             };
-        timeWaitMethod.MandatoryPart = timeWait.UniqueMatchId;
         await MethodWaitRequested(timeWaitMethod);
     }
 
