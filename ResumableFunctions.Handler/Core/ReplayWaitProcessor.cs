@@ -5,6 +5,7 @@ using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
 using System.Linq.Expressions;
+using ResumableFunctions.Handler.Helpers.Expressions;
 
 namespace ResumableFunctions.Handler.Core;
 

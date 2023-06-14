@@ -4,10 +4,10 @@ using Newtonsoft.Json.Linq;
 using System.Linq.Expressions;
 using static System.Linq.Expressions.Expression;
 
-namespace ResumableFunctions.Handler.Helpers;
+namespace ResumableFunctions.Handler.Helpers.Expressions;
 public class MatchExpressionWriter : ExpressionVisitor
 {
-    public LambdaExpression MatchExpressionWithConstants { get; private set; }
+    private LambdaExpression _matchExpressionWithConstants;
     public LambdaExpression MatchExpression { get; private set; }
 
     // NEW expressions
@@ -27,12 +27,12 @@ public class MatchExpressionWriter : ExpressionVisitor
 
     public MatchExpressionWriter(LambdaExpression matchExpression, object instance)
     {
-        MatchExpressionWithConstants = matchExpression;
-        if (MatchExpressionWithConstants == null)
+        _matchExpressionWithConstants = matchExpression;
+        if (_matchExpressionWithConstants == null)
             return;
-        if (MatchExpressionWithConstants?.Parameters.Count == 3)
+        if (_matchExpressionWithConstants?.Parameters.Count == 3)
         {
-            MatchExpressionWithConstants = MatchExpressionWithConstants;
+            MatchExpression = _matchExpressionWithConstants;
             return;
         }
         _currentFunctionInstance = instance;
@@ -55,14 +55,14 @@ public class MatchExpressionWriter : ExpressionVisitor
 
     private void ChangeInputOutputParamsNames()
     {
-        var expression = MatchExpressionWithConstants;
+        var expression = _matchExpressionWithConstants;
         _functionInstanceArg = Parameter(_currentFunctionInstance.GetType(), "functionInstance");
         _inputArg = Parameter(expression.Parameters[0].Type, "input");
         _outputArg = Parameter(expression.Parameters[1].Type, "output");
         var changeParameterVistor = new GenericVisitor();
         changeParameterVistor.OnVisitParamter(ChangeParameters);
         changeParameterVistor.OnVisitConstant(OnVisitFunctionInstance);
-        var updatedBoy = (LambdaExpression)changeParameterVistor.Visit(MatchExpressionWithConstants);
+        var updatedBoy = (LambdaExpression)changeParameterVistor.Visit(_matchExpressionWithConstants);
         var functionType = typeof(Func<,,,>)
             .MakeGenericType(
                 updatedBoy.Parameters[0].Type,
@@ -70,7 +70,7 @@ public class MatchExpressionWriter : ExpressionVisitor
                 _currentFunctionInstance.GetType(),
                 typeof(bool));
 
-        MatchExpressionWithConstants = Lambda(
+        _matchExpressionWithConstants = Lambda(
             functionType,
             updatedBoy.Body,
             _inputArg,
@@ -80,11 +80,11 @@ public class MatchExpressionWriter : ExpressionVisitor
         Expression ChangeParameters(ParameterExpression node)
         {
             //rename output
-            var isOutput = node == MatchExpressionWithConstants.Parameters[1];
+            var isOutput = node == _matchExpressionWithConstants.Parameters[1];
             if (isOutput) return _outputArg;
 
             //rename input
-            var isInput = node == MatchExpressionWithConstants.Parameters[0];
+            var isInput = node == _matchExpressionWithConstants.Parameters[0];
             if (isInput) return _inputArg;
 
             return base.VisitParameter(node);
@@ -100,12 +100,12 @@ public class MatchExpressionWriter : ExpressionVisitor
 
     private void CalcConstantInExpression()
     {
-        MatchExpression = MatchExpressionWithConstants;
+        MatchExpression = _matchExpressionWithConstants;
         var constantTranslationVisior = new GenericVisitor();
         constantTranslationVisior.OnVisitBinary(TryEvaluateBinaryParts);
         constantTranslationVisior.OnVisitUnary(VisitNotEqual);
         //aaa
-        MatchExpressionWithConstants = (LambdaExpression)constantTranslationVisior.Visit(MatchExpressionWithConstants);
+        _matchExpressionWithConstants = (LambdaExpression)constantTranslationVisior.Visit(_matchExpressionWithConstants);
 
         Expression TryEvaluateBinaryParts(BinaryExpression node)
         {
@@ -177,8 +177,8 @@ public class MatchExpressionWriter : ExpressionVisitor
         {
             try
             {
-                var functionType = typeof(Func<,>).MakeGenericType(MatchExpressionWithConstants.Parameters[2].Type, typeof(object));
-                var getExpValue = Lambda(functionType, Convert(expression, typeof(object)), MatchExpressionWithConstants.Parameters[2]).CompileFast();
+                var functionType = typeof(Func<,>).MakeGenericType(_matchExpressionWithConstants.Parameters[2].Type, typeof(object));
+                var getExpValue = Lambda(functionType, Convert(expression, typeof(object)), _matchExpressionWithConstants.Parameters[2]).CompileFast();
                 return getExpValue.DynamicInvoke(_currentFunctionInstance);
             }
             catch (Exception ex)
@@ -237,7 +237,7 @@ public class MatchExpressionWriter : ExpressionVisitor
             if (constPart.IsMandatory || constPart.Operator != ExpressionType.Equal) continue;
 
             partToCheck = constPart.ConstantExpression;
-            var expression = changeToBools.Visit(MatchExpressionWithConstants.Body);
+            var expression = changeToBools.Visit(_matchExpressionWithConstants.Body);
             var compiled = Lambda<Func<bool>>(expression).CompileFast();
             constPart.IsMandatory = !compiled();
         }
@@ -368,8 +368,8 @@ public class MatchExpressionWriter : ExpressionVisitor
             var isOutput = false;
             checkUseParamter.OnVisitParamter(param =>
             {
-                isInput = param == MatchExpressionWithConstants.Parameters[0] || isInput;
-                isOutput = param == MatchExpressionWithConstants.Parameters[1] || isOutput;
+                isInput = param == _matchExpressionWithConstants.Parameters[0] || isInput;
+                isOutput = param == _matchExpressionWithConstants.Parameters[1] || isOutput;
                 return param;
             });
             checkUseParamter.Visit(expression);

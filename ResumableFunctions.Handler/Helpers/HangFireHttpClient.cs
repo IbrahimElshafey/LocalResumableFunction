@@ -2,12 +2,12 @@
 
 namespace ResumableFunctions.Handler.Helpers
 {
-    public class HangFireHttpClient
+    public class HangfireHttpClient
     {
         private readonly IBackgroundProcess backgroundJobClient;
         private readonly HttpClient client;
 
-        public HangFireHttpClient(IBackgroundProcess backgroundJobClient, HttpClient client)
+        public HangfireHttpClient(IBackgroundProcess backgroundJobClient, HttpClient client)
         {
             this.backgroundJobClient = backgroundJobClient;
             this.client = client;

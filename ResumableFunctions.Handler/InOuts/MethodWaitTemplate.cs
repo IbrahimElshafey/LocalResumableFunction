@@ -1,4 +1,5 @@
 ﻿using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.Helpers.Expressions;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Dynamic;
 using System.Linq.Expressions;
@@ -8,7 +9,7 @@ namespace ResumableFunctions.Handler.InOuts;
 public class MethodWaitTemplate : IEntity, IOnSaveEntity
 {
 
-    internal class FieldsNames
+    internal static class FieldsNames
     {
         public const string MatchExpression = nameof(_matchExpression);
         public const string MatchExpressionDynamic = nameof(_matchExpressionDynamic);
@@ -38,14 +39,14 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
 
 
     public static Expression<Func<MethodWaitTemplate, MethodWaitTemplate>> BasicProps =>
-        wt => new MethodWaitTemplate
+        waitTemplate => new MethodWaitTemplate
         {
-            _matchExpression = wt._matchExpression,
-            _setDataExpression = wt._setDataExpression,
-            Id = wt.Id,
-            FunctionId = wt.FunctionId,
-            MethodId = wt.MethodId,
-            MethodGroupId = wt.MethodGroupId,
+            _matchExpression = waitTemplate._matchExpression,
+            _setDataExpression = waitTemplate._setDataExpression,
+            Id = waitTemplate.Id,
+            FunctionId = waitTemplate.FunctionId,
+            MethodId = waitTemplate.MethodId,
+            MethodGroupId = waitTemplate.MethodGroupId,
         };
     [NotMapped]
     public LambdaExpression MatchExpression { get; internal set; }
@@ -72,7 +73,7 @@ public class MethodWaitTemplate : IEntity, IOnSaveEntity
     public Expression<Action<ExpandoObject, ExpandoObject>> SetDataExpressionDynamic { get; internal set; }
 
 
-    bool expressionsLoaded = false;
+    bool expressionsLoaded;
     internal void LoadExpressions(bool forceReload = false)
     {
         var serializer = new ExpressionSerializer();

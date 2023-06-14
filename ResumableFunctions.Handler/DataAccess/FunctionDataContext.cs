@@ -216,12 +216,6 @@ public class FunctionDataContext : DbContext
             .HasConstraintName("FK_WaitsForFunctionState");
     }
 
-    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-    {
-        configurationBuilder
-            .Properties<Type>()
-            .HaveConversion<TypeToStringConverter>();
-    }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {

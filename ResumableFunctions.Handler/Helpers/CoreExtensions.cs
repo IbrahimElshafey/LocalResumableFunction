@@ -5,6 +5,7 @@ using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService;
 using System.Linq.Expressions;
@@ -41,7 +42,7 @@ public static class CoreExtensions
         //services.AddSingleton<IBinaryToObjectConverter,MessagePackBinaryToObjectConverter>();
         services.AddSingleton<BackgroundJobExecutor>();
         services.AddSingleton<HttpClient>();
-        services.AddSingleton<HangFireHttpClient>();
+        services.AddSingleton<HangfireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
         services.AddSingleton(settings.DistributedLockProvider);
 

@@ -2,7 +2,7 @@
 using MessagePack;
 using System.Dynamic;
 
-namespace ResumableFunctions.Handler.Helpers
+namespace ResumableFunctions.Handler.Helpers.Expressions
 {
     public static class ExpandoExtensions
     {

@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions.Bonsai.Serialization;
 using Json = Nuqleon.Json.Expressions;
-namespace ResumableFunctions.Handler.Helpers
+namespace ResumableFunctions.Handler.Helpers.Expressions
 {
     public sealed class ExpressionSerializer : BonsaiExpressionSerializer
     {

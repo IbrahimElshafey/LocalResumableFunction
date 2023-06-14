@@ -11,7 +11,7 @@ internal class CallProcessor : ICallProcessor
     private readonly ILogger<ReplayWaitProcessor> _logger;
     private readonly IWaitProcessor _waitProcessor;
     private readonly IWaitsService _waitsRepository;
-    private readonly HangFireHttpClient _hangFireHttpClient;
+    private readonly HangfireHttpClient _hangFireHttpClient;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IResumableFunctionsSettings _settings;
 
@@ -20,7 +20,7 @@ internal class CallProcessor : ICallProcessor
         IWaitProcessor waitProcessor,
         IWaitsService waitsRepository,
         IBackgroundProcess backgroundJobClient,
-        HangFireHttpClient hangFireHttpClient,
+        HangfireHttpClient hangFireHttpClient,
         BackgroundJobExecutor backgroundJobExecutor,
         IResumableFunctionsSettings settings)
     {

@@ -1,14 +1,14 @@
 ﻿using System.Linq.Expressions;
 using static System.Linq.Expressions.Expression;
 
-namespace ResumableFunctions.Handler.Helpers;
+namespace ResumableFunctions.Handler.Helpers.Expressions;
 
 public class SetDataExpressionWriter : ExpressionVisitor
 {
     private readonly ParameterExpression _functionInstanceArg;
     private readonly List<Expression> setValuesExpressions = new();
 
-    public SetDataExpressionWriter(LambdaExpression setDataExpression,Type funcType)
+    public SetDataExpressionWriter(LambdaExpression setDataExpression, Type funcType)
     {
         if (setDataExpression == null)
             return;
@@ -18,7 +18,7 @@ public class SetDataExpressionWriter : ExpressionVisitor
         }
 
         _functionInstanceArg = Parameter(funcType, "functionInstance");
-      
+
         var updatedBoy = (LambdaExpression)Visit(setDataExpression);
         for (var i = 0; i < setValuesExpressions.Count; i++)
         {

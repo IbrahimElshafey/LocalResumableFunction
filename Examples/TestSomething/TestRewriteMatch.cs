@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
 using System.Linq.Expressions;
 using System.Reflection.Emit;
@@ -55,37 +56,16 @@ namespace TestSomething
 
         public void Run()
         {
-            //var aggregateMethod = typeof(Enumerable).GetMethod("Aggregate");
-            var pushedCall = JsonConvert.DeserializeObject<JObject>("""
-                {
-                    "input":"12345",
-                    "output":{"X":254,"Z":255}
-                }
-                """);
-          
-
             TestWithComplexTypes();
             //TestWithBasicTypes();
-
-            //Expression<Func<JObject, bool>> matchJson = pushedCall =>
-            //    (int)pushedCall["output"] == InstanceId;
-            //var x = matchJson.Compile().Invoke(pushedCall);
-
-            Expression point = () => (PointXY)pushedCall.SelectToken("output").ToObject(typeof(PointXY));
-            Expression<Func<JObject, string>> GetIds =
-                (jobject) => string.Join("#", new[]
-                {
-                    pushedCall.SelectToken("input").ToString(),
-                    pushedCall.SelectToken("output.X").ToString()
-                });
-            var id = GetIds.CompileFast()(pushedCall);
-
         }
+
         class PointXY
         {
             public int X { get; set; }
             public int Y { get; set; }
         }
+
         private void TestWithComplexTypes()
         {
             var wait = WaitMethodTwo();
@@ -115,8 +95,8 @@ namespace TestSomething
         {
             var wait1 = WaitMethodOne();
             var matchRewrite1 = new MatchExpressionWriter(wait1.MatchExpression, this);
-            var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.MatchExpressionWithConstants.CompileFast();
-            var exprssionAsString1 = matchRewrite1.MatchExpressionWithConstants.ToString();
+            var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.MatchExpression.CompileFast();
+            var exprssionAsString1 = matchRewrite1.MatchExpression.ToString();
             var result = method1.Invoke("12345", 5, this);
             result = method1.Invoke("123456", 6, this);
 

@@ -3,9 +3,9 @@ using System.Security.Cryptography;
 using System.Text;
 using static System.Linq.Expressions.Expression;
 
-namespace ResumableFunctions.Handler.Helpers;
+namespace ResumableFunctions.Handler.Helpers.Expressions;
 
-public class WaitExpressionsHash : System.Linq.Expressions.ExpressionVisitor
+public class WaitExpressionsHash : ExpressionVisitor
 {
     public byte[] Hash { get; internal set; }
     public LambdaExpression MatchExpression { get; internal set; }
@@ -31,14 +31,14 @@ public class WaitExpressionsHash : System.Linq.Expressions.ExpressionVisitor
         Hash = MD5.HashData(data);
     }
 
-    private System.Linq.Expressions.Expression ChangeInputAndOutputNames(LambdaExpression expression)
+    private Expression ChangeInputAndOutputNames(LambdaExpression expression)
     {
         var changeParametersVisitor = new GenericVisitor();
         var inputArg = Parameter(expression.Parameters[0].Type, "input");
         var outputArg = Parameter(expression.Parameters[1].Type, "output");
         changeParametersVisitor.OnVisitParamter(ChangeParameterName);
         return changeParametersVisitor.Visit(expression);
-        System.Linq.Expressions.Expression ChangeParameterName(ParameterExpression node)
+        Expression ChangeParameterName(ParameterExpression node)
         {
             //rename output
             var isOutput = node == expression.Parameters[1];

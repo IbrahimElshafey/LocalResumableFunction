@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace ResumableFunctions.Handler.Helpers;
+namespace ResumableFunctions.Handler.Helpers.Expressions;
 
 public class GenericVisitor : ExpressionVisitor
 {
@@ -24,7 +24,7 @@ public class GenericVisitor : ExpressionVisitor
         }
         return base.Visit(node);
     }
-    
+
     internal void OnVisitBinary(Func<BinaryExpression, Expression> binaryVisitFunc)
     {
         _visitors.Add(
@@ -54,8 +54,8 @@ public class GenericVisitor : ExpressionVisitor
           new VisitNodeFunction(
              ex => ex is UnaryExpression,
               (ex) => visitUnary((UnaryExpression)ex)));
-    } 
-    
+    }
+
     internal void OnVisitMember(Func<MemberExpression, Expression> visitMember)
     {
         _visitors.Add(
@@ -63,7 +63,7 @@ public class GenericVisitor : ExpressionVisitor
              ex => ex is MemberExpression,
               (ex) => visitMember((MemberExpression)ex)));
     }
-    
+
     internal void OnVisitCall(Func<MethodCallExpression, Expression> visitCall)
     {
         _visitors.Add(

@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using FastExpressionCompiler;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.Helpers.Expressions;
 
 namespace ResumableFunctions.Handler.InOuts;
 
