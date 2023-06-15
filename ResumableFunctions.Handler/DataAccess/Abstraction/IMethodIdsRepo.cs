@@ -2,7 +2,7 @@
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
-    public interface IMethodIdentifierService
+    public interface IMethodIdsRepo
     {
         Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData, int? serviceId);
         Task AddWaitMethodIdentifier(MethodData methodData, int service);

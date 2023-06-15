@@ -14,24 +14,25 @@ namespace ResumableFunctions.Handler.Core
         private readonly IFirstWaitProcessor _firstWaitProcessor;
         private readonly IRecycleBinService _recycleBinService;
         private readonly IReplayWaitProcessor _replayWaitProcessor;
-        private readonly IWaitsService _waitsRepository;
+        private readonly IWaitsRepo _waitsRepository;
         private readonly IServiceProvider _serviceProvider;
-        private MethodWait _methodWait;
-        private PushedCall _pushedCall;
+      
         private readonly ILogger<WaitProcessor> _logger;
         private readonly IBackgroundProcess _backgroundJobClient;
         private readonly FunctionDataContext _context;
         private readonly BackgroundJobExecutor _backgroundJobExecutor;
         private readonly IDistributedLockProvider _lockProvider;
-        //private MethodWait _methodWait;
-        //private PushedCall _pushedCall;
+
+        private WaitForCall _waitCall;
+        private MethodWait _methodWait;
+        private PushedCall _pushedCall;
 
         public WaitProcessor(
             IServiceProvider serviceProvider,
             ILogger<WaitProcessor> logger,
             IFirstWaitProcessor firstWaitProcessor,
             IRecycleBinService recycleBinService,
-            IWaitsService waitsRepository,
+            IWaitsRepo waitsRepository,
             IBackgroundProcess backgroundJobClient,
             FunctionDataContext context,
             IReplayWaitProcessor replayWaitProcessor,
@@ -302,8 +303,8 @@ namespace ResumableFunctions.Handler.Core
 
             methodWait.Template = await
                _context
-               .MethodWaitTemplates
-               .Select(MethodWaitTemplate.BasicMatchSelector)
+               .WaitTemplates
+               .Select(WaitTemplate.BasicMatchSelector)
                .FirstAsync(x => x.Id == methodWait.TemplateId);
             if (methodWait.Template == null)
             {
@@ -339,11 +340,10 @@ namespace ResumableFunctions.Handler.Core
         }
         private async Task UpdateWaitToMatched(int pushedCallId, int waitId)
         {
-
             try
             {
                 var waitCall = await _context.WaitsForCalls
-                     .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == waitId);
+                    .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == waitId);
                 waitCall.Status = WaitForCallStatus.Matched;
                 await _context.SaveChangesAsync();
             }

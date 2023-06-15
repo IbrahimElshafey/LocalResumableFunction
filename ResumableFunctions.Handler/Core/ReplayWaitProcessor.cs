@@ -14,24 +14,24 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 {
     private readonly ILogger<ReplayWaitProcessor> _logger;
     private readonly FunctionDataContext _context;
-    private readonly IWaitsService _waitsService;
-    private readonly IWaitTemplatesService _waitTemplatesService;
+    private readonly IWaitsRepo _waitsRepo;
+    private readonly IWaitTemplatesRepo _waitTemplatesRepo;
 
     public ReplayWaitProcessor(
         FunctionDataContext context,
         ILogger<ReplayWaitProcessor> logger,
-        IWaitsService waitsService,
-        IWaitTemplatesService templatesService)
+        IWaitsRepo waitsRepo,
+        IWaitTemplatesRepo templatesRepo)
     {
         _context = context;
         _logger = logger;
-        _waitsService = waitsService;
-        _waitTemplatesService = templatesService;
+        _waitsRepo = waitsRepo;
+        _waitTemplatesRepo = templatesRepo;
     }
 
     public async Task<(Wait Wait, bool ProceedExecution)> ReplayWait(ReplayRequest replayRequest)
     {
-        var waitToReplay = await _waitsService.GetOldWaitForReplay(replayRequest);
+        var waitToReplay = await _waitsRepo.GetOldWaitForReplay(replayRequest);
         if (waitToReplay == null)
         {
             string errorMsg = $"Replay failed because there is no wait to replay, replay request was ({replayRequest})";
@@ -42,9 +42,9 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         //todo:review CancelFunctionWaits is suffecient
         //Cancel wait and it's child
         waitToReplay.Status = waitToReplay.Status == WaitStatus.Waiting ? WaitStatus.Canceled : waitToReplay.Status;
-        await _waitsService.CancelSubWaits(waitToReplay.Id);
+        await _waitsRepo.CancelSubWaits(waitToReplay.Id);
         //skip active waits after replay
-        await _waitsService.CancelFunctionWaits(waitToReplay.RequestedByFunctionId, waitToReplay.FunctionStateId);
+        await _waitsRepo.CancelFunctionWaits(waitToReplay.RequestedByFunctionId, waitToReplay.FunctionStateId);
 
         switch (replayRequest.ReplayType)
         {
@@ -97,7 +97,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 mw.MethodToWaitId ?? 0,
                 replayRequest.CurrentFunction);
             duplicateWait.TemplateId = template.Id;
-            await _waitsService.SaveWaitRequestToDb(duplicateWait);
+            await _waitsRepo.SaveWaitRequestToDb(duplicateWait);
             return duplicateWait;
         }
         else
@@ -110,7 +110,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     }
 
-    private async Task<MethodWaitTemplate> AddWaitTemplate(
+    private async Task<WaitTemplate> AddWaitTemplate(
         LambdaExpression matchExpression,
         LambdaExpression setDataExpression,
         int funcId,
@@ -120,9 +120,9 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     {
         var waitExpressionsHash = new WaitExpressionsHash(matchExpression, setDataExpression);
         var expressionsHash = waitExpressionsHash.Hash;
-        var waitTemplate = await _waitTemplatesService.CheckTemplateExist(expressionsHash, funcId, groupId);
+        var waitTemplate = await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, groupId);
         if (waitTemplate == null)
-            waitTemplate = await _waitTemplatesService.AddNewTemplate(
+            waitTemplate = await _waitTemplatesRepo.AddNewTemplate(
                 waitExpressionsHash, functionInstance, funcId, groupId, methodId);
         return waitTemplate;
     }
@@ -142,7 +142,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
         duplicateWait.IsReplay = true;
         duplicateWait.IsFirst = false;
-        await _waitsService.SaveWaitRequestToDb(duplicateWait);
+        await _waitsRepo.SaveWaitRequestToDb(duplicateWait);
         return duplicateWait;
     }
 
@@ -162,7 +162,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         {
             var nextWaitAfterReplay = goBefore.Runner.Current;
             nextWaitAfterReplay.CopyCommonIds(oldCompletedWait);
-            await _waitsService.SaveWaitRequestToDb(nextWaitAfterReplay);
+            await _waitsRepo.SaveWaitRequestToDb(nextWaitAfterReplay);
             return nextWaitAfterReplay;//when replay go before
         }
         else
@@ -197,7 +197,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 mw.RequestedByFunctionId = waitToReplay.RequestedByFunctionId;
                 mw.ParentWaitId = waitToReplay.ParentWaitId;
                 mw.TemplateId = template.Id;
-                await _waitsService.SaveWaitRequestToDb(mw);
+                await _waitsRepo.SaveWaitRequestToDb(mw);
                 return mw;
             }
             else

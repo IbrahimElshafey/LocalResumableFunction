@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
-    public interface IWaitsService
+    public interface IWaitsRepo
     {
         Task AddWait(Wait wait);
         Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId);

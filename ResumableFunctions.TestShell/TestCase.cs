@@ -111,10 +111,15 @@ namespace ResumableFunctions.TestShell
         private FunctionDataContext _context => CurrentApp.Services.GetService<FunctionDataContext>();
         public async Task<List<ResumableFunctionState>> GetInstances<T>()
         {
-            var instances = await _context.FunctionStates.Where(x => x.Status != FunctionStatus.New).ToListAsync();
+            var instances = await _context
+                .FunctionStates
+                .Where(x => x.Status != FunctionStatus.New)
+                .ToListAsync();
             foreach (var instnace in instances)
             {
+                await _context.Entry(instnace).ReloadAsync();
                 instnace.LoadUnmappedProps(typeof(T));
+
             }
             return instances;
         }

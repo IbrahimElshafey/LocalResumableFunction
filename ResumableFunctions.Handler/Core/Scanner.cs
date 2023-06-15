@@ -18,8 +18,8 @@ internal class Scanner
     private readonly FunctionDataContext _context;
     private readonly IResumableFunctionsSettings _settings;
     private readonly ILogger<Scanner> _logger;
-    private readonly IMethodIdentifierService _methodIdentifierRepo;
-    private readonly IWaitsService _waitsRepository;
+    private readonly IMethodIdsRepo _methodIdentifierRepo;
+    private readonly IWaitsRepo _waitsRepository;
     private readonly IFirstWaitProcessor _firstWaitProcessor;
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly string _currentServiceName;
@@ -28,12 +28,12 @@ internal class Scanner
     public Scanner(
         IServiceProvider serviceProvider,
         ILogger<Scanner> logger,
-        IMethodIdentifierService methodIdentifierRepo,
+        IMethodIdsRepo methodIdentifierRepo,
         IFirstWaitProcessor firstWaitProcessor,
         IResumableFunctionsSettings settings,
         FunctionDataContext context,
         IBackgroundProcess backgroundJobClient,
-        IWaitsService waitsRepository,
+        IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor)
     {
         _serviceProvider = serviceProvider;

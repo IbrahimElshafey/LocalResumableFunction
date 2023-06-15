@@ -9,6 +9,6 @@ public class MethodsGroup : IEntity, IEntityInService
 
     public DateTime Created { get; internal set; }
     public int? ServiceId { get; set; }
-    public List<MethodWaitTemplate> WaitTemplates { get; internal set; }
+    public List<WaitTemplate> WaitTemplates { get; internal set; }
 }
 

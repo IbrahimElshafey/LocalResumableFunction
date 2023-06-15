@@ -1,4 +1,5 @@
 ﻿using ResumableFunctions.Handler.Helpers;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
@@ -37,11 +38,16 @@ public class PushedCall : IEntityWithDelete, IEntityInService, IOnSaveEntity
             var outputType = methodInfo.IsAsyncMethod() ?
                 methodInfo.ReturnType.GetGenericArguments()[0] :
                 methodInfo.ReturnType;
-            var t = typeof(GInputOutput<,>).MakeGenericType(new[] { inputType, outputType });
-            dynamic data = converter.ConvertToObject(DataValue, t);
-            Data = InputOutput.FromGeneric(data);
+            Data = GetMethodData(inputType, outputType, DataValue);
         }
         MethodData = converter.ConvertToObject<MethodData>(MethodDataValue);
+    }
 
+    public static InputOutput GetMethodData(Type inputType, Type outputType, byte[] dataBytes)
+    {
+        var converter = new BinaryToObjectConverter();
+        var genericInputOutPut = typeof(GInputOutput<,>).MakeGenericType(inputType, outputType);
+        dynamic data = converter.ConvertToObject(dataBytes, genericInputOutPut);
+        return InputOutput.FromGeneric(data);
     }
 }

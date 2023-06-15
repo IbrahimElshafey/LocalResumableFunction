@@ -10,7 +10,7 @@ public class WaitForCall : IEntity, IEntityInService
     public int? ServiceId { get; set; }
     public int FunctionId { get; internal set; }
     public int StateId { get; internal set; }
-    public WaitForCallStatus Status { get; internal set; }
+    public WaitForCallStatus Status { get; internal set; } = WaitForCallStatus.ExpectedMatch;
     public DateTime Created { get; internal set; }
 
 }

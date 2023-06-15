@@ -44,9 +44,9 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
     public void LoadUnmappedProps(Type stateObjectType = null)
     {
         var converter = new BinaryToObjectConverter();
-        if (stateObjectType != null)
-            StateObject = converter.ConvertToObject(StateObjectValue, stateObjectType);
-        else
-            StateObject = converter.ConvertToObject(StateObjectValue);
+        StateObject =
+            stateObjectType != null ?
+                converter.ConvertToObject(StateObjectValue, stateObjectType) : 
+                converter.ConvertToObject(StateObjectValue);
     }
 }

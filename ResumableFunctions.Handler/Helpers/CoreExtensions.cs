@@ -22,10 +22,11 @@ public static class CoreExtensions
     {
 
 
-        services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig);
-        services.AddScoped<IMethodIdentifierService, MethodIdentifierService>();
-        services.AddScoped<IWaitsService, WaitsService>();
-        services.AddScoped<IWaitTemplatesService, WaitTemplatesService>();
+        // ReSharper disable once RedundantAssignment
+        services.AddDbContext<FunctionDataContext>(optionsBuilder => optionsBuilder = settings.WaitsDbConfig);
+        services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
+        services.AddScoped<IWaitsRepo, WaitsRepo>();
+        services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
 
         services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
         services.AddScoped<IRecycleBinService, RecycleBinService>();
@@ -50,6 +51,7 @@ public static class CoreExtensions
         services.AddScoped<IUiService, UiService.UiService>();
         if (settings.HangfireConfig != null)
         {
+            // ReSharper disable once RedundantAssignment
             services.AddHangfire(x => x = settings.HangfireConfig);
             services.AddSingleton<IBackgroundProcess, HangfireBackgroundProcess>();
             services.AddHangfireServer();
@@ -60,10 +62,7 @@ public static class CoreExtensions
 
     public static void UseResumableFunctions(this IHost app)
     {
-        //WaitMethodAspect.ServiceProvider = app.Services;
-        //HangfireActivator.ServiceProvider = app.Services;
         GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(app.Services));
-
         StartScanProcess(app);
     }
 

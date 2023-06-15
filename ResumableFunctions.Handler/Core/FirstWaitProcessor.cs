@@ -13,8 +13,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 {
     private readonly ILogger<FirstWaitProcessor> _logger;
     private readonly FunctionDataContext _context;
-    private readonly IMethodIdentifierService _methodIdentifierRepo;
-    private readonly IWaitsService _waitsRepository;
+    private readonly IMethodIdsRepo _methodIdentifierRepo;
+    private readonly IWaitsRepo _waitsRepository;
     private readonly IServiceProvider _serviceProvider;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
 
@@ -22,8 +22,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         ILogger<FirstWaitProcessor> logger,
         FunctionDataContext context,
         IServiceProvider serviceProvider,
-        IMethodIdentifierService methodIdentifierRepo,
-        IWaitsService waitsRepository,
+        IMethodIdsRepo methodIdentifierRepo,
+        IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor)
     {
         _logger = logger;
@@ -62,8 +62,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             currentMw.Input = firstMatchedMethodWait.Input;
             currentMw.Output = firstMatchedMethodWait.Output;
             var waitTemplate = await _context
-                .MethodWaitTemplates
-                .Select(MethodWaitTemplate.BasicMatchSelector)
+                .WaitTemplates
+                .Select(WaitTemplate.BasicMatchSelector)
                 .FirstAsync(x => x.Id == firstMatchedMethodWait.TemplateId);
             currentMw.TemplateId = waitTemplate.Id;
             currentMw.Template = waitTemplate;

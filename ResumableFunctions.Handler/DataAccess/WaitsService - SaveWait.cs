@@ -10,7 +10,7 @@ using FastExpressionCompiler;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal partial class WaitsService : IWaitsService
+internal partial class WaitsRepo : IWaitsRepo
 {
     public async Task<bool> SaveWaitRequestToDb(Wait newWait)
     {
@@ -45,13 +45,13 @@ internal partial class WaitsService : IWaitsService
 
     private async Task MethodWaitRequested(MethodWait methodWait)
     {
-        var methodId = await _methodIdentifierService.GetId(methodWait);
+        var methodId = await _methodIdsRepo.GetId(methodWait);
         var funcId = methodWait.RequestedByFunctionId;
         var waitExpressionsHash = new WaitExpressionsHash(methodWait.MatchExpression, methodWait.SetDataExpression);
         var expressionsHash = waitExpressionsHash.Hash;
-        var waitTemplate = await _waitTemplatesService.CheckTemplateExist(expressionsHash, funcId, methodId.GroupId);
+        var waitTemplate = await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, methodId.GroupId);
         if (waitTemplate == null)
-            waitTemplate = await _waitTemplatesService.AddNewTemplate(
+            waitTemplate = await _waitTemplatesRepo.AddNewTemplate(
                 waitExpressionsHash, methodWait.CurrentFunction, funcId, methodId.GroupId, methodId.MethodId);
         methodWait.ServiceId = _settings.CurrentServiceId;
         methodWait.MethodToWaitId = methodId.MethodId;
@@ -106,7 +106,7 @@ internal partial class WaitsService : IWaitsService
         functionWait.FirstWait.ParentWait = functionWait;
         functionWait.FirstWait.ParentWaitId = functionWait.Id;
         functionWait.FirstWait.ServiceId = _settings.CurrentServiceId;
-        var methodId = await _methodIdentifierService.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
+        var methodId = await _methodIdsRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
         functionWait.FirstWait.RequestedByFunction = methodId;
         functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
 

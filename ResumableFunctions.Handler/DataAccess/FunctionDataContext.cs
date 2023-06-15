@@ -42,7 +42,7 @@ public class FunctionDataContext : DbContext
 
     public DbSet<Wait> Waits { get; set; }
     public DbSet<MethodWait> MethodWaits { get; set; }
-    public DbSet<MethodWaitTemplate> MethodWaitTemplates { get; set; }
+    public DbSet<WaitTemplate> WaitTemplates { get; set; }
     public DbSet<MethodsGroup> MethodsGroups { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
 
@@ -148,22 +148,22 @@ public class FunctionDataContext : DbContext
 
     private void ConfigureMethodWaitTemplate(ModelBuilder modelBuilder)
     {
-        var entityBuilder = modelBuilder.Entity<MethodWaitTemplate>();
+        var entityBuilder = modelBuilder.Entity<WaitTemplate>();
         entityBuilder
-            .Property(MethodWaitTemplate.FieldsNames.MatchExpression)
-            .HasColumnName(nameof(MethodWaitTemplate.FieldsNames.MatchExpression));
+            .Property(WaitTemplate.FieldsNames.MatchExpression)
+            .HasColumnName(nameof(WaitTemplate.FieldsNames.MatchExpression));
         entityBuilder
-            .Property(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpression)
-            .HasColumnName(nameof(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpression));
+            .Property(WaitTemplate.FieldsNames.CallMandatoryPartExpression)
+            .HasColumnName(nameof(WaitTemplate.FieldsNames.CallMandatoryPartExpression));
+        //entityBuilder
+        //    .Property(WaitTemplate.FieldsNames.CallMandatoryPartExpressionDynamic)
+        //    .HasColumnName(nameof(WaitTemplate.FieldsNames.CallMandatoryPartExpressionDynamic));
         entityBuilder
-            .Property(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpressionDynamic)
-            .HasColumnName(nameof(MethodWaitTemplate.FieldsNames.CallMandatoryPartExpressionDynamic));
+            .Property(WaitTemplate.FieldsNames.InstanceMandatoryPartExpression)
+            .HasColumnName(nameof(WaitTemplate.FieldsNames.InstanceMandatoryPartExpression));
         entityBuilder
-            .Property(MethodWaitTemplate.FieldsNames.InstanceMandatoryPartExpression)
-            .HasColumnName(nameof(MethodWaitTemplate.FieldsNames.InstanceMandatoryPartExpression));
-        entityBuilder
-            .Property(MethodWaitTemplate.FieldsNames.SetDataExpression)
-            .HasColumnName(nameof(MethodWaitTemplate.FieldsNames.SetDataExpression));
+            .Property(WaitTemplate.FieldsNames.SetDataExpression)
+            .HasColumnName(nameof(WaitTemplate.FieldsNames.SetDataExpression));
         modelBuilder.Entity<MethodsGroup>()
             .HasMany(x => x.WaitTemplates)
             .WithOne(x => x.MethodGroup)

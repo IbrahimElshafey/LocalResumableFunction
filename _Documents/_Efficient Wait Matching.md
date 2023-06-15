@@ -9,12 +9,15 @@
 * Get Wait templates for method group
 	* MethodWaitTemplates.Where(x => x.MethodGroupId)
 	* Will return WaitTemplate list
+* Group templates by MethodId
 * Apply CallMandatoryPartExpressionDynamic extractor expression to pushed call
 	* Will return mandatory part (Mandatory part string,Function Id)
-	* If mandatory part is null or contains null it will be ignored
+	* If mandatory part is null or contains null it will translated to string NULL
 * Query waits table
-	* Where (MandatoryPartValue & FunctionId & MethodGroupId) pairs
+	* Where (MandatoryPartValue in Values & MethodId & FunctionId & MethodGroupId) pairs
 	* Waits result will be marked as partial matches or full match based on template `IsMandatoryPartFullMatch` prop
+
+# Process of same type for a function
 * Will group waits by `WaitTemplateId`
 * For each group one match must be success
 * Match evalution for each group

@@ -17,7 +17,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
 
     public LambdaExpression MatchExpression { get; private set; }
     public LambdaExpression CallMandatoryPartExpression { get; private set; }
-    public Expression<Func<ExpandoObject, string[]>> CallMandatoryPartExpressionDynamic { get; private set; }
+    //public Expression<Func<ExpandoObject, string[]>> CallMandatoryPartExpressionDynamic { get; private set; }
     public LambdaExpression InstanceMandatoryPartExpression { get; private set; }
     public bool IsMandatoryPartFullMatch { get; private set; }
 
@@ -47,10 +47,10 @@ public partial class MatchExpressionWriter : ExpressionVisitor
 
         if (_constantParts.Any(x => x.IsMandatory))
         {
-            var mandatoryPartVistor = new MandatoryPartVisitor(_matchExpression, _constantParts);
-            CallMandatoryPartExpression = mandatoryPartVistor.CallMandatoryPartExpression;
-            CallMandatoryPartExpressionDynamic = mandatoryPartVistor.CallMandatoryPartExpressionDynamic;
-            InstanceMandatoryPartExpression = mandatoryPartVistor.InstanceMandatoryPartExpression;
+            var mandatoryPartVisitor = new MandatoryPartVisitor(_matchExpression, _constantParts);
+            CallMandatoryPartExpression = mandatoryPartVisitor.CallMandatoryPartExpression;
+            //CallMandatoryPartExpressionDynamic = mandatoryPartVistor.CallMandatoryPartExpressionDynamic;
+            InstanceMandatoryPartExpression = mandatoryPartVisitor.InstanceMandatoryPartExpression;
             SetIsMandatoryPartFullMatchValue();
         }
     }

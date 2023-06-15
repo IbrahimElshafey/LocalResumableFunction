@@ -3,10 +3,11 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
-    public interface IWaitTemplatesService
+    public interface IWaitTemplatesRepo
     {
-        Task<MethodWaitTemplate> AddNewTemplate(
+        Task<WaitTemplate> AddNewTemplate(
             WaitExpressionsHash hashResult, object currentFunctionInstance, int funcId, int groupId, int methodId);
-        Task<MethodWaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId);
+        Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId);
+        Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId);
     }
 }

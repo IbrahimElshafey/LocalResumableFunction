@@ -17,7 +17,7 @@ public class MethodWait : Wait
     public string MandatoryPart { get; internal set; }
 
     [NotMapped]
-    internal MethodWaitTemplate Template { get; set; }
+    internal WaitTemplate Template { get; set; }
     public int TemplateId { get; internal set; }
 
     [NotMapped]

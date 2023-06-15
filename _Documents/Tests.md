@@ -1,19 +1,17 @@
 ﻿
-# Test Engine Scenarios
-* Seqeunce [DONE]
-* Wait all [DONE]
-* Wait first [DONE]
-* Wait function [DONE]
-* Wait many functions [DONE]
-* Wait first function [DONE]
+# Write Unit Tests For:
+* Sequence
+* Wait all
+* Wait first
+* Wait function
+* Wait many functions
+* Wait first function
 * Replay [to,after,before] for types:
 	* To
-	* After [DONE]
-	* Before [DONE]
+	* After
+	* Before
 * Replay in sub functions
 * Multiple sub functions levels
-
-# Retest
 * Test loops
 * Test Replay
 

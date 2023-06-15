@@ -61,7 +61,7 @@ namespace ResumableFunctions.Handler.Attributes
             try
             {
                 _pushedCall.Data.Output = result;
-                if (metadata.DeclaringType != typeof(LocalRegisteredMethods))
+                if (metadata.DeclaringType != typeof(LocalRegisteredMethods))//don't push local calls
                     _callPusher.PushCall(_pushedCall).Wait();
             }
             catch (Exception ex)
