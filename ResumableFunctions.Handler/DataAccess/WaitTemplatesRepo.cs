@@ -32,7 +32,6 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
         waitTemplate.MatchExpression = matchWriter.MatchExpression;
         waitTemplate.CallMandatoryPartExpression = matchWriter.CallMandatoryPartExpression;
-        //waitTemplate.CallMandatoryPartExpressionDynamic = matchWriter.CallMandatoryPartExpressionDynamic;
         waitTemplate.InstanceMandatoryPartExpression = matchWriter.InstanceMandatoryPartExpression;
         waitTemplate.IsMandatoryPartFullMatch = matchWriter.IsMandatoryPartFullMatch;
 

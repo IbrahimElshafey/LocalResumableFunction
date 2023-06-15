@@ -65,7 +65,6 @@ internal partial class WaitsRepo : IWaitsRepo
         }
     }
 
-    //todo:critical this method must be optimized
     public async Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId, string methodUrn)
     {
         try
@@ -122,7 +121,8 @@ internal partial class WaitsRepo : IWaitsRepo
         }
     }
 
-    private async IAsyncEnumerable<(Expression<Func<MethodWait, bool>> Clause, bool MakeFullMatch)> GetQueryClauses(int pushedCallId, string methodUrn)
+    private async IAsyncEnumerable<(Expression<Func<MethodWait, bool>> Clause, bool MakeFullMatch)> GetQueryClauses(
+        int pushedCallId, string methodUrn)
     {
         var pushedCall = await _context
             .PushedCalls

@@ -38,6 +38,7 @@ internal partial class WaitsRepo : IWaitsRepo
                 break;
         }
 
+        await _context.SaveChangesAsync();
         return false;
     }
 

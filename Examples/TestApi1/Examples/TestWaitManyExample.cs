@@ -5,7 +5,7 @@ namespace TestApi1.Examples;
 
 public class TestWaitManyExample : ProjectApprovalExample
 {
-    [ResumableFunctionEntryPoint("TestWaitManyExample.WaitThreeMethodAtStart")]
+    //[ResumableFunctionEntryPoint("TestWaitManyExample.WaitThreeMethodAtStart")]
     public async IAsyncEnumerable<Wait> WaitThreeMethodAtStart()
     {
         CurrentProject = new Project()
@@ -29,7 +29,7 @@ public class TestWaitManyExample : ProjectApprovalExample
         Success(nameof(WaitThreeMethodAtStart));
     }
 
-    [ResumableFunctionEntryPoint("TestWaitManyExample.WaitThreeMethod")]
+    //[ResumableFunctionEntryPoint("TestWaitManyExample.WaitThreeMethod")]
     public async IAsyncEnumerable<Wait> WaitThreeMethod()
     {
         yield return
@@ -53,7 +53,7 @@ public class TestWaitManyExample : ProjectApprovalExample
         Success(nameof(WaitThreeMethod));
     }
 
-    [ResumableFunctionEntryPoint("TestWaitManyExample.WaitManyAndGroupExpressionDefined")]
+    //[ResumableFunctionEntryPoint("TestWaitManyExample.WaitManyAndGroupExpressionDefined")]
     public async IAsyncEnumerable<Wait> WaitManyAndGroupExpressionDefined()
     {
         yield return

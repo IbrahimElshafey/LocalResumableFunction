@@ -13,7 +13,6 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
         private readonly List<ConstantPart> _mandatoryParts;
         private readonly LambdaExpression _matchExpression;
         public LambdaExpression CallMandatoryPartExpression { get; internal set; }
-        //public Expression<Func<ExpandoObject, string[]>> CallMandatoryPartExpressionDynamic { get; internal set; }
         public LambdaExpression InstanceMandatoryPartExpression { get; internal set; }
         public MandatoryPartVisitor(LambdaExpression matchExpression, List<ConstantPart> constantParts)
         {
@@ -24,7 +23,6 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
               .OrderBy(x => x.PropPathExpression.ToString())
               .ToList();
             CallMandatoryPartExpression = GetCallMandatoryPartExpression();
-            //CallMandatoryPartExpressionDynamic = GetCallMandatoryPartExpressionDynamic();
             InstanceMandatoryPartExpression = GetInstanceMandatoryPartExpression();
         }
 
@@ -32,7 +30,6 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
 
         private LambdaExpression GetCallMandatoryPartExpression()
         {
-            //return null;
             return Lambda(NewArrayInit(typeof(string), TranslateParts()), _matchExpression.Parameters[0], _matchExpression.Parameters[1]);
 
             IEnumerable<Expression> TranslateParts()

@@ -5,7 +5,7 @@ namespace TestApi1.Examples;
 
 public class TestTimeExample : ProjectApprovalExample
 {
-    [ResumableFunctionEntryPoint("TestTimeExample.TimeWaitTest")]
+    //[ResumableFunctionEntryPoint("TestTimeExample.TimeWaitTest")]
     public async IAsyncEnumerable<Wait> TimeWaitTest()
     {
         yield return
