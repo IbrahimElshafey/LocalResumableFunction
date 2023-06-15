@@ -62,7 +62,7 @@ namespace ResumableFunctions.Handler.Core
                     if (_methodWait != null && _pushedCall != null)
                     {
                         var isSuccess = await Pipeline(
-                            SetData,
+                            SetInputOutput,
                             CheckIfMatch,
                             CloneIfFirst,
                             UpdateFunctionData,
@@ -84,15 +84,30 @@ namespace ResumableFunctions.Handler.Core
             var timeWait = await _waitsRepo.GetTimeWait(timeWaitId);
             timeWait.FunctionState.LoadUnmappedProps(timeWait.RequestedByFunction.InClassType);
             timeWait.LoadUnmappedProps();
-            /*
-             *  CloneIfFirst,
+            _methodWait = timeWait;
+            var isSuccess = await Pipeline(
+                CloneTimeWaitIfFirst,
                 UpdateFunctionData,
                 ResumeExecution);
-             */
+            timeWait.Status = WaitStatus.Completed;
+            if (isSuccess)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            async Task<bool> CloneTimeWaitIfFirst()
+            {
+                if (_methodWait.IsFirst)
+                {
+                    _methodWait = await _firstWaitProcessor.CloneFirstWait(_methodWait);
+                    await _context.SaveChangesAsync();
+                }
+                return true;
+            }
         }
 
 
-        private Task<bool> SetData()
+        private Task<bool> SetInputOutput()
         {
             _pushedCall.LoadUnmappedProps(_methodWait.MethodToWait.MethodInfo);
             _methodWait.Input = _pushedCall.Data.Input;

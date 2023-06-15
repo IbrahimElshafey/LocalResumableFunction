@@ -169,6 +169,7 @@ internal partial class WaitsRepo
                 UniqueMatchId = timeWait.UniqueMatchId,
                 JobId = jobId,
             };
+        //todo:add set data wait template
         await AddWait(timeWaitMethod);
     }
 
