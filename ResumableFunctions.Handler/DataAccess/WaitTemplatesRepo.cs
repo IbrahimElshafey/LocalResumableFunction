@@ -1,20 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal class WaitTemplatesRepo : IWaitTemplatesRepo
+internal class WaitTemplatesRepo : IWaitTemplatesRepo,IDisposable
 {
     private readonly FunctionDataContext _context;
+    private readonly IServiceScope _scope;
 
-    public WaitTemplatesRepo(FunctionDataContext context)
+    public WaitTemplatesRepo(IServiceProvider provider)
     {
-        _context = context;
+        _scope = provider.CreateScope();
+        _context = _scope.ServiceProvider.GetService<FunctionDataContext>();
     }
 
-    public Task<WaitTemplate> AddNewTemplate(
+    public async Task<WaitTemplate> AddNewTemplate(
         WaitExpressionsHash hashResult,
         object currentFunctionInstance,
         int funcId,
@@ -40,7 +43,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo
         waitTemplate.SetDataExpression = setDataWriter.SetDataExpression;
 
         _context.WaitTemplates.Add(waitTemplate);
-        return Task.FromResult(waitTemplate);
+        await _context.SaveChangesAsync();
+        return waitTemplate;
     }
 
     public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
@@ -58,8 +62,15 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo
             .WaitTemplates
             .Select(WaitTemplate.CallMandatoryPartSelector)
             .Where(x => x.MethodGroupId == methodGroupId)
+            .AsNoTracking()
             .ToListAsync();
         result.ForEach(x => x.LoadExpressions());
         return result;
+    }
+
+    public void Dispose()
+    {
+        _context?.Dispose();
+        _scope?.Dispose();
     }
 }

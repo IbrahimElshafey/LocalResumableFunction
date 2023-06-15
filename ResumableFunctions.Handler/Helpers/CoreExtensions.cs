@@ -35,6 +35,7 @@ public static class CoreExtensions
         services.AddScoped<ICallProcessor, CallProcessor>();
         services.AddScoped<ICallPusher, CallPusher>();
         services.AddScoped<Scanner>();
+        services.AddScoped<LocalRegisteredMethods>();
 
 
 

@@ -7,10 +7,11 @@ using System.Linq.Expressions;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Helpers.Expressions;
 using FastExpressionCompiler;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal partial class WaitsRepo : IWaitsRepo
+internal partial class WaitsRepo
 {
     public async Task<bool> SaveWaitRequestToDb(Wait newWait)
     {
@@ -38,12 +39,9 @@ internal partial class WaitsRepo : IWaitsRepo
                 break;
         }
 
-        await _context.SaveChangesAsync();
         return false;
     }
-
-
-
+    
     private async Task MethodWaitRequested(MethodWait methodWait)
     {
         var methodId = await _methodIdsRepo.GetId(methodWait);
@@ -82,7 +80,7 @@ internal partial class WaitsRepo : IWaitsRepo
             childWait.ServiceId = _settings.CurrentServiceId;
             childWait.CurrentFunction = manyWaits.CurrentFunction;
             childWait.ParentWait = manyWaits;
-            await SaveWaitRequestToDb(childWait);//child wait in group
+            await SaveWaitRequestToDb(childWait);
         }
 
         await AddWait(manyWaits);
@@ -121,36 +119,30 @@ internal partial class WaitsRepo : IWaitsRepo
             await SaveWaitRequestToDb(functionWait.FirstWait);//first wait for sub function
     }
 
+
+    public Task<MethodWait> GetTimeWait(string timeWaitId)
+    {
+        var parts = timeWaitId.Split('#');
+        var mandatoryPart = timeWaitId;
+        var groupId = int.Parse(parts[1]);
+        var functionId = int.Parse(parts[2]);
+        var methodId = int.Parse(parts[3]);
+        return _context
+            .MethodWaits
+            .Where(x =>
+                x.MethodGroupToWaitId == groupId &&
+                x.MandatoryPart == mandatoryPart &&
+                x.RequestedByFunctionId == functionId &&
+                x.MethodToWaitId == methodId
+            )
+            .FirstAsync();
+    }
+
     private async Task TimeWaitRequested(TimeWait timeWait)
     {
-
         var timeWaitMethod = new MethodWait<string, bool>(typeof(LocalRegisteredMethods).GetMethod("TimeWait"));
-        var functionType = typeof(Func<,,>)
-            .MakeGenericType(
-                typeof(string),
-                typeof(bool),
-                typeof(bool));
-        //todo: revisit after ComputedInstanceId done, no need for 
-        var inputParameter = Expression.Parameter(typeof(string), "input");
-        var outputParameter = Expression.Parameter(typeof(bool), "output");
-        var setDataExpression = Expression.Lambda(
-            functionType,
-            timeWait.SetDataExpression.Body,
-            inputParameter,
-            outputParameter);
-        var matchExpression = Expression.Lambda(
-            functionType,
-            Expression.Equal(inputParameter, Expression.Constant(timeWait.UniqueMatchId)),
-            inputParameter,
-            outputParameter);
-
-        timeWaitMethod
-           .SetData((Expression<Func<string, bool, bool>>)setDataExpression)
-           .MatchIf((Expression<Func<string, bool, bool>>)matchExpression);
+        TimeWaitSetDataExpression(timeWait, timeWaitMethod);
         timeWaitMethod.CurrentFunction = timeWait.CurrentFunction;
-
-        LocalRegisteredMethods localMethods = null;
-        var jobId = _backgroundJobClient.Schedule(() => localMethods.TimeWait(timeWait.UniqueMatchId), timeWait.TimeToWait);
 
         _context.Entry(timeWait).State = EntityState.Detached;
         timeWaitMethod.ParentWait = timeWait.ParentWait;
@@ -158,6 +150,18 @@ internal partial class WaitsRepo : IWaitsRepo
         timeWaitMethod.RequestedByFunctionId = timeWait.RequestedByFunctionId;
         timeWaitMethod.StateBeforeWait = timeWait.StateBeforeWait;
         timeWaitMethod.StateAfterWait = timeWait.StateAfterWait;
+
+
+        var methodId = await _methodIdsRepo.GetId(timeWaitMethod);
+        timeWaitMethod.ServiceId = _settings.CurrentServiceId;
+        timeWaitMethod.MethodToWaitId = methodId.MethodId;
+        timeWaitMethod.MethodGroupToWaitId = methodId.GroupId;
+        timeWaitMethod.MandatoryPart =
+            $"{timeWait.UniqueMatchId}#{methodId.GroupId}#{timeWait.RequestedByFunctionId}#{methodId.MethodId}";
+
+        var localMethods = _provider.GetService<LocalRegisteredMethods>();
+        var jobId = _backgroundJobClient.Schedule(() => localMethods.TimeWait(timeWaitMethod.MandatoryPart), timeWait.TimeToWait);
+
         timeWaitMethod.ExtraData =
             new WaitExtraData
             {
@@ -165,7 +169,25 @@ internal partial class WaitsRepo : IWaitsRepo
                 UniqueMatchId = timeWait.UniqueMatchId,
                 JobId = jobId,
             };
-        await MethodWaitRequested(timeWaitMethod);
+        await AddWait(timeWaitMethod);
+    }
+
+    private static void TimeWaitSetDataExpression(TimeWait timeWait, MethodWait<string, bool> methodWait)
+    {
+        var functionType = typeof(Func<,,>)
+            .MakeGenericType(
+                typeof(string),
+                typeof(bool),
+                typeof(bool));
+        var inputParameter = Expression.Parameter(typeof(string), "input");
+        var outputParameter = Expression.Parameter(typeof(bool), "output");
+        var setDataExpression = Expression.Lambda(
+            functionType,
+            timeWait.SetDataExpression.Body,
+            inputParameter,
+            outputParameter);
+        methodWait
+            .SetData((Expression<Func<string, bool, bool>>)setDataExpression);
     }
 
     public Task AddWait(Wait wait)

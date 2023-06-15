@@ -14,9 +14,9 @@ namespace ResumableFunctions.Handler.Core
         private readonly IFirstWaitProcessor _firstWaitProcessor;
         private readonly IRecycleBinService _recycleBinService;
         private readonly IReplayWaitProcessor _replayWaitProcessor;
-        private readonly IWaitsRepo _waitsRepository;
+        private readonly IWaitsRepo _waitsRepo;
         private readonly IServiceProvider _serviceProvider;
-      
+
         private readonly ILogger<WaitProcessor> _logger;
         private readonly IBackgroundProcess _backgroundJobClient;
         private readonly FunctionDataContext _context;
@@ -32,7 +32,7 @@ namespace ResumableFunctions.Handler.Core
             ILogger<WaitProcessor> logger,
             IFirstWaitProcessor firstWaitProcessor,
             IRecycleBinService recycleBinService,
-            IWaitsRepo waitsRepository,
+            IWaitsRepo waitsRepo,
             IBackgroundProcess backgroundJobClient,
             FunctionDataContext context,
             IReplayWaitProcessor replayWaitProcessor,
@@ -43,7 +43,7 @@ namespace ResumableFunctions.Handler.Core
             _logger = logger;
             _firstWaitProcessor = firstWaitProcessor;
             _recycleBinService = recycleBinService;
-            _waitsRepository = waitsRepository;
+            _waitsRepo = waitsRepo;
             _backgroundJobClient = backgroundJobClient;
             _context = context;
             _replayWaitProcessor = replayWaitProcessor;
@@ -78,10 +78,17 @@ namespace ResumableFunctions.Handler.Core
                 $"Error when process wait `{methodWaitId}` that may be a match for pushed call `{pushedCallId}`");
         }
 
-        public Task ProcessTimeWaitMatched(string timeWaitId)
+        public async Task ProcessTimeWaitMatched(string timeWaitId)
         {
-            _logger.LogWarning("Process time wait not implemented.");
-            return Task.CompletedTask;
+            //$"{timeWait.UniqueMatchId}#{methodId.GroupId}#{timeWait.RequestedByFunctionId}#{methodId.MethodId}";
+            var timeWait = await _waitsRepo.GetTimeWait(timeWaitId);
+            timeWait.FunctionState.LoadUnmappedProps(timeWait.RequestedByFunction.InClassType);
+            timeWait.LoadUnmappedProps();
+            /*
+             *  CloneIfFirst,
+                UpdateFunctionData,
+                ResumeExecution);
+             */
         }
 
 
@@ -166,7 +173,7 @@ namespace ResumableFunctions.Handler.Core
             Wait currentWait = _methodWait;
             do
             {
-                var parent = await _waitsRepository.GetWaitParent(currentWait);
+                var parent = await _waitsRepo.GetWaitParent(currentWait);
                 switch (currentWait)
                 {
                     case MethodWait methodWait:
@@ -181,7 +188,7 @@ namespace ResumableFunctions.Handler.Core
                         {
                             currentWait.FunctionState.AddLog($"Wait `{currentWait.Name}` is completed.");
                             currentWait.Status = WaitStatus.Completed;
-                            await _waitsRepository.CancelSubWaits(currentWait.Id);
+                            await _waitsRepo.CancelSubWaits(currentWait.Id);
                             await GoNext(parent, currentWait);
                         }
                         else return true;
@@ -258,7 +265,7 @@ namespace ResumableFunctions.Handler.Core
                     await ProceedToNextWait(replayResult.Wait);
             }
             else
-                await _waitsRepository.SaveWaitRequestToDb(nextWait);//next wait after resume function
+                await _waitsRepo.SaveWaitRequestToDb(nextWait);//next wait after resume function
             await _context.SaveChangesAsync();
         }
 
@@ -269,7 +276,7 @@ namespace ResumableFunctions.Handler.Core
             currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
             currentWait.FunctionState.AddLog("Function instance completed.", LogType.Info);
             currentWait.FunctionState.Status = FunctionStatus.Completed;
-            await _waitsRepository.CancelOpenedWaitsForState(currentWait.FunctionStateId);
+            await _waitsRepo.CancelOpenedWaitsForState(currentWait.FunctionStateId);
             await _recycleBinService.RecycleFunction(currentWait.FunctionStateId);
         }
 

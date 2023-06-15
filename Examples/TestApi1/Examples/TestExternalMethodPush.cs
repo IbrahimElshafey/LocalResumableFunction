@@ -9,7 +9,7 @@ namespace TestApi1.Examples
 
         public string Result { get; set; }
 
-        //[ResumableFunctionEntryPoint("TestExternalMethodPush.ResumableFunctionThatWaitExternal")]//Point 1
+        [ResumableFunctionEntryPoint("TestExternalMethodPush.ResumableFunctionThatWaitExternal")]//Point 1
         public async IAsyncEnumerable<Wait> ResumableFunctionThatWaitExternal()
         {
             yield return
