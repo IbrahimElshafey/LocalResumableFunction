@@ -122,15 +122,15 @@ internal partial class WaitsService : IWaitsService
     private async Task TimeWaitRequested(TimeWait timeWait)
     {
 
-        var timeWaitMethod = new MethodWait<string, string>(new LocalRegisteredMethods().TimeWait);
+        var timeWaitMethod = new MethodWait<string, bool>(typeof(LocalRegisteredMethods).GetMethod("TimeWait"));
         var functionType = typeof(Func<,,>)
             .MakeGenericType(
                 typeof(string),
-                typeof(string),
+                typeof(bool),
                 typeof(bool));
         //todo: revisit after ComputedInstanceId done, no need for 
         var inputParameter = Expression.Parameter(typeof(string), "input");
-        var outputParameter = Expression.Parameter(typeof(string), "output");
+        var outputParameter = Expression.Parameter(typeof(bool), "output");
         var setDataExpression = Expression.Lambda(
             functionType,
             timeWait.SetDataExpression.Body,
@@ -143,11 +143,13 @@ internal partial class WaitsService : IWaitsService
             outputParameter);
 
         timeWaitMethod
-           .SetData((Expression<Func<string, string, bool>>)setDataExpression)
-           .MatchIf((Expression<Func<string, string, bool>>)matchExpression);
+           .SetData((Expression<Func<string, bool, bool>>)setDataExpression)
+           .MatchIf((Expression<Func<string, bool, bool>>)matchExpression);
         timeWaitMethod.CurrentFunction = timeWait.CurrentFunction;
 
-        var jobId = _backgroundJobClient.Schedule(() => new LocalRegisteredMethods().TimeWait(timeWait.UniqueMatchId), timeWait.TimeToWait);
+        LocalRegisteredMethods localMethods = null;
+        var jobId = _backgroundJobClient.Schedule(() => localMethods.TimeWait(timeWait.UniqueMatchId), timeWait.TimeToWait);
+
         _context.Entry(timeWait).State = EntityState.Detached;
         timeWaitMethod.ParentWait = timeWait.ParentWait;
         timeWaitMethod.FunctionState = timeWait.FunctionState;

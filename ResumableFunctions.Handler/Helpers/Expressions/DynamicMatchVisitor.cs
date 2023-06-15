@@ -12,9 +12,9 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
 {
     internal class DynamicMatchVisitor : ExpressionVisitor
     {
-        private LambdaExpression _matchExpression;
-        private ParameterExpression _inputOutput;
-        private ParameterExpression _instance;
+        private readonly LambdaExpression _matchExpression;
+        private readonly ParameterExpression _inputOutput;
+        private readonly ParameterExpression _instance;
         private bool _stop;
         public Expression<Func<ExpandoObject, ExpandoObject, bool>> Result { get; internal set; }
 

@@ -8,14 +8,14 @@ using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers.Expressions
 {
-    internal class MandatoryPartVistor : ExpressionVisitor
+    internal class MandatoryPartVisitor : ExpressionVisitor
     {
-        private List<ConstantPart> _mandatoryParts;
-        private LambdaExpression _matchExpression;
+        private readonly List<ConstantPart> _mandatoryParts;
+        private readonly LambdaExpression _matchExpression;
         public LambdaExpression CallMandatoryPartExpression { get; internal set; }
         public Expression<Func<ExpandoObject, string[]>> CallMandatoryPartExpressionDynamic { get; internal set; }
         public LambdaExpression InstanceMandatoryPartExpression { get; internal set; }
-        public MandatoryPartVistor(LambdaExpression matchExpression, List<ConstantPart> constantParts)
+        public MandatoryPartVisitor(LambdaExpression matchExpression, List<ConstantPart> constantParts)
         {
             _matchExpression = matchExpression;
             _mandatoryParts =

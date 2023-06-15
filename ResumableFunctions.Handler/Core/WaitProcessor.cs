@@ -15,7 +15,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IRecycleBinService _recycleBinService;
         private readonly IReplayWaitProcessor _replayWaitProcessor;
         private readonly IWaitsService _waitsRepository;
-        private IServiceProvider _serviceProvider;
+        private readonly IServiceProvider _serviceProvider;
         private MethodWait _methodWait;
         private PushedCall _pushedCall;
         private readonly ILogger<WaitProcessor> _logger;
@@ -50,13 +50,13 @@ namespace ResumableFunctions.Handler.Core
             _lockProvider = lockProvider;
         }
 
-        public async Task ProcessWait(int mehtodWaitId, int pushedCallId)
+        public async Task ProcessWait(int methodWaitId, int pushedCallId)
         {
             await _backgroundJobExecutor.Execute(
-                $"ProcessWait_{mehtodWaitId}_{pushedCallId}",
+                $"ProcessWait_{methodWaitId}_{pushedCallId}",
                 async () =>
                 {
-                    _methodWait = await LoadWait(mehtodWaitId);
+                    _methodWait = await LoadWait(methodWaitId);
                     _pushedCall = await LoadPushedCall(pushedCallId);
                     if (_methodWait != null && _pushedCall != null)
                     {
@@ -74,9 +74,14 @@ namespace ResumableFunctions.Handler.Core
                         }
                     }
                 },
-                $"Error when process wait `{mehtodWaitId}` that may be a match for pushed call `{pushedCallId}`");
+                $"Error when process wait `{methodWaitId}` that may be a match for pushed call `{pushedCallId}`");
         }
 
+        public Task ProcessTimeWaitMatched(string timeWaitId)
+        {
+            _logger.LogWarning("Process time wait not implemented.");
+            return Task.CompletedTask;
+        }
 
 
         private Task<bool> SetData()

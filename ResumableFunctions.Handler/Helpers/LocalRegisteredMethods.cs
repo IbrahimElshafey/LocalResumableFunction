@@ -1,15 +1,22 @@
 ﻿using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Helpers
 {
     public class LocalRegisteredMethods
     {
-        [PushCall("LocalRegisteredMethods.TimeWait")]
-        public string TimeWait(string timeWaitId)
+        private readonly IWaitProcessor _waitProcessor;
+
+        public LocalRegisteredMethods(IWaitProcessor waitProcessor)
         {
-            //todo: special handle for time wait push
-            return nameof(MethodWait.MandatoryPart) + timeWaitId;
+            _waitProcessor = waitProcessor;
+        }
+        [PushCall("LocalRegisteredMethods.TimeWait")]
+        public bool TimeWait(string timeWaitId)
+        {
+            _waitProcessor.ProcessTimeWaitMatched(timeWaitId).Wait();
+            return true;
         }
     }
 }

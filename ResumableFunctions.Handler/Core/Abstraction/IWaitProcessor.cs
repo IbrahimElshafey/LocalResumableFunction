@@ -2,6 +2,7 @@
 {
     public interface IWaitProcessor
     {
-        Task ProcessWait(int mehtodWaitId, int pushedCallId);
+        Task ProcessWait(int methodWaitId, int pushedCallId);
+        Task ProcessTimeWaitMatched(string timeWaitId);
     }
 }

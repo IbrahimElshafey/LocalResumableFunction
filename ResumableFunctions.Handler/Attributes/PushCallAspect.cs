@@ -54,14 +54,15 @@ namespace ResumableFunctions.Handler.Attributes
         [Advice(Kind.After)]
         public void OnExit(
            [Argument(Source.Name)] string name,
-           [Argument(Source.ReturnValue)] object result
-           //[Argument(Source.Metadata)] MethodBase metadata
+           [Argument(Source.ReturnValue)] object result,
+           [Argument(Source.Metadata)] MethodBase metadata
            )
         {
             try
             {
                 _pushedCall.Data.Output = result;
-                _callPusher.PushCall(_pushedCall).Wait();
+                if (metadata.DeclaringType != typeof(LocalRegisteredMethods))
+                    _callPusher.PushCall(_pushedCall).Wait();
             }
             catch (Exception ex)
             {

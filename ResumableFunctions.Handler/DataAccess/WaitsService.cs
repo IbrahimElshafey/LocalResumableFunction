@@ -135,7 +135,7 @@ internal partial class WaitsService : IWaitsService
             return methodGroup;
         else
         {
-            var error = $"Method [{methodUrn}] is not registered in current database as [WaitMethod]."
+            var error = $"Method [{methodUrn}] is not registered in current database as [WaitMethod].";
             _logger.LogWarning(error);
             throw new Exception(error);
         }
