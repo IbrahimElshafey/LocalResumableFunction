@@ -17,6 +17,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private readonly IWaitsRepo _waitsRepository;
     private readonly IServiceProvider _serviceProvider;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
+    private readonly IResumableFunctionsSettings _settings;
 
     public FirstWaitProcessor(
         ILogger<FirstWaitProcessor> logger,
@@ -24,7 +25,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         IServiceProvider serviceProvider,
         IMethodIdsRepo methodIdentifierRepo,
         IWaitsRepo waitsRepository,
-        BackgroundJobExecutor backgroundJobExecutor)
+        BackgroundJobExecutor backgroundJobExecutor,
+        IResumableFunctionsSettings settings)
     {
         _logger = logger;
         _context = context;
@@ -32,6 +34,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _methodIdentifierRepo = methodIdentifierRepo;
         _waitsRepository = waitsRepository;
         _backgroundJobExecutor = backgroundJobExecutor;
+        _settings = settings;
     }
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
@@ -127,7 +130,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     public async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
         var classInstance = (ResumableFunction)Activator.CreateInstance(resumableFunction.DeclaringType);
-        
+
         if (classInstance != null)
         {
             classInstance.InitializeDependencies(_serviceProvider);
@@ -148,12 +151,11 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
                 await _waitsRepository.RemoveFirstWaitIfExist(methodId.Id);
             }
-            var service = await _context.ServicesData.FirstAsync(x => x.AssemblyName == methodId.AssemblyName);
             var functionState = new ResumableFunctionState
             {
                 ResumableFunctionIdentifier = methodId,
                 StateObject = classInstance,
-                ServiceId = service.GetRootServiceId()
+                ServiceId = _settings.CurrentServiceId,
             };
             firstWait.ActionOnWaitsTree(x =>
             {

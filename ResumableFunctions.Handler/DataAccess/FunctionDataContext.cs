@@ -335,6 +335,7 @@ public class FunctionDataContext : DbContext
     {
         if (entityEntry.Entity is Wait wait &&
                  wait.IsFirst &&
+                 wait.IsNode &&
                  wait.IsDeleted == false)
         {
             if (entityEntry.State == EntityState.Modified)

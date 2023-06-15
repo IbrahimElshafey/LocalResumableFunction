@@ -120,10 +120,9 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     {
         var waitExpressionsHash = new WaitExpressionsHash(matchExpression, setDataExpression);
         var expressionsHash = waitExpressionsHash.Hash;
-        var waitTemplate = await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, groupId);
-        if (waitTemplate == null)
-            waitTemplate = await _waitTemplatesRepo.AddNewTemplate(
-                waitExpressionsHash, functionInstance, funcId, groupId, methodId);
+        var waitTemplate = 
+            await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, groupId) ??
+            await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, functionInstance, funcId, groupId, methodId);
         return waitTemplate;
     }
 

@@ -14,7 +14,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo
         _context = context;
     }
 
-    public async Task<WaitTemplate> AddNewTemplate(
+    public Task<WaitTemplate> AddNewTemplate(
         WaitExpressionsHash hashResult,
         object currentFunctionInstance,
         int funcId,
@@ -41,8 +41,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo
         waitTemplate.SetDataExpression = setDataWriter.SetDataExpression;
 
         _context.WaitTemplates.Add(waitTemplate);
-        await _context.SaveChangesAsync();
-        return waitTemplate;
+        return Task.FromResult(waitTemplate);
     }
 
     public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)

@@ -115,9 +115,9 @@ namespace TestSomething
             var result = compiled.DynamicInvoke(pushedCall.Input, pushedCall.Output);
 
             //new[] { ((int)output.EnumProp).ToString(), input.Id.ToString(), input.IsMan.ToString() }
-            var mandatoryDynExps = matchRewriter.CallMandatoryPartExpressionDynamic;
-            var mandatoryDynExpsCompiled = mandatoryDynExps.CompileFast();
-            var dynresult2 = mandatoryDynExpsCompiled.DynamicInvoke(dynamicPushedCall);
+            //var mandatoryDynExps = matchRewriter.CallMandatoryPartExpressionDynamic;
+            //var mandatoryDynExpsCompiled = mandatoryDynExps.CompileFast();
+            //var dynresult2 = mandatoryDynExpsCompiled.DynamicInvoke(dynamicPushedCall);
 
             var instanceMandexp = matchRewriter.InstanceMandatoryPartExpression;
             var instanceMandexpComp = instanceMandexp.CompileFast();

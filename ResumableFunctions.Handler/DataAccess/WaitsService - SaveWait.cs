@@ -49,10 +49,9 @@ internal partial class WaitsRepo : IWaitsRepo
         var funcId = methodWait.RequestedByFunctionId;
         var waitExpressionsHash = new WaitExpressionsHash(methodWait.MatchExpression, methodWait.SetDataExpression);
         var expressionsHash = waitExpressionsHash.Hash;
-        var waitTemplate = await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, methodId.GroupId);
-        if (waitTemplate == null)
-            waitTemplate = await _waitTemplatesRepo.AddNewTemplate(
-                waitExpressionsHash, methodWait.CurrentFunction, funcId, methodId.GroupId, methodId.MethodId);
+        var waitTemplate =
+            await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, methodId.GroupId) ??
+            await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, methodWait.CurrentFunction, funcId, methodId.GroupId, methodId.MethodId);
         methodWait.ServiceId = _settings.CurrentServiceId;
         methodWait.MethodToWaitId = methodId.MethodId;
         methodWait.MethodGroupToWaitId = methodId.GroupId;
@@ -80,6 +79,8 @@ internal partial class WaitsRepo : IWaitsRepo
             childWait.StateAfterWait = manyWaits.StateAfterWait;
             childWait.ParentWait = manyWaits;
             childWait.ServiceId = _settings.CurrentServiceId;
+            childWait.CurrentFunction = manyWaits.CurrentFunction;
+            childWait.ParentWait = manyWaits;
             await SaveWaitRequestToDb(childWait);//child wait in group
         }
 
@@ -177,11 +178,11 @@ internal partial class WaitsRepo : IWaitsRepo
         {
             waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
         }
-        //if (wait is MethodWait { MethodToWaitId: > 0 } methodWait)
-        //{
-        //    //Bug:does this may cause a problem
-        //    methodWait.MethodToWait = null;
-        //}
+        if (wait is MethodWait { MethodToWaitId: > 0 } methodWait)
+        {
+            //Bug:does this may cause a problem
+            methodWait.MethodToWait = null;
+        }
         _context.Waits.Add(wait);
         return Task.CompletedTask;
     }

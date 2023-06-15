@@ -13,22 +13,30 @@ public class WaitExpressionsHash : ExpressionVisitor
 
     public WaitExpressionsHash(LambdaExpression matchExpression, LambdaExpression setDataExpression)
     {
-        var serializer = new ExpressionSerializer();
-        var sb = new StringBuilder();
-        if (matchExpression != null)
+        try
         {
-            MatchExpression =
-                (LambdaExpression)ChangeInputAndOutputNames(matchExpression);
-            sb.Append(serializer.Serialize(matchExpression.ToExpressionSlim()));
+            var serializer = new ExpressionSerializer();
+            var sb = new StringBuilder();
+            if (matchExpression != null)
+            {
+                MatchExpression =
+                    (LambdaExpression)ChangeInputAndOutputNames(matchExpression);
+                sb.Append(matchExpression.ToCSharpString());
+            }
+            if (setDataExpression != null)
+            {
+                SetDataExpression =
+                    (LambdaExpression)ChangeInputAndOutputNames(setDataExpression);
+                sb.Append(setDataExpression.ToCSharpString());
+            }
+            var data = Encoding.Unicode.GetBytes(sb.ToString());
+            Hash = MD5.HashData(data);
         }
-        if (setDataExpression != null)
+        catch (Exception e)
         {
-            SetDataExpression =
-               (LambdaExpression)ChangeInputAndOutputNames(setDataExpression);
-            sb.Append(serializer.Serialize(setDataExpression.ToExpressionSlim()));
+            Console.WriteLine(e);
+            throw;
         }
-        var data = Encoding.Unicode.GetBytes(sb.ToString());
-        Hash = MD5.HashData(data);
     }
 
     private Expression ChangeInputAndOutputNames(LambdaExpression expression)
