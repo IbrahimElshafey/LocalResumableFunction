@@ -42,6 +42,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         //todo:review CancelFunctionWaits is suffecient
         //Cancel wait and it's child
         waitToReplay.Status = waitToReplay.Status == WaitStatus.Waiting ? WaitStatus.Canceled : waitToReplay.Status;
+        waitToReplay.CurrentFunction = replayRequest.CurrentFunction;
         await _waitsRepo.CancelSubWaits(waitToReplay.Id);
         //skip active waits after replay
         await _waitsRepo.CancelFunctionWaits(waitToReplay.RequestedByFunctionId, waitToReplay.FunctionStateId);
@@ -97,7 +98,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 mw.MethodToWaitId ?? 0,
                 replayRequest.CurrentFunction);
             duplicateWait.TemplateId = template.Id;
-            await _waitsRepo.SaveWaitRequestToDb(duplicateWait);
+            await _waitsRepo.SaveWait(duplicateWait);
             return duplicateWait;
         }
         else
@@ -141,7 +142,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
         duplicateWait.IsReplay = true;
         duplicateWait.IsFirst = false;
-        await _waitsRepo.SaveWaitRequestToDb(duplicateWait);
+        await _waitsRepo.SaveWait(duplicateWait);
         return duplicateWait;
     }
 
@@ -161,7 +162,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         {
             var nextWaitAfterReplay = goBefore.Runner.Current;
             nextWaitAfterReplay.CopyCommonIds(oldCompletedWait);
-            await _waitsRepo.SaveWaitRequestToDb(nextWaitAfterReplay);
+            await _waitsRepo.SaveWait(nextWaitAfterReplay);
             return nextWaitAfterReplay;//when replay go before
         }
         else
@@ -196,7 +197,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 mw.RequestedByFunctionId = waitToReplay.RequestedByFunctionId;
                 mw.ParentWaitId = waitToReplay.ParentWaitId;
                 mw.TemplateId = template.Id;
-                await _waitsRepo.SaveWaitRequestToDb(mw);
+                await _waitsRepo.SaveWait(mw);
                 return mw;
             }
             else

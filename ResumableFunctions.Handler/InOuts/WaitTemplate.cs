@@ -57,6 +57,17 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
             ServiceId = waitTemplate.ServiceId
         };
+    public static Expression<Func<WaitTemplate, WaitTemplate>> InstanceMandatoryPartSelector =>
+        waitTemplate => new WaitTemplate
+        {
+            _instanceMandatoryPartExpression = waitTemplate._instanceMandatoryPartExpression,
+            Id = waitTemplate.Id,
+            FunctionId = waitTemplate.FunctionId,
+            MethodId = waitTemplate.MethodId,
+            MethodGroupId = waitTemplate.MethodGroupId,
+            IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
+            ServiceId = waitTemplate.ServiceId
+        };
 
     [NotMapped]
     public LambdaExpression MatchExpression { get; internal set; }

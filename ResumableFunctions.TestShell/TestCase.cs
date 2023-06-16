@@ -88,7 +88,7 @@ namespace ResumableFunctions.TestShell
             object input,
             object outPut)
         {
-            var methodInfo = CoreExtensions.GetMethodInfo(methodSelector).MethodInfo;
+            var methodInfo = CoreExtensions.GetMethodInfo(methodSelector);
             var pusher = CurrentApp.Services.GetService<ICallPusher>();
             var pushResultAttribute = methodInfo.GetCustomAttribute<PushCallAttribute>();
             var pushedCallId = await pusher.PushCall(

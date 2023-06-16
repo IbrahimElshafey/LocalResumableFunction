@@ -164,7 +164,10 @@ namespace ResumableFunctions.Handler.Core
                 using (await _lockProvider.AcquireLockAsync($"UpdateFunctionState_{_methodWait.FunctionStateId}"))
                 {
                     if (_methodWait.UpdateFunctionData())
+                    {
+                        _context.Entry(_methodWait.FunctionState).State = EntityState.Modified;
                         await _context.SaveChangesAsync();
+                    }
                     else
                         throw new Exception(
                             $"Can't update function state `{_methodWait.FunctionStateId}` after method wait `{_methodWait}` matched.");
@@ -280,7 +283,7 @@ namespace ResumableFunctions.Handler.Core
                     await ProceedToNextWait(replayResult.Wait);
             }
             else
-                await _waitsRepo.SaveWaitRequestToDb(nextWait);//next wait after resume function
+                await _waitsRepo.SaveWait(nextWait);//next wait after resume function
             await _context.SaveChangesAsync();
         }
 

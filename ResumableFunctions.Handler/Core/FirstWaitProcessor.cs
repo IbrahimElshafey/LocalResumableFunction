@@ -59,7 +59,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 firstWaitClone.FunctionState.HasErrors() ?
                 FunctionStatus.Error :
                 FunctionStatus.InProgress;
-            await _waitsRepository.SaveWaitRequestToDb(firstWaitClone);//first wait clone
+            await _waitsRepository.SaveWait(firstWaitClone);//first wait clone
 
             var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
             currentMw.Status = WaitStatus.Waiting;
@@ -101,7 +101,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                         firstWait.FunctionState.AddLog(
                             $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.",
                             LogType.Info);
-                    await _waitsRepository.SaveWaitRequestToDb(firstWait);//first wait when register function
+                    await _waitsRepository.SaveWait(firstWait);//first wait when register function
                     WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
                     await _context.SaveChangesAsync();
                 }

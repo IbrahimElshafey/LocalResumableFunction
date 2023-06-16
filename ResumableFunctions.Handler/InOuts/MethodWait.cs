@@ -73,6 +73,9 @@ public class MethodWait : Wait
             LoadExpressions();
             if (IsFirst && MatchExpression == null)
                 return true;
+            if (MethodToWait.MethodInfo == 
+                CoreExtensions.GetMethodInfo<LocalRegisteredMethods>(x => x.TimeWait))
+                return true;
             var check = MatchExpression.CompileFast();
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction);
         }

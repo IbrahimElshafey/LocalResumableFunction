@@ -246,7 +246,9 @@ public static class CoreExtensions
     public static bool CanBeConstant(this object ob)=>
         ob != null && ob.GetType().IsConstantType();
 
-    public static (MethodInfo MethodInfo, Type OwnerType) GetMethodInfo<T>(Expression<Func<T, object>> methodSelector)
+    public static MethodInfo GetMethodInfo<T>(Expression<Func<T, object>> methodSelector) =>
+        GetMethodInfoWithType(methodSelector).MethodInfo;
+    public static (MethodInfo MethodInfo, Type OwnerType) GetMethodInfoWithType<T>(Expression<Func<T, object>> methodSelector)
     {
         MethodInfo mi = null;
         Type ownerType = null;

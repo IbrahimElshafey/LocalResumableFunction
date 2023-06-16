@@ -14,7 +14,7 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
         Task<List<ServiceData>> GetAffectedServicesForCall(string methodUrn);
         Task RemoveFirstWaitIfExist(int methodIdentifierId);
 
-        Task<bool> SaveWaitRequestToDb(Wait newWait);
+        Task<bool> SaveWait(Wait newWait);
         Task<MethodWait> GetTimeWait(string timeWaitId);
     }
 }

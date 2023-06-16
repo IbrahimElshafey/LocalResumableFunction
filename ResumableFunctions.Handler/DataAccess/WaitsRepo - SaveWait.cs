@@ -13,7 +13,7 @@ namespace ResumableFunctions.Handler.DataAccess;
 
 internal partial class WaitsRepo
 {
-    public async Task<bool> SaveWaitRequestToDb(Wait newWait)
+    public async Task<bool> SaveWait(Wait newWait)
     {
         newWait.ServiceId = _settings.CurrentServiceId;
         if (newWait.IsValidWaitRequest() is false)
@@ -26,23 +26,23 @@ internal partial class WaitsRepo
         switch (newWait)
         {
             case MethodWait methodWait:
-                await MethodWaitRequested(methodWait);
+                await SaveMethodWait(methodWait);
                 break;
             case WaitsGroup manyWaits:
-                await WaitsGroupRequested(manyWaits);
+                await SaveWaitsGroup(manyWaits);
                 break;
             case FunctionWait functionWait:
-                await FunctionWaitRequested(functionWait);
+                await SaveFunctionWait(functionWait);
                 break;
             case TimeWait timeWait:
-                await TimeWaitRequested(timeWait);
+                await HandleTimeWaitReques(timeWait);
                 break;
         }
 
         return false;
     }
 
-    private async Task MethodWaitRequested(MethodWait methodWait)
+    private async Task SaveMethodWait(MethodWait methodWait)
     {
         var methodId = await _methodIdsRepo.GetId(methodWait);
         var funcId = methodWait.RequestedByFunctionId;
@@ -55,6 +55,7 @@ internal partial class WaitsRepo
         methodWait.MethodToWaitId = methodId.MethodId;
         methodWait.MethodGroupToWaitId = methodId.GroupId;
         methodWait.TemplateId = waitTemplate.Id;
+        methodWait.Template = waitTemplate;
         if (waitTemplate.InstanceMandatoryPartExpression != null)
         {
             var partIdFunc = waitTemplate.InstanceMandatoryPartExpression.CompileFast();
@@ -67,7 +68,7 @@ internal partial class WaitsRepo
 
 
 
-    private async Task WaitsGroupRequested(WaitsGroup manyWaits)
+    private async Task SaveWaitsGroup(WaitsGroup manyWaits)
     {
         for (var index = 0; index < manyWaits.ChildWaits.Count; index++)
         {
@@ -79,13 +80,13 @@ internal partial class WaitsRepo
             childWait.ParentWait = manyWaits;
             childWait.ServiceId = _settings.CurrentServiceId;
             childWait.CurrentFunction = manyWaits.CurrentFunction;
-            await SaveWaitRequestToDb(childWait);
+            await SaveWait(childWait);
         }
 
         await AddWait(manyWaits);
     }
 
-    private async Task FunctionWaitRequested(FunctionWait functionWait)
+    private async Task SaveFunctionWait(FunctionWait functionWait)
     {
         await AddWait(functionWait);
 
@@ -115,7 +116,7 @@ internal partial class WaitsRepo
             //await ReplayWait(replayWait);//todo:review first wait is replay for what??
         }
         else
-            await SaveWaitRequestToDb(functionWait.FirstWait);//first wait for sub function
+            await SaveWait(functionWait.FirstWait);//first wait for sub function
     }
 
 
@@ -137,9 +138,9 @@ internal partial class WaitsRepo
             .FirstAsync();
     }
 
-    private async Task TimeWaitRequested(TimeWait timeWait)
+    private async Task HandleTimeWaitReques(TimeWait timeWait)
     {
-        var timeWaitMethod = 
+        var timeWaitMethod =
             new MethodWait<TimeWaitInput, bool>(typeof(LocalRegisteredMethods)
                 .GetMethod("TimeWait"));
         TimeWaitSetDataExpression(timeWait, timeWaitMethod);
@@ -172,8 +173,8 @@ internal partial class WaitsRepo
         timeWaitMethod.MethodToWaitId = methodId.MethodId;
         timeWaitMethod.MethodGroupToWaitId = methodId.GroupId;
 
-        await MethodWaitRequested(timeWaitMethod);
-        timeWaitMethod.MandatoryPart = timeWait.UniqueMatchId;
+        await SaveMethodWait(timeWaitMethod);
+        timeWaitMethod.MandatoryPart = "#" + timeWait.UniqueMatchId;
         _context.Entry(timeWait).State = EntityState.Detached;
     }
 
@@ -198,7 +199,7 @@ internal partial class WaitsRepo
         }
 
         // ReSharper disable once EqualExpressionComparison
-        methodWait.MatchIf((timeWaitInput, result) => timeWaitInput.TimeMatchId == "" || true);
+        methodWait.MatchIf((timeWaitInput, result) => timeWaitInput.TimeMatchId == "" && timeWaitInput.FakeProp == null);
     }
 
     public Task AddWait(Wait wait)
