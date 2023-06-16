@@ -2,10 +2,7 @@
 
 ## Core functions
 * New Scan should not delete existing method wait and groups if exist
-* Clear Hangfire jobs table in debug on start
-* Props used in Match and SetData expressions must be public and have getter and setter
 * Write test cases for expressions rewrite because it's critical part
-* Local variables when evaluating expression constants
 * Delay processing wait if the scan is in progress
 * Remove direct use for DbContext
 * Same DLL in two services
@@ -18,12 +15,12 @@
 
 ## Enhancements
 * Refactor long methods
-* Write Roslyn analyzer to force the right use for the library
 * Parameter check lib use
 * Performance Analysis
 * Store options
 	* Use Queue Service to Handle Pushed Calls
 		* Kafka,RbbittMQ or ActiveMQ
+	* Use Queue Service that support queries for fast wait insertion
 * What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 
 * Encryption option sensitive data
