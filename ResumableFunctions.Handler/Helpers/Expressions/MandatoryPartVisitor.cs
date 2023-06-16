@@ -30,15 +30,11 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
 
         private LambdaExpression GetCallMandatoryPartExpression()
         {
-            return Lambda(NewArrayInit(typeof(string), TranslateParts()), _matchExpression.Parameters[0], _matchExpression.Parameters[1]);
-
-            IEnumerable<Expression> TranslateParts()
-            {
-                foreach (var part in _mandatoryParts)
-                {
-                    yield return Call(part.PropPathExpression, typeof(object).GetMethod("ToString"));
-                }
-            }
+            return Lambda(NewArrayInit(
+                typeof(object),
+                _mandatoryParts.Select(x => Convert(x.PropPathExpression, typeof(object)))),
+                _matchExpression.Parameters[0],
+                _matchExpression.Parameters[1]);
         }
 
         private Expression<Func<ExpandoObject, string[]>> GetCallMandatoryPartExpressionDynamic()
@@ -74,15 +70,10 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
         private LambdaExpression GetInstanceMandatoryPartExpression()
         {
             //return null;
-            return Lambda(NewArrayInit(typeof(string), TranslateParts()), _matchExpression.Parameters[2]);
-
-            IEnumerable<Expression> TranslateParts()
-            {
-                foreach (var part in _mandatoryParts)
-                {
-                    yield return Call(part.ConstantOriginalExpression, typeof(object).GetMethod("ToString"));
-                }
-            }
+            return Lambda(NewArrayInit(
+                typeof(object),
+                _mandatoryParts.Select(x => Convert(x.ConstantOriginalExpression, typeof(object)))),
+                _matchExpression.Parameters[2]);
         }
     }
 }

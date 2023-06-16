@@ -4,7 +4,7 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInService, IOnSaveEntity
+public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 {
     public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
@@ -59,7 +59,8 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IEntityInServ
 
     internal async Task<Wait> GetNextWait()
     {
-
+        if(CurrentFunction==null)
+            LoadUnmappedProps();
         var functionRunner = new FunctionRunner(this);
         if (functionRunner.ResumableFunctionExistInCode is false)
         {

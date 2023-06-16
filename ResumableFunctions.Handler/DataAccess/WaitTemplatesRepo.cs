@@ -6,13 +6,15 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal class WaitTemplatesRepo : IWaitTemplatesRepo,IDisposable
+internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 {
     private readonly FunctionDataContext _context;
     private readonly IServiceScope _scope;
+    private readonly IResumableFunctionsSettings _settings;
 
-    public WaitTemplatesRepo(IServiceProvider provider)
+    public WaitTemplatesRepo(IServiceProvider provider, IResumableFunctionsSettings settings)
     {
+        _settings = settings;
         _scope = provider.CreateScope();
         _context = _scope.ServiceProvider.GetService<FunctionDataContext>();
     }
@@ -30,6 +32,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo,IDisposable
             FunctionId = funcId,
             MethodGroupId = groupId,
             BaseHash = hashResult.Hash,
+            ServiceId = _settings.CurrentServiceId
         };
         //todo:Rewrite expressions
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
@@ -52,16 +55,21 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo,IDisposable
         return
              await _context
              .WaitTemplates
-             .FirstOrDefaultAsync(x => x.BaseHash == hash && x.MethodGroupId == groupId && x.FunctionId == funcId);
+             .FirstOrDefaultAsync(x =>
+                 x.BaseHash == hash &&
+                 x.MethodGroupId == groupId &&
+                 x.FunctionId == funcId &&
+                 x.ServiceId == _settings.CurrentServiceId);
     }
 
     public async Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId)
     {
-        var result = await
-            _context
+        var waitTemplatesQry = _context
             .WaitTemplates
             .Select(WaitTemplate.CallMandatoryPartSelector)
-            .Where(x => x.MethodGroupId == methodGroupId)
+            .Where(x => x.MethodGroupId == methodGroupId && x.ServiceId == _settings.CurrentServiceId);
+        var result = await
+            waitTemplatesQry
             .AsNoTracking()
             .ToListAsync();
         result.ForEach(x => x.LoadExpressions());

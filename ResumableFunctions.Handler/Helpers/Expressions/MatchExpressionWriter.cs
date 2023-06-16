@@ -139,7 +139,8 @@ public partial class MatchExpressionWriter : ExpressionVisitor
 
         (Expression Result, bool IsCalculated, object Value) TryTranslateToConstant(Expression expression)
         {
-
+            if (expression is ConstantExpression constantExpression)
+                return (constantExpression, true, constantExpression.Value);
             if (IsUseParameters(expression)) return (expression, false, null);
             var result = GetExpressionValue(expression);
             if (result != null)
@@ -217,21 +218,21 @@ public partial class MatchExpressionWriter : ExpressionVisitor
     //not,member,paramter
     private void MarkMandatoryConstants()
     {
-        var changeToBools = new GenericVisitor();
+        var changeToBooleans = new GenericVisitor();
         Expression partToCheck = null;
-        changeToBools.OnVisitBinary(VisitBinary);
+        changeToBooleans.OnVisitBinary(VisitConstantPart);
 
         foreach (var constPart in _constantParts)
         {
             if (constPart.IsMandatory || constPart.Operator != ExpressionType.Equal) continue;
 
             partToCheck = constPart.ConstantExpression;
-            var expression = changeToBools.Visit(_matchExpression.Body);
+            var expression = changeToBooleans.Visit(_matchExpression.Body);
             var compiled = Lambda<Func<bool>>(expression).CompileFast();
             constPart.IsMandatory = !compiled();
         }
 
-        Expression VisitBinary(BinaryExpression node)
+        Expression VisitConstantPart(BinaryExpression node)
         {
             if (node.Left == partToCheck || node.Right == partToCheck)
                 return Constant(false);

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts;
-public class PushedCall : IEntityWithDelete, IEntityInService, IOnSaveEntity
+public class PushedCall : IEntityWithDelete, IOnSaveEntity
 {
     public int Id { get; internal set; }
     [NotMapped]

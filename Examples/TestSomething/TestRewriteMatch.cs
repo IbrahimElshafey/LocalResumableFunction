@@ -121,7 +121,7 @@ namespace TestSomething
 
             var instanceMandexp = matchRewriter.InstanceMandatoryPartExpression;
             var instanceMandexpComp = instanceMandexp.CompileFast();
-            var dynresult3 = (string[])instanceMandexpComp.DynamicInvoke(this);
+            var dynresult3 = (object[])instanceMandexpComp.DynamicInvoke(this);
             var id = string.Join("#", dynresult3);
         }
 

@@ -12,6 +12,7 @@ public class ServiceData : IObjectWithLog, IEntityWithUpdate
     public List<LogRecord> Logs { get; } = new();
     public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
+    public int? ServiceId { get; internal set; }
     public string AssemblyName { get; internal set; }
     public string Url { get; internal set; }
 

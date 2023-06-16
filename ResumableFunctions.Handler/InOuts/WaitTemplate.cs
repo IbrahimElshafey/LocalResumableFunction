@@ -43,6 +43,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             FunctionId = waitTemplate.FunctionId,
             MethodId = waitTemplate.MethodId,
             MethodGroupId = waitTemplate.MethodGroupId,
+            ServiceId = waitTemplate.ServiceId
         };
 
     public static Expression<Func<WaitTemplate, WaitTemplate>> CallMandatoryPartSelector =>
@@ -54,6 +55,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             MethodId = waitTemplate.MethodId,
             MethodGroupId = waitTemplate.MethodGroupId,
             IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
+            ServiceId = waitTemplate.ServiceId
         };
 
     [NotMapped]
@@ -76,6 +78,8 @@ public class WaitTemplate : IEntity, IOnSaveEntity
 
     [NotMapped]
     public LambdaExpression SetDataExpressionDynamic { get; internal set; }
+
+    public int? ServiceId { get; set; }
 
 
     bool expressionsLoaded;

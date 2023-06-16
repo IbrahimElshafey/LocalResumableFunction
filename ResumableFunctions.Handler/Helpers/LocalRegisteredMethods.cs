@@ -6,16 +6,9 @@ namespace ResumableFunctions.Handler.Helpers
 {
     public class LocalRegisteredMethods
     {
-        private readonly IWaitProcessor _waitProcessor;
-
-        public LocalRegisteredMethods(IWaitProcessor waitProcessor)
-        {
-            _waitProcessor = waitProcessor;
-        }
         [PushCall("LocalRegisteredMethods.TimeWait")]
-        public bool TimeWait(string timeWaitId)
+        public bool TimeWait(TimeWaitInput timeWaitInput)
         {
-            _waitProcessor.ProcessTimeWaitMatched(timeWaitId).Wait();
             return true;
         }
     }

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete, IEntityInService, IOnSaveEntity
+public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 {
     [IgnoreMember]
     public int ErrorCounter { get; set; }

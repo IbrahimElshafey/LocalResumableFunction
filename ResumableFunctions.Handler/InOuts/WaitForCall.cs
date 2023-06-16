@@ -1,7 +1,7 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
 //todo:change this to be imutable entity with no update
-public class WaitForCall : IEntity, IEntityInService
+public class WaitForCall : IEntity
 {
     public int Id { get; internal set; }
     public PushedCall PushedCall { get; internal set; }

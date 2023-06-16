@@ -266,8 +266,8 @@ public class FunctionDataContext : DbContext
 
     private void SetServiceId(EntityEntry entry)
     {
-        if (entry.Entity is IEntityInService entityInService)
-            entityInService.ServiceId = _settings.CurrentServiceId;
+        if (entry.Entity is IEntity entityInService)
+            Entry(entityInService).Property(x=>x.ServiceId).CurrentValue = _settings.CurrentServiceId;
     }
 
     private async Task SetWaitsPaths(CancellationToken cancellationToken)

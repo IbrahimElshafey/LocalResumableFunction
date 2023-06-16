@@ -3,7 +3,7 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
-public abstract class MethodIdentifier : IEntityWithUpdate, IEntityInService
+public abstract class MethodIdentifier : IEntityWithUpdate
 {
     private MethodInfo _methodInfo;
 

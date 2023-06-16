@@ -88,7 +88,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             duplicateWait.IsFirst = false;
 
             ////todo:recalc mandatory part
-            //duplicateWait.MandatoryPart = rewriteMatchExpression.MandatoryPart;
+            //duplicateWait.TimeMatchId = rewriteMatchExpression.TimeMatchId;
             var template = await AddWaitTemplate(
                 replayRequest.MatchExpression,
                 mw.SetDataExpression,

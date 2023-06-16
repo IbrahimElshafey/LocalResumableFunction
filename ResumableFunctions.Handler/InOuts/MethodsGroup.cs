@@ -1,6 +1,6 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
-public class MethodsGroup : IEntity, IEntityInService
+public class MethodsGroup : IEntity
 {
     public int Id { get; internal set; }
     public string MethodGroupUrn { get; internal set; }

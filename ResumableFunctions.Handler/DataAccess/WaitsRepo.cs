@@ -45,12 +45,11 @@ internal partial class WaitsRepo : IWaitsRepo
             var methodGroupId = await GetMethodGroupId(methodUrn);
             var serviceIds =
                     _context
-                   .MethodWaits
-                   .Select(x => new { x.MethodGroupToWaitId, x.ServiceId, x.Status })
-                   .Where(x => x.MethodGroupToWaitId == methodGroupId && x.Status == WaitStatus.Waiting)
+                   .WaitTemplates
+                   .Select(x => new { x.MethodGroupId, x.ServiceId})
+                   .Where(x => x.MethodGroupId == methodGroupId)
                    .Distinct()
                    .Select(x => x.ServiceId)
-                   //.ToList()//sqlite does not translate if in memory 
                    ;
 
             return await _context
@@ -73,7 +72,14 @@ internal partial class WaitsRepo : IWaitsRepo
         try
         {
             var matchedWaitsIds = new List<WaitId>();
-            await foreach (var queryClause in GetQueryClauses(pushedCallId, methodUrn))
+            var pushedCall = await _context
+                .PushedCalls
+                .Select(x => new PushedCall { Id = x.Id, DataValue = x.DataValue })
+                .FirstOrDefaultAsync(x => x.Id == pushedCallId);
+            if (pushedCall is null)
+                throw new NullReferenceException($"No pushed method with ID [{pushedCallId}] exist in DB.");
+            
+            await foreach (var queryClause in GetQueryClauses(pushedCall, methodUrn))
             {
                 var matchedIds = await _context
                     .MethodWaits
@@ -108,7 +114,7 @@ internal partial class WaitsRepo : IWaitsRepo
                         ServiceId = _settings.CurrentServiceId,
                         FunctionId = waitId.FunctionId,
                         StateId = waitId.StateId,
-                        Status = waitId.FullMatch ? WaitForCallStatus.Matched : WaitForCallStatus.PartiallyMatched
+                        //Status = waitId.FullMatch ? WaitForCallStatus.Matched : WaitForCallStatus.PartiallyMatched
                     }).ToList();
                 _context.WaitsForCalls.AddRange(waitsForCall);
             }
@@ -125,16 +131,8 @@ internal partial class WaitsRepo : IWaitsRepo
     }
 
     private async IAsyncEnumerable<(Expression<Func<MethodWait, bool>> Clause, bool MakeFullMatch)> GetQueryClauses(
-        int pushedCallId, string methodUrn)
+        PushedCall pushedCall, string methodUrn)
     {
-        var pushedCall = await _context
-            .PushedCalls
-            .Select(x => new PushedCall { Id = x.Id, DataValue = x.DataValue })
-            .FirstOrDefaultAsync(x => x.Id == pushedCallId);
-
-        if (pushedCall is null)
-            throw new NullReferenceException($"No pushed method with ID [{pushedCallId}] exist in DB.");
-
         var methodGroupId = await GetMethodGroupId(methodUrn);
         var templates = await _waitTemplatesRepo.GetWaitTemplates(methodGroupId);
 
@@ -146,25 +144,25 @@ internal partial class WaitsRepo : IWaitsRepo
                 var outputType = template.CallMandatoryPartExpression.Parameters[1].Type;
                 var methodData = PushedCall.GetMethodData(inputType, outputType, pushedCall.DataValue);
                 var getMandatoryFunc = template.CallMandatoryPartExpression.CompileFast();
-                var parts = (string[])getMandatoryFunc.DynamicInvoke(methodData.Input, methodData.Output);
-                var mandatory = string.Join("#", parts ?? new[] { "" });
-                Expression<Func<MethodWait, bool>> query = x =>
-                    x.MethodGroupToWaitId == methodGroupId &&
-                    x.Status == WaitStatus.Waiting &&
-                    x.ServiceId == _settings.CurrentServiceId &&
-                    x.MethodToWaitId == template.MethodId &&
-                    x.RequestedByFunctionId == template.FunctionId &&
-                    x.MandatoryPart == mandatory;
+                var parts = (object[])getMandatoryFunc.DynamicInvoke(methodData.Input, methodData.Output);
+                var mandatory = string.Join("#", parts);
+                Expression<Func<MethodWait, bool>> query = wait =>
+                    wait.MethodGroupToWaitId == methodGroupId &&
+                    wait.Status == WaitStatus.Waiting &&
+                    wait.ServiceId == _settings.CurrentServiceId &&
+                    wait.MethodToWaitId == template.MethodId &&
+                    wait.RequestedByFunctionId == template.FunctionId &&
+                    wait.MandatoryPart == mandatory;
                 yield return (query, template.IsMandatoryPartFullMatch);
             }
             else
             {
-                Expression<Func<MethodWait, bool>> query = x =>
-                    x.MethodGroupToWaitId == methodGroupId &&
-                    x.Status == WaitStatus.Waiting &&
-                    x.ServiceId == _settings.CurrentServiceId &&
-                    x.RequestedByFunctionId == template.FunctionId &&
-                    x.MethodToWaitId == template.MethodId;
+                Expression<Func<MethodWait, bool>> query = wait =>
+                    wait.MethodGroupToWaitId == methodGroupId &&
+                    wait.Status == WaitStatus.Waiting &&
+                    wait.ServiceId == _settings.CurrentServiceId &&
+                    wait.RequestedByFunctionId == template.FunctionId &&
+                    wait.MethodToWaitId == template.MethodId;
                 yield return (query, false);
             }
         }

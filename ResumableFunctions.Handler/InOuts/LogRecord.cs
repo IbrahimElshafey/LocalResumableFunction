@@ -1,7 +1,7 @@
 ﻿
 namespace ResumableFunctions.Handler.InOuts;
 
-public class LogRecord : IEntity, IEntityInService
+public class LogRecord : IEntity
 {
     public int Id { get; internal set; }
     public int? EntityId { get; internal set; }
