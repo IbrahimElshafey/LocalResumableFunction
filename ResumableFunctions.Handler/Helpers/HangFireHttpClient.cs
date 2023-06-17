@@ -1,4 +1,5 @@
-﻿using ResumableFunctions.Handler.Core.Abstraction;
+﻿using System.ComponentModel;
+using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.Helpers
 {
@@ -25,7 +26,7 @@ namespace ResumableFunctions.Handler.Helpers
             
         }
 
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public async Task HttpGet(string url)
         {
             var resposne = await client.GetAsync(url);

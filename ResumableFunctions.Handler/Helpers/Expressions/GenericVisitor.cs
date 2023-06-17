@@ -30,7 +30,7 @@ public class GenericVisitor : ExpressionVisitor
         _visitors.Add(
            new VisitNodeFunction(
               ex => ex is BinaryExpression,
-               (ex) => binaryVisitFunc((BinaryExpression)ex)));
+               ex => binaryVisitFunc((BinaryExpression)ex)));
     }
 
     internal void OnVisitParamter(Func<ParameterExpression, Expression> parameterVisitFunc)
@@ -38,14 +38,14 @@ public class GenericVisitor : ExpressionVisitor
         _visitors.Add(
             new VisitNodeFunction(
                 ex => ex is ParameterExpression,
-                (ex) => parameterVisitFunc((ParameterExpression)ex)));
+                ex => parameterVisitFunc((ParameterExpression)ex)));
     }
     internal void OnVisitConstant(Func<ConstantExpression, Expression> constantVisitFunc)
     {
         _visitors.Add(
             new VisitNodeFunction(
                 ex => ex is ConstantExpression,
-                (ex) => constantVisitFunc((ConstantExpression)ex)));
+                ex => constantVisitFunc((ConstantExpression)ex)));
     }
 
     internal void OnVisitUnary(Func<UnaryExpression, Expression> visitUnary)
@@ -53,7 +53,7 @@ public class GenericVisitor : ExpressionVisitor
         _visitors.Add(
           new VisitNodeFunction(
              ex => ex is UnaryExpression,
-              (ex) => visitUnary((UnaryExpression)ex)));
+              ex => visitUnary((UnaryExpression)ex)));
     }
 
     internal void OnVisitMember(Func<MemberExpression, Expression> visitMember)
@@ -61,7 +61,7 @@ public class GenericVisitor : ExpressionVisitor
         _visitors.Add(
           new VisitNodeFunction(
              ex => ex is MemberExpression,
-              (ex) => visitMember((MemberExpression)ex)));
+              ex => visitMember((MemberExpression)ex)));
     }
 
     internal void OnVisitCall(Func<MethodCallExpression, Expression> visitCall)
@@ -69,7 +69,7 @@ public class GenericVisitor : ExpressionVisitor
         _visitors.Add(
           new VisitNodeFunction(
              ex => ex is MethodCallExpression,
-              (ex) => visitCall((MethodCallExpression)ex)));
+              ex => visitCall((MethodCallExpression)ex)));
     }
 
     private class VisitNodeFunction

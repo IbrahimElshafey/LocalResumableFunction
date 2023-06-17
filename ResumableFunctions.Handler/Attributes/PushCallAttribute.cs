@@ -2,7 +2,7 @@
 
 namespace ResumableFunctions.Handler.Attributes
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Method)]
     [Injection(typeof(PushCallAspect), Inherited = true)]
     public class PushCallAttribute : Attribute, ITrackingIdetifier
     {

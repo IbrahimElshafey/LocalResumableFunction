@@ -1,11 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
-using ResumableFunctions.Handler.InOuts;
-using System.Dynamic;
-using System.IO;
+﻿using System.Dynamic;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Xml.Linq;
-using static ResumableFunctions.Handler.Helpers.Expressions.MatchExpressionWriter;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers.Expressions
@@ -40,8 +34,8 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
                     paramter.Path
                 );
             }
-            else
-                _stop = true;
+
+            _stop = true;
             return base.VisitMember(node);
         }
 

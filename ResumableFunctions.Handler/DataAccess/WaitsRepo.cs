@@ -1,13 +1,11 @@
-﻿using ResumableFunctions.Handler.InOuts;
-using Microsoft.EntityFrameworkCore;
-using ResumableFunctions.Handler.Helpers;
-using Microsoft.Extensions.Logging;
-using ResumableFunctions.Handler.DataAccess.Abstraction;
-using System.Linq.Expressions;
-using ResumableFunctions.Handler.Core.Abstraction;
-using System.Linq;
+﻿using System.Linq.Expressions;
 using FastExpressionCompiler;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal partial class WaitsRepo : IWaitsRepo
@@ -46,7 +44,7 @@ internal partial class WaitsRepo : IWaitsRepo
             var serviceIds =
                     _context
                    .WaitTemplates
-                   .Select(x => new { x.MethodGroupId, x.ServiceId})
+                   .Select(x => new { x.MethodGroupId, x.ServiceId })
                    .Where(x => x.MethodGroupId == methodGroupId)
                    .Distinct()
                    .Select(x => x.ServiceId)
@@ -61,8 +59,8 @@ internal partial class WaitsRepo : IWaitsRepo
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                $"Error when GetServicesForMethodCall(methodUrn:{methodUrn})", ex);
+            _logger.LogError(ex,
+                $"Error when GetServicesForMethodCall(methodUrn:{methodUrn})");
             throw;
         }
     }
@@ -78,7 +76,7 @@ internal partial class WaitsRepo : IWaitsRepo
                 .FirstOrDefaultAsync(x => x.Id == pushedCallId);
             if (pushedCall is null)
                 throw new NullReferenceException($"No pushed method with ID [{pushedCallId}] exist in DB.");
-            
+
             await foreach (var queryClause in GetQueryClauses(pushedCall, methodUrn))
             {
                 var matchedIds = await _context
@@ -114,7 +112,7 @@ internal partial class WaitsRepo : IWaitsRepo
                         ServiceId = _settings.CurrentServiceId,
                         FunctionId = waitId.FunctionId,
                         StateId = waitId.StateId,
-                        //Status = waitId.FullMatch ? WaitForCallStatus.Matched : WaitForCallStatus.PartiallyMatched
+                        //MatchStatus = waitId.FullMatch ? MatchStatus.Matched : MatchStatus.PartiallyMatched
                     }).ToList();
                 _context.WaitsForCalls.AddRange(waitsForCall);
             }
@@ -124,8 +122,7 @@ internal partial class WaitsRepo : IWaitsRepo
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                $"Error when GetWaitsIdsForMethodCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})", ex);
+            _logger.LogError(ex, $"Error when GetWaitsIdsForMethodCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})");
             throw;
         }
     }
@@ -178,12 +175,9 @@ internal partial class WaitsRepo : IWaitsRepo
                .FirstOrDefaultAsync();
         if (methodGroup != default)
             return methodGroup;
-        else
-        {
-            var error = $"Method [{methodUrn}] is not registered in current database as [WaitMethod].";
-            _logger.LogWarning(error);
-            throw new Exception(error);
-        }
+        var error = $"Method [{methodUrn}] is not registered in current database as [WaitMethod].";
+        _logger.LogWarning(error);
+        throw new Exception(error);
     }
 
     public async Task<Wait> GetWaitGroup(int? parentGroupId)
@@ -229,7 +223,7 @@ internal partial class WaitsRepo : IWaitsRepo
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error when RemoveFirstWaitIfExist for function `{methodIdentifierId}`", ex);
+            _logger.LogError(ex, $"Error when RemoveFirstWaitIfExist for function `{methodIdentifierId}`");
         }
 
     }

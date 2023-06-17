@@ -1,8 +1,8 @@
-﻿using ResumableFunctions.Handler.InOuts;
+﻿using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
-using Medallion.Threading;
+using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -30,8 +30,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
                .FirstOrDefaultAsync(x => x.Id == id);
         if (resumableFunctionIdentifier != null)
             return resumableFunctionIdentifier;
-        else
-            throw new NullReferenceException($"Can't find resumable function with ID `{id}` in database.");
+        throw new NullReferenceException($"Can't find resumable function with ID `{id}` in database.");
     }
     public async Task<ResumableFunctionIdentifier> TryGetResumableFunction(MethodData methodData)
     {
@@ -45,8 +44,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
         var resumableFunctionIdentifier = await TryGetResumableFunction(methodData);
         if (resumableFunctionIdentifier != null)
             return resumableFunctionIdentifier;
-        else
-            throw new NullReferenceException($"Can't find resumable function ({methodData}) in database.");
+        throw new NullReferenceException($"Can't find resumable function ({methodData}) in database.");
     }
 
     public async Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData, int? serviceId)
@@ -60,14 +58,12 @@ internal class MethodIdsRepo : IMethodIdsRepo
                 inDb.ServiceId = serviceId;
                 return inDb;
             }
-            else
-            {
-                var add = new ResumableFunctionIdentifier();
-                add.FillFromMethodData(methodData);
-                add.ServiceId = serviceId;
-                _context.ResumableFunctionIdentifiers.Add(add);
-                return add;
-            }
+
+            var add = new ResumableFunctionIdentifier();
+            add.FillFromMethodData(methodData);
+            add.ServiceId = serviceId;
+            _context.ResumableFunctionIdentifiers.Add(add);
+            return add;
         }
     }
 
@@ -145,8 +141,8 @@ internal class MethodIdsRepo : IMethodIdsRepo
         {
             return childMethodIdentifier;
         }
-        else
-            throw new NullReferenceException($"Can't find wait method ({methodData}) in database.");
+
+        throw new NullReferenceException($"Can't find wait method ({methodData}) in database.");
     }
 
     public async Task<(int MethodId, int GroupId)> GetId(MethodWait methodWait)

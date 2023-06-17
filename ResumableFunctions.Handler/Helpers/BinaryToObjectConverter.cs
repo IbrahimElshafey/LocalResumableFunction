@@ -1,7 +1,7 @@
-﻿using MessagePack;
-using MessagePack.Resolvers;
-using System.Dynamic;
+﻿using System.Dynamic;
 using System.Linq.CompilerServices.TypeSystem;
+using MessagePack;
+using MessagePack.Resolvers;
 
 namespace ResumableFunctions.Handler.Helpers;
 internal class BinaryToObjectConverter : BinaryToObjectConverterAbstract
@@ -28,7 +28,7 @@ internal class BinaryToObjectConverter : BinaryToObjectConverterAbstract
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error when convert bytes to ExpandoObject", ex);
+            throw new Exception("Error when convert bytes to ExpandoObject", ex);
         }
     }
 

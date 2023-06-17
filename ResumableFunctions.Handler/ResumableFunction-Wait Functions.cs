@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.InOuts;
-using System.Reflection;
 
 namespace ResumableFunctions.Handler;
 

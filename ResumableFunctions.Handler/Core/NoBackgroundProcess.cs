@@ -1,7 +1,7 @@
-﻿using ResumableFunctions.Handler.Core.Abstraction;
-using Hangfire.Annotations;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using FastExpressionCompiler;
+using Hangfire.Annotations;
+using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.Core;
 

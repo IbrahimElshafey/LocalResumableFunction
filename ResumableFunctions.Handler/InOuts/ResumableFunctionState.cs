@@ -1,7 +1,7 @@
 ﻿
+using System.ComponentModel.DataAnnotations.Schema;
 using MessagePack;
 using ResumableFunctions.Handler.Helpers;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts;
 

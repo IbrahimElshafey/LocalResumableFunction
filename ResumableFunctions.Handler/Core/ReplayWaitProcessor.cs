@@ -1,11 +1,11 @@
-﻿using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.InOuts;
+﻿using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
-using System.Linq.Expressions;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.Helpers.Expressions;
+using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -101,13 +101,11 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             await _waitsRepo.SaveWait(duplicateWait);
             return duplicateWait;
         }
-        else
-        {
-            string errorMsg = $"When the replay type is [{ReplayType.GoToWithNewMatch}]" +
-                              $"the wait to replay  must be of type [{nameof(MethodWait)}]";
-            waitToReplay.FunctionState.AddError(errorMsg);
-            throw new Exception(errorMsg);
-        }
+
+        string errorMsg = $"When the replay type is [{ReplayType.GoToWithNewMatch}]" +
+                          $"the wait to replay  must be of type [{nameof(MethodWait)}]";
+        waitToReplay.FunctionState.AddError(errorMsg);
+        throw new Exception(errorMsg);
 
     }
 
@@ -156,7 +154,6 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             return null;
         }
 
-        //oldCompletedWait.Status = WaitStatus.Canceled;
         var goBefore = await GoBefore(oldCompletedWait);
         if (goBefore.HasWait)
         {
@@ -165,13 +162,11 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             await _waitsRepo.SaveWait(nextWaitAfterReplay);
             return nextWaitAfterReplay;//when replay go before
         }
-        else
-        {
-            const string errorMsg = "Replay Go Before found no waits!!";
-            _logger.LogError(errorMsg);
-            oldCompletedWait.FunctionState.AddError(errorMsg);
-            throw new Exception(errorMsg);
-        }
+
+        const string errorMsg = "Replay Go Before found no waits!!";
+        _logger.LogError(errorMsg);
+        oldCompletedWait.FunctionState.AddError(errorMsg);
+        throw new Exception(errorMsg);
     }
 
     private async Task<Wait> ReplayGoBeforeWithNewMatch(ReplayRequest replayWait, Wait waitToReplay)
@@ -200,22 +195,18 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 await _waitsRepo.SaveWait(mw);
                 return mw;
             }
-            else
-            {
-                const string errorMsg = "Replay Go Before with ne match found no waits!!";
-                _logger.LogError(errorMsg);
-                waitToReplay.FunctionState.AddError(errorMsg);
-                throw new Exception(errorMsg);
-            }
+
+            const string errorMsg = "Replay Go Before with ne match found no waits!!";
+            _logger.LogError(errorMsg);
+            waitToReplay.FunctionState.AddError(errorMsg);
+            throw new Exception(errorMsg);
         }
-        else
-        {
-            string message = $"When the replay type is [{ReplayType.GoBeforeWithNewMatch}]" +
-                            $"the wait to replay  must be of type [{nameof(MethodWait)}]";
-            _logger.LogError(message);
-            waitToReplay.FunctionState.AddError(message);
-            throw new Exception(message);
-        }
+
+        string message = $"When the replay type is [{ReplayType.GoBeforeWithNewMatch}]" +
+                         $"the wait to replay  must be of type [{nameof(MethodWait)}]";
+        _logger.LogError(message);
+        waitToReplay.FunctionState.AddError(message);
+        throw new Exception(message);
     }
 
     private bool ReplayMatchIsSameSignature(ReplayRequest replayWait, MethodWait mw)

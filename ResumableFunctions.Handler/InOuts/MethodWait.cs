@@ -37,11 +37,6 @@ public class MethodWait : Wait
     [NotMapped]
     public object Output { get; set; }
 
-    //todo:bug
-    private Assembly FunctionAssembly =>
-        MethodToWait?.MethodInfo?.DeclaringType.Assembly ??
-        RequestedByFunction?.MethodInfo?.DeclaringType.Assembly ??
-        Assembly.GetEntryAssembly();
 
     public bool UpdateFunctionData()
     {
@@ -52,14 +47,13 @@ public class MethodWait : Wait
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog(
-                $"Function instance data updated after wait [{Name}] matched.",
-                LogType.Info);//todo:function state in progress
+                $"Function instance data updated after wait [{Name}] matched.");
             return true;
         }
         catch (Exception ex)
         {
             FunctionState.AddLog(
-                $"An error occured when try to update function data after method wait [{Name}] matched." +
+                $"An error occurred when try to update function data after method wait [{Name}] matched." +
                 ex.Message,
                 LogType.Error);
             return false;

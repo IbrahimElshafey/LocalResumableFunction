@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
-using ResumableFunctions.Handler.InOuts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -78,7 +78,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
         catch (Exception ex)
         {
-            await LogErrorToService(resumableFunction, ex, $"Error when try to clone first wait for function [{resumableFunction.GetFullName()}]");
+            await LogErrorToService(ex, $"Error when try to clone first wait for function [{resumableFunction.GetFullName()}]");
             throw;
         }
     }
@@ -99,8 +99,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     var firstWait = await GetFirstWait(resumableFunction, true);
                     if (firstWait != null)
                         firstWait.FunctionState.AddLog(
-                            $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.",
-                            LogType.Info);
+                            $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.");
                     await _waitsRepository.SaveWait(firstWait);//first wait when register function
                     WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
                     await _context.SaveChangesAsync();
@@ -108,7 +107,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 catch (Exception ex)
                 {
                     if (resumableFunction != null)
-                        await LogErrorToService(resumableFunction, ex, errorMsg);
+                        await LogErrorToService(ex, errorMsg);
                     await _waitsRepository.RemoveFirstWaitIfExist(functionId);
                 }
 
@@ -116,16 +115,13 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             errorMsg);
     }
 
-    private async Task LogErrorToService(MethodInfo resumableFunction, Exception ex, string errorMsg)
+    private async Task LogErrorToService(Exception ex, string errorMsg)
     {
         _logger.LogError(ex, errorMsg);
-        var assemblyName = resumableFunction.DeclaringType.Assembly.GetName().Name;
-        var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assemblyName);
-        if (serviceData != null)
-        {
-            serviceData.AddError(errorMsg, ex);
-            await _context.SaveChangesAsync();
-        }
+        var serviceData = new ServiceData { Id = _settings.CurrentServiceId };
+        _context.Entry(serviceData).State = EntityState.Unchanged;
+        serviceData.AddError(errorMsg, ex);
+        await _context.SaveChangesAsync();
     }
 
     public async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
@@ -169,7 +165,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
 
         var errorMsg = $"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]";
-        await LogErrorToService(resumableFunction, null, errorMsg);
+        await LogErrorToService(null, errorMsg);
         throw new NullReferenceException(errorMsg);
     }
 

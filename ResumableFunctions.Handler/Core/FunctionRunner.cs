@@ -38,22 +38,15 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
 
     public async ValueTask<bool> MoveNextAsync()
     {
-        try
+        var stateBeforeWait = GetState();
+        var hasNext = await _this.MoveNextAsync();
+        if (hasNext)
         {
-            var stateBeforeWait = GetState();
-            var hasNext = await _this.MoveNextAsync();
-            if (hasNext)
-            {
-                _this.Current.StateBeforeWait = stateBeforeWait;
-                _this.Current.StateAfterWait = GetState();
-            }
+            _this.Current.StateBeforeWait = stateBeforeWait;
+            _this.Current.StateAfterWait = GetState();
+        }
 
-            return hasNext;
-        }
-        catch (Exception ex)
-        {
-            throw;
-        }
+        return hasNext;
     }
 
     private void CreateRunner(Type functionRunnerType, ResumableFunction resumableFunctionLocal)

@@ -1,5 +1,5 @@
-﻿using Hangfire.Annotations;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
+using Hangfire.Annotations;
 
 namespace ResumableFunctions.Handler.Core.Abstraction
 {

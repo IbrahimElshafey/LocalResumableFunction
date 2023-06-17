@@ -1,8 +1,8 @@
-﻿using Medallion.Threading;
+﻿using System.Runtime.CompilerServices;
+using Medallion.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.InOuts;
-using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler.Helpers
 {
@@ -44,8 +44,9 @@ namespace ResumableFunctions.Handler.Helpers
             }
             catch (Exception ex)
             {
-                var codeInfo = $"\nSource File Path: {sourceFilePath}\n" +
-                        $"Line Number: {sourceLineNumber}";
+                var codeInfo = 
+                    $"\nSource File Path: {sourceFilePath}\n" +
+                    $"Line Number: {sourceLineNumber}";
                 if (errorMessage == null)
                     _logger.LogError(ex,
                         $"Error when execute `{methodName}`\n{codeInfo}");

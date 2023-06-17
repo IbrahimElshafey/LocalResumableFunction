@@ -1,5 +1,5 @@
-﻿using ResumableFunctions.Handler.InOuts;
-using System.Reflection;
+﻿using System.Reflection;
+using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Core.Abstraction
 {

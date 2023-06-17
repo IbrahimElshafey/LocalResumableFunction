@@ -1,10 +1,9 @@
-﻿using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.InOuts;
+﻿using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Logging;
-using Medallion.Threading;
+using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;
 public class FunctionDataContext : DbContext
@@ -30,7 +29,7 @@ public class FunctionDataContext : DbContext
         }
         catch (Exception ex)
         {
-            _logger.LogError("Error when call `Database.EnsureCreated()` for `FunctionDataContext`", ex);
+            _logger.LogError(ex, "Error when call `Database.EnsureCreated()` for `FunctionDataContext`");
         }
     }
 
@@ -130,7 +129,7 @@ public class FunctionDataContext : DbContext
 
         waitBuilder
             .HasIndex(x => x.Status)
-            .HasFilter($"Status = {(int)WaitStatus.Waiting}")
+            .HasFilter($"{nameof(Wait.Status)} = {(int)WaitStatus.Waiting}")
             .HasDatabaseName("Index_ActiveWaits");
 
         var methodWaitBuilder = modelBuilder.Entity<MethodWait>();
@@ -211,7 +210,7 @@ public class FunctionDataContext : DbContext
         modelBuilder.Entity<MethodsGroup>()
            .HasIndex(x => x.MethodGroupUrn)
             .HasDatabaseName("Index_MethodGroupUniqueUrn")
-            .IsUnique(true);
+            .IsUnique();
     }
 
     private void ConfigureResumableFunctionState(EntityTypeBuilder<ResumableFunctionState> entityTypeBuilder)

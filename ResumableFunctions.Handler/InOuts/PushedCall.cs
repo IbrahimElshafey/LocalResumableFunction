@@ -1,7 +1,6 @@
-﻿using ResumableFunctions.Handler.Helpers;
-using System;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
+using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 public class PushedCall : IEntityWithDelete, IOnSaveEntity

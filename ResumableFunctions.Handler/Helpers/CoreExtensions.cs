@@ -1,4 +1,7 @@
-﻿using Hangfire;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ResumableFunctions.Handler.Core;
@@ -8,9 +11,6 @@ using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
@@ -165,7 +165,7 @@ public static class CoreExtensions
                 bool sameSiganture =
                     interfaceMethod.Name == method.Name &&
                     interfaceMethod.ReturnType == method.ReturnType &&
-                    Enumerable.SequenceEqual(interfaceMethod.GetParameters().Select(x => x.ParameterType), method.GetParameters().Select(x => x.ParameterType));
+                    interfaceMethod.GetParameters().Select(x => x.ParameterType).SequenceEqual(method.GetParameters().Select(x => x.ParameterType));
                 if (sameSiganture)
                     return interfaceMethod;
             }
@@ -283,10 +283,8 @@ public static class CoreExtensions
                     ownerType = extensionOnType;
                     return true;
                 }
-                else
-                {
-                    return false;
-                }
+
+                return false;
             }
 
             bool inCurrentType = methodInfo.ReflectedType.IsAssignableFrom(typeof(T));

@@ -1,11 +1,9 @@
-﻿using AspectInjector.Broker;
+﻿using System.Reflection;
+using AspectInjector.Broker;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using System.Reflection;
-
-
 
 namespace ResumableFunctions.Handler.Attributes
 {

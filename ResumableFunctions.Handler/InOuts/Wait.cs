@@ -120,7 +120,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         switch (this)
         {
             case MethodWait methodWait:
-                result = new MethodWait()
+                result = new MethodWait
                 {
                     TemplateId = methodWait.TemplateId,
                     MethodGroupToWaitId = methodWait.MethodGroupToWaitId,
@@ -176,8 +176,6 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 
     internal virtual bool IsValidWaitRequest()
     {
-        //FunctionState.StatusMessage = message;
-        //FunctionState.Status = FunctionStatus.ErrorOccured;
         var isNameDuplicated =
             FunctionState
             .Waits

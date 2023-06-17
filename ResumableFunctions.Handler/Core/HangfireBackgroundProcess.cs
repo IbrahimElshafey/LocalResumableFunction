@@ -1,7 +1,7 @@
-﻿using ResumableFunctions.Handler.Core.Abstraction;
-using Hangfire.Annotations;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Hangfire;
+using Hangfire.Annotations;
+using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.Core;
 internal class HangfireBackgroundProcess : IBackgroundProcess

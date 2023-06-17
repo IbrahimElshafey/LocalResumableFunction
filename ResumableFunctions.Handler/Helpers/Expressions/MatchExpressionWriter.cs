@@ -1,8 +1,7 @@
-﻿using FastExpressionCompiler;
+﻿using System.Linq.Expressions;
+using FastExpressionCompiler;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Dynamic;
-using System.Linq.Expressions;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers.Expressions;
@@ -189,17 +188,20 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             }
             //else if (expression.NodeType == ExpressionType.New)
             //    return expression;
-            else if (result is DateTime date)
+
+            if (result is DateTime date)
             {
                 return (New(typeof(DateTime).GetConstructor(new[] { typeof(long) }), Constant(date.Ticks)), true, date);
             }
-            else if (result is Guid guid)
+
+            if (result is Guid guid)
             {
                 return (New(
                     typeof(Guid).GetConstructor(new[] { typeof(string) }),
                     Constant(guid.ToString())), true, guid);
             }
-            else if (JsonConvert.SerializeObject(result) is string json)
+
+            if (JsonConvert.SerializeObject(result) is string json)
             {
                 return (Convert(
                     Call(

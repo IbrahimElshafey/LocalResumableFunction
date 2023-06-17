@@ -188,9 +188,6 @@ namespace ResumableFunctions.Handler.UiService
 
         public async Task<List<PushedCallInfo>> GetPushedCalls(int page = 0)
         {
-            //x.WaitsForCall.Count(),
-            //x.WaitsForCall.Count(x => x.Status == WaitForCallStatus.Matched),
-            //x.WaitsForCall.Count(x => x.Status == WaitForCallStatus.NotMatched)
             var counts =
                 _context
                 .WaitsForCalls
@@ -199,8 +196,8 @@ namespace ResumableFunctions.Handler.UiService
                 {
                     CallId = x.Key,
                     All = x.Count(),
-                    Matched = x.Count(x => x.Status == WaitForCallStatus.Matched),
-                    NotMatched = x.Count(x => x.Status == WaitForCallStatus.NotMatched),
+                    Matched = x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.Matched),
+                    NotMatched = x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.NotMatched),
                 });
             var query = _context.PushedCalls
                 .Join(counts,

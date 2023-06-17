@@ -1,5 +1,4 @@
 ﻿using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Helpers

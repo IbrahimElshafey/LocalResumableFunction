@@ -125,13 +125,15 @@ internal class Scanner
         await _context.SaveChangesAsync();
 
 
-        if (entryPointCheck.IsEntry && entryPointCheck.IsActive)
+        if (entryPointCheck is { IsEntry: true, IsActive: true })
         {
-            _backgroundJobClient.Enqueue(() => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
+            _backgroundJobClient.Enqueue(
+                () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
         }
-        else if (entryPointCheck.IsEntry && !entryPointCheck.IsActive)
+        else if (entryPointCheck is { IsEntry: true, IsActive: false })
         {
-            _backgroundJobClient.Enqueue(() => _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id));
+            _backgroundJobClient.Enqueue(
+                () => _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id));
         }
     }
 
@@ -242,7 +244,7 @@ internal class Scanner
         if (shouldScan is false)
             serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].");
         if (_settings.ForceRescan)
-            serviceData.AddLog($"Will be scanned because force rescan is enabled in Debug mode.", LogType.Warning);
+            serviceData.AddLog("Will be scanned because force rescan is enabled in Debug mode.", LogType.Warning);
         return shouldScan || _settings.ForceRescan;
 
         async Task<ServiceData> AddNewServiceData(string serviceUrl, string currentAssemblyName)
@@ -299,7 +301,7 @@ internal class Scanner
         {
             var errorMsg = $"Error when adding a method identifier of type `MethodWait` for type `{type.FullName}`";
             serviceData?.AddError(errorMsg, ex);
-            _logger.LogError(errorMsg, ex);
+            _logger.LogError(ex,errorMsg);
             throw;
         }
 

@@ -1,7 +1,6 @@
-﻿using MessagePack.Resolvers;
+﻿using System.Dynamic;
 using MessagePack;
-using System.Dynamic;
-using FastExpressionCompiler;
+using MessagePack.Resolvers;
 
 namespace ResumableFunctions.Handler.Helpers.Expressions
 {
