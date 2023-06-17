@@ -5,6 +5,8 @@ public enum MatchStatus
     ExpectedMatch,
     Matched,
     NotMatched,
+    PartiallyMatched,
+    DuplicationCanceled
 }
 
 public enum InstanceUpdateStatus

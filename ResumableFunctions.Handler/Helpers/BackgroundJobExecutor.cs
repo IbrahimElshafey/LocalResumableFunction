@@ -34,13 +34,11 @@ namespace ResumableFunctions.Handler.Helpers
         {
             try
             {
-                using (var handle = await _lockProvider.TryAcquireLockAsync(_settings.CurrentDbName + lockName))
-                {
-                    if (handle is null) return;
+                await using var handle = await _lockProvider.TryAcquireLockAsync(_settings.CurrentDbName + lockName);
+                if (handle is null) return;
 
-                    using IServiceScope scope = _serviceProvider.CreateScope();
-                    await backgroundTask();
-                }
+                using IServiceScope scope = _serviceProvider.CreateScope();
+                await backgroundTask();
             }
             catch (Exception ex)
             {

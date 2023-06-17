@@ -11,11 +11,11 @@ internal class GetMethodInfoTest
 {
     internal void Run()
     {
-        var mi1 = GetMethodInfo<WaitProcessor>(wp => wp.ProcessWait);
-        var mi2 = GetMethodInfo<WaitProcessor>(wp => wp.ProcessWait(1, 1));
-        var mi3 = GetMethodInfo<string>(wp => string.Compare("", "sss"));
-        var mi4 = GetMethodInfo<WaitProcessor>(wp => wp.ToString());
-        var mi5 = GetMethodInfo<List<int>>(wp => wp.Any(x => x == 10));
+        //var mi1 = GetMethodInfo<WaitProcessor>(wp => wp.ProcessFunctionExpectedMatches);
+        //var mi2 = GetMethodInfo<WaitProcessor>(wp => wp.ProcessFunctionExpectedMatches(1, 1));
+        //var mi3 = GetMethodInfo<string>(wp => string.Compare("", "sss"));
+        //var mi4 = GetMethodInfo<WaitProcessor>(wp => wp.ToString());
+        //var mi5 = GetMethodInfo<List<int>>(wp => wp.Any(x => x == 10));
     }
 
     public static (MethodInfo MethodInfo, Type OwnerType) GetMethodInfo<T>(Expression<Func<T, object>> methodSelector)

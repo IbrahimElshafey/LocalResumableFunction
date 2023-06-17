@@ -9,14 +9,6 @@ namespace ResumableFunctions.Handler.InOuts;
 public class WaitTemplate : IEntity, IOnSaveEntity
 {
 
-    internal static class FieldsNames
-    {
-        public const string MatchExpression = nameof(_matchExpression);
-        public const string CallMandatoryPartExpression = nameof(_callMandatoryPartExpression);
-        //public const string CallMandatoryPartExpressionDynamic = nameof(_callMandatoryPartExpressionDynamic);
-        public const string InstanceMandatoryPartExpression = nameof(_instanceMandatoryPartExpression);
-        public const string SetDataExpression = nameof(_setDataExpression);
-    }
     public int Id { get; internal set; }
     public int FunctionId { get; internal set; }
     public int MethodId { get; internal set; }
@@ -26,18 +18,19 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public DateTime Created { get; internal set; }
     public bool IsMandatoryPartFullMatch { get; internal set; }
 
-    private string _matchExpression;
-    private string _callMandatoryPartExpression;
-    //private string _callMandatoryPartExpressionDynamic;
-    private string _instanceMandatoryPartExpression;
-    private string _setDataExpression;
+    internal string MatchExpressionValue { get; set; }
+
+    internal string CallMandatoryPartExpressionValue { get; set; }
+
+    internal string InstanceMandatoryPartExpressionValue { get;  set; }
+    internal string SetDataExpressionValue { get;  set; }
 
 
     public static Expression<Func<WaitTemplate, WaitTemplate>> BasicMatchSelector =>
         waitTemplate => new WaitTemplate
         {
-            _matchExpression = waitTemplate._matchExpression,
-            _setDataExpression = waitTemplate._setDataExpression,
+            MatchExpressionValue = waitTemplate.MatchExpressionValue,
+            SetDataExpressionValue = waitTemplate.SetDataExpressionValue,
             Id = waitTemplate.Id,
             FunctionId = waitTemplate.FunctionId,
             MethodId = waitTemplate.MethodId,
@@ -48,7 +41,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public static Expression<Func<WaitTemplate, WaitTemplate>> CallMandatoryPartSelector =>
         waitTemplate => new WaitTemplate
         {
-            _callMandatoryPartExpression = waitTemplate._callMandatoryPartExpression,
+            CallMandatoryPartExpressionValue = waitTemplate.CallMandatoryPartExpressionValue,
             Id = waitTemplate.Id,
             FunctionId = waitTemplate.FunctionId,
             MethodId = waitTemplate.MethodId,
@@ -59,13 +52,14 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public static Expression<Func<WaitTemplate, WaitTemplate>> InstanceMandatoryPartSelector =>
         waitTemplate => new WaitTemplate
         {
-            _instanceMandatoryPartExpression = waitTemplate._instanceMandatoryPartExpression,
+            InstanceMandatoryPartExpressionValue = waitTemplate.InstanceMandatoryPartExpressionValue,
             Id = waitTemplate.Id,
             FunctionId = waitTemplate.FunctionId,
             MethodId = waitTemplate.MethodId,
             MethodGroupId = waitTemplate.MethodGroupId,
             IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
-            ServiceId = waitTemplate.ServiceId
+            ServiceId = waitTemplate.ServiceId,
+            BaseHash = waitTemplate.BaseHash
         };
 
     [NotMapped]
@@ -98,14 +92,14 @@ public class WaitTemplate : IEntity, IOnSaveEntity
         var serializer = new ExpressionSerializer();
         if (expressionsLoaded && !forceReload) return;
 
-        if (_matchExpression != null)
-            MatchExpression = (LambdaExpression)serializer.Deserialize(_matchExpression).ToExpression();
-        if (_setDataExpression != null)
-            SetDataExpression = (LambdaExpression)serializer.Deserialize(_setDataExpression).ToExpression();
-        if (_callMandatoryPartExpression != null)
-            CallMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(_callMandatoryPartExpression).ToExpression();
-        if (_instanceMandatoryPartExpression != null)
-            InstanceMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(_instanceMandatoryPartExpression).ToExpression();
+        if (MatchExpressionValue != null)
+            MatchExpression = (LambdaExpression)serializer.Deserialize(MatchExpressionValue).ToExpression();
+        if (SetDataExpressionValue != null)
+            SetDataExpression = (LambdaExpression)serializer.Deserialize(SetDataExpressionValue).ToExpression();
+        if (CallMandatoryPartExpressionValue != null)
+            CallMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(CallMandatoryPartExpressionValue).ToExpression();
+        if (InstanceMandatoryPartExpressionValue != null)
+            InstanceMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(InstanceMandatoryPartExpressionValue).ToExpression();
         //if (_callMandatoryPartExpressionDynamic != null)
         //    CallMandatoryPartExpressionDynamic = (Expression<Func<ExpandoObject, string[]>>)
         //        serializer.Deserialize(_callMandatoryPartExpressionDynamic).ToExpression();
@@ -130,18 +124,18 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     {
         var serializer = new ExpressionSerializer();
         if (MatchExpression != null)
-            _matchExpression = serializer.Serialize(MatchExpression.ToExpressionSlim());
+            MatchExpressionValue = serializer.Serialize(MatchExpression.ToExpressionSlim());
         if (SetDataExpression != null)
-            _setDataExpression = serializer.Serialize(SetDataExpression.ToExpressionSlim());
+            SetDataExpressionValue = serializer.Serialize(SetDataExpression.ToExpressionSlim());
         //if (CallMandatoryPartExpressionDynamic != null)
         //    _callMandatoryPartExpressionDynamic = serializer.Serialize(CallMandatoryPartExpressionDynamic.ToExpressionSlim());
         if (CallMandatoryPartExpression != null)
         {
-            _callMandatoryPartExpression = serializer.Serialize(CallMandatoryPartExpression.ToExpressionSlim());
+            CallMandatoryPartExpressionValue = serializer.Serialize(CallMandatoryPartExpression.ToExpressionSlim());
             //using var md5 = MD5.Create();
-            //MandatoryPartHash = md5.ComputeHash(Encoding.UTF8.GetBytes(_callMandatoryPartExpression));
+            //MandatoryPartHash = md5.ComputeHash(Encoding.UTF8.GetBytes(CallMandatoryPartExpressionValue));
         }
         if (InstanceMandatoryPartExpression != null)
-            _instanceMandatoryPartExpression = serializer.Serialize(InstanceMandatoryPartExpression.ToExpressionSlim());
+            InstanceMandatoryPartExpressionValue = serializer.Serialize(InstanceMandatoryPartExpression.ToExpressionSlim());
     }
 }

@@ -115,13 +115,14 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             errorMsg);
     }
 
-    private async Task LogErrorToService(Exception ex, string errorMsg)
+    //todo:review this method
+    private Task LogErrorToService(Exception ex, string errorMsg)
     {
         _logger.LogError(ex, errorMsg);
         var serviceData = new ServiceData { Id = _settings.CurrentServiceId };
         _context.Entry(serviceData).State = EntityState.Unchanged;
         serviceData.AddError(errorMsg, ex);
-        await _context.SaveChangesAsync();
+        return Task.CompletedTask;
     }
 
     public async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)

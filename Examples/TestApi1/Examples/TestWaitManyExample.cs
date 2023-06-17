@@ -8,7 +8,7 @@ public class TestWaitManyExample : ProjectApprovalExample
     [ResumableFunctionEntryPoint("TestWaitManyExample.WaitThreeMethodAtStart")]
     public async IAsyncEnumerable<Wait> WaitThreeMethodAtStart()
     {
-        CurrentProject = new Project()
+        CurrentProject = new Project
         {
             Id = 1005,
             Name = "WaitThreeMethodAtStart",

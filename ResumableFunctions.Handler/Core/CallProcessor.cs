@@ -60,10 +60,10 @@ internal class CallProcessor : ICallProcessor
             $"ServiceProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
             async () =>
             {
-                var waitsIds = await _waitsRepository.GetWaitsIdsForMethodCall(pushedCallId, methodUrn);
-                foreach (var waitId in waitsIds)
+                var matchedFunctionsIds = await _waitsRepository.GetMatchedFunctionsForCall(pushedCallId, methodUrn);
+                foreach (var functionId in matchedFunctionsIds)
                 {
-                    _backgroundJobClient.Enqueue(() => _waitProcessor.ProcessWait(waitId.Id, pushedCallId));
+                    _backgroundJobClient.Enqueue(() => _waitProcessor.ProcessFunctionExpectedMatches(functionId, pushedCallId));
                 }
             },
             $"Error when call `ServiceProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");

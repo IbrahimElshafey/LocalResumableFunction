@@ -52,16 +52,26 @@ namespace ResumableFunctions.Handler.Core
             _lockProvider = lockProvider;
         }
 
-        public async Task ProcessWait(int methodWaitId, int pushedCallId)
+        public async Task ProcessFunctionExpectedMatches(int functionId, int pushedCallId)
         {
             await _backgroundJobExecutor.Execute(
-                $"ProcessWait_{methodWaitId}_{pushedCallId}",
+                $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
                 async () =>
                 {
-                    _methodWait = await LoadWait(methodWaitId);
+                    var waitForCall =
+                        await _context
+                        .WaitsForCalls
+                        .Where(x => x.PushedCallId == pushedCallId && x.FunctionId == functionId && x.MatchStatus == MatchStatus.PartiallyMatched)
+                        .ToListAsync();
+
                     _pushedCall = await LoadPushedCall(pushedCallId);
-                    if (_methodWait != null && _pushedCall != null)
+
+                    foreach (var expectedMatch in waitForCall)
                     {
+                        _waitCall = expectedMatch;
+                        _methodWait = await LoadWait(expectedMatch.WaitId);
+
+
                         var isSuccess = await Pipeline(
                             SetInputOutput,
                             CheckIfMatch,
@@ -69,14 +79,15 @@ namespace ResumableFunctions.Handler.Core
                             UpdateFunctionData,
                             ResumeExecution);
 
-                        if (isSuccess)
-                        {
-                            //todo:this must be the one call here
-                            await _context.SaveChangesAsync();
-                        }
+                        if (!isSuccess) continue;
+                        
+                        waitForCall.ForEach(x =>
+                            x.MatchStatus = x.MatchStatus == MatchStatus.PartiallyMatched ? MatchStatus.DuplicationCanceled : x.MatchStatus);
+                        await _context.SaveChangesAsync();
+                        break;
                     }
                 },
-                $"Error when process wait `{methodWaitId}` that may be a match for pushed call `{pushedCallId}`");
+                $"Error when process wait `{_methodWait?.Id}` that may be a match for pushed call `{pushedCallId}` and function `{functionId}`");
         }
 
         private Task<bool> SetInputOutput()
@@ -86,14 +97,13 @@ namespace ResumableFunctions.Handler.Core
             _methodWait.Output = _pushedCall.Data.Output;
             return Task.FromResult(true);
         }
+
         private async Task<bool> CheckIfMatch()
         {
             var pushedCallId = _pushedCall.Id;
             try
             {
                 var isMatch = _methodWait.IsMatched();
-                _waitCall = await _context.WaitsForCalls
-                    .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == _methodWait.Id);
                 if (isMatch)
                 {
                     _methodWait.FunctionState.AddLog(
@@ -107,7 +117,7 @@ namespace ResumableFunctions.Handler.Core
             catch (Exception ex)
             {
                 _methodWait.FunctionState.AddError(
-                    $"Error occured when evaluate match for [{_methodWait.Name}] in [{_methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].", ex);
+                    $"Error occurred when evaluate match for [{_methodWait.Name}] in [{_methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].", ex);
                 return false;
             }
         }
@@ -157,7 +167,7 @@ namespace ResumableFunctions.Handler.Core
                         $"Concurrency Exception occured when process wait [{_methodWait.Name}]." +
                         $"\nProcessing this wait will be scheduled.",
                         ex);
-                _backgroundJobClient.Schedule(() => ProcessWait(_methodWait.Id, pushedCallId), TimeSpan.FromSeconds(2.5));
+                _backgroundJobClient.Schedule(() => ProcessFunctionExpectedMatches(_methodWait.Id, pushedCallId), TimeSpan.FromSeconds(2.5));
                 return false;
             }
             return true;
@@ -336,14 +346,13 @@ namespace ResumableFunctions.Handler.Core
             {
                 var pushedCall = await _context
                    .PushedCalls
-                   .FirstOrDefaultAsync(x => x.Id == pushedCallId);
-                if (pushedCall == null)
-                {
-                    var error = $"No pushed method exist with ID ({pushedCallId}).";
-                    _logger.LogError(error);
-                    throw new Exception(error);
-                }
-                return pushedCall;
+                   .FindAsync(pushedCallId);
+
+                if (pushedCall != null) return pushedCall;
+
+                var error = $"No pushed method exist with ID ({pushedCallId}).";
+                _logger.LogError(error);
+                throw new Exception(error);
             }
             catch (Exception ex)
             {

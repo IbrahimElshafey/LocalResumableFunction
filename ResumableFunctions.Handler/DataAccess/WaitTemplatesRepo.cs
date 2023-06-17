@@ -52,14 +52,16 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
     public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
     {
-        var result = await _context
+        //todo:select what we need 
+        var result = (await _context
             .WaitTemplates
-            //.Select(WaitTemplate.InstanceMandatoryPartSelector)
-            .FirstOrDefaultAsync(x =>
-                x.BaseHash == hash &&
+            .Select(WaitTemplate.InstanceMandatoryPartSelector)
+            .Where(x =>
                 x.MethodGroupId == groupId &&
                 x.FunctionId == funcId &&
-                x.ServiceId == _settings.CurrentServiceId);
+                x.ServiceId == _settings.CurrentServiceId)
+            .ToListAsync())
+            .FirstOrDefault(x => x.BaseHash == hash);
         result?.LoadExpressions();
         return result;
     }

@@ -65,11 +65,11 @@ internal partial class WaitsRepo : IWaitsRepo
         }
     }
 
-    public async Task<List<WaitId>> GetWaitsIdsForMethodCall(int pushedCallId, string methodUrn)
+    public async Task<List<int>> GetMatchedFunctionsForCall(int pushedCallId, string methodUrn)
     {
         try
         {
-            var matchedWaitsIds = new List<WaitId>();
+            var matchedWaitsIds = new List<WaitForCall>();
             var pushedCall = await _context
                 .PushedCalls
                 .Select(x => new PushedCall { Id = x.Id, DataValue = x.DataValue })
@@ -82,47 +82,44 @@ internal partial class WaitsRepo : IWaitsRepo
                 var matchedIds = await _context
                     .MethodWaits
                     .Where(queryClause.Clause)
-                    .Select(x => new WaitId(x.Id, x.RequestedByFunctionId, x.FunctionStateId))
+                    .OrderByDescending(x => x.Id)
+                    .Select(x => new WaitForCall
+                    {
+                        WaitId = x.Id,
+                        FunctionId = x.RequestedByFunctionId,
+                        StateId = x.FunctionStateId
+                    })
                     .ToListAsync();
-                foreach (var waitId in matchedIds)
+                for (var index = 0; index < matchedIds.Count; index++)
                 {
-                    waitId.FullMatch = queryClause.MakeFullMatch;
-                    matchedWaitsIds.Add(waitId);
+                    var waitForCall = matchedIds[index];
+                    waitForCall.PushedCallId = pushedCallId;
+                    waitForCall.ServiceId = _settings.CurrentServiceId;
+                    waitForCall.MatchStatus = MatchStatus.PartiallyMatched;
+
+
+                    if (queryClause.MakeFullMatch && index == 0)
+                    {
+                        matchedWaitsIds.Add(waitForCall);
+                        break;
+                    }
+
+                    matchedWaitsIds.Add(waitForCall);
                 }
             }
-            //should I lock based on methodGroupId for cross services, may be no because it's used inside lock!!!
 
-
-
-
-            bool noMatchedWaits = matchedWaitsIds?.Any() is not true;
+            var noMatchedWaits = matchedWaitsIds.Any() is not true;
             if (noMatchedWaits)
-            {
                 _logger.LogWarning($"No waits matched for pushed method [{pushedCallId}]");
-                //_context.PushedCalls.Remove(pushedCall);
-            }
-            else
-            {
-                var waitsForCall = matchedWaitsIds
-                    .Select(waitId =>
-                    new WaitForCall
-                    {
-                        PushedCallId = pushedCallId,
-                        WaitId = waitId.Id,
-                        ServiceId = _settings.CurrentServiceId,
-                        FunctionId = waitId.FunctionId,
-                        StateId = waitId.StateId,
-                        //MatchStatus = waitId.FullMatch ? MatchStatus.Matched : MatchStatus.PartiallyMatched
-                    }).ToList();
-                _context.WaitsForCalls.AddRange(waitsForCall);
-            }
 
+            _context.WaitsForCalls.AddRange(matchedWaitsIds);
             await _context.SaveChangesAsync();
-            return matchedWaitsIds;
+            var functionIds = matchedWaitsIds.Select(x => x.FunctionId).Distinct().ToList();
+            return functionIds;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error when GetWaitsIdsForMethodCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})");
+            _logger.LogError(ex, $"Error when GetMatchedFunctionsForCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})");
             throw;
         }
     }

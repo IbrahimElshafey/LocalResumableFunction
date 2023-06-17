@@ -148,21 +148,10 @@ public class FunctionDataContext : DbContext
     private void ConfigureMethodWaitTemplate(ModelBuilder modelBuilder)
     {
         var entityBuilder = modelBuilder.Entity<WaitTemplate>();
-        entityBuilder
-            .Property(WaitTemplate.FieldsNames.MatchExpression)
-            .HasColumnName(nameof(WaitTemplate.FieldsNames.MatchExpression));
-        entityBuilder
-            .Property(WaitTemplate.FieldsNames.CallMandatoryPartExpression)
-            .HasColumnName(nameof(WaitTemplate.FieldsNames.CallMandatoryPartExpression));
-        //entityBuilder
-        //    .Property(WaitTemplate.FieldsNames.CallMandatoryPartExpressionDynamic)
-        //    .HasColumnName(nameof(WaitTemplate.FieldsNames.CallMandatoryPartExpressionDynamic));
-        entityBuilder
-            .Property(WaitTemplate.FieldsNames.InstanceMandatoryPartExpression)
-            .HasColumnName(nameof(WaitTemplate.FieldsNames.InstanceMandatoryPartExpression));
-        entityBuilder
-            .Property(WaitTemplate.FieldsNames.SetDataExpression)
-            .HasColumnName(nameof(WaitTemplate.FieldsNames.SetDataExpression));
+        entityBuilder.Property(x => x.MatchExpressionValue);
+        entityBuilder.Property(x => x.CallMandatoryPartExpressionValue);
+        entityBuilder.Property(x => x.InstanceMandatoryPartExpressionValue);
+        entityBuilder.Property(x => x.SetDataExpressionValue);
         modelBuilder.Entity<MethodsGroup>()
             .HasMany(x => x.WaitTemplates)
             .WithOne(x => x.MethodGroup)
@@ -266,7 +255,7 @@ public class FunctionDataContext : DbContext
     private void SetServiceId(EntityEntry entry)
     {
         if (entry.Entity is IEntity entityInService)
-            Entry(entityInService).Property(x=>x.ServiceId).CurrentValue = _settings.CurrentServiceId;
+            Entry(entityInService).Property(x => x.ServiceId).CurrentValue = _settings.CurrentServiceId;
     }
 
     private async Task SetWaitsPaths(CancellationToken cancellationToken)
