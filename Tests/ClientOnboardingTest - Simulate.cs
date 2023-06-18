@@ -17,7 +17,7 @@ namespace Tests
                 typeof(ClientOnboardingService),
                 typeof(ClientOnboardingWorkflow));
 
-            test.RegisteredServices.AddScoped<IClientOnboardingService, ClientOnboardingService>();
+            test.RegisteredServices.AddScoped<IClientOnboardingService, ClientOnboardingServiceFake>();
 
             await test.ScanTypes();
 
@@ -39,6 +39,14 @@ namespace Tests
                instance.ClientMeetingId.MeetingId,
                new MeetingResult { MeetingId = instance.ClientMeetingId.MeetingId, MeetingResultId = 155, ClientAcceptTheDeal = true, ClientRejectTheDeal = false });
             instance = await RoundCheck(test, 3, true);
+        }
+    }
+
+    internal class ClientOnboardingServiceFake: ClientOnboardingService
+    {
+        public override TaskId AskOwnerToApproveClient(int registrationFormId)
+        {
+            return new TaskId { Id = 1000 };
         }
     }
 }

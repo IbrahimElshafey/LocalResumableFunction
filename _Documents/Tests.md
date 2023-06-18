@@ -27,3 +27,4 @@
 # Problem to solve 
 * We can't mock Resumable function class dependacies and use the mocks because off attributes checks
 * Could we fake dll and then mock faked instances
+* No Fakes or Mokes libraries you should write your fake implementation for your interfaces

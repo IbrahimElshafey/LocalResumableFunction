@@ -15,7 +15,7 @@ namespace ClientOnboarding.Services
             };
         }
 
-        public TaskId AskOwnerToApproveClient(int registrationFormId)
+        public virtual TaskId AskOwnerToApproveClient(int registrationFormId)
         {
             return new TaskId { Id = registrationFormId };
         }
