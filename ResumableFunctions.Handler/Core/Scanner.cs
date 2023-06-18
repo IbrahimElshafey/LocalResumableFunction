@@ -59,10 +59,8 @@ internal class Scanner
                 await RegisterMethods(typeof(LocalRegisteredMethods), null);
 
                 await _context.SaveChangesAsync();
-
-                await _context.DisposeAsync();
             },
-            $"Error when scan [{_currentServiceName}]");
+            $"Error when scan [{_currentServiceName}]", true);
 
     }
 
@@ -301,7 +299,7 @@ internal class Scanner
         {
             var errorMsg = $"Error when adding a method identifier of type `MethodWait` for type `{type.FullName}`";
             serviceData?.AddError(errorMsg, ex);
-            _logger.LogError(ex,errorMsg);
+            _logger.LogError(ex, errorMsg);
             throw;
         }
 

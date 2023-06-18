@@ -14,6 +14,7 @@ internal class CallProcessor : ICallProcessor
     private readonly HangfireHttpClient _hangFireHttpClient;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IResumableFunctionsSettings _settings;
+    private readonly IScanStateRepo _scanStateRepo;
 
     public CallProcessor(
         ILogger<ReplayWaitProcessor> logger,
@@ -22,7 +23,8 @@ internal class CallProcessor : ICallProcessor
         IBackgroundProcess backgroundJobClient,
         HangfireHttpClient hangFireHttpClient,
         BackgroundJobExecutor backgroundJobExecutor,
-        IResumableFunctionsSettings settings)
+        IResumableFunctionsSettings settings,
+        IScanStateRepo scanStateRepo)
     {
         _logger = logger;
         _waitProcessor = waitProcessor;
@@ -31,27 +33,31 @@ internal class CallProcessor : ICallProcessor
         _hangFireHttpClient = hangFireHttpClient;
         _backgroundJobExecutor = backgroundJobExecutor;
         _settings = settings;
+        _scanStateRepo = scanStateRepo;
     }
 
     public async Task InitialProcessPushedCall(int pushedCallId, string methodUrn)
     {
-        await _backgroundJobExecutor.Execute(
-            $"InitialProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
-            async () =>
-            {
-                var services = await _waitsRepository.GetAffectedServicesForCall(methodUrn);
-                if (services == null || services.Any() is false) return;
-
-                foreach (var service in services)
+        if (await _scanStateRepo.IsScanFinished())
+            await _backgroundJobExecutor.Execute(
+                $"InitialProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
+                async () =>
                 {
-                    var isLocal = service.Id == _settings.CurrentServiceId;
-                    if (isLocal)
-                        await ServiceProcessPushedCall(pushedCallId, methodUrn);
-                    else
-                        await CallOwnerService(service, pushedCallId, methodUrn);
-                }
-            },
-            $"Error when call `InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
+                    var services = await _waitsRepository.GetAffectedServicesForCall(methodUrn);
+                    if (services == null || services.Any() is false) return;
+
+                    foreach (var service in services)
+                    {
+                        var isLocal = service.Id == _settings.CurrentServiceId;
+                        if (isLocal)
+                            await ServiceProcessPushedCall(pushedCallId, methodUrn);
+                        else
+                            await CallOwnerService(service, pushedCallId, methodUrn);
+                    }
+                },
+                $"Error when call `InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
+        else
+            _backgroundJobClient.Schedule(() => InitialProcessPushedCall(pushedCallId, methodUrn), TimeSpan.FromSeconds(3));
     }
 
     public async Task ServiceProcessPushedCall(int pushedCallId, string methodUrn)
