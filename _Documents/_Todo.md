@@ -1,17 +1,18 @@
-﻿# Todo
-* Delay processing wait if the scan is in progress
+﻿# Hot Todo
+* New scan should not delete existing method wait and groups if exist
+* Same DLL in two services
+* Time wait clone if first
+* Test replay
 
 ## Core functions
-* New scan should not delete existing method wait and groups if exist
+* Review logs to service , why first error only
+* Optimize wait table indexes to enable fast wait insertion
+	* Remove index 
+		* [ParentWaitId] in [dbo].[Waits]
+* Review check after locks
+* Review activate and deactivate function
 * Remove direct use for DbContext
-* Same DLL in two services
 * Review all places where database update occurs
-* Function priority
-	* How hangfire handle priority
-* Can I use .net standard for Handler project
-* Use pull mode to get calls from a queue
-* Replace HttpHangfire with abstraction to enable queue based communication
-* Review todos
 
 ## Todos in code
 * Handle clone time wait FirstWaitProcessor.cs	42

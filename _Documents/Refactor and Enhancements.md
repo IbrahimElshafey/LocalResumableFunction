@@ -23,5 +23,6 @@
 	* After Resumed
 	* On Error Occurred
 * Use pull mode to get calls from a queue
+* Replace HttpHangfire with abstraction to enable queue based communication
 * How can I benefit from Azure Service Fabric
 	* https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-overview
