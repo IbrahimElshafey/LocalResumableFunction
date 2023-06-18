@@ -14,6 +14,7 @@ public class WaitsGroup : Wait
         WaitType = WaitType.GroupWaitAll;
     }
     private LambdaExpression _countExpression;
+
     [NotMapped]
     public LambdaExpression GroupMatchExpression
     {
@@ -54,10 +55,6 @@ public class WaitsGroup : Wait
 
     private LambdaExpression GetGroupMatchExpression()
     {
-        //todo:may be a bug
-        var assembly =
-            RequestedByFunction.MethodInfo.DeclaringType.Assembly ??
-            Assembly.GetEntryAssembly();
         if (GroupMatchExpressionValue != null)
         {
             var serializer = new ExpressionSerializer();
@@ -100,26 +97,5 @@ public class WaitsGroup : Wait
         //}
         return base.IsValidWaitRequest();
     }
-
-    //todo: no need remove it, wait name must be unique in per function
-    private bool CheckNameDuplication()
-    {
-        var duplicatedWaits =
-             ChildWaits
-             .Flatten(child => child.ChildWaits)
-             .GroupBy(child => child.Name)
-             .Where(child => child.Count() > 1)
-             .ToList();
-        if (duplicatedWaits?.Any() is true)
-        {
-            FunctionState?.AddLog(
-                   $"The wait named [{duplicatedWaits.First().First().Name}] is duplicated in group [{Name}]," +
-                   $",fix it to not cause a problem. Name can't be duplicated in the group.",
-                   LogType.Error);
-            return false;
-        }
-        return true;
-    }
-
 
 }

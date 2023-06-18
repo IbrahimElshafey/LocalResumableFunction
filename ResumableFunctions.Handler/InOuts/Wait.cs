@@ -10,7 +10,6 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     public DateTime Created { get; internal set; }
     public string Name { get; internal set; }
 
-    //Todo:create filtered index on status column
     public WaitStatus Status { get; internal set; } = WaitStatus.Waiting;
     public bool IsFirst { get; internal set; }
     public int StateBeforeWait { get; internal set; }

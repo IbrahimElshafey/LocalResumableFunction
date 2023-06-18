@@ -1,6 +1,6 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
-//todo:change this to be immutable entity with no update
+//todo:review concurrency exceptions for `WaitForCall`
 public class WaitForCall : IEntityWithUpdate
 {
     public int Id { get; internal set; }

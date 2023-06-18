@@ -15,7 +15,7 @@ namespace ResumableFunctions.TestShell
         {
             _testName = testName;
         }
-        public IGlobalConfiguration HangfireConfig => null;//No bachground processing  using hangfire
+        public IGlobalConfiguration HangfireConfig => null;//No hangfire background processing
 
         public DbContextOptionsBuilder WaitsDbConfig => new DbContextOptionsBuilder().UseSqlite($"DataSource={_testName}_Waits.db");
 

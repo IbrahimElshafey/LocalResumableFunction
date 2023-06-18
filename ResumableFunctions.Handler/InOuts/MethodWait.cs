@@ -85,7 +85,7 @@ public class MethodWait : Wait
 
     internal override bool IsValidWaitRequest()
     {
-        //Todo:validate type serialization
+        //Todo:validate input output type serialization
         if (!IsFirst && MatchExpression == null)
             FunctionState.AddError(
                 $"You didn't set the `MatchIfExpression` for wait [{Name}] that is not a first wait," +

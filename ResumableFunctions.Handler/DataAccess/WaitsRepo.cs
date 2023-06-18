@@ -185,15 +185,6 @@ internal partial class WaitsRepo : IWaitsRepo
         return result!;
     }
 
-    private IQueryable<Wait> GetFunctionInstanceWaits(int requestedByFunctionId, int functionStateId)
-    {
-        return _context.Waits
-            .OrderByDescending(x => x.Id)
-            .Include(x => x.RequestedByFunction)
-            .Where(x =>
-                x.RequestedByFunctionId == requestedByFunctionId &&
-                x.FunctionStateId == functionStateId);
-    }
 
 
     //todo:fix this for group
@@ -210,7 +201,7 @@ internal partial class WaitsRepo : IWaitsRepo
             if (firstWaitInDb != null)
             {
                 firstWaitInDb.ActionOnWaitsTree(wait => wait.IsDeleted = true);
-                //load entity to delete it , concurrency controltoken and FKs
+                //load entity to delete it , concurrency control token and FKs
                 var functionState = await _context
                     .FunctionStates
                     .FirstAsync(x => x.Id == firstWaitInDb.FunctionStateId);
@@ -282,14 +273,16 @@ internal partial class WaitsRepo : IWaitsRepo
     public async Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId)
     {
 
-        //todo:doeswe handle sub functions waits
-        var functionWaits =
-            await GetFunctionInstanceWaits(
-                    requestedByFunctionId,
-                    functionStateId)
-                .ToListAsync();
+        //todo:handle sub functions waits
+        var functionInstanceWaits =
+            await _context.Waits
+            .OrderByDescending(x => x.Id)
+            .Where(x =>
+                x.RequestedByFunctionId == requestedByFunctionId &&
+                x.FunctionStateId == functionStateId)
+            .ToListAsync();
 
-        foreach (var wait in functionWaits)
+        foreach (var wait in functionInstanceWaits)
         {
             wait.Cancel();
             await CancelSubWaits(wait.Id);
@@ -299,10 +292,14 @@ internal partial class WaitsRepo : IWaitsRepo
     public async Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait)
     {
         var waitToReplay =
-            await GetFunctionInstanceWaits(
-                    replayWait.RequestedByFunctionId,
-                    replayWait.FunctionState.Id)
-                .FirstOrDefaultAsync(x => x.Name == replayWait.Name && x.IsNode);
+            await _context.Waits
+            .OrderByDescending(x => x.Id)
+            .Include(x => x.RequestedByFunction)
+            .FirstOrDefaultAsync(x =>
+                x.RequestedByFunctionId == replayWait.RequestedByFunctionId &&
+                x.FunctionStateId == replayWait.FunctionState.Id &&
+                x.Name == replayWait.Name &&
+                x.IsNode);
 
         if (waitToReplay == null)
         {

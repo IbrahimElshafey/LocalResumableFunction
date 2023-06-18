@@ -61,9 +61,5 @@ namespace ResumableFunctions.AspNetService
                 _logger.LogError(ex, "Error when handle external method call.");
             }
         }
-
-        //todo:CheckMethod/s exist
-        //todo:force rescan
-        //todo:get readable expression for MatchExpression ,SetDataExpression and GroupMatchExpression
     }
 }

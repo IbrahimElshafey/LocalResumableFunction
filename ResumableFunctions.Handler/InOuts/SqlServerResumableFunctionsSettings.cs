@@ -60,9 +60,9 @@ namespace ResumableFunctions.Handler.InOuts
         private string HangfireDbName => $"{Assembly.GetEntryAssembly().GetName().Name}_HangfireDb".Replace(".", "_");
 
         public int CurrentServiceId { get; set; }
-        public string CurrentDbName { get ; set; }
+        public string CurrentDbName { get; set; }
 
-        public IDistributedLockProvider DistributedLockProvider => 
+        public IDistributedLockProvider DistributedLockProvider =>
             new SqlDistributedSynchronizationProvider($"Data Source={ServerName};Initial Catalog=master;Integrated Security=True");
 
         private void CreateHangfireDb()
@@ -72,7 +72,8 @@ namespace ResumableFunctions.Handler.InOuts
             var context = new DbContext(dbConfig.Options);
             try
             {
-                context.Database.EnsureCreated();//todo:how to pass IDistributedLockProvider and lock
+                using var loc = DistributedLockProvider.AcquireLock(HangfireDbName);
+                context.Database.EnsureCreated();
             }
             catch (Exception)
             {

@@ -117,33 +117,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
 
     }
 
-    public async Task<WaitMethodIdentifier> GetWaitMethod(MethodWait methodWait)
-    {
-        if (methodWait.MethodData == null && methodWait.MethodToWaitId != default)
-            return
-                await _context
-                .WaitMethodIdentifiers
-                .FirstOrDefaultAsync(x => x.Id == methodWait.MethodToWaitId);
-
-        var methodData = methodWait.MethodData;
-        methodData.Validate();
-        //todo:refine this query
-        var methodGroup =
-            await _context
-                .MethodsGroups
-                .Include(x => x.WaitMethodIdentifiers)
-                .FirstOrDefaultAsync(x => x.MethodGroupUrn == methodData.MethodUrn);
-        var childMethodIdentifier =
-            methodGroup
-            .WaitMethodIdentifiers
-            .FirstOrDefault(x => x.MethodHash.SequenceEqual(methodData.MethodHash));
-        if (childMethodIdentifier != null)
-        {
-            return childMethodIdentifier;
-        }
-
-        throw new NullReferenceException($"Can't find wait method ({methodData}) in database.");
-    }
+    
 
     public async Task<(int MethodId, int GroupId)> GetId(MethodWait methodWait)
     {

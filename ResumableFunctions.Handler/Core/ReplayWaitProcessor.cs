@@ -40,10 +40,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         }
 
         //todo:review CancelFunctionWaits is suffecient
-        //Cancel wait and it's child
         waitToReplay.Status = waitToReplay.Status == WaitStatus.Waiting ? WaitStatus.Canceled : waitToReplay.Status;
         waitToReplay.CurrentFunction = replayRequest.CurrentFunction;
-        await _waitsRepo.CancelSubWaits(waitToReplay.Id);
         //skip active waits after replay
         await _waitsRepo.CancelFunctionWaits(waitToReplay.RequestedByFunctionId, waitToReplay.FunctionStateId);
 
@@ -76,7 +74,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     {
         if (waitToReplay is MethodWait mw)
         {
-            mw.LoadExpressions();//todo: expression not loaded
+            mw.LoadExpressions();
             var oldMatchExpression = mw.MatchExpression;
 
 

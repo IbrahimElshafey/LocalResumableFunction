@@ -34,7 +34,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             BaseHash = hashResult.Hash,
             ServiceId = _settings.CurrentServiceId
         };
-        //todo:Rewrite expressions
+
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
         waitTemplate.MatchExpression = matchWriter.MatchExpression;
         waitTemplate.CallMandatoryPartExpression = matchWriter.CallMandatoryPartExpression;
@@ -52,7 +52,6 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
     public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
     {
-        //todo:select what we need 
         var result = (await _context
             .WaitTemplates
             .Select(WaitTemplate.InstanceMandatoryPartSelector)

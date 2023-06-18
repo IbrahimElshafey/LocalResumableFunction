@@ -29,7 +29,7 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
 
     public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; internal set; }
     public int ResumableFunctionIdentifierId { get; internal set; }
-    public FunctionStatus Status { get; internal set; } //todo:reset before scan
+    public FunctionStatus Status { get; internal set; }
     public DateTime Modified { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
 

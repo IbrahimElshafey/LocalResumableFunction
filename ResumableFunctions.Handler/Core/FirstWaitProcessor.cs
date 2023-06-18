@@ -119,8 +119,12 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private Task LogErrorToService(Exception ex, string errorMsg)
     {
         _logger.LogError(ex, errorMsg);
-        var serviceData = new ServiceData { Id = _settings.CurrentServiceId };
-        _context.Entry(serviceData).State = EntityState.Unchanged;
+        var serviceData = _context.ServicesData.Local.FirstOrDefault(x => x.Id == _settings.CurrentServiceId);
+        if (serviceData == null)
+        {
+            serviceData = new ServiceData { Id = _settings.CurrentServiceId };
+            _context.Entry(serviceData).State = EntityState.Unchanged;
+        }
         serviceData.AddError(errorMsg, ex);
         return Task.CompletedTask;
     }

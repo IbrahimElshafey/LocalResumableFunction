@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+using FastExpressionCompiler;
 using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.InOuts;
 
@@ -44,24 +46,22 @@ public abstract partial class ResumableFunction
     internal void InitializeDependencies(IServiceProvider serviceProvider)
     {
         //todo:should I create new scope??
-        var setDepsMi = GetType().GetMethod(
-            "SetDeps", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        if (setDepsMi == null)
-            setDepsMi = GetType().GetMethod(
+        //void SetDependencies(dep1,dep2,....)
+        var setDependenciesMi = GetType().GetMethod(
             "SetDependencies", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        if (setDepsMi == null)
-            setDepsMi = GetType().GetMethod(
-            "Dependencies", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        if (setDepsMi == null)
+
+        if (setDependenciesMi == null)
         {
-            this.AddLog("No set dependencies method found that match the criteria.", LogType.Warning);
+            this.AddLog(
+                "No instance method like `void SetDependencies(Interface dep1,...)` found that set your dependencies.",
+                LogType.Warning);
             return;
         }
 
-        var parameters = setDepsMi.GetParameters();
+        var parameters = setDependenciesMi.GetParameters();
         var inputs = new object[parameters.Count()];
-        if (setDepsMi.ReturnType == typeof(void) &&
-            parameters.Count() >= 1)
+        bool matchSignature = setDependenciesMi.ReturnType == typeof(void) && parameters.Count() >= 1;
+        if (matchSignature)
         {
             for (int i = 0; i < parameters.Length; i++)
             {
@@ -72,8 +72,26 @@ public abstract partial class ResumableFunction
         }
         else
         {
-            this.AddLog("No set dependencies method found that match the criteria.", LogType.Warning);
+            this.AddLog(
+               "No instance method like `void SetDependencies(Interface dep1,...)` found that set your dependencies.",
+               LogType.Warning);
         }
-        setDepsMi.Invoke(this, inputs);
+        setDependenciesMi.Invoke(this, inputs);
+        //CallSetDependencies(inputs, setDependenciesMi, parameters);
+    }
+
+    private void CallSetDependencies(object[] inputs, MethodInfo mi, ParameterInfo[] parameterTypes)
+    {
+        var instance = Expression.Parameter(GetType(), "instance");
+        var depsParams = parameterTypes.Select(x => Expression.Parameter(x.ParameterType)).ToList();
+        var parameters = new List<ParameterExpression>
+        {
+            instance
+        };
+        parameters.AddRange(depsParams);
+        var call = Expression.Call(instance, mi, depsParams);
+        var lambda = Expression.Lambda(call, parameters);
+        var compiledFunction = lambda.CompileFast();
+        compiledFunction.DynamicInvoke(this, inputs);
     }
 }

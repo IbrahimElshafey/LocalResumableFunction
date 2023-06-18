@@ -11,6 +11,22 @@
 * Can I use .net standard for Handler project
 * Use pull mode to get calls from a queue
 * Replace HttpHangfire with abstraction to enable queue based communication
+* Review todos
+## Todos in code
+* Handle clone time wait FirstWaitProcessor.cs	42
+* review `LogErrorToService` method	FirstWaitProcessor.cs	118
+* Review `CancelFunctionWaits` is suffecient	ReplayWaitProcessor.cs	42
+* Recalc mandatory part	ReplayWaitProcessor.cs	89
+* May cause problem for go back after	WaitProcessor.cs	236
+* Validate same signature for group methods	MethodIdsRepo.cs	74
+* `RemoveFirstWaitIfExist` fix this for group	WaitsRepo.cs	190
+* Handle sub functions waits when cancel WaitsRepo.cs	276
+* Enhance `GenericVisitor` class by override it's methods 	GenericVisitor.cs	7
+* Validate input output type is serializable	MethodWait.cs	88
+* Review concurrency exceptions for `WaitForCall` when update	WaitForCall.cs	3
+* Should I create new scope when initialize function instance??	ResumableFunction-Wait Functions.cs	46
+* Refine `GetMethodsInfo` query	ResumableFunctions.Handler	UiService.cs	161
+* Set `settings.CurrentServiceUrl` here if null	Extensions.cs	31
 
 ## Enhancements
 * Refactor long methods
