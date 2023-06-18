@@ -17,6 +17,7 @@ namespace Tests
                 typeof(ClientOnboardingService),
                 typeof(ClientOnboardingWorkflow));
             test.RegisteredServices.AddScoped<IClientOnboardingService, ClientOnboardingService>();
+
             await test.ScanTypes();
 
             var callId =
@@ -24,46 +25,19 @@ namespace Tests
                 x => x.ClientFillsForm,
                 new RegistrationForm { FormData = "Form data", UserId = 1000 },
                 new RegistrationResult { FormId = 5000 });
-
-            var pushedCalls = await test.GetPushedCalls();
-            Assert.Single(pushedCalls);
-
-            var instances = await test.GetInstances<ClientOnboardingWorkflow>();
-            Assert.Single(instances);
-
-            var currentInstance = instances.First();
-            (currentInstance.StateObject as ClientOnboardingWorkflow).OwnerTaskId = new TaskId { Id = 6000 };
-            await test.UpdateData(currentInstance);
+            var instance = await RoundCheck(test, 1);
 
             await test.SimulateMethodCall<ClientOnboardingService>(
                 x => x.OwnerApproveClient,
-                new OwnerApproveClientInput { TaskId = 6000, Decision = true },
+                new OwnerApproveClientInput { TaskId = instance.OwnerTaskId.Id, Decision = true },
                 new OwnerApproveClientResult { OwnerApprovalId = 9000 });
-
-            pushedCalls = await test.GetPushedCalls();
-            Assert.Equal(2, pushedCalls.Count);
-
-            var waits = await test.GetWaits(currentInstance.Id);
-            Assert.Equal(3, waits.Count);
-
-            var lastWait = waits.Last();
-            Assert.Equal(WaitStatus.Waiting, lastWait.Status);
-            Assert.Equal("Wait Meeting Result", lastWait.Name);
-
-            (currentInstance.StateObject as ClientOnboardingWorkflow).ClientMeetingId = 
-                new ClientMeetingId { MeetingId = 122, UserId = 1000 };
-            await test.UpdateData(currentInstance);
+            instance = await RoundCheck(test, 2);
 
             await test.SimulateMethodCall<ClientOnboardingService>(
                x => x.SendMeetingResult,
-               122,
-               new MeetingResult { MeetingId = 122, MeetingResultId = 155, ClientAcceptTheDeal = true, ClientRejectTheDeal = false });
-
-            pushedCalls = await test.GetPushedCalls();
-            Assert.Equal(3, pushedCalls.Count);
-
-            currentInstance = (await test.GetInstances<ClientOnboardingWorkflow>()).Last();
-            Assert.Equal(FunctionStatus.Completed, currentInstance.Status);
+               instance.ClientMeetingId.MeetingId,
+               new MeetingResult { MeetingId = instance.ClientMeetingId.MeetingId, MeetingResultId = 155, ClientAcceptTheDeal = true, ClientRejectTheDeal = false });
+            instance = await RoundCheck(test, 3, true);
         }
     }
 }

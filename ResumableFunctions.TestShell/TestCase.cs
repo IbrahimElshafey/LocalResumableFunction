@@ -134,14 +134,6 @@ namespace ResumableFunctions.TestShell
             return calls;
         }
 
-        public async Task UpdateData(params object[] objects)
-        {
-            foreach (var item in objects)
-            {
-                _context.Entry(item).State = EntityState.Modified;
-            }
-            await _context.SaveChangesAsync();
-        }
 
         public async Task<List<Wait>> GetWaits(int? instanceId = null)
         {
