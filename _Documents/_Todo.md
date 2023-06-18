@@ -28,22 +28,6 @@
 * Should I create new scope when initialize function instance??	ResumableFunction-Wait Functions.cs	46
 * Refine `GetMethodsInfo` query	ResumableFunctions.Handler	UiService.cs	161
 
-## Enhancements
-* Refactor long methods
-* Parameter check lib use
-* Performance Analysis
-* Store options
-	* Use Queue Service to Handle Pushed Calls
-		* Kafka,RbbittMQ or ActiveMQ
-	* Use Queue Service that support queries for fast wait insertion
-* What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
-
-* Encryption option sensitive data
-	* Function state
-	* Match and SetData Expressions
-* Resumable function hooks
-	* After Resumed
-	* On Error Occurred
 
 
 
