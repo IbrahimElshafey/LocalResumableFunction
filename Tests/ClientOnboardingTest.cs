@@ -17,7 +17,6 @@ namespace Tests
                 typeof(ClientOnboardingService),
                 typeof(ClientOnboardingWorkflow));
             test.RegisteredServices.AddScoped<IClientOnboardingService, ClientOnboardingService>();
-            test.RegisteredServices.AddScoped<ClientOnboardingWorkflow>();
             await test.ScanTypes();
 
             var service = test.CurrentApp.Services.GetService<IClientOnboardingService>();

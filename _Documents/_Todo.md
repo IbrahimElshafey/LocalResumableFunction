@@ -1,8 +1,8 @@
 ﻿# Todo
 
 ## Core functions
-* New scan should not delete existing method wait and groups if exist
 * Delay processing wait if the scan is in progress
+* New scan should not delete existing method wait and groups if exist
 * Remove direct use for DbContext
 * Same DLL in two services
 * Review all places where database update occurs
@@ -12,6 +12,7 @@
 * Use pull mode to get calls from a queue
 * Replace HttpHangfire with abstraction to enable queue based communication
 * Review todos
+
 ## Todos in code
 * Handle clone time wait FirstWaitProcessor.cs	42
 * review `LogErrorToService` method	FirstWaitProcessor.cs	118

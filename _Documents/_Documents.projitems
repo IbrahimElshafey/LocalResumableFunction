@@ -9,7 +9,7 @@
     <Import_RootNamespace>_Documents</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Commands.md" />
+    <None Include="$(MSBuildThisFileDirectory)Reading\Commands.md" />
     <None Include="$(MSBuildThisFileDirectory)Documentation Plan.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading\External Reading.md" />
     <None Include="$(MSBuildThisFileDirectory)LongMethods.xlsx" />
@@ -24,6 +24,7 @@
     <None Include="$(MSBuildThisFileDirectory)TestShell.md" />
     <None Include="$(MSBuildThisFileDirectory)UI.md" />
     <None Include="$(MSBuildThisFileDirectory)_Roslyn Analyzer.md" />
+    <None Include="$(MSBuildThisFileDirectory)Refactor and Enhancements.md" />
     <None Include="$(MSBuildThisFileDirectory)_Todo.md" />
     <None Include="$(MSBuildThisFileDirectory)~temp.md" />
   </ItemGroup>
