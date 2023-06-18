@@ -26,7 +26,6 @@
 * Review concurrency exceptions for `WaitForCall` when update	WaitForCall.cs	3
 * Should I create new scope when initialize function instance??	ResumableFunction-Wait Functions.cs	46
 * Refine `GetMethodsInfo` query	ResumableFunctions.Handler	UiService.cs	161
-* Set `settings.CurrentServiceUrl` here if null	Extensions.cs	31
 
 ## Enhancements
 * Refactor long methods

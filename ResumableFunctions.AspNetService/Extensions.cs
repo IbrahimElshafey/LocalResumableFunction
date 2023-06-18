@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler.Helpers;
@@ -22,13 +23,11 @@ namespace ResumableFunctions.AspNetService
         
         public static void RegisterCurrentService(this WebApplication app)
         {
+           
             app.UseResumableFunctions();
             app.UseHangfireDashboard();
             app.MapRazorPages();
             app.UseStaticFiles();
-
-
-            //todo:set `settings.CurrentServiceUrl` here if null
 
             app.UseRouting();
 
