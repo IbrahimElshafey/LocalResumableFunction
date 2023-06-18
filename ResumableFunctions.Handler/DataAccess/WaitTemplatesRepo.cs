@@ -68,14 +68,28 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
     public async Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId)
     {
+        var functionIds = await _context
+            .MethodWaits
+            .Where(x =>
+                x.Status == WaitStatus.Waiting &&
+                x.MethodGroupToWaitId == methodGroupId)
+            .Select(x => x.RequestedByFunctionId)
+            .Distinct()
+            .ToListAsync();
+
         var waitTemplatesQry = _context
             .WaitTemplates
             .Select(WaitTemplate.CallMandatoryPartSelector)
-            .Where(x => x.MethodGroupId == methodGroupId && x.ServiceId == _settings.CurrentServiceId);
+            .Where(x =>
+                x.MethodGroupId == methodGroupId &&
+                x.ServiceId == _settings.CurrentServiceId &&
+                functionIds.Contains(x.FunctionId));
+
         var result = await
             waitTemplatesQry
             .AsNoTracking()
             .ToListAsync();
+
         result.ForEach(x => x.LoadExpressions());
         return result;
     }
