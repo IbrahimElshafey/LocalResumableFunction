@@ -4,7 +4,6 @@ using MessagePack;
 using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
-
 public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 {
     [IgnoreMember]

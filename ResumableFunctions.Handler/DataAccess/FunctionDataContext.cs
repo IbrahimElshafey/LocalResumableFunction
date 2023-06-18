@@ -31,6 +31,7 @@ public class FunctionDataContext : DbContext
         }
     }
 
+    public DbSet<ScanState> ScanStates { get; set; }
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
 
     public DbSet<MethodIdentifier> MethodIdentifiers { get; set; }

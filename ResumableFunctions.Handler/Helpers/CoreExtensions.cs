@@ -27,6 +27,7 @@ public static class CoreExtensions
         services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
         services.AddScoped<IWaitsRepo, WaitsRepo>();
         services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
+        services.AddScoped<IScanStateRepo, ScanStateRepo>();
 
         services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
         services.AddScoped<IRecycleBinService, RecycleBinService>();
@@ -35,13 +36,11 @@ public static class CoreExtensions
         services.AddScoped<ICallProcessor, CallProcessor>();
         services.AddScoped<ICallPusher, CallPusher>();
         services.AddScoped<Scanner>();
-
+        services.AddScoped<BackgroundJobExecutor>();
 
 
 
         services.AddSingleton<BinaryToObjectConverterAbstract, BinaryToObjectConverter>();
-        //services.AddSingleton<IBinaryToObjectConverter,MessagePackBinaryToObjectConverter>();
-        services.AddSingleton<BackgroundJobExecutor>();
         services.AddSingleton<HttpClient>();
         services.AddSingleton<HangfireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);

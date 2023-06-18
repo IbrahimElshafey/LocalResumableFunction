@@ -1,7 +1,7 @@
 ﻿# Todo
+* Delay processing wait if the scan is in progress
 
 ## Core functions
-* Delay processing wait if the scan is in progress
 * New scan should not delete existing method wait and groups if exist
 * Remove direct use for DbContext
 * Same DLL in two services

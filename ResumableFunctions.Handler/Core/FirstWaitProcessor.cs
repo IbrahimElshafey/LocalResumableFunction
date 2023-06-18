@@ -112,7 +112,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 }
 
             },
-            errorMsg);
+            errorMsg, true);
     }
 
     //todo:review this method
@@ -207,6 +207,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     await _context.SaveChangesAsync();
                 }
             },
-            $"Error when try to deactivate first wait for function [{functionId}]");
+            $"Error when try to deactivate first wait for function [{functionId}]", true);
     }
 }
