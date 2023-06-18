@@ -61,7 +61,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
                 x.FunctionId == funcId &&
                 x.ServiceId == _settings.CurrentServiceId)
             .ToListAsync())
-            .FirstOrDefault(x => x.BaseHash == hash);
+            .FirstOrDefault(x => x.BaseHash.SequenceEqual(hash));
         result?.LoadExpressions();
         return result;
     }

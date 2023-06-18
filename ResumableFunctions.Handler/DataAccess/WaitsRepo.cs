@@ -82,7 +82,7 @@ internal partial class WaitsRepo : IWaitsRepo
                 var matchedIds = await _context
                     .MethodWaits
                     .Where(queryClause.Clause)
-                    .OrderByDescending(x => x.Id)
+                    .OrderBy(x => x.IsFirst)
                     .Select(x => new WaitForCall
                     {
                         WaitId = x.Id,
