@@ -11,7 +11,7 @@
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Commands.md" />
     <None Include="$(MSBuildThisFileDirectory)Documentation Plan.md" />
-    <None Include="$(MSBuildThisFileDirectory)External Reading.md" />
+    <None Include="$(MSBuildThisFileDirectory)Reading\External Reading.md" />
     <None Include="$(MSBuildThisFileDirectory)LongMethods.xlsx" />
     <None Include="$(MSBuildThisFileDirectory)Aggregate Column Idea.md" />
     <None Include="$(MSBuildThisFileDirectory)Publisher.md" />

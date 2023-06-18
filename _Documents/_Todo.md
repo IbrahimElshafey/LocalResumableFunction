@@ -1,8 +1,7 @@
 ﻿# Todo
 
 ## Core functions
-* New Scan should not delete existing method wait and groups if exist
-* Write test cases for expressions rewrite because it's critical part
+* New scan should not delete existing method wait and groups if exist
 * Delay processing wait if the scan is in progress
 * Remove direct use for DbContext
 * Same DLL in two services
@@ -10,7 +9,7 @@
 * Function priority
 	* How hangfire handle priority
 * Can I use .net standard for Handler project
-* Use pull mode to get pushed calls from a queue
+* Use pull mode to get calls from a queue
 * Replace HttpHangfire with abstraction to enable queue based communication
 
 ## Enhancements

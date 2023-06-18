@@ -1,5 +1,4 @@
 ﻿# When process pushed call received for service (Each service process it's waits)
-* When we get waits templates may be some of them are not active
 * Time wait clone if first
 * Review logs to service , why first error only
 * Optimize wait table indexes to enable fast wait insertion
