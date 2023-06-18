@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Medallion.Threading;
+using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 
@@ -7,12 +8,18 @@ namespace ResumableFunctions.Handler.DataAccess;
 internal class ScanStateRepo : IScanStateRepo
 {
     private readonly FunctionDataContext _context;
+    private readonly IDistributedLockProvider _lockProvider;
 
-    public ScanStateRepo(FunctionDataContext context)
+    public ScanStateRepo(FunctionDataContext context, IDistributedLockProvider lockProvider)
     {
         _context = context;
+        _lockProvider = lockProvider;
     }
-    public async Task<bool> IsScanFinished() => await _context.ScanStates.CountAsync() == 0;
+    public async Task<bool> IsScanFinished()
+    {
+        await using var lockScanStat = await _lockProvider.AcquireLockAsync("ScanStateLock");
+        return await _context.ScanStates.CountAsync() == 0;
+    }
 
     public async Task<int> AddScanState(string name)
     {
@@ -24,6 +31,7 @@ internal class ScanStateRepo : IScanStateRepo
 
     public async Task<bool> RemoveScanState(int id)
     {
+        await using var lockScanStat = await _lockProvider.AcquireLockAsync("ScanStateLock");
         var toRemove = _context.ScanStates.Local.FirstOrDefault(x => x.Id == id);
         if (toRemove == null)
         {
