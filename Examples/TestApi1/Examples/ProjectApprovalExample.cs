@@ -1,11 +1,10 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 
 namespace TestApi1.Examples;
 
-internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
+public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
 {
     public Project CurrentProject { get; set; }
     public bool ManagerOneApproval { get; set; }
@@ -13,17 +12,20 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     public bool ManagerThreeApproval { get; set; }
     public bool ManagerFourApproval { get; set; }
     public bool ManagerFiveApproval { get; set; }
-    public string ExternalMethodStatus { get; private set; } = "Not matched yet.";
+    public string ExternalMethodStatus { get; set; } = "Not matched yet.";
 
-    [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow")]//Point 1
+    [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow", isActive: true)]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
     {
+        //throw new NotImplementedException("Exception on get first wait.");
         yield return
          Wait<Project, bool>("Project Submitted", ProjectSubmitted)//Point 2
              .MatchIf((project, output) => output && !project.IsResubmit)//Point 3
              .SetData((project, output) => CurrentProject == project);//Point 4
-
+        this.AddLog("###After Project Submitted");
+        //throw new NotImplementedException("Exception after first wait match.");
         await AskManagerToApprove("Manager One", CurrentProject.Id);
+        //throw new Exception("Critical exception aftrer AskManagerToApprove");
         yield return
                Wait<ApprovalDecision, bool>("Manager One Approve Project", ManagerOneApproveProject)
                    .MatchIf((approvalDecision, output) => approvalDecision.ProjectId == CurrentProject.Id)
@@ -31,7 +33,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
 
         if (ManagerOneApproval is false)
         {
-            WriteMessage("Go back and ask applicant to resubmitt project.");
+            this.AddLog("Go back and ask applicant to resubmitt project.");
             await AskApplicantToResubmittProject(CurrentProject.Id);
             yield return GoBackTo<Project, bool>("Project Submitted", (project, output) => output && project.IsResubmit && project.Id == CurrentProject.Id);
         }
@@ -41,6 +43,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
             await InfromApplicantAboutApproval(CurrentProject.Id);
         }
         Success(nameof(ProjectApprovalFlow));
+
     }
 
     private Task InfromApplicantAboutApproval(int id)
@@ -166,14 +169,14 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         WriteMessage("One of two waits matched");
     }
 
-    [WaitMethod("ProjectApprovalExample.PrivateMethod")]
+    [PushCall("ProjectApprovalExample.PrivateMethod")]
     internal bool PrivateMethod(Project project)
     {
         WriteMessage("Project Submitted");
         return true;
     }
 
-    [WaitMethod("ProjectApprovalExample.ProjectSubmitted")]
+    [PushCall("ProjectApprovalExample.ProjectSubmitted")]
     internal async Task<bool> ProjectSubmitted(Project project)
     {
         //await Task.Delay(100);
@@ -181,21 +184,21 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         return true;
     }
 
-    [WaitMethod("ProjectApprovalExample.ManagerOneApproveProject")]
+    [PushCall("ProjectApprovalExample.ManagerOneApproveProject")]
     public bool ManagerOneApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager One Approve Project with decision ({args.Decision})");
         return args.Decision;
     }
 
-    [WaitMethod("ProjectApprovalExample.ManagerTwoApproveProject")]
+    [PushCall("ProjectApprovalExample.ManagerTwoApproveProject")]
     public bool ManagerTwoApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Two Approve Project with decision ({args.Decision})");
         return args.Decision;
     }
 
-    [WaitMethod("ProjectApprovalExample.ManagerThreeApproveProject")]
+    [PushCall("ProjectApprovalExample.ManagerThreeApproveProject")]
     public bool ManagerThreeApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Three Approve Project with decision ({args.Decision})");
@@ -203,7 +206,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     }
 
 
-    [WaitMethod("ProjectApprovalExample.ManagerFourApproveProject")]
+    [PushCall("ProjectApprovalExample.ManagerFourApproveProject")]
     public bool ManagerFourApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");
@@ -241,7 +244,7 @@ internal class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Console.ForegroundColor = ConsoleColor.White;
     }
 
-    [WaitMethod("IManagerFiveApproval.ManagerFiveApproveProject")]
+    [PushCall("IManagerFiveApproval.ManagerFiveApproveProject")]
     public bool ManagerFiveApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");

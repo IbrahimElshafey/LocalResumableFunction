@@ -1,6 +1,4 @@
-using Hangfire;
 using ResumableFunctions.AspNetService;
-using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.InOuts;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,8 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
-        new ResumableFunctionsSettings()
-        .UseSqlServer()
+        new SqlServerResumableFunctionsSettings()
         .SetCurrentServiceUrl("https://localhost:7099/")
         .SetDllsToScan("ReferenceLibrary"));
 
@@ -20,7 +17,7 @@ builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
-app.ScanCurrentService();
+app.RegisterCurrentService();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -36,7 +33,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-
-
-
 app.Run();
+

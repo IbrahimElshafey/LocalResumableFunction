@@ -1,6 +1,6 @@
 ﻿namespace ResumableFunctions.Handler.Attributes;
 
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Method)]
 public sealed class ResumableFunctionAttribute : Attribute, ITrackingIdetifier
 {
 

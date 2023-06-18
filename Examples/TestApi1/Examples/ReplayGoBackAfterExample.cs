@@ -1,9 +1,8 @@
-﻿using ResumableFunctions.Handler;
-using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts;
 
 namespace TestApi1.Examples;
 
-internal class ReplayGoBackAfterExample : ProjectApprovalExample
+public class ReplayGoBackAfterExample : ProjectApprovalExample
 {
     private const string ProjectSumbitted = "Project Sumbitted";
 

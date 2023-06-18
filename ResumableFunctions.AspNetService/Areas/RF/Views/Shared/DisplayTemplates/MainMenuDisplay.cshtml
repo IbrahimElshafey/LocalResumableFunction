@@ -1,0 +1,25 @@
+﻿@model MainMenuDisplay
+<div class="w3-margin-buttom">
+    <input type="hidden" id="is-menu-page" value="true" />
+    <div class="w3-bar-block w3-light-grey w3-cell " style="min-width:230px;">
+        @for (int i = 0; i < Model.Items.Length; i++)
+        {
+            var menuItem = Model.Items[i];
+            <button id="tab-link-@i" data-view-link="@(menuItem.PartialViewUrl)"
+                    class="w3-bar-item w3-button tablink w3-border-bottom w3-border-indigo"
+                    onclick="openViewPart('@i')">
+                @menuItem.DisplayName
+            </button>
+        }
+        @if (Model.BackLinkText != null)
+        {
+            <button class="w3-bar-item w3-button w3-text-indigo" onclick="location.href='@(Model.BackLink)';">
+                <b>@Model.BackLinkText</b>
+            </button>
+        }
+    </div>
+
+    <div id="main-page-content" class="w3-cell" style="width:100%">
+    </div>
+
+</div>

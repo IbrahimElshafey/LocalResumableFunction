@@ -1,0 +1,68 @@
+﻿@using ResumableFunctions.Handler.InOuts;
+@model ServiceData
+<div class="w3-margin">
+    <header class="w3-text-indigo">
+        <h2 class="w3-margin-top"><b>@Model.AssemblyName Service Details</b></h2>
+    </header>
+    <table class="w3-table" style="width:100%;">
+        <tr>
+            <td><b>Service Name:</b></td>
+            <td>@Model.AssemblyName</td>
+        </tr>
+        @if (Model.Url != null)
+        {
+            <tr>
+                <td><b>Service Url:</b></td>
+                <td>
+                    <a class="w3-text-blue" href="@Model.Url">@Model.Url</a>
+                </td>
+            </tr>
+            <tr>
+                <td><b>Hangfire Url:</b></td>
+                <td>
+                    <a class="w3-text-blue" href="@Model.Url.TrimEnd('/')/hangfire">Hangfire</a>
+                </td>
+            </tr>
+            <tr>
+                <td><b>Swagger Url:</b></td>
+                <td>
+                    <a class="w3-text-blue" href="@Model.Url.TrimEnd('/')/swagger">Swagger</a>
+                </td>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <td><b>Service Url:</b></td>
+                <td>
+                    <b class="w3-text-red">No Service URL defined</b>
+                </td>
+            </tr>
+        }
+        <tr>
+            <td><b>Other Dlls:</b></td>
+            <td>@Model.ReferencedDlls</td>
+        </tr>
+        <tr>
+            <td><b>Registration Date:</b></td>
+            <td>@Model.Created</td>
+        </tr>
+        <tr>
+            <td><b>Last Scan Date:</b></td>
+            <td>@Model.Modified</td>
+        </tr>
+     @*   <tr>
+            <td><b>Scan Errors Count:</b></td>
+            <td>@Model.ErrorCounter</td>
+        </tr>*@
+    </table>
+    @if (Model.Url != null)
+    {
+        <header class="w3-text-indigo">
+            <h2 class="w3-margin-top"><b>Actions</b></h2>
+        </header>
+        <button class="w3-button w3-indigo">Rescan Service</button>
+        <button class="w3-button w3-indigo">Verify Scanned Methods </button>
+        <button class="w3-button w3-indigo">Verify Start Waits</button>
+    }
+</div>

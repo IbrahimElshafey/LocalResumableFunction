@@ -1,14 +1,10 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using ResumableFunctions.Handler;
-using ResumableFunctions.Handler.Data;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using System;
 
 namespace ResumableFunctions.AspNetService
 {
@@ -21,23 +17,28 @@ namespace ResumableFunctions.AspNetService
                 .AddControllersAsServices();
             mvcBuilder.Services.AddRazorPages();
             mvcBuilder.Services.AddResumableFunctionsCore(settings);
+            //CreateHangfireDb(mvcBuilder, settings);
         }
-       
 
-        public static void ScanCurrentService(this WebApplication app)
+        
+        public static void RegisterCurrentService(this WebApplication app)
         {
+           
             app.UseResumableFunctions();
             app.UseHangfireDashboard();
             app.MapRazorPages();
             app.UseStaticFiles();
 
-
             app.UseRouting();
 
+            app.MapControllerRoute(
+                name: "MyArea",
+                pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
+
         }
 
         public static T ToObject<T>(this Stream stream)

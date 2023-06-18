@@ -1,0 +1,71 @@
+﻿@using ResumableFunctions.Handler.UiService.InOuts;
+@model List<MethodGroupInfo>
+<div class="w3-margin">
+    <header class="w3-text-indigo">
+        <h2 class="w3-margin-top"><b>Methods Groups</b></h2>
+    </header>
+    <div class="w3-container">
+        <div class="w3-row-padding w3-margin"
+             style="margin-left: -16px !important;margin-right: -16px !important;">
+            <div class="w3-col l5">
+                <b class="w3-text-indigo">Search</b>
+                <input class="w3-input w3-border" type="text" required="" placeholder="Search by Method URN">
+            </div>
+            <div class="w3-col l3">
+                <b class="w3-text-indigo">DLL</b>
+                <select class="w3-select" name="option">
+                    <option value="" disabled selected>Choose your option</option>
+                    <option value="1">All Services</option>
+                    <option value="2">Service 2</option>
+                    <option value="3">Service 3</option>
+                </select>
+            </div>
+            <div class="w3-col l2">
+                <span class="w3-text-light-gray">s</span>
+                <input type="button" class="w3-input w3-button w3-indigo" value="Search" />
+            </div>
+            <div class="w3-col l2">
+                <span class="w3-text-light-gray">s</span>
+                <input type="button" class="w3-input w3-button w3-indigo" value="Reset" />
+            </div>
+        </div>
+        <table class="w3-table-all">
+            <thead>
+                <tr class="w3-indigo">
+                    <th>Method Group URN</th>
+                    <th>Methods</th>
+                    <th>Active Waits</th>
+                    <th>Completed Waits</th>
+                    <th>Canceled Waits</th>
+                    <th>Registration Date</th>
+                </tr>
+            </thead>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <span> @item.URN</span>
+                        <span>
+                            <a href="~/RF/PushedCall" class="w3-text-blue">
+                                (@(item.ActiveWaits + item.CompletedWaits + item.CanceledWaits) Waits)
+                            </a>
+                        </span>
+                    </td>
+                    <td>
+                        <a href="~/rfui/MethodsInGroup" class="w3-text-blue">@item.MethodsCount</a>
+                    </td>
+                    <td>
+                        @item.ActiveWaits
+                    </td>
+                    <td>
+                        @item.CompletedWaits
+                    </td>
+                    <td>
+                        @item.CanceledWaits
+                    </td>
+                    <td>@item.Created</td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

@@ -1,43 +1,37 @@
-﻿using System.Diagnostics;
-using System.Linq.Expressions;
-using System.Reflection.Metadata;
-using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.InOuts;
+﻿using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using System.Reflection.Emit;
-using System.Text.Json;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ResumableFunctions.Handler.InOuts;
 
-namespace ResumableFunctions.Handler.Data;
-
+namespace ResumableFunctions.Handler.DataAccess;
 public class FunctionDataContext : DbContext
 {
-    internal readonly MethodIdentifierRepository methodIdentifierRepo;
-    internal readonly WaitsRepository waitsRepository;
+    private readonly ILogger<FunctionDataContext> _logger;
+    private readonly IResumableFunctionsSettings _settings;
 
     public FunctionDataContext(
-        IServiceProvider serviceProvider, IResumableFunctionsSettings settings) : base(settings.WaitsDbConfig.Options)
+        ILogger<FunctionDataContext> logger,
+        IResumableFunctionsSettings settings,
+        IDistributedLockProvider lockProvider) : base(settings.WaitsDbConfig.Options)
     {
+        _logger = logger;
+        _settings = settings;
         try
         {
+            var database = Database.GetDbConnection().Database;
+            settings.CurrentDbName = database;
+            using (var loc = lockProvider.AcquireLock(database))
             Database.EnsureCreated();
-            methodIdentifierRepo = serviceProvider.GetService<MethodIdentifierRepository>();
-            waitsRepository = serviceProvider.GetService<WaitsRepository>();
-            methodIdentifierRepo._context = this;
-            waitsRepository._context = this;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            //Task.Delay(TimeSpan.FromMinutes(3)).Wait();
-            Database.EnsureCreated();
+            _logger.LogError(ex, "Error when call `Database.EnsureCreated()` for `FunctionDataContext`");
         }
     }
 
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
-    public DbSet<FunctionStateLogRecord> FunctionStateLogs { get; set; }
 
     public DbSet<MethodIdentifier> MethodIdentifiers { get; set; }
     public DbSet<WaitMethodIdentifier> WaitMethodIdentifiers { get; set; }
@@ -45,30 +39,36 @@ public class FunctionDataContext : DbContext
 
     public DbSet<Wait> Waits { get; set; }
     public DbSet<MethodWait> MethodWaits { get; set; }
+    public DbSet<WaitTemplate> WaitTemplates { get; set; }
     public DbSet<MethodsGroup> MethodsGroups { get; set; }
     public DbSet<FunctionWait> FunctionWaits { get; set; }
 
     public DbSet<PushedCall> PushedCalls { get; set; }
+    public DbSet<WaitForCall> WaitsForCalls { get; set; }
+
+
     public DbSet<ServiceData> ServicesData { get; set; }
 
+    public DbSet<LogRecord> Logs { get; set; }
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ConfigureResumableFunctionState(modelBuilder.Entity<ResumableFunctionState>());
         ConfigureMethodIdentifier(modelBuilder);
-        ConfigurePushedCalls(modelBuilder.Entity<PushedCall>());
+        ConfigurePushedCalls(modelBuilder);
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
         ConfigureWaits(modelBuilder);
+        ConfigureMethodWaitTemplate(modelBuilder);
         ConfigurConcurrencyToken(modelBuilder);
         ConfigurSoftDeleteFilter(modelBuilder);
-
         base.OnModelCreating(modelBuilder);
     }
 
+
+
     private void ConfigurSoftDeleteFilter(ModelBuilder modelBuilder)
     {
-        //todo:https://haacked.com/archive/2019/07/29/query-filter-by-interface/
         modelBuilder.Entity<Wait>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<ResumableFunctionState>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<PushedCall>().HasQueryFilter(p => !p.IsDeleted);
@@ -92,44 +92,47 @@ public class FunctionDataContext : DbContext
     {
         //entityTypeBuilder.Property(x => x.Modified).HasDefaultValue(DateTime.MinValue);
         entityTypeBuilder.HasIndex(x => x.AssemblyName);
+
+        //entityTypeBuilder
+        //    .HasMany(x => x.Waits)
+        //    .WithOne(wait => wait.Service)
+        //    .HasForeignKey(x => x.ServiceId)
+        //    .HasConstraintName("FK_Waits_For_Service");
     }
 
-    private void ConfigurePushedCalls(EntityTypeBuilder<PushedCall> entityTypeBuilder)
+    private void ConfigurePushedCalls(ModelBuilder modelBuilder)
     {
-        entityTypeBuilder
-          .Property(x => x.Input)
-          .HasConversion<ObjectToJsonConverter>();
+        var pushedCallBuilder = modelBuilder.Entity<PushedCall>();
 
-        entityTypeBuilder
-            .Property(x => x.Output)
-            .HasConversion<ObjectToJsonConverter>();
+        pushedCallBuilder
+           .HasMany(x => x.WaitsForCall)
+           .WithOne(waitForCall => waitForCall.PushedCall)
+           .HasForeignKey(waitForCall => waitForCall.PushedCallId)
+           .HasConstraintName("FK_Waits_For_Call");
 
-        entityTypeBuilder
-           .Property(x => x.MethodData)
-           .HasConversion(
-            v => JsonConvert.SerializeObject(v),
-            v => JsonConvert.DeserializeObject<MethodData>(v));
+        var waitForCallBuilder = modelBuilder.Entity<WaitForCall>();
+        waitForCallBuilder.HasIndex(x => x.ServiceId, "WaitForCall_ServiceId_Idx");
+        waitForCallBuilder.HasIndex(x => x.FunctionId, "WaitForCall_FunctionId_Idx");
     }
 
     private void ConfigureWaits(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Wait>()
+        EntityTypeBuilder<Wait> waitBuilder = modelBuilder.Entity<Wait>();
+        waitBuilder
             .HasMany(x => x.ChildWaits)
             .WithOne(wait => wait.ParentWait)
             .HasForeignKey(x => x.ParentWaitId)
             .HasConstraintName("FK_ChildWaits_For_Wait");
 
-        modelBuilder.Entity<Wait>()
-            .Property(x => x.ExtraData)
-            .HasConversion<ObjectToJsonConverter>();
+        waitBuilder
+            .HasIndex(x => x.Status)
+            .HasFilter($"{nameof(Wait.Status)} = {(int)WaitStatus.Waiting}")
+            .HasDatabaseName("Index_ActiveWaits");
 
-        modelBuilder.Entity<MethodWait>()
-          .Property(mw => mw.MatchIfExpressionValue)
-          .HasColumnName(nameof(MethodWait.MatchIfExpressionValue));
-
-        modelBuilder.Entity<MethodWait>()
-            .Property(mw => mw.SetDataExpressionValue)
-            .HasColumnName(nameof(MethodWait.SetDataExpressionValue));
+        var methodWaitBuilder = modelBuilder.Entity<MethodWait>();
+        methodWaitBuilder
+          .Property(x => x.MethodToWaitId)
+          .HasColumnName(nameof(MethodWait.MethodToWaitId));
 
         modelBuilder.Entity<WaitsGroup>()
            .Property(mw => mw.GroupMatchExpressionValue)
@@ -137,6 +140,20 @@ public class FunctionDataContext : DbContext
 
         modelBuilder.Ignore<ReplayRequest>();
         modelBuilder.Ignore<TimeWait>();
+    }
+
+    private void ConfigureMethodWaitTemplate(ModelBuilder modelBuilder)
+    {
+        var entityBuilder = modelBuilder.Entity<WaitTemplate>();
+        entityBuilder.Property(x => x.MatchExpressionValue);
+        entityBuilder.Property(x => x.CallMandatoryPartExpressionValue);
+        entityBuilder.Property(x => x.InstanceMandatoryPartExpressionValue);
+        entityBuilder.Property(x => x.SetDataExpressionValue);
+        modelBuilder.Entity<MethodsGroup>()
+            .HasMany(x => x.WaitTemplates)
+            .WithOne(x => x.MethodGroup)
+            .HasForeignKey(x => x.MethodGroupId)
+            .HasConstraintName("WaitTemplates_ForMethodGroup");
     }
 
     private void ConfigureMethodIdentifier(ModelBuilder modelBuilder)
@@ -163,22 +180,23 @@ public class FunctionDataContext : DbContext
 
         modelBuilder.Entity<MethodsGroup>()
           .HasMany(x => x.WaitMethodIdentifiers)
-          .WithOne(waitMid => waitMid.ParentMethodGroup)
+          .WithOne(waitMid => waitMid.MethodGroup)
           .OnDelete(DeleteBehavior.Restrict)
-          .HasForeignKey(x => x.ParentMethodGroupId)
+          .HasForeignKey(x => x.MethodGroupId)
           .HasConstraintName("FK_Group_WaitMethodIdentifiers");
 
-        modelBuilder.Entity<WaitMethodIdentifier>()
-        .HasMany(x => x.WaitsRequestsForMethod)
-        .WithOne(mw => mw.MethodToWait)
-        .OnDelete(DeleteBehavior.Restrict)
-        .HasForeignKey(x => x.MethodToWaitId)
-        .HasConstraintName("FK_WaitsRequestsForMethod");
+
+        //modelBuilder.Entity<WaitMethodIdentifier>()
+        //.HasMany(x => x.WaitsRequestsForMethod)
+        //.WithOne(mw => mw.MethodToWait)
+        //.OnDelete(DeleteBehavior.Restrict)
+        //.HasForeignKey(x => x.MethodToWaitId)
+        //.HasConstraintName("FK_WaitsRequestsForMethod");
 
         modelBuilder.Entity<MethodsGroup>()
            .HasIndex(x => x.MethodGroupUrn)
             .HasDatabaseName("Index_MethodGroupUniqueUrn")
-            .IsUnique(true);
+            .IsUnique();
     }
 
     private void ConfigureResumableFunctionState(EntityTypeBuilder<ResumableFunctionState> entityTypeBuilder)
@@ -187,101 +205,163 @@ public class FunctionDataContext : DbContext
             .HasMany(x => x.Waits)
             .WithOne(wait => wait.FunctionState)
             .HasForeignKey(x => x.FunctionStateId)
-            .HasConstraintName("FK_Waits_For_FunctionState");
-
-        entityTypeBuilder
-            .HasMany(x => x.LogRecords)
-            .WithOne(wait => wait.FunctionState)
-            .HasForeignKey(x => x.FunctionStateId)
-            .HasConstraintName("FK_Logs_For_FunctionState");
-
-        entityTypeBuilder
-           .Property(x => x.StateObject)
-           .HasConversion<ObjectToJsonConverter>();
+            .HasConstraintName("FK_WaitsForFunctionState");
     }
 
-    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-    {
-        //configurationBuilder
-        //    .Properties<Expression>()
-        //    .HaveConversion<ExpressionToJsonConverter>();
-        //configurationBuilder
-        //    .Properties<LambdaExpression>()
-        //    .HaveConversion<LambdaExpressionToJsonConverter>();
-        configurationBuilder
-            .Properties<Type>()
-            .HaveConversion<TypeToStringConverter>();
-    }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
-        SetDates();
-        NeverUpdateFirstWait();
-        HandleSoftDelete();
-        ExcludeFalseAddEntries();
-        return base.SaveChangesAsync(cancellationToken);
-    }
-
-    private void NeverUpdateFirstWait()
-    {
-        foreach (var entityEntry in ChangeTracker.Entries())
+        try
         {
-            if (
-                entityEntry.State == EntityState.Modified &&
-                entityEntry.Entity is Wait wait &&
-                wait.IsFirst &&
-                wait.IsDeleted == false)
-            {
-                entityEntry.State = EntityState.Unchanged;
-                Entry(wait.FunctionState).State = EntityState.Unchanged;
-            }
+            BeforeSaveData();
+            var result = await base.SaveChangesAsync(cancellationToken);
+            await SetWaitsPaths(cancellationToken);
+            await SaveEntitiesLogs(cancellationToken);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error when save changes.");
+            throw;
+        }
+
+    }
+
+    private void BeforeSaveData()
+    {
+        var entries = ChangeTracker.Entries().ToList();
+        foreach (var entry in entries)
+        {
+            SetDates(entry);
+            SetServiceId(entry);
+            NeverUpdateFirstWait(entry);
+            HandleSoftDelete(entry);
+            ExcludeFalseAddEntries(entry);
+            OnSaveEntity(entry);
         }
     }
 
-    private void HandleSoftDelete()
+    private void OnSaveEntity(EntityEntry entry)
     {
-        foreach (var entityEntry in ChangeTracker.Entries())
-        {
-            switch (entityEntry.State)
-            {
-                case EntityState.Deleted when entityEntry.Entity is IEntityWithDelete:
-                    entityEntry.Property(nameof(IEntityWithDelete.IsDeleted)).CurrentValue = true;
-                    entityEntry.State = EntityState.Modified;
-                    break;
-            }
-        }
+        if (entry.Entity is IOnSaveEntity saveEntity)
+            if (entry.State == EntityState.Modified || entry.State == EntityState.Added)
+                saveEntity.OnSave();
+
     }
 
-    private void SetDates()
+    private void SetServiceId(EntityEntry entry)
     {
-        foreach (var entityEntry in ChangeTracker.Entries())
-        {
-            switch (entityEntry.State)
-            {
-                case EntityState.Modified when entityEntry.Entity is IEntityWithUpdate:
-                    entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.Now;
-                    entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
-                    break;
-                case EntityState.Added when entityEntry.Entity is IEntityWithUpdate:
-                    entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
-                    entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
-                    break;
-                case EntityState.Added when entityEntry.Entity is IEntity:
-                    entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
-                    break;
-            }
-        }
+        if (entry.Entity is IEntity entityInService)
+            Entry(entityInService).Property(x => x.ServiceId).CurrentValue = _settings.CurrentServiceId;
     }
 
-    private void ExcludeFalseAddEntries()
+    private async Task SetWaitsPaths(CancellationToken cancellationToken)
     {
-        var falseAddEntries =
-                    ChangeTracker
-                    .Entries()
-                    .Where(x => x.State == EntityState.Added && x.IsKeySet)
+        try
+        {
+            var waits =
+                ChangeTracker
+                .Entries()
+                    .Where(x => x.Entity is Wait)
+                    .Select(x => (Wait)x.Entity)
                     .ToList();
+            foreach (var wait in waits)
+            {
+                wait.Path = GetWaitPath(wait);
+            }
+            await base.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error when set waits paths.");
+        }
 
-        falseAddEntries
-            .ForEach(x => x.State = EntityState.Unchanged);
+        string GetWaitPath(Wait wait)
+        {
+            var path = $"/{wait.Id}";
+            while (wait?.ParentWait != null)
+            {
+                path = $"/{wait.ParentWaitId}" + path;
+                wait = wait.ParentWait;
+            }
+            return path;
+        }
+    }
+
+    private async Task SaveEntitiesLogs(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var entitiesWithLog =
+                ChangeTracker
+                .Entries()
+                    .Where(x => x.Entity is IObjectWithLog entityWithLog && entityWithLog.Logs.Any())
+                    .Select(x => (IObjectWithLog)x.Entity)
+                    .ToList();
+            foreach (var entity in entitiesWithLog)
+            {
+                entity.Logs.ForEach(logRecord =>
+                {
+                    if (logRecord.EntityId <= 0 || logRecord.EntityId == null)
+                        logRecord.EntityId = ((IEntity)entity).Id;
+                    logRecord.ServiceId = _settings.CurrentServiceId;
+                });
+                Logs.AddRange(entity.Logs.Where(x => x.Id == 0));
+            }
+            await base.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error when save entity logs.");
+        }
+    }
+
+    private void NeverUpdateFirstWait(EntityEntry entityEntry)
+    {
+        if (entityEntry.Entity is Wait wait &&
+                 wait.IsFirst &&
+                 wait.IsNode &&
+                 wait.IsDeleted == false)
+        {
+            if (entityEntry.State == EntityState.Modified)
+                entityEntry.State = EntityState.Unchanged;
+            if (Entry(wait.FunctionState).State == EntityState.Modified)
+                Entry(wait.FunctionState).State = EntityState.Unchanged;
+        }
+    }
+
+    private void HandleSoftDelete(EntityEntry entityEntry)
+    {
+        switch (entityEntry.State)
+        {
+            case EntityState.Deleted when entityEntry.Entity is IEntityWithDelete:
+                entityEntry.Property(nameof(IEntityWithDelete.IsDeleted)).CurrentValue = true;
+                entityEntry.State = EntityState.Modified;
+                break;
+        }
+    }
+
+    private void SetDates(EntityEntry entityEntry)
+    {
+        switch (entityEntry.State)
+        {
+            case EntityState.Modified when entityEntry.Entity is IEntityWithUpdate:
+                entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.Now;
+                entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
+                break;
+            case EntityState.Added when entityEntry.Entity is IEntityWithUpdate:
+                entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
+                entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
+                break;
+            case EntityState.Added when entityEntry.Entity is IEntity:
+                entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
+                break;
+        }
+    }
+
+    private void ExcludeFalseAddEntries(EntityEntry entry)
+    {
+        if (entry.State == EntityState.Added && entry.IsKeySet)
+            entry.State = EntityState.Unchanged;
     }
 }

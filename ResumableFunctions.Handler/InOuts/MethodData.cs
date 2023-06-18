@@ -1,15 +1,8 @@
-﻿using ResumableFunctions.Handler.Attributes;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Metadata;
+﻿using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
+using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts
@@ -26,7 +19,8 @@ namespace ResumableFunctions.Handler.InOuts
             string methodSignature,
             byte[] methodHash,
             string methodUrn,
-            bool canPublishFromExternal)
+            bool canPublishFromExternal,
+            bool isActive)
         {
             AssemblyName = assemblyName;
             ClassName = className;
@@ -35,6 +29,7 @@ namespace ResumableFunctions.Handler.InOuts
             MethodHash = methodHash;
             MethodUrn = methodUrn;
             CanPublishFromExternal = canPublishFromExternal;
+            IsActive = isActive;
         }
         public MethodData()
         {
@@ -57,8 +52,8 @@ namespace ResumableFunctions.Handler.InOuts
             var wma = methodInfo
               .GetCustomAttributes()
               .FirstOrDefault(
-              attribute => attribute.TypeId == WaitMethodAttribute.AttributeId
-              ) as WaitMethodAttribute;
+              attribute => attribute.TypeId == PushCallAttribute.AttributeId
+              ) as PushCallAttribute;
 
             return wma?.CanPublishFromExternal ?? false;
         }
@@ -77,7 +72,7 @@ namespace ResumableFunctions.Handler.InOuts
                 attribute =>
                     attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId ||
                     attribute.TypeId == ResumableFunctionAttribute.AttributeId ||
-                    attribute.TypeId == WaitMethodAttribute.AttributeId
+                    attribute.TypeId == PushCallAttribute.AttributeId
                 );
 
             return (trackId as ITrackingIdetifier)?.MethodUrn;
@@ -97,6 +92,7 @@ namespace ResumableFunctions.Handler.InOuts
         public int MethodIdentifierId { get; internal set; }
         public MethodType MethodType { get; internal set; }
         public bool CanPublishFromExternal { get; internal set; }
+        public bool IsActive { get; internal set; } = true;
 
         internal static string CalcSignature(MethodBase value)
         {
@@ -133,7 +129,7 @@ namespace ResumableFunctions.Handler.InOuts
 
         public override string ToString()
         {
-            return $"{AssemblyName} # {ClassName}.{MethodName} # {MethodSignature}";
+            return $"[{AssemblyName} # {ClassName}.{MethodName} # {MethodSignature}] with type {MethodType}";
         }
 
         internal bool Validate()

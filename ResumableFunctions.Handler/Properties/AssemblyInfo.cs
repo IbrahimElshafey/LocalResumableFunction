@@ -16,6 +16,6 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM.
 
 [assembly: Guid("6d8d5159-e480-4f1c-ab61-e5e72f60b13e")]
-[assembly: InternalsVisibleTo("ResumableFunctionScanner")]
-[assembly: InternalsVisibleTo("Test")]
+[assembly: InternalsVisibleTo("TestSomething")]
 [assembly: InternalsVisibleTo("ResumableFunctions.AspNetService")]
+[assembly: InternalsVisibleTo("ResumableFunctions.TestShell")]

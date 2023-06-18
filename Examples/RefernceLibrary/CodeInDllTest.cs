@@ -18,21 +18,27 @@ namespace ReferenceLibrary
                 //.NoSetData()
                 ;
             yield return Wait<string, string>
-                ("Wait say hello duplicate", SayHello)
-                .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
-                .SetData((userName, helloMsg) => UserName == userName)
-                //.NoSetData()
-                ;
+               ("Wait say goodby", SayGoodby)
+               .MatchIf((userName, helloMsg) => userName == UserName)
+               .SetData((userName, helloMsg) => UserName == userName)
+               //.NoSetData()
+               ;
+            //yield return Wait<string, string>
+            //    ("Wait say hello duplicate", SayHello)
+            //    .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
+            //    .SetData((userName, helloMsg) => UserName == userName)
+            //    //.NoSetData()
+            //    ;
             Console.WriteLine("Done");
         }
 
-        [WaitMethod("CodeInDllTest.SayHello")]
+        [PushCall("CodeInDllTest.SayHello")]
         public string SayHello(string userName)
         {
             return $"Hello, {userName}.";
         }
 
-        [WaitMethod("CodeInDllTest.SayGoodby")]
+        [PushCall("CodeInDllTest.SayGoodby")]
         public string SayGoodby(string userName)
         {
             return $"Goodby, {userName}.";

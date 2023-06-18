@@ -1,3 +1,5 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
-internal record WaitId(int Id, string RequestedByAssembly);
+public record WaitId(int Id,int FunctionId,int StateId)
+{
+}

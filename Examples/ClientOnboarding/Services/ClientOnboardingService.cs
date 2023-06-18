@@ -5,12 +5,8 @@ namespace ClientOnboarding.Services
 {
     internal class ClientOnboardingService : IClientOnboardingService
     {
-        public ClientOnboardingService()
-        {
 
-        }
-
-        [WaitMethod("ClientOnboardingService.ClientFillsForm")]
+        [PushCall("ClientOnboardingService.ClientFillsForm")]
         public RegistrationResult ClientFillsForm(RegistrationForm registrationForm)
         {
             return new RegistrationResult
@@ -19,12 +15,12 @@ namespace ClientOnboarding.Services
             };
         }
 
-        public TaskId AskOwnerToApproveClient(int registrationFormId)
+        public virtual TaskId AskOwnerToApproveClient(int registrationFormId)
         {
             return new TaskId { Id = registrationFormId };
         }
 
-        [WaitMethod("ClientOnboardingService.OwnerApproveClient")]
+        [PushCall("ClientOnboardingService.OwnerApproveClient")]
         public OwnerApproveClientResult OwnerApproveClient(OwnerApproveClientInput ownerApproveClientInput)
         {
             return new OwnerApproveClientResult
@@ -53,7 +49,7 @@ namespace ClientOnboarding.Services
             };
         }
 
-        [WaitMethod("ClientOnboardingService.SendMeetingResult")]
+        [PushCall("ClientOnboardingService.SendMeetingResult")]
         public MeetingResult SendMeetingResult(int meetingId)
         {
             var id = Random.Shared.Next();

@@ -1,9 +1,8 @@
-﻿using ResumableFunctions.Handler;
-using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts;
 
 namespace TestApi1.Examples;
 
-internal class TestLoopsExample : ProjectApprovalExample
+public class TestLoopsExample : ProjectApprovalExample
 {
     public int Counter { get; set; }
     public async IAsyncEnumerable<Wait> WaitManagerOneThreeTimeApprovals()

@@ -1,114 +1,54 @@
 ﻿# Todo
 
+## Core functions
+* Delay processing wait if the scan is in progress
+* New scan should not delete existing method wait and groups if exist
+* Remove direct use for DbContext
+* Same DLL in two services
+* Review all places where database update occurs
+* Function priority
+	* How hangfire handle priority
+* Can I use .net standard for Handler project
+* Use pull mode to get calls from a queue
+* Replace HttpHangfire with abstraction to enable queue based communication
+* Review todos
 
-
-## Prepare how to use?
-* Implement workflows in 
-	* https://tallyfy.com/workflow-examples/
-	* https://clickup.com/blog/workflow-examples/
-* Inter services waits documentation
-* Record videos
-* Enhance nuget package use
-	*  Add FodyWeavers.xml automatic
-	*  Why fody not work directlly
-
-
-## UI project
-* Add UI Project (Use MVC not pages)
-	* Servcies Registred
-		* Verify scanned methods 
-		* Find methods not in code
-		* verify method signatures
-		* verify start waits exist in db
-		* Push External Mehtod Call
-	* Monitor active resumable functions
-		* It's props 
-			* Status
-			* Name (Full Name)
-			* CurrentStateObject
-			* Created
-			* LastUpdated
-		* Waits tree
-			* Wait Name
-			* Status
-			* Is Replay
-			* Extra Data
-			* Wait Type
-			* Created
-			* If match --> Pushed method input & output
-			* Expressions if method wait
-			* Need Load Function Data for match
-			* Wait method
-			* Count Expression if group
-			* Actions on Method Wait ()
-			* Actions on Group Wait ()
-			* Actions on Function Wait ()
-		* Logs list from function state logs
-
-
-
-## Scan Enhancements
-* Validate URN duplication when scan if diffrent method signature
-* Detect deleted methods
-* Wait methods in same method group must have the same signature
-* Verify that fody MethodBoundaryAspect is active
-* Logging for scan sessions
-
-## Refactoring and rewrite code
-* UOW to support no-sql implementation
-* Refactor ResumableFunctionHandler to be multiple classes
-	* RegisterFirstWait
-	* CloneFirstWait
-	* ProcessPushedCall
-	* ProcessMatchedWait
-* what are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
-
-
-## Publisher Project
-* Scan and send scan result to service owner to verify signatures
-* Use PeriodicTimer to handle background tasks
-	* Send failed requests to servies
-	* Scan Dlls
-* Use LiteDb to save scan Data and requests
-
-## Background Cleaning Job
-* Move completed/cancled function instance to Recycle Bin
-	* It's logs
-	* Waits
-* Move completed pushed methods
-* Move inactive methods identifier
-* Move old logs for scan sessions
-* Move soft deleted rows to recyle bin DB
-
-## Migrate Resumable Function DB
-* How to migrate resumable function database from development to production??
-* What about HangfireDb
-
-
-## How to Test resumable function?
-* How to unit test a resumable functions
-	* Generate unit test code for resumable function
-		
+## Todos in code
+* Handle clone time wait FirstWaitProcessor.cs	42
+* review `LogErrorToService` method	FirstWaitProcessor.cs	118
+* Review `CancelFunctionWaits` is suffecient	ReplayWaitProcessor.cs	42
+* Recalc mandatory part	ReplayWaitProcessor.cs	89
+* May cause problem for go back after	WaitProcessor.cs	236
+* Validate same signature for group methods	MethodIdsRepo.cs	74
+* `RemoveFirstWaitIfExist` fix this for group	WaitsRepo.cs	190
+* Handle sub functions waits when cancel WaitsRepo.cs	276
+* Enhance `GenericVisitor` class by override it's methods 	GenericVisitor.cs	7
+* Validate input output type is serializable	MethodWait.cs	88
+* Review concurrency exceptions for `WaitForCall` when update	WaitForCall.cs	3
+* Should I create new scope when initialize function instance??	ResumableFunction-Wait Functions.cs	46
+* Refine `GetMethodsInfo` query	ResumableFunctions.Handler	UiService.cs	161
 
 ## Enhancements
-* Save function state all fields [public and non public]
-* Find fast and best object serializer
+* Refactor long methods
 * Parameter check lib use
-* Speed Analysis	
-	* https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/event-counters?tabs=windows
+* Performance Analysis
+* Store options
+	* Use Queue Service to Handle Pushed Calls
+		* Kafka,RbbittMQ or ActiveMQ
+	* Use Queue Service that support queries for fast wait insertion
+* What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 
-
-# External Waits (Will be seprate projects)
-* Monitor network requests using reverse proxy and push MethodCalls [TCP Listener]
-* WebHook for the service [Publisher Project Done]
-* RabbitMQ or any service bus [Subscribe to event]
-* File/Folder Changes [File Watcher]
-
-
-## Less Priority
+* Encryption option sensitive data
+	* Function state
+	* Match and SetData Expressions
 * Resumable function hooks
-	* Before initiating the first wait => write your cod in function
-	* After initiate first wait => write your cod in function
 	* After Resumed
-	* After Completed => write your cod in function end
-	* On Error Occurred => write your cod in function catch block
+	* On Error Occurred
+
+
+
+# External Waits (Will be separate projects)
+* Monitor network requests using reverse proxy and push MethodCalls [TCP Listener]
+	* https://github.com/microsoft/reverse-proxy
+* File/Folder Changes [File Watcher]
+* RabbitMQ or any service bus [Subscribe to event]

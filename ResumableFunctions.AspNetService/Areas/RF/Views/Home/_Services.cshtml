@@ -1,0 +1,74 @@
+﻿@*Services*@
+@model ServicesListModel
+<div class="w3-margin">
+    <header class="w3-text-indigo">
+        <h2 class="w3-margin-top"><b>Services List</b></h2>
+    </header>
+    <div class="w3-container">
+        <table class="w3-table-all">
+            <thead>
+                <tr class="w3-indigo">
+                    <th>Service Name</th>
+                    <th>Swagger</th>
+                    <th>Hangfire</th>
+                    <th>Logs</th>
+                    <th>Resumable</th>
+                    <th>Methods</th>
+                    <th>DLLs</th>
+                    <th>Registration</th>
+                    <th>Last Scan</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            @for (int i = 0; i < Model.Services.Count; i++)
+            {
+                var service = Model.Services[i];
+                var swaggerUrl = service.Url?.TrimEnd('/') + (service.Url == null ? "" : "/swagger");
+                var hangfireUrl = service.Url?.TrimEnd('/') + (service.Url == null ? "" : "/hangfire");
+                <tr>
+                    <td><a href="./RF/ServiceDetails?serviceId=@(service.Id)" class="w3-text-blue">@service.Name</a></td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(swaggerUrl))
+                        {
+                            <a href="@swaggerUrl" class="w3-text-blue">Swagger</a>
+                        }
+                    </td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(hangfireUrl))
+                        {
+                            <a href="@hangfireUrl" class="w3-text-blue">Hangfire</a>
+                        }
+                    </td>
+                    <td>
+                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=1" class="w3-text-@(service.LogErrors == 0 ? "green" :"red")">
+                            @(service.LogErrors == 0 ? "No Errors" : $"{service.LogErrors} Error")
+                        </a>
+                    </td>
+                    <td>
+                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=2" class="w3-text-blue">@service.FunctionsCount</a>
+                    </td>
+                    <td>
+                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=3" class="w3-text-blue">@service.MethodsCount</a>
+                    </td>
+                   
+                    <td>
+                        @(service.Dlls?.Aggregate((x, y) => $"{x}, {y}"))
+                    </td>
+                    <td>
+                        @service.Registration
+                    </td>
+                    <td>
+                        @service.LastScan
+                    </td>
+                    <td>
+                        <div class="w3-row">
+                            <button class="w3-button w3-tiny w3-indigo">Re-Scan</button>
+                            <button class="w3-button w3-tiny w3-indigo">Verify Methods</button>
+                            <button class="w3-button w3-tiny w3-indigo">Verify Start Waits</button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>

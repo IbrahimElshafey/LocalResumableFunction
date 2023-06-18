@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using ResumableFunctions.Handler.InOuts;
-using Newtonsoft.Json;
 
 namespace ResumableFunctions.Handler;
 

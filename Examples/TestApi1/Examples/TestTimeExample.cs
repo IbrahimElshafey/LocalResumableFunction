@@ -3,7 +3,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace TestApi1.Examples;
 
-internal class TestTimeExample : ProjectApprovalExample
+public class TestTimeExample : ProjectApprovalExample
 {
     [ResumableFunctionEntryPoint("TestTimeExample.TimeWaitTest")]
     public async IAsyncEnumerable<Wait> TimeWaitTest()

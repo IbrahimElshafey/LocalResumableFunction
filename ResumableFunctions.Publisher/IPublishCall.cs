@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ResumableFunctions.Publisher
+﻿namespace ResumableFunctions.Publisher
 {
     public interface IPublishCall
     {
@@ -13,7 +6,8 @@ namespace ResumableFunctions.Publisher
             Func<TInput, Task<TOutput>> methodToPush,
             TInput input,
             TOutput output,
-            string methodIdetifier);
+            string methodIdetifier,
+            string serviceName);
         Task Publish(MethodCall MethodCall);
     }
 }

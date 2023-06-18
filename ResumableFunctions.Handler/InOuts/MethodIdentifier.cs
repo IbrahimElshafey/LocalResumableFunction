@@ -1,7 +1,4 @@
 ﻿using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
@@ -11,14 +8,13 @@ public abstract class MethodIdentifier : IEntityWithUpdate
     private MethodInfo _methodInfo;
 
     public int Id { get; internal set; }
-
     public string AssemblyName { get; internal set; }
+    public DateTime Created { get; internal set; }
     public string ClassName { get; internal set; }
     public string MethodName { get; internal set; }
     public string MethodSignature { get; internal set; }
     public byte[] MethodHash { get; internal set; }
-    public MethodType Type { get; set; }
-    public bool CanPublishFromExternal { get; set; }
+    public MethodType Type { get; internal set; }
     internal MethodInfo MethodInfo
     {
         get
@@ -28,10 +24,10 @@ public abstract class MethodIdentifier : IEntityWithUpdate
             return _methodInfo;
         }
     }
+    public int? ServiceId { get; set; }
 
     public DateTime Modified { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
-    public DateTime Created { get; internal set; }
 
     public override string ToString()
     {
@@ -47,7 +43,6 @@ public abstract class MethodIdentifier : IEntityWithUpdate
         MethodName = methodData.MethodName;
         MethodSignature = methodData.MethodSignature;
         MethodHash = methodData.MethodHash;
-        CanPublishFromExternal = methodData.CanPublishFromExternal;
     }
 }
 

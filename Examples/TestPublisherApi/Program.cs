@@ -1,5 +1,7 @@
 using ResumableFunctions.Publisher;
 
+namespace TestPublisherApi;
+
 internal class Program
 {
     private static void Main(string[] args)

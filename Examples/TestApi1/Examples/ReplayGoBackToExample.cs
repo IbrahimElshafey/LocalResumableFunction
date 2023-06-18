@@ -2,7 +2,7 @@
 
 namespace TestApi1.Examples;
 
-internal class ReplayGoBackToExample : ProjectApprovalExample
+public class ReplayGoBackToExample : ProjectApprovalExample
 {
     private const string ProjectSumbitted = "Project Sumbitted";
 

@@ -1,18 +1,14 @@
-﻿using Hangfire;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
+using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.Helpers
 {
-    public class HangFireHttpClient
+    public class HangfireHttpClient
     {
-        private readonly IBackgroundJobClient backgroundJobClient;
+        private readonly IBackgroundProcess backgroundJobClient;
         private readonly HttpClient client;
 
-        public HangFireHttpClient(IBackgroundJobClient backgroundJobClient, HttpClient client)
+        public HangfireHttpClient(IBackgroundProcess backgroundJobClient, HttpClient client)
         {
             this.backgroundJobClient = backgroundJobClient;
             this.client = client;
@@ -30,7 +26,7 @@ namespace ResumableFunctions.Handler.Helpers
             
         }
 
-        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public async Task HttpGet(string url)
         {
             var resposne = await client.GetAsync(url);

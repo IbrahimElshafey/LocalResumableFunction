@@ -1,23 +1,16 @@
-﻿using Hangfire;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.Internal;
-using Newtonsoft.Json.Linq;
-using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.Data;
-using ResumableFunctions.Handler.InOuts;
-using System.Diagnostics;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Text;
+using Hangfire;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using ResumableFunctions.Handler.Core;
+using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.Helpers.Expressions;
+using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.UiService;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
@@ -27,31 +20,62 @@ public static class CoreExtensions
     //internal static IServiceProvider GetServiceProvider() => _ServiceProvider;
     public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
     {
-        services.AddDbContext<FunctionDataContext>(x => x = settings.WaitsDbConfig, ServiceLifetime.Transient);
-        services.AddTransient<ResumableFunctionHandler>();
-        services.AddTransient<Scanner>();
-        services.AddTransient<MethodIdentifierRepository>();
-        services.AddTransient<WaitsRepository>();
+
+
+        // ReSharper disable once RedundantAssignment
+        services.AddDbContext<FunctionDataContext>(optionsBuilder => optionsBuilder = settings.WaitsDbConfig);
+        services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
+        services.AddScoped<IWaitsRepo, WaitsRepo>();
+        services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
+
+        services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
+        services.AddScoped<IRecycleBinService, RecycleBinService>();
+        services.AddScoped<IReplayWaitProcessor, ReplayWaitProcessor>();
+        services.AddScoped<IWaitProcessor, WaitProcessor>();
+        services.AddScoped<ICallProcessor, CallProcessor>();
+        services.AddScoped<ICallPusher, CallPusher>();
+        services.AddScoped<Scanner>();
+
+
+
+
+        services.AddSingleton<BinaryToObjectConverterAbstract, BinaryToObjectConverter>();
+        //services.AddSingleton<IBinaryToObjectConverter,MessagePackBinaryToObjectConverter>();
+        services.AddSingleton<BackgroundJobExecutor>();
         services.AddSingleton<HttpClient>();
-        services.AddSingleton<HangFireHttpClient>();
+        services.AddSingleton<HangfireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
-        if (settings.HangFireConfig != null)
+        services.AddSingleton(settings.DistributedLockProvider);
+
+
+        services.AddScoped<IUiService, UiService.UiService>();
+        if (settings.HangfireConfig != null)
         {
-            services.AddHangfire(x => x = settings.HangFireConfig);
+            // ReSharper disable once RedundantAssignment
+            services.AddHangfire(x => x = settings.HangfireConfig);
+            services.AddSingleton<IBackgroundProcess, HangfireBackgroundProcess>();
             services.AddHangfireServer();
         }
+        else
+            services.AddSingleton<IBackgroundProcess, NoBackgroundProcess>();
     }
+
     public static void UseResumableFunctions(this IHost app)
     {
-        WaitMethodAttribute.ServiceProvider = app.Services;
-        HangfireActivator.ServiceProvider = app.Services;
-        GlobalConfiguration.Configuration
-          .UseActivator(new HangfireActivator());
+        GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(app.Services));
+        StartScanProcess(app);
+    }
 
-        var backgroundJobClient = app.Services.GetService<IBackgroundJobClient>();
-        var scanner = app.Services.GetService<Scanner>();
+
+    private static void StartScanProcess(IHost app)
+    {
+        using var scope = app.Services.CreateScope();
+        var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundProcess>();
+        var scanner = scope.ServiceProvider.GetService<Scanner>();
         backgroundJobClient.Enqueue(() => scanner.Start());
     }
+
+
     public static (bool IsFunctionData, MemberExpression NewExpression) GetDataParamterAccess(
         this MemberExpression node,
         ParameterExpression functionInstanceArg)
@@ -141,7 +165,7 @@ public static class CoreExtensions
                 bool sameSiganture =
                     interfaceMethod.Name == method.Name &&
                     interfaceMethod.ReturnType == method.ReturnType &&
-                    Enumerable.SequenceEqual(interfaceMethod.GetParameters().Select(x => x.ParameterType), method.GetParameters().Select(x => x.ParameterType));
+                    interfaceMethod.GetParameters().Select(x => x.ParameterType).SequenceEqual(method.GetParameters().Select(x => x.ParameterType));
                 if (sameSiganture)
                     return interfaceMethod;
             }
@@ -164,27 +188,6 @@ public static class CoreExtensions
             }
 
         return _methodInfo;
-    }
-
-    //from:https://haacked.com/archive/2019/07/29/query-filter-by-interface/
-    public static void AppendQueryFilter<T>(
-                this EntityTypeBuilder<T> entityTypeBuilder, Expression<Func<T, bool>> expression) where T : class
-    {
-        var parameterType = Parameter(entityTypeBuilder.Metadata.ClrType);
-
-        var expressionFilter = ReplacingExpressionVisitor.Replace(
-            expression.Parameters.Single(), parameterType, expression.Body);
-
-        if (entityTypeBuilder.Metadata.GetQueryFilter() != null)
-        {
-            var currentQueryFilter = entityTypeBuilder.Metadata.GetQueryFilter();
-            var currentExpressionFilter = ReplacingExpressionVisitor.Replace(
-                currentQueryFilter.Parameters.Single(), parameterType, currentQueryFilter.Body);
-            expressionFilter = AndAlso(currentExpressionFilter, expressionFilter);
-        }
-
-        var lambdaExpression = Lambda(expressionFilter, parameterType);
-        entityTypeBuilder.HasQueryFilter(lambdaExpression);
     }
 
     public static IEnumerable<T> Flatten<T>(
@@ -228,5 +231,66 @@ public static class CoreExtensions
         //    child.CascadeSetDeleted();
         //}
         return null;
+    }
+
+
+    //https://www.newtonsoft.com/json/help/html/serializationguide.htm
+    //https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/built-in-types
+    //https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/constants
+    public static bool IsConstantType(this Type type)
+    {
+        var types = new[] { typeof(bool), typeof(byte), typeof(sbyte), typeof(char), typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(nint), typeof(nuint), typeof(long), typeof(ulong), typeof(short), typeof(ushort), typeof(string) };
+        return types.Contains(type);
+    }
+
+    public static bool CanBeConstant(this object ob)=>
+        ob != null && ob.GetType().IsConstantType();
+
+    public static MethodInfo GetMethodInfo<T>(Expression<Func<T, object>> methodSelector) =>
+        GetMethodInfoWithType(methodSelector).MethodInfo;
+    public static (MethodInfo MethodInfo, Type OwnerType) GetMethodInfoWithType<T>(Expression<Func<T, object>> methodSelector)
+    {
+        MethodInfo mi = null;
+        Type ownerType = null;
+        var visitor = new GenericVisitor();
+        visitor.OnVisitCall(VisitMethod);
+        visitor.OnVisitConstant(VisitConstant);
+        visitor.Visit(methodSelector);
+        return (mi, ownerType);
+
+        Expression VisitMethod(MethodCallExpression node)
+        {
+            if (IsInCurrentType(node.Method))
+                mi = node.Method;
+            return node;
+        }
+        Expression VisitConstant(ConstantExpression node)
+        {
+            if (node.Value is MethodInfo info && IsInCurrentType(info))
+                mi = info;
+            return node;
+        }
+
+        bool IsInCurrentType(MethodInfo methodInfo)
+        {
+            bool isExtension = methodInfo.IsDefined(typeof(ExtensionAttribute), true);
+            if (isExtension)
+            {
+                var extensionOnType = methodInfo.GetParameters()[0].ParameterType;
+                var canBeAppliedToCurrent = extensionOnType.IsAssignableFrom(typeof(T));
+                if (canBeAppliedToCurrent)
+                {
+                    ownerType = extensionOnType;
+                    return true;
+                }
+
+                return false;
+            }
+
+            bool inCurrentType = methodInfo.ReflectedType.IsAssignableFrom(typeof(T));
+            if (inCurrentType)
+                ownerType = methodInfo.ReflectedType;
+            return inCurrentType;
+        }
     }
 }

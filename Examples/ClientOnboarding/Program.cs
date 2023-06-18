@@ -1,5 +1,4 @@
 using ClientOnboarding.Services;
-using ClientOnboarding.Workflow;
 using ResumableFunctions.AspNetService;
 using ResumableFunctions.Handler.InOuts;
 using System.Diagnostics;
@@ -10,15 +9,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddControllers()
-    .AddResumableFunctions(new ResumableFunctionsSettings().UseSqlServer());
+    .AddResumableFunctions(new SqlServerResumableFunctionsSettings());
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddTransient<IClientOnboardingService, ClientOnboardingService>();
+builder.Services.AddScoped<IClientOnboardingService, ClientOnboardingService>();
 //builder.Services.AddScoped<ClientOnboardingWorkflow>();
 
 var app = builder.Build();
-app.ScanCurrentService();
+app.RegisterCurrentService();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
