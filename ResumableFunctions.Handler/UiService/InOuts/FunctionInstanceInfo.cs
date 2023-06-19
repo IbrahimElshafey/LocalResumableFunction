@@ -2,7 +2,7 @@
 
 namespace ResumableFunctions.Handler.UiService.InOuts
 {
-    public record FunctionInstanceInfo(ResumableFunctionState FunctionState, Wait CurrentWait, int WaitsCount)
+    public record FunctionInstanceInfo(ResumableFunctionState FunctionState, Wait CurrentWait, int WaitsCount, int Id)
     {
         public string StateColor => FunctionState.Status switch
         {

@@ -1,0 +1,14 @@
+﻿@using ResumableFunctions.Handler.InOuts;
+@model WaitsGroup
+<li>
+    <div class="w3-card w3-gray w3-padding w3-round">
+        <h5><b>@Model.Name</b></h5>
+        <span>WaitGroup(@Model.WaitType)</span>
+    </div>
+    <ul>
+        @foreach (var wait in Model.ChildWaits)
+        {
+            @Html.DisplayFor(x=>wait)
+        }
+    </ul>
+</li>

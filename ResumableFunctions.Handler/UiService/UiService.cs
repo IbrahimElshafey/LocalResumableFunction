@@ -229,7 +229,9 @@ namespace ResumableFunctions.Handler.UiService
                  .Select(functionState => new FunctionInstanceInfo(
                      functionState,
                      functionState.Waits.First(wait => wait.IsNode && wait.Status == WaitStatus.Waiting),
-                     functionState.Waits.Count()));
+                     functionState.Waits.Count(),
+                     functionState.Id
+                     ));
             var result = await query.ToListAsync();
             //result.ForEach(x => x.FunctionState.LoadUnmappedProps());
             return result;
@@ -310,7 +312,7 @@ namespace ResumableFunctions.Handler.UiService
                 if (setDataExpressionValue == null) return string.Empty;
                 var setDataExp = serializer.Deserialize(setDataExpressionValue);
                 var result = new StringBuilder();
-                if (setDataExp is LambdaExpressionSlim lambdaExpression && 
+                if (setDataExp is LambdaExpressionSlim lambdaExpression &&
                     lambdaExpression.Body is BlockExpressionSlim blockExpression)
                 {
                     foreach (var exp in blockExpression.Expressions)
@@ -323,6 +325,37 @@ namespace ResumableFunctions.Handler.UiService
                 }
                 return result.ToString();
             }
+        }
+
+        public async Task<FunctionInstanceDetails> GetInstanceDetails(int instanceId)
+        {
+            var instance =
+                await _context
+                .FunctionStates
+                .Include(x => x.ResumableFunctionIdentifier)
+                .FirstAsync(x => x.Id == instanceId);
+
+            var logs =
+                await _context
+                .Logs
+                .Where(x => x.EntityId == instanceId && x.EntityType == nameof(ResumableFunctionState))
+                .ToListAsync();
+            var waits =
+                await _context.Waits
+                .Where(x => x.FunctionStateId == instanceId)
+                .ToListAsync();
+            return new FunctionInstanceDetails(
+                instanceId,
+                instance.ResumableFunctionIdentifier.RF_MethodUrn,
+                $"{instance.ResumableFunctionIdentifier.ClassName}.{instance.ResumableFunctionIdentifier.MethodName}",
+                instance.Status,
+                MessagePackSerializer.ConvertToJson(instance.StateObjectValue),
+                instance.Created,
+                instance.Modified,
+                logs.Count(x => x.Type == LogType.Error),
+                waits.Where(x => x.IsNode).ToList(),
+                logs
+                );
         }
     }
 }

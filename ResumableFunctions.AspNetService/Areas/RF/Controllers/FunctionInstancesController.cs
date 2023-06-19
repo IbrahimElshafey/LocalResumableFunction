@@ -25,9 +25,10 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
                     Instances = await _uiService.GetFunctionInstances(functionId)
                 });
         }
-        public async Task<IActionResult> FunctionInstance()
+
+        public async Task<IActionResult> FunctionInstance(int instanceId)
         {
-            return View();
+            return View(await _uiService.GetInstanceDetails(instanceId));
         }
 
     }

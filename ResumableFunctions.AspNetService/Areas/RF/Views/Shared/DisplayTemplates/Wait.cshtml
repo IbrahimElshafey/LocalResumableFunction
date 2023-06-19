@@ -1,0 +1,11 @@
+﻿@using ResumableFunctions.Handler.InOuts;
+@model Wait
+
+@if (Model is MethodWait mw)
+{
+    <text>@Html.DisplayFor(x => mw, nameof(MethodWait))</text>
+}
+else if (Model is WaitsGroup group)
+    Html.DisplayFor(x => group, nameof(WaitsGroup));
+else if (Model is FunctionWait function)
+    Html.DisplayFor(x => function, nameof(FunctionWait));

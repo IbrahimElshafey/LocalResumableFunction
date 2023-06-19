@@ -27,28 +27,6 @@
                 <th width="50%">More Wait Details</th>
             </tr>
         </thead>
-
-        <style>
-            .ExecutionSuccessed,
-            .UpdateSuccessed,
-            .Matched,
-            .Completed {
-                color: green;
-            }
-
-            .PartiallyMatched,
-            .DuplicationCanceled,
-            .ExpectedMatch,
-            .NotStartedYet {
-                color: navajowhite;
-            }
-
-            .ExecutionFailed
-            .UpdateFailed
-            .NotMatched{
-                color: red;
-            }
-        </style>
         @foreach (var wait in Model.Waits)
         {
             <tr>
@@ -78,4 +56,25 @@
         }
 
     </table>
+    <style>
+        .ExecutionSuccessed,
+        .UpdateSuccessed,
+        .Matched,
+        .Completed {
+            color: green;
+        }
+
+        .PartiallyMatched,
+        .DuplicationCanceled,
+        .ExpectedMatch,
+        .NotStartedYet {
+            color: navajowhite;
+        }
+
+        .ExecutionFailed,
+        .UpdateFailed,
+        .NotMatched {
+            color: red;
+        }
+    </style>
 </div>

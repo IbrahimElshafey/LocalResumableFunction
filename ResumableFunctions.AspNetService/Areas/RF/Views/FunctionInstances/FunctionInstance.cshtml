@@ -1,10 +1,11 @@
-﻿@*https://www.jqueryscript.net/other/jQuery-Plugin-For-Easily-Readable-JSON-Data-Viewer.html*@
+﻿@using ResumableFunctions.Handler.UiService.InOuts;
+@model FunctionInstanceDetails
 <div class="w3-container w3-margin">
     <header class="w3-text-blue-gray">
         <h2 class="w3-margin-top">
             <b>
-                <span class="w3-text-indigo">ProjectApprovalExample.ProjectApprovalFlow</span>
-                Instance <span class="w3-text-indigo">135</span>  Details
+                <span class="w3-text-indigo">@Model.FunctionUrn</span>
+                Instance <span class="w3-text-indigo">@Model.InstanceId</span>  Details
             </b>
         </h2>
     </header>
@@ -14,69 +15,46 @@
     <table class="w3-table">
         <tr>
             <th width="250px"><b>Function Name:</b></th>
-            <th>ProjectApprovalExample.ProjectApprovalFlow</th>
+            <th>@Model.FunctionName</th>
         </tr>
         <tr>
             <td><b>Status:</b></td>
-            <td class="w3-text-green">Completed</td>
+            <td class="w3-text-green">@Model.Status</td>
         </tr>
         <tr>
             <td><b>State Object:</b></td>
             <td class="jsonContainer">
                 <pre>
-                <code class="JsonObject">{"CurrentProject":null,"ManagerOneApproval":true,"ManagerTwoApproval":false,"ManagerThreeApproval":false,"ManagerFourApproval":false,"ManagerFiveApproval":false,"ExternalMethodStatus":"Not matched yet."}</code>
+                <pre class="JsonObject">
+                        @Model.InstanceData
+                </pre>
                 </pre>
             </td>
         </tr>
         <tr>
             <td><b>Creation Date:</b></td>
-            <td>08/05/2023</td>
+            <td>@Model.Created</td>
         </tr>
         <tr>
             <td><b>Last Modified:</b></td>
-            <td>10/05/2023</td>
+            <td>@Model.Modified</td>
         </tr>
         <tr>
             <td><b>Errors Count:</b></td>
-            <td>10</td>
+            <td>@Model.ErrorsCount</td>
         </tr>
     </table>
     <br />
-    <input class="w3-button w3-indigo" type="button" onclick="location.href='/RF/FunctionInstances/AllInstances';" value="Back to Function Intstances" />
+    <input class="w3-button w3-indigo" type="button" onclick="location.href='/RF/FunctionInstances/AllInstances';" value="All Function Intstances" />
 
     <header class="w3-text-indigo">
         <h4 class="w3-margin-top"><b>Waits Tree</b></h4>
     </header>
     <ul class="w3-ul">
-        <li>
-            <div class="w3-card w3-gray w3-padding w3-round">
-                <h5><b>Wait Three Methods</b></h5>
-                <span>WaitGroup(Wait All)</span>
-            </div>
-            <ul>
-                <li>
-                    <div class="w3-card w3-green w3-padding w3-round">
-                        <h6><b>Wait Manager One Approval</b></h6>
-                        <span><b>Type: </b>Method Wait</span>
-                        <span><b>Status: </b>Completed</span>
-                    </div>
-                </li>
-                <li>
-                    <div class="w3-card w3-orange w3-padding w3-round">
-                        <h6><b>Wait Manager One Approval</b></h6>
-                        <span><b>Type: </b>Method Wait</span>
-                        <span><b>Status: </b>Cancled</span>
-                    </div>
-                </li>
-                <li>
-                    <div class="w3-card w3-light-gray w3-padding w3-round">
-                        <h6><b>Wait Manager One Approval</b></h6>
-                        <span><b>Type: </b>Method Wait</span>
-                        <span><b>Status: </b>Waiting</span>
-                    </div>
-                </li>
-            </ul>
-        </li>
+        @foreach (var logItem in Model.Waits)
+        {
+            @Html.DisplayFor(x => logItem,logItem.GetType().Name)
+        }
     </ul>
 
 
@@ -85,34 +63,24 @@
     </header>
     @*Logs partial*@
     <div class="w3-container">
-         <div class="w3-row w3-margin w3-padding">
-          
+        <div class="w3-row w3-margin w3-padding">
+
             <div class="w3-col l2" style="width:300px">
-                <input 
-                    style="accent-color: green;"
-                    class="w3-check w3-indigo" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Warning')">
+                <input style="accent-color: green;"
+                       class="w3-check w3-indigo" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Warning')">
                 <label>Hide/Show 2 Warning</label>
             </div>
             <div class="w3-col l2" style="width:300px">
-                <input 
-                    style="accent-color: green;"
-                    class="w3-check w3-indigo" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Info')">
+                <input style="accent-color: green;"
+                       class="w3-check w3-indigo" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Info')">
                 <label>Hide/Show 12 Info</label>
             </div>
         </div>
         <div class="w3-margin">
-            <div class="w3-panel w3-deep-orange">
-                <h5>Error!</h5>
-                <p>Red often indicates a dangerous or negative situation.</p>
-            </div>
-            <div class="w3-panel w3-amber">
-                <h5>Warning!</h5>
-                <p>Red often indicates a dangerous or   dfgfbf fvjdkjksdikc cikxjcm negative situation.</p>
-            </div>
-            <div class="w3-panel w3-green">
-                <h5>Info!</h5>
-                <p>Red often indicates a dangerous or negative situation.</p>
-            </div>
+            @foreach (var logItem in Model.Logs)
+            {
+                @Html.DisplayFor(x => logItem)
+            }
         </div>
     </div>
 </div>
