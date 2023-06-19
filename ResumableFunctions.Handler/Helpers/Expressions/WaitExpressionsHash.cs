@@ -44,7 +44,7 @@ public class WaitExpressionsHash : ExpressionVisitor
         var changeParametersVisitor = new GenericVisitor();
         var inputArg = Parameter(expression.Parameters[0].Type, "input");
         var outputArg = Parameter(expression.Parameters[1].Type, "output");
-        changeParametersVisitor.OnVisitParamter(ChangeParameterName);
+        changeParametersVisitor.OnVisitParameter(ChangeParameterName);
         return changeParametersVisitor.Visit(expression);
         Expression ChangeParameterName(ParameterExpression node)
         {

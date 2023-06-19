@@ -33,7 +33,7 @@ public class GenericVisitor : ExpressionVisitor
                ex => binaryVisitFunc((BinaryExpression)ex)));
     }
 
-    internal void OnVisitParamter(Func<ParameterExpression, Expression> parameterVisitFunc)
+    internal void OnVisitParameter(Func<ParameterExpression, Expression> parameterVisitFunc)
     {
         _visitors.Add(
             new VisitNodeFunction(

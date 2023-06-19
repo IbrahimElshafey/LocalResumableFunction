@@ -50,7 +50,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         _inputArg = Parameter(expression.Parameters[0].Type, "input");
         _outputArg = Parameter(expression.Parameters[1].Type, "output");
         var changeParameterVistor = new GenericVisitor();
-        changeParameterVistor.OnVisitParamter(ChangeParameters);
+        changeParameterVistor.OnVisitParameter(ChangeParameters);
         changeParameterVistor.OnVisitConstant(OnVisitFunctionInstance);
         var updatedBoy = (LambdaExpression)changeParameterVistor.Visit(_matchExpression);
         var functionType = typeof(Func<,,,>)
@@ -154,7 +154,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         {
             var checkUseParamter = new GenericVisitor();
             var isParamter = false;
-            checkUseParamter.OnVisitParamter(param =>
+            checkUseParamter.OnVisitParameter(param =>
             {
                 if (param.Name == "input" || param.Name == "output")
                     isParamter = true || isParamter;
@@ -268,7 +268,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
     {
         //var _pushedCall = Parameter(typeof(JObject), "pushedCall");
         //var usePushedCall = new GenericVisitor();
-        //usePushedCall.OnVisitParamter(VisitParameter);
+        //usePushedCall.OnVisitParameter(VisitParameter);
         //var updatedBoy = usePushedCall.Visit(MatchExpressionWithConstants.Body);
         //JObjectMatchExpression = Lambda<Func<JObject, bool>>(updatedBoy, _pushedCall);
         //Expression VisitParameter(ParameterExpression node)
@@ -293,7 +293,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
     private Expression AccesUsingJToken(Expression propPathExpression, ParameterExpression pushedCall)
     {
         var useJobject = new GenericVisitor();
-        //useJobject.OnVisitParamter(VisitParameter);
+        //useJobject.OnVisitParameter(VisitParameter);
         //useJobject.OnVisitMember(VisitMember);
         useJobject.AddVisitor(x => x is ParameterExpression || x is MemberExpression, VisitParameterOrMember);
         return useJobject.Visit(propPathExpression);
@@ -332,7 +332,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             var checkUseParamter = new GenericVisitor();
             var isInput = false;
             var isOutput = false;
-            checkUseParamter.OnVisitParamter(param =>
+            checkUseParamter.OnVisitParameter(param =>
             {
                 isInput = param == _matchExpression.Parameters[0] || isInput;
                 isOutput = param == _matchExpression.Parameters[1] || isOutput;

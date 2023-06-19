@@ -23,7 +23,6 @@
 * Validate same signature for group methods	MethodIdsRepo.cs	74
 * `RemoveFirstWaitIfExist` fix this for group	WaitsRepo.cs	190
 * Handle sub functions waits when cancel WaitsRepo.cs	276
-* Enhance `GenericVisitor` class by override it's methods 	GenericVisitor.cs	7
 * Validate input output type is serializable	MethodWait.cs	88
 * Review concurrency exceptions for `WaitForCall` when update	WaitForCall.cs	3
 * Should I create new scope when initialize function instance??	ResumableFunction-Wait Functions.cs	46
