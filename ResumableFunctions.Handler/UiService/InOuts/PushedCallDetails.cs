@@ -17,16 +17,16 @@ namespace ResumableFunctions.Handler.UiService.InOuts
     }
 
     public record WaitForPushedCallDetails(
-        string Name,//wait
+        string Name,
         WaitStatus Status,
-        string FunctionName,//wait.RequestedByFunc.Name
+        string FunctionName,
         int InstanceId,
-        string MatchExpression,//wait.template.match
+        string MatchExpression,
         string SetDataExpression,
         DateTime Created,
         string MandatoryPart,
-        string MandatoryPartExpression,//wait.template.man
-        MatchStatus MatchStatus,//call
+        string MandatoryPartExpression,
+        MatchStatus MatchStatus,
         InstanceUpdateStatus InstanceUpdateStatus,
         ExecutionStatus ExecutionStatus
         );

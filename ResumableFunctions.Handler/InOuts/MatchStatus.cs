@@ -20,6 +20,6 @@ public enum InstanceUpdateStatus
 public enum ExecutionStatus
 {
     NotStartedYet,
-    Successed,
-    Failed,
+    ExecutionSuccessed,
+    ExecutionFailed,
 }

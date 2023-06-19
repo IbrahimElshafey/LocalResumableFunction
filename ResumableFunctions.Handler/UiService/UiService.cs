@@ -290,6 +290,7 @@ namespace ResumableFunctions.Handler.UiService
 
             string GetMatch(string matchExpressionValue)
             {
+                if (matchExpressionValue == null) return string.Empty;
                 var result = serializer.Deserialize(matchExpressionValue).ToCSharpString();
                 if (result.Length > 37)
                     result = result.Substring(37);
@@ -297,6 +298,7 @@ namespace ResumableFunctions.Handler.UiService
             }
             string GetmandatoryParts(string instanceMandatoryPartExpressionValue)
             {
+                if (instanceMandatoryPartExpressionValue == null) return string.Empty;
                 var result = serializer.Deserialize(instanceMandatoryPartExpressionValue).ToCSharpString();
                 if (result.Length > 34)
                     result = result.Substring(33);
@@ -305,6 +307,7 @@ namespace ResumableFunctions.Handler.UiService
             }
             string GetSetData(string setDataExpressionValue)
             {
+                if (setDataExpressionValue == null) return string.Empty;
                 var setDataExp = serializer.Deserialize(setDataExpressionValue);
                 var result = new StringBuilder();
                 if (setDataExp is LambdaExpressionSlim lambdaExpression && 
@@ -312,8 +315,10 @@ namespace ResumableFunctions.Handler.UiService
                 {
                     foreach (var exp in blockExpression.Expressions)
                     {
+                        if (exp.NodeType == ExpressionType.Default) continue;
                         var expStr = exp.ToCSharpString();
                         result.AppendLine(expStr);
+                        result.AppendLine(";<br>");
                     }
                 }
                 return result.ToString();

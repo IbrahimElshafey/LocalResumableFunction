@@ -198,20 +198,25 @@ namespace ResumableFunctions.Handler.Core
                                 await _waitsRepo.CancelSubWaits(currentWait.Id);
                                 await GoNext(parent, currentWait);
                             }
-                            else return true;
+                            else
+                            {
+                                await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionSuccessed);
+                                return true;
+                            }
                             break;
                     }
 
                     currentWait = parent;
 
                 } while (currentWait != null);
-                await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.Successed);
+                
             }
             catch (Exception)
             {
-                await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.Failed);
+                await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionFailed);
                 throw;
             }
+            await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionSuccessed);
             return true;
         }
 

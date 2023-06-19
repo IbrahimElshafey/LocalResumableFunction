@@ -24,23 +24,44 @@
         <thead>
             <tr class="w3-indigo">
                 <th width="50%">Basic Wait Details</th>
-                <th width="50%">Basic Wait Details</th>
+                <th width="50%">More Wait Details</th>
             </tr>
         </thead>
 
+        <style>
+            .ExecutionSuccessed,
+            .UpdateSuccessed,
+            .Matched,
+            .Completed {
+                color: green;
+            }
+
+            .PartiallyMatched,
+            .DuplicationCanceled,
+            .ExpectedMatch,
+            .NotStartedYet {
+                color: navajowhite;
+            }
+
+            .ExecutionFailed
+            .UpdateFailed
+            .NotMatched{
+                color: red;
+            }
+        </style>
         @foreach (var wait in Model.Waits)
         {
             <tr>
                 <td>
                     <ul>
                         <li><b>Name: </b>@wait.Name</li>
-                        <li><b>Status: </b><span class="w3-text-green">@wait.Status</span></li>
+                        <li><b>Status: </b><span class="@wait.Status">@wait.Status</span></li>
                         <li>
                             <b>In Function Instance: </b>
-                            <a href="~/rfui/ResumableFunctionInstances" class="w3-text-blue">@wait.FunctionName</a>
+                            <a href="~/RF/FunctionInstances/FunctionInstance" class="w3-text-blue">@wait.FunctionName (@wait.InstanceId)</a>
                         </li>
                         <li><b>Match If: </b>@wait.MatchExpression</li>
-                        <li><b>Set Data: </b>@wait.SetDataExpression</li>
+                        <li><b>Set Data: </b>@Html.Raw(wait.SetDataExpression)</li>
                     </ul>
                 </td>
                 <td>
@@ -48,9 +69,9 @@
                         <li><b>Mandatory Part: </b>@wait.MandatoryPart</li>
                         <li><b>Mandatory Part Expression: </b>@wait.MandatoryPartExpression</li>
                         <li><b>Created: </b>@wait.Created</li>
-                        <li><b>Match: </b>@wait.MatchStatus</li>
-                        <li><b>Instance Update Status: </b>@wait.InstanceUpdateStatus</li>
-                        <li><b>Execution Status: </b>@wait.ExecutionStatus</li>
+                        <li><b>Match: </b><span class="@wait.MatchStatus">@wait.MatchStatus</span></li>
+                        <li><b>Instance Update Status: </b><span class="@wait.InstanceUpdateStatus">@wait.InstanceUpdateStatus</span></li>
+                        <li><b>Execution Status: </b><span class="@wait.ExecutionStatus">@wait.ExecutionStatus</span></li>
                     </ul>
                 </td>
             </tr>
