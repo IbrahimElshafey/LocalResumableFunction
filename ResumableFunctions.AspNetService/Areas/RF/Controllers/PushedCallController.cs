@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Handler.UiService;
 
 namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
 {
@@ -7,15 +8,17 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
     public class PushedCallController : Controller
     {
         private readonly ILogger<PushedCallController> _logger;
+        private readonly IUiService _service;
 
-        public PushedCallController(ILogger<PushedCallController> logger)
+        public PushedCallController(ILogger<PushedCallController> logger,IUiService service)
         {
             _logger = logger;
+            _service = service;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Details(int pushedCallId)
         {
-            return View();
+            return View(await _service.GetPushedCallDetails(pushedCallId));
         }
     }
 }

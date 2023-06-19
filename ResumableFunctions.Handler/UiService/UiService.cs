@@ -1,7 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MessagePack;
+using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.DataAccess;
+using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
+using System.Linq.Expressions;
+using System.Text;
 
 namespace ResumableFunctions.Handler.UiService
 {
@@ -229,6 +233,91 @@ namespace ResumableFunctions.Handler.UiService
             var result = await query.ToListAsync();
             //result.ForEach(x => x.FunctionState.LoadUnmappedProps());
             return result;
+        }
+
+        public async Task<PushedCallDetails> GetPushedCallDetails(int pushedCallId)
+        {
+            var pushedCall = await _context.PushedCalls.FindAsync(pushedCallId);
+            pushedCall.LoadUnmappedProps();
+            var methodUrn = pushedCall.MethodData.MethodUrn;
+            var inputOutput = MessagePackSerializer.ConvertToJson(pushedCall.DataValue);
+            var callExpecetdMatches =
+                await _context
+                .WaitsForCalls
+                .Where(x => x.PushedCallId == pushedCallId)
+                .ToListAsync();
+            var waitsIds = callExpecetdMatches.Select(x => x.WaitId).ToList();
+
+            var waits =
+                await (
+                from wait in _context.MethodWaits.Include(x => x.RequestedByFunction).Where(x => waitsIds.Contains(x.Id))
+                from template in _context.WaitTemplates
+                where wait.TemplateId == template.Id
+                select new
+                {
+                    wait.Id,
+                    wait.Name,
+                    wait.Status,
+                    wait.RequestedByFunction.RF_MethodUrn,
+                    wait.FunctionStateId,
+                    template.MatchExpressionValue,
+                    template.SetDataExpressionValue,
+                    template.InstanceMandatoryPartExpressionValue,
+                    wait.MandatoryPart
+                })
+                .ToListAsync();
+            var serializer = new ExpressionSerializer();
+            var waitsForCall =
+                (from callMatch in callExpecetdMatches
+                 from wait in waits
+                 where callMatch.WaitId == wait.Id
+                 select new WaitForPushedCallDetails(
+                    wait.Name,
+                    wait.Status,
+                    wait.RF_MethodUrn,
+                    wait.FunctionStateId,
+                    GetMatch(wait.MatchExpressionValue),
+                    GetSetData(wait.SetDataExpressionValue),
+                    callMatch.Created,
+                    wait.MandatoryPart,
+                    GetmandatoryParts(wait.InstanceMandatoryPartExpressionValue),
+                    callMatch.MatchStatus,
+                    callMatch.InstanceUpdateStatus,
+                    callMatch.ExecutionStatus
+                    ))
+                .ToList();
+            return new PushedCallDetails(inputOutput, methodUrn, waitsForCall);
+
+            string GetMatch(string matchExpressionValue)
+            {
+                var result = serializer.Deserialize(matchExpressionValue).ToCSharpString();
+                if (result.Length > 37)
+                    result = result.Substring(37);
+                return result;
+            }
+            string GetmandatoryParts(string instanceMandatoryPartExpressionValue)
+            {
+                var result = serializer.Deserialize(instanceMandatoryPartExpressionValue).ToCSharpString();
+                if (result.Length > 34)
+                    result = result.Substring(33);
+                result = result.Replace("(object)", "");
+                return result;
+            }
+            string GetSetData(string setDataExpressionValue)
+            {
+                var setDataExp = serializer.Deserialize(setDataExpressionValue);
+                var result = new StringBuilder();
+                if (setDataExp is LambdaExpressionSlim lambdaExpression && 
+                    lambdaExpression.Body is BlockExpressionSlim blockExpression)
+                {
+                    foreach (var exp in blockExpression.Expressions)
+                    {
+                        var expStr = exp.ToCSharpString();
+                        result.AppendLine(expStr);
+                    }
+                }
+                return result.ToString();
+            }
         }
     }
 }

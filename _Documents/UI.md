@@ -1,5 +1,9 @@
-﻿# UI project
-* Errors OverView
+﻿# Hot todos
+* Pushed call view
+* Instance details view
+* Method waits view
+# UI project
+* Errors Overview Page
 * RF Instance Details
 	* Waits tree
 		* Wait Name
@@ -18,8 +22,6 @@
 			* Wait Again and Execute Code before (If Completed/Canceled)
 			* Wait Next Wait (If Completed/Canceled)
 			* Set Matched (If Waiting)
-* Method Waits
-* Pushed Calls Waits
 * All Logs View
 * Actions on service
 	* Find dead methods
@@ -29,5 +31,5 @@
 	* Instance in progress but not wait anything check
 	* Validate URN duplication when scan if diffrent method signature
 	* Wait methods in same method group must have the same signature
-	* Rerun faild isntance
+	* Return failed instancs
 	* Stop resumable function new instances
