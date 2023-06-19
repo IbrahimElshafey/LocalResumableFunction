@@ -24,6 +24,7 @@ public class MethodWait : Wait
     internal WaitMethodIdentifier MethodToWait { get; set; }
 
     internal int? MethodToWaitId { get; set; }
+    internal int? MatchedByCallId { get; set; }
 
     internal MethodsGroup MethodGroupToWait { get; set; }
     internal int MethodGroupToWaitId { get; set; }

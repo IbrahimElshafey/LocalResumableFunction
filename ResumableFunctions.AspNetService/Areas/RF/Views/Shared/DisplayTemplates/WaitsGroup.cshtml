@@ -8,7 +8,7 @@
     <ul>
         @foreach (var wait in Model.ChildWaits)
         {
-            @Html.DisplayFor(x=>wait)
+            @Html.DisplayFor(x=>wait,wait.GetType().Name)
         }
     </ul>
 </li>

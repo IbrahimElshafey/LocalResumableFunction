@@ -141,6 +141,7 @@ namespace ResumableFunctions.Handler.Core
         private async Task<bool> UpdateFunctionData()
         {
             var pushedCallId = _pushedCall.Id;
+            _methodWait.MatchedByCallId = pushedCallId;
             try
             {
                 await using (await _lockProvider.AcquireLockAsync($"UpdateFunctionState_{_methodWait.FunctionStateId}"))

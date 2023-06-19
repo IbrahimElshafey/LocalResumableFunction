@@ -134,6 +134,9 @@ public class FunctionDataContext : DbContext
         methodWaitBuilder
           .Property(x => x.MethodToWaitId)
           .HasColumnName(nameof(MethodWait.MethodToWaitId));
+        methodWaitBuilder
+          .Property(x => x.MatchedByCallId)
+          .HasColumnName(nameof(MethodWait.MatchedByCallId));
 
         modelBuilder.Entity<WaitsGroup>()
            .Property(mw => mw.GroupMatchExpressionValue)

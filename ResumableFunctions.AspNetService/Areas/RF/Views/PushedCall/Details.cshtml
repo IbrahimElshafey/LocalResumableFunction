@@ -36,7 +36,7 @@
                         <li><b>Status: </b><span class="@wait.Status">@wait.Status</span></li>
                         <li>
                             <b>In Function Instance: </b>
-                            <a href="~/RF/FunctionInstances/FunctionInstance" class="w3-text-blue">@wait.FunctionName (@wait.InstanceId)</a>
+                            <a href="~/RF/FunctionInstances/FunctionInstance?instanceId=@wait.InstanceId" class="w3-text-blue">@wait.FunctionName (@wait.InstanceId)</a>
                         </li>
                         <li><b>Match If: </b>@wait.MatchExpression</li>
                         <li><b>Set Data: </b>@Html.Raw(wait.SetDataExpression)</li>
