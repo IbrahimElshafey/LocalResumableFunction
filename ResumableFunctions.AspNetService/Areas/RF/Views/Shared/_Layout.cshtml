@@ -5,7 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
+        .Completed,
+        .ExecutionSuccessed,
+        .UpdateSuccessed,
+        .Matched,
+        .Completed {
+            color: green;
+        }
 
+        .Waiting,
+        .PartiallyMatched,
+        .DuplicationCanceled,
+        .ExpectedMatch,
+        .NotStartedYet {
+            color: orange;
+        }
+
+        .Canceled,
+        .ExecutionFailed,
+        .UpdateFailed,
+        .NotMatched {
+            color: red;
+        }
+
+        .tab {
+            display: inline-block;
+            margin-right: 4em;
+        }
+
+        li{
+            border-bottom: 0px !important;
+        }
         /* W3.CSS 4.15 December 2020 by Jan Egil and Borge Refsnes */
         html {
             box-sizing: border-box

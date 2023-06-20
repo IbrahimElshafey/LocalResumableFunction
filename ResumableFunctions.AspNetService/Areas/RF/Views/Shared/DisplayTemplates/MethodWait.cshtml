@@ -1,9 +1,28 @@
 ﻿@using ResumableFunctions.Handler.InOuts;
+@using ResumableFunctions.Handler.UiService.InOuts;
 @model MethodWait
 <li>
-    <div class="w3-card w3-green w3-padding w3-round">
-        <h6><b>@Model.Name</b></h6>
-        <span><b>Type: </b>Method Wait</span>
-        <span><b>Status: </b>@Model.Status</span>
+    <div class="w3-card w3-white w3-padding w3-round">
+        <h6 class="w3-text-indigo"><b>@Model.Name</b></h6>
+        <ul class="w3-ul">
+            <li>
+                <span class="tab"><b class="w3-text-blue-gray">Status: </b><span class="@Model.Status">@Model.Status</span></span>
+            </li>
+            @if (Model.Template != null)
+            {
+                <li>
+                    @Html.DisplayFor(x => x.Template,"TemplateDisplay")
+                    <br />
+                    <span><b class="w3-text-blue-gray">Mandatory Part: </b><span>@Model.MandatoryPart</span></span>
+                </li>
+            }
+            <li>
+                <span class="tab"><b class="w3-text-blue-gray">Created: </b><span>@Model.Created</span></span>
+                @if (Model.Modified != default)
+                {
+                    <span><b class="w3-text-blue-gray">Modified: </b><span>@Model.Modified</span></span>
+                }
+            </li>
+        </ul>
     </div>
 </li>

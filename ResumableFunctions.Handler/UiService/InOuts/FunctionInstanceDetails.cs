@@ -1,4 +1,5 @@
 ﻿using ResumableFunctions.Handler.InOuts;
+using System.Collections;
 
 namespace ResumableFunctions.Handler.UiService.InOuts
 {
@@ -12,11 +13,12 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public DateTime Created { get; }
         public DateTime Modified { get; }
         public int ErrorsCount { get; }
-        public List<Wait> Waits { get; }
+        public ArrayList Waits { get; }
+        public List<MethodWaitDetails> MethodWaitDetails { get; }
         public List<LogRecord> Logs { get; }
 
         public FunctionInstanceDetails(
-            int instanceId, string name, string functionName, FunctionStatus status, string instanceData, DateTime created, DateTime modified, int errorsCount, List<Wait> waits, List<LogRecord> logs)
+            int instanceId, string name, string functionName, FunctionStatus status, string instanceData, DateTime created, DateTime modified, int errorsCount, ArrayList waits, List<LogRecord> logs)
         {
             InstanceId = instanceId;
             FunctionUrn = name;

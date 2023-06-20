@@ -65,10 +65,6 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     [NotMapped]
     public LambdaExpression MatchExpression { get; internal set; }
 
-
-    //[NotMapped]
-    //public Expression<Func<ExpandoObject, string[]>> CallMandatoryPartExpressionDynamic { get; internal set; }
-
     [NotMapped]
     public LambdaExpression CallMandatoryPartExpression { get; internal set; }
 
@@ -80,8 +76,6 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     [NotMapped]
     public LambdaExpression SetDataExpression { get; internal set; }
 
-    [NotMapped]
-    public LambdaExpression SetDataExpressionDynamic { get; internal set; }
 
     public int? ServiceId { get; set; }
 
@@ -100,9 +94,6 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             CallMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(CallMandatoryPartExpressionValue).ToExpression();
         if (InstanceMandatoryPartExpressionValue != null)
             InstanceMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(InstanceMandatoryPartExpressionValue).ToExpression();
-        //if (_callMandatoryPartExpressionDynamic != null)
-        //    CallMandatoryPartExpressionDynamic = (Expression<Func<ExpandoObject, string[]>>)
-        //        serializer.Deserialize(_callMandatoryPartExpressionDynamic).ToExpression();
 
         expressionsLoaded = true;
     }
@@ -127,14 +118,8 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             MatchExpressionValue = serializer.Serialize(MatchExpression.ToExpressionSlim());
         if (SetDataExpression != null)
             SetDataExpressionValue = serializer.Serialize(SetDataExpression.ToExpressionSlim());
-        //if (CallMandatoryPartExpressionDynamic != null)
-        //    _callMandatoryPartExpressionDynamic = serializer.Serialize(CallMandatoryPartExpressionDynamic.ToExpressionSlim());
         if (CallMandatoryPartExpression != null)
-        {
             CallMandatoryPartExpressionValue = serializer.Serialize(CallMandatoryPartExpression.ToExpressionSlim());
-            //using var md5 = MD5.Create();
-            //MandatoryPartHash = md5.ComputeHash(Encoding.UTF8.GetBytes(CallMandatoryPartExpressionValue));
-        }
         if (InstanceMandatoryPartExpression != null)
             InstanceMandatoryPartExpressionValue = serializer.Serialize(InstanceMandatoryPartExpression.ToExpressionSlim());
     }

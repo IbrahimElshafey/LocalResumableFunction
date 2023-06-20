@@ -1,11 +1,19 @@
-﻿@using ResumableFunctions.Handler.InOuts;
+﻿@using ResumableFunctions.Handler.Helpers.Expressions;
+@using ResumableFunctions.Handler.InOuts;
 @model WaitsGroup
 <li>
-    <div class="w3-card w3-gray w3-padding w3-round">
-        <h5><b>@Model.Name</b></h5>
-        <span>WaitGroup(@Model.WaitType)</span>
+    <div class="w3-card w3-pale-blue w3-padding w3-round">
+        <h5 class="w3-text-indigo"><b>@Model.Name</b></h5>
+        <span>@Model.WaitType</span>
+        <span class="@Model.Status">@Model.Status</span>
+        <br />
+        @if (Model.GroupMatchExpressionValue != null)
+        {
+            <span><b>Match Exprssion: </b><span>@(new ExpressionSerializer().Deserialize(Model.GroupMatchExpressionValue).ToCSharpString())</span></span>
+        }
+        <p></p>
     </div>
-    <ul>
+    <ul class="w3-ul">
         @foreach (var wait in Model.ChildWaits)
         {
             @Html.DisplayFor(x=>wait,wait.GetType().Name)

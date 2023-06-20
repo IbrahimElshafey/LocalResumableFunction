@@ -4,6 +4,7 @@ using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
+using System.Collections;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -268,63 +269,25 @@ namespace ResumableFunctions.Handler.UiService
                     wait.MandatoryPart
                 })
                 .ToListAsync();
-            var serializer = new ExpressionSerializer();
+
             var waitsForCall =
                 (from callMatch in callExpecetdMatches
                  from wait in waits
                  where callMatch.WaitId == wait.Id
-                 select new WaitForPushedCallDetails(
+                 select new MethodWaitDetails(
                     wait.Name,
                     wait.Status,
                     wait.RF_MethodUrn,
                     wait.FunctionStateId,
-                    GetMatch(wait.MatchExpressionValue),
-                    GetSetData(wait.SetDataExpressionValue),
                     callMatch.Created,
                     wait.MandatoryPart,
-                    GetmandatoryParts(wait.InstanceMandatoryPartExpressionValue),
                     callMatch.MatchStatus,
                     callMatch.InstanceUpdateStatus,
-                    callMatch.ExecutionStatus
+                    callMatch.ExecutionStatus,
+                    new TemplateDisplay(wait.MatchExpressionValue, wait.SetDataExpressionValue, wait.InstanceMandatoryPartExpressionValue)
                     ))
                 .ToList();
             return new PushedCallDetails(inputOutput, methodUrn, waitsForCall);
-
-            string GetMatch(string matchExpressionValue)
-            {
-                if (matchExpressionValue == null) return string.Empty;
-                var result = serializer.Deserialize(matchExpressionValue).ToCSharpString();
-                if (result.Length > 37)
-                    result = result.Substring(37);
-                return result;
-            }
-            string GetmandatoryParts(string instanceMandatoryPartExpressionValue)
-            {
-                if (instanceMandatoryPartExpressionValue == null) return string.Empty;
-                var result = serializer.Deserialize(instanceMandatoryPartExpressionValue).ToCSharpString();
-                if (result.Length > 34)
-                    result = result.Substring(33);
-                result = result.Replace("(object)", "");
-                return result;
-            }
-            string GetSetData(string setDataExpressionValue)
-            {
-                if (setDataExpressionValue == null) return string.Empty;
-                var setDataExp = serializer.Deserialize(setDataExpressionValue);
-                var result = new StringBuilder();
-                if (setDataExp is LambdaExpressionSlim lambdaExpression &&
-                    lambdaExpression.Body is BlockExpressionSlim blockExpression)
-                {
-                    foreach (var exp in blockExpression.Expressions)
-                    {
-                        if (exp.NodeType == ExpressionType.Default) continue;
-                        var expStr = exp.ToCSharpString();
-                        result.AppendLine(expStr);
-                        result.AppendLine(";<br>");
-                    }
-                }
-                return result.ToString();
-            }
         }
 
         public async Task<FunctionInstanceDetails> GetInstanceDetails(int instanceId)
@@ -340,10 +303,13 @@ namespace ResumableFunctions.Handler.UiService
                 .Logs
                 .Where(x => x.EntityId == instanceId && x.EntityType == nameof(ResumableFunctionState))
                 .ToListAsync();
+
             var waits =
                 await _context.Waits
                 .Where(x => x.FunctionStateId == instanceId)
                 .ToListAsync();
+            await SetWaitTemplates(waits);
+            var waitsNodes = new ArrayList(waits.Where(x => x.IsNode).ToList());
             return new FunctionInstanceDetails(
                 instanceId,
                 instance.ResumableFunctionIdentifier.RF_MethodUrn,
@@ -353,9 +319,34 @@ namespace ResumableFunctions.Handler.UiService
                 instance.Created,
                 instance.Modified,
                 logs.Count(x => x.Type == LogType.Error),
-                waits.Where(x => x.IsNode).ToList(),
+                waitsNodes,
                 logs
                 );
+        }
+
+        private async Task SetWaitTemplates(List<Wait> waits)
+        {
+            var templatesIds = waits
+                .Where(x => x is MethodWait mw)
+                .Select(x => (MethodWait)x)
+                .Select(x => x.TemplateId)
+                .ToList();
+            var templates =
+                  await _context.WaitTemplates
+                .Where(x => templatesIds.Contains(x.Id))
+                .Select(template => new WaitTemplate
+                {
+                    MatchExpressionValue = template.MatchExpressionValue,
+                    SetDataExpressionValue = template.SetDataExpressionValue,
+                    InstanceMandatoryPartExpressionValue = template.CallMandatoryPartExpressionValue,
+                    Id = template.Id
+                })
+                .ToDictionaryAsync(x => x.Id);
+            foreach (var wait in waits)
+            {
+                if (wait is MethodWait mw && templates.ContainsKey(mw.TemplateId))
+                    mw.Template = templates[mw.TemplateId];
+            }
         }
     }
 }
