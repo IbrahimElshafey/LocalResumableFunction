@@ -1,15 +1,17 @@
-﻿namespace ResumableFunctions.Handler.UiService.InOuts
+﻿using ResumableFunctions.Handler.InOuts;
+
+namespace ResumableFunctions.Handler.UiService.InOuts
 {
     public class PushedCallDetails
     {
         public string InputOutput { get; }
-        public string MethodUrn { get; }
+        public MethodData MethodData { get; }
         public List<MethodWaitDetails> Waits { get; }
 
-        public PushedCallDetails(string inputOutput, string methodUrn, List<MethodWaitDetails> waits)
+        public PushedCallDetails(string inputOutput, MethodData methodData, List<MethodWaitDetails> waits)
         {
             InputOutput = inputOutput;
-            MethodUrn = methodUrn;
+            MethodData = methodData;
             Waits = waits;
         }
     }

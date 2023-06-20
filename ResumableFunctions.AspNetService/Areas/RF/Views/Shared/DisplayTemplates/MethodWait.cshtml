@@ -6,7 +6,11 @@
         <h6 class="w3-text-indigo"><b>@Model.Name</b></h6>
         <ul class="w3-ul">
             <li>
-                <span class="tab"><b class="w3-text-blue-gray">Status: </b><span class="@Model.Status">@Model.Status</span></span>
+                <span><b class="w3-text-blue-gray">Status: </b><span class="@Model.Status">@Model.Status</span></span>
+                @if (Model.Status != WaitStatus.Waiting)
+                {
+                    <a class="w3-text-blue" href="~/RF/PushedCall/Details?pushedCallId=@Model.MatchedByCallId">By Call</a>
+                }
             </li>
             @if (Model.Template != null)
             {

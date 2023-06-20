@@ -242,7 +242,7 @@ namespace ResumableFunctions.Handler.UiService
         {
             var pushedCall = await _context.PushedCalls.FindAsync(pushedCallId);
             pushedCall.LoadUnmappedProps();
-            var methodUrn = pushedCall.MethodData.MethodUrn;
+            var methodData = pushedCall.MethodData;
             var inputOutput = MessagePackSerializer.ConvertToJson(pushedCall.DataValue);
             var callExpecetdMatches =
                 await _context
@@ -287,7 +287,7 @@ namespace ResumableFunctions.Handler.UiService
                     new TemplateDisplay(wait.MatchExpressionValue, wait.SetDataExpressionValue, wait.InstanceMandatoryPartExpressionValue)
                     ))
                 .ToList();
-            return new PushedCallDetails(inputOutput, methodUrn, waitsForCall);
+            return new PushedCallDetails(inputOutput, methodData, waitsForCall);
         }
 
         public async Task<FunctionInstanceDetails> GetInstanceDetails(int instanceId)

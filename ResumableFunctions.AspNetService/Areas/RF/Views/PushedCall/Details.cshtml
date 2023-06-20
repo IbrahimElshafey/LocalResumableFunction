@@ -3,17 +3,28 @@
 @model PushedCallDetails
 <div class="w3-container w3-margin">
     <header class="w3-text-blue-gray">
-        <h2 class="w3-margin-top"><b>Pushed Call <span class="w3-text-indigo">@Model.MethodUrn</span></b></h2>
+        <h2 class="w3-margin-top"><b>Pushed Call <span class="w3-text-indigo">@Model.MethodData.MethodUrn</span></b></h2>
     </header>
 
     <div class="w3-row-padding">
-        <div class="w3-col s8">
+        <div class="w3-col s6">
             <header class="w3-text-indigo">
                 <h4 class="w3-margin-top"><b>Input & Output</b></h4>
             </header>
             <pre class="JsonObject" style=" word-wrap: break-word;">
                 @Model.InputOutput
             </pre>
+        </div>
+         <div class="w3-col s6">
+            <header class="w3-text-indigo">
+                <h4 class="w3-margin-top"><b>Method Info</b></h4>
+            </header>
+           <ul>
+                <li><b>Name: </b>@Model.MethodData.MethodName</li>
+                <li><b>Class Name: </b>@Model.MethodData.ClassName</li>
+                <li><b>Assembly Name: </b>@Model.MethodData.AssemblyName</li>
+                <li><b>Can Publish From External: </b>@Model.MethodData.CanPublishFromExternal</li>
+            </ul>
         </div>
     </div>
     <br />
