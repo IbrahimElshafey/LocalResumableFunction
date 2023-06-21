@@ -10,8 +10,9 @@ namespace ResumableFunctions.Publisher
         public static void AddResumableFunctionsPublisher(this IServiceCollection services, IPublisherSettings settings)
         {
             services.AddSingleton(typeof(IPublisherSettings), settings);
-            services.AddSingleton(typeof(IPublishCall), settings.PublishCallImplementation);
             services.AddSingleton<HttpClient>();
+            services.AddSingleton(typeof(ICallPublisher), settings.CallPublisherType);
+            
         }
 
         public static void UseResumableFunctionsPublisher(this IHost app)

@@ -1,6 +1,7 @@
 ﻿using AspectInjector.Broker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Publisher.InOuts;
 using System.Reflection;
 
 namespace ResumableFunctions.Publisher;
@@ -10,7 +11,7 @@ public class PublishMethodAspect
 {
     private MethodCall _methodCall;
     private ILogger<PublishMethodAspect> _logger;
-    private IPublishCall _publishMethod;
+    private ICallPublisher _publishMethod;
     internal static IServiceProvider ServiceProvider;
 
     public PublishMethodAspect()
@@ -32,10 +33,16 @@ public class PublishMethodAspect
         var publishMethodAttribute = triggers.OfType<PublishMethodAttribute>().First();
 
         _logger = ServiceProvider.GetService<ILogger<PublishMethodAspect>>();
-        _publishMethod = ServiceProvider.GetService<IPublishCall>();
+        _publishMethod = ServiceProvider.GetService<ICallPublisher>();
         _methodCall = new MethodCall
         {
-            MethodUrn = publishMethodAttribute.MethodIdentifier,
+            MethodData = new MethodData
+            {
+                MethodUrn = publishMethodAttribute.MethodIdentifier,
+                AssemblyName = metadata.DeclaringType.Assembly.FullName,
+                ClassName = metadata.DeclaringType.Name,
+                MethodName = metadata.Name,
+            },
             ServiceName = publishMethodAttribute.ServiceName
         };
         if (args.Length > 0)

@@ -1,6 +1,8 @@
-﻿namespace ResumableFunctions.Publisher
+﻿using ResumableFunctions.Publisher.InOuts;
+
+namespace ResumableFunctions.Publisher
 {
-    public interface IPublishCall
+    public interface ICallPublisher
     {
         Task Publish<TInput, TOutput>(
             Func<TInput, Task<TOutput>> methodToPush,

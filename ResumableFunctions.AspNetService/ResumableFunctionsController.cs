@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using System.Buffers;
+using System.Linq.CompilerServices.TypeSystem;
 
 namespace ResumableFunctions.AspNetService
 {
@@ -34,26 +38,26 @@ namespace ResumableFunctions.AspNetService
         }
 
         [HttpPost(nameof(ExternalCall))]
-        public async Task ExternalCall([FromBody] dynamic input)
+        public async Task ExternalCall()
         {
             try
             {
-                var externalCall =
-                    JsonConvert.DeserializeObject<ExternalCallArgs>((string)input.ToString());
+                var x = await Request.BodyReader.ReadAsync();
+                var bytes = x.Buffer.ToArray();
+                var serialzer = new BinaryToObjectConverter();
+                var externalCall = serialzer.ConvertToObject<ExternalCallArgs>(bytes);
                 if (externalCall == null)
                     throw new ArgumentNullException(nameof(externalCall));
                 var pushedCall = new PushedCall
                 {
-                    MethodData = new MethodData
-                    {
-                        MethodUrn = externalCall.MethodUrn
-                    },
+                    MethodData = externalCall.MethodData,
                     Data = new()
                     {
                         Input = externalCall.Input,
                         Output = externalCall.Output
                     }
                 };
+                pushedCall.MethodData.CanPublishFromExternal = true;
                 await _callPusher.PushExternalCall(pushedCall, externalCall.ServiceName);
             }
             catch (Exception ex)

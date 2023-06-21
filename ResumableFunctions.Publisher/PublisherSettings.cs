@@ -9,7 +9,7 @@
         }
 
 
-        public Type PublishCallImplementation => typeof(PublishCallDirect);
+        public Type CallPublisherType => typeof(HttpCallPublisher);
 
         public Dictionary<string, string> ServicesRegistry { get; }
     }

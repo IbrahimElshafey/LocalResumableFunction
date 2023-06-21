@@ -37,31 +37,34 @@ namespace ResumableFunctions.Handler.Helpers
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
+            var hasException = false;
+            var scanTaskId = 0;
             try
             {
                 await using var handle = await _lockProvider.TryAcquireLockAsync(_settings.CurrentDbName + lockName);
                 if (handle is null) return;//if another process work on same task then ignore
 
                 using IServiceScope scope = _serviceProvider.CreateScope();
-                var scanTaskId = 0;
                 if (isScanTask)
                     scanTaskId = await _scanStateRepo.AddScanState(lockName);
                 await backgroundTask();
-                if (isScanTask)
-                    await _scanStateRepo.RemoveScanState(scanTaskId);
             }
             catch (Exception ex)
             {
+                hasException = true;
                 var codeInfo =
                     $"\nSource File Path: {sourceFilePath}\n" +
                     $"Line Number: {sourceLineNumber}";
-                if (errorMessage == null)
-                    _logger.LogError(ex,
-                        $"Error when execute `{methodName}`\n{codeInfo}");
-                else
-                    _logger.LogError(ex, errorMessage + codeInfo);
-
+                _logger.LogError(ex,
+                        errorMessage == null ?
+                        $"Error when execute `{methodName}`\n{codeInfo}" :
+                        $"{errorMessage}\n{codeInfo}");
                 throw;
+            }
+            finally
+            {
+                if (isScanTask && !hasException)
+                    await _scanStateRepo.RemoveScanState(scanTaskId);
             }
         }
     }

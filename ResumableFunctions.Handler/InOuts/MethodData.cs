@@ -58,7 +58,7 @@ namespace ResumableFunctions.Handler.InOuts
             return wma?.CanPublishFromExternal ?? false;
         }
 
-        public string MethodUrn { get; internal set; }
+        public string MethodUrn { get; set; }
         public string AssemblyName { get; internal set; }
         public string ClassName { get; internal set; }
         public string MethodName { get; internal set; }
@@ -88,8 +88,6 @@ namespace ResumableFunctions.Handler.InOuts
             }
         }
 
-        public MethodIdentifier MethodIdentifier { get; internal set; }
-        public int MethodIdentifierId { get; internal set; }
         public MethodType MethodType { get; internal set; }
         public bool CanPublishFromExternal { get; internal set; }
         public bool IsActive { get; internal set; } = true;

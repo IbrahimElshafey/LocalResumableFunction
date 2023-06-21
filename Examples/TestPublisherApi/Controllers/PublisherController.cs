@@ -24,7 +24,7 @@ namespace TestPublisherApi.Controllers
         }
 
         [HttpGet(nameof(Method456))]
-        [PublishMethod("PublisherController.Method456", "TestApi2")]
+        [PublishMethod("PublisherController.Method456", "TestApi2")]//not exist in TestApi2
         public string Method456(string input)
         {
             return $"{nameof(Method456)} called with input `{input}`";

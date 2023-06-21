@@ -3,6 +3,6 @@
     public interface IPublisherSettings
     {
         Dictionary<string,string> ServicesRegistry { get;}
-        Type PublishCallImplementation { get; }
+        Type CallPublisherType { get; }
     }
 }

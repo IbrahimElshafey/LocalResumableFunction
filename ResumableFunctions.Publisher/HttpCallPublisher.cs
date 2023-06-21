@@ -1,15 +1,19 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MessagePack.Resolvers;
+using MessagePack;
+using Microsoft.Extensions.Logging;
+using ResumableFunctions.Publisher.InOuts;
 using System.Net.Http.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ResumableFunctions.Publisher
 {
-    public class PublishCallDirect : IPublishCall
+    public class HttpCallPublisher : ICallPublisher
     {
         private readonly IPublisherSettings _settings;
         private readonly HttpClient _client;
-        private readonly ILogger<PublishCallDirect> _logger;
+        private readonly ILogger<HttpCallPublisher> _logger;
 
-        public PublishCallDirect(IPublisherSettings settings, HttpClient client, ILogger<PublishCallDirect> logger)
+        public HttpCallPublisher(IPublisherSettings settings, HttpClient client, ILogger<HttpCallPublisher> logger)
         {
             _settings = settings;
             _client = client;
@@ -24,7 +28,7 @@ namespace ResumableFunctions.Publisher
         {
             await Publish(new MethodCall
             {
-                MethodUrn = methodUrn,
+                MethodData = new MethodData { MethodUrn = methodUrn },
                 Input = input,
                 Output = output,
                 ServiceName = serviceName
@@ -35,12 +39,13 @@ namespace ResumableFunctions.Publisher
         {
             try
             {
-                //call `/api/ResumableFunctions/ExternalCall`
-                //_functionHandler.QueuePushedCallProcessing(_pushedCall).Wait();
                 var serviceUrl = _settings.ServicesRegistry[methodCall.ServiceName];
                 var actionUrl =
                     $"{serviceUrl}api/ResumableFunctions/ExternalCall";
-                var resposne = await _client.PostAsJsonAsync(actionUrl, methodCall);
+                var body = MessagePackSerializer.Serialize(methodCall, ContractlessStandardResolver.Options);
+                //create a System.Net.Http.MultiPartFormDataContent
+                
+                var resposne = await _client.PostAsync(actionUrl, new ByteArrayContent(body));
                 resposne.EnsureSuccessStatusCode();
             }
             catch (Exception ex)
