@@ -89,13 +89,13 @@ public class MethodWait : Wait
         //Todo:validate input output type serialization
         if (!IsFirst && MatchExpression == null)
             FunctionState.AddError(
-                $"You didn't set the `MatchIfExpression` for wait [{Name}] that is not a first wait," +
+                $"You didn't set the `MatchExpression` for wait [{Name}] that is not a first wait," +
                 $"This will lead to no match for all calls," +
-                $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchIfExpression`," +
+                $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchExpression`," +
                 $"or use MatchAll() method.");
         if (IsFirst && MatchExpression == null)
             FunctionState.AddLog(
-                $"You didn't set the `MatchIfExpression` for first wait [{Name}]," +
+                $"You didn't set the `MatchExpression` for first wait [{Name}]," +
                 $"This will lead to all calls will be matched.",
                 LogType.Warning);
         if (SetDataExpression == null)

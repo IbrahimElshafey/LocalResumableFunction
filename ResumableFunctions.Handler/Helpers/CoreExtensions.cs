@@ -32,7 +32,7 @@ public static class CoreExtensions
         services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
         services.AddScoped<IRecycleBinService, RecycleBinService>();
         services.AddScoped<IReplayWaitProcessor, ReplayWaitProcessor>();
-        services.AddScoped<IWaitProcessor, WaitProcessor>();
+        services.AddScoped<IExpectedMatchesProcessor, ExpectedMatchesProcessor>();
         services.AddScoped<ICallProcessor, CallProcessor>();
         services.AddScoped<ICallPusher, CallPusher>();
         services.AddScoped<Scanner>();

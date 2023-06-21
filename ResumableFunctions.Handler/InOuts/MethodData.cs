@@ -134,7 +134,7 @@ namespace ResumableFunctions.Handler.InOuts
 
         internal bool Validate()
         {
-            if (MethodUrn == null)
+            if (string.IsNullOrWhiteSpace(MethodUrn))
                 throw new NullReferenceException($"For method ({this}) MethodUrn must not be null");
             return true;
         }

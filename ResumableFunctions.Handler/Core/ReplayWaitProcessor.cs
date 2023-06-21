@@ -194,7 +194,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 return mw;
             }
 
-            const string errorMsg = "Replay Go Before with ne match found no waits!!";
+            const string errorMsg = "Replay Go Before with new match found no waits!!";
             _logger.LogError(errorMsg);
             waitToReplay.FunctionState.AddError(errorMsg);
             throw new Exception(errorMsg);

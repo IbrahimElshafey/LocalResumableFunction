@@ -76,8 +76,8 @@ public abstract partial class ResumableFunction
                "No instance method like `void SetDependencies(Interface dep1,...)` found that set your dependencies.",
                LogType.Warning);
         }
-        setDependenciesMi.Invoke(this, inputs);
-        //CallSetDependencies(inputs, setDependenciesMi, parameters);
+        //setDependenciesMi.Invoke(this, inputs);
+        CallSetDependencies(inputs, setDependenciesMi, parameters);
     }
 
     private void CallSetDependencies(object[] inputs, MethodInfo mi, ParameterInfo[] parameterTypes)
@@ -92,6 +92,11 @@ public abstract partial class ResumableFunction
         var call = Expression.Call(instance, mi, depsParams);
         var lambda = Expression.Lambda(call, parameters);
         var compiledFunction = lambda.CompileFast();
-        compiledFunction.DynamicInvoke(this, inputs);
+        var paramsAll = new List<object>(inputs.Length)
+        {
+            this
+        };
+        paramsAll.AddRange(inputs);
+        compiledFunction.DynamicInvoke(paramsAll.ToArray());
     }
 }

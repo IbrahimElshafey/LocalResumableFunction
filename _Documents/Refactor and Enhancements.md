@@ -7,7 +7,7 @@
 
 
 # Enhancements
-* Function priority
+* Function=Matched waits priority
 	* How hangfire handle priority
 * Parameter check lib use
 * Performance Analysis

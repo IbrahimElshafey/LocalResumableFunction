@@ -3,6 +3,8 @@
 * Same DLL in two services
 * Time wait clone if first
 * Test replay
+* Review activate and deactivate function
+* Use IMaterializationInterceptor to set entity dependencies
 
 ## Core functions
 * Review logs to service , why first error only
@@ -10,7 +12,6 @@
 	* Remove index 
 		* [ParentWaitId] in [dbo].[Waits]
 * Review check after locks
-* Review activate and deactivate function
 * Remove direct use for DbContext
 * Review all places where database update occurs
 
@@ -28,11 +29,9 @@
 * Should I create new scope when initialize function instance??	ResumableFunction-Wait Functions.cs	46
 * Refine `GetMethodsInfo` query	ResumableFunctions.Handler	UiService.cs	161
 
-
-
-
-# External Waits (Will be separate projects)
-* Monitor network requests using reverse proxy and push MethodCalls [TCP Listener]
-	* https://github.com/microsoft/reverse-proxy
-* File/Folder Changes [File Watcher]
-* RabbitMQ or any service bus [Subscribe to event]
+# Eid Vaction Wok on 
+* Video Records & Documentation
+* Background Cleaning Job
+* Write unit tests
+* Finalize UI v1
+* Publisher project

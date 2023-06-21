@@ -10,7 +10,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Core
 {
-    internal class WaitProcessor : IWaitProcessor
+    internal class ExpectedMatchesProcessor : IExpectedMatchesProcessor
     {
         private readonly IFirstWaitProcessor _firstWaitProcessor;
         private readonly IRecycleBinService _recycleBinService;
@@ -18,7 +18,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IWaitsRepo _waitsRepo;
         private readonly IServiceProvider _serviceProvider;
 
-        private readonly ILogger<WaitProcessor> _logger;
+        private readonly ILogger<ExpectedMatchesProcessor> _logger;
         private readonly IBackgroundProcess _backgroundJobClient;
         private readonly FunctionDataContext _context;
         private readonly BackgroundJobExecutor _backgroundJobExecutor;
@@ -28,9 +28,9 @@ namespace ResumableFunctions.Handler.Core
         private MethodWait _methodWait;
         private PushedCall _pushedCall;
 
-        public WaitProcessor(
+        public ExpectedMatchesProcessor(
             IServiceProvider serviceProvider,
-            ILogger<WaitProcessor> logger,
+            ILogger<ExpectedMatchesProcessor> logger,
             IFirstWaitProcessor firstWaitProcessor,
             IRecycleBinService recycleBinService,
             IWaitsRepo waitsRepo,
@@ -58,15 +58,19 @@ namespace ResumableFunctions.Handler.Core
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
                 async () =>
                 {
-                    var waitForCall =
+                    var waitsForCall =
                         await _context
                         .WaitsForCalls
-                        .Where(x => x.PushedCallId == pushedCallId && x.FunctionId == functionId && x.MatchStatus == MatchStatus.PartiallyMatched)
+                        .Where(x =>
+                        x.PushedCallId == pushedCallId &&
+                        x.FunctionId == functionId &&
+                        (x.MatchStatus == MatchStatus.PartiallyMatched ||
+                            x.InstanceUpdateStatus == InstanceUpdateStatus.UpdateFailed))
                         .ToListAsync();
 
                     _pushedCall = await LoadPushedCall(pushedCallId);
 
-                    foreach (var expectedMatch in waitForCall)
+                    foreach (var expectedMatch in waitsForCall)
                     {
                         _waitCall = expectedMatch;
                         _methodWait = await LoadWait(expectedMatch.WaitId);
@@ -80,8 +84,8 @@ namespace ResumableFunctions.Handler.Core
                             ResumeExecution);
 
                         if (!isSuccess) continue;
-                        
-                        waitForCall.ForEach(x =>
+
+                        waitsForCall.ForEach(x =>
                             x.MatchStatus = x.MatchStatus == MatchStatus.PartiallyMatched ? MatchStatus.DuplicationCanceled : x.MatchStatus);
                         await _context.SaveChangesAsync();
                         break;
@@ -168,7 +172,9 @@ namespace ResumableFunctions.Handler.Core
                         $"Concurrency Exception occured when process wait [{_methodWait.Name}]." +
                         $"\nProcessing this wait will be scheduled.",
                         ex);
-                _backgroundJobClient.Schedule(() => ProcessFunctionExpectedMatches(_methodWait.Id, pushedCallId), TimeSpan.FromSeconds(2.5));
+                _backgroundJobClient.Schedule(() =>
+                    ProcessFunctionExpectedMatches(_methodWait.RequestedByFunctionId, pushedCallId),
+                    TimeSpan.FromSeconds(10));
                 return false;
             }
             return true;
@@ -210,7 +216,7 @@ namespace ResumableFunctions.Handler.Core
                     currentWait = parent;
 
                 } while (currentWait != null);
-                
+
             }
             catch (Exception)
             {

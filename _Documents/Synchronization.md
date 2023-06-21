@@ -1,13 +1,5 @@
 ﻿# Synchronization Scenarios
-* Two waits trying update same FunctionState [done]
-	* Using distributed lock for Update Function Data method
-	* Optimistic concurrency token will be validated and exception will be throw and hangfire will replay the task
-* First wait closed but new request come before create new one [done]
-	* Dont update the first wait , clone it 
-* Update pushed calls counter [Done]
-	* Seprate table and one record for each match
-* Database.EnsureCreated(); in same time from multiple services [Done]
-	* We should use inter services lock
+
 * Multiple scan process in same time [Done]
 	* Using distributed lock $"Scanner_StartServiceScanning_{_currentServiceName}"
 * Different services may try to add same MethodGroup at same time 
