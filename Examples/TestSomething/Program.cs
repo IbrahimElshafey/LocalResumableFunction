@@ -4,7 +4,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        switch (3)
+        switch (11)
         {
             case 1:
                 TestTreeCascadeAction(); break;
@@ -30,7 +30,12 @@ internal class Program
             case 10:
                 new GetMethodInfoTest().Run();
                 break;
+            case 11:
+                new TimerTest().Run();
+                break;
         }
+
+        Console.ReadLine();
     }
 
     private static async Task TestAspectInjectorAsync()

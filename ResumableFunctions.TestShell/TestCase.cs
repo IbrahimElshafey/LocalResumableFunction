@@ -142,5 +142,13 @@ namespace ResumableFunctions.TestShell
                 query = query.Where(x => x.FunctionStateId == instanceId);
             return await query.OrderBy(x => x.Id).ToListAsync();
         }
+
+        public async Task<List<LogRecord>> GetErrors()
+        {
+            return
+                await _context.Logs
+                .Where(x => x.Type == LogType.Error)
+                .ToListAsync();
+        }
     }
 }

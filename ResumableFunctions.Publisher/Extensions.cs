@@ -12,7 +12,6 @@ namespace ResumableFunctions.Publisher
             services.AddSingleton(typeof(IPublisherSettings), settings);
             services.AddSingleton<HttpClient>();
             services.AddSingleton(typeof(ICallPublisher), settings.CallPublisherType);
-            
         }
 
         public static void UseResumableFunctionsPublisher(this IHost app)

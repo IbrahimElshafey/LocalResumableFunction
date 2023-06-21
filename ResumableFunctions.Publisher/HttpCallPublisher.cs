@@ -45,8 +45,11 @@ namespace ResumableFunctions.Publisher
                 var body = MessagePackSerializer.Serialize(methodCall, ContractlessStandardResolver.Options);
                 //create a System.Net.Http.MultiPartFormDataContent
                 
-                var resposne = await _client.PostAsync(actionUrl, new ByteArrayContent(body));
-                resposne.EnsureSuccessStatusCode();
+                var response = await _client.PostAsync(actionUrl, new ByteArrayContent(body));
+                response.EnsureSuccessStatusCode();
+                var result = await response.Content.ReadAsStringAsync();
+                //result may be 1 or -1
+                //todo:queue failed requests to be processed later here and in the below exception
             }
             catch (Exception ex)
             {

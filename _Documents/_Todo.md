@@ -14,6 +14,7 @@
 * Review check after locks
 * Remove direct use for DbContext
 * Review all places where database update occurs
+* Sql server settings (password,username) or connection string
 
 ## Todos in code
 * Handle clone time wait FirstWaitProcessor.cs	42
@@ -29,9 +30,10 @@
 * Should I create new scope when initialize function instance??	ResumableFunction-Wait Functions.cs	46
 * Refine `GetMethodsInfo` query	ResumableFunctions.Handler	UiService.cs	161
 
-# Eid Vaction Wok on 
+# Eid Vaction Wok on (ordered by priority)
+* Hot Todos
+* Finalize UI v1
+* Write unit tests
 * Video Records & Documentation
 * Background Cleaning Job
-* Write unit tests
-* Finalize UI v1
 * Publisher project

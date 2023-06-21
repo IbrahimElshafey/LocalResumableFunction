@@ -38,12 +38,12 @@ namespace ResumableFunctions.AspNetService
         }
 
         [HttpPost(nameof(ExternalCall))]
-        public async Task ExternalCall()
+        public async Task<int> ExternalCall()
         {
             try
             {
-                var x = await Request.BodyReader.ReadAsync();
-                var bytes = x.Buffer.ToArray();
+                var body = await Request.BodyReader.ReadAsync();
+                var bytes = body.Buffer.ToArray();
                 var serialzer = new BinaryToObjectConverter();
                 var externalCall = serialzer.ConvertToObject<ExternalCallArgs>(bytes);
                 if (externalCall == null)
@@ -59,10 +59,12 @@ namespace ResumableFunctions.AspNetService
                 };
                 pushedCall.MethodData.CanPublishFromExternal = true;
                 await _callPusher.PushExternalCall(pushedCall, externalCall.ServiceName);
+                return 1;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error when handle external method call.");
+                return -1;
             }
         }
     }

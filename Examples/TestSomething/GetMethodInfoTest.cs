@@ -6,7 +6,6 @@ using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.Helpers.Expressions;
 
 namespace TestSomething;
-
 internal class GetMethodInfoTest
 {
     internal void Run()

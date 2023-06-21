@@ -1,5 +1,6 @@
 ﻿# Todo
 * RegsiterAssemblies(names,functions test)
+* Get Logs
 * Get instances for pushed call
 * Get matched waits for pushed call
 
