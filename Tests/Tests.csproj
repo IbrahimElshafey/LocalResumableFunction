@@ -24,7 +24,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Examples\ClientOnboarding\ClientOnboarding.csproj" />
-    <ProjectReference Include="..\ResumableFunctions.TestShell\ResumableFunctions.TestShell.csproj" />
   </ItemGroup>
 
 </Project>

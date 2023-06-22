@@ -2,8 +2,7 @@ using ClientOnboarding.InOuts;
 using ClientOnboarding.Services;
 using ClientOnboarding.Workflow;
 using Microsoft.Extensions.DependencyInjection;
-using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.TestShell;
+using ResumableFunctions.Handler.TestShell;
 
 namespace Tests
 {

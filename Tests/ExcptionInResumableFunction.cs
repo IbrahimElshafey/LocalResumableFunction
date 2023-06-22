@@ -1,7 +1,7 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.TestShell;
+using ResumableFunctions.Handler.TestShell;
 
 namespace Tests
 {

@@ -1,5 +1,6 @@
 ﻿using FastExpressionCompiler;
 using Hangfire;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,7 +16,7 @@ using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace ResumableFunctions.TestShell
+namespace ResumableFunctions.Handler.TestShell
 {
     public class TestCase
     {
@@ -24,15 +25,15 @@ namespace ResumableFunctions.TestShell
         private HostApplicationBuilder _builder;
         private readonly Type[] _types;
         private readonly string _testName;
-        private readonly InMemorySettings _settings;
+        private readonly TestSettings _settings;
 
         public TestCase(string testName, params Type[] types)
         {
             _testName = testName;
-            _settings = new InMemorySettings(testName);
+            _settings = new TestSettings(testName);
             SetBuilder();
             CancelSqliteEditor();
-            DeleteDbs();
+            DeleteDb();
             _types = types;
         }
 
@@ -50,12 +51,20 @@ namespace ResumableFunctions.TestShell
             _builder.Services.AddResumableFunctionsCore(_settings);
         }
 
-        private void DeleteDbs()
+        private void DeleteDb()
         {
-            if (File.Exists($"{_testName}_Hangfire.db"))
-                File.Delete($"{_testName}_Hangfire.db");
-            if (File.Exists($"{_testName}_Waits.db"))
-                File.Delete($"{_testName}_Waits.db");
+            try
+            {
+                using var connection = new SqlConnection("Server=(localdb)\\MSSQLLocalDB;Database=master;");
+                var sqlCommandText = $"DROP DATABASE [{_testName}]";
+                using var sqlCommand = new SqlCommand(sqlCommandText, connection);
+                sqlCommand.ExecuteNonQuery();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            
         }
 
         public IServiceCollection RegisteredServices => _builder.Services;

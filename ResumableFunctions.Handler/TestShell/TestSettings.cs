@@ -4,20 +4,22 @@ using Medallion.Threading.WaitHandles;
 using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.InOuts;
 
-namespace ResumableFunctions.TestShell
+namespace ResumableFunctions.Handler.TestShell
 {
-    internal class InMemorySettings : IResumableFunctionsSettings
+    internal class TestSettings : IResumableFunctionsSettings
     {
 
         private readonly string _testName;
 
-        public InMemorySettings(string testName)
+        public TestSettings(string testName)
         {
             _testName = testName;
         }
         public IGlobalConfiguration HangfireConfig => null;
 
-        public DbContextOptionsBuilder WaitsDbConfig => new DbContextOptionsBuilder().UseSqlite($"DataSource={_testName}_Waits.db");
+        public DbContextOptionsBuilder WaitsDbConfig =>
+            new DbContextOptionsBuilder()
+            .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={_testName}_Waits;");
 
         public string CurrentServiceUrl => null;
 
