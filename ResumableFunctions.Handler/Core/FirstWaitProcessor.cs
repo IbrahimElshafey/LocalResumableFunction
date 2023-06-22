@@ -57,10 +57,14 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 {
                     timeWait.TimeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
                         () => new LocalRegisteredMethods().TimeWait(
-                        new TimeWaitInput { TimeMatchId = timeWait.UniqueMatchId }), timeWait.TimeToWait);
-                    timeWait.TimeWaitMethod.MandatoryPart = "#" + timeWait.UniqueMatchId;
+                        new TimeWaitInput
+                        {
+                            TimeMatchId = firstMatchedMethodWait.MandatoryPart.Substring(1)
+                        }), timeWait.TimeToWait);
+                    timeWait.TimeWaitMethod.MandatoryPart = firstMatchedMethodWait.MandatoryPart;
+                    timeWait.IgnoreJobCreation = true;
                 }
-                
+
             });
             //firstWaitClone.FunctionState.AddLog(
             //    $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.", LogType.Info);

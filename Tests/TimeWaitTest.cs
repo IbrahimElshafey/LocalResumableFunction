@@ -16,13 +16,12 @@ namespace Tests
         {
             var test = new TestCase(nameof(TestTimeWaitAtStrat_Test), typeof(TimeWaitWorkflow));
             await test.ScanTypes();
-            var waits = await test.GetWaits(null, true);
             await RoundTest(test, 1);
 
-            await Task.Delay(TimeSpan.FromSeconds(3));
+            await Task.Delay(TimeSpan.FromSeconds(3.5));
             await RoundTest(test, 2);
 
-            await Task.Delay(TimeSpan.FromSeconds(3));
+            await Task.Delay(TimeSpan.FromSeconds(3.5));
             await RoundTest(test, 3);
         }
 
@@ -31,9 +30,9 @@ namespace Tests
             var pushedCalls = await test.GetPushedCalls();
             var waits = await test.GetWaits(null, true);
             var instances = await test.GetInstances<TimeWaitWorkflow>(true);
-            Assert.True(pushedCalls.Count == round - 1);
-            Assert.True(instances.Count == round);
-            Assert.True(waits.Count == round);
+            Assert.Equal(round - 1, pushedCalls.Count);
+            Assert.Equal(round, waits.Count);
+            Assert.Equal(round, instances.Count);
             var errors = await test.GetErrors();
             Assert.Empty(errors);
         }
@@ -44,7 +43,7 @@ namespace Tests
         [ResumableFunctionEntryPoint("TestTimeWait")]
         public async IAsyncEnumerable<Wait> TestTimeWaitAtStrat()
         {
-            yield return Wait(TimeSpan.FromSeconds(3));
+            yield return Wait(TimeSpan.FromSeconds(2.5));
             Console.WriteLine("Time wait at start matched.");
         }
     }

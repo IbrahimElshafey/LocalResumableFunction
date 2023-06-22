@@ -15,6 +15,7 @@ public class TimeWait : Wait
     }
 
     public TimeSpan TimeToWait { get; internal set; }
+    public bool IgnoreJobCreation { get; internal set; }
     internal string UniqueMatchId { get; set; }
     internal MethodWait TimeWaitMethod
     {

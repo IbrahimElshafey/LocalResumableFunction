@@ -142,9 +142,10 @@ internal partial class WaitsRepo
 
         var methodId = await _methodIdsRepo.GetId(timeWaitMethod);
 
-        timeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
-            () => new LocalRegisteredMethods().TimeWait(
-                    new TimeWaitInput { TimeMatchId = timeWait.UniqueMatchId }), timeWait.TimeToWait);
+        if (!timeWait.IgnoreJobCreation)
+            timeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
+                () => new LocalRegisteredMethods().TimeWait(
+                        new TimeWaitInput { TimeMatchId = timeWait.UniqueMatchId }), timeWait.TimeToWait);
 
         timeWaitMethod.ServiceId = _settings.CurrentServiceId;
         timeWaitMethod.MethodToWaitId = methodId.MethodId;
