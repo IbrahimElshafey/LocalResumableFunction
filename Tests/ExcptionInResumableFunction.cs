@@ -5,7 +5,7 @@ using ResumableFunctions.TestShell;
 
 namespace Tests
 {
-    public partial class ExcptionInResumableFunction_Test
+    public class ExcptionInResumableFunction_Test
     {
         [Fact]
         public async Task ExceptionAtStart_Test()

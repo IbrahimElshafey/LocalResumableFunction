@@ -78,6 +78,7 @@ namespace ResumableFunctions.TestShell
             var scanner = scope.ServiceProvider.GetService<Scanner>();
             foreach (var type in _types)
                 await scanner.RegisterMethods(type, serviceData);
+            await scanner.RegisterMethods(typeof(LocalRegisteredMethods), serviceData);
             foreach (var type in _types)
                 if (type.IsSubclassOf(typeof(ResumableFunction)))
                     await scanner.RegisterResumableFunctionsInClass(type);
@@ -98,7 +99,7 @@ namespace ResumableFunctions.TestShell
             });
             inputVisitor.Visit(methodSelector);
             if (input != null)
-               return await SimulateMethodCall(methodSelector, input, output);
+                return await SimulateMethodCall(methodSelector, input, output);
             else
                 throw new Exception("Can't get input");
         }
@@ -129,12 +130,14 @@ namespace ResumableFunctions.TestShell
         }
 
         private FunctionDataContext _context => CurrentApp.Services.GetService<FunctionDataContext>();
-        public async Task<List<ResumableFunctionState>> GetInstances<T>()
+        public async Task<List<ResumableFunctionState>> GetInstances<T>(bool includeNew = false)
         {
-            var instances = await _context
-                .FunctionStates
-                .Where(x => x.Status != FunctionStatus.New)
-                .ToListAsync();
+            var query = _context.FunctionStates.AsQueryable();
+            if (includeNew is false)
+            {
+                query = query.Where(x => x.Status != FunctionStatus.New);
+            }
+            var instances = await query.ToListAsync();
             foreach (var instnace in instances)
             {
                 await _context.Entry(instnace).ReloadAsync();
@@ -155,11 +158,13 @@ namespace ResumableFunctions.TestShell
         }
 
 
-        public async Task<List<Wait>> GetWaits(int? instanceId = null)
+        public async Task<List<Wait>> GetWaits(int? instanceId = null, bool includeFirst = false)
         {
-            var query = _context.Waits.Where(x => !x.IsFirst);
+            var query = _context.Waits.AsQueryable();
             if (instanceId != null)
                 query = query.Where(x => x.FunctionStateId == instanceId);
+            if (includeFirst is false)
+                query = query.Where(x => !x.IsFirst);
             return await query.OrderBy(x => x.Id).ToListAsync();
         }
 
@@ -170,5 +175,7 @@ namespace ResumableFunctions.TestShell
                 .Where(x => x.Type == LogType.Error)
                 .ToListAsync();
         }
+
+
     }
 }

@@ -128,14 +128,10 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> CloneIfFirst()
         {
-            var pushedCallId = _pushedCall.Id;
             if (_methodWait.IsFirst)
             {
-                var waitCall = await _context
-                    .WaitsForCalls
-                    .FirstAsync(x => x.PushedCallId == pushedCallId && x.WaitId == _methodWait.Id);
                 _methodWait = await _firstWaitProcessor.CloneFirstWait(_methodWait);
-                waitCall.WaitId = _methodWait.Id;
+                _waitCall.WaitId = _methodWait.Id;
                 await _context.SaveChangesAsync();
             }
             return true;

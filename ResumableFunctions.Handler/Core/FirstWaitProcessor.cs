@@ -18,6 +18,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private readonly IServiceProvider _serviceProvider;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IResumableFunctionsSettings _settings;
+    private readonly IBackgroundProcess _backgroundJobClient;
 
     public FirstWaitProcessor(
         ILogger<FirstWaitProcessor> logger,
@@ -26,7 +27,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         IMethodIdsRepo methodIdentifierRepo,
         IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor,
-        IResumableFunctionsSettings settings)
+        IResumableFunctionsSettings settings,
+        IBackgroundProcess backgroundJobClient)
     {
         _logger = logger;
         _context = context;
@@ -35,6 +37,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _waitsRepository = waitsRepository;
         _backgroundJobExecutor = backgroundJobExecutor;
         _settings = settings;
+        _backgroundJobClient = backgroundJobClient;
     }
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
@@ -46,10 +49,18 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         {
             var firstWaitClone = await GetFirstWait(resumableFunction, false);
             firstWaitClone.Status = WaitStatus.Temp;
-            firstWaitClone.ActionOnWaitsTree(x =>
+            firstWaitClone.ActionOnWaitsTree(wait =>
             {
-                x.IsFirst = false;
-                x.FunctionState.StateObject = firstMatchedMethodWait?.FunctionState?.StateObject;
+                wait.IsFirst = false;
+                wait.FunctionState.StateObject = firstMatchedMethodWait?.FunctionState?.StateObject;
+                if (wait is TimeWait timeWait)
+                {
+                    timeWait.TimeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
+                        () => new LocalRegisteredMethods().TimeWait(
+                        new TimeWaitInput { TimeMatchId = timeWait.UniqueMatchId }), timeWait.TimeToWait);
+                    timeWait.TimeWaitMethod.MandatoryPart = "#" + timeWait.UniqueMatchId;
+                }
+                
             });
             //firstWaitClone.FunctionState.AddLog(
             //    $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.", LogType.Info);
@@ -71,6 +82,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 .FirstAsync(x => x.Id == firstMatchedMethodWait.TemplateId);
             currentMw.TemplateId = waitTemplate.Id;
             currentMw.Template = waitTemplate;
+            currentMw.IsFirst = false;
             currentMw.LoadExpressions();
             await _context.SaveChangesAsync();
             firstWaitClone.Status = WaitStatus.Waiting;
@@ -93,8 +105,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             {
                 try
                 {
-                    var mi = await _methodIdentifierRepo.GetResumableFunction(functionId);
-                    resumableFunction = mi.MethodInfo;
+                    var resumableFunctionId = await _methodIdentifierRepo.GetResumableFunction(functionId);
+                    resumableFunction = resumableFunctionId.MethodInfo;
                     WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
                     var firstWait = await GetFirstWait(resumableFunction, true);
                     if (firstWait != null)

@@ -1,6 +1,6 @@
 ﻿# Hot Todo
-* New scan should not delete existing method wait and groups if exist
 * Same DLL in two services
+* New scan should not delete existing method wait and groups if exist
 * Time wait clone if first
 * Test replay
 * Review activate and deactivate function

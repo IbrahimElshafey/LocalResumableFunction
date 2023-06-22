@@ -138,35 +138,14 @@ internal partial class WaitsRepo
 
     private async Task HandleTimeWaitReques(TimeWait timeWait)
     {
-        var timeWaitMethod =
-            new MethodWait<TimeWaitInput, bool>(typeof(LocalRegisteredMethods)
-                .GetMethod("TimeWait"));
-        TimeWaitSetDataExpression(timeWait, timeWaitMethod);
-        timeWaitMethod.CurrentFunction = timeWait.CurrentFunction;
+        var timeWaitMethod = timeWait.TimeWaitMethod;
 
         var methodId = await _methodIdsRepo.GetId(timeWaitMethod);
-        var jobId = _backgroundJobClient.Schedule(
-            () =>
-                new LocalRegisteredMethods().TimeWait(new TimeWaitInput
-                {
-                    //ServiceId = _settings.CurrentServiceId,
-                    //GroupId = methodId.GroupId,
-                    TimeMatchId = timeWait.UniqueMatchId,
-                    //FunctionId = timeWait.RequestedByFunctionId,
-                    //MethodId = methodId.MethodId
-                }), timeWait.TimeToWait);
-        timeWaitMethod.ParentWait = timeWait.ParentWait;
-        timeWaitMethod.FunctionState = timeWait.FunctionState;
-        timeWaitMethod.RequestedByFunctionId = timeWait.RequestedByFunctionId;
-        timeWaitMethod.StateBeforeWait = timeWait.StateBeforeWait;
-        timeWaitMethod.StateAfterWait = timeWait.StateAfterWait;
-        timeWaitMethod.ExtraData =
-            new WaitExtraData
-            {
-                TimeToWait = timeWait.TimeToWait,
-                UniqueMatchId = timeWait.UniqueMatchId,
-                JobId = jobId,
-            };
+
+        timeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
+            () => new LocalRegisteredMethods().TimeWait(
+                    new TimeWaitInput { TimeMatchId = timeWait.UniqueMatchId }), timeWait.TimeToWait);
+
         timeWaitMethod.ServiceId = _settings.CurrentServiceId;
         timeWaitMethod.MethodToWaitId = methodId.MethodId;
         timeWaitMethod.MethodGroupToWaitId = methodId.GroupId;
@@ -176,29 +155,7 @@ internal partial class WaitsRepo
         _context.Entry(timeWait).State = EntityState.Detached;
     }
 
-    private static void TimeWaitSetDataExpression(TimeWait timeWait, MethodWait<TimeWaitInput, bool> methodWait)
-    {
-        var functionType = typeof(Func<,,>)
-            .MakeGenericType(
-                typeof(TimeWaitInput),
-                typeof(bool),
-                typeof(bool));
-        var inputParameter = Expression.Parameter(typeof(TimeWaitInput), "input");
-        var outputParameter = Expression.Parameter(typeof(bool), "output");
-        if (timeWait.SetDataExpression != null)
-        {
-            var setDataExpression = Expression.Lambda(
-                functionType,
-                timeWait.SetDataExpression.Body,
-                inputParameter,
-                outputParameter);
-            methodWait
-                .SetData((Expression<Func<TimeWaitInput, bool, bool>>)setDataExpression);
-        }
 
-        // ReSharper disable once EqualExpressionComparison
-        methodWait.MatchIf((timeWaitInput, result) => timeWaitInput.TimeMatchId == "" && timeWaitInput.FakeProp == null);
-    }
 
     public Task AddWait(Wait wait)
     {

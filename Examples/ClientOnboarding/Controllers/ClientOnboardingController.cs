@@ -1,6 +1,9 @@
 using ClientOnboarding.InOuts;
 using ClientOnboarding.Services;
 using Microsoft.AspNetCore.Mvc;
+using ResumableFunctions.Handler;
+using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.InOuts;
 
 namespace ClientOnboarding.Controllers
 {
@@ -38,6 +41,16 @@ namespace ClientOnboarding.Controllers
         public MeetingResult SendMeetingResult(int meetingId)
         {
             return service.SendMeetingResult(meetingId);
+        }
+    }
+
+    public class TimeWaitWorkflow : ResumableFunction
+    {
+        [ResumableFunctionEntryPoint("TestTimeWait")]
+        public async IAsyncEnumerable<Wait> TestTimeWaitAtStrat()
+        {
+            yield return Wait(TimeSpan.FromDays(1));
+            Console.WriteLine("Time wait at start matched.");
         }
     }
 }

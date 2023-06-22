@@ -8,10 +8,11 @@ public abstract partial class ResumableFunction
     {
         return new TimeWait
         {
-            Name = nameof(TimeWait),
+            Name = $"#{nameof(TimeWait)}#",
             TimeToWait = timeToWait,
             UniqueMatchId = Guid.NewGuid().ToString(),
-            CurrentFunction = this
+            CurrentFunction = this,
+            IsNode = true,
         };
     }
     

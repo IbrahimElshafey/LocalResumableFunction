@@ -44,7 +44,8 @@ public class MethodWait : Wait
         try
         {
             LoadExpressions();
-            var setDataExpression = SetDataExpression.CompileFast();
+            if (SetDataExpression == null) return true;
+                var setDataExpression = SetDataExpression.CompileFast();
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog(
@@ -68,7 +69,7 @@ public class MethodWait : Wait
             LoadExpressions();
             if (IsFirst && MatchExpression == null)
                 return true;
-            if (MethodToWait.MethodInfo == 
+            if (MethodToWait.MethodInfo ==
                 CoreExtensions.GetMethodInfo<LocalRegisteredMethods>(x => x.TimeWait))
                 return true;
             var check = MatchExpression.CompileFast();

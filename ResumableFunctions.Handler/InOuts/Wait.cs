@@ -199,6 +199,8 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 
     internal MethodWait GetChildMethodWait(string name)
     {
+        if (this is TimeWait tw)
+            return tw.TimeWaitMethod;
         var result = this
             .Flatten(x => x.ChildWaits)
             .FirstOrDefault(x => x.Name == name && x is MethodWait mw);
