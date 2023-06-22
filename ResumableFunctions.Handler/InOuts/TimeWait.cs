@@ -36,7 +36,7 @@ public class TimeWait : Wait
                     TimeToWait = TimeToWait,
                     UniqueMatchId = UniqueMatchId,
                 };
-            _timeMethodWait.MatchIf((timeWaitInput, result) => timeWaitInput.TimeMatchId == "" && timeWaitInput.FakeProp == null);
+            _timeMethodWait.MatchIf((timeWaitInput, result) => timeWaitInput.TimeMatchId == "");
             return _timeMethodWait;
         }
     }

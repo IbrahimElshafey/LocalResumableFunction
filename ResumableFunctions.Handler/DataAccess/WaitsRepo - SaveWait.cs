@@ -152,7 +152,7 @@ internal partial class WaitsRepo
         timeWaitMethod.MethodGroupToWaitId = methodId.GroupId;
 
         await SaveMethodWait(timeWaitMethod);
-        timeWaitMethod.MandatoryPart = "#" + timeWait.UniqueMatchId;
+        timeWaitMethod.MandatoryPart = timeWait.UniqueMatchId;
         _context.Entry(timeWait).State = EntityState.Detached;
     }
 

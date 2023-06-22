@@ -38,7 +38,7 @@ namespace Tests
             Assert.Equal(round, instances.Count);
             var errors = await test.GetErrors();
             Assert.Empty(errors);
-            return (waits.First(x => x.IsFirst) as MethodWait).MandatoryPart.Substring(1);
+            return (waits.First(x => x.IsFirst) as MethodWait).MandatoryPart;
         }
     }
 
