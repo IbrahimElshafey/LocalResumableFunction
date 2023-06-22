@@ -21,7 +21,7 @@ public class TestTimeExample : ProjectApprovalExample
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .SetData((input, output) => ManagerOneApproval == output),
                 Wait(TimeSpan.FromDays(2))
-            .SetData(() => TimerMatched == true)
+            .SetData(x => TimerMatched == true)
         ).First();
 
         if (TimerMatched)

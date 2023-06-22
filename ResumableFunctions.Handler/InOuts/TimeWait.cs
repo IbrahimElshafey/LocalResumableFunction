@@ -41,21 +41,21 @@ public class TimeWait : Wait
         }
     }
 
-    public Wait SetData(Expression<Func<bool>> value)
+    public Wait SetData(Expression<Func<TimeWaitInput, bool>> setDataExp)
     {
 
-        if (value != null)
+        if (setDataExp != null)
         {
             var functionType = typeof(Func<,,>)
                 .MakeGenericType(
                  typeof(TimeWaitInput),
                  typeof(bool),
                  typeof(bool));
-            var inputParameter = Expression.Parameter(typeof(TimeWaitInput), "input");
+            var inputParameter = setDataExp.Parameters[0];
             var outputParameter = Expression.Parameter(typeof(bool), "output");
             var setDataExpression = Expression.Lambda(
                 functionType,
-                value.Body,
+                setDataExp.Body,
                 inputParameter,
                 outputParameter);
             _timeMethodWait
