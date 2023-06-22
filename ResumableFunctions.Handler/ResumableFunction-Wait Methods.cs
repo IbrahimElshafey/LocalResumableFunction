@@ -7,6 +7,17 @@ public abstract partial class ResumableFunction
 {
 
     internal MethodInfo CurrentResumableFunction { get; set; }
+    protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(string name, Func<TInput, TOutput> method)
+    {
+        return new MethodWait<TInput, TOutput>(method)
+        {
+            Name = name,
+            WaitType = WaitType.MethodWait,
+            IsNode = true,
+            CurrentFunction = this,
+        };
+    }
+
     protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(string name, Func<TInput, Task<TOutput>> method)
     {
         return new MethodWait<TInput, TOutput>(method)
@@ -18,16 +29,7 @@ public abstract partial class ResumableFunction
         };
     }
 
-    protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(string name, Func<TInput, TOutput> method)
-    {
-        return new MethodWait<TInput, TOutput>(method)
-        {
-            Name = name,
-            WaitType = WaitType.MethodWait,
-            IsNode = true,
-            CurrentFunction = this,
-        };
-    }
+    
 
     protected WaitsGroup Wait(string name, params MethodWait[] manyMethodsWait)
     {

@@ -1,4 +1,5 @@
-﻿using Hangfire;
+﻿using FastExpressionCompiler;
+using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,6 +9,7 @@ using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
 using System.Diagnostics;
 using System.Linq.Expressions;
@@ -82,11 +84,29 @@ namespace ResumableFunctions.TestShell
         }
 
 
+        //todo:enhance this to take paramters in method call
+        public async Task<int> SimulateMethodCall<ClassType>(
+           Expression<Func<ClassType, object>> methodSelector,
+           object output)
+        {
+            object input = null;
+            var inputVisitor = new GenericVisitor();
+            inputVisitor.OnVisitCall(call =>
+            {
+                input = Expression.Lambda(call.Arguments[0]).CompileFast().DynamicInvoke();
+                return call;
+            });
+            inputVisitor.Visit(methodSelector);
+            if (input != null)
+               return await SimulateMethodCall(methodSelector, input, output);
+            else
+                throw new Exception("Can't get input");
+        }
 
         public async Task<int> SimulateMethodCall<ClassType>(
             Expression<Func<ClassType, object>> methodSelector,
             object input,
-            object outPut)
+            object output)
         {
             var methodInfo = CoreExtensions.GetMethodInfo(methodSelector);
             var pusher = CurrentApp.Services.GetService<ICallPusher>();
@@ -97,7 +117,7 @@ namespace ResumableFunctions.TestShell
                     Data =
                     {
                         Input= input,
-                        Output= outPut//may be async task
+                        Output= output//may be async task
                     },
                     MethodData = new MethodData(methodInfo)
                     {

@@ -13,7 +13,7 @@ namespace Tests
         public async Task Test_ClientOnBoarding_NoSimulate()
         {
             var test = new TestCase(
-                "Test_ClientOnBoarding_NS",
+                nameof(Test_ClientOnBoarding_NoSimulate),
                 typeof(ClientOnboardingService),
                 typeof(ClientOnboardingWorkflow));
             test.RegisteredServices.AddScoped<IClientOnboardingService, ClientOnboardingService>();

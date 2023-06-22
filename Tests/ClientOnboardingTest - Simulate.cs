@@ -13,7 +13,7 @@ namespace Tests
         public async Task Test_ClientOnBoarding_SimulateCalls()
         {
             var test = new TestCase(
-                "Test_ClientOnBoarding_S",
+                nameof(Test_ClientOnBoarding_SimulateCalls),
                 typeof(ClientOnboardingService),
                 typeof(ClientOnboardingWorkflow));
 
