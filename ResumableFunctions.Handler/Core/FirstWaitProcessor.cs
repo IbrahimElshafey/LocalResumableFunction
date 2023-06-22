@@ -42,7 +42,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
     {
-        //todo:handle clone time wait
         var resumableFunction = firstMatchedMethodWait.RequestedByFunction.MethodInfo;
 
         try

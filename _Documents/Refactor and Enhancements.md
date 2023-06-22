@@ -26,3 +26,6 @@
 * Replace HttpHangfire with abstraction to enable queue based communication
 * How can I benefit from Azure Service Fabric
 	* https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-overview
+* Optimize wait table indexes to enable fast wait insertion
+	* Remove index 
+		* [ParentWaitId] in [dbo].[Waits]
