@@ -13,9 +13,9 @@ namespace Tests
     public partial class TimeWaitTests
     {
         [Fact]
-        public async Task TestTimeWaitAtStrat_Test()
+        public async Task TestTimeWaitAtStart_Test()
         {
-            var test = new TestCase(nameof(TestTimeWaitAtStrat_Test), typeof(TimeWaitWorkflow));
+            var test = new TestCase(nameof(TestTimeWaitAtStart_Test), typeof(TimeWaitWorkflow));
             await test.ScanTypes();
             var timeWaitId = await RoundTest(test, 1);
 
@@ -38,7 +38,7 @@ namespace Tests
             Assert.Equal(round, instances.Count);
             var errors = await test.GetErrors();
             Assert.Empty(errors);
-            return (waits.First(x => x.IsFirst) as MethodWait).MandatoryPart;
+            return (waits.First(x => x.IsFirst) as MethodWait)?.MandatoryPart;
         }
     }
 
@@ -47,7 +47,7 @@ namespace Tests
         public string TimeWaitId { get; set; }
 
         [ResumableFunctionEntryPoint("TestTimeWait")]
-        public async IAsyncEnumerable<Wait> TestTimeWaitAtStrat()
+        public async IAsyncEnumerable<Wait> TestTimeWaitAtStart()
         {
             yield return
                 Wait(TimeSpan.FromDays(2))

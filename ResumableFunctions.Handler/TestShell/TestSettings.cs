@@ -19,7 +19,7 @@ namespace ResumableFunctions.Handler.TestShell
 
         public DbContextOptionsBuilder WaitsDbConfig =>
             new DbContextOptionsBuilder()
-            .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={_testName}_Waits;");
+            .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={_testName};");
 
         public string CurrentServiceUrl => null;
 

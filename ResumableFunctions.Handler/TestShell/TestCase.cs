@@ -12,9 +12,12 @@ using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
+using System.Data;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Reflection;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
+using System.Threading;
 
 namespace ResumableFunctions.Handler.TestShell
 {
@@ -30,20 +33,12 @@ namespace ResumableFunctions.Handler.TestShell
         public TestCase(string testName, params Type[] types)
         {
             _testName = testName;
+            DeleteDb();
             _settings = new TestSettings(testName);
             SetBuilder();
-            CancelSqliteEditor();
-            DeleteDb();
             _types = types;
         }
 
-        private void CancelSqliteEditor()
-        {
-            foreach (var process in Process.GetProcessesByName("DB Browser for SQLite"))
-            {
-                process.Kill(true);
-            }
-        }
 
         private void SetBuilder()
         {
@@ -55,10 +50,10 @@ namespace ResumableFunctions.Handler.TestShell
         {
             try
             {
-                using var connection = new SqlConnection("Server=(localdb)\\MSSQLLocalDB;Database=master;");
-                var sqlCommandText = $"DROP DATABASE [{_testName}]";
-                using var sqlCommand = new SqlCommand(sqlCommandText, connection);
-                sqlCommand.ExecuteNonQuery();
+                var dbConfig = new DbContextOptionsBuilder()
+                    .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={_testName};");
+                var context = new DbContext(dbConfig.Options);
+                var s=context.Database.EnsureDeleted();
             }
             catch (Exception ex)
             {
