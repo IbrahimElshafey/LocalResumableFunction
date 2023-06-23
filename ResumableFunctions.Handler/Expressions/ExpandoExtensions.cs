@@ -2,7 +2,7 @@
 using MessagePack;
 using MessagePack.Resolvers;
 
-namespace ResumableFunctions.Handler.Helpers.Expressions
+namespace ResumableFunctions.Handler.Expressions
 {
     public static class ExpandoExtensions
     {

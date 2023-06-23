@@ -3,8 +3,8 @@ using FastExpressionCompiler;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core;
+using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;

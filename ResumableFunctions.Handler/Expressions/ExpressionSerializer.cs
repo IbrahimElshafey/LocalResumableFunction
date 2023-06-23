@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions.Bonsai.Serialization;
 using Nuqleon.Json.Serialization;
 using Json = Nuqleon.Json.Expressions;
-namespace ResumableFunctions.Handler.Helpers.Expressions
+namespace ResumableFunctions.Handler.Expressions
 {
     public sealed class ExpressionSerializer : BonsaiExpressionSerializer
     {

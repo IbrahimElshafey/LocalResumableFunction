@@ -10,7 +10,7 @@ namespace Tests
         [Fact]
         public async Task ExceptionAtStart_Test()
         {
-            var test = new TestCase(nameof(ExceptionAtStart_Test), typeof(ExceptionBeforeFirstWait));
+            var test = new TestCase(nameof(ExceptionAtStart_Test), typeof(ExceptionsInFunction));
             await test.ScanTypes();
             var errorLogs = await test.GetLogs();
             Assert.True(errorLogs.Count > 0);
@@ -19,17 +19,18 @@ namespace Tests
         [Fact]
         public async Task ExceptionAfterFirstWait_Test()
         {
-            var test = new TestCase(nameof(ExceptionAfterFirstWait_Test), typeof(ExceptionAfterFirstWait));
+            var test = new TestCase(nameof(ExceptionAfterFirstWait_Test), typeof(ExceptionsInFunction));
             await test.ScanTypes();
             var errorLogs = await test.GetLogs();
             Assert.Empty(errorLogs);
-            await test.SimulateMethodCall<ExceptionAfterFirstWait>(x => x.MethodToWait("Ibrahim"), "3");
+            await test.SimulateMethodCall<ExceptionsInFunction>(x => x.MethodToWait("Ibrahim"), "3");
             errorLogs = await test.GetLogs();
             Assert.NotEmpty(errorLogs);
         }
+
     }
 
-    public class ExceptionAfterFirstWait : ResumableFunction
+    public class ExceptionsInFunction : ResumableFunction
     {
         public string? MethodOutput { get; set; }
 
@@ -43,14 +44,6 @@ namespace Tests
             throw new Exception("Can't get any wait");
         }
 
-        [PushCall("MethodToWait")]
-        public string MethodToWait(string input)
-        {
-            return input?.Length.ToString();
-        }
-    }
-    public class ExceptionBeforeFirstWait : ResumableFunction
-    {
         [ResumableFunctionEntryPoint("ExceptionAtStart")]
         public async IAsyncEnumerable<Wait> ExceptionAtStart()
         {
@@ -65,5 +58,7 @@ namespace Tests
         {
             return input?.Length.ToString();
         }
+
+       
     }
 }

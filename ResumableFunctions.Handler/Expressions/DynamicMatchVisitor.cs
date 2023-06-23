@@ -1,12 +1,12 @@
 ﻿using System.Dynamic;
 using System.Linq.Expressions;
+using ResumableFunctions.Handler.Helpers;
 using static System.Linq.Expressions.Expression;
 
-namespace ResumableFunctions.Handler.Helpers.Expressions
+namespace ResumableFunctions.Handler.Expressions
 {
     internal class DynamicMatchVisitor : ExpressionVisitor
     {
-        private readonly LambdaExpression _matchExpression;
         private readonly ParameterExpression _inputOutput;
         private readonly ParameterExpression _instance;
         private bool _stop;
@@ -14,24 +14,23 @@ namespace ResumableFunctions.Handler.Helpers.Expressions
 
         public DynamicMatchVisitor(LambdaExpression matchExpression)
         {
-            _matchExpression = matchExpression;
             _inputOutput = Parameter(typeof(ExpandoObject), "inputOutput");
             _instance = Parameter(typeof(ExpandoObject), "instance");
-            var result = Visit(_matchExpression.Body);
-            if (!_stop)
+            var result = Visit(matchExpression.Body);
+            if (!_stop && result != null) 
                 Result = Lambda<Func<ExpandoObject, ExpandoObject, bool>>(result, _inputOutput, _instance);
         }
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            var paramter = GetParamter(node.ToString());
+            var parameter = GetParamter(node.ToString());
             if (CanConvert(node.Type))
             {
                 var getValueMi = typeof(ExpandoExtensions).GetMethods().First(x => x.Name == "Get" && x.IsGenericMethod).MakeGenericMethod(node.Type);
                 return Call(
                     getValueMi,
-                    paramter.ParameterExpression,
-                    paramter.Path
+                    parameter.ParameterExpression,
+                    parameter.Path
                 );
             }
 

@@ -8,7 +8,7 @@ using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
-using ResumableFunctions.Handler.Helpers.Expressions;
+using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService;
 using static System.Linq.Expressions.Expression;

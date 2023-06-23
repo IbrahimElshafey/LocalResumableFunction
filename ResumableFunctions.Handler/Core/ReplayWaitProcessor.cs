@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Core;

@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 using static System.Linq.Expressions.Expression;
 
-namespace ResumableFunctions.Handler.Helpers.Expressions;
+namespace ResumableFunctions.Handler.Expressions;
 
 public class WaitExpressionsHash : ExpressionVisitor
 {

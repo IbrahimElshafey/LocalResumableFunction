@@ -1,7 +1,8 @@
 ﻿using System.Linq.Expressions;
+using ResumableFunctions.Handler.Helpers;
 using static System.Linq.Expressions.Expression;
 
-namespace ResumableFunctions.Handler.Helpers.Expressions;
+namespace ResumableFunctions.Handler.Expressions;
 
 public class SetDataExpressionWriter : ExpressionVisitor
 {

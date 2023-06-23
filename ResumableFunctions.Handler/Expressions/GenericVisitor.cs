@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace ResumableFunctions.Handler.Helpers.Expressions;
+namespace ResumableFunctions.Handler.Expressions;
 
 public class GenericVisitor : ExpressionVisitor
 {

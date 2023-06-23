@@ -106,16 +106,16 @@ internal class Scanner
     }
 
 
-    internal async Task RegisterResumableFunction(MethodInfo resumableFunctionMinfo, ServiceData serviceData)
+    internal async Task RegisterResumableFunction(MethodInfo resumableFunctionMInfo, ServiceData serviceData)
     {
 
-        var entryPointCheck = EntryPointCheck(resumableFunctionMinfo);
+        var entryPointCheck = EntryPointCheck(resumableFunctionMInfo);
         var methodType = entryPointCheck.IsEntry ? MethodType.ResumableFunctionEntryPoint : MethodType.SubResumableFunction;
-        serviceData.AddLog($"Register resumable function [{resumableFunctionMinfo.GetFullName()}] of type [{methodType}]");
+        serviceData.AddLog($"Register resumable function [{resumableFunctionMInfo.GetFullName()}] of type [{methodType}]");
 
         var resumableFunctionIdentifier = await _methodIdentifierRepo
             .AddResumableFunctionIdentifier(
-            new MethodData(resumableFunctionMinfo)
+            new MethodData(resumableFunctionMInfo)
             {
                 MethodType = methodType,
                 IsActive = entryPointCheck.IsActive
@@ -374,6 +374,14 @@ internal class Scanner
     private bool ValidateResumableFunctionSignature(MethodInfo resumableFunction, ServiceData serviceData)
     {
         var result = true;
+        if (!resumableFunction.IsAsyncMethod())
+        {
+            var errorMsg =
+                $"The resumable function [{resumableFunction.GetFullName()}] must be async.";
+            serviceData.AddError(errorMsg);
+            _logger.LogError(errorMsg);
+            result = false;
+        }
         if (resumableFunction.ReturnType != typeof(IAsyncEnumerable<Wait>) || resumableFunction.GetParameters().Length != 0)
         {
             var errorMsg =

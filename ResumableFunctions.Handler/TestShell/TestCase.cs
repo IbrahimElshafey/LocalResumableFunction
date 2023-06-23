@@ -10,7 +10,6 @@ using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.Helpers.Expressions;
 using ResumableFunctions.Handler.InOuts;
 using System.Data;
 using System.Diagnostics;
@@ -18,14 +17,14 @@ using System.Linq.Expressions;
 using System.Reflection;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.Threading;
+using ResumableFunctions.Handler.Expressions;
 
 namespace ResumableFunctions.Handler.TestShell
 {
     public class TestCase
     {
         public IHost CurrentApp { get; private set; }
-
-        private HostApplicationBuilder _builder;
+        private readonly HostApplicationBuilder _builder;
         private readonly Type[] _types;
         private readonly TestSettings _settings;
 
@@ -33,15 +32,9 @@ namespace ResumableFunctions.Handler.TestShell
         {
             DeleteDb(testName);
             _settings = new TestSettings(testName);
-            SetBuilder();
-            _types = types;
-        }
-
-
-        private void SetBuilder()
-        {
             _builder = Host.CreateApplicationBuilder();
             _builder.Services.AddResumableFunctionsCore(_settings);
+            _types = types;
         }
 
         public static void DeleteDb(string dbName)
@@ -60,28 +53,29 @@ namespace ResumableFunctions.Handler.TestShell
             GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(CurrentApp.Services));
 
             using var scope = CurrentApp.Services.CreateScope();
-            var context = scope.ServiceProvider.GetService<FunctionDataContext>();
             var serviceData = new ServiceData
             {
                 AssemblyName = _types[0].Assembly.GetName().Name,
                 ParentId = -1,
             };
-            context.ServicesData.Add(serviceData);
-            context.SaveChanges();
+            Context.ServicesData.Add(serviceData);
+            await Context.SaveChangesAsync();
             _settings.CurrentServiceId = serviceData.Id;
             var scanner = scope.ServiceProvider.GetService<Scanner>();
             foreach (var type in _types)
                 await scanner.RegisterMethods(type, serviceData);
             await scanner.RegisterMethods(typeof(LocalRegisteredMethods), serviceData);
+            
             foreach (var type in _types)
                 if (type.IsSubclassOf(typeof(ResumableFunction)))
                     await scanner.RegisterResumableFunctionsInClass(type);
+            await Context.SaveChangesAsync();
         }
 
 
-        //todo:enhance this to take paramters in method call
-        public async Task<int> SimulateMethodCall<ClassType>(
-           Expression<Func<ClassType, object>> methodSelector,
+        //todo:enhance this to take parameters in method call
+        public async Task<int> SimulateMethodCall<TClassType>(
+           Expression<Func<TClassType, object>> methodSelector,
            object output)
         {
             object input = null;
@@ -123,10 +117,10 @@ namespace ResumableFunctions.Handler.TestShell
             return pushedCallId;
         }
 
-        private FunctionDataContext _context => CurrentApp.Services.GetService<FunctionDataContext>();
+        private FunctionDataContext Context => CurrentApp.Services.GetService<FunctionDataContext>();
         public async Task<List<ResumableFunctionState>> GetInstances<T>(bool includeNew = false)
         {
-            var query = _context.FunctionStates.AsQueryable();
+            var query = Context.FunctionStates.AsQueryable();
             if (includeNew is false)
             {
                 query = query.Where(x => x.Status != FunctionStatus.New);
@@ -134,7 +128,7 @@ namespace ResumableFunctions.Handler.TestShell
             var instances = await query.ToListAsync();
             foreach (var instnace in instances)
             {
-                await _context.Entry(instnace).ReloadAsync();
+                await Context.Entry(instnace).ReloadAsync();
                 instnace.LoadUnmappedProps(typeof(T));
 
             }
@@ -143,7 +137,7 @@ namespace ResumableFunctions.Handler.TestShell
 
         public async Task<List<PushedCall>> GetPushedCalls()
         {
-            var calls = await _context.PushedCalls.ToListAsync();
+            var calls = await Context.PushedCalls.ToListAsync();
             foreach (var call in calls)
             {
                 call.LoadUnmappedProps();
@@ -154,7 +148,7 @@ namespace ResumableFunctions.Handler.TestShell
 
         public async Task<List<Wait>> GetWaits(int? instanceId = null, bool includeFirst = false)
         {
-            var query = _context.Waits.AsQueryable();
+            var query = Context.Waits.AsQueryable();
             if (instanceId != null)
                 query = query.Where(x => x.FunctionStateId == instanceId);
             if (includeFirst is false)
@@ -165,7 +159,7 @@ namespace ResumableFunctions.Handler.TestShell
         public async Task<List<LogRecord>> GetLogs(LogType logType = LogType.Error)
         {
             return
-                await _context.Logs
+                await Context.Logs
                     .Where(x => x.Type == logType)
                     .ToListAsync();
         }

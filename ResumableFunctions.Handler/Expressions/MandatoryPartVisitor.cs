@@ -1,9 +1,9 @@
 ﻿using System.Dynamic;
 using System.Linq.Expressions;
-using static ResumableFunctions.Handler.Helpers.Expressions.MatchExpressionWriter;
+using static ResumableFunctions.Handler.Expressions.MatchExpressionWriter;
 using static System.Linq.Expressions.Expression;
 
-namespace ResumableFunctions.Handler.Helpers.Expressions
+namespace ResumableFunctions.Handler.Expressions
 {
     internal class MandatoryPartVisitor : ExpressionVisitor
     {

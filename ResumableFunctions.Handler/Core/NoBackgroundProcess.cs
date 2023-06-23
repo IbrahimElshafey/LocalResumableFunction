@@ -2,7 +2,6 @@
 using FastExpressionCompiler;
 using Hangfire.Annotations;
 using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.Helpers.Expressions;
 
 namespace ResumableFunctions.Handler.Core;
 

@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Security.Cryptography;
 using System.Text;
-using ResumableFunctions.Handler.Helpers.Expressions;
+using ResumableFunctions.Handler.Expressions;
 
 namespace ResumableFunctions.Handler.InOuts;
 

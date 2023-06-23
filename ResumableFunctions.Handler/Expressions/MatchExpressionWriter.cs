@@ -2,9 +2,10 @@
 using FastExpressionCompiler;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using ResumableFunctions.Handler.Helpers;
 using static System.Linq.Expressions.Expression;
 
-namespace ResumableFunctions.Handler.Helpers.Expressions;
+namespace ResumableFunctions.Handler.Expressions;
 public partial class MatchExpressionWriter : ExpressionVisitor
 {
     private LambdaExpression _matchExpression;
