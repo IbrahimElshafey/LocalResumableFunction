@@ -45,7 +45,7 @@ public class MethodWait : Wait
         {
             LoadExpressions();
             if (SetDataExpression == null) return true;
-                var setDataExpression = SetDataExpression.CompileFast();
+            var setDataExpression = SetDataExpression.CompileFast();
             setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog(
@@ -54,11 +54,9 @@ public class MethodWait : Wait
         }
         catch (Exception ex)
         {
-            FunctionState.AddLog(
-                $"An error occurred when try to update function data after method wait [{Name}] matched." +
-                ex.Message,
-                LogType.Error);
-            return false;
+            var error = $"An error occurred when try to update function data after method wait [{Name}] matched." + ex.Message;
+            FunctionState.AddLog(error, LogType.Error);
+            throw new Exception(error, ex);
         }
     }
 
@@ -67,43 +65,42 @@ public class MethodWait : Wait
         try
         {
             LoadExpressions();
-            if (IsFirst && MatchExpression == null)
+            if (WasFirst && MatchExpression == null)
                 return true;
             if (MethodToWait.MethodInfo ==
                 CoreExtensions.GetMethodInfo<LocalRegisteredMethods>(x => x.TimeWait))
                 return true;
             var check = MatchExpression.CompileFast();
-            return (bool)check.DynamicInvoke(Input, Output, CurrentFunction);
+            return (bool)check.DynamicInvoke(Input, Output, CurrentFunction)!;
         }
         catch (Exception ex)
         {
-            FunctionState.AddError(
-               $"An error occured when try evaluate match expression for wait [{Name}]." +
-               ex.Message,
-               ex);
-            return false;
+            var error = $"An error occurred when try evaluate match expression for wait [{Name}]." +
+                        ex.Message;
+            FunctionState.AddError(error, ex);
+            throw new Exception(error, ex);
         }
     }
 
     internal override bool IsValidWaitRequest()
     {
         //Todo:validate input output type serialization
-        if (!IsFirst && MatchExpression == null)
+        if (!WasFirst && MatchExpression == null)
             FunctionState.AddError(
                 $"You didn't set the `MatchExpression` for wait [{Name}] that is not a first wait," +
                 $"This will lead to no match for all calls," +
                 $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchExpression`," +
                 $"or use MatchAll() method.");
-        if (IsFirst && MatchExpression == null)
+        if (WasFirst && MatchExpression == null)
             FunctionState.AddLog(
                 $"You didn't set the `MatchExpression` for first wait [{Name}]," +
                 $"This will lead to all calls will be matched.",
                 LogType.Warning);
         if (SetDataExpression == null)
-            FunctionState.AddError(
+            FunctionState.AddLog(
                 $"You didn't set the `SetDataExpression` for wait [{Name}], " +
                 $"The execution will not continue, " +
-                $"Please use `NoSetData()` if this is intended.");
+                $"Please use `NoSetData()` if this is intended.", LogType.Warning);
         return base.IsValidWaitRequest();
     }
 

@@ -51,6 +51,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             firstWaitClone.ActionOnWaitsTree(wait =>
             {
                 wait.IsFirst = false;
+                wait.WasFirst = true;
                 wait.FunctionState.StateObject = firstMatchedMethodWait?.FunctionState?.StateObject;
                 if (wait is TimeWait timeWait)
                 {
@@ -93,8 +94,9 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
         catch (Exception ex)
         {
-            await LogErrorToService(ex, $"Error when try to clone first wait for function [{resumableFunction.GetFullName()}]");
-            throw;
+            var error = $"Error when try to clone first wait for function [{resumableFunction.GetFullName()}]";
+            await LogErrorToService(ex, error);
+            throw new Exception(error, ex);
         }
     }
 
@@ -124,6 +126,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     if (resumableFunction != null)
                         await LogErrorToService(ex, errorMsg);
                     await _waitsRepository.RemoveFirstWaitIfExist(functionId);
+                    throw;
                 }
 
             },
@@ -131,62 +134,65 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     }
 
     //todo:review this method
-    private Task LogErrorToService(Exception ex, string errorMsg)
+    private async Task LogErrorToService(Exception ex, string errorMsg)
     {
         _logger.LogError(ex, errorMsg);
-        var serviceData = _context.ServicesData.Local.FirstOrDefault(x => x.Id == _settings.CurrentServiceId);
-        if (serviceData == null)
+        _context.Logs.Add(new LogRecord
         {
-            serviceData = new ServiceData { Id = _settings.CurrentServiceId };
-            _context.Entry(serviceData).State = EntityState.Unchanged;
-        }
-        serviceData.AddError(errorMsg, ex);
-        return Task.CompletedTask;
+            EntityId = _settings.CurrentServiceId,
+            EntityType = nameof(ServiceData),
+            Message = errorMsg + ex,
+            Type = LogType.Error
+        });
+        await _context.SaveChangesAsync();
     }
 
     public async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
         var classInstance = (ResumableFunction)Activator.CreateInstance(resumableFunction.DeclaringType);
 
-        if (classInstance != null)
+        if (classInstance == null)
         {
-            classInstance.InitializeDependencies(_serviceProvider);
-            classInstance.CurrentResumableFunction = resumableFunction;
-            var functionRunner = new FunctionRunner(classInstance, resumableFunction);
-            if (functionRunner.ResumableFunctionExistInCode is false)
-            {
-                string message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
-                _logger.LogWarning(message);
-                throw new NullReferenceException(message);
-            }
 
-            await functionRunner.MoveNextAsync();
-            var firstWait = functionRunner.Current;
-            var methodId = await _methodIdentifierRepo.GetResumableFunction(new MethodData(resumableFunction));
-            if (removeIfExist)
-            {
-                WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
-                await _waitsRepository.RemoveFirstWaitIfExist(methodId.Id);
-            }
-            var functionState = new ResumableFunctionState
-            {
-                ResumableFunctionIdentifier = methodId,
-                StateObject = classInstance,
-                ServiceId = _settings.CurrentServiceId,
-            };
-            firstWait.ActionOnWaitsTree(x =>
-            {
-                x.RequestedByFunction = methodId;
-                x.RequestedByFunctionId = methodId.Id;
-                x.IsFirst = true;
-                x.FunctionState = functionState;
-            });
-            return firstWait;
+            var errorMsg = $"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]";
+            await LogErrorToService(null, errorMsg);
+            throw new NullReferenceException(errorMsg);
         }
 
-        var errorMsg = $"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]";
-        await LogErrorToService(null, errorMsg);
-        throw new NullReferenceException(errorMsg);
+        classInstance.InitializeDependencies(_serviceProvider);
+        classInstance.CurrentResumableFunction = resumableFunction;
+        var functionRunner = new FunctionRunner(classInstance, resumableFunction);
+        if (functionRunner.ResumableFunctionExistInCode is false)
+        {
+            string message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
+            _logger.LogWarning(message);
+            await LogErrorToService(null, message);
+            throw new NullReferenceException(message);
+        }
+
+        await functionRunner.MoveNextAsync();
+        var firstWait = functionRunner.Current;
+        var methodId = await _methodIdentifierRepo.GetResumableFunction(new MethodData(resumableFunction));
+        if (removeIfExist)
+        {
+            WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
+            await _waitsRepository.RemoveFirstWaitIfExist(methodId.Id);
+        }
+        var functionState = new ResumableFunctionState
+        {
+            ResumableFunctionIdentifier = methodId,
+            StateObject = classInstance,
+            ServiceId = _settings.CurrentServiceId,
+        };
+        firstWait.ActionOnWaitsTree(x =>
+        {
+            x.RequestedByFunction = methodId;
+            x.RequestedByFunctionId = methodId.Id;
+            x.IsFirst = true;
+            x.WasFirst = true;
+            x.FunctionState = functionState;
+        });
+        return firstWait;
     }
 
     private void WriteMessage(string message)
@@ -209,7 +215,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                                 wait.Status == WaitStatus.Waiting)
                         .ToListAsync();
 
-                if (firstWaits == null) return;
                 foreach (var firstWait in firstWaits)
                 {
                     if (firstWait != default)

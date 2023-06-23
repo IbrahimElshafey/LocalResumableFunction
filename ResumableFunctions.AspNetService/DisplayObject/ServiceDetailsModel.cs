@@ -17,7 +17,7 @@ namespace ResumableFunctions.AspNetService.DisplayObject
                         $"{serviceStatistics.ServiceName} Service Details",
                         $"/RF/ServiceDetails/{PartialNames.ServiceDetails}?serviceId={ServiceId}"),
                     new MainMenuItem(
-                        $"Service Logs ({serviceStatistics.ErrorCounter} Errors)",
+                        $"Service GetLogs ({serviceStatistics.ErrorCounter} Errors)",
                         $"/RF/ServiceDetails/{PartialNames.ServiceLogs}?serviceId={ServiceId}"),
                     new MainMenuItem(
                         $"Resumable Functions ({serviceStatistics.FunctionsCount})",

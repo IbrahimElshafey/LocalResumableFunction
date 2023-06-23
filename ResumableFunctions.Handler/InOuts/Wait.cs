@@ -12,6 +12,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 
     public WaitStatus Status { get; internal set; } = WaitStatus.Waiting;
     public bool IsFirst { get; internal set; }
+    public bool WasFirst { get; internal set; }
     public int StateBeforeWait { get; internal set; }//todo:move to template
     public int StateAfterWait { get; internal set; }//todo:move to template
     public bool IsNode { get; internal set; }//todo:move to template
@@ -185,7 +186,10 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
                 $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name",
                 LogType.Warning);
         }
-        return FunctionState.HasErrors() is false;
+
+        var hasErrors = FunctionState.HasErrors();
+        if (hasErrors) Status = WaitStatus.InError;
+        return hasErrors is false;
     }
 
 
@@ -201,9 +205,10 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     {
         if (this is TimeWait tw)
             return tw.TimeWaitMethod;
+
         var result = this
             .Flatten(x => x.ChildWaits)
-            .FirstOrDefault(x => x.Name == name && x is MethodWait mw);
+            .FirstOrDefault(x => x.Name == name && x is MethodWait);
         if (result == null)
             throw new NullReferenceException($"No MethodWait with name [{name}] exist in ChildWaits tree [{Name}]");
         return (MethodWait)result;

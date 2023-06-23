@@ -25,7 +25,7 @@ namespace ResumableFunctions.AspNetService.DisplayObject
                             $"Pushed Calls ({mainStatistics.PushedCalls})",
                             $"/RF/Home/{PartialNames.PushedCalls}"),
                         new MainMenuItem(
-                            $"Logs ({mainStatistics.LatestLogErrors} New Error)",
+                            $"GetLogs ({mainStatistics.LatestLogErrors} New Error)",
                             $"/RF/Home/{PartialNames.LatestLogs}"),
                 }
             };

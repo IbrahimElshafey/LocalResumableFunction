@@ -125,7 +125,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     private async Task<Wait> GetWaitDuplicationAsync(Wait waitToReplay)
     {
-        if (waitToReplay.IsFirst)
+        if (waitToReplay.WasFirst)
         {
             const string errorMsg =
                 "Go to the first wait with same match will create new separate function instance, " +
@@ -144,7 +144,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     private async Task<Wait> ReplayGoBefore(Wait oldCompletedWait)
     {
-        if (oldCompletedWait.IsFirst)
+        if (oldCompletedWait.WasFirst)
         {
             const string errorMessage = "Go before the first wait with same match will create new separate function instance.";
             _logger.LogWarning(errorMessage);

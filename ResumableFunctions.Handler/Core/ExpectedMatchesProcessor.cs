@@ -120,9 +120,10 @@ namespace ResumableFunctions.Handler.Core
             }
             catch (Exception ex)
             {
-                _methodWait.FunctionState.AddError(
-                    $"Error occurred when evaluate match for [{_methodWait.Name}] in [{_methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].", ex);
-                return false;
+                var error =
+                    $"Error occurred when evaluate match for [{_methodWait.Name}] in [{_methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].";
+                _methodWait.FunctionState.AddError(error, ex);
+                throw new Exception(error, ex);
             }
         }
 
@@ -160,19 +161,21 @@ namespace ResumableFunctions.Handler.Core
 
                     }
                 }
+
                 _methodWait.CurrentFunction.InitializeDependencies(_serviceProvider);
             }
             catch (DbUpdateConcurrencyException ex)
             {
                 _methodWait.FunctionState.AddError(
-                        $"Concurrency Exception occured when process wait [{_methodWait.Name}]." +
-                        $"\nProcessing this wait will be scheduled.",
-                        ex);
+                    $"Concurrency Exception occurred when process wait [{_methodWait.Name}]." +
+                    $"\nProcessing this wait will be scheduled.",
+                    ex);
                 _backgroundJobClient.Schedule(() =>
-                    ProcessFunctionExpectedMatches(_methodWait.RequestedByFunctionId, pushedCallId),
+                        ProcessFunctionExpectedMatches(_methodWait.RequestedByFunctionId, pushedCallId),
                     TimeSpan.FromSeconds(10));
                 return false;
             }
+
             return true;
         }
 
@@ -187,7 +190,7 @@ namespace ResumableFunctions.Handler.Core
                     switch (currentWait)
                     {
                         case MethodWait methodWait:
-                            currentWait.Status = currentWait.IsFirst ? currentWait.Status : WaitStatus.Completed;
+                            currentWait.Status = WaitStatus.Completed;
                             await GoNext(parent, methodWait);
                             await _context.SaveChangesAsync();
                             break;

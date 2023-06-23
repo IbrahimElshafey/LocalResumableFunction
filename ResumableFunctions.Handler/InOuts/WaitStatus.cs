@@ -6,4 +6,5 @@ public enum WaitStatus
     Canceled = 1,
     Completed = 2,
     Temp = 4,
+    InError = 5
 }

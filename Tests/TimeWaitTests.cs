@@ -36,7 +36,7 @@ namespace Tests
             Assert.Equal(round - 1, pushedCalls.Count);
             Assert.Equal(round, waits.Count);
             Assert.Equal(round, instances.Count);
-            var errors = await test.GetErrors();
+            var errors = await test.GetLogs();
             Assert.Empty(errors);
             return (waits.First(x => x.IsFirst) as MethodWait)?.MandatoryPart;
         }

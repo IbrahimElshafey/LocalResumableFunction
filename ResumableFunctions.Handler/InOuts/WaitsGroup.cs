@@ -87,15 +87,4 @@ public class WaitsGroup : Wait
         WaitType = WaitType.GroupWaitFirst;
         return this;
     }
-
-    internal override bool IsValidWaitRequest()
-    {
-        //foreach (var childWait in ChildWaits)
-        //{
-        //    if (!childWait.IsValidWaitRequest())
-        //        break;
-        //}
-        return base.IsValidWaitRequest();
-    }
-
 }

@@ -27,13 +27,11 @@ namespace ResumableFunctions.Handler.TestShell
 
         private HostApplicationBuilder _builder;
         private readonly Type[] _types;
-        private readonly string _testName;
         private readonly TestSettings _settings;
 
         public TestCase(string testName, params Type[] types)
         {
-            _testName = testName;
-            DeleteDb();
+            DeleteDb(testName);
             _settings = new TestSettings(testName);
             SetBuilder();
             _types = types;
@@ -46,20 +44,12 @@ namespace ResumableFunctions.Handler.TestShell
             _builder.Services.AddResumableFunctionsCore(_settings);
         }
 
-        private void DeleteDb()
+        public static void DeleteDb(string dbName)
         {
-            try
-            {
-                var dbConfig = new DbContextOptionsBuilder()
-                    .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={_testName};");
-                var context = new DbContext(dbConfig.Options);
-                var s=context.Database.EnsureDeleted();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            
+            var dbConfig = new DbContextOptionsBuilder()
+                .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={dbName};");
+            var context = new DbContext(dbConfig.Options);
+            context.Database.EnsureDeleted();
         }
 
         public IServiceCollection RegisteredServices => _builder.Services;
@@ -172,14 +162,13 @@ namespace ResumableFunctions.Handler.TestShell
             return await query.OrderBy(x => x.Id).ToListAsync();
         }
 
-        public async Task<List<LogRecord>> GetErrors()
+        public async Task<List<LogRecord>> GetLogs(LogType logType = LogType.Error)
         {
             return
                 await _context.Logs
-                .Where(x => x.Type == LogType.Error)
-                .ToListAsync();
+                    .Where(x => x.Type == logType)
+                    .ToListAsync();
         }
-
 
     }
 }

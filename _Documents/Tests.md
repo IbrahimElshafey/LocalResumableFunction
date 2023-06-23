@@ -15,7 +15,8 @@
 * Test loops
 * Test Replay
 * Write test cases for expressions rewrite because it's critical part
-
+* Sub functions tests
+	* Pushed call activate one instance,what if same function and sub fnction wait the same wait
 # Performance Test
 * 1 Million active wait for same function
 	* With mandatory part exist

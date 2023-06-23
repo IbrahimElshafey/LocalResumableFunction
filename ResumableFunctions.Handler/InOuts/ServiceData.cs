@@ -25,7 +25,6 @@ public class ServiceData : IObjectWithLog, IEntityWithUpdate
     public void AddError(string message, Exception ex = null, string code = "")
     {
         (this as IObjectWithLog).AddError(message, ex, code);
-        //refernce dlls logs to main
         Logs.Last().EntityId = ParentId == -1 ? Id : ParentId;
     }
 

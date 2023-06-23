@@ -1,6 +1,6 @@
 ﻿# Hot Todo Core functions
-* `RemoveFirstWaitIfExist` fix this for group	WaitsRepo.cs	190
 * Same DLL in two services
+* `RemoveFirstWaitIfExist` fix this for group	WaitsRepo.cs	190
 * New scan should not delete existing method wait and groups if exist
 * Test replay
 * Review activate and deactivate function

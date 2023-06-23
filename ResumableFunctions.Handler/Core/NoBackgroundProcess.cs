@@ -15,24 +15,45 @@ internal class NoBackgroundProcess : IBackgroundProcess
 
     public string Enqueue([InstantHandle, NotNull] Expression<Func<Task>> methodCall)
     {
-        //methodCall = (Expression<Func<Task>>)TranslateConstants(methodCall);
-        var compiled = methodCall.CompileFast();
-        compiled.Invoke().Wait();
-        return default;
+        try
+        {
+            var compiled = methodCall.CompileFast();
+            compiled.Invoke().Wait();
+            return default;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return default;
+        }
     }
 
     public string Schedule([InstantHandle, NotNull] Expression<Func<Task>> methodCall, TimeSpan delay)
     {
-        //methodCall = (Expression<Func<Task>>)TranslateConstants(methodCall);
-        Task.Delay(delay).ContinueWith(x => methodCall.CompileFast().Invoke().Wait());
-        return default;
+        try
+        {
+            Task.Delay(delay).ContinueWith(x => methodCall.CompileFast().Invoke().Wait());
+            return default;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return default;
+        }
     }
 
     public string Schedule([InstantHandle, NotNull] Expression<Action> methodCall, TimeSpan delay)
     {
-        //methodCall = (Expression<Action>)TranslateConstants(methodCall);
-        Task.Delay(delay).ContinueWith(x => methodCall.CompileFast().Invoke());
-        return default;
+        try
+        {
+            Task.Delay(delay).ContinueWith(x => methodCall.CompileFast().Invoke());
+            return default;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return default;
+        }
     }
 
     //private Expression TranslateConstants(Expression methodCall)
