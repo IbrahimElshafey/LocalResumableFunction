@@ -2,7 +2,9 @@
 # Write Unit Tests for basic scenarios:
 * Sequence
 * Wait all
-* Wait first
+* Wait all as first 
+* Wait first in many
+* Wait first in many as first
 * Wait function
 * Wait many functions
 * Wait first function
@@ -17,6 +19,7 @@
 * Write test cases for expressions rewrite because it's critical part
 * Sub functions tests
 	* Pushed call activate one instance,what if same function and sub fnction wait the same wait
+* Attributes test
 # Performance Test
 * 1 Million active wait for same function
 	* With mandatory part exist

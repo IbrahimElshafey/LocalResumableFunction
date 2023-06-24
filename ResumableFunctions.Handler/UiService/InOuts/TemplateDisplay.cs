@@ -23,7 +23,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
             _serializer = new ExpressionSerializer();
             MatchExpression = GetMatch(matchExpressionValue);
             SetDataExpression = GetSetData(setDataExpressionValue);
-            MandatoryPartExpression = GetmandatoryParts(instanceMandatoryPartExpressionValue);
+            MandatoryPartExpression = GetMandatoryParts(instanceMandatoryPartExpressionValue);
         }
 
         string GetMatch(string matchExpressionValue)
@@ -34,11 +34,12 @@ namespace ResumableFunctions.Handler.UiService.InOuts
                 result = result.Substring(37);
             return result;
         }
-        string GetmandatoryParts(string instanceMandatoryPartExpressionValue)
+        string GetMandatoryParts(string instanceMandatoryPartExpressionValue)
         {
             if (instanceMandatoryPartExpressionValue == null) return string.Empty;
             var result = _serializer.Deserialize(instanceMandatoryPartExpressionValue).ToCSharpString();
             result = result.Replace("(input, output) => new object[]", "");
+            result = result.Replace("functionInstance => new object[]", "");
             result = result.Replace("(object)", "");
             return result;
         }

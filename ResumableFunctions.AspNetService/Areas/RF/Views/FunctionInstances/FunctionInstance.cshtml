@@ -45,7 +45,9 @@
         </tr>
     </table>
     <br />
-    <input class="w3-button w3-indigo" type="button" onclick="location.href='/RF/FunctionInstances/AllInstances';" value="All Function Intstances" />
+    <input class="w3-button w3-indigo" type="button" 
+           onclick="location.href='/RF/FunctionInstances/AllInstances?functionId=@Model.FunctionId&functionName=@Model.FunctionUrn'" 
+           value="All Function Intstances" />
 
     <header class="w3-text-indigo">
         <h4 class="w3-margin-top"><b>Waits Tree</b></h4>

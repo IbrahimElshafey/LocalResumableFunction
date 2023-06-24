@@ -283,7 +283,10 @@ namespace ResumableFunctions.Handler.UiService
                     callMatch.MatchStatus,
                     callMatch.InstanceUpdateStatus,
                     callMatch.ExecutionStatus,
-                    new TemplateDisplay(wait.MatchExpressionValue, wait.SetDataExpressionValue, wait.InstanceMandatoryPartExpressionValue)
+                    new TemplateDisplay(
+                        wait.MatchExpressionValue, 
+                        wait.SetDataExpressionValue, 
+                        wait.InstanceMandatoryPartExpressionValue)
                     ))
                 .ToList();
             return new PushedCallDetails(inputOutput, methodData, waitsForCall);
@@ -311,6 +314,7 @@ namespace ResumableFunctions.Handler.UiService
             var waitsNodes = new ArrayList(waits.Where(x => x.IsNode).ToList());
             return new FunctionInstanceDetails(
                 instanceId,
+                instance.ResumableFunctionIdentifier.Id,
                 instance.ResumableFunctionIdentifier.RF_MethodUrn,
                 $"{instance.ResumableFunctionIdentifier.ClassName}.{instance.ResumableFunctionIdentifier.MethodName}",
                 instance.Status,

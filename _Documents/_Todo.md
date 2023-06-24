@@ -1,5 +1,7 @@
 ﻿# Hot Todo Core functions
 * Same DLL in two services
+* Error codes for logs
+* Scan result methods are exist
 * `RemoveFirstWaitIfExist` fix this for group	WaitsRepo.cs	190
 * Review that new scan should not delete existing methods and groups if exist
 * Test replay

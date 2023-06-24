@@ -23,7 +23,7 @@
                 <li><b>Name: </b>@Model.MethodData.MethodName</li>
                 <li><b>Class Name: </b>@Model.MethodData.ClassName</li>
                 <li><b>Assembly Name: </b>@Model.MethodData.AssemblyName</li>
-                <li><b>Can Publish From External: </b>@Model.MethodData.CanPublishFromExternal</li>
+                @*<li><b>Can Publish From External: </b>@Model.MethodData.CanPublishFromExternal</li>*@
             </ul>
         </div>
     </div>
@@ -55,8 +55,8 @@
                 </td>
                 <td>
                     <ul>
-                        <li><b>Mandatory Part: </b>@wait.MandatoryPart</li>
-                        <li><b>Mandatory Part Expression: </b>@wait.MandatoryPartExpression</li>
+                        <li><b>Instance Mandatory Parts: </b>@wait.MandatoryPartExpression</li>
+                        <li><b>Mandatory Part Values: </b>@wait.MandatoryPart</li>
                         <li><b>Created: </b>@wait.Created</li>
                         <li><b>Match: </b><span class="@wait.MatchStatus">@wait.MatchStatus</span></li>
                         <li><b>Instance Update Status: </b><span class="@wait.InstanceUpdateStatus">@wait.InstanceUpdateStatus</span></li>

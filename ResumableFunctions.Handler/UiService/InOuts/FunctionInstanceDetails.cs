@@ -16,11 +16,13 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public ArrayList Waits { get; }
         public List<MethodWaitDetails> MethodWaitDetails { get; }
         public List<LogRecord> Logs { get; }
+        public int FunctionId { get; }
 
         public FunctionInstanceDetails(
-            int instanceId, string name, string functionName, FunctionStatus status, string instanceData, DateTime created, DateTime modified, int errorsCount, ArrayList waits, List<LogRecord> logs)
+            int instanceId,int functionId, string name, string functionName, FunctionStatus status, string instanceData, DateTime created, DateTime modified, int errorsCount, ArrayList waits, List<LogRecord> logs)
         {
             InstanceId = instanceId;
+            FunctionId = functionId;
             FunctionUrn = name;
             FunctionName = functionName;
             Status = status;

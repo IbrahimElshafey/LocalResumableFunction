@@ -8,29 +8,29 @@ namespace ResumableFunctions.Handler.UiService.InOuts
     public class MethodWaitDetails
     {
         public MethodWaitDetails(
-        string Name,
-        WaitStatus Status,
-        string FunctionName,
-        int InstanceId,
-        DateTime Created,
-        string MandatoryPart,
-        MatchStatus MatchStatus,
-        InstanceUpdateStatus InstanceUpdateStatus,
-        ExecutionStatus ExecutionStatus,
+        string name,
+        WaitStatus status,
+        string functionName,
+        int instanceId,
+        DateTime created,
+        string mandatoryPart,
+        MatchStatus matchStatus,
+        InstanceUpdateStatus instanceUpdateStatus,
+        ExecutionStatus executionStatus,
         TemplateDisplay templateDisplay)
         {
-            this.Name = Name;
-            this.Status = Status;
-            this.FunctionName = FunctionName;
-            this.InstanceId = InstanceId;
-            this.MatchExpression = templateDisplay.MatchExpression;
-            this.SetDataExpression = templateDisplay.SetDataExpression;
-            this.Created = Created;
-            this.MandatoryPart = MandatoryPart;
-            this.MandatoryPartExpression = templateDisplay.MandatoryPartExpression;
-            this.MatchStatus = MatchStatus;
-            this.InstanceUpdateStatus = InstanceUpdateStatus;
-            this.ExecutionStatus = ExecutionStatus;
+            Name = name;
+            Status = status;
+            FunctionName = functionName;
+            InstanceId = instanceId;
+            MatchExpression = templateDisplay.MatchExpression;
+            SetDataExpression = templateDisplay.SetDataExpression;
+            Created = created;
+            MandatoryPart = mandatoryPart;
+            MandatoryPartExpression = templateDisplay.MandatoryPartExpression;
+            MatchStatus = matchStatus;
+            InstanceUpdateStatus = instanceUpdateStatus;
+            ExecutionStatus = executionStatus;
         }
         public DateTime Created { get; }
         public ExecutionStatus ExecutionStatus { get; }
