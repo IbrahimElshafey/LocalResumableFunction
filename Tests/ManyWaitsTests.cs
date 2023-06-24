@@ -20,13 +20,16 @@ namespace Tests
             await test.ScanTypes();
             var errors = await test.GetLogs();
             Assert.Empty(errors);
-           
+
             var wms = new WaitThreeMethodsAtStart();
             wms.Method1("1");
             wms.Method2("2");
             wms.Method3("3");
 
+            var pushedCalls = await test.GetPushedCalls();
+            Assert.Equal(3, pushedCalls.Count);
             errors = await test.GetLogs();
+            Assert.Empty(errors);
             var waits = await test.GetWaits();
             Assert.Equal(4, waits.Count);
         }
@@ -48,9 +51,9 @@ namespace Tests
 
         [PushCall("Method1")]
         public string Method1(string input) => "Method1 Call";
-        [PushCall("Method2")] 
+        [PushCall("Method2")]
         public string Method2(string input) => "Method2 Call";
-        [PushCall("Method3")] 
+        [PushCall("Method3")]
         public string Method3(string input) => "Method3 Call";
     }
 

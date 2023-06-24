@@ -58,8 +58,9 @@ namespace ResumableFunctions.Handler.TestShell
                 AssemblyName = _types[0].Assembly.GetName().Name,
                 ParentId = -1,
             };
-            Context.ServicesData.Add(serviceData);
-            await Context.SaveChangesAsync();
+            await using var context = scope.ServiceProvider.GetService<FunctionDataContext>();
+            context.ServicesData.Add(serviceData);
+            await context.SaveChangesAsync();
             _settings.CurrentServiceId = serviceData.Id;
             var scanner = scope.ServiceProvider.GetService<Scanner>();
             foreach (var type in _types)
@@ -69,7 +70,7 @@ namespace ResumableFunctions.Handler.TestShell
             foreach (var type in _types)
                 if (type.IsSubclassOf(typeof(ResumableFunction)))
                     await scanner.RegisterResumableFunctionsInClass(type);
-            await Context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
 
 
@@ -92,8 +93,8 @@ namespace ResumableFunctions.Handler.TestShell
                 throw new Exception("Can't get input");
         }
 
-        public async Task<int> SimulateMethodCall<ClassType>(
-            Expression<Func<ClassType, object>> methodSelector,
+        public async Task<int> SimulateMethodCall<TClassType>(
+            Expression<Func<TClassType, object>> methodSelector,
             object input,
             object output)
         {
@@ -114,6 +115,7 @@ namespace ResumableFunctions.Handler.TestShell
                         CanPublishFromExternal = pushResultAttribute.CanPublishFromExternal,
                     },
                 });
+            await Context.SaveChangesAsync();
             return pushedCallId;
         }
 

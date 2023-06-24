@@ -4,7 +4,6 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
     public interface IWaitsRepo
     {
-        Task AddWait(Wait wait);
         Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId);
         Task CancelOpenedWaitsForState(int stateId);
         Task CancelSubWaits(int parentId);
@@ -15,6 +14,5 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
         Task RemoveFirstWaitIfExist(int methodIdentifierId);
 
         Task<bool> SaveWait(Wait newWait);
-        Task<MethodWait> GetTimeWait(string timeWaitId);
     }
 }

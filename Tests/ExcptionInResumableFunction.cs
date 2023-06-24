@@ -10,7 +10,7 @@ namespace Tests
         [Fact]
         public async Task ExceptionAtStart_Test()
         {
-            var test = new TestCase(nameof(ExceptionAtStart_Test), typeof(ExceptionsInFunction));
+            var test = new TestCase(nameof(ExceptionAtStart_Test), typeof(ExceptionAtStartTest));
             await test.ScanTypes();
             var errorLogs = await test.GetLogs();
             Assert.True(errorLogs.Count > 0);
@@ -19,18 +19,18 @@ namespace Tests
         [Fact]
         public async Task ExceptionAfterFirstWait_Test()
         {
-            var test = new TestCase(nameof(ExceptionAfterFirstWait_Test), typeof(ExceptionsInFunction));
+            var test = new TestCase(nameof(ExceptionAfterFirstWait_Test), typeof(ExceptionAfterFirstWaitTest));
             await test.ScanTypes();
             var errorLogs = await test.GetLogs();
             Assert.Empty(errorLogs);
-            await test.SimulateMethodCall<ExceptionsInFunction>(x => x.MethodToWait("Ibrahim"), "3");
+            await test.SimulateMethodCall<ExceptionAfterFirstWaitTest>(x => x.MethodToWait("Ibrahim"), "3");
             errorLogs = await test.GetLogs();
             Assert.NotEmpty(errorLogs);
         }
 
     }
 
-    public class ExceptionsInFunction : ResumableFunction
+    public class ExceptionAfterFirstWaitTest : ResumableFunction
     {
         public string? MethodOutput { get; set; }
 
@@ -44,7 +44,17 @@ namespace Tests
             throw new Exception("Can't get any wait");
         }
 
-        [ResumableFunctionEntryPoint("ExceptionAtStart")]
+        [PushCall("MethodToWait")]
+        public string MethodToWait(string input)
+        {
+            return input?.Length.ToString();
+        }
+    }
+    public class ExceptionAtStartTest : ResumableFunction
+    {
+        
+
+        [ResumableFunctionEntryPoint("ExceptionAtStartTest")]
         public async IAsyncEnumerable<Wait> ExceptionAtStart()
         {
             throw new Exception("Can't get any wait");
@@ -54,11 +64,9 @@ namespace Tests
         }
 
         [PushCall("MethodToWait")]
-        public string MethodToWait(string input)
+        public string? MethodToWait(string input)
         {
             return input?.Length.ToString();
         }
-
-       
     }
 }

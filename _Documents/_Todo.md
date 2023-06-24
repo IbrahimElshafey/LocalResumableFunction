@@ -1,7 +1,7 @@
 ﻿# Hot Todo Core functions
 * Same DLL in two services
 * `RemoveFirstWaitIfExist` fix this for group	WaitsRepo.cs	190
-* New scan should not delete existing method wait and groups if exist
+* Review that new scan should not delete existing methods and groups if exist
 * Test replay
 * Review activate and deactivate function
 * Use IMaterializationInterceptor to set entity dependencies

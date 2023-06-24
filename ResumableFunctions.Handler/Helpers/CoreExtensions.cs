@@ -128,25 +128,16 @@ public static class CoreExtensions
 
     public static bool IsAsyncMethod(this MethodBase method)
     {
-        var attType = typeof(AsyncStateMachineAttribute);
+        var attribute =
+            method.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) ??
+            method.GetCustomAttribute(typeof(AsyncIteratorStateMachineAttribute));
 
-        // Obtain the custom attribute for the method. 
-        // The value returned contains the StateMachineType property. 
-        // Null is returned if the attribute isn't present for the method. 
-        var attrib = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
+        if (attribute != null) return true;
 
-
-        if (attrib == null)
-        {
-            bool returnTypeIsTask =
-              attrib == null &&
-              method is MethodInfo mi &&
-              mi != null &&
-              mi.ReturnType.IsGenericType &&
-              mi.ReturnType.GetGenericTypeDefinition() == typeof(Task<>);
-            return returnTypeIsTask;
-        }
-        return true;
+        var returnTypeIsTask =
+            method is MethodInfo { ReturnType.IsGenericType: true } mi &&
+            mi.ReturnType.GetGenericTypeDefinition() == typeof(Task<>);
+        return returnTypeIsTask;
     }
 
 

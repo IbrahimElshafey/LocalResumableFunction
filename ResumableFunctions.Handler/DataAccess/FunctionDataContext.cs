@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;
-public class FunctionDataContext : DbContext
+public sealed class FunctionDataContext : DbContext
 {
     private readonly ILogger<FunctionDataContext> _logger;
     private readonly IResumableFunctionsSettings _settings;
@@ -22,7 +22,7 @@ public class FunctionDataContext : DbContext
         {
             var database = Database.GetDbConnection().Database;
             settings.CurrentDbName = database;
-            using (var loc = lockProvider.AcquireLock(database))
+            using var loc = lockProvider.AcquireLock(database);
             Database.EnsureCreated();
         }
         catch (Exception ex)
@@ -299,9 +299,9 @@ public class FunctionDataContext : DbContext
             var entitiesWithLog =
                 ChangeTracker
                 .Entries()
-                    .Where(x => x.Entity is IObjectWithLog entityWithLog && entityWithLog.Logs.Any())
-                    .Select(x => (IObjectWithLog)x.Entity)
-                    .ToList();
+                .Where(x => x.Entity is IObjectWithLog entityWithLog && entityWithLog.Logs.Any())
+                .Select(x => (IObjectWithLog)x.Entity)
+                .ToList();
             foreach (var entity in entitiesWithLog)
             {
                 entity.Logs.ForEach(logRecord =>
