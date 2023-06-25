@@ -13,8 +13,6 @@ namespace ResumableFunctions.Handler.Core;
 
 internal class Scanner
 {
-    private readonly IServiceProvider _serviceProvider;
-
     private readonly FunctionDataContext _context;
     private readonly IResumableFunctionsSettings _settings;
     private readonly ILogger<Scanner> _logger;
@@ -26,7 +24,6 @@ internal class Scanner
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
 
     public Scanner(
-        IServiceProvider serviceProvider,
         ILogger<Scanner> logger,
         IMethodIdsRepo methodIdentifierRepo,
         IFirstWaitProcessor firstWaitProcessor,
@@ -36,7 +33,6 @@ internal class Scanner
         IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor)
     {
-        _serviceProvider = serviceProvider;
         _logger = logger;
         _methodIdentifierRepo = methodIdentifierRepo;
         _firstWaitProcessor = firstWaitProcessor;
@@ -100,8 +96,7 @@ internal class Scanner
     {
         await _context.Entry(serviceData).ReloadAsync();
         serviceData.AddLog($"Update last scan date for service [{serviceData.AssemblyName}] to [{DateTime.Now}].");
-        if (serviceData != null)
-            serviceData.Modified = DateTime.Now;
+        serviceData.Modified = DateTime.Now;
         await _context.SaveChangesAsync();
     }
 
@@ -119,7 +114,7 @@ internal class Scanner
             {
                 MethodType = methodType,
                 IsActive = entryPointCheck.IsActive
-            }, _settings.CurrentServiceId);
+            });
         await _context.SaveChangesAsync();
 
 
@@ -285,7 +280,7 @@ internal class Scanner
                 if (ValidateMethod(method, serviceData))
                 {
                     var methodData = new MethodData(method) { MethodType = MethodType.MethodWait };
-                    await _methodIdentifierRepo.AddWaitMethodIdentifier(methodData, _settings.CurrentServiceId);
+                    await _methodIdentifierRepo.AddWaitMethodIdentifier(methodData);
                     serviceData?.AddLog($"Adding method identifier {methodData}");
                 }
                 else

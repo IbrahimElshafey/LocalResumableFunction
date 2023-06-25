@@ -13,7 +13,6 @@ internal partial class WaitsRepo
 {
     public async Task<bool> SaveWait(Wait newWait)
     {
-        newWait.ServiceId = _settings.CurrentServiceId;
         if (newWait.IsValidWaitRequest() is false)
         {
             string message =
@@ -33,7 +32,7 @@ internal partial class WaitsRepo
                 await SaveFunctionWait(functionWait);
                 break;
             case TimeWait timeWait:
-                await HandleTimeWaitReques(timeWait);
+                await HandleTimeWaitRequest(timeWait);
                 break;
         }
 
@@ -49,7 +48,6 @@ internal partial class WaitsRepo
         var waitTemplate =
             await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, methodId.GroupId) ??
             await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, methodWait.CurrentFunction, funcId, methodId.GroupId, methodId.MethodId);
-        methodWait.ServiceId = _settings.CurrentServiceId;
         methodWait.MethodToWaitId = methodId.MethodId;
         methodWait.MethodGroupToWaitId = methodId.GroupId;
         methodWait.TemplateId = waitTemplate.Id;
@@ -75,7 +73,6 @@ internal partial class WaitsRepo
             childWait.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
             childWait.RequestedByFunction = manyWaits.RequestedByFunction;
             childWait.StateAfterWait = manyWaits.StateAfterWait;
-            childWait.ServiceId = _settings.CurrentServiceId;
             childWait.ParentWait = manyWaits;
             childWait.CurrentFunction = manyWaits.CurrentFunction;
             await SaveWait(childWait);
@@ -103,7 +100,6 @@ internal partial class WaitsRepo
         functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
         functionWait.FirstWait.ParentWait = functionWait;
         functionWait.FirstWait.ParentWaitId = functionWait.Id;
-        functionWait.FirstWait.ServiceId = _settings.CurrentServiceId;
         var methodId = await _methodIdsRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
         functionWait.FirstWait.RequestedByFunction = methodId;
         functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
@@ -136,7 +132,7 @@ internal partial class WaitsRepo
             .FirstAsync();
     }
 
-    private async Task HandleTimeWaitReques(TimeWait timeWait)
+    private async Task HandleTimeWaitRequest(TimeWait timeWait)
     {
         var timeWaitMethod = timeWait.TimeWaitMethod;
 
@@ -146,7 +142,6 @@ internal partial class WaitsRepo
             timeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
                 () => new LocalRegisteredMethods().TimeWait(
                         new TimeWaitInput { TimeMatchId = timeWait.UniqueMatchId }), timeWait.TimeToWait);
-        timeWaitMethod.ServiceId = _settings.CurrentServiceId;
         timeWaitMethod.MethodToWaitId = methodId.MethodId;
         timeWaitMethod.MethodGroupToWaitId = methodId.GroupId;
 

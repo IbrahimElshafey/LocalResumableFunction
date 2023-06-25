@@ -94,7 +94,6 @@ internal partial class WaitsRepo : IWaitsRepo
                 {
                     var waitForCall = matchedIds[index];
                     waitForCall.PushedCallId = pushedCallId;
-                    waitForCall.ServiceId = _settings.CurrentServiceId;
                     waitForCall.MatchStatus = MatchStatus.PartiallyMatched;
 
 

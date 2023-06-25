@@ -255,8 +255,19 @@ public sealed class FunctionDataContext : DbContext
 
     private void SetServiceId(EntityEntry entry)
     {
-        if (entry.Entity is IEntity entityInService)
-            Entry(entityInService).Property(x => x.ServiceId).CurrentValue = _settings.CurrentServiceId;
+        if (entry.Entity is IEntity entityInService && entry.State == EntityState.Added)
+        {
+            if (entityInService.ServiceId is > 0 && entityInService.ServiceId != _settings.CurrentServiceId)
+            {
+                _logger.LogError(
+                    $"Try to change `ServiceId` for entity `{entityInService.GetType().Name}:{entityInService.Id}`" +
+                    $" from {entityInService.ServiceId} to {_settings.CurrentServiceId}");
+            }
+            else if (entityInService.ServiceId is > 0)
+                return;
+            else
+                Entry(entityInService).Property(x => x.ServiceId).CurrentValue = _settings.CurrentServiceId;
+        }
     }
 
     private async Task SetWaitsPaths(CancellationToken cancellationToken)
@@ -306,7 +317,7 @@ public sealed class FunctionDataContext : DbContext
             {
                 entity.Logs.ForEach(logRecord =>
                 {
-                    if (logRecord.EntityId <= 0 || logRecord.EntityId == null)
+                    if (logRecord.EntityId is <= 0 or null)
                         logRecord.EntityId = ((IEntity)entity).Id;
                     logRecord.ServiceId = _settings.CurrentServiceId;
                 });

@@ -20,10 +20,12 @@ namespace ResumableFunctions.Handler.InOuts
         //;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False
         public SqlServerResumableFunctionsSettings(string server = null, string waitsDbName = null)
         {
+#if DEBUG
+            ForceRescan = true;
+#endif
             if (server != null)
                 ServerName = server;
-            if (waitsDbName == null)
-                waitsDbName = "ResumableFunctionsData";
+            waitsDbName ??= "ResumableFunctionsData";
             CreateHangfireDb();
             HangfireConfig = GlobalConfiguration
                 .Configuration

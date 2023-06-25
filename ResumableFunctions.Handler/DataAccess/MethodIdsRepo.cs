@@ -65,13 +65,11 @@ internal class MethodIdsRepo : IMethodIdsRepo
         if (inDb != null)
         {
             inDb.FillFromMethodData(methodData);
-            inDb.ServiceId = _settings.CurrentServiceId;
             return inDb;
         }
 
         var add = new ResumableFunctionIdentifier();
         add.FillFromMethodData(methodData);
-        add.ServiceId = _settings.CurrentServiceId;
         _context.ResumableFunctionIdentifiers.Add(add);
         return add;
     }
@@ -94,14 +92,12 @@ internal class MethodIdsRepo : IMethodIdsRepo
         if (isUpdate)
         {
             methodInDb.FillFromMethodData(methodData);
-                methodInDb.ServiceId = _settings.CurrentServiceId;
             return;
         }
 
 
         var toAdd = new WaitMethodIdentifier();
         toAdd.FillFromMethodData(methodData);
-            toAdd.ServiceId = _settings.CurrentServiceId;
         var isChildAdd =
             methodGroup != null;
 
