@@ -40,15 +40,20 @@ internal partial class WaitsRepo : IWaitsRepo
     {
         try
         {
+            if (methodUrn.StartsWith("LocalRegisteredMethods."))
+            {
+                return new List<ServiceData> { new() { Id = _settings.CurrentServiceId } };
+            }
+
             var methodGroupId = await GetMethodGroupId(methodUrn);
             var serviceIds =
-                    _context
-                   .WaitTemplates
-                   .Select(x => new { x.MethodGroupId, x.ServiceId })
-                   .Where(x => x.MethodGroupId == methodGroupId)
-                   .Distinct()
-                   .Select(x => x.ServiceId)
-                   ;
+                _context
+                .WaitTemplates
+                .Select(x => new { x.MethodGroupId, x.ServiceId })
+                .Where(x => x.MethodGroupId == methodGroupId)
+                .Distinct()
+                .Select(x => x.ServiceId);
+
 
             return await _context
                 .ServicesData
@@ -176,13 +181,6 @@ internal partial class WaitsRepo : IWaitsRepo
         throw new Exception(error);
     }
 
-    public async Task<Wait> GetWaitGroup(int? parentGroupId)
-    {
-        var result = await _context.Waits
-            .Include(x => x.ChildWaits)
-            .FirstOrDefaultAsync(x => x.Id == parentGroupId);
-        return result!;
-    }
 
 
 
@@ -199,7 +197,15 @@ internal partial class WaitsRepo : IWaitsRepo
 
             if (firstWaitInDb != null)
             {
-                firstWaitInDb.ActionOnWaitsTree(wait => wait.IsDeleted = true);
+                firstWaitInDb.ActionOnWaitsTree(wait =>
+                {
+                    wait.IsDeleted = true;
+                    if (wait is MethodWait { Name: $"#{nameof(LocalRegisteredMethods.TimeWait)}#" })
+                    {
+                        wait.LoadUnmappedProps();
+                        _backgroundJobClient.Delete(wait.ExtraData.JobId);
+                    }
+                });
                 //load entity to delete it , concurrency control token and FKs
                 var functionState = await _context
                     .FunctionStates
@@ -240,8 +246,7 @@ internal partial class WaitsRepo : IWaitsRepo
     {
         wait.LoadUnmappedProps();
         wait.Cancel();
-        if (wait is MethodWait mw &&
-            mw.Name == $"#{nameof(LocalRegisteredMethods.TimeWait)}#")
+        if (wait is MethodWait { Name: $"#{nameof(LocalRegisteredMethods.TimeWait)}#" })
         {
             _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }

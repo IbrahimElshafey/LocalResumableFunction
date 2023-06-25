@@ -36,11 +36,11 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
             return PartialView(PartialNames.ServiceLogs, await _uiService.GetServiceLogs(serviceId));
         }
 
-        [ActionName(PartialNames.ResumabelFunctions)]
+        [ActionName(PartialNames.ResumableFunctions)]
         public async Task<IActionResult> GetResumabelFunctionsAsync(int serviceId)
         {
             return PartialView(
-                PartialNames.ResumabelFunctions,
+                PartialNames.ResumableFunctions,
                 await _uiService.GetFunctionsInfo(serviceId));
         }
 

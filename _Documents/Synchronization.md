@@ -1,5 +1,7 @@
 ﻿# Synchronization Scenarios
-
+* Push call at same time
+* Update [dbo].[WaitsForCalls] row
+* [dbo].[MethodIdentifiers] is updatable
 * Multiple scan process in same time [Done]
 	* Using distributed lock $"Scanner_StartServiceScanning_{_currentServiceName}"
 * Different services may try to add same MethodGroup at same time 

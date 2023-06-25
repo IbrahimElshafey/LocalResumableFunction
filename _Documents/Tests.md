@@ -2,10 +2,11 @@
 # Write Unit Tests for basic scenarios:
 * Sequence
 * Wait all
-* Wait all as first 
+* Wait all as first wait
 * Wait first in many
-* Wait first in many as first
-* Wait function
+* Wait first in many as first wait
+* Wait sub function
+* Wait sub function as first wait
 * Wait many functions
 * Wait first function
 * Replay [to,after,before] for types:

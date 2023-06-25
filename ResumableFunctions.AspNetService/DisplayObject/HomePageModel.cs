@@ -17,7 +17,7 @@ namespace ResumableFunctions.AspNetService.DisplayObject
                             $"/RF/Home/{PartialNames.ServicesList}"),
                         new MainMenuItem(
                             $"Resumable Functions ({mainStatistics.ResumableFunctions}) & ({mainStatistics.ResumableFunctionsInstances}) Instances",
-                             $"/RF/ServiceDetails/{PartialNames.ResumabelFunctions}"),
+                             $"/RF/ServiceDetails/{PartialNames.ResumableFunctions}"),
                         new MainMenuItem(
                             $"Methods ({mainStatistics.ResumableFunctions})",
                             $"/RF/ServiceDetails/{PartialNames.MethodsList}"),
@@ -25,7 +25,7 @@ namespace ResumableFunctions.AspNetService.DisplayObject
                             $"Pushed Calls ({mainStatistics.PushedCalls})",
                             $"/RF/Home/{PartialNames.PushedCalls}"),
                         new MainMenuItem(
-                            $"GetLogs ({mainStatistics.LatestLogErrors} New Error)",
+                            $"Logs ({mainStatistics.LatestLogErrors} New Error)",
                             $"/RF/Home/{PartialNames.LatestLogs}"),
                 }
             };

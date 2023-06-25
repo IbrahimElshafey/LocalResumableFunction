@@ -32,7 +32,6 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             FunctionId = funcId,
             MethodGroupId = groupId,
             BaseHash = hashResult.Hash,
-            ServiceId = _settings.CurrentServiceId
         };
 
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);

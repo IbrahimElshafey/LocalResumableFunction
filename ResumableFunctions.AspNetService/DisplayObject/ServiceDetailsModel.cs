@@ -21,7 +21,7 @@ namespace ResumableFunctions.AspNetService.DisplayObject
                         $"/RF/ServiceDetails/{PartialNames.ServiceLogs}?serviceId={ServiceId}"),
                     new MainMenuItem(
                         $"Resumable Functions ({serviceStatistics.FunctionsCount})",
-                        $"/RF/ServiceDetails/{PartialNames.ResumabelFunctions}?serviceId={ServiceId}"),
+                        $"/RF/ServiceDetails/{PartialNames.ResumableFunctions}?serviceId={ServiceId}"),
                     new MainMenuItem(
                         $"Methods ({serviceStatistics.MethodsCount})",
                         $"/RF/ServiceDetails/{PartialNames.MethodsList}?serviceId={ServiceId}"),

@@ -12,9 +12,6 @@ namespace ResumableFunctions.Handler.Attributes
             CanPublishFromExternal = canPublishFromExternal;
         }
 
-        /// <summary>
-        /// used to enable developer to change method name an parameters and keep point to the old one
-        /// </summary>
         public string MethodUrn { get; }
         public bool CanPublishFromExternal { get; }
 

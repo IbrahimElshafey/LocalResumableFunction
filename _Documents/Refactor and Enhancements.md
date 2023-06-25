@@ -3,11 +3,11 @@
 * Refactor long methods
 * Remove direct use for DbContext
 * What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
-* Replace HttpHangfire with abstraction to enable queue based communication
+* Replace HttpHangfire with abstraction to enable queue based communication between services
 
 
 # Enhancements
-* Function=Matched waits priority
+* Function priority/Matched Waits priority
 	* How hangfire handle priority
 * Parameter check lib use
 * Performance Analysis
@@ -15,15 +15,13 @@
 	* Use Queue Service to Handle Pushed Calls
 		* Kafka,RbbittMQ or ActiveMQ
 	* Use Queue Service that support queries for fast wait insertion
-* Use .net standard for Handler project
-* Encryption option sensitive data
+* Encryption option for sensitive data
 	* Function state
 	* Match and SetData Expressions
 * Resumable function hooks
 	* After Resumed
 	* On Error Occurred
 * Use pull mode to get calls from a queue
-* Replace HttpHangfire with abstraction to enable queue based communication
 * How can I benefit from Azure Service Fabric
 	* https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-overview
 * Optimize wait table indexes to enable fast wait insertion
