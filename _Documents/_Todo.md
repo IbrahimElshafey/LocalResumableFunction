@@ -1,8 +1,8 @@
 ﻿# Hot Todo Core functions
-* Review Set Wait Path
-* Same DLL in two services
 * Error codes for logs
 * Review queries and use ServiceId
+* Same DLL in two services
+
 * If register first wait failed for function make it halted
 * If service scan failed make it halted
 * Review that new scan should not delete existing methods and groups if exist
@@ -28,8 +28,8 @@
 
 # Eid Vaction Wok on (ordered by priority)
 * Hot Todos
-* Finalize UI v1
 * Write unit tests
+* Finalize UI v1
 * Video Records & Documentation
 * Background Cleaning Job
 * Publisher project

@@ -11,7 +11,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
     private readonly ILogger<MethodIdsRepo> _logger;
     private readonly FunctionDataContext _context;
     private readonly IDistributedLockProvider _lockProvider;
-    private IResumableFunctionsSettings _settings;
+    private readonly IResumableFunctionsSettings _settings;
 
     public MethodIdsRepo(
         ILogger<MethodIdsRepo> logger,
@@ -30,7 +30,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
         var resumableFunctionIdentifier =
            await _context
                .ResumableFunctionIdentifiers
-               .FirstOrDefaultAsync(x => x.Id == id);
+               .FirstOrDefaultAsync(x => x.Id == id && x.ServiceId == _settings.CurrentServiceId);
         if (resumableFunctionIdentifier != null)
             return resumableFunctionIdentifier;
         var error = $"Can't find resumable function with ID `{id}` in database.";
@@ -44,9 +44,11 @@ internal class MethodIdsRepo : IMethodIdsRepo
         return await _context
                 .ResumableFunctionIdentifiers
                 .FirstOrDefaultAsync(
-                    x => x.Type == MethodType.ResumableFunctionEntryPoint && 
-                         x.RF_MethodUrn == methodData.MethodUrn);
+                    x => x.Type == MethodType.ResumableFunctionEntryPoint &&
+                         x.RF_MethodUrn == methodData.MethodUrn &&
+                         x.ServiceId == _settings.CurrentServiceId);
     }
+
     public async Task<ResumableFunctionIdentifier> GetResumableFunction(MethodData methodData)
     {
         var resumableFunctionIdentifier = await TryGetResumableFunction(methodData);
@@ -128,13 +130,15 @@ internal class MethodIdsRepo : IMethodIdsRepo
             .MethodsGroups
             .Where(x => x.MethodGroupUrn == methodData.MethodUrn)
             .Select(x => x.Id);
+
         var methodIdQry = _context
             .WaitMethodIdentifiers
             .Where(x =>
-            groupIdQuery.Contains(x.MethodGroupId) &&
-            x.MethodName == methodData.MethodName &&
-            x.ClassName == methodData.ClassName &&
-            x.AssemblyName == methodData.AssemblyName)
+                groupIdQuery.Contains(x.MethodGroupId) &&
+                x.MethodName == methodData.MethodName &&
+                x.ClassName == methodData.ClassName &&
+                x.AssemblyName == methodData.AssemblyName
+            )
             .Select(x => new { x.Id, x.MethodGroupId });
         var methodId = await methodIdQry.FirstAsync();
         return (methodId.Id, methodId.MethodGroupId);

@@ -224,6 +224,7 @@ internal partial class WaitsRepo : IWaitsRepo
 
     public async Task CancelSubWaits(int parentId)
     {
+        //todo: use path prop
         await CancelWaits(parentId);
 
         async Task CancelWaits(int pId)

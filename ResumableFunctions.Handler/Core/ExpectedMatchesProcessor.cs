@@ -27,6 +27,7 @@ namespace ResumableFunctions.Handler.Core
         private WaitForCall _waitCall;
         private MethodWait _methodWait;
         private PushedCall _pushedCall;
+        private readonly IResumableFunctionsSettings _settings;
 
         public ExpectedMatchesProcessor(
             IServiceProvider serviceProvider,
@@ -38,7 +39,8 @@ namespace ResumableFunctions.Handler.Core
             FunctionDataContext context,
             IReplayWaitProcessor replayWaitProcessor,
             BackgroundJobExecutor backgroundJobExecutor,
-            IDistributedLockProvider lockProvider)
+            IDistributedLockProvider lockProvider,
+            IResumableFunctionsSettings settings)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -50,6 +52,7 @@ namespace ResumableFunctions.Handler.Core
             _replayWaitProcessor = replayWaitProcessor;
             _backgroundJobExecutor = backgroundJobExecutor;
             _lockProvider = lockProvider;
+            _settings = settings;
         }
 
         public async Task ProcessFunctionExpectedMatches(int functionId, int pushedCallId)
@@ -64,8 +67,9 @@ namespace ResumableFunctions.Handler.Core
                         .Where(x =>
                         x.PushedCallId == pushedCallId &&
                         x.FunctionId == functionId &&
+                        x.ServiceId == _settings.CurrentServiceId &&
                         (x.MatchStatus == MatchStatus.PartiallyMatched ||
-                            x.InstanceUpdateStatus == InstanceUpdateStatus.UpdateFailed))
+                         x.InstanceUpdateStatus == InstanceUpdateStatus.UpdateFailed))
                         .ToListAsync();
 
                     _pushedCall = await LoadPushedCall(pushedCallId);

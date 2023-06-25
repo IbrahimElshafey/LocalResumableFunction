@@ -255,18 +255,20 @@ public sealed class FunctionDataContext : DbContext
 
     private void SetServiceId(EntityEntry entry)
     {
-        if (entry.Entity is IEntity entityInService && entry.State == EntityState.Added)
+        if (entry.Entity is not IEntity entityInService || entry.State != EntityState.Added) return;
+
+        switch (entityInService.ServiceId)
         {
-            if (entityInService.ServiceId is > 0 && entityInService.ServiceId != _settings.CurrentServiceId)
-            {
+            case > 0 when entityInService.ServiceId != _settings.CurrentServiceId:
                 _logger.LogError(
                     $"Try to change `ServiceId` for entity `{entityInService.GetType().Name}:{entityInService.Id}`" +
                     $" from {entityInService.ServiceId} to {_settings.CurrentServiceId}");
-            }
-            else if (entityInService.ServiceId is > 0)
+                break;
+            case > 0:
                 return;
-            else
+            default:
                 Entry(entityInService).Property(x => x.ServiceId).CurrentValue = _settings.CurrentServiceId;
+                break;
         }
     }
 
@@ -274,16 +276,15 @@ public sealed class FunctionDataContext : DbContext
     {
         try
         {
-            var waits =
+            var waitsWithNoPath =
                 ChangeTracker
                 .Entries()
-                    .Where(x => x.Entity is Wait)
-                    .Select(x => (Wait)x.Entity)
-                    .ToList();
-            foreach (var wait in waits)
-            {
+                .Where(x => x.Entity is Wait { Path: null })
+                .Select(x => (Wait)x.Entity)
+                .ToList();
+            foreach (var wait in waitsWithNoPath) 
                 wait.Path = GetWaitPath(wait);
-            }
+
             await base.SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)

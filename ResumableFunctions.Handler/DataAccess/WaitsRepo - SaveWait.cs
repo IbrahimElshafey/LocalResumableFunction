@@ -15,11 +15,12 @@ internal partial class WaitsRepo
     {
         if (newWait.IsValidWaitRequest() is false)
         {
-            string message =
+            var message =
                 $"Error when validate the requested wait [{newWait.Name}] " +
-                $"that requested by function [{newWait?.RequestedByFunction}].";
+                $"that requested by function [{newWait.RequestedByFunction}].";
             _logger.LogError(message);
         }
+
         switch (newWait)
         {
             case MethodWait methodWait:

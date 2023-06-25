@@ -128,10 +128,10 @@ namespace ResumableFunctions.Handler.TestShell
                 query = query.Where(x => x.Status != FunctionStatus.New);
             }
             var instances = await query.ToListAsync();
-            foreach (var instnace in instances)
+            foreach (var instance in instances)
             {
-                await Context.Entry(instnace).ReloadAsync();
-                instnace.LoadUnmappedProps(typeof(T));
+                await Context.Entry(instance).ReloadAsync();
+                instance.LoadUnmappedProps(typeof(T));
 
             }
             return instances;

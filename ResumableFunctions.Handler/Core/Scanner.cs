@@ -240,7 +240,8 @@ internal class Scanner
 
         async Task<ServiceData> AddNewServiceData(string serviceUrl, string currentAssemblyName)
         {
-            var parentId = await GetParentServiceId(currentAssemblyName);
+            //var parentId = await GetParentServiceId(currentAssemblyName);
+            var parentId = _settings.CurrentServiceId;
             var newServiceData = new ServiceData
             {
                 AssemblyName = currentAssemblyName,
@@ -253,16 +254,16 @@ internal class Scanner
             return newServiceData;
         }
 
-        async Task<int> GetParentServiceId(string currentAssemblyName)
-        {
-            return
-                _currentServiceName == currentAssemblyName ?
-                -1 :
-                await _context.ServicesData
-                .Where(x => x.AssemblyName == _currentServiceName)
-                .Select(x => x.Id)
-                .FirstOrDefaultAsync();
-        }
+        //async Task<int> GetParentServiceId(string currentAssemblyName)
+        //{
+        //    return
+        //        _currentServiceName == currentAssemblyName ?
+        //        -1 :
+        //        await _context.ServicesData
+        //        .Where(x => x.AssemblyName == _currentServiceName)
+        //        .Select(x => x.Id)
+        //        .FirstOrDefaultAsync();
+        //}
     }
 
 
