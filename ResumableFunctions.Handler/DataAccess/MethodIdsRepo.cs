@@ -11,7 +11,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
     private readonly ILogger<MethodIdsRepo> _logger;
     private readonly FunctionDataContext _context;
     private readonly IDistributedLockProvider _lockProvider;
-    private readonly IResumableFunctionsSettings _settings;
+    private IResumableFunctionsSettings _settings;
 
     public MethodIdsRepo(
         ILogger<MethodIdsRepo> logger,
