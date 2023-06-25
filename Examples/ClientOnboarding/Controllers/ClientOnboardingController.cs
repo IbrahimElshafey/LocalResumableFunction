@@ -47,7 +47,7 @@ namespace ClientOnboarding.Controllers
     public class TimeWaitWorkflow : ResumableFunction
     {
         [ResumableFunctionEntryPoint("TestTimeWait")]
-        public async IAsyncEnumerable<Wait> TestTimeWaitAtStrat()
+        public async IAsyncEnumerable<Wait> TestTimeWaitAtStart()
         {
             yield return Wait(TimeSpan.FromDays(1));
             Console.WriteLine("Time wait at start matched.");

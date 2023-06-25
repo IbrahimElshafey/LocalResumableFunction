@@ -322,16 +322,15 @@ public sealed class FunctionDataContext : DbContext
 
     private void NeverUpdateFirstWait(EntityEntry entityEntry)
     {
-        if (entityEntry.Entity is Wait wait &&
-                 wait.IsFirst &&
-                 wait.IsNode &&
-                 wait.IsDeleted == false)
-        {
-            if (entityEntry.State == EntityState.Modified)
-                entityEntry.State = EntityState.Unchanged;
-            if (Entry(wait.FunctionState).State == EntityState.Modified)
-                Entry(wait.FunctionState).State = EntityState.Unchanged;
-        }
+        if (entityEntry.Entity is not Wait { IsFirst: true, IsNode: true, IsDeleted: false } wait) return;
+
+        if (entityEntry.State == EntityState.Modified)
+            entityEntry.State = EntityState.Unchanged;
+
+        if (wait.FunctionState == null) return;
+        var functionState = Entry(wait.FunctionState);
+        if (functionState.State == EntityState.Modified)
+            functionState.State = EntityState.Unchanged;
     }
 
     private void HandleSoftDelete(EntityEntry entityEntry)

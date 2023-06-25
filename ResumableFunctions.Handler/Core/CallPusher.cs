@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.InOuts;
+using System.Threading;
 
 namespace ResumableFunctions.Handler.Core
 {
@@ -16,7 +17,8 @@ namespace ResumableFunctions.Handler.Core
         public CallPusher(
             FunctionDataContext context,
             IBackgroundProcess backgroundJobClient,
-            ICallProcessor processor, ILogger<CallPusher> logger)
+            ICallProcessor processor, 
+            ILogger<CallPusher> logger)
         {
             _context = context;
             _backgroundJobClient = backgroundJobClient;
@@ -31,18 +33,23 @@ namespace ResumableFunctions.Handler.Core
             _backgroundJobClient.Enqueue(() => _processor.InitialProcessPushedCall(pushedCall.Id, pushedCall.MethodData.MethodUrn));
             return pushedCall.Id;
         }
-
+        static readonly SemaphoreSlim SemaphoreSlim = new(1, 1);
         public async Task<int> PushExternalCall(PushedCall pushedCall, string serviceName)
         {
-            string methodUrn = pushedCall.MethodData.MethodUrn;
-            if (await IsExternal(methodUrn) is false)
+            await SemaphoreSlim.WaitAsync();
+            try
             {
-                string errorMsg =
+                var methodUrn = pushedCall.MethodData.MethodUrn;
+                if (await IsExternal(methodUrn)) return await PushCall(pushedCall);
+                var errorMsg =
                     $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}].";
                 _logger.LogError(errorMsg);
                 throw new Exception(errorMsg);
             }
-            return await PushCall(pushedCall);
+            finally
+            {
+                SemaphoreSlim.Release();
+            }
         }
 
         internal async Task<bool> IsExternal(string methodUrn)

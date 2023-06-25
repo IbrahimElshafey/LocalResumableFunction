@@ -48,18 +48,18 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         {
             var firstWaitClone = await GetFirstWait(resumableFunction, false);
             firstWaitClone.Status = WaitStatus.Temp;
-            firstWaitClone.ActionOnWaitsTree(wait =>
+            firstWaitClone.ActionOnWaitsTree(waitClone =>
             {
-                wait.IsFirst = false;
-                wait.WasFirst = true;
-                wait.FunctionState.StateObject = firstMatchedMethodWait?.FunctionState?.StateObject;
-                if (wait is TimeWait timeWait)
+                waitClone.IsFirst = false;
+                waitClone.WasFirst = true;
+                waitClone.FunctionState.StateObject = firstMatchedMethodWait?.FunctionState?.StateObject;
+                if (waitClone is TimeWait timeWait)
                 {
                     timeWait.TimeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
                         () => new LocalRegisteredMethods().TimeWait(
                         new TimeWaitInput
                         {
-                            TimeMatchId = firstMatchedMethodWait.MandatoryPart.Substring(1)
+                            TimeMatchId = firstMatchedMethodWait.MandatoryPart
                         }), timeWait.TimeToWait);
                     timeWait.TimeWaitMethod.MandatoryPart = firstMatchedMethodWait.MandatoryPart;
                     timeWait.IgnoreJobCreation = true;
@@ -182,7 +182,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         {
             ResumableFunctionIdentifier = methodId,
             StateObject = classInstance,
-            ServiceId = _settings.CurrentServiceId,
         };
         firstWait.ActionOnWaitsTree(x =>
         {

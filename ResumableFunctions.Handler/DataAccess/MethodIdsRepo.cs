@@ -11,15 +11,18 @@ internal class MethodIdsRepo : IMethodIdsRepo
     private readonly ILogger<MethodIdsRepo> _logger;
     private readonly FunctionDataContext _context;
     private readonly IDistributedLockProvider _lockProvider;
+    private readonly IResumableFunctionsSettings _settings;
 
     public MethodIdsRepo(
         ILogger<MethodIdsRepo> logger,
         FunctionDataContext context,
-        IDistributedLockProvider lockProvider)
+        IDistributedLockProvider lockProvider,
+        IResumableFunctionsSettings settings)
     {
         _logger = logger;
         _context = context;
         _lockProvider = lockProvider;
+        _settings = settings;
     }
 
     public async Task<ResumableFunctionIdentifier> GetResumableFunction(int id)
@@ -30,94 +33,95 @@ internal class MethodIdsRepo : IMethodIdsRepo
                .FirstOrDefaultAsync(x => x.Id == id);
         if (resumableFunctionIdentifier != null)
             return resumableFunctionIdentifier;
-        throw new NullReferenceException($"Can't find resumable function with ID `{id}` in database.");
+        var error = $"Can't find resumable function with ID `{id}` in database.";
+        _logger.LogError(error);
+        throw new NullReferenceException(error);
     }
+
     public async Task<ResumableFunctionIdentifier> TryGetResumableFunction(MethodData methodData)
     {
         methodData.Validate();
         return await _context
                 .ResumableFunctionIdentifiers
-                .FirstOrDefaultAsync(x => x.RF_MethodUrn == methodData.MethodUrn);
+                .FirstOrDefaultAsync(
+                    x => x.Type == MethodType.ResumableFunctionEntryPoint && 
+                         x.RF_MethodUrn == methodData.MethodUrn);
     }
     public async Task<ResumableFunctionIdentifier> GetResumableFunction(MethodData methodData)
     {
         var resumableFunctionIdentifier = await TryGetResumableFunction(methodData);
         if (resumableFunctionIdentifier != null)
             return resumableFunctionIdentifier;
-        throw new NullReferenceException($"Can't find resumable function ({methodData}) in database.");
+        var error = $"Can't find resumable function ({methodData}) in database.";
+        _logger.LogError(error);
+        throw new NullReferenceException(error);
     }
 
-    public async Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData, int? serviceId)
+    public async Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData)
     {
-        using (await _lockProvider.AcquireLockAsync($"ResumableFunction_{methodData.MethodUrn}"))
+        await using var lockHandle =
+            await _lockProvider.AcquireLockAsync($"ResumableFunction_{methodData.MethodUrn}");
+        var inDb = await TryGetResumableFunction(methodData);
+        if (inDb != null)
         {
-            var inDb = await TryGetResumableFunction(methodData);
-            if (inDb != null)
-            {
-                inDb.FillFromMethodData(methodData);
-                inDb.ServiceId = serviceId;
-                return inDb;
-            }
+            inDb.FillFromMethodData(methodData);
+            inDb.ServiceId = _settings.CurrentServiceId;
+            return inDb;
+        }
 
-            var add = new ResumableFunctionIdentifier();
-            add.FillFromMethodData(methodData);
-            add.ServiceId = serviceId;
-            _context.ResumableFunctionIdentifiers.Add(add);
-            return add;
+        var add = new ResumableFunctionIdentifier();
+        add.FillFromMethodData(methodData);
+        add.ServiceId = _settings.CurrentServiceId;
+        _context.ResumableFunctionIdentifiers.Add(add);
+        return add;
+    }
+
+    public async Task AddWaitMethodIdentifier(MethodData methodData)
+    {
+        await using var waitHandle =
+            await _lockProvider.AcquireLockAsync($"WaitMethod_{methodData.MethodUrn}");
+        var methodGroup =
+            await _context
+                .MethodsGroups
+                .Include(x => x.WaitMethodIdentifiers)
+                .FirstOrDefaultAsync(x => x.MethodGroupUrn == methodData.MethodUrn);
+        var methodInDb = methodGroup?.WaitMethodIdentifiers?
+            .FirstOrDefault(x => x.MethodHash.SequenceEqual(methodData.MethodHash));
+
+        var isUpdate =
+            methodGroup != null &&
+            methodInDb != null;
+        if (isUpdate)
+        {
+            methodInDb.FillFromMethodData(methodData);
+                methodInDb.ServiceId = _settings.CurrentServiceId;
+            return;
+        }
+
+
+        var toAdd = new WaitMethodIdentifier();
+        toAdd.FillFromMethodData(methodData);
+            toAdd.ServiceId = _settings.CurrentServiceId;
+        var isChildAdd =
+            methodGroup != null;
+
+        if (isChildAdd)
+        {
+            methodGroup.WaitMethodIdentifiers?.Add(toAdd);
+        }
+        else
+        {
+            var group = new MethodsGroup
+            {
+                MethodGroupUrn = methodData.MethodUrn,
+            };
+            group.WaitMethodIdentifiers.Add(toAdd);
+            _context.MethodsGroups.Add(group);
+            await _context.SaveChangesAsync();
         }
     }
 
-    public async Task AddWaitMethodIdentifier(MethodData methodData, int service)
-    {
-        using (await _lockProvider.AcquireLockAsync($"WaitMethod_{methodData.MethodUrn}"))
-        {
-            //todo:validate same signature for group methods
-            var methodGroup =
-                await _context
-                    .MethodsGroups
-                    .Include(x => x.WaitMethodIdentifiers)
-                    .FirstOrDefaultAsync(x => x.MethodGroupUrn == methodData.MethodUrn);
-            var methodInDb = methodGroup?.WaitMethodIdentifiers?
-                .FirstOrDefault(x => x.MethodHash.SequenceEqual(methodData.MethodHash));
 
-
-
-            var isUpdate =
-                methodGroup != null &&
-                methodInDb != null;
-            if (isUpdate)
-            {
-                methodInDb.FillFromMethodData(methodData);
-                methodInDb.ServiceId = service;
-                return;
-            }
-
-
-            var toAdd = new WaitMethodIdentifier();
-            toAdd.FillFromMethodData(methodData);
-            toAdd.ServiceId = service;
-            var isChildAdd =
-                methodGroup != null &&
-                methodInDb == null;
-            var isNewParent = methodGroup == null;
-
-            if (isChildAdd)
-                methodGroup.WaitMethodIdentifiers.Add(toAdd);
-            else if (isNewParent)
-            {
-                var group = new MethodsGroup
-                {
-                    MethodGroupUrn = methodData.MethodUrn,
-                };
-                group.WaitMethodIdentifiers.Add(toAdd);
-                _context.MethodsGroups.Add(group);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-    }
-
-    
 
     public async Task<(int MethodId, int GroupId)> GetId(MethodWait methodWait)
     {

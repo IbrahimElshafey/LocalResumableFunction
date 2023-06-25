@@ -75,8 +75,8 @@ internal partial class WaitsRepo
             childWait.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
             childWait.RequestedByFunction = manyWaits.RequestedByFunction;
             childWait.StateAfterWait = manyWaits.StateAfterWait;
-            childWait.ParentWait = manyWaits;
             childWait.ServiceId = _settings.CurrentServiceId;
+            childWait.ParentWait = manyWaits;
             childWait.CurrentFunction = manyWaits.CurrentFunction;
             await SaveWait(childWait);
         }
@@ -146,7 +146,6 @@ internal partial class WaitsRepo
             timeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
                 () => new LocalRegisteredMethods().TimeWait(
                         new TimeWaitInput { TimeMatchId = timeWait.UniqueMatchId }), timeWait.TimeToWait);
-
         timeWaitMethod.ServiceId = _settings.CurrentServiceId;
         timeWaitMethod.MethodToWaitId = methodId.MethodId;
         timeWaitMethod.MethodGroupToWaitId = methodId.GroupId;

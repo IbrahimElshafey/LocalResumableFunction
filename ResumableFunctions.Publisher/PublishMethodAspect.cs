@@ -68,7 +68,7 @@ public class PublishMethodAspect
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error when try to pushe method call for method [{name}]");
+            _logger.LogError(ex, $"Error when try to push call for method [{name}]");
         }
     }
 }

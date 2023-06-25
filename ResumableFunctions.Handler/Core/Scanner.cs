@@ -123,15 +123,16 @@ internal class Scanner
         await _context.SaveChangesAsync();
 
 
-        if (entryPointCheck is { IsEntry: true, IsActive: true })
+        switch (entryPointCheck)
         {
-            _backgroundJobClient.Enqueue(
-                () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
-        }
-        else if (entryPointCheck is { IsEntry: true, IsActive: false })
-        {
-            _backgroundJobClient.Enqueue(
-                () => _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id));
+            case { IsEntry: true, IsActive: true }:
+                _backgroundJobClient.Enqueue(
+                    () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
+                break;
+            case { IsEntry: true, IsActive: false }:
+                _backgroundJobClient.Enqueue(
+                    () => _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id));
+                break;
         }
     }
 
@@ -147,6 +148,7 @@ internal class Scanner
 
                 var dateBeforeScan = DateTime.Now;
                 if (await CheckScan(assemblyPath, _settings.CurrentServiceUrl) is false) continue;
+                
 
                 var assembly = Assembly.LoadFile(assemblyPath);
                 var serviceData =
@@ -194,14 +196,11 @@ internal class Scanner
     private async Task<bool> CheckScan(string assemblyPath, string serviceUrl)
     {
         var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
-        var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
+        var serviceData = 
+            await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName) ??
+            await AddNewServiceData(serviceUrl, currentAssemblyName);
 
-        if (serviceData == null)
-        {
-            serviceData = await AddNewServiceData(serviceUrl, currentAssemblyName);
-            _settings.CurrentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
-        }
-
+        _settings.CurrentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
         if (File.Exists(assemblyPath) is false)
         {
             string message = $"Assembly file ({assemblyPath}) not exist.";
@@ -211,7 +210,6 @@ internal class Scanner
         }
 
         serviceData.ErrorCounter = 0;
-        _settings.CurrentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
 
         if (serviceData.ParentId == -1)
         {
@@ -247,17 +245,17 @@ internal class Scanner
 
         async Task<ServiceData> AddNewServiceData(string serviceUrl, string currentAssemblyName)
         {
-            int parentId = await GetParentServiceId(currentAssemblyName);
-            ServiceData serviceData = new ServiceData
+            var parentId = await GetParentServiceId(currentAssemblyName);
+            var newServiceData = new ServiceData
             {
                 AssemblyName = currentAssemblyName,
                 Url = serviceUrl,
                 ParentId = parentId
             };
-            _context.ServicesData.Add(serviceData);
-            serviceData.AddLog($"Assembly [{currentAssemblyName}] will be scaned.");
+            _context.ServicesData.Add(newServiceData);
+            newServiceData.AddLog($"Assembly [{currentAssemblyName}] will be scanned.");
             await _context.SaveChangesAsync();
-            return serviceData;
+            return newServiceData;
         }
 
         async Task<int> GetParentServiceId(string currentAssemblyName)

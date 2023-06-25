@@ -63,7 +63,7 @@ namespace ResumableFunctions.Handler.Attributes
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error when try to pushe method call for method [{name}]");
+                _logger.LogError(ex, $"Error when try to push call for method [{name}]");
             }
             //Console.WriteLine($"Method `{name}` executed and result is `{result}`");
         }

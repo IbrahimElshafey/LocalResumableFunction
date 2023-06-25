@@ -55,16 +55,15 @@ namespace ResumableFunctions.Handler.Helpers
                 var codeInfo =
                     $"\nSource File Path: {sourceFilePath}\n" +
                     $"Line Number: {sourceLineNumber}";
-                _logger.LogError(ex,
-                        errorMessage == null ?
-                        $"Error when execute `{methodName}`\n{codeInfo}" :
-                        $"{errorMessage}\n{codeInfo}");
+                errorMessage = errorMessage == null ?
+                    $"Error when execute `{methodName}`\n{codeInfo}" :
+                    $"{errorMessage}\n{codeInfo}";
+                _logger.LogError(ex, errorMessage);
                 throw;
             }
             finally
             {
-                if (isScanTask && !hasException)
-                    await _scanStateRepo.RemoveScanState(scanTaskId);
+                await _scanStateRepo.RemoveScanState(scanTaskId);
             }
         }
     }
