@@ -1,7 +1,7 @@
 ﻿
 # Refactor
-* Refactor long methods
 * Remove direct use for DbContext
+* Refactor long methods
 * What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 * Replace HttpHangfire with abstraction to enable queue based communication between services
 

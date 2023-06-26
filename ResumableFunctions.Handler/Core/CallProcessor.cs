@@ -44,7 +44,10 @@ internal class CallProcessor : ICallProcessor
                 async () =>
                 {
                     var services = await _waitsRepository.GetAffectedServicesForCall(methodUrn);
-                    if (services == null || services.Any() is false) return;
+                    if (services == null || services.Any() is false)
+                    {
+                        return;
+                    }
 
                     foreach (var service in services)
                     {

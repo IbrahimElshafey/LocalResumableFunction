@@ -24,3 +24,5 @@ dotnet nuget push ResumableFunctions.AspNetService.1.0.0.nupkg --api-key <key> -
 dotnet nuget push ResumableFunctions.Publisher.1.0.0.nupkg --api-key <key> --source https://api.nuget.org/v3/index.json
 
 Nuget cache C:\Users\Administrator\.nuget\packages
+
+Admin123 postgress

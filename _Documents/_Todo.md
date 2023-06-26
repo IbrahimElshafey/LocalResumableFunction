@@ -1,12 +1,11 @@
 ﻿# Hot Todo Core functions
-* Error codes for logs
-* Review queries and use ServiceId
 * Same DLL in two services
-
+* Error codes for logs
+* [Refactor and Enhancements.md]
 * If register first wait failed for function make it halted
 * If service scan failed make it halted
 * Review that new scan should not delete existing methods and groups if exist
-* Test replay
+
 * Review activate and deactivate function
 * Use IMaterializationInterceptor to set entity dependencies
 * Review check after locks

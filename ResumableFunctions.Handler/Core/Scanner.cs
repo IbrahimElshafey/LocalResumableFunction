@@ -22,6 +22,7 @@ internal class Scanner
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly string _currentServiceName;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
+    private readonly IServiceRepo _serviceRepo;
 
     public Scanner(
         ILogger<Scanner> logger,
@@ -31,7 +32,8 @@ internal class Scanner
         FunctionDataContext context,
         IBackgroundProcess backgroundJobClient,
         IWaitsRepo waitsRepository,
-        BackgroundJobExecutor backgroundJobExecutor)
+        BackgroundJobExecutor backgroundJobExecutor,
+        IServiceRepo serviceRepo)
     {
         _logger = logger;
         _methodIdentifierRepo = methodIdentifierRepo;
@@ -42,12 +44,13 @@ internal class Scanner
         _waitsRepository = waitsRepository;
         _currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
         _backgroundJobExecutor = backgroundJobExecutor;
+        _serviceRepo = serviceRepo;
     }
 
     public async Task Start()
     {
         await _backgroundJobExecutor.Execute(
-            $"Scanner_StartServiceScanning_{_currentServiceName}",
+            $"Scanner_ScanningService_{_currentServiceName}",
             async () =>
             {
                 await RegisterMethods(GetAssembliesToScan());
@@ -60,27 +63,17 @@ internal class Scanner
 
     }
 
-
-    private void ScopeInit(IServiceScope scope)
-    {
-#if DEBUG
-        _settings.ForceRescan = true;
-#endif
-    }
-
     private List<string> GetAssembliesToScan()
     {
         var currentFolder = AppContext.BaseDirectory;
-
-        WriteMessage($"Get assemblies to scan in directory [{currentFolder}].");
-        //var assemblyPaths = Directory.EnumerateFiles(_currentFolder, "*.dll").Where(IsIncludedInScan).ToList();
+        _logger.LogInformation($"Get assemblies to scan in directory [{currentFolder}].");
         var assemblyPaths = new List<string>
             {
                 $"{currentFolder}{_currentServiceName}.dll"
             };
         if (_settings.DllsToScan != null)
-            assemblyPaths.AddRange(
-                _settings.DllsToScan.Select(x => $"{currentFolder}{x}.dll"));
+            assemblyPaths.AddRange(_settings.DllsToScan.Select(x => $"{currentFolder}{x}.dll"));
+       
         assemblyPaths = assemblyPaths.Distinct().ToList();
         return assemblyPaths;
     }
@@ -92,18 +85,8 @@ internal class Scanner
         BindingFlags.Static |
         BindingFlags.Instance;
 
-    private async Task UpdateScanDate(ServiceData serviceData)
-    {
-        await _context.Entry(serviceData).ReloadAsync();
-        serviceData.AddLog($"Update last scan date for service [{serviceData.AssemblyName}] to [{DateTime.Now}].");
-        serviceData.Modified = DateTime.Now;
-        await _context.SaveChangesAsync();
-    }
-
-
     internal async Task RegisterResumableFunction(MethodInfo resumableFunctionMInfo, ServiceData serviceData)
     {
-
         var entryPointCheck = EntryPointCheck(resumableFunctionMInfo);
         var methodType = entryPointCheck.IsEntry ? MethodType.ResumableFunctionEntryPoint : MethodType.SubResumableFunction;
         serviceData.AddLog($"Register resumable function [{resumableFunctionMInfo.GetFullName()}] of type [{methodType}]");
@@ -139,15 +122,14 @@ internal class Scanner
             try
             {
                 //check if file exist
-                WriteMessage($"Start scan assembly [{assemblyPath}]");
+                _logger.LogInformation($"Start scan assembly [{assemblyPath}]");
 
                 var dateBeforeScan = DateTime.Now;
-                if (await CheckScan(assemblyPath, _settings.CurrentServiceUrl) is false) continue;
+                if (await _serviceRepo.CheckAssemblyScan(assemblyPath) is false) continue;
                 
 
                 var assembly = Assembly.LoadFile(assemblyPath);
-                var serviceData =
-                    await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assembly.GetName().Name);
+                var serviceData = await _serviceRepo.GetServiceData(assembly.GetName().Name);
 
                 foreach (var type in assembly.GetTypes())
                 {
@@ -157,14 +139,14 @@ internal class Scanner
                         resumableFunctionClasses.Add(type);
                 }
 
-                WriteMessage($"Save discovered method waits for assembly [{assemblyPath}].");
+                _logger.LogInformation($"Save discovered method waits for assembly [{assemblyPath}].");
                 await _context.SaveChangesAsync();
 
                 foreach (var resumableFunctionClass in resumableFunctionClasses)
                     await RegisterResumableFunctionsInClass(resumableFunctionClass);
 
-                await UpdateScanDate(serviceData);
-                await DeleteOldScanData(dateBeforeScan);
+                await _serviceRepo.UpdateDllScanDate(serviceData);
+                await _serviceRepo.DeleteOldScanData(dateBeforeScan);
             }
             catch (Exception ex)
             {
@@ -173,99 +155,6 @@ internal class Scanner
             }
         }
     }
-
-    private async Task DeleteOldScanData(DateTime dateBeforeScan)
-    {
-        var currentService = await _context
-            .ServicesData
-            .FirstAsync(x => x.AssemblyName == _currentServiceName);
-        await _context
-            .Logs
-            .Where(x =>
-                x.EntityId == currentService.Id &&
-                x.EntityType == nameof(ServiceData) &&
-                x.Created < dateBeforeScan)
-            .ExecuteDeleteAsync();
-    }
-
-    private async Task<bool> CheckScan(string assemblyPath, string serviceUrl)
-    {
-        var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
-        var serviceData = 
-            await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName) ??
-            await AddNewServiceData(serviceUrl, currentAssemblyName);
-
-        _settings.CurrentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
-        if (File.Exists(assemblyPath) is false)
-        {
-            string message = $"Assembly file ({assemblyPath}) not exist.";
-            _logger.LogError(message);
-            serviceData.AddError(message);
-            return false;
-        }
-
-        serviceData.ErrorCounter = 0;
-
-        if (serviceData.ParentId == -1)
-        {
-            await _context
-               .ServicesData
-               .Where(x => x.ParentId == serviceData.Id)
-               .ExecuteDeleteAsync();
-        }
-
-
-        var assembly = Assembly.LoadFile(assemblyPath);
-        var isReferenceResumableFunction =
-            assembly.GetReferencedAssemblies().Any(x => new[]
-            {
-                        "ResumableFunctions.Handler",
-                        "ResumableFunctions.AspNetService"
-            }.Contains(x.Name));
-        if (isReferenceResumableFunction is false)
-        {
-            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].");
-            return false;
-        }
-
-        var lastBuildDate = File.GetLastWriteTime(assemblyPath);
-        serviceData.Url = serviceUrl;
-        serviceData.AddLog($"Check last scan date for assembly [{currentAssemblyName}].");
-        bool shouldScan = lastBuildDate > serviceData.Modified;
-        if (shouldScan is false)
-            serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].");
-        if (_settings.ForceRescan)
-            serviceData.AddLog("Will be scanned because force rescan is enabled in Debug mode.", LogType.Warning);
-        return shouldScan || _settings.ForceRescan;
-
-        async Task<ServiceData> AddNewServiceData(string serviceUrl, string currentAssemblyName)
-        {
-            //var parentId = await GetParentServiceId(currentAssemblyName);
-            var parentId = _settings.CurrentServiceId;
-            var newServiceData = new ServiceData
-            {
-                AssemblyName = currentAssemblyName,
-                Url = serviceUrl,
-                ParentId = parentId
-            };
-            _context.ServicesData.Add(newServiceData);
-            newServiceData.AddLog($"Assembly [{currentAssemblyName}] will be scanned.");
-            await _context.SaveChangesAsync();
-            return newServiceData;
-        }
-
-        //async Task<int> GetParentServiceId(string currentAssemblyName)
-        //{
-        //    return
-        //        _currentServiceName == currentAssemblyName ?
-        //        -1 :
-        //        await _context.ServicesData
-        //        .Where(x => x.AssemblyName == _currentServiceName)
-        //        .Select(x => x.Id)
-        //        .FirstOrDefaultAsync();
-        //}
-    }
-
 
     internal async Task RegisterMethods(Type type, ServiceData serviceData)
     {
@@ -332,10 +221,7 @@ internal class Scanner
 
     internal async Task RegisterResumableFunctionsInClass(Type type)
     {
-        var currentAssemblyName = type.Assembly.GetName().Name;
-        var serviceData = await _context
-            .ServicesData
-            .FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
+        var serviceData = await _serviceRepo.GetServiceData(type.Assembly.GetName().Name);
         serviceData.AddLog($"Try to find resumable functions in type [{type.FullName}]");
         var resumableFunctions = type
             .GetMethods(GetBindingFlags())
@@ -361,7 +247,7 @@ internal class Scanner
         var resumableFunctionAttribute =
             (ResumableFunctionEntryPointAttribute)resumableFunction.GetCustomAttributes()
             .FirstOrDefault(attribute => attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId);
-        bool isFunctionActive = (resumableFunctionAttribute != null && resumableFunctionAttribute.IsActive);
+        var isFunctionActive = resumableFunctionAttribute is { IsActive: true };
         return (resumableFunctionAttribute != null, isFunctionActive);
     }
 
@@ -393,11 +279,6 @@ internal class Scanner
         return result;
     }
 
-
-    private void WriteMessage(string message)
-    {
-        _logger.LogInformation(message);
-    }
 
 }
 
