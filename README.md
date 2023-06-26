@@ -1,4 +1,4 @@
-**Project Status: Main functionality done but Todos/Bugs/Enhancements exist [here](https://github.com/IbrahimElshafey/ResumableFunctions/blob/main/_Documents/_Todo.md)**
+**Project Status: Work in progress [here](https://github.com/IbrahimElshafey/ResumableFunctions/tree/main/_Documents)**
 * [What is Resumable Function?](#what-is-resumable-function)
 * [Why this project?](#why-this-project)
 * [Example Explained](#example-explained)

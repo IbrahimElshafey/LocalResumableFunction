@@ -25,6 +25,7 @@
     <None Include="$(MSBuildThisFileDirectory)_Roslyn Analyzer.md" />
     <None Include="$(MSBuildThisFileDirectory)Refactor and Enhancements.md" />
     <None Include="$(MSBuildThisFileDirectory)Other Wait Types.md" />
+    <None Include="$(MSBuildThisFileDirectory)README.md" />
     <None Include="$(MSBuildThisFileDirectory)_Todo.md" />
   </ItemGroup>
   <ItemGroup>
