@@ -32,12 +32,23 @@ namespace Tests
             Assert.Empty(errors);
             var waits = await test.GetWaits();
             Assert.Equal(4, waits.Count);
+
+            wms.Method1("1");
+            wms.Method2("2");
+            wms.Method3("3");
+
+            pushedCalls = await test.GetPushedCalls();
+            Assert.Equal(6, pushedCalls.Count);
+            errors = await test.GetLogs();
+            Assert.Empty(errors);
+            waits = await test.GetWaits();
+            Assert.Equal(8, waits.Count);
         }
 
         [Fact]
         public async Task WaitTwoMethodsAfterFirst_Test()
         {
-            var test = new TestCase(nameof(WaitThreeMethodsAtStart_Test), typeof(WaitManyMethods));
+            var test = new TestCase(nameof(WaitTwoMethodsAfterFirst_Test), typeof(WaitManyMethods));
             await test.ScanTypes();
             var errors = await test.GetLogs();
             Assert.Empty(errors);
@@ -55,20 +66,32 @@ namespace Tests
             Assert.Equal(4, waits.Count);
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Completed).Count());
             Assert.Equal(2, waits.Where(x => x.IsNode).Count());
+
+            wms = new WaitManyMethods();
+            wms.Method4("1");
+            wms.Method5("2");
+            wms.Method6("3");
+
+            pushedCalls = await test.GetPushedCalls();
+            Assert.Equal(6, pushedCalls.Count);
+            errors = await test.GetLogs();
+            Assert.Empty(errors);
+            waits = await test.GetWaits();
+            Assert.Equal(8, waits.Count);
+            Assert.Equal(8, waits.Where(x => x.Status == WaitStatus.Completed).Count());
+            Assert.Equal(4, waits.Where(x => x.IsNode).Count());
         }
 
         [Fact]
-        public async Task WaitFirstInThree_Test()
+        public async Task WaitFirstInThreeAtStart_Test()
         {
-            var test = new TestCase(nameof(WaitThreeMethodsAtStart_Test), typeof(WaitManyMethods));
+            var test = new TestCase(nameof(WaitFirstInThreeAtStart_Test), typeof(WaitManyMethods));
             await test.ScanTypes();
             var errors = await test.GetLogs();
             Assert.Empty(errors);
 
             var wms = new WaitManyMethods();
             wms.Method7("1");
-            //wms.Method5("2");
-            //wms.Method6("3");
 
             var pushedCalls = await test.GetPushedCalls();
             Assert.Equal(1, pushedCalls.Count);
@@ -76,8 +99,21 @@ namespace Tests
             Assert.Empty(errors);
             var waits = await test.GetWaits();
             Assert.Equal(4, waits.Count);
-            Assert.Equal(1, waits.Where(x => x.Status == WaitStatus.Completed).Count());
-            Assert.Equal(1, waits.Where(x => x.IsNode).Count());
+            Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Completed));
+            Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
+            Assert.Equal(1, waits.Count(x => x.IsNode));
+
+            //round two
+            wms.Method8("1");
+            pushedCalls = await test.GetPushedCalls();
+            Assert.Equal(2, pushedCalls.Count);
+            errors = await test.GetLogs();
+            Assert.Empty(errors);
+            waits = await test.GetWaits();
+            Assert.Equal(8, waits.Count);
+            Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Completed).Count());
+            Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Canceled).Count());
+            Assert.Equal(2, waits.Where(x => x.IsNode).Count());
         }
     }
 
@@ -99,7 +135,7 @@ namespace Tests
         public async IAsyncEnumerable<Wait> TwoMethodsAfterFirst()
         {
             yield return Wait<string, string>("Method 4", Method4);
-            yield return Wait("Wait three methods",
+            yield return Wait("Two Methods After First",
                 Wait<string, string>("Method 5", Method5).MatchAll(),
                 Wait<string, string>("Method 6", Method6).MatchAll()
             );
@@ -109,11 +145,11 @@ namespace Tests
         [ResumableFunctionEntryPoint("WaitFirstInThree")]
         public async IAsyncEnumerable<Wait> WaitFirstInThree()
         {
-            yield return Wait("Wait three methods",
+            yield return Wait("Wait First In Three",
                 Wait<string, string>("Method 7", Method7),
                 Wait<string, string>("Method 8", Method8),
                 Wait<string, string>("Method 9", Method9)
-            );
+            ).First();
             await Task.Delay(100);
             Console.WriteLine("WaitFirstInThree");
         }
