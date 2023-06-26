@@ -102,7 +102,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
         var errorMsg = $"When the replay type is [{ReplayType.GoToWithNewMatch}]" +
                        $"the wait to replay  must be of type [{nameof(MethodWait)}]";
-        waitToReplay.FunctionState.AddError(errorMsg);
+        waitToReplay.FunctionState.AddError(errorMsg, null, Constants.ReplayWaitMustBeMethod);
         throw new Exception(errorMsg);
 
     }
@@ -117,7 +117,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     {
         var waitExpressionsHash = new WaitExpressionsHash(matchExpression, setDataExpression);
         var expressionsHash = waitExpressionsHash.Hash;
-        var waitTemplate = 
+        var waitTemplate =
             await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, groupId) ??
             await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, functionInstance, funcId, groupId, methodId);
         return waitTemplate;
@@ -131,7 +131,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 "Go to the first wait with same match will create new separate function instance, " +
                 "so execution will not be complete.";
             _logger.LogWarning(errorMsg);
-            waitToReplay.FunctionState.AddError(errorMsg);
+            waitToReplay.FunctionState.AddError(errorMsg, null, Constants.ReplayFirstError);
             return null;
         }
         var duplicateWait = waitToReplay.DuplicateWait();
@@ -148,7 +148,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         {
             const string errorMessage = "Go before the first wait with same match will create new separate function instance.";
             _logger.LogWarning(errorMessage);
-            oldCompletedWait.FunctionState.AddError(errorMessage);
+            oldCompletedWait.FunctionState.AddError(errorMessage, null, Constants.ReplayFirstError);
             return null;
         }
 
@@ -163,7 +163,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
         const string errorMsg = "Replay Go Before found no waits!!";
         _logger.LogError(errorMsg);
-        oldCompletedWait.FunctionState.AddError(errorMsg);
+        oldCompletedWait.FunctionState.AddError(errorMsg, null, Constants.ReplayNoWaitFound);
         throw new Exception(errorMsg);
     }
 
@@ -196,13 +196,13 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
             const string errorMsg = "Replay Go Before with new match found no waits!!";
             _logger.LogError(errorMsg);
-            waitToReplay.FunctionState.AddError(errorMsg);
+            waitToReplay.FunctionState.AddError(errorMsg, null, Constants.ReplayNoWaitFound);
             throw new Exception(errorMsg);
         }
 
         var message = $"When the replay type is [{ReplayType.GoBeforeWithNewMatch}]" +
                       $"the wait to replay  must be of type [{nameof(MethodWait)}]";
-        _logger.LogError(message);
+        _logger.LogError(message, null, Constants.ReplayWaitMustBeMethod);
         waitToReplay.FunctionState.AddError(message);
         throw new Exception(message);
     }

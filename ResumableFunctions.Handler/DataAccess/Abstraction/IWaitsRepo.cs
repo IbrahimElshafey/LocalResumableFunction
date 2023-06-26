@@ -13,7 +13,6 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
         Task<List<int>> GetMatchedFunctionsForCall(int pushedCallId,string methodUrn);
         Task<List<ServiceData>> GetAffectedServicesForCall(string methodUrn);
         Task RemoveFirstWaitIfExist(int methodIdentifierId);
-
         Task<bool> SaveWait(Wait newWait);
     }
 }

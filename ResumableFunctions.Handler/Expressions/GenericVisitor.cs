@@ -4,7 +4,6 @@ namespace ResumableFunctions.Handler.Expressions;
 
 public class GenericVisitor : ExpressionVisitor
 {
-    //todo:enhance this class by override it's methods 
     private readonly List<VisitNodeFunction> _visitors = new();
     public void AddVisitor(
         Func<Expression, bool> whenExpressionMatch,

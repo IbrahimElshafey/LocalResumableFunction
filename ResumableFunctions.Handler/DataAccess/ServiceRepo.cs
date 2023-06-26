@@ -4,6 +4,7 @@ using ResumableFunctions.Handler.InOuts;
 using System.Reflection;
 using System.Runtime;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -54,7 +55,7 @@ public class ServiceRepo : IServiceRepo
         else if (serviceData.ParentId != _settings.CurrentServiceId)
         {
             var rootService = _context.ServicesData.Local.FirstOrDefault(x => x.Id == _settings.CurrentServiceId);
-            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to this service because it's used in another service.");
+            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to this service because it's used in another service.", null, Constants.DllExistInAnotherService);
             return false;
         }
 
@@ -63,7 +64,7 @@ public class ServiceRepo : IServiceRepo
         {
             var message = $"Assembly file ({assemblyPath}) not exist.";
             _logger.LogError(message);
-            serviceData.AddError(message);
+            serviceData.AddError(message, null, Constants.FileNotExist);
             return false;
         }
 
@@ -88,7 +89,7 @@ public class ServiceRepo : IServiceRepo
 
         if (isReferenceResumableFunction is false)
         {
-            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].");
+            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].", null, Constants.DllNotReferenceRequiredDll);
             return false;
         }
 

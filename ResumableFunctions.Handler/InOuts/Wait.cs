@@ -65,7 +65,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         if (functionRunner.ResumableFunctionExistInCode is false)
         {
             var errorMsg = $"Resumable function ({RequestedByFunction.MethodName}) not exist in code";
-            FunctionState.AddError(errorMsg);
+            FunctionState.AddError(errorMsg, null, Constants.MethodNotInCode);
             throw new Exception(errorMsg);
         }
 
@@ -83,7 +83,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         catch (Exception ex)
         {
             FunctionState.AddError(
-                $"An error occurred after resuming execution after wait `{this}`.", ex);
+                $"An error occurred after resuming execution after wait `{this}`.", ex, Constants.ProceedToNextWaitError);
             FunctionState.Status = FunctionStatus.Error;
             throw;
         }

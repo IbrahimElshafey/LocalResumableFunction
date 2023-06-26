@@ -126,7 +126,7 @@ namespace ResumableFunctions.Handler.Core
             {
                 var error =
                     $"Error occurred when evaluate match for [{_methodWait.Name}] in [{_methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].";
-                _methodWait.FunctionState.AddError(error, ex);
+                _methodWait.FunctionState.AddError(error, ex, Constants.MatchEvaluationError);
                 throw new Exception(error, ex);
             }
         }
@@ -173,7 +173,7 @@ namespace ResumableFunctions.Handler.Core
                 _methodWait.FunctionState.AddError(
                     $"Concurrency Exception occurred when process wait [{_methodWait.Name}]." +
                     $"\nProcessing this wait will be scheduled.",
-                    ex);
+                    ex, Constants.ConcurrencyException);
                 _backgroundJobClient.Schedule(() =>
                         ProcessFunctionExpectedMatches(_methodWait.RequestedByFunctionId, pushedCallId),
                     TimeSpan.FromSeconds(10));
@@ -253,7 +253,7 @@ namespace ResumableFunctions.Handler.Core
                 {
                     var errorMsg = $"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).";
                     _logger.LogWarning(errorMsg);
-                    currentWait.FunctionState.AddError(errorMsg);
+                    currentWait.FunctionState.AddError(errorMsg, null, Constants.ProceedToNextWaitParentNull);
                     return;
                 }
 
@@ -281,7 +281,7 @@ namespace ResumableFunctions.Handler.Core
             {
                 var errorMessage = $"Error when proceed to next wait after {currentWait}";
                 _logger.LogError(ex, errorMessage);
-                currentWait.FunctionState.AddError(errorMessage, ex);
+                currentWait.FunctionState.AddError(errorMessage, ex, Constants.ProceedToNextWaitError);
                 throw;
             }
         }

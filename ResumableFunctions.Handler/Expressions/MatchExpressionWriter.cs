@@ -50,10 +50,10 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         _functionInstanceArg = Parameter(_currentFunctionInstance.GetType(), "functionInstance");
         _inputArg = Parameter(expression.Parameters[0].Type, "input");
         _outputArg = Parameter(expression.Parameters[1].Type, "output");
-        var changeParameterVistor = new GenericVisitor();
-        changeParameterVistor.OnVisitParameter(ChangeParameters);
-        changeParameterVistor.OnVisitConstant(OnVisitFunctionInstance);
-        var updatedBoy = (LambdaExpression)changeParameterVistor.Visit(_matchExpression);
+        var changeParameterVisitor = new GenericVisitor();
+        changeParameterVisitor.OnVisitParameter(ChangeParameters);
+        changeParameterVisitor.OnVisitConstant(OnVisitFunctionInstance);
+        var updatedBoy = (LambdaExpression)changeParameterVisitor.Visit(_matchExpression);
         var functionType = typeof(Func<,,,>)
             .MakeGenericType(
                 updatedBoy.Parameters[0].Type,
