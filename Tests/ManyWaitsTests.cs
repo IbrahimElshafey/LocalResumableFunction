@@ -115,8 +115,65 @@ namespace Tests
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Canceled).Count());
             Assert.Equal(2, waits.Where(x => x.IsNode).Count());
         }
+
+        [Fact]
+        public async Task WaitManyMethodsWithExpression_Test()
+        {
+            var test = new TestCase(nameof(WaitManyMethodsWithExpression_Test), typeof(WaitManyMethodsWithExpression));
+            await test.ScanTypes();
+            var errors = await test.GetLogs();
+            Assert.Empty(errors);
+
+            var wms = new WaitManyMethodsWithExpression();
+            wms.Method2("1");
+            wms.Method3("1");
+
+            var pushedCalls = await test.GetPushedCalls();
+            Assert.Equal(2, pushedCalls.Count);
+            errors = await test.GetLogs();
+            Assert.Empty(errors);
+            var waits = await test.GetWaits();
+            Assert.Equal(4, waits.Count);
+            Assert.Equal(3, waits.Count(x => x.Status == WaitStatus.Completed));
+            Assert.Equal(1, waits.Count(x => x.Status == WaitStatus.Canceled));
+            Assert.Equal(1, waits.Count(x => x.IsNode));
+
+
+            wms.Method3("1");
+            wms.Method1("1");
+
+            pushedCalls = await test.GetPushedCalls();
+            Assert.Equal(4, pushedCalls.Count);
+            errors = await test.GetLogs();
+            Assert.Empty(errors);
+            waits = await test.GetWaits();
+            Assert.Equal(8, waits.Count);
+            Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
+            Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
+            Assert.Equal(2, waits.Count(x => x.IsNode));
+        }
     }
 
+    public class WaitManyMethodsWithExpression : ResumableFunction
+    {
+        [ResumableFunctionEntryPoint("WaitManyWithExpression")]
+        public async IAsyncEnumerable<Wait> WaitThreeAtStart()
+        {
+            yield return Wait("Wait three methods",
+                Wait<string, string>("Method 1", Method1),
+                Wait<string, string>("Method 2", Method2),
+                Wait<string, string>("Method 3", Method3)
+            ).When(group => group.CompletedCount == 2);
+            await Task.Delay(100);
+            Console.WriteLine("Three method done");
+        }
+
+        [PushCall("Method1")]
+        public string Method1(string input) => "Method1 Call";
+        [PushCall("Method2")]
+        public string Method2(string input) => "Method2 Call";
+        [PushCall("Method3")] public string Method3(string input) => "Method3 Call";
+    }
     public class WaitManyMethods : ResumableFunction
     {
         [ResumableFunctionEntryPoint("WaitThreeAtStart")]

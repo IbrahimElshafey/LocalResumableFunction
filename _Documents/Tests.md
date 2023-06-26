@@ -6,9 +6,9 @@
 * Wait first in many [Done]
 * Wait first in many as first wait [Done]
 * Wait many with match expression
-* Wait many with match expression as first wait
+* Wait many with match expression as first wait [Done]
 
-* Wait sub function
+* Wait sub function [done]
 * Wait sub function as first wait [Done]
 
 * Wait many functions
