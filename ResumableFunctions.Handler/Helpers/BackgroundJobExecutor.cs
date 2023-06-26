@@ -44,7 +44,7 @@ namespace ResumableFunctions.Handler.Helpers
                 await using var handle = await _lockProvider.TryAcquireLockAsync(_settings.CurrentDbName + lockName);
                 if (handle is null) return;//if another process work on same task then ignore
 
-                using IServiceScope scope = _serviceProvider.CreateScope();
+                using var scope = _serviceProvider.CreateScope();
                 if (isScanTask)
                     scanTaskId = await _scanStateRepo.AddScanState(lockName);
                 await backgroundTask();

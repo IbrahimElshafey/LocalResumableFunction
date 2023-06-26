@@ -26,7 +26,7 @@ internal class SetDepsTest
         if (setDepsMi.ReturnType == typeof(void) &&
             parameters.Count() >= 1)
         {
-            for (int i = 0; i < parameters.Length; i++)
+            for (var i = 0; i < parameters.Length; i++)
             {
                 var par = parameters[i];
                 if (par.ParameterType == typeof(int))

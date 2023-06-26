@@ -34,7 +34,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         var waitToReplay = await _waitsRepo.GetOldWaitForReplay(replayRequest);
         if (waitToReplay == null)
         {
-            string errorMsg = $"Replay failed because there is no wait to replay, replay request was ({replayRequest})";
+            var errorMsg = $"Replay failed because there is no wait to replay, replay request was ({replayRequest})";
             _logger.LogWarning(errorMsg);
             throw new Exception(errorMsg);
         }
@@ -100,8 +100,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             return duplicateWait;
         }
 
-        string errorMsg = $"When the replay type is [{ReplayType.GoToWithNewMatch}]" +
-                          $"the wait to replay  must be of type [{nameof(MethodWait)}]";
+        var errorMsg = $"When the replay type is [{ReplayType.GoToWithNewMatch}]" +
+                       $"the wait to replay  must be of type [{nameof(MethodWait)}]";
         waitToReplay.FunctionState.AddError(errorMsg);
         throw new Exception(errorMsg);
 
@@ -200,8 +200,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             throw new Exception(errorMsg);
         }
 
-        string message = $"When the replay type is [{ReplayType.GoBeforeWithNewMatch}]" +
-                         $"the wait to replay  must be of type [{nameof(MethodWait)}]";
+        var message = $"When the replay type is [{ReplayType.GoBeforeWithNewMatch}]" +
+                      $"the wait to replay  must be of type [{nameof(MethodWait)}]";
         _logger.LogError(message);
         waitToReplay.FunctionState.AddError(message);
         throw new Exception(message);

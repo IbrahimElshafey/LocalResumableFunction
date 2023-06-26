@@ -42,7 +42,7 @@ internal class GetMethodInfoTest
 
         bool IsInCurrentType(MethodInfo methodInfo)
         {
-            bool isExtension = methodInfo.IsDefined(typeof(ExtensionAttribute), true);
+            var isExtension = methodInfo.IsDefined(typeof(ExtensionAttribute), true);
             if (isExtension)
             {
                 var extensionOnType = methodInfo.GetParameters()[0].ParameterType;
@@ -58,7 +58,7 @@ internal class GetMethodInfoTest
                 }
             }
 
-            bool inCurrentType = methodInfo.ReflectedType.IsAssignableFrom(typeof(T));
+            var inCurrentType = methodInfo.ReflectedType.IsAssignableFrom(typeof(T));
             if (inCurrentType)
                 ownerType = methodInfo.ReflectedType;
             return inCurrentType;

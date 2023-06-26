@@ -271,12 +271,10 @@ internal class Scanner
             _logger.LogError(errorMsg);
             result = false;
         }
-        if (resumableFunction.IsStatic)
-        {
-            serviceData.AddError($"Resumable function `{resumableFunction.GetFullName()}` must be instance method.");
-            result = false;
-        }
-        return result;
+
+        if (!resumableFunction.IsStatic) return result;
+        serviceData.AddError($"Resumable function `{resumableFunction.GetFullName()}` must be instance method.");
+        return false;
     }
 
 

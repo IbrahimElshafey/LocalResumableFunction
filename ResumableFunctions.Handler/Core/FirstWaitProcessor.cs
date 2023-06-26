@@ -103,7 +103,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     public async Task RegisterFirstWait(int functionId)
     {
         MethodInfo resumableFunction = null;
-        string errorMsg = $"Error when try to register first wait for function [{functionId}]";
+        var errorMsg = $"Error when try to register first wait for function [{functionId}]";
         await _backgroundJobExecutor.Execute(
             $"FirstWaitProcessor_RegisterFirstWait_{functionId}",
             async () =>
@@ -164,7 +164,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         var functionRunner = new FunctionRunner(classInstance, resumableFunction);
         if (functionRunner.ResumableFunctionExistInCode is false)
         {
-            string message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
+            var message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
             _logger.LogWarning(message);
             await LogErrorToService(null, message);
             throw new NullReferenceException(message);

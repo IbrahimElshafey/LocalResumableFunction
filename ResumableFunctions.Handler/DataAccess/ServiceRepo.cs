@@ -52,7 +52,7 @@ public class ServiceRepo : IServiceRepo
         _settings.CurrentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
         if (File.Exists(assemblyPath) is false)
         {
-            string message = $"Assembly file ({assemblyPath}) not exist.";
+            var message = $"Assembly file ({assemblyPath}) not exist.";
             _logger.LogError(message);
             serviceData.AddError(message);
             return false;

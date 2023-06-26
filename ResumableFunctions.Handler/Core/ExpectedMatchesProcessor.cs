@@ -251,7 +251,7 @@ namespace ResumableFunctions.Handler.Core
                 //todo:bug:may cause problem for go back after
                 if (currentWait.ParentWait != null && currentWait.ParentWait.Status != WaitStatus.Waiting)
                 {
-                    string errorMsg = $"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).";
+                    var errorMsg = $"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).";
                     _logger.LogWarning(errorMsg);
                     currentWait.FunctionState.AddError(errorMsg);
                     return;

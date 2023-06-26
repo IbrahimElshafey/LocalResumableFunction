@@ -118,7 +118,7 @@ public sealed class FunctionDataContext : DbContext
 
     private void ConfigureWaits(ModelBuilder modelBuilder)
     {
-        EntityTypeBuilder<Wait> waitBuilder = modelBuilder.Entity<Wait>();
+        var waitBuilder = modelBuilder.Entity<Wait>();
         waitBuilder
             .HasMany(x => x.ChildWaits)
             .WithOne(wait => wait.ParentWait)

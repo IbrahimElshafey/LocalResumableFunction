@@ -149,11 +149,11 @@ public static class CoreExtensions
     public static MethodInfo GetInterfaceMethod(this MethodInfo method)
     {
         var type = method.DeclaringType;
-        foreach (Type interf in type.GetInterfaces())
+        foreach (var interf in type.GetInterfaces())
         {
-            foreach (MethodInfo interfaceMethod in interf.GetMethods())
+            foreach (var interfaceMethod in interf.GetMethods())
             {
-                bool sameSiganture =
+                var sameSiganture =
                     interfaceMethod.Name == method.Name &&
                     interfaceMethod.ReturnType == method.ReturnType &&
                     interfaceMethod.GetParameters().Select(x => x.ParameterType).SequenceEqual(method.GetParameters().Select(x => x.ParameterType));
@@ -167,7 +167,7 @@ public static class CoreExtensions
     public static MethodInfo GetMethodInfo(string AssemblyName, string ClassName, string MethodName, string MethodSignature)
     {
         MethodInfo _methodInfo = null;
-        string assemblyPath = $"{AppContext.BaseDirectory}{AssemblyName}.dll";
+        var assemblyPath = $"{AppContext.BaseDirectory}{AssemblyName}.dll";
         if (File.Exists(assemblyPath))
             if (AssemblyName != null && ClassName != null && MethodName != null)
             {
@@ -264,7 +264,7 @@ public static class CoreExtensions
 
         bool IsInCurrentType(MethodInfo methodInfo)
         {
-            bool isExtension = methodInfo.IsDefined(typeof(ExtensionAttribute), true);
+            var isExtension = methodInfo.IsDefined(typeof(ExtensionAttribute), true);
             if (isExtension)
             {
                 var extensionOnType = methodInfo.GetParameters()[0].ParameterType;
@@ -278,7 +278,7 @@ public static class CoreExtensions
                 return false;
             }
 
-            bool inCurrentType = methodInfo.ReflectedType.IsAssignableFrom(typeof(T));
+            var inCurrentType = methodInfo.ReflectedType.IsAssignableFrom(typeof(T));
             if (inCurrentType)
                 ownerType = methodInfo.ReflectedType;
             return inCurrentType;

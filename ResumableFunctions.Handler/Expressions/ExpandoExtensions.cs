@@ -16,9 +16,9 @@ namespace ResumableFunctions.Handler.Expressions
             var comparer = StringComparer.OrdinalIgnoreCase;
             var root = new Dictionary<string, object>(_this, comparer);
             var parts = path.Split('.');
-            object result = root[parts[0]];
+            var result = root[parts[0]];
             var parent = parts.Length > 1 ? (IDictionary<object, object>)root[parts[0]] : null;
-            for (int i = 1; i < parts.Length; i++)
+            for (var i = 1; i < parts.Length; i++)
             {
                 var currentProp = parts[i];
                 result = parent[currentProp];
@@ -36,7 +36,7 @@ namespace ResumableFunctions.Handler.Expressions
             else
             {
                 var parent = (IDictionary<object, object>)root[parts[0]];
-                for (int i = 1; i < parts.Length; i++)
+                for (var i = 1; i < parts.Length; i++)
                 {
                     var currentProp = parts[i];
                     if (i == parts.Length - 1)

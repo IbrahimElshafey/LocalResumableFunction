@@ -60,10 +60,10 @@ public abstract partial class ResumableFunction
 
         var parameters = setDependenciesMi.GetParameters();
         var inputs = new object[parameters.Count()];
-        bool matchSignature = setDependenciesMi.ReturnType == typeof(void) && parameters.Count() >= 1;
+        var matchSignature = setDependenciesMi.ReturnType == typeof(void) && parameters.Count() >= 1;
         if (matchSignature)
         {
-            for (int i = 0; i < parameters.Length; i++)
+            for (var i = 0; i < parameters.Length; i++)
             {
                 inputs[i] =
                     serviceProvider.GetService(parameters[i].ParameterType) ??

@@ -21,8 +21,8 @@ internal class BinaryPackTest
         var loaded = BinaryConverter.Deserialize<MyObject<int>>(data);
         var loaded2 = BinaryConverter.Deserialize<MyObject2>(data);
 
-        MethodInfo method = typeof(BinaryConverter).GetMethod("Deserialize", 1, new[] { typeof(byte[]) });
-        MethodInfo generic = method.MakeGenericMethod(typeof(MyObject3));
+        var method = typeof(BinaryConverter).GetMethod("Deserialize", 1, new[] { typeof(byte[]) });
+        var generic = method.MakeGenericMethod(typeof(MyObject3));
         //var loaded2 = generic.Invoke(null, new[] { data });
 
       
