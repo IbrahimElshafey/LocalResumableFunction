@@ -1,5 +1,5 @@
 ﻿# Hot Todo Core functions
-* Same DLL in two services
+
 * Error codes for logs
 * [Refactor and Enhancements.md]
 * If register first wait failed for function make it halted

@@ -6,6 +6,6 @@ public interface IServiceRepo
 {
     Task UpdateDllScanDate(ServiceData dll);
     Task DeleteOldScanData(DateTime dateBeforeScan);
-    Task<bool> CheckAssemblyScan(string assemblyPath);
+    Task<bool> ShouldScanAssembly(string assemblyPath);
     Task<ServiceData> GetServiceData(string assemblyName);
 }

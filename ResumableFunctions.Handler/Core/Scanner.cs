@@ -125,7 +125,7 @@ internal class Scanner
                 _logger.LogInformation($"Start scan assembly [{assemblyPath}]");
 
                 var dateBeforeScan = DateTime.Now;
-                if (await _serviceRepo.CheckAssemblyScan(assemblyPath) is false) continue;
+                if (await _serviceRepo.ShouldScanAssembly(assemblyPath) is false) continue;
                 
 
                 var assembly = Assembly.LoadFile(assemblyPath);

@@ -42,12 +42,21 @@ public class ServiceRepo : IServiceRepo
             .ExecuteDeleteAsync();
     }
 
-    public async Task<bool> CheckAssemblyScan(string assemblyPath)
+    public async Task<bool> ShouldScanAssembly(string assemblyPath)
     {
         var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
-        var serviceData =
-            await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName) ??
-            await AddNewServiceData(currentAssemblyName);
+        var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
+
+        if (serviceData == null)
+        {
+            serviceData = await AddNewServiceData(currentAssemblyName);
+        }
+        else if (serviceData.ParentId != _settings.CurrentServiceId)
+        {
+            var rootService = _context.ServicesData.Local.FirstOrDefault(x => x.Id == _settings.CurrentServiceId);
+            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to this service because it's used in another service.");
+            return false;
+        }
 
         _settings.CurrentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
         if (File.Exists(assemblyPath) is false)
@@ -73,9 +82,10 @@ public class ServiceRepo : IServiceRepo
         var isReferenceResumableFunction =
             assembly.GetReferencedAssemblies().Any(x => new[]
             {
-                        "ResumableFunctions.Handler",
-                        "ResumableFunctions.AspNetService"
+                "ResumableFunctions.Handler",
+                "ResumableFunctions.AspNetService"
             }.Contains(x.Name));
+
         if (isReferenceResumableFunction is false)
         {
             serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].");
