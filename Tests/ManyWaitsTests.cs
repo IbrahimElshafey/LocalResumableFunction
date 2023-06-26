@@ -56,6 +56,29 @@ namespace Tests
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Completed).Count());
             Assert.Equal(2, waits.Where(x => x.IsNode).Count());
         }
+
+        [Fact]
+        public async Task WaitFirstInThree_Test()
+        {
+            var test = new TestCase(nameof(WaitThreeMethodsAtStart_Test), typeof(WaitManyMethods));
+            await test.ScanTypes();
+            var errors = await test.GetLogs();
+            Assert.Empty(errors);
+
+            var wms = new WaitManyMethods();
+            wms.Method7("1");
+            //wms.Method5("2");
+            //wms.Method6("3");
+
+            var pushedCalls = await test.GetPushedCalls();
+            Assert.Equal(1, pushedCalls.Count);
+            errors = await test.GetLogs();
+            Assert.Empty(errors);
+            var waits = await test.GetWaits();
+            Assert.Equal(4, waits.Count);
+            Assert.Equal(1, waits.Where(x => x.Status == WaitStatus.Completed).Count());
+            Assert.Equal(1, waits.Where(x => x.IsNode).Count());
+        }
     }
 
     public class WaitManyMethods : ResumableFunction
@@ -83,6 +106,18 @@ namespace Tests
             await Task.Delay(100);
         }
 
+        [ResumableFunctionEntryPoint("WaitFirstInThree")]
+        public async IAsyncEnumerable<Wait> WaitFirstInThree()
+        {
+            yield return Wait("Wait three methods",
+                Wait<string, string>("Method 7", Method7),
+                Wait<string, string>("Method 8", Method8),
+                Wait<string, string>("Method 9", Method9)
+            );
+            await Task.Delay(100);
+            Console.WriteLine("WaitFirstInThree");
+        }
+
         [PushCall("Method1")]
         public string Method1(string input) => "Method1 Call";
         [PushCall("Method2")]
@@ -91,6 +126,9 @@ namespace Tests
         [PushCall("Method4")] public string Method4(string input) => "Method4 Call";
         [PushCall("Method5")] public string Method5(string input) => "Method5 Call";
         [PushCall("Method6")] public string Method6(string input) => "Method6 Call";
+        [PushCall("Method7")] public string Method7(string input) => "Method7 Call";
+        [PushCall("Method8")] public string Method8(string input) => "Method8 Call";
+        [PushCall("Method9")] public string Method9(string input) => "Method9 Call";
     }
 
 }
