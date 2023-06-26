@@ -11,7 +11,7 @@ builder.Services
     .AddResumableFunctions(
         new SqlServerResumableFunctionsSettings()
         .SetCurrentServiceUrl("https://localhost:7140/")
-        .SetDllsToScan("ReferenceLibrary")
+        //.SetDllsToScan("ReferenceLibrary")
         );
 
 builder.Services.AddEndpointsApiExplorer();
