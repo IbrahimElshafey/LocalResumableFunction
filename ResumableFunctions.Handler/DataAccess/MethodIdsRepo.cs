@@ -44,7 +44,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
         return await _context
                 .ResumableFunctionIdentifiers
                 .FirstOrDefaultAsync(
-                    x => x.Type == MethodType.ResumableFunctionEntryPoint &&
+                    x => (x.Type == MethodType.ResumableFunctionEntryPoint|| x.Type == MethodType.SubResumableFunction) &&
                          x.RF_MethodUrn == methodData.MethodUrn &&
                          x.ServiceId == _settings.CurrentServiceId);
     }

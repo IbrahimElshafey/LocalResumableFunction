@@ -1,26 +1,40 @@
 ﻿
 # Write Unit Tests for basic scenarios:
-* Sequence
-* Wait all
-* Wait all as first wait
-* Wait first in many
-* Wait first in many as first wait
+* Sequence [Done]
+* Wait all [Done]
+* Wait all as first wait [Done]
+* Wait first in many [Done]
+* Wait first in many as first wait [Done]
+* Wait many with match expression
+* Wait many with match expression as first wait
+
 * Wait sub function
 * Wait sub function as first wait
+
 * Wait many functions
-* Wait first function
-* Replay [to,after,before] for types:
-	* To
-	* After
-	* Before
+* Wait many functions as first
+
+* Replay types:
+	* GoAfter
+    * GoBefore
+    * GoBeforeWithNewMatch
+    * GoTo
+    * GoToWithNewMatch
+
 * Replay in sub functions
+
 * Multiple sub functions levels
+
 * Test loops
-* Test Replay
+
+
 * Write test cases for expressions rewrite because it's critical part
+
 * Sub functions tests
 	* Pushed call activate one instance,what if same function and sub fnction wait the same wait
+
 * Attributes test
+
 * Scan results exist
 
 # Performance Test

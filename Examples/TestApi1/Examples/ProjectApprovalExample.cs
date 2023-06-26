@@ -136,7 +136,7 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Success(nameof(SubFunctionTest));
     }
 
-    [ResumableFunction("ProjectApprovalExample.WaitTwoManagers")]
+    [SubResumableFunction("ProjectApprovalExample.WaitTwoManagers")]
     public async IAsyncEnumerable<Wait> WaitTwoManagers()
     {
         WriteMessage("WaitTwoManagers started");

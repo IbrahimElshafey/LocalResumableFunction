@@ -71,7 +71,7 @@ namespace ResumableFunctions.Handler.InOuts
                 .FirstOrDefault(
                 attribute =>
                     attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId ||
-                    attribute.TypeId == ResumableFunctionAttribute.AttributeId ||
+                    attribute.TypeId == SubResumableFunctionAttribute.AttributeId ||
                     attribute.TypeId == PushCallAttribute.AttributeId
                 );
 
