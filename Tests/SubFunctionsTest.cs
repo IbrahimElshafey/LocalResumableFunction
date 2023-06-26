@@ -3,7 +3,6 @@ using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.TestShell;
 using static Tests.Sequence;
-using static Tests.SubFunctionsTest;
 
 namespace Tests;
 
@@ -95,7 +94,7 @@ public class SubFunctionsTest
         [ResumableFunctionEntryPoint("TwoFunctionsAtFirst")]
         public async IAsyncEnumerable<Wait> Test()
         {
-            yield return Wait("Wait sub function2", SubFunction1, SubFunction2);
+            yield return Wait("Wait two sub functions", SubFunction1, SubFunction2);
             await Task.Delay(100);
         }
 

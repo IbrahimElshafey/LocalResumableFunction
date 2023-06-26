@@ -12,6 +12,7 @@
 
 * Wait many functions
 * Wait many functions as first [Done]
+* Multiple sub functions levels
 
 * Replay types:
 	* GoAfter
@@ -21,8 +22,6 @@
     * GoToWithNewMatch
 
 * Replay in sub functions
-
-* Multiple sub functions levels
 
 * Test loops
 
