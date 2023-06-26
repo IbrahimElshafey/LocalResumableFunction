@@ -1,5 +1,4 @@
-﻿
-# Write Unit Tests for basic scenarios:
+﻿# Write Unit Tests for basic scenarios:
 * Sequence [Done]
 * Wait all [Done]
 * Wait all as first wait [Done]
@@ -8,11 +7,11 @@
 * Wait many with match expression
 * Wait many with match expression as first wait [Done]
 
-* Wait sub function [done]
+* Wait sub function [Done]
 * Wait sub function as first wait [Done]
 
 * Wait many functions
-* Wait many functions as first
+* Wait many functions as first [Done]
 
 * Replay types:
 	* GoAfter
@@ -26,7 +25,6 @@
 * Multiple sub functions levels
 
 * Test loops
-
 
 * Write test cases for expressions rewrite because it's critical part
 
