@@ -133,7 +133,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             errorMsg, true);
     }
 
-    //todo:review this method
     private async Task LogErrorToService(Exception ex, string errorMsg)
     {
         _logger.LogError(ex, errorMsg);

@@ -136,7 +136,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
         var methodAttribute =
             method.GetCustomAttribute(typeof(PushCallAttribute));
 
-        //todo: cause problem when mock service and try to simulate lock
+        //todo: cause problem when mock service and try to simulate calls
         if (methodAttribute == null)
             throw new Exception(
                 $"You must add attribute [{nameof(PushCallAttribute)}] to method {method.GetFullName()}");

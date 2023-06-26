@@ -75,29 +75,29 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         if (waitToReplay is MethodWait mw)
         {
             mw.LoadExpressions();
-            var oldMatchExpression = mw.MatchExpression;
-
 
             if (ReplayMatchIsSameSignature(replayRequest, mw) is false)
                 return null;
 
-            var duplicateWait = waitToReplay.DuplicateWait() as MethodWait;
-            duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
-            duplicateWait.IsReplay = true;
-            duplicateWait.IsFirst = false;
+            if (waitToReplay.DuplicateWait() is MethodWait duplicateWait)
+            {
+                duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
+                duplicateWait.IsReplay = true;
+                duplicateWait.IsFirst = false;
 
-            ////todo:recalc mandatory part
-            //duplicateWait.TimeMatchId = rewriteMatchExpression.TimeMatchId;
-            var template = await AddWaitTemplate(
-                replayRequest.MatchExpression,
-                mw.SetDataExpression,
-                mw.RequestedByFunctionId,
-                mw.MethodGroupToWaitId,
-                mw.MethodToWaitId ?? 0,
-                replayRequest.CurrentFunction);
-            duplicateWait.TemplateId = template.Id;
-            await _waitsRepo.SaveWait(duplicateWait);
-            return duplicateWait;
+                ////todo:re-calc mandatory part
+                //duplicateWait.TimeMatchId = rewriteMatchExpression.TimeMatchId;
+                var template = await AddWaitTemplate(
+                    replayRequest.MatchExpression,
+                    mw.SetDataExpression,
+                    mw.RequestedByFunctionId,
+                    mw.MethodGroupToWaitId,
+                    mw.MethodToWaitId ?? 0,
+                    replayRequest.CurrentFunction);
+                duplicateWait.TemplateId = template.Id;
+                await _waitsRepo.SaveWait(duplicateWait);
+                return duplicateWait;
+            }
         }
 
         var errorMsg = $"When the replay type is [{ReplayType.GoToWithNewMatch}]" +

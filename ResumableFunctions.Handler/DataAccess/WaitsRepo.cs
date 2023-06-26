@@ -181,10 +181,6 @@ internal partial class WaitsRepo : IWaitsRepo
         throw new Exception(error);
     }
 
-
-
-
-    //todo:fix this for group
     public async Task RemoveFirstWaitIfExist(int methodIdentifierId)
     {
         try

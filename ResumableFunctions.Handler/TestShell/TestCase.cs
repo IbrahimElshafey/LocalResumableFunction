@@ -74,7 +74,6 @@ namespace ResumableFunctions.Handler.TestShell
         }
 
 
-        //todo:enhance this to take parameters in method call
         public async Task<int> SimulateMethodCall<TClassType>(
            Expression<Func<TClassType, object>> methodSelector,
            object output)

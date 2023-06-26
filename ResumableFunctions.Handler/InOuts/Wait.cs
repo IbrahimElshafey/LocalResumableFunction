@@ -8,14 +8,14 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 {
     public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
-    public string Name { get; internal set; }//todo:move to template
+    public string Name { get; internal set; }
 
     public WaitStatus Status { get; internal set; } = WaitStatus.Waiting;
     public bool IsFirst { get; internal set; }
     public bool WasFirst { get; internal set; }
-    public int StateBeforeWait { get; internal set; }//todo:move to template
-    public int StateAfterWait { get; internal set; }//todo:move to template
-    public bool IsNode { get; internal set; }//todo:move to template
+    public int StateBeforeWait { get; internal set; }
+    public int StateAfterWait { get; internal set; }
+    public bool IsNode { get; internal set; }
     public bool IsReplay { get; internal set; }
 
     [NotMapped]

@@ -1,19 +1,15 @@
 ﻿# Hot Todo Core functions
-* Error codes for logs
+* Tests
 * [Refactor_and_Enhancements.md]
 * If register first wait failed for function make it halted
 * If service scan failed make it halted
 * Review that new scan should not delete existing methods and groups if exist
 
-
-* Use IMaterializationInterceptor to set entity dependencies
-* Review check after locks
 * Remove direct use for DbContext
-* Review all places where database update occurs
 * Sql server settings (password,username) or connection string
+* Use IMaterializationInterceptor to set entity dependencies
 
 ## Todos in code
-* `RemoveFirstWaitIfExist` fix this for group	WaitsRepo.cs	190
 * Review `CancelFunctionWaits` is suffecient	ReplayWaitProcessor.cs	42
 * Recalc mandatory part	ReplayWaitProcessor.cs	89
 * May cause problem for go back after	WaitProcessor.cs	236

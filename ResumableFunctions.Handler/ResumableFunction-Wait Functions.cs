@@ -46,7 +46,6 @@ public abstract partial class ResumableFunction
     internal void InitializeDependencies(IServiceProvider serviceProvider)
     {
         //todo:should I create new scope??
-        //void SetDependencies(dep1,dep2,....)
         var setDependenciesMi = GetType().GetMethod(
             "SetDependencies", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 

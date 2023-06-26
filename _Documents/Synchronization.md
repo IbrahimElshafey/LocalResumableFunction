@@ -6,7 +6,7 @@
 	* Using distributed lock $"Scanner_StartServiceScanning_{_currentServiceName}"
 * Different services may try to add same MethodGroup at same time 
 	* Uniqe index exception handel
-
+* Review all places where database update occurs
 # Synchronization cross processes on same servers or same process tasks
 * Overview of synchronization primitives 
 	* https://learn.microsoft.com/en-us/dotnet/standard/threading/overview-of-synchronization-primitives
