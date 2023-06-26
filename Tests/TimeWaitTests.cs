@@ -10,7 +10,7 @@ using ResumableFunctions.Handler.TestShell;
 
 namespace Tests
 {
-    public partial class TimeWaitTests
+    public class TimeWaitTests
     {
         [Fact]
         public async Task TestTimeWaitAtStart_Test()
