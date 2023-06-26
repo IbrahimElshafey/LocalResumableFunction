@@ -121,7 +121,7 @@ namespace ResumableFunctions.Handler.TestShell
         private FunctionDataContext Context => CurrentApp.Services.GetService<FunctionDataContext>();
         public async Task<List<ResumableFunctionState>> GetInstances<T>(bool includeNew = false)
         {
-            var query = Context.FunctionStates.AsQueryable();
+            var query = Context.FunctionStates.AsQueryable().AsNoTracking();
             if (includeNew is false)
             {
                 query = query.Where(x => x.Status != FunctionStatus.New);
@@ -129,7 +129,7 @@ namespace ResumableFunctions.Handler.TestShell
             var instances = await query.ToListAsync();
             foreach (var instance in instances)
             {
-                await Context.Entry(instance).ReloadAsync();
+                //await Context.Entry(instance).ReloadAsync();
                 instance.LoadUnmappedProps(typeof(T));
 
             }
@@ -138,7 +138,7 @@ namespace ResumableFunctions.Handler.TestShell
 
         public async Task<List<PushedCall>> GetPushedCalls()
         {
-            var calls = await Context.PushedCalls.ToListAsync();
+            var calls = await Context.PushedCalls.AsNoTracking().ToListAsync();
             foreach (var call in calls)
             {
                 call.LoadUnmappedProps();
@@ -149,7 +149,7 @@ namespace ResumableFunctions.Handler.TestShell
 
         public async Task<List<Wait>> GetWaits(int? instanceId = null, bool includeFirst = false)
         {
-            var query = Context.Waits.AsQueryable();
+            var query = Context.Waits.AsQueryable().AsNoTracking();
             if (instanceId != null)
                 query = query.Where(x => x.FunctionStateId == instanceId);
             if (includeFirst is false)
@@ -162,6 +162,7 @@ namespace ResumableFunctions.Handler.TestShell
             return
                 await Context.Logs
                     .Where(x => x.Type == logType)
+                    .AsNoTracking()
                     .ToListAsync();
         }
 
