@@ -27,28 +27,30 @@ namespace ResumableFunctions.Handler.TestShell
         private readonly HostApplicationBuilder _builder;
         private readonly Type[] _types;
         private readonly TestSettings _settings;
+        private readonly string _testName;
 
         public TestCase(string testName, params Type[] types)
         {
-            DeleteDb(testName);
+            _testName = testName;
             _settings = new TestSettings(testName);
             _builder = Host.CreateApplicationBuilder();
-            _builder.Services.AddResumableFunctionsCore(_settings);
             _types = types;
         }
 
-        public static void DeleteDb(string dbName)
+        public static async Task DeleteDb(string dbName)
         {
             var dbConfig = new DbContextOptionsBuilder()
                 .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={dbName};");
             var context = new DbContext(dbConfig.Options);
-            context.Database.EnsureDeleted();
+            await context.Database.EnsureDeletedAsync();
         }
 
         public IServiceCollection RegisteredServices => _builder.Services;
 
         public async Task ScanTypes()
         {
+            await DeleteDb(_testName);
+            _builder.Services.AddResumableFunctionsCore(_settings);
             CurrentApp = _builder.Build();
             GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(CurrentApp.Services));
 
@@ -66,7 +68,7 @@ namespace ResumableFunctions.Handler.TestShell
             foreach (var type in _types)
                 await scanner.RegisterMethods(type, serviceData);
             await scanner.RegisterMethods(typeof(LocalRegisteredMethods), serviceData);
-            
+
             foreach (var type in _types)
                 if (type.IsSubclassOf(typeof(ResumableFunction)))
                     await scanner.RegisterResumableFunctionsInClass(type);

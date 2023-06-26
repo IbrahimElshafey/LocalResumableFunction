@@ -9,7 +9,7 @@
 * Wait many with match expression as first wait
 
 * Wait sub function
-* Wait sub function as first wait
+* Wait sub function as first wait [Done]
 
 * Wait many functions
 * Wait many functions as first

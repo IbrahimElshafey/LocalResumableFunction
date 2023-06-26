@@ -1,4 +1,5 @@
 ﻿# Hot Todo Core functions
+* Function Name must not duplicate
 * Tests
 * [Refactor_and_Enhancements.md]
 * If register first wait failed for function make it halted
