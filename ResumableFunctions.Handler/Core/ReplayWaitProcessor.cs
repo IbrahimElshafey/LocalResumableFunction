@@ -39,7 +39,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             throw new Exception(errorMsg);
         }
 
-        //todo:review CancelFunctionWaits is suffecient
+        //todo:review CancelFunctionWaits is sufficient
         waitToReplay.Status = waitToReplay.Status == WaitStatus.Waiting ? WaitStatus.Canceled : waitToReplay.Status;
         waitToReplay.CurrentFunction = replayRequest.CurrentFunction;
         //skip active waits after replay
@@ -158,7 +158,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             var nextWaitAfterReplay = goBefore.Runner.Current;
             nextWaitAfterReplay.CopyCommonIds(oldCompletedWait);
             await _waitsRepo.SaveWait(nextWaitAfterReplay);
-            return nextWaitAfterReplay;//when replay go before
+            return nextWaitAfterReplay;
         }
 
         const string errorMsg = "Replay Go Before found no waits!!";

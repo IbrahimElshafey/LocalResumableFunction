@@ -1,7 +1,8 @@
 ﻿# Hot Todo Core functions
-* Function Name must not duplicate
 * Tests
+* Function Name must not duplicate
 * [Refactor_and_Enhancements.md]
+
 * If register first wait failed for function make it halted
 * If service scan failed make it halted
 * Review that new scan should not delete existing methods and groups if exist

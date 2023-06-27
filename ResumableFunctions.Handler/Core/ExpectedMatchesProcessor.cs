@@ -290,11 +290,12 @@ namespace ResumableFunctions.Handler.Core
             if (nextWait is ReplayRequest replayRequest)
             {
                 var replayResult = await _replayWaitProcessor.ReplayWait(replayRequest);
-                if (replayResult.ProceedExecution && replayResult.Wait != null)
+                _context.Entry(replayResult.Wait.FunctionState).State = EntityState.Modified;
+                if (replayResult is { ProceedExecution: true, Wait: not null })
                     await ProceedToNextWait(replayResult.Wait);
             }
             else
-                await _waitsRepo.SaveWait(nextWait);//next wait after resume function
+                await _waitsRepo.SaveWait(nextWait);
             await _context.SaveChangesAsync();
         }
 
