@@ -42,7 +42,11 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
     {
-        var resumableFunction = firstMatchedMethodWait.RequestedByFunction.MethodInfo;
+        var rootId = int.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
+        var resumableFunction =
+            rootId != firstMatchedMethodWait.Id ?
+            (await _context.Waits.Include(x => x.RequestedByFunction).FirstAsync(x => x.Id == rootId)).RequestedByFunction.MethodInfo:
+            firstMatchedMethodWait.RequestedByFunction.MethodInfo;
 
         try
         {

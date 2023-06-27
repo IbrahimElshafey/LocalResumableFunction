@@ -14,7 +14,7 @@ namespace Tests
     public partial class RemoveDbs
     {
         [Fact(Skip = "After Tests Only")]
-        public void TestTimeWaitAtStart_Test()
+        public async Task TestTimeWaitAtStart_Test()
         {
             var tests = Assembly
                 .Load("Tests")
@@ -24,7 +24,8 @@ namespace Tests
                 .Select(testMethodName => testMethodName.Name)
                 .ToList();
 
-            tests.ForEach(TestCase.DeleteDb);
+            foreach (var test in tests)
+                await TestCase.DeleteDb(test);
             Assert.True(true);
         }
 

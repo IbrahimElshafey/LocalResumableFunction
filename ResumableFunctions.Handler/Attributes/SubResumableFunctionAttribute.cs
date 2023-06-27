@@ -1,14 +1,14 @@
 ﻿namespace ResumableFunctions.Handler.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class ResumableFunctionAttribute : Attribute, ITrackingIdetifier
+public sealed class SubResumableFunctionAttribute : Attribute, ITrackingIdetifier
 {
 
-    public const string AttributeId = nameof(ResumableFunctionAttribute);
+    public const string AttributeId = nameof(SubResumableFunctionAttribute);
     public override object TypeId => AttributeId;
     public string MethodUrn { get; }
 
-    public ResumableFunctionAttribute(string methodUrn)
+    public SubResumableFunctionAttribute(string methodUrn)
     {
         MethodUrn = methodUrn;
     }

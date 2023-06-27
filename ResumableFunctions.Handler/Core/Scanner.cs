@@ -223,22 +223,28 @@ internal class Scanner
     {
         var serviceData = await _serviceRepo.GetServiceData(type.Assembly.GetName().Name);
         serviceData.AddLog($"Try to find resumable functions in type [{type.FullName}]");
-        var resumableFunctions = type
-            .GetMethods(GetBindingFlags())
-            .Where(method => method
-                .GetCustomAttributes()
-                .Any(attribute =>
-                    attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId ||
-                    attribute.TypeId == ResumableFunctionAttribute.AttributeId
-                ));
 
-        foreach (var resumableFunctionInfo in resumableFunctions)
+        await RegisterFunctions(SubResumableFunctionAttribute.AttributeId);
+        await _context.SaveChangesAsync();
+        await RegisterFunctions(ResumableFunctionEntryPointAttribute.AttributeId);
+
+        async Task RegisterFunctions(string attributeId)
         {
-            if (ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
-                await RegisterResumableFunction(resumableFunctionInfo, serviceData);
-            else
-                serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", null, Constants.CantRegisterFunction);
+            var functions = type
+                .GetMethods(GetBindingFlags())
+                .Where(method => method
+                    .GetCustomAttributes()
+                    .Any(attribute => attribute.TypeId == attributeId));
+
+            foreach (var resumableFunctionInfo in functions)
+            {
+                if (ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
+                    await RegisterResumableFunction(resumableFunctionInfo, serviceData);
+                else
+                    serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", null, Constants.CantRegisterFunction);
+            }
         }
+
     }
 
 

@@ -15,7 +15,6 @@ public class WaitExpressionsHash : ExpressionVisitor
     {
         try
         {
-            var serializer = new ExpressionSerializer();
             var sb = new StringBuilder();
             if (matchExpression != null)
             {

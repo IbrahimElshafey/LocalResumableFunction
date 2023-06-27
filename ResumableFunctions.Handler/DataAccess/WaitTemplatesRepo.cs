@@ -66,22 +66,20 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
     public async Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId)
     {
-        var functionIds = await _context
+        var templateIds = await _context
             .MethodWaits
             .Where(x =>
                 x.Status == WaitStatus.Waiting &&
-                x.MethodGroupToWaitId == methodGroupId)
-            .Select(x => x.RequestedByFunctionId)
+                x.MethodGroupToWaitId == methodGroupId&&
+                x.ServiceId == _settings.CurrentServiceId)
+            .Select(x => x.TemplateId)
             .Distinct()
             .ToListAsync();
 
         var waitTemplatesQry = _context
             .WaitTemplates
             .Select(WaitTemplate.CallMandatoryPartSelector)
-            .Where(x =>
-                x.MethodGroupId == methodGroupId &&
-                x.ServiceId == _settings.CurrentServiceId &&
-                functionIds.Contains(x.FunctionId));
+            .Where(x => templateIds.Contains(x.Id));
 
         var result = await
             waitTemplatesQry
@@ -90,6 +88,13 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
         result.ForEach(x => x.LoadExpressions());
         return result;
+    }
+
+    public async Task<WaitTemplate> GetById(int templateId)
+    {
+        var waitTemplate = await _context.WaitTemplates.FindAsync(templateId);
+        waitTemplate?.LoadExpressions();
+        return waitTemplate;
     }
 
     public void Dispose()

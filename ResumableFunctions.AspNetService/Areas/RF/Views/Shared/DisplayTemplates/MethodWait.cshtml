@@ -4,31 +4,36 @@
 <li>
     <div class="w3-card w3-white w3-padding w3-round">
         <h6 class="w3-text-indigo"><b>@Model.Name</b></h6>
-        <ul class="w3-ul">
-            <li>
-                <span><b class="w3-text-blue-gray">Status: </b><span class="@Model.Status">@Model.Status</span></span>
-                @if (Model.Status != WaitStatus.Waiting)
-                {
-                    <a class="w3-text-blue" href="~/RF/PushedCall/Details?pushedCallId=@Model.MatchedByCallId">By Call</a>
-                }
-            </li>
+        <table class="w3-ul">
+            <tr>
+                <td><b class="w3-text-blue-gray">Status: </b></td>
+                <td>
+                    <span class="@Model.Status">@Model.Status</span>
+                    @if (Model.Status != WaitStatus.Waiting)
+                    {
+                        <a class="w3-text-blue" href="~/RF/PushedCall/Details?pushedCallId=@Model.MatchedByCallId">By Call</a>
+                    }
+                </td>
+                
+            </tr>
             @if (Model.Template != null)
             {
-                <li>
-                    @Html.DisplayFor(x => x.Template,"TemplateDisplay")
-                    <br />
-                    <span>
-                        <b class="w3-text-blue-gray">Mandatory Part Values: </b><span>@Model.MandatoryPart</span>
-                    </span>
-                </li>
+                @Html.DisplayFor(x => x.Template, "TemplateDisplay")
+                <tr>
+                    <td><b class="w3-text-blue-gray">Mandatory Part Values: </b></td>
+                    <td>@Model.MandatoryPart</td>
+                </tr>
             }
-            <li>
-                <span class="tab"><b class="w3-text-blue-gray">Created: </b><span>@Model.Created</span></span>
-                @if (Model.Modified != default)
+            <tr>
+                <td><b class="w3-text-blue-gray">Created: </b></td>
+                <td>@Model.Created</td>
+             
+                @if (Model.Modified != DateTime.MinValue)
                 {
-                    <span><b class="w3-text-blue-gray">Modified: </b><span>@Model.Modified</span></span>
+                    <td><b class="w3-text-blue-gray">Modified: </b></td>
+                    <td>@Model.Modified</td>
                 }
-            </li>
-        </ul>
+            </tr>
+        </table>
     </div>
 </li>

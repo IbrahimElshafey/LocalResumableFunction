@@ -124,6 +124,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
                 {
                     TemplateId = methodWait.TemplateId,
                     MethodGroupToWaitId = methodWait.MethodGroupToWaitId,
+                    MethodToWaitId = methodWait.MethodToWaitId
                 };
                 break;
             case FunctionWait:
