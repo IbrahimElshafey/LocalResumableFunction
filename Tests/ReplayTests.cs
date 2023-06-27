@@ -73,7 +73,70 @@ public class ReplayTests
         Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
 
     }
+    [Fact]
+    public async Task GoBeforeWithNewMatch_Test()
+    {
+        var test = new TestCase(nameof(GoBeforeWithNewMatch_Test), typeof(GoBeforeWithNewMatchFunction));
+        await test.ScanTypes();
 
+        var logs = await test.GetLogs();
+        Assert.Empty(logs);
+
+        var instance = new GoBeforeWithNewMatchFunction();
+        instance.Method1("Test1");
+        instance.Method2("Test1");
+        instance.Method2("Back");
+
+        logs = await test.GetLogs();
+        Assert.Empty(logs);
+        var pushedCalls = await test.GetPushedCalls();
+        Assert.Equal(3, pushedCalls.Count);
+        var instances = await test.GetInstances<GoBeforeWithNewMatchFunction>();
+        Assert.Single(instances);
+        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(20, (instances[0].StateObject as GoBeforeWithNewMatchFunction).Counter);
+        var waits = await test.GetWaits();
+        Assert.Equal(3, waits.Count);
+        Assert.Equal(3, waits.Count(x => x.Status == WaitStatus.Completed));
+
+        instance.Method1("Test2");
+        instance.Method2("Test2");
+        instance.Method2("Back");
+        logs = await test.GetLogs();
+        Assert.Empty(logs);
+        pushedCalls = await test.GetPushedCalls();
+        Assert.Equal(6, pushedCalls.Count);
+        instances = await test.GetInstances<GoBeforeWithNewMatchFunction>();
+        Assert.Equal(2, instances.Count);
+        Assert.Equal(2, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(20, (instances[1].StateObject as GoBeforeWithNewMatchFunction).Counter);
+        waits = await test.GetWaits();
+        Assert.Equal(6, waits.Count);
+        Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
+
+    }
+
+    public class GoBeforeWithNewMatchFunction : ResumableFunction
+    {
+        public int Counter { get; set; }
+        [ResumableFunctionEntryPoint("GoBeforeWithNewMatch")]
+        public async IAsyncEnumerable<Wait> Test()
+        {
+            yield return
+                Wait<string, string>("M1", Method1);
+
+            Counter += 10;
+            yield return
+                Wait<string, string>("M2", Method2).MatchAll();
+
+            if (Counter < 20)
+                yield return GoBackBefore<string, string>("M2", (input, output) => input == "Back");
+            await Task.Delay(100);
+        }
+
+        [PushCall("Method1")] public string Method1(string input) => input + "M1";
+        [PushCall("Method2")] public string Method2(string input) => input + "M2";
+    }
     public class GoAfterFunction : ResumableFunction
     {
         public int Counter { get; set; }

@@ -15,8 +15,8 @@
 * Multiple sub functions levels [Done]
 
 * Replay types:
-	* GoAfter [done]
-    * GoBefore
+	* GoAfter [Done]
+    * GoBefore [Done]
     * GoBeforeWithNewMatch
     * GoTo
     * GoToWithNewMatch
