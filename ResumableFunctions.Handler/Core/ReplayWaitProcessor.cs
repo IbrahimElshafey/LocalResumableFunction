@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
@@ -13,17 +12,14 @@ namespace ResumableFunctions.Handler.Core;
 internal class ReplayWaitProcessor : IReplayWaitProcessor
 {
     private readonly ILogger<ReplayWaitProcessor> _logger;
-    private readonly FunctionDataContext _context;
     private readonly IWaitsRepo _waitsRepo;
     private readonly IWaitTemplatesRepo _waitTemplatesRepo;
 
     public ReplayWaitProcessor(
-        FunctionDataContext context,
         ILogger<ReplayWaitProcessor> logger,
         IWaitsRepo waitsRepo,
         IWaitTemplatesRepo templatesRepo)
     {
-        _context = context;
         _logger = logger;
         _waitsRepo = waitsRepo;
         _waitTemplatesRepo = templatesRepo;
@@ -121,21 +117,28 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         return waitTemplate;
     }
 
-    private async Task<Wait> GetWaitDuplicationAsync(Wait waitToReplay)
+    private async Task<Wait> GetWaitDuplicationAsync(Wait oldWaitToReplay)
     {
-        if (waitToReplay.WasFirst)
+        if (oldWaitToReplay.WasFirst)
         {
             const string errorMsg =
                 "Go to the first wait with same match will create new separate function instance, " +
                 "so execution will not be complete.";
             _logger.LogWarning(errorMsg);
-            waitToReplay.FunctionState.AddError(errorMsg, null, Constants.ReplayFirstError);
+            oldWaitToReplay.FunctionState.AddError(errorMsg, null, Constants.ReplayFirstError);
             return null;
         }
-        var duplicateWait = waitToReplay.DuplicateWait();
-        duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
-        duplicateWait.IsReplay = true;
-        duplicateWait.IsFirst = false;
+
+
+        var duplicateWait = oldWaitToReplay.DuplicateWait();
+        duplicateWait.ActionOnWaitsTree(wait =>
+        {
+            wait.Name += $"-Replay-{DateTime.Now.Ticks}";
+            wait.IsReplay = true;
+            wait.IsFirst = false;
+            wait.CurrentFunction = (ResumableFunction)duplicateWait.FunctionState.StateObject;
+            wait.Status = WaitStatus.Waiting;
+        });
         await _waitsRepo.SaveWait(duplicateWait);
         return duplicateWait;
     }
@@ -170,28 +173,28 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         if (oldWaitToReplay is MethodWait oldMethodWait)
         {
             var goBefore = await GoBefore(oldWaitToReplay);
-            if (goBefore is { HasWait: true, Runner.Current: MethodWait mw })
+            if (goBefore is { HasWait: true, Runner.Current: MethodWait methodWaitToReplay })
             {
-                if (ReplayMatchIsSameSignature(replayWait, mw) is false)
+                if (ReplayMatchIsSameSignature(replayWait, methodWaitToReplay) is false)
                     return null;
 
 
                 var template = await AddWaitTemplateIfNotExist(
                      replayWait.MatchExpression,
-                     mw.SetDataExpression,
+                     methodWaitToReplay.SetDataExpression,
                      oldMethodWait.RequestedByFunctionId,
                      oldMethodWait.MethodGroupToWaitId,
                      oldMethodWait.MethodToWaitId ?? 0,
                      replayWait.CurrentFunction);
 
-                mw.FunctionState = replayWait.FunctionState;
-                mw.FunctionStateId = replayWait.FunctionStateId;
-                mw.RequestedByFunction = oldWaitToReplay.RequestedByFunction;
-                mw.RequestedByFunctionId = oldWaitToReplay.RequestedByFunctionId;
-                mw.ParentWaitId = oldWaitToReplay.ParentWaitId;
-                mw.TemplateId = template.Id;
-                await _waitsRepo.SaveWait(mw);
-                return mw;
+                methodWaitToReplay.FunctionState = replayWait.FunctionState;
+                methodWaitToReplay.FunctionStateId = replayWait.FunctionStateId;
+                methodWaitToReplay.RequestedByFunction = oldWaitToReplay.RequestedByFunction;
+                methodWaitToReplay.RequestedByFunctionId = oldWaitToReplay.RequestedByFunctionId;
+                methodWaitToReplay.ParentWaitId = oldWaitToReplay.ParentWaitId;
+                methodWaitToReplay.TemplateId = template.Id;
+                await _waitsRepo.SaveWait(methodWaitToReplay);
+                return methodWaitToReplay;
             }
 
             const string errorMsg = "Replay Go Before with new match found no waits!!";
@@ -225,7 +228,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         if (hasWait)
         {
             var waitToReplay = runner.Current;
-            waitToReplay.Name += "-Replay";
+            waitToReplay.Name += $"-Replay-{DateTime.Now.Ticks}";
             waitToReplay.IsReplay = true;
             waitToReplay.IsFirst = false;
         }

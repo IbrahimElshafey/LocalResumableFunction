@@ -46,21 +46,36 @@ internal partial class WaitsRepo
         var funcId = methodWait.RequestedByFunctionId;
         var waitExpressionsHash = new WaitExpressionsHash(methodWait.MatchExpression, methodWait.SetDataExpression);
         var expressionsHash = waitExpressionsHash.Hash;
-        var waitTemplate =
-            await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, methodId.GroupId) ??
-            await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, methodWait.CurrentFunction, funcId, methodId.GroupId, methodId.MethodId);
+        await SetWaitTemplate();
         methodWait.MethodToWaitId = methodId.MethodId;
         methodWait.MethodGroupToWaitId = methodId.GroupId;
-        methodWait.TemplateId = waitTemplate.Id;
-        methodWait.Template = waitTemplate;
-        if (waitTemplate.InstanceMandatoryPartExpression != null)
-        {
-            var partIdFunc = waitTemplate.InstanceMandatoryPartExpression.CompileFast();
-            var parts = (object[])partIdFunc.DynamicInvoke(methodWait.CurrentFunction);
-            if (parts?.Any() == true)
-                methodWait.MandatoryPart = string.Join("#", parts);
-        }
+
         await AddWait(methodWait);
+        
+        async Task SetWaitTemplate()
+        {
+            WaitTemplate waitTemplate = null;
+            if (methodWait.TemplateId == default)
+            {
+                waitTemplate =
+                    await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, methodId.GroupId) ??
+                    await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, methodWait.CurrentFunction, funcId,
+                        methodId.GroupId, methodId.MethodId);
+            }
+            else
+            {
+                waitTemplate = await _waitTemplatesRepo.GetById(methodWait.TemplateId);
+            }
+            methodWait.TemplateId = waitTemplate.Id;
+            methodWait.Template = waitTemplate;
+            if (waitTemplate.InstanceMandatoryPartExpression != null)
+            {
+                var partIdFunc = waitTemplate.InstanceMandatoryPartExpression.CompileFast();
+                var parts = (object[])partIdFunc.DynamicInvoke(methodWait.CurrentFunction);
+                if (parts?.Any() == true)
+                    methodWait.MandatoryPart = string.Join("#", parts);
+            }
+        }
     }
 
 

@@ -44,7 +44,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
         return await _context
                 .ResumableFunctionIdentifiers
                 .FirstOrDefaultAsync(
-                    x => (x.Type == MethodType.ResumableFunctionEntryPoint|| x.Type == MethodType.SubResumableFunction) &&
+                    x => (x.Type == MethodType.ResumableFunctionEntryPoint || x.Type == MethodType.SubResumableFunction) &&
                          x.RF_MethodUrn == methodData.MethodUrn &&
                          x.ServiceId == _settings.CurrentServiceId);
     }
@@ -123,6 +123,8 @@ internal class MethodIdsRepo : IMethodIdsRepo
 
     public async Task<(int MethodId, int GroupId)> GetId(MethodWait methodWait)
     {
+        if (methodWait.MethodGroupToWaitId != default && methodWait.MethodToWaitId != default)
+            return (methodWait.MethodToWaitId ?? 0, methodWait.MethodGroupToWaitId);
 
         var methodData = methodWait.MethodData;
         methodData.Validate();

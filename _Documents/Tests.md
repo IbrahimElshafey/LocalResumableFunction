@@ -17,7 +17,7 @@
 * Replay types:
 	* GoAfter [Done]
     * GoBefore [Done]
-    * GoBeforeWithNewMatch
+    * GoBeforeWithNewMatch [Done]
     * GoTo
     * GoToWithNewMatch
 
@@ -43,6 +43,6 @@
 * One method activate 1000 function type
 
 # Problem to solve 
-* We can't mock Resumable function class dependacies and use the mocks because off attributes checks
-* Could we fake dll and then mock faked instances
+* We can't mock Resumable function class dependencies and use the mocks because of attributes checks
+* Could we fake dll and then mock faked instances?
 * No Fakes or Mokes libraries you should write your fake implementation for your interfaces

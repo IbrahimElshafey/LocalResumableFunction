@@ -85,17 +85,25 @@ public class MethodWait : Wait
     internal override bool IsValidWaitRequest()
     {
         //Todo:validate input output type serialization
-        if (!WasFirst && MatchExpression == null)
-            FunctionState.AddError(
-                $"You didn't set the `MatchExpression` for wait [{Name}] that is not a first wait," +
-                $"This will lead to no match for all calls," +
-                $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchExpression`," +
-                $"or use MatchAll() method.", null, Constants.SetDataEvaluationError);
-        if (WasFirst && MatchExpression == null)
-            FunctionState.AddLog(
-                $"You didn't set the `MatchExpression` for first wait [{Name}]," +
-                $"This will lead to all calls will be matched.",
-                LogType.Warning);
+        if (IsReplay)
+            return true;
+        switch (WasFirst)
+        {
+            case false when MatchExpression == null:
+                FunctionState.AddError(
+                    $"You didn't set the `MatchExpression` for wait [{Name}] that is not a first wait," +
+                    $"This will lead to no match for all calls," +
+                    $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchExpression`," +
+                    $"or use MatchAll() method.", null, Constants.SetDataEvaluationError);
+                break;
+            case true when MatchExpression == null:
+                FunctionState.AddLog(
+                    $"You didn't set the `MatchExpression` for first wait [{Name}]," +
+                    $"This will lead to all calls will be matched.",
+                    LogType.Warning);
+                break;
+        }
+
         if (SetDataExpression == null)
             FunctionState.AddLog(
                 $"You didn't set the `SetDataExpression` for wait [{Name}], " +

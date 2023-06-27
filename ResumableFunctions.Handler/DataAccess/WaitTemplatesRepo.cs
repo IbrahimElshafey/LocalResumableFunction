@@ -90,6 +90,13 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         return result;
     }
 
+    public async Task<WaitTemplate> GetById(int templateId)
+    {
+        var waitTemplate = await _context.WaitTemplates.FindAsync(templateId);
+        waitTemplate?.LoadExpressions();
+        return waitTemplate;
+    }
+
     public void Dispose()
     {
         _context?.Dispose();
