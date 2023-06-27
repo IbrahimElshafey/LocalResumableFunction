@@ -1,6 +1,5 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
-//todo:review concurrency exceptions for `WaitForCall`
 public class WaitForCall : IEntityWithUpdate
 {
     public int Id { get; internal set; }

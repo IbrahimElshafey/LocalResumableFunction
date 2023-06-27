@@ -1,10 +1,9 @@
 ﻿
 # Refactor
-* Remove direct use for DbContext
 * Refactor long methods
-* What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
-* Replace HttpHangfire with abstraction to enable queue based communication between services
-
+* Optimize wait table indexes to enable fast wait insertion
+	* Remove index 
+		* [ParentWaitId] in [dbo].[Waits]
 
 # Enhancements
 * Function priority/Matched Waits priority
@@ -24,6 +23,3 @@
 * Use pull mode to get calls from a queue
 * How can I benefit from Azure Service Fabric
 	* https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-overview
-* Optimize wait table indexes to enable fast wait insertion
-	* Remove index 
-		* [ParentWaitId] in [dbo].[Waits]

@@ -15,15 +15,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Areas\RF\Views\Shared\Components\**" />
+    <Content Remove="Areas\RF\Views\Shared\Components\**" />
+    <EmbeddedResource Remove="Areas\RF\Views\Shared\Components\**" />
+    <None Remove="Areas\RF\Views\Shared\Components\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ResumableFunctions.Handler\ResumableFunctions.Handler.csproj" />
   </ItemGroup>
-
-
-	<ItemGroup>
-	  <Folder Include="Areas\RF\Views\Shared\Components\" />
-	</ItemGroup>
 </Project>

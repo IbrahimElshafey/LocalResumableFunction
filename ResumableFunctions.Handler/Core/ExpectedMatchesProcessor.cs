@@ -162,7 +162,6 @@ namespace ResumableFunctions.Handler.Core
                         await UpdateWaitRecord(x => x.InstanceUpdateStatus = InstanceUpdateStatus.UpdateFailed);
                         throw new Exception(
                             $"Can't update function state `{_methodWait.FunctionStateId}` after method wait `{_methodWait}` matched.");
-
                     }
                 }
 
@@ -390,10 +389,13 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> Pipeline(params Func<Task<bool>>[] actions)
         {
-            foreach (var action in actions)
-                if (!await action())
-                    return false;
-            return true;
+            await using (await _lockProvider.AcquireLockAsync($"WaitCall_{_waitCall.Id}"))
+            {
+                foreach (var action in actions)
+                    if (!await action())
+                        return false;
+                return true;
+            }
         }
     }
 

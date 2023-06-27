@@ -35,10 +35,9 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             throw new Exception(errorMsg);
         }
 
-        //todo:review CancelFunctionWaits is sufficient
         oldWaitForReplay.Status = oldWaitForReplay.Status == WaitStatus.Waiting ? WaitStatus.Canceled : oldWaitForReplay.Status;
         oldWaitForReplay.CurrentFunction = replayRequest.CurrentFunction;
-        //skip active waits after replay
+
         await _waitsRepo.CancelFunctionWaits(oldWaitForReplay.RequestedByFunctionId, oldWaitForReplay.FunctionStateId);
 
         switch (replayRequest.ReplayType)

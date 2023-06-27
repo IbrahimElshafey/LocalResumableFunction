@@ -49,7 +49,7 @@ namespace ResumableFunctions.Publisher
                 response.EnsureSuccessStatusCode();
                 var result = await response.Content.ReadAsStringAsync();
                 //result may be 1 or -1
-                //todo:queue failed requests to be processed later here and in the below exception
+                //todo:[publisher] queue failed requests to be processed later here and in the below exception
             }
             catch (Exception ex)
             {

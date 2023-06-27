@@ -273,8 +273,6 @@ internal partial class WaitsRepo : IWaitsRepo
 
     public async Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId)
     {
-
-        //todo:handle sub functions waits
         var functionInstanceWaits =
             await _context.Waits
             .OrderByDescending(x => x.Id)

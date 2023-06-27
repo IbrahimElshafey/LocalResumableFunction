@@ -162,7 +162,6 @@ namespace ResumableFunctions.Handler.UiService
                     //LastWait = x.Max(x => x.Created),
                     MethodGroupId = x.Key
                 });
-            //todo refine this query
             var methodIdsQuery = _context
                 .WaitMethodIdentifiers
                 .GroupBy(x => x.MethodGroupId)

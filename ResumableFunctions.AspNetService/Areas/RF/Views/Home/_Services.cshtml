@@ -8,8 +8,7 @@
         <table class="w3-table-all">
             <thead>
                 <tr class="w3-indigo">
-                    <th>Service Name</th>
-                    <th>Swagger</th>
+                    <th>Service</th>
                     <th>Hangfire</th>
                     <th>GetLogs</th>
                     <th>Resumable</th>
@@ -25,17 +24,20 @@
                 var swaggerUrl = service.Url?.TrimEnd('/') + (service.Url == null ? "" : "/swagger");
                 var hangfireUrl = service.Url?.TrimEnd('/') + (service.Url == null ? "" : "/hangfire");
                 <tr>
-                    <td><a href="./RF/ServiceDetails?serviceId=@(service.Id)" class="w3-text-blue">@service.Name</a></td>
                     <td>
                         @if (!string.IsNullOrEmpty(swaggerUrl))
                         {
-                            <a href="@swaggerUrl" class="w3-text-blue">Swagger</a>
+                            <a href="@swaggerUrl" target="_blank" class="w3-text-blue">@service.Name</a>
+                        }
+                        else
+                        {
+                            <span>@service.Name</span>
                         }
                     </td>
                     <td>
                         @if (!string.IsNullOrEmpty(hangfireUrl))
                         {
-                            <a href="@hangfireUrl" class="w3-text-blue">Hangfire</a>
+                            <a href="@hangfireUrl" target="_blank" class="w3-text-blue">Hangfire</a>
                         }
                     </td>
                     <td>
