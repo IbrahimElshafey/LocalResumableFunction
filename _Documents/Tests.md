@@ -19,20 +19,16 @@
     * GoBefore [Done]
     * GoBeforeWithNewMatch [Done]
     * GoTo [Done]
-    * GoToWithNewMatch
+    * GoToWithNewMatch [Done]
 
 * Replay in sub functions
-
+* Sub functions tests
+	* Pushed call activate one instance,what if same function and sub fnction wait the same wait
 * Test loops
 
 * Write test cases for expressions rewrite because it's critical part
-
-* Sub functions tests
-	* Pushed call activate one instance,what if same function and sub fnction wait the same wait
-
 * Attributes test
-
-* Scan results exist
+* Scan results is correct
 
 # Performance Test
 * 1 Million active wait for same function
