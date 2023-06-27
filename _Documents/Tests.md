@@ -18,7 +18,7 @@
 	* GoAfter [Done]
     * GoBefore [Done]
     * GoBeforeWithNewMatch [Done]
-    * GoTo
+    * GoTo [Done]
     * GoToWithNewMatch
 
 * Replay in sub functions

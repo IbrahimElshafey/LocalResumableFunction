@@ -80,6 +80,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
                 duplicateWait.IsReplay = true;
                 duplicateWait.IsFirst = false;
+                duplicateWait.CurrentFunction = (ResumableFunction)duplicateWait.FunctionState.StateObject;
+                duplicateWait.Status = WaitStatus.Waiting;
 
                 var template = await AddWaitTemplateIfNotExist(
                     replayRequest.MatchExpression,

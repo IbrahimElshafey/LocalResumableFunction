@@ -112,17 +112,17 @@ public static class CoreExtensions
         }
     }
 
-    public static bool SameMatchSignature(LambdaExpression expressionOne, LambdaExpression expressionTwo)
+    public static bool SameMatchSignature(LambdaExpression replayMatch, LambdaExpression methodMatch)
     {
-        var isEqual = expressionOne != null && expressionTwo != null;
+        var isEqual = replayMatch != null && methodMatch != null;
         if (isEqual is false) return false;
-        if (expressionOne.ReturnType != expressionTwo.ReturnType)
+        if (replayMatch.ReturnType != methodMatch.ReturnType)
             return false;
-        if (expressionOne.Parameters.Count != expressionTwo.Parameters.Count)
-            return false;
-        var minParamsCount = Math.Min(expressionOne.Parameters.Count, expressionTwo.Parameters.Count);
+        //if (replayMatch.Parameters.Count != methodMatch.Parameters.Count)
+        //    return false;
+        var minParamsCount = Math.Min(replayMatch.Parameters.Count, methodMatch.Parameters.Count);
         for (var i = 0; i < minParamsCount; i++)
-            if (expressionOne.Parameters[i].Type != expressionTwo.Parameters[i].Type)
+            if (replayMatch.Parameters[i].Type != methodMatch.Parameters[i].Type)
                 return false;
         return true;
     }
