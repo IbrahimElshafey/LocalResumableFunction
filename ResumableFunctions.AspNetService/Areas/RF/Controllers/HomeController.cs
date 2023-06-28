@@ -14,21 +14,14 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
         public HomeController(ILogger<HomeController> logger, IUiService uiService)
         {
             _logger = logger;
-            this._uiService = uiService;
+            _uiService = uiService;
         }
 
         public async Task<IActionResult> Index()
         {
-            try
-            {
-                var model = new HomePageModel();
-                model.SetMenu(await _uiService.GetMainStatistics());
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                return View("Error", ex);
-            }
+            var model = new HomePageModel();
+            model.SetMenu(await _uiService.GetMainStatistics());
+            return View(model);
         }
 
         [ActionName(PartialNames.ServicesList)]

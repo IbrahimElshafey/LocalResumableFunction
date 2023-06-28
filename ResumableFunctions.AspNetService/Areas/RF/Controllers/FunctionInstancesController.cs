@@ -14,7 +14,7 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
         public FunctionInstancesController(ILogger<FunctionInstancesController> logger, IUiService uiService)
         {
             _logger = logger;
-            this._uiService = uiService;
+            _uiService = uiService;
         }
         public async Task<IActionResult> AllInstances(int functionId, string functionName)
         {

@@ -1,4 +1,6 @@
 ﻿# Hot Todo Core functions
+* Clear Jobs before scan
+* Set Data Expression may be a method
 * TaskList
 * Remove direct use for DbContext
 * Function Name must not duplicate

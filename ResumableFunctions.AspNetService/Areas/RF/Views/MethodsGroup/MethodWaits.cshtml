@@ -5,26 +5,7 @@
         <h2 class="w3-margin-top"><b>Waits for method group <span class="w3-text-indigo">`ProjectSumbitted`</span></b></h2>
     </header>
 
-    @* <header class="w3-text-indigo">
-    <h4 class="w3-margin-top"><b>Actions</b></h4>
-    </header>
-    <button class="w3-button w3-indigo">Re-push</button>
-    <button class="w3-button w3-indigo">Cancel Active Waits</button>
-    <button class="w3-button w3-indigo">Reopen Completed Waits</button>*@
-    <br />
-    <header class="w3-text-indigo">
-        <h4 class="w3-margin-top"><b>Waits List</b></h4>
-    </header>
-    <p class="w3-col m6 l4">
-        <select class="w3-select" name="option">
-            <option value="" disabled selected>Choose a Status</option>
-            <option value="1">Completed</option>
-            <option value="3">Cancled</option>
-            <option value="3">Waiting</option>
-            <option value="3">All</option>
-
-        </select>
-    </p>
+   <br/>
     <table class="w3-table-all w3-padding-32" style="width: 100%;table-layout: fixed;">
         <thead>
             <tr class="w3-indigo">
@@ -35,7 +16,7 @@
                 <th>Set Data Expression</th>
                 <th width="120px">Created</th>
                 <th width="120px">Matched</th>
-                <th>Actions</th>
+                @*<th>Actions</th>*@
             </tr>
         </thead>
         <tr>
@@ -46,11 +27,11 @@
             <td>(project, output) => CurrentProject == project</td>
             <td>12/02/2022</td>
             <td>12/02/2023</td>
-            <td>
+         @*   <td>
                 <div class="w3-row">
                     <button class="w3-button w3-col l6 w3-tiny w3-indigo">Wait Again</button>
                 </div>
-            </td>
+            </td>*@
         </tr>
         <tr>
             <td>Wait Project Submit For Verification</td>
@@ -60,11 +41,11 @@
             <td>(project, output) => CurrentProject == project</td>
             <td>12/02/2022</td>
             <td>None</td>
-            <td>
+         @*   <td>
                 <div class="w3-row">
                     <button class="w3-button w3-col l6 w3-tiny w3-indigo">Cancel</button>
                 </div>
-            </td>
+            </td>*@
         </tr>
     </table>
 </div>

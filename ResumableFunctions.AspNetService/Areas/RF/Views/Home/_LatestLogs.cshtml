@@ -4,21 +4,34 @@
     <header class="w3-text-indigo">
         <h2 class="w3-margin-top"><b>Latest Log Errors</b></h2>
     </header>
-    <div class="w3-row-padding w3-margin"
-         style="margin-left: -16px !important;margin-right: -16px !important;">
-        <div class="w3-col l3">
-            <b class="w3-text-indigo">Service</b>
-            <select class="w3-select" name="option">
-                <option value="" disabled selected>Choose your option</option>
-                <option value="1">All Services</option>
-                <option value="2">Service 2</option>
-                <option value="3">Service 3</option>
-            </select>
-        </div>
-       
-    </div>
     <div class="w3-container">
-        <div class="w3-row w3-margin w3-padding">
+        <div class="w3-row-padding w3-margin"
+             style="margin-left: -16px !important;margin-right: -16px !important;">
+            <div class="w3-col l3">
+                <b class="w3-text-indigo">Service</b>
+                <select class="w3-select" name="option">
+                    <option value="" disabled selected>Choose your option</option>
+                    <option value="1">All Services</option>
+                    <option value="2">Service 2</option>
+                    <option value="3">Service 3</option>
+                </select>
+            </div>
+            <div class="w3-col l3">
+                <b class="w3-text-indigo">Error Code</b>
+                <select class="w3-select" name="option">
+                    <option value="" disabled selected>Choose your option</option>
+                    <option value="1">All Services</option>
+                    <option value="2">Service 2</option>
+                    <option value="3">Service 3</option>
+                </select>
+            </div>
+            <div class="w3-col l2">
+                <span class="w3-text-light-gray">s</span>
+                <input type="button" class="w3-input w3-button w3-indigo" value="Search" />
+            </div>
+
+        </div>
+        <div class="w3-row">
 
             <div class="w3-col l2" style="width:300px">
                 <input class="w3-check" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Warning')">
@@ -29,7 +42,7 @@
                 <label>Hide/Show @(Model.Count(x => x.Type == LogType.Info)) Info</label>
             </div>
         </div>
-        <div class="w3-margin">
+        <div>
             @for (var i = 0; i < Model.Count; i++)
             {
                 @Html.DisplayFor(x => Model[i])
