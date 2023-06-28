@@ -1,7 +1,7 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 using static Tests.Sequence;
 
 namespace Tests;
@@ -11,7 +11,7 @@ public class SubFunctionsTest
     [Fact]
     public async Task FunctionAfterFirst_Test()
     {
-        var test = new TestCase(nameof(FunctionAfterFirst_Test), typeof(FunctionAfterFirst));
+        using var test = new TestShell(nameof(FunctionAfterFirst_Test), typeof(FunctionAfterFirst));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();
@@ -34,7 +34,7 @@ public class SubFunctionsTest
     [Fact]
     public async Task FunctionAtStart_Test()
     {
-        var test = new TestCase(nameof(FunctionAtStart_Test), typeof(SubFunctions));
+        using var test = new TestShell(nameof(FunctionAtStart_Test), typeof(SubFunctions));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();
@@ -56,7 +56,7 @@ public class SubFunctionsTest
     [Fact]
     public async Task TwoFunctionsAtFirst_Test()
     {
-        var test = new TestCase(nameof(TwoFunctionsAtFirst_Test), typeof(TwoFunctionsAtFirst));
+        using var test = new TestShell(nameof(TwoFunctionsAtFirst_Test), typeof(TwoFunctionsAtFirst));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();

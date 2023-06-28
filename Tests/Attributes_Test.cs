@@ -1,7 +1,7 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
 
@@ -10,7 +10,7 @@ public class Attributes_Test
     [Fact]
     public async Task NotSyncFunction_Test()
     {
-        var test = new TestCase(nameof(NotSyncFunction_Test), typeof(AttributesUsageClass));
+        using var test = new TestShell(nameof(NotSyncFunction_Test), typeof(AttributesUsageClass));
         await test.ScanTypes();
         var errorLogs = await test.GetLogs();
         Assert.NotEmpty(errorLogs);

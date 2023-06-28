@@ -4,7 +4,7 @@ using Medallion.Threading.WaitHandles;
 using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.InOuts;
 
-namespace ResumableFunctions.Handler.TestShell
+namespace ResumableFunctions.Handler.Testing
 {
     internal class TestSettings : IResumableFunctionsSettings
     {
@@ -31,5 +31,7 @@ namespace ResumableFunctions.Handler.TestShell
 
         public IDistributedLockProvider DistributedLockProvider =>
             new WaitHandleDistributedSynchronizationProvider();
+        //public IDistributedLockProvider DistributedLockProvider =>
+        //    new SqlDistributedSynchronizationProvider("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True");
     }
 }

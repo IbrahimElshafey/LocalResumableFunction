@@ -1,27 +1,22 @@
-﻿using FastExpressionCompiler;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+using FastExpressionCompiler;
 using Hangfire;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ResumableFunctions.Handler;
+using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
+using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using System.Data;
-using System.Diagnostics;
-using System.Linq.Expressions;
-using System.Reflection;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using System.Threading;
-using ResumableFunctions.Handler.Expressions;
 
-namespace ResumableFunctions.Handler.TestShell
+namespace ResumableFunctions.Handler.Testing
 {
-    public class TestCase
+    public class TestShell:IDisposable
     {
         public IHost CurrentApp { get; private set; }
         private readonly HostApplicationBuilder _builder;
@@ -29,7 +24,7 @@ namespace ResumableFunctions.Handler.TestShell
         private readonly TestSettings _settings;
         private readonly string _testName;
 
-        public TestCase(string testName, params Type[] types)
+        public TestShell(string testName, params Type[] types)
         {
             _testName = testName;
             _settings = new TestSettings(testName);
@@ -73,6 +68,7 @@ namespace ResumableFunctions.Handler.TestShell
                 if (type.IsSubclassOf(typeof(ResumableFunction)))
                     await scanner.RegisterResumableFunctionsInClass(type);
             await context.SaveChangesAsync();
+            await context.DisposeAsync();
         }
 
 
@@ -168,5 +164,10 @@ namespace ResumableFunctions.Handler.TestShell
                     .ToListAsync();
         }
 
+        public void Dispose()
+        {
+            Context?.Dispose();
+            CurrentApp?.Dispose();
+        }
     }
 }

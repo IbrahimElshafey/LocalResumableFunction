@@ -7,7 +7,7 @@ using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
@@ -25,7 +25,7 @@ namespace Tests
                 .ToList();
 
             foreach (var test in tests)
-                await TestCase.DeleteDb(test);
+                await TestShell.DeleteDb(test);
             Assert.True(true);
         }
 

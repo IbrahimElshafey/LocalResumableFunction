@@ -1,7 +1,7 @@
 ﻿using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 using static Tests.SubFunctionsLevelsTest;
 
 namespace Tests;
@@ -11,7 +11,7 @@ public class SubFunctionsLevelsTest
     [Fact]
     public async Task FunctionLevels_Test()
     {
-        var test = new TestCase(nameof(FunctionLevels_Test), typeof(FunctionLevels));
+        using var test = new TestShell(nameof(FunctionLevels_Test), typeof(FunctionLevels));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();

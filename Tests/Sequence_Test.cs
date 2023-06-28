@@ -1,7 +1,7 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
 
@@ -10,7 +10,7 @@ public class Sequence
     [Fact]
     public async Task SequenceFunction_Test()
     {
-        var test = new TestCase(nameof(SequenceFunction_Test), typeof(SequenceFunction));
+        using var test = new TestShell(nameof(SequenceFunction_Test), typeof(SequenceFunction));
         await test.ScanTypes();
         await RoundTest(0, test);
 
@@ -25,7 +25,7 @@ public class Sequence
         await RoundTest(3, test, true);
     }
 
-    private async Task RoundTest(int round, TestCase test, bool isFinal = false)
+    private async Task RoundTest(int round, TestShell test, bool isFinal = false)
     {
         var errorLogs = await test.GetLogs();
         Assert.Empty(errorLogs);

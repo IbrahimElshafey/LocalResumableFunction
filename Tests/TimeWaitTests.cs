@@ -6,7 +6,7 @@ using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
@@ -15,7 +15,7 @@ namespace Tests
         [Fact]
         public async Task TestTimeWaitAtStart_Test()
         {
-            var test = new TestCase(nameof(TestTimeWaitAtStart_Test), typeof(TimeWaitWorkflow));
+            using var test = new TestShell(nameof(TestTimeWaitAtStart_Test), typeof(TimeWaitWorkflow));
             await test.ScanTypes();
             var timeWaitId = await RoundTest(test, 1);
 
@@ -28,7 +28,7 @@ namespace Tests
             await RoundTest(test, 3);
         }
 
-        private async Task<string> RoundTest(TestCase test, int round)
+        private async Task<string> RoundTest(TestShell test, int round)
         {
             var pushedCalls = await test.GetPushedCalls();
             var waits = await test.GetWaits(null, true);

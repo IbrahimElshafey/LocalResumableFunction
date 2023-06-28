@@ -2,7 +2,7 @@ using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 using static Tests.SubFunctionsTest;
 
 namespace Tests;
@@ -12,7 +12,7 @@ public class ReplayTests
     [Fact]
     public async Task GoAfter_Test()
     {
-        var test = new TestCase(nameof(GoAfter_Test), typeof(GoAfterFunction));
+        using var test = new TestShell(nameof(GoAfter_Test), typeof(GoAfterFunction));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();
@@ -37,7 +37,7 @@ public class ReplayTests
     [Fact]
     public async Task GoBefore_Test()
     {
-        var test = new TestCase(nameof(GoBefore_Test), typeof(GoBeforeFunction));
+        using var test = new TestShell(nameof(GoBefore_Test), typeof(GoBeforeFunction));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();
@@ -73,10 +73,11 @@ public class ReplayTests
         Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
 
     }
+    
     [Fact]
     public async Task GoBeforeWithNewMatch_Test()
     {
-        var test = new TestCase(nameof(GoBeforeWithNewMatch_Test), typeof(GoBeforeWithNewMatchFunction));
+        using var test = new TestShell(nameof(GoBeforeWithNewMatch_Test), typeof(GoBeforeWithNewMatchFunction));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();
@@ -120,7 +121,7 @@ public class ReplayTests
     [Fact]
     public async Task ReplayGoTo_Test()
     {
-        var test = new TestCase(nameof(ReplayGoTo_Test), typeof(ReplayGoToFunction));
+        using var test = new TestShell(nameof(ReplayGoTo_Test), typeof(ReplayGoToFunction));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();
@@ -163,7 +164,7 @@ public class ReplayTests
     [Fact]
     public async Task GoToWithNewMatch_Test()
     {
-        var test = new TestCase(nameof(ReplayGoTo_Test), typeof(GoToWithNewMatchFunction));
+        using var test = new TestShell(nameof(GoToWithNewMatch_Test), typeof(GoToWithNewMatchFunction));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();

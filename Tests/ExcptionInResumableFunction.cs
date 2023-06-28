@@ -1,7 +1,7 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
@@ -10,7 +10,7 @@ namespace Tests
         [Fact]
         public async Task ExceptionAtStart_Test()
         {
-            var test = new TestCase(nameof(ExceptionAtStart_Test), typeof(ExceptionAtStartTest));
+            using var test = new TestShell(nameof(ExceptionAtStart_Test), typeof(ExceptionAtStartTest));
             await test.ScanTypes();
             var errorLogs = await test.GetLogs();
             Assert.True(errorLogs.Count > 0);
@@ -19,7 +19,7 @@ namespace Tests
         [Fact]
         public async Task ExceptionAfterFirstWait_Test()
         {
-            var test = new TestCase(nameof(ExceptionAfterFirstWait_Test), typeof(ExceptionAfterFirstWaitTest));
+            using var test = new TestShell(nameof(ExceptionAfterFirstWait_Test), typeof(ExceptionAfterFirstWaitTest));
             await test.ScanTypes();
             var errorLogs = await test.GetLogs();
             Assert.Empty(errorLogs);
