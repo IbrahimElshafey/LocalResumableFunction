@@ -76,7 +76,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             firstWaitClone.FunctionState.Logs.AddRange(firstWaitClone.FunctionState.Logs);
             firstWaitClone.FunctionState.Status =
                 firstWaitClone.FunctionState.HasErrors() ?
-                FunctionStatus.Error :
+                FunctionStatus.InError :
                 FunctionStatus.InProgress;
             await _waitsRepository.SaveWait(firstWaitClone);//first wait clone
 

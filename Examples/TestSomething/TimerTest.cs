@@ -6,6 +6,7 @@ internal class TimerTest
     private int _round = 1;
     internal async Task Run()
     {
+        Action<string> func = (input) => Console.WriteLine("Method " + input);
         Console.WriteLine($"Wait {_time / 1000} seconds.");
         await Task.Delay(_time);
         _round++;

@@ -5,5 +5,5 @@ public enum FunctionStatus
     New,
     InProgress,
     Completed,
-    Error
+    InError
 }

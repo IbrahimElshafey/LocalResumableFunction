@@ -146,7 +146,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
 
         if (methodAttribute == null)
             throw new Exception(
-                $"You must add attribute [{nameof(PushCallAttribute)}] to method {method.GetFullName()}");
+                $"You must add attribute `{nameof(PushCallAttribute)}` to method `{method.GetFullName()}`");
 
         MethodData = new MethodData(method);
         Name = $"#{method.Name}#";

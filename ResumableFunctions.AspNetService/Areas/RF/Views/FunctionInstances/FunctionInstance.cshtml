@@ -1,4 +1,5 @@
 ﻿@using ResumableFunctions.Handler.UiService.InOuts;
+@using ResumableFunctions.Handler.InOuts
 @model FunctionInstanceDetails
 <div class="w3-container w3-margin">
     <header class="w3-text-blue-gray">
@@ -19,7 +20,7 @@
         </tr>
         <tr>
             <td><b>Status:</b></td>
-            <td class="w3-text-green">@Model.Status</td>
+            <td class="@Model.Status">@Model.Status</td>
         </tr>
         <tr>
             <td><b>State Object:</b></td>
@@ -70,12 +71,12 @@
             <div class="w3-col l2" style="width:300px">
                 <input style="accent-color: green;"
                        class="w3-check w3-indigo" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Warning')">
-                <label>Hide/Show 2 Warning</label>
+                <label>Hide/Show @Model.Logs.Count(x=>x.Type==LogType.Warning) Warning</label>
             </div>
             <div class="w3-col l2" style="width:300px">
                 <input style="accent-color: green;"
                        class="w3-check w3-indigo" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Info')">
-                <label>Hide/Show 12 Info</label>
+                <label>Hide/Show @Model.Logs.Count(x=>x.Type==LogType.Info) Info</label>
             </div>
         </div>
         <div class="w3-margin">

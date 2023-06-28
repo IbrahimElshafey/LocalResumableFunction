@@ -84,7 +84,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         {
             FunctionState.AddError(
                 $"An error occurred after resuming execution after wait `{this}`.", ex, Constants.ProceedToNextWaitError);
-            FunctionState.Status = FunctionStatus.Error;
+            FunctionState.Status = FunctionStatus.InError;
             throw;
         }
         finally
@@ -97,7 +97,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
             FunctionState.Logs.AddRange(CurrentFunction.Logs);
             FunctionState.Status =
               CurrentFunction.HasErrors() || FunctionState.HasErrors() ?
-              FunctionStatus.Error :
+              FunctionStatus.InError :
               FunctionStatus.InProgress;
         }
     }

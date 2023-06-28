@@ -49,14 +49,16 @@ namespace ResumableFunctions.Handler.UiService
                 .ServicesData
                 .Where(x => x.ParentId == -1)
                 .ToListAsync();
-            var childDllsErrors =
+
+            var serviceErrors =
                 await _context
-               .ServicesData
-               .Where(x => x.ParentId != -1)
-               .GroupBy(x => x.ParentId)
-               .Select(x => new { ServiceId = x.Key, ErrorsCount = x.Sum(x => x.ErrorCounter) })
+               .Logs
+               .Where(x => x.Type == LogType.Error)
+               .GroupBy(x => x.ServiceId)
+               .Select(x => new { ServiceId = x.Key, ErrorsCount = x.Count() })
                .ToDictionaryAsync(x => x.ServiceId);
-            var counts = await _context
+
+            var methodsCounts = await _context
                 .MethodIdentifiers
                 .GroupBy(x => x.ServiceId)
                 .Select(x => new
@@ -69,12 +71,10 @@ namespace ResumableFunctions.Handler.UiService
             foreach (var service in services)
             {
                 var item = new ServiceInfo(service.Id, service.AssemblyName, service.Url, service.ReferencedDlls, service.Created, service.Modified);
-                item.LogErrors = service.ErrorCounter;
-                if (childDllsErrors.ContainsKey(service.Id))
-                    item.LogErrors += childDllsErrors[service.Id].ErrorsCount;
-                if (counts.ContainsKey(service.Id))
+                if (serviceErrors.TryGetValue(service.Id, out var error))
+                    item.LogErrors = error.ErrorsCount;
+                if (methodsCounts.TryGetValue(service.Id, out var methodsCounter))
                 {
-                    var methodsCounter = counts[service.Id];
                     item.FunctionsCount = methodsCounter.FunctionsCount;
                     item.MethodsCount = methodsCounter.MethodsCount;
                 }
@@ -154,7 +154,7 @@ namespace ResumableFunctions.Handler.UiService
                       x.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsNode).Name,
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InProgress),
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.Completed),
-                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.Error)))
+                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InError)))
               .ToListAsync();
         }
 
