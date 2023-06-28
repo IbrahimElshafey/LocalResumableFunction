@@ -46,16 +46,15 @@ public class ServiceRepo : IServiceRepo
     public async Task<bool> ShouldScanAssembly(string assemblyPath)
     {
         var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
-        var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
+        var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName) ??
+                          await AddNewServiceData(currentAssemblyName);
 
-        if (serviceData == null)
-        {
-            serviceData = await AddNewServiceData(currentAssemblyName);
-        }
-        else if (serviceData.ParentId != _settings.CurrentServiceId)
+        var notRoot = serviceData.Id != _settings.CurrentServiceId;
+        var notInCurrent = serviceData.ParentId != _settings.CurrentServiceId;
+        if (notInCurrent && notRoot)
         {
             var rootService = _context.ServicesData.Local.FirstOrDefault(x => x.Id == _settings.CurrentServiceId);
-            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to this service because it's used in another service.", null, Constants.DllExistInAnotherService);
+            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to service `{Assembly.GetEntryAssembly()?.GetName().Name}` because it's used in another service.", null, Constants.DllExistInAnotherService);
             return false;
         }
 
@@ -100,7 +99,7 @@ public class ServiceRepo : IServiceRepo
         if (shouldScan is false)
             serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].");
         if (_settings.ForceRescan)
-            serviceData.AddLog("Will be scanned because force rescan is enabled in Debug mode.", LogType.Warning);
+            serviceData.AddLog($"Dll `{currentAssemblyName}` Will be scanned because force rescan is enabled in.", LogType.Warning);
         return shouldScan || _settings.ForceRescan;
     }
 

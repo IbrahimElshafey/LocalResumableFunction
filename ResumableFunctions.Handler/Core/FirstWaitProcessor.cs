@@ -45,7 +45,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         var rootId = int.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
         var resumableFunction =
             rootId != firstMatchedMethodWait.Id ?
-            (await _context.Waits.Include(x => x.RequestedByFunction).FirstAsync(x => x.Id == rootId)).RequestedByFunction.MethodInfo:
+            (await _context.Waits.Include(x => x.RequestedByFunction).FirstAsync(x => x.Id == rootId)).RequestedByFunction.MethodInfo :
             firstMatchedMethodWait.RequestedByFunction.MethodInfo;
 
         try
@@ -107,7 +107,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     public async Task RegisterFirstWait(int functionId)
     {
         MethodInfo resumableFunction = null;
-        var errorMsg = $"Error when try to register first wait for function [{functionId}]";
+        var functionName = "";
         await _backgroundJobExecutor.Execute(
             $"FirstWaitProcessor_RegisterFirstWait_{functionId}",
             async () =>
@@ -116,6 +116,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 {
                     var resumableFunctionId = await _methodIdentifierRepo.GetResumableFunction(functionId);
                     resumableFunction = resumableFunctionId.MethodInfo;
+                    functionName = resumableFunction.Name;
                     WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
                     var firstWait = await GetFirstWait(resumableFunction, true);
                     if (firstWait != null)
@@ -128,13 +129,14 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 catch (Exception ex)
                 {
                     if (resumableFunction != null)
-                        await LogErrorToService(ex, errorMsg);
+                        await LogErrorToService(ex, ErrorMsg());
                     await _waitsRepository.RemoveFirstWaitIfExist(functionId);
                     throw;
                 }
 
             },
-            errorMsg, true);
+            ErrorMsg(), true);
+        string ErrorMsg() => $"Error when try to register first wait for function [{functionName}:{functionId}]";
     }
 
     private async Task LogErrorToService(Exception ex, string errorMsg)

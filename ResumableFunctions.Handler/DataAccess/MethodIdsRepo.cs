@@ -30,7 +30,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
         var resumableFunctionIdentifier =
            await _context
                .ResumableFunctionIdentifiers
-               .FirstOrDefaultAsync(x => x.Id == id && x.ServiceId == _settings.CurrentServiceId);
+               .FirstOrDefaultAsync(x => x.Id == id);
         if (resumableFunctionIdentifier != null)
             return resumableFunctionIdentifier;
         var error = $"Can't find resumable function with ID `{id}` in database.";

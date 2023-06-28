@@ -1,23 +1,39 @@
-﻿<div class="w3-margin">
+﻿@using ResumableFunctions.Handler.InOuts;
+@model List<LogRecord>
+<div class="w3-margin">
     <header class="w3-text-indigo">
         <h2 class="w3-margin-top"><b>Latest Log Errors</b></h2>
     </header>
-
+    <div class="w3-row-padding w3-margin"
+         style="margin-left: -16px !important;margin-right: -16px !important;">
+        <div class="w3-col l3">
+            <b class="w3-text-indigo">Service</b>
+            <select class="w3-select" name="option">
+                <option value="" disabled selected>Choose your option</option>
+                <option value="1">All Services</option>
+                <option value="2">Service 2</option>
+                <option value="3">Service 3</option>
+            </select>
+        </div>
+       
+    </div>
     <div class="w3-container">
-        <div class="w3-margin">
-            <div class="w3-panel w3-deep-orange">
-                <h5>Error!</h5>
-                <p>Red often indicates a dangerous or negative situation.</p>
+        <div class="w3-row w3-margin w3-padding">
+
+            <div class="w3-col l2" style="width:300px">
+                <input class="w3-check" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Warning')">
+                <label>Hide/Show @(Model.Count(x => x.Type == LogType.Warning)) Warning</label>
             </div>
-            <div class="w3-panel w3-amber">
-                <h5>Warning!</h5>
-                <p>Red often indicates a dangerous or   dfgfbf fvjdkjksdikc cikxjcm negative situation.</p>
-            </div>
-            <div class="w3-panel w3-green">
-                <h5>Info!</h5>
-                <p>Red often indicates a dangerous or negative situation.</p>
+            <div class="w3-col l2" style="width:300px">
+                <input class="w3-check" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Info')">
+                <label>Hide/Show @(Model.Count(x => x.Type == LogType.Info)) Info</label>
             </div>
         </div>
-        <button class="w3-button w3-indigo w3-margin-top">Show More...</button>
+        <div class="w3-margin">
+            @for (var i = 0; i < Model.Count; i++)
+            {
+                @Html.DisplayFor(x => Model[i])
+            }
+        </div>
     </div>
 </div>

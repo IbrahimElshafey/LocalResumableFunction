@@ -1,6 +1,7 @@
 ﻿# Hot todos
-* Methods in group view
 * All logs View
+* Clear Jobs before scan
+* Methods in group view
 * Waits for method group view
 
 

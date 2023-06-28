@@ -8,6 +8,7 @@ namespace ResumableFunctions.Handler.UiService
         Task<MainStatistics> GetMainStatistics();
         Task<ServiceData> GetServiceInfo(int serviceId);
         Task<List<LogRecord>> GetServiceLogs(int serviceId);
+        Task<List<LogRecord>> GetLogs(int page = 0);
         Task<List<ServiceInfo>> GetServicesList();
         Task<ServiceStatistics> GetServiceStatistics(int serviceId);
         Task<List<FunctionInfo>> GetFunctionsInfo(int? serviceId);

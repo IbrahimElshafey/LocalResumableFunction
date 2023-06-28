@@ -4,8 +4,6 @@ using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
 using System.Collections;
-using System.Linq.Expressions;
-using System.Text;
 
 namespace ResumableFunctions.Handler.UiService
 {
@@ -22,25 +20,25 @@ namespace ResumableFunctions.Handler.UiService
         {
             var services =
                 await _context.ServicesData.CountAsync(x => x.ParentId == -1);
-            var resumableFunction =
+            var resumableFunctionsCount =
                 await _context.ResumableFunctionIdentifiers.CountAsync(x => x.Type == MethodType.ResumableFunctionEntryPoint);
-            var resumableFunctionsInstances = await _context.FunctionStates.CountAsync();
-            var methods = await _context.WaitMethodIdentifiers.CountAsync();
+            var resumableFunctionsInstances = await _context.FunctionStates.CountAsync() - resumableFunctionsCount;
+            var methodGroups = await _context.MethodsGroups.CountAsync();
             var pushedCalls = await _context.PushedCalls.CountAsync();
-            var latestLogErrors =
-                await
-                _context
-                .Logs
-                .OrderByDescending(x => x.Id)
-                .Take(20)
-                .CountAsync(x => x.Type == LogType.Error);
+            //var latestLogErrors =
+            //    await
+            //    _context
+            //    .Logs
+            //    .OrderByDescending(x => x.Id)
+            //    .Take(20)
+            //    .CountAsync(x => x.Type == LogType.Error);
             return new MainStatistics(
                 services,
-                resumableFunction,
+                resumableFunctionsCount,
                 resumableFunctionsInstances,
-                methods,
+                methodGroups,
                 pushedCalls,
-                latestLogErrors);
+                0);
         }
 
         public async Task<List<ServiceInfo>> GetServicesList()
@@ -125,11 +123,23 @@ namespace ResumableFunctions.Handler.UiService
             return service;
         }
 
-        public Task<List<LogRecord>> GetServiceLogs(int serviceId)
+        public async Task<List<LogRecord>> GetServiceLogs(int serviceId)
         {
-            return _context
+            return await _context
                 .Logs
-                .Where(x => x.EntityId == serviceId && x.EntityType == nameof(ServiceData))
+                .Where(x => x.ServiceId == serviceId)
+                .OrderByDescending(x => x.Id)
+                .ToListAsync();
+        }
+
+        public async Task<List<LogRecord>> GetLogs(int page = 0)
+        {
+            return await _context
+                .Logs
+                .Where(x => x.Type != LogType.Info)
+                .OrderByDescending(x => x.Id)
+                .Skip(page * 100)
+                .Take(100)
                 .ToListAsync();
         }
 
@@ -283,8 +293,8 @@ namespace ResumableFunctions.Handler.UiService
                     callMatch.InstanceUpdateStatus,
                     callMatch.ExecutionStatus,
                     new TemplateDisplay(
-                        wait.MatchExpressionValue, 
-                        wait.SetDataExpressionValue, 
+                        wait.MatchExpressionValue,
+                        wait.SetDataExpressionValue,
                         wait.InstanceMandatoryPartExpressionValue)
                     ))
                 .ToList();

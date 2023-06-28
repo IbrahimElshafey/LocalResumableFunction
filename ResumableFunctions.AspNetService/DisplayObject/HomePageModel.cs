@@ -17,15 +17,15 @@ namespace ResumableFunctions.AspNetService.DisplayObject
                             $"/RF/Home/{PartialNames.ServicesList}"),
                         new MainMenuItem(
                             $"Resumable Functions ({mainStatistics.ResumableFunctions}) & ({mainStatistics.ResumableFunctionsInstances}) Instances",
-                             $"/RF/ServiceDetails/{PartialNames.ResumableFunctions}"),
+                             $"/RF/Home/{PartialNames.ResumableFunctions}"),
                         new MainMenuItem(
                             $"Methods ({mainStatistics.ResumableFunctions})",
-                            $"/RF/ServiceDetails/{PartialNames.MethodsList}"),
+                            $"/RF/Home/{PartialNames.MethodsList}"),
                         new MainMenuItem(
                             $"Pushed Calls ({mainStatistics.PushedCalls})",
                             $"/RF/Home/{PartialNames.PushedCalls}"),
                         new MainMenuItem(
-                            $"Logs ({mainStatistics.LatestLogErrors} New Error)",
+                            "Logs",
                             $"/RF/Home/{PartialNames.LatestLogs}"),
                 }
             };

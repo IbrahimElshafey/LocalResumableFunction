@@ -67,7 +67,6 @@ namespace ResumableFunctions.Handler.Core
                         .Where(x =>
                         x.PushedCallId == pushedCallId &&
                         x.FunctionId == functionId &&
-                        x.ServiceId == _settings.CurrentServiceId &&
                         (x.MatchStatus == MatchStatus.PartiallyMatched ||
                          x.InstanceUpdateStatus == InstanceUpdateStatus.UpdateFailed))
                         .ToListAsync();

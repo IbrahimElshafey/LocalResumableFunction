@@ -6,8 +6,9 @@
 * Replace HttpHangfire with abstraction to enable queue based communication between services
 * Sql server settings (password,username) or connection string
 
-* Tests
+
 * UI
+* Tests
 
 * Use IMaterializationInterceptor to set entity dependencies
 * If register first wait failed for function make it halted

@@ -52,7 +52,7 @@ public abstract partial class ResumableFunction
         if (setDependenciesMi == null)
         {
             this.AddLog(
-                "No instance method like `void SetDependencies(Interface dep1,...)` found that set your dependencies.",
+                $"No instance method like `void SetDependencies(Interface dep1,...)` found in class `{GetType().FullName}` that set your dependencies.",
                 LogType.Warning);
             return;
         }
@@ -72,7 +72,7 @@ public abstract partial class ResumableFunction
         else
         {
             this.AddLog(
-               "No instance method like `void SetDependencies(Interface dep1,...)` found that set your dependencies.",
+                $"No instance method like `void SetDependencies(Interface dep1,...)` found in class `{GetType().FullName}` that set your dependencies.",
                LogType.Warning);
         }
         //setDependenciesMi.Invoke(this, inputs);
