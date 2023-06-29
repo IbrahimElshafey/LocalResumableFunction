@@ -1,8 +1,20 @@
 ﻿# UI project
+* Services View
+	* Add pushed call count column
+	* Links should work and filter views data
+	* Add Errors Overview View
+* Resumable Functions
+	* Filters
+* Method Group 
+	* Filters
+	* Methods in group view
+	* Waits for method group view
+* Pushed Calls
+	* Filter
 * All logs View
-* Methods in group view
-* Waits for method group view
-* Errors Overview Page
+	* Filtering
+
+
 
 * Waits tree
 	* Extra Data

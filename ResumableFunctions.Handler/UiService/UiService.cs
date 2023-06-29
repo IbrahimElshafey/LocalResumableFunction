@@ -4,6 +4,7 @@ using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
 using System.Collections;
+using System.Diagnostics.Metrics;
 
 namespace ResumableFunctions.Handler.UiService
 {
@@ -207,24 +208,25 @@ namespace ResumableFunctions.Handler.UiService
                 .GroupBy(x => x.PushedCallId)
                 .Select(x => new
                 {
-                    CallId = x.Key,
-                    All = x.Count(),
-                    Matched = x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.Matched),
-                    NotMatched = x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.NotMatched),
+                    CallId = (int?)x.Key,
+                    All = (int?)x.Count(),
+                    Matched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.Matched),
+                    NotMatched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.NotMatched),
                 });
-            var query = _context.PushedCalls
-                .Join(counts,
-                call => call.Id,
-                counter => counter.CallId,
-                (call, counter) =>
-                new PushedCallInfo(
-                    call,
-                    counter.All,
-                    counter.Matched,
-                    counter.NotMatched
-                ));
 
-            var result = await query.ToListAsync();
+            var query =
+                from call in _context.PushedCalls
+                orderby call.Id descending
+                join counter in counts on call.Id equals counter.CallId into joinResult
+                from item in joinResult.DefaultIfEmpty()
+                select new { item, call };
+            var result = (await query.ToListAsync())
+                .Select(x => new PushedCallInfo(
+                    x.call,
+                    x.item?.All ?? 0,
+                    x.item?.Matched ?? 0,
+                    x.item?.NotMatched ?? 0
+                )).ToList();
             result.ForEach(x => x.PushedCall.LoadUnmappedProps());
             return result;
         }
