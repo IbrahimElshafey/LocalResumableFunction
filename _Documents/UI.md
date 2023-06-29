@@ -1,6 +1,5 @@
 ﻿# UI project
 * Services View
-	* Add pushed call count column
 	* Links should work and filter views data
 	* Add Errors Overview View
 * Resumable Functions

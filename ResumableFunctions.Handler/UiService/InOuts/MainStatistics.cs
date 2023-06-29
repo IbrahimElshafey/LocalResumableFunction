@@ -4,7 +4,7 @@
         int Services,
         int ResumableFunctions,
         int ResumableFunctionsInstances,
-        int Methods,
+        int MethodGroups,
         int PushedCalls,
         int LatestLogErrors);
 }

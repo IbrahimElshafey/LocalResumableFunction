@@ -69,16 +69,29 @@ namespace ResumableFunctions.Handler.UiService
                     ServiceId = x.Key
                 })
                 .ToDictionaryAsync(x => x.ServiceId);
+
+            var pushedCalls=await _context
+                .PushedCalls
+                .GroupBy(x=>x.ServiceId)
+                .Select(x => new { ServiceId = x.Key, PushedCalls = x.Count() })
+                .ToDictionaryAsync(x => x.ServiceId);
+
             foreach (var service in services)
             {
                 var item = new ServiceInfo(service.Id, service.AssemblyName, service.Url, service.ReferencedDlls, service.Created, service.Modified);
+
                 if (serviceErrors.TryGetValue(service.Id, out var error))
                     item.LogErrors = error.ErrorsCount;
+
                 if (methodsCounts.TryGetValue(service.Id, out var methodsCounter))
                 {
                     item.FunctionsCount = methodsCounter.FunctionsCount;
                     item.MethodsCount = methodsCounter.MethodsCount;
                 }
+
+                if (pushedCalls.TryGetValue(service.Id, out var pushedCallsCount))
+                    item.PushedCallsCount = pushedCallsCount.PushedCalls;
+
                 result.Add(item);
             }
             return result;

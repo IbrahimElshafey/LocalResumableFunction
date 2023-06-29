@@ -10,9 +10,10 @@
                 <tr class="w3-indigo">
                     <th>Service</th>
                     <th>Hangfire</th>
-                    <th>GetLogs</th>
-                    <th>Resumable</th>
+                    <th>Logs</th>
+                    <th>Functions</th>
                     <th>Methods</th>
+                    <th>Pushed Calls</th>
                     <th>Registration</th>
                     <th>Last Scan</th>
                     @*<th>Actions</th>*@
@@ -51,6 +52,9 @@
                     <td>
                         <a href="~/RF?serviceId=@(service.Id)#view=2" class="w3-text-blue">@service.MethodsCount</a>
                     </td>
+                    <td>
+                        <a href="~/RF?serviceId=@(service.Id)#view=3" class="w3-text-blue">@service.PushedCallsCount</a>
+                    </td>
                    
                     @*<td>
                         @(service.Dlls?.Aggregate((x, y) => $"{x}, {y}"))
@@ -64,7 +68,7 @@
                   @*  <td>
                         <div class="w3-row">
                             <button class="w3-button w3-tiny w3-indigo">Re-Scan</button>
-                            <button class="w3-button w3-tiny w3-indigo">Verify Methods</button>
+                            <button class="w3-button w3-tiny w3-indigo">Verify MethodGroups</button>
                             <button class="w3-button w3-tiny w3-indigo">Verify Start Waits</button>
                         </div>
                     </td>*@
