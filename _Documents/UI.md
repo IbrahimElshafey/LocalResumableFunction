@@ -1,13 +1,10 @@
-﻿# Hot todos
+﻿# UI project
 * All logs View
 * Methods in group view
 * Waits for method group view
-
-
-# UI project
 * Errors Overview Page
+
 * Waits tree
-	* Is Replay
 	* Extra Data
 	
 

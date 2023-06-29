@@ -5,16 +5,16 @@ namespace ResumableFunctions.Publisher;
 /// <summary>
 ///     Add this to the method you want to 
 ///     push it's call to the a resumable function service.
-/// </summary>
+/// </summary>  
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 [Injection(typeof(PublishMethodAspect), Inherited = true)]
 public sealed class PublishMethodAttribute : Attribute
 {
-    public PublishMethodAttribute(string methodIdetifier, string serviceName)
+    public PublishMethodAttribute(string methodIdentifier, string serviceName)
     {
-        if (string.IsNullOrWhiteSpace(methodIdetifier))
+        if (string.IsNullOrWhiteSpace(methodIdentifier))
             throw new ArgumentNullException("MethodIdentifier can't be null or empty.");
-        MethodIdentifier = methodIdetifier;
+        MethodIdentifier = methodIdentifier;
         ServiceName = serviceName;
     }
 

@@ -114,7 +114,7 @@ namespace ResumableFunctions.Handler.Core
                 if (isMatch)
                 {
                     _methodWait.FunctionState.AddLog(
-                        $"Wait matched [{_methodWait.Name}] for [{_methodWait.RequestedByFunction}].");
+                        $"Wait `{_methodWait.Name}` matched in `{_methodWait.RequestedByFunction.MethodName}`.");
                     await UpdateWaitRecord(x => x.MatchStatus = MatchStatus.Matched);
                 }
                 else
@@ -124,7 +124,8 @@ namespace ResumableFunctions.Handler.Core
             catch (Exception ex)
             {
                 var error =
-                    $"Error occurred when evaluate match for [{_methodWait.Name}] in [{_methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].";
+                    $"Error occurred when evaluate match for `{_methodWait.Name}` " +
+                    $"in `{_methodWait.RequestedByFunction.MethodName}` when pushed call `{pushedCallId}`.";
                 _methodWait.FunctionState.AddError(error, ex, Constants.MatchEvaluationError);
                 throw new Exception(error, ex);
             }

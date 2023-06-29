@@ -41,15 +41,15 @@
                         }
                     </td>
                     <td>
-                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=1" class="w3-text-@(service.LogErrors == 0 ? "green" :"red")">
+                        <a href="~/RF?serviceId=@(service.Id)#view=4" class="w3-text-@(service.LogErrors == 0 ? "green" :"red")">
                             @(service.LogErrors == 0 ? "No Errors" : $"{service.LogErrors} Error")
                         </a>
                     </td>
                     <td>
-                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=2" class="w3-text-blue">@service.FunctionsCount</a>
+                        <a href="~/RF?serviceId=@(service.Id)#view=1" class="w3-text-blue">@service.FunctionsCount</a>
                     </td>
                     <td>
-                        <a href="./RF/ServiceDetails?serviceId=@(service.Id)#view=3" class="w3-text-blue">@service.MethodsCount</a>
+                        <a href="~/RF?serviceId=@(service.Id)#view=2" class="w3-text-blue">@service.MethodsCount</a>
                     </td>
                    
                     @*<td>
