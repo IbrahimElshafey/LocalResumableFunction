@@ -221,7 +221,10 @@ internal class Scanner
 
     internal async Task RegisterResumableFunctionsInClass(Type type)
     {
+
         var serviceData = await _serviceRepo.GetServiceData(type.Assembly.GetName().Name);
+
+        CheckSetDependenciesMethodExist(type, serviceData);
         serviceData.AddLog($"Try to find resumable functions in type [{type.FullName}]");
 
         var hasCtorLess = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
@@ -253,6 +256,19 @@ internal class Scanner
             }
         }
 
+    }
+
+    private void CheckSetDependenciesMethodExist(Type type, ServiceData serviceData)
+    {
+
+        var setDependenciesMi = type.GetMethod(
+            "SetDependencies", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+        if (setDependenciesMi != null) return;
+
+        serviceData.AddLog(
+            $"No instance method like `void SetDependencies(Interface dep1,...)` found in class `{type.FullName}` that set your dependencies.",
+            LogType.Warning);
     }
 
 

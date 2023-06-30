@@ -99,7 +99,7 @@ public class ServiceRepo : IServiceRepo
         if (shouldScan is false)
             serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].");
         if (_settings.ForceRescan)
-            serviceData.AddLog($"Dll `{currentAssemblyName}` Will be scanned because force rescan is enabled in.", LogType.Warning);
+            serviceData.AddLog($"Dll `{currentAssemblyName}` Will be scanned because force rescan is enabled.", LogType.Warning);
         return shouldScan || _settings.ForceRescan;
     }
 
