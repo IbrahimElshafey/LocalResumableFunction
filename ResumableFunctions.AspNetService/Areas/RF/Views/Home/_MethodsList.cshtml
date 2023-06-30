@@ -46,13 +46,14 @@
                     <td>
                         <span> @item.URN</span>
                         <span>
-                            <a href="~/RF/MethodsGroup/MethodWaits" target="_blank" class="w3-text-blue">
+                            <a href="~/RF/MethodsGroup/MethodWaits" onclick="document.getElementById('id01').style.display='block'" target="_blank" class="w3-text-blue">
                                 (@(item.ActiveWaits + item.CompletedWaits + item.CanceledWaits) Waits)
                             </a>
                         </span>
                     </td>
                     <td>
-                        <a href="~/RF/MethodsGroup/MethodsInGroup" target="_blank" class="w3-text-blue">@item.MethodsCount</a>
+                        @*href="~/RF/MethodsGroup/MethodsInGroup"*@
+                        <a onclick="document.getElementById('id01').style.display='block'" target="_blank" class="w3-text-blue">@item.MethodsCount</a>
                     </td>
                     <td>
                         @item.ActiveWaits
@@ -67,5 +68,60 @@
                 </tr>
             }
         </table>
+    </div>
+
+    <div id="id01" class="w3-modal">
+        <div class="w3-modal-content" style="width: 90%;height: 90%;">
+            <div class="w3-container">
+                <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+                <header class="w3-text-blue-gray w3-col l10">
+                    <h2 class="w3-margin-top"><b>Waits for method group <span class="w3-text-indigo">`ProjectSubmitted`</span></b></h2>
+                </header>
+
+                <br />
+                <table class="w3-table-all w3-padding-32" style="width: 100%;table-layout: fixed;">
+                    <thead>
+                        <tr class="w3-indigo">
+                            <th>Name</th>
+                            <th>In Resumable Function</th>
+                            <th width="120px">Status</th>
+                            <th>Match Expression</th>
+                            <th>Set Data Expression</th>
+                            <th width="120px">Created</th>
+                            <th width="120px">Matched</th>
+                            @*<th>Actions</th>*@
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td>Wait Project Submit</td>
+                        <td><a href="~/rfui/ResumableFunctionInstances" class="w3-text-blue">ProjectApprovalWorkflowStart</a></td>
+                        <td class="w3-text-green">Completed</td>
+                        <td>(project, output) => output && !project.IsResubmit</td>
+                        <td>(project, output) => CurrentProject == project</td>
+                        <td>12/02/2022</td>
+                        <td>12/02/2023</td>
+                        @*   <td>
+                        <div class="w3-row">
+                        <button class="w3-button w3-col l6 w3-tiny w3-indigo">Wait Again</button>
+                        </div>
+                        </td>*@
+                    </tr>
+                    <tr>
+                        <td>Wait Project Submit For Verification</td>
+                        <td><a href="~/rfui/ResumableFunctionInstances" class="w3-text-blue">SubmitVerificationWorkflow</a></td>
+                        <td class="w3-text-orange">Waiting</td>
+                        <td>(project, output) => output && !project.IsResubmit</td>
+                        <td>(project, output) => CurrentProject == project</td>
+                        <td>12/02/2022</td>
+                        <td>None</td>
+                        @*   <td>
+                        <div class="w3-row">
+                        <button class="w3-button w3-col l6 w3-tiny w3-indigo">Cancel</button>
+                        </div>
+                        </td>*@
+                    </tr>
+                </table>
+            </div>
+        </div>
     </div>
 </div>

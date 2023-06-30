@@ -76,11 +76,15 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
             if (waitToReplay.DuplicateWait() is MethodWait duplicateWait)
             {
-                duplicateWait.Name += $"-Replay-{DateTime.Now.Ticks}";
-                duplicateWait.IsReplay = true;
-                duplicateWait.IsFirst = false;
-                duplicateWait.CurrentFunction = (ResumableFunction)duplicateWait.FunctionState.StateObject;
-                duplicateWait.Status = WaitStatus.Waiting;
+                duplicateWait.ActionOnWaitsTree(wait =>
+                {
+                    wait.Name += $"-Replay-{DateTime.Now.Ticks}";
+                    wait.IsReplay = true;
+                    wait.IsFirst = false;
+                    wait.CurrentFunction = (ResumableFunction)duplicateWait.FunctionState.StateObject;
+                    wait.Status = WaitStatus.Waiting;
+                });
+
 
                 var template = await AddWaitTemplateIfNotExist(
                     replayRequest.MatchExpression,
@@ -229,9 +233,13 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         if (hasWait)
         {
             var waitToReplay = runner.Current;
-            waitToReplay.Name += $"-Replay-{DateTime.Now.Ticks}";
-            waitToReplay.IsReplay = true;
-            waitToReplay.IsFirst = false;
+            waitToReplay.ActionOnWaitsTree(wait =>
+            {
+                wait.Name += $"-Replay-{DateTime.Now.Ticks}";
+                wait.IsReplay = true;
+                wait.IsFirst = false;
+            });
+
         }
         return (runner, hasWait);
     }

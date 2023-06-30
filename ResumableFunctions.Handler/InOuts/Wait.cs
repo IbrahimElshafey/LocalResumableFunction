@@ -55,6 +55,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     internal ResumableFunction CurrentFunction { get; set; }
 
     internal bool CanBeParent => this is FunctionWait || this is WaitsGroup;
+    internal int? CallId { get; set; }
 
 
     internal async Task<Wait> GetNextWait()
@@ -184,7 +185,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         if (isNameDuplicated)
         {
             FunctionState.AddLog(
-                $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name",
+                $"The wait named `{Name}` is duplicated in function `{RequestedByFunction?.MethodName}` body,fix it to not cause a problem. If it's a loop concat the  index to the name",
                 LogType.Warning);
         }
 

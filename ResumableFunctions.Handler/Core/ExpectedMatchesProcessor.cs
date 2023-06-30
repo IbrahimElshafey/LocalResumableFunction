@@ -27,7 +27,6 @@ namespace ResumableFunctions.Handler.Core
         private WaitForCall _waitCall;
         private MethodWait _methodWait;
         private PushedCall _pushedCall;
-        private readonly IResumableFunctionsSettings _settings;
 
         public ExpectedMatchesProcessor(
             IServiceProvider serviceProvider,
@@ -39,8 +38,7 @@ namespace ResumableFunctions.Handler.Core
             FunctionDataContext context,
             IReplayWaitProcessor replayWaitProcessor,
             BackgroundJobExecutor backgroundJobExecutor,
-            IDistributedLockProvider lockProvider,
-            IResumableFunctionsSettings settings)
+            IDistributedLockProvider lockProvider)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -52,7 +50,6 @@ namespace ResumableFunctions.Handler.Core
             _replayWaitProcessor = replayWaitProcessor;
             _backgroundJobExecutor = backgroundJobExecutor;
             _lockProvider = lockProvider;
-            _settings = settings;
         }
 
         public async Task ProcessFunctionExpectedMatches(int functionId, int pushedCallId)
@@ -146,7 +143,7 @@ namespace ResumableFunctions.Handler.Core
         private async Task<bool> UpdateFunctionData()
         {
             var pushedCallId = _pushedCall.Id;
-            _methodWait.MatchedByCallId = pushedCallId;
+            _methodWait.CallId = pushedCallId;
             try
             {
                 await using (await _lockProvider.AcquireLockAsync($"UpdateFunctionState_{_methodWait.FunctionStateId}"))
@@ -204,7 +201,7 @@ namespace ResumableFunctions.Handler.Core
                             {
                                 currentWait.FunctionState.AddLog($"Wait `{currentWait.Name}` is completed.");
                                 currentWait.Status = WaitStatus.Completed;
-                                await _waitsRepo.CancelSubWaits(currentWait.Id);
+                                await _waitsRepo.CancelSubWaits(currentWait.Id, _pushedCall.Id);
                                 await GoNext(parent, currentWait);
                             }
                             else

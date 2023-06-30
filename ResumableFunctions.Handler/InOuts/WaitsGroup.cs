@@ -9,11 +9,12 @@ namespace ResumableFunctions.Handler.InOuts;
 
 public class WaitsGroup : Wait
 {
+    private LambdaExpression _countExpression;
+
     public WaitsGroup()
     {
-        WaitType = WaitType.GroupWaitAll;
+        WaitType = WaitType.GroupWaitAll;   
     }
-    private LambdaExpression _countExpression;
 
     [NotMapped]
     public LambdaExpression GroupMatchExpression
@@ -26,7 +27,6 @@ public class WaitsGroup : Wait
 
     public override bool IsCompleted()
     {
-
         var isFinished = false;
         switch (WaitType)
         {

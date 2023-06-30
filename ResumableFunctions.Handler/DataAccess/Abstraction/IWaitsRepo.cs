@@ -7,7 +7,7 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
     {
         Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId);
         Task CancelOpenedWaitsForState(int stateId);
-        Task CancelSubWaits(int parentId);
+        Task CancelSubWaits(int parentId,int pushedCallId);
         Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait);
         Task<Wait> GetWaitParent(Wait wait);
         Task<List<int>> GetMatchedFunctionsForCall(int pushedCallId,string methodUrn);

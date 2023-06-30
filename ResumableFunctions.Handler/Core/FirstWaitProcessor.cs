@@ -213,10 +213,11 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 var firstWaits = await _context
                         .Waits
                         .Include(x => x.FunctionState)
-                        .Where(wait =>
-                                wait.RequestedByFunctionId == functionId &&
-                                wait.IsFirst &&
-                                wait.Status == WaitStatus.Waiting)
+                        .Where(
+                            wait =>
+                            wait.RequestedByFunctionId == functionId &&
+                            wait.IsFirst &&
+                            wait.Status == WaitStatus.Waiting)
                         .ToListAsync();
 
                 foreach (var firstWait in firstWaits)
@@ -231,6 +232,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     await _context.SaveChangesAsync();
                 }
             },
-            $"Error when try to deactivate first wait for function [{functionId}]", true);
+            $"Error when try to deactivate first wait for function `{functionId}`.", true);
     }
 }

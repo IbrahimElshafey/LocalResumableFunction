@@ -5,5 +5,10 @@
 }
 <div class="w3-panel @type.Class log-item-@Model.Type">
     <h5><b>@type.Title [@Model.Created]</b></h5>
-    <p>@Html.Raw(Html.Encode(Model.Message).Replace("\n", "<br />"))</p>
+    <p>@Html.Raw(Html.Encode(Model.Message).Replace("\n", "<br />"))
+    @if (Model.EntityType == nameof(ResumableFunctionState))
+    {
+            <a class="function-instance-label" style="display:block;" href="~/RF/FunctionInstances/FunctionInstance?instanceId=@Model.EntityId">In Function Instance #@Model.EntityId</a>
+    }
+    </p>
 </div>

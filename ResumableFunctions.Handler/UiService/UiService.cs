@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
+using System;
 using System.Collections;
 using System.Diagnostics.Metrics;
 
@@ -70,9 +71,9 @@ namespace ResumableFunctions.Handler.UiService
                 })
                 .ToDictionaryAsync(x => x.ServiceId);
 
-            var pushedCalls=await _context
+            var pushedCalls = await _context
                 .PushedCalls
-                .GroupBy(x=>x.ServiceId)
+                .GroupBy(x => x.ServiceId)
                 .Select(x => new { ServiceId = x.Key, PushedCalls = x.Count() })
                 .ToDictionaryAsync(x => x.ServiceId);
 
@@ -159,6 +160,33 @@ namespace ResumableFunctions.Handler.UiService
 
         public async Task<List<FunctionInfo>> GetFunctionsInfo(int? serviceId)
         {
+            //var countsQuery =
+            //    await (from functionState in _context.FunctionStates.Include(x => x.ResumableFunctionIdentifier)
+            //           group functionState by functionState.ResumableFunctionIdentifierId
+            //    into g
+            //           select new
+            //           {
+            //               FunctionId = g.Key,
+            //               InProgress = g.Count(x => x.Status == FunctionStatus.InProgress),
+            //               Completed = g.Count(x => x.Status == FunctionStatus.Completed),
+            //               InError = g.Count(x => x.Status == FunctionStatus.InError)
+            //           }).ToListAsync();
+            //var functionWithFirstWait =
+            //    await (from function in _context.ResumableFunctionIdentifiers.Include(x => x.WaitsCreatedByFunction)
+            //           select new { function,FirstWait= function.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsNode).Name })
+            //    .ToListAsync();
+            //var result =
+            //    (from counts in countsQuery.DefaultIfEmpty()
+            //    from function in functionWithFirstWait
+            //    where counts.FunctionId == function.function.Id
+            //    select new FunctionInfo(
+            //        function.function,
+            //        function.FirstWait,
+            //        counts?.InProgress??0,
+            //        counts?.Completed ?? 0,
+            //        counts?.InError ?? 0
+            //    )).ToList();
+            //return result;
             return await _context.ResumableFunctionIdentifiers
               .Include(x => x.ActiveFunctionsStates)
               .Include(x => x.WaitsCreatedByFunction)
@@ -168,7 +196,8 @@ namespace ResumableFunctions.Handler.UiService
                       x.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsNode).Name,
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InProgress),
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.Completed),
-                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InError)))
+                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InError)
+                      ))
               .ToListAsync();
         }
 
@@ -186,6 +215,7 @@ namespace ResumableFunctions.Handler.UiService
                     //LastWait = x.Max(x => x.Created),
                     MethodGroupId = x.Key
                 });
+
             var methodIdsQuery = _context
                 .WaitMethodIdentifiers
                 .GroupBy(x => x.MethodGroupId)
@@ -196,19 +226,21 @@ namespace ResumableFunctions.Handler.UiService
                     GroupCreated = x.First().MethodGroup.Created,
                     GroupUrn = x.First().MethodGroup.MethodGroupUrn
                 });
-            var join = from wait in waitsQuery
-                       from methodId in methodIdsQuery
-                       where wait.MethodGroupId == methodId.MethodGroupId
-                       select new { wait, methodId };
+
+            var join =
+                from wait in waitsQuery
+                join methodId in methodIdsQuery on wait.MethodGroupId equals methodId.MethodGroupId into jo
+                from item in jo.DefaultIfEmpty()
+                select new { wait, methodId = item };
 
             return (await join.ToListAsync())
                 .Select(x => new MethodGroupInfo(
-                                     x.wait.MethodGroupId,
+                                     x.wait?.MethodGroupId ?? 0,
                                      x.methodId.GroupUrn,
                                      x.methodId.MethodsCount,
-                                     x.wait.Waiting,
-                                     x.wait.Completed,
-                                     x.wait.Canceled,
+                                     x.wait?.Waiting ?? 0,
+                                     x.wait?.Completed ?? 0,
+                                     x.wait?.Canceled ?? 0,
                                      x.methodId.GroupCreated))
                 .ToList();
         }
@@ -267,12 +299,12 @@ namespace ResumableFunctions.Handler.UiService
             pushedCall.LoadUnmappedProps();
             var methodData = pushedCall.MethodData;
             var inputOutput = MessagePackSerializer.ConvertToJson(pushedCall.DataValue);
-            var callExpecetdMatches =
+            var callExpectedMatches =
                 await _context
                 .WaitsForCalls
                 .Where(x => x.PushedCallId == pushedCallId)
                 .ToListAsync();
-            var waitsIds = callExpecetdMatches.Select(x => x.WaitId).ToList();
+            var waitsIds = callExpectedMatches.Select(x => x.WaitId).ToList();
 
             var waits =
                 await (
@@ -294,7 +326,7 @@ namespace ResumableFunctions.Handler.UiService
                 .ToListAsync();
 
             var waitsForCall =
-                (from callMatch in callExpecetdMatches
+                (from callMatch in callExpectedMatches
                  from wait in waits
                  where callMatch.WaitId == wait.Id
                  select new MethodWaitDetails(

@@ -224,6 +224,14 @@ internal class Scanner
         var serviceData = await _serviceRepo.GetServiceData(type.Assembly.GetName().Name);
         serviceData.AddLog($"Try to find resumable functions in type [{type.FullName}]");
 
+        var hasCtorLess = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+            null, Type.EmptyTypes, null) == null;
+        if (hasCtorLess)
+        {
+            serviceData.AddError($"You must define parameter-less constructor for type `{type.FullName}` to enable serialization for it.");
+            return;
+        }
+
         await RegisterFunctions(SubResumableFunctionAttribute.AttributeId);
         await _context.SaveChangesAsync();
         await RegisterFunctions(ResumableFunctionEntryPointAttribute.AttributeId);

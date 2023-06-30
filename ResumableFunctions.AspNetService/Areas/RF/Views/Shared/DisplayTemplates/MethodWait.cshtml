@@ -9,12 +9,12 @@
                 <td><b class="w3-text-blue-gray">Status: </b></td>
                 <td>
                     <span class="@Model.Status">@Model.Status</span>
-                    @if (Model.Status != WaitStatus.Waiting)
+                    @if (Model.CallId > 0)
                     {
-                        <a class="w3-text-blue" href="~/RF/PushedCall/Details?pushedCallId=@Model.MatchedByCallId">By Call</a>
+                        <a class="w3-text-blue" href="~/RF/PushedCall/Details?pushedCallId=@Model.CallId">By Call</a>
                     }
                 </td>
-                
+
             </tr>
             @if (Model.Template != null)
             {
@@ -27,7 +27,7 @@
             <tr>
                 <td><b class="w3-text-blue-gray">Created: </b></td>
                 <td>@Model.Created</td>
-             
+
                 @if (Model.Modified != DateTime.MinValue)
                 {
                     <td><b class="w3-text-blue-gray">Modified: </b></td>

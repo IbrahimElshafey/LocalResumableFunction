@@ -135,8 +135,8 @@ public sealed class FunctionDataContext : DbContext
           .Property(x => x.MethodToWaitId)
           .HasColumnName(nameof(MethodWait.MethodToWaitId));
         methodWaitBuilder
-          .Property(x => x.MatchedByCallId)
-          .HasColumnName(nameof(MethodWait.MatchedByCallId));
+          .Property(x => x.CallId)
+          .HasColumnName(nameof(MethodWait.CallId));
 
         modelBuilder.Entity<WaitsGroup>()
            .Property(mw => mw.GroupMatchExpressionValue)

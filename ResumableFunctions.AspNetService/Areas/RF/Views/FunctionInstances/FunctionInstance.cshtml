@@ -1,6 +1,11 @@
 ﻿@using ResumableFunctions.Handler.UiService.InOuts;
 @using ResumableFunctions.Handler.InOuts
 @model FunctionInstanceDetails
+<style>
+    .function-instance-label {
+        display:none !important;
+    }
+</style>
 <div class="w3-container w3-margin">
     <header class="w3-text-blue-gray">
         <h2 class="w3-margin-top">
@@ -46,8 +51,8 @@
         </tr>
     </table>
     <br />
-    <input class="w3-button w3-indigo" type="button" 
-           onclick="location.href='/RF/FunctionInstances/AllInstances?functionId=@Model.FunctionId&functionName=@Model.FunctionUrn'" 
+    <input class="w3-button w3-indigo" type="button"
+           onclick="location.href='/RF/FunctionInstances/AllInstances?functionId=@Model.FunctionId&functionName=@Model.FunctionUrn'"
            value="All Function Intstances" />
 
     <header class="w3-text-indigo">

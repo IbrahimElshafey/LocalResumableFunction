@@ -218,7 +218,7 @@ internal partial class WaitsRepo : IWaitsRepo
     }
 
 
-    public async Task CancelSubWaits(int parentId)
+    public async Task CancelSubWaits(int parentId, int pushedCallId)
     {
         //todo: use path prop
         await CancelWaits(parentId);
@@ -232,17 +232,18 @@ internal partial class WaitsRepo : IWaitsRepo
                 .ToListAsync();
             foreach (var wait in waits)
             {
-                CancelWait(wait);
+                CancelWait(wait, pushedCallId);
                 if (wait.CanBeParent)
                     await CancelWaits(wait.Id);
             }
         }
     }
 
-    private void CancelWait(Wait wait)
+    private void CancelWait(Wait wait, int pushedCallId)
     {
         wait.LoadUnmappedProps();
         wait.Cancel();
+        wait.CallId = pushedCallId;
         if (wait is MethodWait { Name: $"#{nameof(LocalRegisteredMethods.TimeWait)}#" })
         {
             _backgroundJobClient.Delete(wait.ExtraData.JobId);
@@ -284,7 +285,7 @@ internal partial class WaitsRepo : IWaitsRepo
         foreach (var wait in functionInstanceWaits)
         {
             wait.Cancel();
-            await CancelSubWaits(wait.Id);
+            await CancelSubWaits(wait.Id, -1);
         }
     }
 

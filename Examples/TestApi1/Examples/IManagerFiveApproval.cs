@@ -4,7 +4,7 @@ namespace TestApi1.Examples
 {
     internal interface IManagerFiveApproval
     {
-        [PushCall("IManagerFiveApproval.ManagerFiveApproveProject")]
+        [PushCall("IManagerFiveApproval.ManagerFiveApproveProject",true)]
         bool ManagerFiveApproveProject(ApprovalDecision args);
     }
 }
