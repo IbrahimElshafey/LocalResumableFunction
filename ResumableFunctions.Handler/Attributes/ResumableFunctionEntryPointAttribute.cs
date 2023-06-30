@@ -6,7 +6,7 @@
 /// 
 [AttributeUsage(AttributeTargets.Method)]
 
-public sealed class ResumableFunctionEntryPointAttribute : Attribute, ITrackingIdetifier
+public sealed class ResumableFunctionEntryPointAttribute : Attribute, ITrackingIdentifier
 {
     public const string AttributeId = nameof(ResumableFunctionEntryPointAttribute);
     public override object TypeId => AttributeId;

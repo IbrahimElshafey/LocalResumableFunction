@@ -79,7 +79,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
     public async Task AddWaitMethodIdentifier(MethodData methodData)
     {
         await using var waitHandle =
-            await _lockProvider.AcquireLockAsync($"WaitMethod_{methodData.MethodUrn}");
+            await _lockProvider.AcquireLockAsync($"MethodGroup_{methodData.MethodUrn}");
         var methodGroup =
             await _context
                 .MethodsGroups

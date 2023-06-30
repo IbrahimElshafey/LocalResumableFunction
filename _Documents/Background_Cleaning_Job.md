@@ -6,3 +6,4 @@
 * Delete old logs for scan sessions
 * Delete soft deleted rows
 * Delete unused WaitTemplates
+* Delete unused Method Identifires that not exist in code

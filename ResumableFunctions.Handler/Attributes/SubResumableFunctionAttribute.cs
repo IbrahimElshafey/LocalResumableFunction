@@ -1,7 +1,7 @@
 ﻿namespace ResumableFunctions.Handler.Attributes;
 
 [AttributeUsage(AttributeTargets.Method)]
-public sealed class SubResumableFunctionAttribute : Attribute, ITrackingIdetifier
+public sealed class SubResumableFunctionAttribute : Attribute, ITrackingIdentifier
 {
 
     public const string AttributeId = nameof(SubResumableFunctionAttribute);
