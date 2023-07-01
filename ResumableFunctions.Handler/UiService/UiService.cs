@@ -209,33 +209,32 @@ namespace ResumableFunctions.Handler.UiService
                 .GroupBy(x => x.MethodGroupToWaitId)
                 .Select(x => new
                 {
-                    Waiting = x.Count(x => x.Status == WaitStatus.Waiting),
-                    Completed = x.Count(x => x.Status == WaitStatus.Completed),
-                    Canceled = x.Count(x => x.Status == WaitStatus.Canceled),
-                    //LastWait = x.Max(x => x.Created),
-                    MethodGroupId = x.Key
+                    Waiting = (int?)x.Count(x => x.Status == WaitStatus.Waiting),
+                    Completed = (int?)x.Count(x => x.Status == WaitStatus.Completed),
+                    Canceled = (int?)x.Count(x => x.Status == WaitStatus.Canceled),
+                    MethodGroupId = (int?)x.Key
                 });
 
             var methodIdsQuery = _context
-                .WaitMethodIdentifiers
-                .GroupBy(x => x.MethodGroupId)
+                .MethodsGroups
+                .Include(x => x.WaitMethodIdentifiers)
                 .Select(x => new
                 {
-                    MethodGroupId = x.Key,
-                    MethodsCount = x.Count(),
-                    GroupCreated = x.First().MethodGroup.Created,
-                    GroupUrn = x.First().MethodGroup.MethodGroupUrn
+                    MethodGroupId = x.Id,
+                    MethodsCount = x.WaitMethodIdentifiers.Count,
+                    GroupCreated = x.Created,
+                    GroupUrn = x.MethodGroupUrn
                 });
 
             var join =
-                from wait in waitsQuery
-                join methodId in methodIdsQuery on wait.MethodGroupId equals methodId.MethodGroupId into jo
+                from methodId in methodIdsQuery
+                join wait in waitsQuery on methodId.MethodGroupId equals wait.MethodGroupId into jo
                 from item in jo.DefaultIfEmpty()
-                select new { wait, methodId = item };
+                select new { wait = item, methodId };
 
             return (await join.ToListAsync())
                 .Select(x => new MethodGroupInfo(
-                                     x.wait?.MethodGroupId ?? 0,
+                                     x.methodId.MethodGroupId,
                                      x.methodId.GroupUrn,
                                      x.methodId.MethodsCount,
                                      x.wait?.Waiting ?? 0,
@@ -381,6 +380,74 @@ namespace ResumableFunctions.Handler.UiService
                 waitsNodes,
                 logs
                 );
+        }
+
+        public async Task<List<MethodInGroupInfo>> GetMethodsInGroup(int groupId)
+        {
+            var groupUrn =
+                await _context
+                .MethodsGroups
+                .Where(x => x.Id == groupId)
+                .Select(x => x.MethodGroupUrn)
+                .FirstOrDefaultAsync();
+            var query =
+                from method in _context.WaitMethodIdentifiers
+                from service in _context.ServicesData
+                where method.ServiceId == service.Id && method.MethodGroupId == groupId
+                select new { method, ServiceName = service.AssemblyName };
+            return
+                (await query.ToListAsync())
+                .Select(x => new MethodInGroupInfo(
+                    x.ServiceName,
+                    x.method,
+                    groupUrn))
+                .ToList();
+        }
+
+        public async Task<List<MethodWaitDetails>> GetWaitsForGroup(int groupId)
+        {
+            var groupName =
+                await _context
+                    .MethodsGroups
+                    .Where(x => x.Id == groupId)
+                    .Select(x => x.MethodGroupUrn)
+                    .FirstOrDefaultAsync();
+            var query =
+                from methodWait in _context.MethodWaits.Include(x=>x.RequestedByFunction)
+                from template in _context.WaitTemplates
+                where methodWait.TemplateId == template.Id && methodWait.MethodGroupToWaitId == groupId
+                select new
+                {
+                    methodWait,
+                    template.MatchExpressionValue,
+                    template.SetDataExpressionValue,
+                    template.InstanceMandatoryPartExpressionValue,
+                    methodWait.RequestedByFunction.RF_MethodUrn
+                };
+
+            var result =
+                (await query.ToListAsync())
+                .Select(x =>
+                    new MethodWaitDetails(
+                        x.methodWait.Name,
+                        x.methodWait.Status,
+                        x.RF_MethodUrn,
+                        x.methodWait.FunctionStateId,
+                        x.methodWait.Created,
+                        x.methodWait.MandatoryPart,
+                        MatchStatus.ExpectedMatch,
+                        InstanceUpdateStatus.NotUpdatedYet,
+                        ExecutionStatus.NotStartedYet,
+                        new TemplateDisplay(x.MatchExpressionValue, x.SetDataExpressionValue,
+                            x.InstanceMandatoryPartExpressionValue)
+                    )
+                    {
+                        CallId = x.methodWait.CallId,
+                        GroupName = groupName
+                    })
+                .ToList();
+
+            return result;
         }
 
         private async Task SetWaitTemplates(List<Wait> waits)

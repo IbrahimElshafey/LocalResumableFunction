@@ -31,29 +31,32 @@
         </div>
         <table class="w3-table-all">
             <thead>
-                <tr class="w3-indigo">
-                    <th>Method Group URN</th>
-                    <th>MethodGroups</th>
-                    <th>Active Waits</th>
-                    <th>Completed Waits</th>
-                    <th>Canceled Waits</th>
-                    <th>Registration Date</th>
-                </tr>
+            <tr class="w3-indigo">
+                <th>Method Group URN</th>
+                <th>MethodGroups</th>
+                <th>Active Waits</th>
+                <th>Completed Waits</th>
+                <th>Canceled Waits</th>
+                <th>Registration Date</th>
+            </tr>
             </thead>
             @foreach (var item in Model)
             {
                 <tr>
                     <td>
-                        <span> @item.URN</span>
-                        <span>
-                            <a href="~/RF/MethodsGroup/MethodWaits" target="_blank" class="w3-text-blue">
-                                (@(item.ActiveWaits + item.CompletedWaits + item.CanceledWaits) Waits)
-                            </a>
-                        </span>
+                        <span>@item.URN #@item.Id</span>
+                        @if (item.AllWaitsCount > 0)
+                        {
+                            <span>
+                                <a href="~/RF/MethodsGroup/MethodWaits?groupId=@item.Id" target="_blank" class="w3-text-blue">
+                                    (@(item.AllWaitsCount) Waits)
+                                </a>
+                            </span>
+                        }
                     </td>
                     <td>
                         @*href="~/RF/MethodsGroup/MethodsInGroup"*@
-                        <a onclick="document.getElementById('id01').style.display='block'" target="_blank" class="w3-text-blue">@item.MethodsCount</a>
+                        <a onclick="LoadMethods(@item.Id)" target="_blank" class="w3-text-blue">@item.MethodsCount</a>
                     </td>
                     <td>
                         @item.ActiveWaits
@@ -73,36 +76,10 @@
     <div id="id01" class="w3-modal">
         <div class="w3-modal-content" style="width: 90%;height:auto;">
             <div class="w3-container">
-                <span onclick="document.getElementById('id01').style.display='none'" class="w3-button w3-display-topright">&times;</span>
+                <span onclick="CloseMethodsModal()" class="w3-button w3-display-topright">&times;</span>
                 <div id="methods-in-group">
-                    <header class="w3-text-blue-gray w3-col l10 w3-margin">
-                        <h2 class="w3-margin-top">
-                            <b>Method in group <span class="w3-text-indigo">`ProjectSubmitted`</span></b>
-                        </h2>
-                    </header>
-                    <div class="w3-container">
-                        <table class="w3-table-all">
-                            <thead>
-                            <tr class="w3-indigo">
-                                <th>Service & Assembly Name</th>
-                                <th>Class Name</th>
-                                <th>Method</th>
-                                <th>Can Publish From External</th>
-                                <th>Created</th>
-                                <th>Modified</th>
-                            </tr>
-                            </thead>
-                            <tr>
-                                <td>TestApi1, ReferenceLibrary</td>
-                                <td>TestApi1.Examples.ExternalServiceClass</td>
-                                <td>int ExternalMethodTest(object input)</td>
-                                <td>True</td>
-                                <td>12/02/2022</td>
-                                <td>12/02/2023</td>
-                            </tr>
-                        </table>
-                        <br />
-                        <br />
+                    <div class="progress-bar">
+                        <div class="progress-bar-value"></div>
                     </div>
                 </div>
             </div>

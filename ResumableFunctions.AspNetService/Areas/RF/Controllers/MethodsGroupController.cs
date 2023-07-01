@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.AspNetService.DisplayObject;
 using ResumableFunctions.Handler.UiService;
+using System.Text.RegularExpressions;
 
 namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
 {
@@ -18,15 +19,15 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
         }
 
         [ActionName("MethodsInGroup")]
-        public async Task<IActionResult> MethodsInGroup()
+        public async Task<IActionResult> MethodsInGroup(int groupId)
         {
-            return View("MethodsInGroup");
+            return PartialView("MethodsInGroup", await _uiService.GetMethodsInGroup(groupId));
         }
 
         [ActionName("MethodWaits")]
-        public async Task<IActionResult> MethodWaits()
+        public async Task<IActionResult> MethodWaits(int groupId)
         {
-            return View("MethodWaits");
+            return View("MethodWaits", await _uiService.GetWaitsForGroup(groupId));
         }
     }
 }

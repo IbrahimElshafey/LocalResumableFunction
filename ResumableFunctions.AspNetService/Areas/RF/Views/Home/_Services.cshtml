@@ -19,9 +19,8 @@
                     @*<th>Actions</th>*@
                 </tr>
             </thead>
-            @for (var i = 0; i < Model.Services.Count; i++)
+            @foreach (var service in Model.Services)
             {
-                var service = Model.Services[i];
                 var swaggerUrl = service.Url?.TrimEnd('/') + (service.Url == null ? "" : "/swagger");
                 var hangfireUrl = service.Url?.TrimEnd('/') + (service.Url == null ? "" : "/hangfire");
                 <tr>
@@ -42,36 +41,26 @@
                         }
                     </td>
                     <td>
-                        <a href="~/RF?serviceId=@(service.Id)#view=4" class="w3-text-@(service.LogErrors == 0 ? "green" :"red")">
+                        <a href="~/RF?serviceId=@service.Id#view=4" class="w3-text-@(service.LogErrors == 0 ? "green" :"red")">
                             @(service.LogErrors == 0 ? "No Errors" : $"{service.LogErrors} Error")
                         </a>
                     </td>
                     <td>
-                        <a href="~/RF?serviceId=@(service.Id)#view=1" class="w3-text-blue">@service.FunctionsCount</a>
+                        <a href="~/RF?serviceId=@service.Id#view=1" class="w3-text-blue">@service.FunctionsCount</a>
                     </td>
                     <td>
-                        <a href="~/RF?serviceId=@(service.Id)#view=2" class="w3-text-blue">@service.MethodsCount</a>
+                        <a href="~/RF?serviceId=@service.Id#view=2" class="w3-text-blue">@service.MethodsCount</a>
                     </td>
                     <td>
-                        <a href="~/RF?serviceId=@(service.Id)#view=3" class="w3-text-blue">@service.PushedCallsCount</a>
+                        <a href="~/RF?serviceId=@service.Id#view=3" class="w3-text-blue">@service.PushedCallsCount</a>
                     </td>
                    
-                    @*<td>
-                        @(service.Dlls?.Aggregate((x, y) => $"{x}, {y}"))
-                    </td>*@
                     <td>
                         @service.Registration
                     </td>
                     <td>
                         @service.LastScan
                     </td>
-                  @*  <td>
-                        <div class="w3-row">
-                            <button class="w3-button w3-tiny w3-indigo">Re-Scan</button>
-                            <button class="w3-button w3-tiny w3-indigo">Verify MethodGroups</button>
-                            <button class="w3-button w3-tiny w3-indigo">Verify Start Waits</button>
-                        </div>
-                    </td>*@
                 </tr>
             }
         </table>

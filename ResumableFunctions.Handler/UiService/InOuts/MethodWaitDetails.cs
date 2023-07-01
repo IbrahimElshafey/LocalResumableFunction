@@ -44,5 +44,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public string Name { get; }
         public string SetDataExpression { get; }
         public WaitStatus Status { get; }
+        public int? CallId { get; set; }
+        public string GroupName { get; set; }
     }
 }
