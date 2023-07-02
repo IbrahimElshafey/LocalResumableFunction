@@ -20,7 +20,7 @@ namespace ResumableFunctions.Handler.Core
 
         private readonly ILogger<ExpectedMatchesProcessor> _logger;
         private readonly IBackgroundProcess _backgroundJobClient;
-        private readonly FunctionDataContext _context;
+        private readonly IUnitOfWork _context;
         private readonly BackgroundJobExecutor _backgroundJobExecutor;
         private readonly IDistributedLockProvider _lockProvider;
 
@@ -35,7 +35,7 @@ namespace ResumableFunctions.Handler.Core
             IRecycleBinService recycleBinService,
             IWaitsRepo waitsRepo,
             IBackgroundProcess backgroundJobClient,
-            FunctionDataContext context,
+            IUnitOfWork context,
             IReplayWaitProcessor replayWaitProcessor,
             BackgroundJobExecutor backgroundJobExecutor,
             IDistributedLockProvider lockProvider)
@@ -150,7 +150,7 @@ namespace ResumableFunctions.Handler.Core
                 {
                     if (_methodWait.UpdateFunctionData())
                     {
-                        _context.Entry(_methodWait.FunctionState).State = EntityState.Modified;
+                        _context.MarkEntityAsModified(_methodWait.FunctionState);
                         await _context.SaveChangesAsync();
                         await UpdateWaitRecord(x => x.InstanceUpdateStatus = InstanceUpdateStatus.UpdateSuccessed);
                     }

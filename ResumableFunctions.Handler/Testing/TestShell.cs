@@ -65,7 +65,7 @@ namespace ResumableFunctions.Handler.Testing
                 AssemblyName = _types[0].Assembly.GetName().Name,
                 ParentId = -1,
             };
-            await using var context = scope.ServiceProvider.GetService<FunctionDataContext>();
+            await using var context = scope.ServiceProvider.GetService<WaitsDataContext>();
             context.ServicesData.Add(serviceData);
             await context.SaveChangesAsync();
             _settings.CurrentServiceId = serviceData.Id;
@@ -127,7 +127,7 @@ namespace ResumableFunctions.Handler.Testing
             return pushedCallId;
         }
 
-        private FunctionDataContext Context => CurrentApp.Services.GetService<FunctionDataContext>();
+        private WaitsDataContext Context => CurrentApp.Services.GetService<WaitsDataContext>();
         public async Task<List<ResumableFunctionState>> GetInstances<T>(bool includeNew = false)
         {
             var query = Context.FunctionStates.AsQueryable().AsNoTracking();

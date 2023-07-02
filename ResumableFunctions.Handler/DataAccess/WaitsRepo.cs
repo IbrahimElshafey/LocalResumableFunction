@@ -11,7 +11,7 @@ namespace ResumableFunctions.Handler.DataAccess;
 internal partial class WaitsRepo : IWaitsRepo
 {
     private readonly ILogger<WaitsRepo> _logger;
-    private readonly FunctionDataContext _context;
+    private readonly WaitsDataContext _context;
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly IMethodIdsRepo _methodIdsRepo;
     private readonly IResumableFunctionsSettings _settings;
@@ -21,7 +21,7 @@ internal partial class WaitsRepo : IWaitsRepo
     public WaitsRepo(
         ILogger<WaitsRepo> logger,
         IBackgroundProcess backgroundJobClient,
-        FunctionDataContext context,
+        WaitsDataContext context,
         IMethodIdsRepo methodIdentifierRepo,
         IResumableFunctionsSettings settings,
         IWaitTemplatesRepo waitTemplatesRepo,

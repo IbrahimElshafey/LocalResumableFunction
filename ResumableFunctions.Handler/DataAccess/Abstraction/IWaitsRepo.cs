@@ -3,6 +3,10 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
+    public interface IFunctionStateRepo
+    {
+
+    }
     public interface IWaitsRepo
     {
         Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId);

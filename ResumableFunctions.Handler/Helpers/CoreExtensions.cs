@@ -24,7 +24,7 @@ public static class CoreExtensions
 
 
         // ReSharper disable once RedundantAssignment
-        services.AddDbContext<FunctionDataContext>(optionsBuilder => optionsBuilder = settings.WaitsDbConfig);
+        services.AddDbContext<WaitsDataContext>(optionsBuilder => optionsBuilder = settings.WaitsDbConfig);
         services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
         services.AddScoped<IWaitsRepo, WaitsRepo>();
         services.AddScoped<IServiceRepo, ServiceRepo>();
