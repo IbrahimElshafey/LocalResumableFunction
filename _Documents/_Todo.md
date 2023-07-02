@@ -1,7 +1,7 @@
 ﻿# Hot Todo Core functions
-* TaskList
 * Remove direct use for DbContext
-* Function name must not duplicate
+* Function URN name must not duplicate
+* Method URN name must not duplicate in same class
 * What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
 * Replace HttpHangfire with abstraction to enable queue based communication between services
 * Sql server settings (password,username) or connection string

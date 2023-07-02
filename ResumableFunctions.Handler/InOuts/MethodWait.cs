@@ -83,7 +83,6 @@ public class MethodWait : Wait
 
     internal override bool IsValidWaitRequest()
     {
-        //Todo:validate input output type serialization
         if (IsReplay)
             return true;
         switch (WasFirst)

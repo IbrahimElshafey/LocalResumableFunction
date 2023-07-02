@@ -220,16 +220,15 @@ internal partial class WaitsRepo : IWaitsRepo
 
     public async Task CancelSubWaits(int parentId, int pushedCallId)
     {
-        //todo: use path prop
         await CancelWaits(parentId);
 
         async Task CancelWaits(int pId)
         {
             var waits = await _context
                 .Waits
-                .Include(x => x.FunctionState)
                 .Where(x => x.ParentWaitId == pId && x.Status == WaitStatus.Waiting)
                 .ToListAsync();
+
             foreach (var wait in waits)
             {
                 CancelWait(wait, pushedCallId);
@@ -248,7 +247,7 @@ internal partial class WaitsRepo : IWaitsRepo
         {
             _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
-        wait.FunctionState.AddLog($"Wait `{wait.Name}` canceled.");
+        //wait.FunctionState.AddLog($"Wait `{wait.Name}` canceled.");
     }
 
     public async Task<Wait> GetWaitParent(Wait wait)

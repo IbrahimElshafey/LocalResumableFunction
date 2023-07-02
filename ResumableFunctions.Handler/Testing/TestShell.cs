@@ -63,6 +63,7 @@ namespace ResumableFunctions.Handler.Testing
             foreach (var type in _types)
                 await scanner.RegisterMethods(type, serviceData);
             await scanner.RegisterMethods(typeof(LocalRegisteredMethods), serviceData);
+            await context.SaveChangesAsync();
 
             foreach (var type in _types)
                 if (type.IsSubclassOf(typeof(ResumableFunction)))
