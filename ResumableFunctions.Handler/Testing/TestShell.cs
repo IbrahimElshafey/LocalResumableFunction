@@ -23,7 +23,8 @@ namespace ResumableFunctions.Handler.Testing
         private readonly Type[] _types;
         private readonly TestSettings _settings;
         private readonly string _testName;
-
+        //(localdb)\\MSSQLLocalDB
+        private const string Server= ".\\SQLEXPRESS";
         public TestShell(string testName, params Type[] types)
         {
             _testName = testName;
@@ -31,13 +32,22 @@ namespace ResumableFunctions.Handler.Testing
             _builder = Host.CreateApplicationBuilder();
             _types = types;
         }
-
+        
         public static async Task DeleteDb(string dbName)
         {
             var dbConfig = new DbContextOptionsBuilder()
-                .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={dbName};");
+                .UseSqlServer(
+                    $"Server={Server};Database={dbName};Trusted_Connection=True;TrustServerCertificate=True;");
             var context = new DbContext(dbConfig.Options);
-            await context.Database.EnsureDeletedAsync();
+            try
+            {
+                await context.Database.EnsureDeletedAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         public IServiceCollection RegisteredServices => _builder.Services;

@@ -10,6 +10,8 @@ namespace ResumableFunctions.Handler.Testing
     {
 
         private readonly string _testName;
+        //(localdb)\\MSSQLLocalDB
+        private const string Server = ".\\SQLEXPRESS";
 
         public TestSettings(string testName)
         {
@@ -19,7 +21,7 @@ namespace ResumableFunctions.Handler.Testing
 
         public DbContextOptionsBuilder WaitsDbConfig =>
             new DbContextOptionsBuilder()
-            .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={_testName};");
+            .UseSqlServer($"Server={Server};Database={_testName};Trusted_Connection=True;TrustServerCertificate=True;");
 
         public string CurrentServiceUrl => null;
 

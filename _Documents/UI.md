@@ -1,17 +1,8 @@
 ﻿# UI project
 * Services View
-	* Links should work and filter views data
 	* Add Errors Overview View
-* Resumable Functions
-	* Filters
-* Method Group 
-	* Filters
-	* Methods in group view
-	* Waits for method group view
-* Pushed Calls
-	* Filter
-* All logs View
-	* Filtering
+	* Wait Status InError
+* Filters and search in all views
 
 
 
