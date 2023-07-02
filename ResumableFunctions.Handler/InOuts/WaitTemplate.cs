@@ -9,10 +9,10 @@ namespace ResumableFunctions.Handler.InOuts;
 public class WaitTemplate : IEntity, IOnSaveEntity
 {
 
-    public int Id { get; internal set; }
-    public int FunctionId { get; internal set; }
-    public int MethodId { get; internal set; }
-    public int MethodGroupId { get; internal set; }
+    public long Id { get; internal set; }
+    public long FunctionId { get; internal set; }
+    public long MethodId { get; internal set; }
+    public long MethodGroupId { get; internal set; }
     public MethodsGroup MethodGroup { get; internal set; }
     public byte[] BaseHash { get; internal set; }
     public DateTime Created { get; internal set; }
@@ -77,7 +77,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public LambdaExpression SetDataExpression { get; internal set; }
 
 
-    public int? ServiceId { get; set; }
+    public long? ServiceId { get; set; }
 
 
     bool expressionsLoaded;

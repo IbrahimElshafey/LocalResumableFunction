@@ -212,7 +212,7 @@ namespace ResumableFunctions.Handler.UiService
                     Waiting = (int?)x.Count(x => x.Status == WaitStatus.Waiting),
                     Completed = (int?)x.Count(x => x.Status == WaitStatus.Completed),
                     Canceled = (int?)x.Count(x => x.Status == WaitStatus.Canceled),
-                    MethodGroupId = (int?)x.Key
+                    MethodGroupId = (long?)x.Key
                 });
 
             var methodIdsQuery = _context
@@ -252,7 +252,7 @@ namespace ResumableFunctions.Handler.UiService
                 .GroupBy(x => x.PushedCallId)
                 .Select(x => new
                 {
-                    CallId = (int?)x.Key,
+                    CallId = (long?)x.Key,
                     All = (int?)x.Count(),
                     Matched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.Matched),
                     NotMatched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.NotMatched),
@@ -284,7 +284,7 @@ namespace ResumableFunctions.Handler.UiService
                  .Select(functionState => new FunctionInstanceInfo(
                      functionState,
                      functionState.Waits.First(wait => wait.IsNode && wait.Status == WaitStatus.Waiting),
-                     functionState.Waits.Count(),
+                     functionState.Waits.Count,
                      functionState.Id
                      ));
             var result = await query.ToListAsync();

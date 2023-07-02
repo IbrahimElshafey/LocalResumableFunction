@@ -2,8 +2,8 @@
 {
     public interface IScanStateRepo
     {
-        Task<int> AddScanState(string name);
-        Task<bool> RemoveScanState(int id);
+        Task<long> AddScanState(string name);
+        Task<bool> RemoveScanState(long id);
         Task<bool> IsScanFinished();
     }
 }

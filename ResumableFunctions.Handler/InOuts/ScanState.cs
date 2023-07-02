@@ -2,11 +2,11 @@
 
 public class ScanState : IEntity
 {
-    public int Id { get; internal set; }
+    public long Id { get; internal set; }
 
     public DateTime Created { get; internal set; }
 
-    public int? ServiceId { get; internal set; }
+    public long? ServiceId { get; internal set; }
 
     public string Name { get; set; }
 }

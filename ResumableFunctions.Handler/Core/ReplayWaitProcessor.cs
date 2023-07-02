@@ -109,9 +109,9 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     private async Task<WaitTemplate> AddWaitTemplateIfNotExist(
         LambdaExpression matchExpression,
         LambdaExpression setDataExpression,
-        int funcId,
-        int groupId,
-        int methodId,
+        long funcId,
+        long groupId,
+        long methodId,
         object functionInstance)
     {
         var waitExpressionsHash = new WaitExpressionsHash(matchExpression, setDataExpression);

@@ -18,15 +18,15 @@ public class MethodWait : Wait
 
     [NotMapped]
     internal WaitTemplate Template { get; set; }
-    public int TemplateId { get; internal set; }
+    public long TemplateId { get; internal set; }
 
     [NotMapped]
     internal WaitMethodIdentifier MethodToWait { get; set; }
 
-    internal int? MethodToWaitId { get; set; }
+    internal long? MethodToWaitId { get; set; }
 
     internal MethodsGroup MethodGroupToWait { get; set; }
-    internal int MethodGroupToWaitId { get; set; }
+    internal long MethodGroupToWaitId { get; set; }
 
     [NotMapped]
     internal MethodData MethodData { get; set; }

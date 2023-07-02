@@ -52,7 +52,7 @@ namespace ResumableFunctions.Handler.Core
             _lockProvider = lockProvider;
         }
 
-        public async Task ProcessFunctionExpectedMatches(int functionId, int pushedCallId)
+        public async Task ProcessFunctionExpectedMatches(long functionId, long pushedCallId)
         {
             await _backgroundJobExecutor.Execute(
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
@@ -306,7 +306,7 @@ namespace ResumableFunctions.Handler.Core
             await _recycleBinService.RecycleFunction(currentWait.FunctionStateId);
         }
 
-        private async Task<MethodWait> LoadWait(int waitId)
+        private async Task<MethodWait> LoadWait(long waitId)
         {
             var methodWait = await _context
                     .MethodWaits
@@ -351,7 +351,7 @@ namespace ResumableFunctions.Handler.Core
             return methodWait;
         }
 
-        private async Task<PushedCall> LoadPushedCall(int pushedCallId)
+        private async Task<PushedCall> LoadPushedCall(long pushedCallId)
         {
             try
             {

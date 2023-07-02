@@ -2,6 +2,6 @@
 {
     public interface IRecycleBinService
     {
-        Task RecycleFunction(int functionInstanceId);
+        Task RecycleFunction(long functionInstanceId);
     }
 }

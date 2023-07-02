@@ -104,7 +104,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
     }
 
-    public async Task RegisterFirstWait(int functionId)
+    public async Task RegisterFirstWait(long functionId)
     {
         MethodInfo resumableFunction = null;
         var functionName = "";

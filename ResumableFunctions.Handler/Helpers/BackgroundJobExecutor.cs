@@ -37,8 +37,7 @@ namespace ResumableFunctions.Handler.Helpers
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            var hasException = false;
-            var scanTaskId = 0;
+            long scanTaskId = 0;
             try
             {
                 await using var handle = await _lockProvider.TryAcquireLockAsync(_settings.CurrentDbName + lockName);
@@ -51,7 +50,6 @@ namespace ResumableFunctions.Handler.Helpers
             }
             catch (Exception ex)
             {
-                hasException = true;
                 var codeInfo =
                     $"\nSource File Path: {sourceFilePath}\n" +
                     $"Line Number: {sourceLineNumber}";

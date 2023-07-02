@@ -5,14 +5,14 @@ using ResumableFunctions.Handler.Helpers;
 namespace ResumableFunctions.Handler.InOuts;
 public class PushedCall : IEntityWithDelete, IOnSaveEntity
 {
-    public int Id { get; internal set; }
+    public long Id { get; internal set; }
     [NotMapped]
     public MethodData MethodData { get; internal set; }
     public byte[] MethodDataValue { get; internal set; }
     [NotMapped]
     public InputOutput Data { get; internal set; } = new();
     public byte[] DataValue { get; internal set; }
-    public int? ServiceId { get; set; }
+    public long? ServiceId { get; set; }
     public List<WaitForCall> WaitsForCall { get; internal set; } = new();
 
     public DateTime Created { get; internal set; }

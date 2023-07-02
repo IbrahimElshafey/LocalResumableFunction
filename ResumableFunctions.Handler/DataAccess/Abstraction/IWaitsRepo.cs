@@ -5,14 +5,14 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
     public interface IWaitsRepo
     {
-        Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId);
-        Task CancelOpenedWaitsForState(int stateId);
-        Task CancelSubWaits(int parentId,int pushedCallId);
+        Task CancelFunctionWaits(long requestedByFunctionId, long functionStateId);
+        Task CancelOpenedWaitsForState(long stateId);
+        Task CancelSubWaits(long parentId,long pushedCallId);
         Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait);
         Task<Wait> GetWaitParent(Wait wait);
-        Task<List<int>> GetMatchedFunctionsForCall(int pushedCallId,string methodUrn);
+        Task<List<long>> GetMatchedFunctionsForCall(long pushedCallId,string methodUrn);
         Task<List<ServiceData>> GetAffectedServicesForCall(string methodUrn);
-        Task RemoveFirstWaitIfExist(int methodIdentifierId);
+        Task RemoveFirstWaitIfExist(long methodIdentifierId);
         Task<bool> SaveWait(Wait newWait);
     }
 }

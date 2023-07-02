@@ -61,7 +61,7 @@ namespace ResumableFunctions.Handler.InOuts
 
         private string HangfireDbName => $"{Assembly.GetEntryAssembly().GetName().Name}_HangfireDb".Replace(".", "_");
 
-        public int CurrentServiceId { get; set; } = -1;
+        public long CurrentServiceId { get; set; } = -1;
         public string CurrentDbName { get; set; }
 
         public IDistributedLockProvider DistributedLockProvider =>

@@ -2,7 +2,7 @@
 
 namespace ResumableFunctions.Handler.UiService.InOuts
 {
-    public record FunctionInstanceInfo(ResumableFunctionState FunctionState, Wait CurrentWait, int WaitsCount, int Id)
+    public record FunctionInstanceInfo(ResumableFunctionState FunctionState, Wait CurrentWait, int WaitsCount, long Id)
     {
         public string StateColor => FunctionState.Status switch
         {
@@ -10,6 +10,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
             FunctionStatus.InProgress => "yellow",
             FunctionStatus.Completed => "green",
             FunctionStatus.InError => "red",
+            _ => throw new ArgumentOutOfRangeException()
         };
     }
 }

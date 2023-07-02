@@ -25,7 +25,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
         _settings = settings;
     }
 
-    public async Task<ResumableFunctionIdentifier> GetResumableFunction(int id)
+    public async Task<ResumableFunctionIdentifier> GetResumableFunction(long id)
     {
         var resumableFunctionIdentifier =
            await _context
@@ -121,7 +121,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
 
 
 
-    public async Task<(int MethodId, int GroupId)> GetId(MethodWait methodWait)
+    public async Task<(long MethodId, long GroupId)> GetId(MethodWait methodWait)
     {
         if (methodWait.MethodGroupToWaitId != default && methodWait.MethodToWaitId != default)
             return (methodWait.MethodToWaitId ?? 0, methodWait.MethodGroupToWaitId);

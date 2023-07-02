@@ -21,7 +21,7 @@ internal class ScanStateRepo : IScanStateRepo
         return await _context.ScanStates.CountAsync() == 0;
     }
 
-    public async Task<int> AddScanState(string name)
+    public async Task<long> AddScanState(string name)
     {
         var toAdd = new ScanState { Name = name };
         _context.ScanStates.Add(toAdd);
@@ -29,7 +29,7 @@ internal class ScanStateRepo : IScanStateRepo
         return toAdd.Id;
     }
 
-    public async Task<bool> RemoveScanState(int id)
+    public async Task<bool> RemoveScanState(long id)
     {
         await using var lockScanStat = await _lockProvider.AcquireLockAsync("ScanStateLock");
         var toRemove = _context.ScanStates.Local.FirstOrDefault(x => x.Id == id);

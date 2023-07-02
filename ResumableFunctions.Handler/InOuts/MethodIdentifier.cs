@@ -7,7 +7,7 @@ public abstract class MethodIdentifier : IEntityWithUpdate
 {
     private MethodInfo _methodInfo;
 
-    public int Id { get; internal set; }
+    public long Id { get; internal set; }
     public string AssemblyName { get; internal set; }
     public DateTime Created { get; internal set; }
     public string ClassName { get; internal set; }
@@ -24,7 +24,7 @@ public abstract class MethodIdentifier : IEntityWithUpdate
             return _methodInfo;
         }
     }
-    public int? ServiceId { get; set; }
+    public long? ServiceId { get; set; }
 
     public DateTime Modified { get; internal set; }
     public string ConcurrencyToken { get; internal set; }

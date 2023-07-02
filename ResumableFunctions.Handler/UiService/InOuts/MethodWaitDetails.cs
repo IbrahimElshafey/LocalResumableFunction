@@ -11,7 +11,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         string name,
         WaitStatus status,
         string functionName,
-        int instanceId,
+        long instanceId,
         DateTime created,
         string mandatoryPart,
         MatchStatus matchStatus,
@@ -35,7 +35,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public DateTime Created { get; }
         public ExecutionStatus ExecutionStatus { get; }
         public string FunctionName { get; }
-        public int InstanceId { get; }
+        public long InstanceId { get; }
         public InstanceUpdateStatus InstanceUpdateStatus { get; }
         public string MandatoryPart { get; }
         public string MandatoryPartExpression { get; }
@@ -44,7 +44,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public string Name { get; }
         public string SetDataExpression { get; }
         public WaitStatus Status { get; }
-        public int? CallId { get; set; }
+        public long? CallId { get; set; }
         public string GroupName { get; set; }
     }
 }

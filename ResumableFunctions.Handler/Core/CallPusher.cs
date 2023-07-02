@@ -26,7 +26,7 @@ namespace ResumableFunctions.Handler.Core
             _logger = logger;
         }
 
-        public async Task<int> PushCall(PushedCall pushedCall)
+        public async Task<long> PushCall(PushedCall pushedCall)
         {
             _context.PushedCalls.Add(pushedCall);
             await _context.SaveChangesAsync();
@@ -34,7 +34,7 @@ namespace ResumableFunctions.Handler.Core
             return pushedCall.Id;
         }
         static readonly SemaphoreSlim SemaphoreSlim = new(1, 1);
-        public async Task<int> PushExternalCall(PushedCall pushedCall, string serviceName)
+        public async Task<long> PushExternalCall(PushedCall pushedCall, string serviceName)
         {
             await SemaphoreSlim.WaitAsync();
             try
