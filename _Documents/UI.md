@@ -1,6 +1,7 @@
 ﻿# UI project
 * Services View
 	* Add Errors Overview View
+	* Add Scan Overview View
 	* Wait Status InError
 * Filters and search in all views
 

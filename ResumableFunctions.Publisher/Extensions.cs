@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
+using Microsoft.Extensions.Http;
 namespace ResumableFunctions.Publisher
 {
     public static class Extensions
@@ -10,7 +10,7 @@ namespace ResumableFunctions.Publisher
         public static void AddResumableFunctionsPublisher(this IServiceCollection services, IPublisherSettings settings)
         {
             services.AddSingleton(typeof(IPublisherSettings), settings);
-            services.AddSingleton<HttpClient>();
+            services.AddHttpClient();
             services.AddSingleton(typeof(ICallPublisher), settings.CallPublisherType);
         }
 

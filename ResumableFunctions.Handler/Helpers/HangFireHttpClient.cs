@@ -5,13 +5,13 @@ namespace ResumableFunctions.Handler.Helpers
 {
     public class HangfireHttpClient
     {
-        private readonly IBackgroundProcess backgroundJobClient;
-        private readonly HttpClient client;
+        private readonly IBackgroundProcess _backgroundJobClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public HangfireHttpClient(IBackgroundProcess backgroundJobClient, HttpClient client)
+        public HangfireHttpClient(IBackgroundProcess backgroundJobClient, IHttpClientFactory httpClientFactory)
         {
-            this.backgroundJobClient = backgroundJobClient;
-            this.client = client;
+            _backgroundJobClient = backgroundJobClient;
+            _httpClientFactory = httpClientFactory;
         }
         public async Task EnqueueGetRequestIfFail(string url)
         {
@@ -21,7 +21,7 @@ namespace ResumableFunctions.Handler.Helpers
             }
             catch (Exception)
             {
-                backgroundJobClient.Enqueue(() => HttpGet(url));
+                _backgroundJobClient.Enqueue(() => HttpGet(url));
             }
             
         }
@@ -29,8 +29,9 @@ namespace ResumableFunctions.Handler.Helpers
         [EditorBrowsable(EditorBrowsableState.Never)]
         public async Task HttpGet(string url)
         {
-            var resposne = await client.GetAsync(url);
-            resposne.EnsureSuccessStatusCode();
+            var client = _httpClientFactory.CreateClient();
+            var response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
         }
     }
 }

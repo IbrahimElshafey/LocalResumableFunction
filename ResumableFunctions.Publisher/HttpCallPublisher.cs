@@ -10,13 +10,13 @@ namespace ResumableFunctions.Publisher
     public class HttpCallPublisher : ICallPublisher
     {
         private readonly IPublisherSettings _settings;
-        private readonly HttpClient _client;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<HttpCallPublisher> _logger;
 
-        public HttpCallPublisher(IPublisherSettings settings, HttpClient client, ILogger<HttpCallPublisher> logger)
+        public HttpCallPublisher(IPublisherSettings settings, IHttpClientFactory httpClientFactory, ILogger<HttpCallPublisher> logger)
         {
             _settings = settings;
-            _client = client;
+            _httpClientFactory = httpClientFactory;
             _logger = logger;
         }
 
@@ -44,8 +44,8 @@ namespace ResumableFunctions.Publisher
                     $"{serviceUrl}api/ResumableFunctions/ExternalCall";
                 var body = MessagePackSerializer.Serialize(methodCall, ContractlessStandardResolver.Options);
                 //create a System.Net.Http.MultiPartFormDataContent
-                
-                var response = await _client.PostAsync(actionUrl, new ByteArrayContent(body));
+                var client = _httpClientFactory.CreateClient();
+                var response = await client.PostAsync(actionUrl, new ByteArrayContent(body));
                 response.EnsureSuccessStatusCode();
                 var result = await response.Content.ReadAsStringAsync();
                 //result may be 1 or -1
