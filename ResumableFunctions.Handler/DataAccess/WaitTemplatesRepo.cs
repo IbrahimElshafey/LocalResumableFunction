@@ -69,7 +69,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             .MethodWaits
             .Where(x =>
                 x.Status == WaitStatus.Waiting &&
-                x.MethodGroupToWaitId == methodGroupId&&
+                x.MethodGroupToWaitId == methodGroupId &&
                 x.ServiceId == _settings.CurrentServiceId)
             .Select(x => x.TemplateId)
             .Distinct()
@@ -94,6 +94,15 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         var waitTemplate = await _context.WaitTemplates.FindAsync(templateId);
         waitTemplate?.LoadExpressions();
         return waitTemplate;
+    }
+
+    public async Task<WaitTemplate> GetWaitTemplateWithBasicMatch(long methodWaitTemplateId)
+    {
+        return 
+            await _context
+            .WaitTemplates
+            .Select(WaitTemplate.BasicMatchSelector)
+            .FirstAsync(x => x.Id == methodWaitTemplateId);
     }
 
     public void Dispose()

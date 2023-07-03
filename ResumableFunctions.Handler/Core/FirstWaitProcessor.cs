@@ -6,6 +6,7 @@ using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -15,11 +16,12 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private readonly IUnitOfWork _context;
     private readonly IMethodIdsRepo _methodIdentifierRepo;
     private readonly IWaitsRepo _waitsRepository;
+    private readonly IWaitTemplatesRepo _templatesRepo;
     private readonly IServiceProvider _serviceProvider;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IResumableFunctionsSettings _settings;
     private readonly IBackgroundProcess _backgroundJobClient;
-    private readonly IFunctionStateRepo _functionStateRepo;
+    private readonly IServiceRepo _serviceRepo;
 
     public FirstWaitProcessor(
         ILogger<FirstWaitProcessor> logger,
@@ -30,7 +32,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         BackgroundJobExecutor backgroundJobExecutor,
         IResumableFunctionsSettings settings,
         IBackgroundProcess backgroundJobClient,
-        IFunctionStateRepo functionStateRepo)
+        IServiceRepo serviceRepo,
+        IWaitTemplatesRepo templatesRepo)
     {
         _logger = logger;
         _context = context;
@@ -40,15 +43,16 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _backgroundJobExecutor = backgroundJobExecutor;
         _settings = settings;
         _backgroundJobClient = backgroundJobClient;
-        _functionStateRepo = functionStateRepo;
+        _serviceRepo = serviceRepo;
+        _templatesRepo = templatesRepo;
     }
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
     {
-        var rootId = int.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
+        var rootId = long.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
         var resumableFunction =
             rootId != firstMatchedMethodWait.Id ?
-            (await _context.Waits.Include(x => x.RequestedByFunction).FirstAsync(x => x.Id == rootId)).RequestedByFunction.MethodInfo :
+            await _waitsRepository.GetRequestedByMethodInfo(rootId) :
             firstMatchedMethodWait.RequestedByFunction.MethodInfo;
 
         try
@@ -87,10 +91,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             currentMw.Status = WaitStatus.Waiting;
             currentMw.Input = firstMatchedMethodWait.Input;
             currentMw.Output = firstMatchedMethodWait.Output;
-            var waitTemplate = await _context
-                .WaitTemplates
-                .Select(WaitTemplate.BasicMatchSelector)
-                .FirstAsync(x => x.Id == firstMatchedMethodWait.TemplateId);
+            var waitTemplate = await _templatesRepo.GetWaitTemplateWithBasicMatch(firstMatchedMethodWait.TemplateId);
             currentMw.TemplateId = waitTemplate.Id;
             currentMw.Template = waitTemplate;
             currentMw.IsFirst = false;
@@ -102,7 +103,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         catch (Exception ex)
         {
             var error = $"Error when try to clone first wait for function [{resumableFunction.GetFullName()}]";
-            await LogErrorToService(ex, error);
+            await _serviceRepo.AddErrorLog(ex, error);
             throw new Exception(error, ex);
         }
     }
@@ -132,7 +133,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 catch (Exception ex)
                 {
                     if (resumableFunction != null)
-                        await LogErrorToService(ex, ErrorMsg());
+                        await _serviceRepo.AddErrorLog(ex, ErrorMsg());
+
                     await _waitsRepository.RemoveFirstWaitIfExist(functionId);
                     throw;
                 }
@@ -142,18 +144,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         string ErrorMsg() => $"Error when try to register first wait for function [{functionName}:{functionId}]";
     }
 
-    private async Task LogErrorToService(Exception ex, string errorMsg)
-    {
-        _logger.LogError(ex, errorMsg);
-        _context.Logs.Add(new LogRecord
-        {
-            EntityId = _settings.CurrentServiceId,
-            EntityType = nameof(ServiceData),
-            Message = errorMsg + ex,
-            Type = LogType.Error
-        });
-        await _context.SaveChangesAsync();
-    }
 
     public async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
@@ -163,7 +153,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         {
 
             var errorMsg = $"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]";
-            await LogErrorToService(null, errorMsg);
+            await _serviceRepo.AddErrorLog(null, errorMsg);
+            
             throw new NullReferenceException(errorMsg);
         }
 
@@ -174,7 +165,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         {
             var message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
             _logger.LogWarning(message);
-            await LogErrorToService(null, message);
+            await _serviceRepo.AddErrorLog(null, message);
+            
             throw new NullReferenceException(message);
         }
 

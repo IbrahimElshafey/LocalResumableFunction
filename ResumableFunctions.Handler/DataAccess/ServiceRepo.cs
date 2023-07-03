@@ -108,6 +108,19 @@ internal class ServiceRepo : IServiceRepo
         return await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assemblyName);
     }
 
+    public async Task AddErrorLog(Exception ex, string errorMsg)
+    {
+        _logger.LogError(ex, errorMsg);
+        _context.Logs.Add(new LogRecord
+        {
+            EntityId = _settings.CurrentServiceId,
+            EntityType = nameof(ServiceData),
+            Message = errorMsg + ex,
+            Type = LogType.Error
+        });
+        await _context.SaveChangesAsync();
+    }
+
     private async Task<ServiceData> AddNewServiceData(string currentAssemblyName)
     {
         var parentId = _settings.CurrentServiceId;

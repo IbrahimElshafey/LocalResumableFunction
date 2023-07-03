@@ -8,4 +8,6 @@ public interface IServiceRepo
     Task DeleteOldScanData(DateTime dateBeforeScan);
     Task<bool> ShouldScanAssembly(string assemblyPath);
     Task<ServiceData> GetServiceData(string assemblyName);
+
+    Task AddErrorLog(Exception ex, string errorMsg);
 }

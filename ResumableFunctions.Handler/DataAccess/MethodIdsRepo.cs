@@ -145,4 +145,22 @@ internal class MethodIdsRepo : IMethodIdsRepo
         var methodId = await methodIdQry.FirstAsync();
         return (methodId.Id, methodId.MethodGroupId);
     }
+
+    public async Task<WaitMethodIdentifier> GetMethodIdentifierById(long? methodToWaitId)
+    {
+        return 
+            await _context
+            .WaitMethodIdentifiers
+            .FindAsync(methodToWaitId);
+    }
+
+    public async Task<bool> CanPublishFromExternal(string methodUrn)
+    {
+       return await _context
+            .MethodsGroups
+            .Include(x => x.WaitMethodIdentifiers)
+            .Where(x => x.MethodGroupUrn == methodUrn)
+            .SelectMany(x => x.WaitMethodIdentifiers)
+            .AnyAsync(x => x.CanPublishFromExternal);
+    }
 }

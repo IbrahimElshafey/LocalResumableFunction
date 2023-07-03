@@ -10,5 +10,6 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
         Task<WaitTemplate> CheckTemplateExist(byte[] hash, long funcId, long groupId);
         Task<List<WaitTemplate>> GetWaitTemplates(long methodGroupId);
         Task<WaitTemplate> GetById(long templateId);
+        Task<WaitTemplate> GetWaitTemplateWithBasicMatch(long methodWaitTemplateId);
     }
 }

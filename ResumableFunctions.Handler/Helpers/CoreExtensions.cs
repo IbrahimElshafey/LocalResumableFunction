@@ -24,12 +24,7 @@ public static class CoreExtensions
 
 
         // ReSharper disable once RedundantAssignment
-        services.AddDbContext<WaitsDataContext>(optionsBuilder => optionsBuilder = settings.WaitsDbConfig);
-        services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
-        services.AddScoped<IWaitsRepo, WaitsRepo>();
-        services.AddScoped<IServiceRepo, ServiceRepo>();
-        services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
-        services.AddScoped<IScanStateRepo, ScanStateRepo>();
+        ResolveDbInterfaces(services, settings);
 
         services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
         services.AddScoped<IRecycleBinService, RecycleBinService>();
@@ -59,6 +54,19 @@ public static class CoreExtensions
         }
         else
             services.AddSingleton<IBackgroundProcess, NoBackgroundProcess>();
+    }
+
+    private static void ResolveDbInterfaces(IServiceCollection services, IResumableFunctionsSettings settings)
+    {
+        services.AddDbContext<WaitsDataContext>(optionsBuilder => optionsBuilder = settings.WaitsDbConfig);
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
+        services.AddScoped<IWaitsRepo, WaitsRepo>();
+        services.AddScoped<IServiceRepo, ServiceRepo>();
+        services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
+        services.AddScoped<IScanStateRepo, ScanStateRepo>();
+        services.AddScoped<IPushedCallsRepo, PushedCallsRepo>();
+        services.AddScoped<IWaitsForCallsRepo, WaitsForCallsRepo>();
     }
 
     public static void UseResumableFunctions(this IHost app)

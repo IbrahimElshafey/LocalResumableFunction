@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection;
 using FastExpressionCompiler;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -38,6 +39,24 @@ internal partial class WaitsRepo
         }
 
         return false;
+    }
+
+    public async Task<MethodWait> GetMethodWait(long waitId, params Expression<Func<MethodWait, object>>[] includes)
+    {
+        var query = _context.MethodWaits.AsQueryable();
+        foreach (var include in includes)
+        {
+            query = query.Include(include);
+        }
+        return await query
+            .Where(x => x.Status == WaitStatus.Waiting)
+            .FirstOrDefaultAsync(x => x.Id == waitId);
+    }
+
+    public async Task<MethodInfo> GetRequestedByMethodInfo(long rootId)
+    {
+        return (await _context.Waits.Include(x => x.RequestedByFunction).FirstAsync(x => x.Id == rootId))
+            .RequestedByFunction.MethodInfo;
     }
 
     private async Task SaveMethodWait(MethodWait methodWait)
@@ -128,25 +147,6 @@ internal partial class WaitsRepo
         }
         else
             await SaveWait(functionWait.FirstWait);//first wait for sub function
-    }
-
-
-    public Task<MethodWait> GetTimeWait(string timeWaitId)
-    {
-        var parts = timeWaitId.Split('#');
-        var mandatoryPart = timeWaitId;
-        var groupId = int.Parse(parts[1]);
-        var functionId = int.Parse(parts[2]);
-        var methodId = int.Parse(parts[3]);
-        return _context
-            .MethodWaits
-            .Where(x =>
-                x.MethodGroupToWaitId == groupId &&
-                x.MandatoryPart == mandatoryPart &&
-                x.RequestedByFunctionId == functionId &&
-                x.MethodToWaitId == methodId
-            )
-            .FirstAsync();
     }
 
     private async Task HandleTimeWaitRequest(TimeWait timeWait)
