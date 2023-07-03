@@ -8,7 +8,7 @@ namespace ResumableFunctions.Handler.DataAccess;
 
 internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 {
-    private readonly FunctionDataContext _context;
+    private readonly WaitsDataContext _context;
     private readonly IServiceScope _scope;
     private readonly IResumableFunctionsSettings _settings;
 
@@ -16,7 +16,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
     {
         _settings = settings;
         _scope = provider.CreateScope();
-        _context = _scope.ServiceProvider.GetService<FunctionDataContext>();
+        _context = _scope.ServiceProvider.GetService<WaitsDataContext>();
     }
 
     public async Task<WaitTemplate> AddNewTemplate(WaitExpressionsHash hashResult,

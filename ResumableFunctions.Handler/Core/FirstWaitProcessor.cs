@@ -12,23 +12,25 @@ namespace ResumableFunctions.Handler.Core;
 internal class FirstWaitProcessor : IFirstWaitProcessor
 {
     private readonly ILogger<FirstWaitProcessor> _logger;
-    private readonly FunctionDataContext _context;
+    private readonly IUnitOfWork _context;
     private readonly IMethodIdsRepo _methodIdentifierRepo;
     private readonly IWaitsRepo _waitsRepository;
     private readonly IServiceProvider _serviceProvider;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IResumableFunctionsSettings _settings;
     private readonly IBackgroundProcess _backgroundJobClient;
+    private readonly IFunctionStateRepo _functionStateRepo;
 
     public FirstWaitProcessor(
         ILogger<FirstWaitProcessor> logger,
-        FunctionDataContext context,
+        IUnitOfWork context,
         IServiceProvider serviceProvider,
         IMethodIdsRepo methodIdentifierRepo,
         IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor,
         IResumableFunctionsSettings settings,
-        IBackgroundProcess backgroundJobClient)
+        IBackgroundProcess backgroundJobClient,
+        IFunctionStateRepo functionStateRepo)
     {
         _logger = logger;
         _context = context;
@@ -38,6 +40,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _backgroundJobExecutor = backgroundJobExecutor;
         _settings = settings;
         _backgroundJobClient = backgroundJobClient;
+        _functionStateRepo = functionStateRepo;
     }
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
@@ -204,34 +207,34 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _logger.LogInformation(message);
     }
 
-    public async Task DeactivateFirstWait(int functionId)
-    {
-        await _backgroundJobExecutor.Execute(
-            $"DeactivateFirstWait_{functionId}",
-            async () =>
-            {
-                var firstWaits = await _context
-                        .Waits
-                        .Include(x => x.FunctionState)
-                        .Where(
-                            wait =>
-                            wait.RequestedByFunctionId == functionId &&
-                            wait.IsFirst &&
-                            wait.Status == WaitStatus.Waiting)
-                        .ToListAsync();
+    //public async Task DeactivateFirstWait(int functionId)
+    //{
+    //    await _backgroundJobExecutor.Execute(
+    //        $"DeactivateFirstWait_{functionId}",
+    //        async () =>
+    //        {
+    //            var firstWaits = await _context
+    //                    .Waits
+    //                    .Include(x => x.FunctionState)
+    //                    .Where(
+    //                        wait =>
+    //                        wait.RequestedByFunctionId == functionId &&
+    //                        wait.IsFirst &&
+    //                        wait.Status == WaitStatus.Waiting)
+    //                    .ToListAsync();
 
-                foreach (var firstWait in firstWaits)
-                {
-                    if (firstWait != default)
-                    {
-                        firstWait.IsFirst = false;
-                        firstWait.Cancel();
-                        _context.Waits.Remove(firstWait);
-                        _context.FunctionStates.Remove(firstWait.FunctionState);
-                    }
-                    await _context.SaveChangesAsync();
-                }
-            },
-            $"Error when try to deactivate first wait for function `{functionId}`.", true);
-    }
+    //            foreach (var firstWait in firstWaits)
+    //            {
+    //                if (firstWait != default)
+    //                {
+    //                    firstWait.IsFirst = false;
+    //                    firstWait.Cancel();
+    //                    _context.Waits.Remove(firstWait);
+    //                    _context.FunctionStates.Remove(firstWait.FunctionState);
+    //                }
+    //                await _context.SaveChangesAsync();
+    //            }
+    //        },
+    //        $"Error when try to deactivate first wait for function `{functionId}`.", true);
+    //}
 }

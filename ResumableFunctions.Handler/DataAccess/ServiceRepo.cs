@@ -8,14 +8,14 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-public class ServiceRepo : IServiceRepo
+internal class ServiceRepo : IServiceRepo
 {
-    private readonly FunctionDataContext _context;
+    private readonly WaitsDataContext _context;
     private readonly IResumableFunctionsSettings _settings;
     private readonly ILogger<ServiceRepo> _logger;
 
     public ServiceRepo(
-        FunctionDataContext context,
+        WaitsDataContext context,
         IResumableFunctionsSettings settings,
         ILogger<ServiceRepo> logger)
     {

@@ -13,7 +13,7 @@ namespace ResumableFunctions.Handler.Core;
 
 internal class Scanner
 {
-    private readonly FunctionDataContext _context;
+    private readonly IUnitOfWork _context;
     private readonly IResumableFunctionsSettings _settings;
     private readonly ILogger<Scanner> _logger;
     private readonly IMethodIdsRepo _methodIdentifierRepo;
@@ -29,7 +29,7 @@ internal class Scanner
         IMethodIdsRepo methodIdentifierRepo,
         IFirstWaitProcessor firstWaitProcessor,
         IResumableFunctionsSettings settings,
-        FunctionDataContext context,
+        IUnitOfWork context,
         IBackgroundProcess backgroundJobClient,
         IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor,

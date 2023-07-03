@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 using System.Threading;
 
@@ -9,13 +10,13 @@ namespace ResumableFunctions.Handler.Core
 {
     internal class CallPusher : ICallPusher
     {
-        private readonly FunctionDataContext _context;
+        private readonly IUnitOfWork _context;
         private readonly IBackgroundProcess _backgroundJobClient;
         private readonly ICallProcessor _processor;
         private readonly ILogger<CallPusher> _logger;
 
         public CallPusher(
-            FunctionDataContext context,
+            IUnitOfWork context,
             IBackgroundProcess backgroundJobClient,
             ICallProcessor processor, 
             ILogger<CallPusher> logger)

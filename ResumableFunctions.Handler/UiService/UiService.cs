@@ -11,9 +11,9 @@ namespace ResumableFunctions.Handler.UiService
 {
     internal class UiService : IUiService
     {
-        private readonly FunctionDataContext _context;
+        private readonly WaitsDataContext _context;
 
-        public UiService(FunctionDataContext context)
+        public UiService(WaitsDataContext context)
         {
             _context = context;
         }
