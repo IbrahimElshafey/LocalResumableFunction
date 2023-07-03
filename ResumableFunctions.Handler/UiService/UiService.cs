@@ -98,7 +98,7 @@ namespace ResumableFunctions.Handler.UiService
             return result;
         }
 
-        public async Task<ServiceStatistics> GetServiceStatistics(int serviceId)
+        public async Task<ServiceStatistics> GetServiceStatistics(long serviceId)
         {
             //name,error counts,functions count,methods count
             var service = await _context.ServicesData.FindAsync(serviceId);
@@ -125,7 +125,7 @@ namespace ResumableFunctions.Handler.UiService
                 counts?.MethodsCount ?? 0);
         }
 
-        public async Task<ServiceData> GetServiceInfo(int serviceId)
+        public async Task<ServiceData> GetServiceInfo(long serviceId)
         {
             var service = await _context.ServicesData.FindAsync(serviceId);
             var dlls = await _context
@@ -138,7 +138,7 @@ namespace ResumableFunctions.Handler.UiService
             return service;
         }
 
-        public async Task<List<LogRecord>> GetServiceLogs(int serviceId)
+        public async Task<List<LogRecord>> GetServiceLogs(long serviceId)
         {
             return await _context
                 .Logs
@@ -158,7 +158,7 @@ namespace ResumableFunctions.Handler.UiService
                 .ToListAsync();
         }
 
-        public async Task<List<FunctionInfo>> GetFunctionsInfo(int? serviceId)
+        public async Task<List<FunctionInfo>> GetFunctionsInfo(long? serviceId)
         {
             //var countsQuery =
             //    await (from functionState in _context.FunctionStates.Include(x => x.ResumableFunctionIdentifier)
@@ -201,7 +201,7 @@ namespace ResumableFunctions.Handler.UiService
               .ToListAsync();
         }
 
-        public async Task<List<MethodGroupInfo>> GetMethodsInfo(int? serviceId)
+        public async Task<List<MethodGroupInfo>> GetMethodsInfo(long? serviceId)
         {
             // int Id, string URN, int MethodsCount,int ActiveWaits,int CompletedWaits,int CanceledWaits
             var waitsQuery = _context
@@ -244,7 +244,7 @@ namespace ResumableFunctions.Handler.UiService
                 .ToList();
         }
 
-        public async Task<List<PushedCallInfo>> GetPushedCalls(int page = 0)
+        public async Task<List<PushedCallInfo>> GetPushedCalls(long page)
         {
             var counts =
                 _context
@@ -275,7 +275,7 @@ namespace ResumableFunctions.Handler.UiService
             return result;
         }
 
-        public async Task<List<FunctionInstanceInfo>> GetFunctionInstances(int functionId)
+        public async Task<List<FunctionInstanceInfo>> GetFunctionInstances(long functionId)
         {
             var query =
                  _context.FunctionStates
@@ -292,7 +292,7 @@ namespace ResumableFunctions.Handler.UiService
             return result;
         }
 
-        public async Task<PushedCallDetails> GetPushedCallDetails(int pushedCallId)
+        public async Task<PushedCallDetails> GetPushedCallDetails(long pushedCallId)
         {
             var pushedCall = await _context.PushedCalls.FindAsync(pushedCallId);
             pushedCall.LoadUnmappedProps();
@@ -347,7 +347,7 @@ namespace ResumableFunctions.Handler.UiService
             return new PushedCallDetails(inputOutput, methodData, waitsForCall);
         }
 
-        public async Task<FunctionInstanceDetails> GetInstanceDetails(int instanceId)
+        public async Task<FunctionInstanceDetails> GetInstanceDetails(long instanceId)
         {
             var instance =
                 await _context
@@ -382,7 +382,7 @@ namespace ResumableFunctions.Handler.UiService
                 );
         }
 
-        public async Task<List<MethodInGroupInfo>> GetMethodsInGroup(int groupId)
+        public async Task<List<MethodInGroupInfo>> GetMethodsInGroup(long groupId)
         {
             var groupUrn =
                 await _context
@@ -404,7 +404,7 @@ namespace ResumableFunctions.Handler.UiService
                 .ToList();
         }
 
-        public async Task<List<MethodWaitDetails>> GetWaitsForGroup(int groupId)
+        public async Task<List<MethodWaitDetails>> GetWaitsForGroup(long groupId)
         {
             var groupName =
                 await _context
