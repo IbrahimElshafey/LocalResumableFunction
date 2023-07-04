@@ -1,4 +1,5 @@
 ﻿# Todo
+* Function to tests URNs
 * Round Check method
 	* Expected Errors
 		* And in Log
