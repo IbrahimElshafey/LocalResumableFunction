@@ -12,6 +12,17 @@ namespace ResumableFunctions.Handler.Testing
         private readonly string _testName;
         //(localdb)\\MSSQLLocalDB
         private const string Server = ".\\SQLEXPRESS";
+        private TimeSpan cleanDatabaseEvery;
+
+        public TimeSpan GetCleanDatabaseEvery()
+        {
+            return cleanDatabaseEvery;
+        }
+
+        public void SetCleanDatabaseEvery(TimeSpan value)
+        {
+            cleanDatabaseEvery = value;
+        }
 
         public TestSettings(string testName)
         {
@@ -33,7 +44,5 @@ namespace ResumableFunctions.Handler.Testing
 
         public IDistributedLockProvider DistributedLockProvider =>
             new WaitHandleDistributedSynchronizationProvider();
-        //public IDistributedLockProvider DistributedLockProvider =>
-        //    new SqlDistributedSynchronizationProvider("Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=master;Integrated Security=True");
     }
 }
