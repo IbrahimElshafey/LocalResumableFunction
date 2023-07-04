@@ -1,5 +1,6 @@
-﻿# Hot Todo Core functions
-
+﻿# Working On Now
+* Continue work on tests
+* Test Shell Enhancements
 
 * Connect to server exception log
 * If service scan failed make it halted
@@ -7,13 +8,11 @@
 * Function URN name must not duplicate in same class
 
 # Workin on version 1.0.8
-* Continue work on tests
-* Test Shell Enhancements
 * Background Cleaning Job
 * Review Concurrency problems
 * UI V1
 * ResumableFunctions.Publisher
-* More advanced samples
+* Advanced Sample
 * Update Documentation and Record Videos
 
 
