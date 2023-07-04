@@ -1,6 +1,5 @@
 ﻿# Hot Todo Core functions
 * Connect to server exception log
-* Sql server settings (password,username) or connection string
 * Function URN name must not duplicate
 * Method URN name must not duplicate in same class
 

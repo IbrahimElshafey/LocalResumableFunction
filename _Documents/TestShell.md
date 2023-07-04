@@ -1,5 +1,13 @@
 ﻿# Todo
-* RegisterAssemblies(names,functions test)
+* Round Check method
+	* Expected Errors
+		* And in Log
+	* Expected pushed calls
+	* Expected Waits Count
+	* Expected Compeletd Waits Count
+	* Expected Canceled Waits Count
+	* Expected Instances Counts
+* RegisterAssemblies (names, functions test)
 * Get Logs
 * Get instances for pushed call
 * Get matched waits for pushed call
