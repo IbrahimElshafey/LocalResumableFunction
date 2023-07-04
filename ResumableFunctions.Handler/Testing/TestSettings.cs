@@ -12,16 +12,11 @@ namespace ResumableFunctions.Handler.Testing
         private readonly string _testName;
         //(localdb)\\MSSQLLocalDB
         private const string Server = ".\\SQLEXPRESS";
-        private TimeSpan cleanDatabaseEvery;
 
-        public TimeSpan GetCleanDatabaseEvery()
-        {
-            return cleanDatabaseEvery;
-        }
 
-        public void SetCleanDatabaseEvery(TimeSpan value)
+        public IResumableFunctionsSettings CleanDatabaseEvery(TimeSpan time)
         {
-            cleanDatabaseEvery = value;
+            return this;
         }
 
         public TestSettings(string testName)

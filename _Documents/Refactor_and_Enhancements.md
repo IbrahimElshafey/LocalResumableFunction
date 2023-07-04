@@ -25,3 +25,8 @@
 * Use pull mode to get calls from a queue
 * How can I benefit from Azure Service Fabric
 	* https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-overview
+* ID must be long for
+	* Pushed Call
+	* Wait
+	* WaitForCalls
+	* Logs

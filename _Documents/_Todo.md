@@ -1,24 +1,19 @@
 ﻿# Hot Todo Core functions
+
+
 * Connect to server exception log
-* ID must be long for
-	* Pushed Call
-	* Wait
-	* WaitForCalls
-	* Logs
-
-
-
 * If service scan failed make it halted
 * Method URN name must not duplicate in same class
+* Function URN name must not duplicate in same class
 
 # Workin on version 1.0.8
-* Any Hot Todos
-* UI V1
+* Continue work on tests
 * Test Shell Enhancements
 * Background Cleaning Job
-* ResumableFunctions.Publisher
-* Continue work on tests
 * Review Concurrency problems
+* UI V1
+* ResumableFunctions.Publisher
+* More advanced samples
 * Update Documentation and Record Videos
 
 

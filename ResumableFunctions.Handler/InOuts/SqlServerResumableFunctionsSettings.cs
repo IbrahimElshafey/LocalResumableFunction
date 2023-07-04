@@ -113,5 +113,9 @@ namespace ResumableFunctions.Handler.InOuts
             }
         }
 
+        public IResumableFunctionsSettings CleanDatabaseEvery(TimeSpan time)
+        {
+            return this;
+        }
     }
 }
