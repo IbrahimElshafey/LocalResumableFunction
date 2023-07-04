@@ -413,7 +413,7 @@ namespace ResumableFunctions.Handler.UiService
                     .Select(x => x.MethodGroupUrn)
                     .FirstOrDefaultAsync();
             var query =
-                from methodWait in _context.MethodWaits.Include(x=>x.RequestedByFunction)
+                from methodWait in _context.MethodWaits.Include(x => x.RequestedByFunction)
                 from template in _context.WaitTemplates
                 where methodWait.TemplateId == template.Id && methodWait.MethodGroupToWaitId == groupId
                 select new
@@ -473,6 +473,14 @@ namespace ResumableFunctions.Handler.UiService
                 if (wait is MethodWait mw && templates.ContainsKey(mw.TemplateId))
                     mw.Template = templates[mw.TemplateId];
             }
+        }
+
+        public async Task<List<ServiceData>> GetServices()
+        {
+            return
+                await _context.ServicesData
+                .Where(x => x.ParentId == -1)
+                .ToListAsync();
         }
     }
 }

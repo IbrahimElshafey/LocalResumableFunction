@@ -28,5 +28,29 @@ namespace ResumableFunctions.Handler.Helpers
         public const string ReplayNoWaitFound = "ReplayNoWaitFound";
         public const string SetDataEvaluationError = "SetDataEvaluationError";
         public const string MethodNotInCode = "MethodNotInCode";
+
+        public static List<string> ErrorCodes = new List<string>
+        {
+            MethodMustNotBeGeneric      ,
+            MethodMustReturnValue       ,
+            AsyncMethodMustBeTask       ,
+            MethodMustBeInstance        ,
+            MethodMustHaveOneInput      ,
+            DllExistInAnotherService    ,
+            DllNotReferenceRequiredDll  ,
+            CantRegisterFunction        ,
+            FunctionMustBeAsync         ,
+            FunctionNotMatchSignature   ,
+            FileNotExist                ,
+            MatchEvaluationError        ,
+            ConcurrencyException        ,
+            ProceedToNextWaitParentNull ,
+            ProceedToNextWaitError      ,
+            ReplayWaitMustBeMethod      ,
+            ReplayFirstError            ,
+            ReplayNoWaitFound           ,
+            SetDataEvaluationError      ,
+            MethodNotInCode             ,
+        };
     }
 }

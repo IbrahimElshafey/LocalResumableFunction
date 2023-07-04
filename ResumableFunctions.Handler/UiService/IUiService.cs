@@ -5,7 +5,8 @@ namespace ResumableFunctions.Handler.UiService
 {
     public interface IUiService
     {
-        Task<MainStatistics> GetMainStatistics();
+        //Task<MainStatistics> GetMainStatistics();
+        Task<List<ServiceData>> GetServices();
         Task<ServiceData> GetServiceInfo(long serviceId);
         Task<List<LogRecord>> GetServiceLogs(long serviceId);
         Task<List<LogRecord>> GetLogs(int page = 0);

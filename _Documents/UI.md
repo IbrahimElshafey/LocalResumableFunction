@@ -1,4 +1,5 @@
 ﻿# UI project
+* Tables problem on small screens
 * Services View
 	* Add Other Errors View
 	* Add Scan Overview View

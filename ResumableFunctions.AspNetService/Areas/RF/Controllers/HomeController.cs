@@ -17,10 +17,10 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
             _uiService = uiService;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             var model = new HomePageModel();
-            model.SetMenu(await _uiService.GetMainStatistics());
+            model.SetMenu();
             return View(model);
         }
 
