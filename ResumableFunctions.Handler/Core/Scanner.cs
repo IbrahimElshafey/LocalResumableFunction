@@ -55,7 +55,7 @@ internal class Scanner
             {
                 await RegisterMethods(GetAssembliesToScan());
 
-                await RegisterMethods(typeof(LocalRegisteredMethods), null);
+                await RegisterMethodsInType(typeof(LocalRegisteredMethods), null);
 
                 await _context.SaveChangesAsync();
             },
@@ -133,7 +133,7 @@ internal class Scanner
 
                 foreach (var type in assembly.GetTypes())
                 {
-                    await RegisterMethods(type, serviceData);
+                    await RegisterMethodsInType(type, serviceData);
                     //await RegisterExternalMethods(type);
                     if (type.IsSubclassOf(typeof(ResumableFunction)))
                         resumableFunctionClasses.Add(type);
@@ -156,7 +156,7 @@ internal class Scanner
         }
     }
 
-    internal async Task RegisterMethods(Type type, ServiceData serviceData)
+    internal async Task RegisterMethodsInType(Type type, ServiceData serviceData)
     {
         try
         {

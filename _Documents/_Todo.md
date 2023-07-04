@@ -1,11 +1,11 @@
 ﻿# Hot Todo Core functions
 * Connect to server exception log
-* Function URN name must not duplicate
-* Method URN name must not duplicate in same class
+
+
 
 
 * If service scan failed make it halted
-
+* Method URN name must not duplicate in same class
 
 # Workin on version 1.0.8
 * Any Hot Todos
@@ -14,6 +14,7 @@
 * Background Cleaning Job
 * ResumableFunctions.Publisher
 * Continue work on tests
+* Review Concurrency problems
 * Update Documentation and Record Videos
 
 

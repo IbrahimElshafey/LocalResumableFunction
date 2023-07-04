@@ -10,10 +10,9 @@ namespace ResumableFunctions.Handler.InOuts
 {
     public class SqlServerResumableFunctionsSettings : IResumableFunctionsSettings
     {
-        private const string LocalDbServer = "(localdb)\\MSSQLLocalDB;";
         public IGlobalConfiguration HangfireConfig { get; private set; }
         public DbContextOptionsBuilder WaitsDbConfig { get; private set; }
-        public SqlConnectionStringBuilder ConnectionBuilder { get; }
+        private readonly SqlConnectionStringBuilder _connectionBuilder;
 
         public string CurrentServiceUrl { get; private set; }
         public string[] DllsToScan { get; private set; }
@@ -21,17 +20,20 @@ namespace ResumableFunctions.Handler.InOuts
 
 
         //;Connect Timeout=30;Encrypt=False;Trust Server Certificate=False;Application Intent=ReadWrite;Multi Subnet Failover=False
-        public SqlServerResumableFunctionsSettings(SqlConnectionStringBuilder connectionBuilder = null, string waitsDbName = null, string hangfireDbName = null)
+        public SqlServerResumableFunctionsSettings(
+            SqlConnectionStringBuilder connectionBuilder = null,
+            string waitsDbName = null,
+            string hangfireDbName = null)
         {
 #if DEBUG
             ForceRescan = true;
 #endif
             if (connectionBuilder != null)
-                ConnectionBuilder = connectionBuilder;
+                _connectionBuilder = connectionBuilder;
             else
             {
-                ConnectionBuilder = new SqlConnectionStringBuilder("Server=(localdb)\\MSSQLLocalDB");
-                ConnectionBuilder["Trusted_Connection"] = "yes";
+                _connectionBuilder = new SqlConnectionStringBuilder("Server=(localdb)\\MSSQLLocalDB");
+                _connectionBuilder["Trusted_Connection"] = "yes";
             }
 
             SetWaitsDbConfig(waitsDbName);
@@ -41,8 +43,8 @@ namespace ResumableFunctions.Handler.InOuts
         private void SetWaitsDbConfig(string waitsDbName)
         {
             waitsDbName ??= "ResumableFunctionsData";
-            ConnectionBuilder["Database"] = waitsDbName;
-            WaitsDbConfig = new DbContextOptionsBuilder().UseSqlServer(ConnectionBuilder.ConnectionString);
+            _connectionBuilder["Database"] = waitsDbName;
+            WaitsDbConfig = new DbContextOptionsBuilder().UseSqlServer(_connectionBuilder.ConnectionString);
         }
 
         private void SetHangfireConfig(string dbName)
@@ -51,7 +53,7 @@ namespace ResumableFunctions.Handler.InOuts
             
             CreateEmptyHangfireDb(hangfireDbName);
             
-            ConnectionBuilder["Database"] = hangfireDbName;
+            _connectionBuilder["Database"] = hangfireDbName;
            
             HangfireConfig = GlobalConfiguration
                 .Configuration
@@ -59,7 +61,7 @@ namespace ResumableFunctions.Handler.InOuts
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
                 .UseSqlServerStorage(
-                    ConnectionBuilder.ConnectionString,
+                    _connectionBuilder.ConnectionString,
                     new SqlServerStorageOptions
                     {
                         CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
@@ -90,15 +92,15 @@ namespace ResumableFunctions.Handler.InOuts
         {
             get
             {
-                ConnectionBuilder.InitialCatalog = "master";
-                return new SqlDistributedSynchronizationProvider(ConnectionBuilder.ConnectionString);
+                _connectionBuilder.InitialCatalog = "master";
+                return new SqlDistributedSynchronizationProvider(_connectionBuilder.ConnectionString);
             }
         }
 
         private void CreateEmptyHangfireDb(string hangfireDbName)
         {
-            ConnectionBuilder["Database"] = hangfireDbName;
-            var dbConfig = new DbContextOptionsBuilder().UseSqlServer(ConnectionBuilder.ConnectionString);
+            _connectionBuilder["Database"] = hangfireDbName;
+            var dbConfig = new DbContextOptionsBuilder().UseSqlServer(_connectionBuilder.ConnectionString);
             var context = new DbContext(dbConfig.Options);
             try
             {
