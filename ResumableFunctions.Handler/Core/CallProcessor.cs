@@ -3,6 +3,7 @@ using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using System.ComponentModel;
 
 namespace ResumableFunctions.Handler.Core;
 internal class CallProcessor : ICallProcessor
@@ -36,6 +37,7 @@ internal class CallProcessor : ICallProcessor
         _scanStateRepo = scanStateRepo;
     }
 
+    [DisplayName("Initial Process Pushed Call `{0}` for MethodUrn `{1}`")]
     public async Task InitialProcessPushedCall(int pushedCallId, string methodUrn)
     {
         if (await _scanStateRepo.IsScanFinished())
@@ -63,6 +65,7 @@ internal class CallProcessor : ICallProcessor
             _backgroundJobClient.Schedule(() => InitialProcessPushedCall(pushedCallId, methodUrn), TimeSpan.FromSeconds(3));
     }
 
+    [DisplayName("Current Service Process Pushed Call `{0}` for MethodUrn: `{1}`")]
     public async Task ServiceProcessPushedCall(int pushedCallId, string methodUrn)
     {
         await _backgroundJobExecutor.Execute(

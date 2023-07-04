@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -47,6 +48,7 @@ internal class Scanner
         _serviceRepo = serviceRepo;
     }
 
+    [DisplayName("Start Scanning Current Service")]
     public async Task Start()
     {
         await _backgroundJobExecutor.Execute(
@@ -107,9 +109,9 @@ internal class Scanner
                 _backgroundJobClient.Enqueue(
                     () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
                 break;
+
             case { IsEntry: true, IsActive: false }:
-                _backgroundJobClient.Enqueue(
-                    () => _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id));
+                await _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id);
                 break;
         }
     }

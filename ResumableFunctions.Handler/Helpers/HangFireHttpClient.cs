@@ -27,6 +27,7 @@ namespace ResumableFunctions.Handler.Helpers
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DisplayName("HTTP GET `{0}`")]
         public async Task HttpGet(string url)
         {
             var client = _httpClientFactory.CreateClient();

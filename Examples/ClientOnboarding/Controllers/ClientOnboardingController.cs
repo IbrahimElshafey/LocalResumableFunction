@@ -22,7 +22,7 @@ namespace ClientOnboarding.Controllers
         {
             _logger = logger;
             this.service = service;
-            
+
         }
 
         [HttpPost(nameof(ClientFillsForm))]
@@ -49,7 +49,7 @@ namespace ClientOnboarding.Controllers
         [ResumableFunctionEntryPoint("TestTimeWait")]
         public async IAsyncEnumerable<Wait> TestTimeWaitAtStart()
         {
-            yield return Wait(TimeSpan.FromDays(1));
+            yield return Wait(TimeSpan.FromDays(1), "one day");
             Console.WriteLine("Time wait at start matched.");
         }
     }

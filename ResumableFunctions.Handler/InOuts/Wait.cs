@@ -21,6 +21,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     [NotMapped]
     public WaitExtraData ExtraData { get; internal set; }
     public byte[] ExtraDataValue { get; internal set; }
+
     public int? ServiceId { get; set; }
 
     public WaitType WaitType { get; internal set; }

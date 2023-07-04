@@ -211,7 +211,6 @@ internal partial class WaitsRepo : IWaitsRepo
         {
             _logger.LogError(ex, $"Error when RemoveFirstWaitIfExist for function `{methodIdentifierId}`");
         }
-
     }
 
 

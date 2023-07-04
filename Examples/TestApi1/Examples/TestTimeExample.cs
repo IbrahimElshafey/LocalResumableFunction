@@ -20,7 +20,7 @@ public class TestTimeExample : ProjectApprovalExample
                 new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .SetData((input, output) => ManagerOneApproval == output),
-                Wait(TimeSpan.FromDays(2))
+                Wait(TimeSpan.FromDays(2), "Two Days")
             .SetData(x => TimerMatched == true)
         ).First();
 

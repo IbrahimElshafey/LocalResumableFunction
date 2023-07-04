@@ -70,7 +70,7 @@ internal partial class WaitsRepo
         methodWait.MethodGroupToWaitId = methodId.GroupId;
 
         await AddWait(methodWait);
-        
+
         async Task SetWaitTemplate()
         {
             WaitTemplate waitTemplate = null;
@@ -154,11 +154,16 @@ internal partial class WaitsRepo
         var timeWaitMethod = timeWait.TimeWaitMethod;
 
         var methodId = await _methodIdsRepo.GetId(timeWaitMethod);
-
+        
+        var timeWaitInput = new TimeWaitInput
+        {
+            TimeMatchId = timeWait.UniqueMatchId,
+            Description = $"`{timeWait.Name}` in function `{timeWait.RequestedByFunction.RF_MethodUrn}:{timeWait.FunctionState.Id}`"
+        };
         if (!timeWait.IgnoreJobCreation)
             timeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
-                () => new LocalRegisteredMethods().TimeWait(
-                        new TimeWaitInput { TimeMatchId = timeWait.UniqueMatchId }), timeWait.TimeToWait);
+                () => new LocalRegisteredMethods().TimeWait(timeWaitInput), timeWait.TimeToWait);
+
         timeWaitMethod.MethodToWaitId = methodId.MethodId;
         timeWaitMethod.MethodGroupToWaitId = methodId.GroupId;
 

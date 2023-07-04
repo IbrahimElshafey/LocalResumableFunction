@@ -1,6 +1,10 @@
 ﻿# Hot Todo Core functions
 * Connect to server exception log
-* Logs for first wait goes to first instance
+* ID must be long for
+	* Pushed Call
+	* Wait
+	* WaitForCalls
+	* Logs
 
 
 

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -66,6 +67,7 @@ namespace ResumableFunctions.Handler.Core
             _serviceRepo = serviceRepo;
         }
 
+        [DisplayName("Process Function Expected Matches where `FunctionId:{0}` and `PushedCallId:{1}`")]
         public async Task ProcessFunctionExpectedMatches(int functionId, int pushedCallId)
         {
             await _backgroundJobExecutor.Execute(

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.ComponentModel;
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
@@ -67,7 +68,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                         () => new LocalRegisteredMethods().TimeWait(
                         new TimeWaitInput
                         {
-                            TimeMatchId = firstMatchedMethodWait.MandatoryPart
+                            TimeMatchId = firstMatchedMethodWait.MandatoryPart,
+                            Description = $"`{timeWait.Name}` in function `{firstMatchedMethodWait.RequestedByFunction.RF_MethodUrn}:{firstMatchedMethodWait.FunctionState.Id}`"
                         }), timeWait.TimeToWait);
                     timeWait.TimeWaitMethod.MandatoryPart = firstMatchedMethodWait.MandatoryPart;
                     timeWait.IgnoreJobCreation = true;
@@ -103,6 +105,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
     }
 
+    [DisplayName("Register First Wait for Function `{0}`")]
     public async Task RegisterFirstWait(int functionId)
     {
         MethodInfo resumableFunction = null;
@@ -154,7 +157,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
             var errorMsg = $"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]";
             await _serviceRepo.AddErrorLog(null, errorMsg);
-            
+
             throw new NullReferenceException(errorMsg);
         }
 
@@ -166,13 +169,13 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             var message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
             _logger.LogWarning(message);
             await _serviceRepo.AddErrorLog(null, message);
-            
+
             throw new NullReferenceException(message);
         }
 
         await functionRunner.MoveNextAsync();
         var firstWait = functionRunner.Current;
-        
+
         if (firstWait == null)
         {
             await _serviceRepo.AddErrorLog(null, $"Can't get first wait in function `{resumableFunction.GetFullName()}`.");
