@@ -21,9 +21,9 @@ namespace ResumableFunctions.Handler.Helpers
             }
             catch (Exception)
             {
-                _backgroundJobClient.Enqueue(() => HttpGet(url));
+                _backgroundJobClient.Schedule(() => HttpGet(url), TimeSpan.FromSeconds(3));
             }
-            
+
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]

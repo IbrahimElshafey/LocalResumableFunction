@@ -1,14 +1,9 @@
 ﻿# UI project
 * Services View
-	* Add Errors Overview View
+	* Add Other Errors View
 	* Add Scan Overview View
-	* Wait Status InError
+	* Wait Status InError not shown in views
 * Filters and search in all views
-
-
-
-* Waits tree
-	* Extra Data
 	
 
 
