@@ -1,7 +1,9 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using System.Time;
 using FastExpressionCompiler;
 using Hangfire;
+using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,8 +25,8 @@ namespace ResumableFunctions.Handler.Testing
         private readonly Type[] _types;
         private readonly TestSettings _settings;
         private readonly string _testName;
-        //(localdb)\\MSSQLLocalDB
-        private const string Server= ".\\SQLEXPRESS";
+        private IDistributedSynchronizationHandle _lock;
+        private const string Server= "(localdb)\\MSSQLLocalDB";
         public TestShell(string testName, params Type[] types)
         {
             _testName = testName;
@@ -57,6 +59,8 @@ namespace ResumableFunctions.Handler.Testing
             await DeleteDb(_testName);
             _builder.Services.AddResumableFunctionsCore(_settings);
             CurrentApp = _builder.Build();
+            var lockProvider = CurrentApp.Services.GetService<IDistributedLockProvider>();
+            _lock = await lockProvider.AcquireLockAsync("Test827556");
             GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(CurrentApp.Services));
 
             using var scope = CurrentApp.Services.CreateScope();
@@ -176,6 +180,7 @@ namespace ResumableFunctions.Handler.Testing
 
         public void Dispose()
         {
+            _lock.Dispose();
             Context?.Dispose();
             CurrentApp?.Dispose();
         }

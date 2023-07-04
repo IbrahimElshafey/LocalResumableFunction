@@ -10,8 +10,7 @@ namespace ResumableFunctions.Handler.Testing
     {
 
         private readonly string _testName;
-        //(localdb)\\MSSQLLocalDB
-        private const string Server = ".\\SQLEXPRESS";
+        private const string Server = "(localdb)\\MSSQLLocalDB";
 
 
         public IResumableFunctionsSettings CleanDatabaseEvery(TimeSpan time)
