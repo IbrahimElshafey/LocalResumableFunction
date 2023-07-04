@@ -2,7 +2,7 @@
 {
     public interface ICallProcessor
     {
-        Task InitialProcessPushedCall(long pushedCallId, string methodUrn);
-        Task ServiceProcessPushedCall(long pushedCallId, string methodUrn);
+        Task InitialProcessPushedCall(int pushedCallId, string methodUrn);
+        Task ServiceProcessPushedCall(int pushedCallId, string methodUrn);
     }
 }

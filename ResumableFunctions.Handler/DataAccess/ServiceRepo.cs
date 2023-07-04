@@ -136,4 +136,15 @@ internal class ServiceRepo : IServiceRepo
         return newServiceData;
     }
 
+    public async Task AddLog(string msg, LogType logType = LogType.Info)
+    {
+        _context.Logs.Add(new LogRecord
+        {
+            EntityId = _settings.CurrentServiceId,
+            EntityType = nameof(ServiceData),
+            Message = msg,
+            Type = logType
+        });
+        await _context.SaveChangesAsync();
+    }
 }

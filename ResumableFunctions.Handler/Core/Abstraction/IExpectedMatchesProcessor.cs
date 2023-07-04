@@ -2,6 +2,6 @@
 {
     public interface IExpectedMatchesProcessor
     {
-        Task ProcessFunctionExpectedMatches(long functionId, long pushedCallId);
+        Task ProcessFunctionExpectedMatches(int functionId, int pushedCallId);
     }
 }

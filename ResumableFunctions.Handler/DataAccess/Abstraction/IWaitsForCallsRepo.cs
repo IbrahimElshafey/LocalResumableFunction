@@ -4,5 +4,5 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction;
 
 public interface IWaitsForCallsRepo
 {
-    Task<List<WaitForCall>> GetWaitsForCall(long pushedCallId, long functionId);
+    Task<List<WaitForCall>> GetWaitsForCall(int pushedCallId, int functionId);
 }

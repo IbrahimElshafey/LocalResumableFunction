@@ -10,4 +10,5 @@ public interface IServiceRepo
     Task<ServiceData> GetServiceData(string assemblyName);
 
     Task AddErrorLog(Exception ex, string errorMsg);
+    Task AddLog(string msg, LogType logType = LogType.Info);
 }

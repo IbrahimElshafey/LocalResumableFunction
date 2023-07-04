@@ -4,7 +4,7 @@ namespace ResumableFunctions.Handler.Core
 {
     internal class RecycleBinService : IRecycleBinService
     {
-        public Task RecycleFunction(long functionInstanceId)
+        public Task RecycleFunction(int functionInstanceId)
         {
             return Task.CompletedTask;
         }

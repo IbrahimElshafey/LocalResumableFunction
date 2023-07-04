@@ -36,7 +36,7 @@ internal class CallProcessor : ICallProcessor
         _scanStateRepo = scanStateRepo;
     }
 
-    public async Task InitialProcessPushedCall(long pushedCallId, string methodUrn)
+    public async Task InitialProcessPushedCall(int pushedCallId, string methodUrn)
     {
         if (await _scanStateRepo.IsScanFinished())
             await _backgroundJobExecutor.Execute(
@@ -63,7 +63,7 @@ internal class CallProcessor : ICallProcessor
             _backgroundJobClient.Schedule(() => InitialProcessPushedCall(pushedCallId, methodUrn), TimeSpan.FromSeconds(3));
     }
 
-    public async Task ServiceProcessPushedCall(long pushedCallId, string methodUrn)
+    public async Task ServiceProcessPushedCall(int pushedCallId, string methodUrn)
     {
         await _backgroundJobExecutor.Execute(
             $"ServiceProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
@@ -79,7 +79,7 @@ internal class CallProcessor : ICallProcessor
     }
 
 
-    private async Task CallOwnerService(ServiceData service, long pushedCallId, string methodUrn)
+    private async Task CallOwnerService(ServiceData service, int pushedCallId, string methodUrn)
     {
         try
         {

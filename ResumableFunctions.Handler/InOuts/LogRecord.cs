@@ -3,15 +3,15 @@ namespace ResumableFunctions.Handler.InOuts;
 
 public class LogRecord : IEntity
 {
-    public long Id { get; internal set; }
-    public long? EntityId { get; internal set; }
+    public int Id { get; internal set; }
+    public int? EntityId { get; internal set; }
     public string EntityType { get; internal set; }
     public LogType Type { get; internal set; } = LogType.Info;
     public string Message { get; internal set; }
     public bool IsCustom { get; internal set; }
     public DateTime Created { get; internal set; }
     public string Code { get; internal set; }
-    public long? ServiceId { get; set; }
+    public int? ServiceId { get; set; }
 
     public override string ToString()
     {

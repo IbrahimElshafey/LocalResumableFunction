@@ -21,9 +21,9 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
     public async Task<WaitTemplate> AddNewTemplate(WaitExpressionsHash hashResult,
         object currentFunctionInstance,
-        long funcId,
-        long groupId,
-        long methodId)
+        int funcId,
+        int groupId,
+        int methodId)
     {
         var waitTemplate = new WaitTemplate
         {
@@ -48,7 +48,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         return waitTemplate;
     }
 
-    public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, long funcId, long groupId)
+    public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
     {
         var result = (await _context
             .WaitTemplates
@@ -63,7 +63,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         return result;
     }
 
-    public async Task<List<WaitTemplate>> GetWaitTemplates(long methodGroupId)
+    public async Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId)
     {
         var templateIds = await _context
             .MethodWaits
@@ -89,14 +89,14 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         return result;
     }
 
-    public async Task<WaitTemplate> GetById(long templateId)
+    public async Task<WaitTemplate> GetById(int templateId)
     {
         var waitTemplate = await _context.WaitTemplates.FindAsync(templateId);
         waitTemplate?.LoadExpressions();
         return waitTemplate;
     }
 
-    public async Task<WaitTemplate> GetWaitTemplateWithBasicMatch(long methodWaitTemplateId)
+    public async Task<WaitTemplate> GetWaitTemplateWithBasicMatch(int methodWaitTemplateId)
     {
         return 
             await _context

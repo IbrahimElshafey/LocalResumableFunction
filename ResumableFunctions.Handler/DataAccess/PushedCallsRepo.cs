@@ -11,7 +11,7 @@ internal class PushedCallsRepo : IPushedCallsRepo
     {
         _context = context;
     }
-    public async Task<PushedCall> GetById(long pushedCallId)
+    public async Task<PushedCall> GetById(int pushedCallId)
     {
         return await _context
             .PushedCalls

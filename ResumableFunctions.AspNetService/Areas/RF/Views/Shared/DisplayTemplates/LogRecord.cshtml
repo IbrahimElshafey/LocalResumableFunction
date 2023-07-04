@@ -8,7 +8,7 @@
     <p>@Html.Raw(Html.Encode(Model.Message).Replace("\n", "<br />"))
     @if (Model.EntityType == nameof(ResumableFunctionState))
     {
-            <a class="function-instance-label" style="display:block;" href="~/RF/FunctionInstances/FunctionInstance?instanceId=@Model.EntityId">In Function Instance #@Model.EntityId</a>
+            <a class="function-instance-label" target="_blank" style="display:block;" href="~/RF/FunctionInstances/FunctionInstance?instanceId=@Model.EntityId">In Function Instance #@Model.EntityId</a>
     }
     </p>
 </div>

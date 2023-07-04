@@ -12,8 +12,8 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
     [IgnoreMember]
     [NotMapped]
     public List<LogRecord> Logs { get; } = new();
-    public long Id { get; internal set; }
-    public long? ServiceId { get; set; }
+    public int Id { get; internal set; }
+    public int? ServiceId { get; set; }
     public string UserDefinedId { get; internal set; }
     public DateTime Created { get; internal set; }
     /// <summary>
@@ -27,7 +27,7 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
 
 
     public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; internal set; }
-    public long ResumableFunctionIdentifierId { get; internal set; }
+    public int ResumableFunctionIdentifierId { get; internal set; }
     public FunctionStatus Status { get; internal set; }
     public DateTime Modified { get; internal set; }
     public string ConcurrencyToken { get; internal set; }

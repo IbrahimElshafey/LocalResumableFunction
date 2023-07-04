@@ -83,7 +83,7 @@ namespace ResumableFunctions.Handler.Testing
         }
 
 
-        public async Task<long> SimulateMethodCall<TClassType>(
+        public async Task<int> SimulateMethodCall<TClassType>(
            Expression<Func<TClassType, object>> methodSelector,
            object output)
         {
@@ -101,7 +101,7 @@ namespace ResumableFunctions.Handler.Testing
             throw new Exception("Can't get input");
         }
 
-        public async Task<long> SimulateMethodCall<TClassType>(Expression<Func<TClassType, object>> methodSelector,
+        public async Task<int> SimulateMethodCall<TClassType>(Expression<Func<TClassType, object>> methodSelector,
             object input,
             object output)
         {

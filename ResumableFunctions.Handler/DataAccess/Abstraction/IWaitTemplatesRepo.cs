@@ -6,10 +6,10 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
     public interface IWaitTemplatesRepo
     {
         Task<WaitTemplate> AddNewTemplate(
-            WaitExpressionsHash hashResult, object currentFunctionInstance, long funcId, long groupId, long methodId);
-        Task<WaitTemplate> CheckTemplateExist(byte[] hash, long funcId, long groupId);
-        Task<List<WaitTemplate>> GetWaitTemplates(long methodGroupId);
-        Task<WaitTemplate> GetById(long templateId);
-        Task<WaitTemplate> GetWaitTemplateWithBasicMatch(long methodWaitTemplateId);
+            WaitExpressionsHash hashResult, object currentFunctionInstance, int funcId, int groupId, int methodId);
+        Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId);
+        Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId);
+        Task<WaitTemplate> GetById(int templateId);
+        Task<WaitTemplate> GetWaitTemplateWithBasicMatch(int methodWaitTemplateId);
     }
 }

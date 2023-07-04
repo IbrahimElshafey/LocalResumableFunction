@@ -1,6 +1,6 @@
 ﻿# Hot Todo Core functions
 * Connect to server exception log
-
+* Logs for first wait goes to first instance
 
 
 

@@ -85,7 +85,7 @@ namespace ResumableFunctions.Handler.InOuts
         }
 
 
-        public long CurrentServiceId { get; set; } = -1;
+        public int CurrentServiceId { get; set; } = -1;
         public string CurrentDbName { get; set; }
 
         public IDistributedLockProvider DistributedLockProvider

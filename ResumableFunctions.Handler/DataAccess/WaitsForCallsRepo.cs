@@ -13,7 +13,7 @@ internal class WaitsForCallsRepo : IWaitsForCallsRepo
     {
         _context = context;
     }
-    public async Task<List<WaitForCall>> GetWaitsForCall(long pushedCallId, long functionId)
+    public async Task<List<WaitForCall>> GetWaitsForCall(int pushedCallId, int functionId)
     {
         return
             await _context

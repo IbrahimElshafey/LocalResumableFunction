@@ -2,8 +2,8 @@
 
 public interface IEntity
 {
-    long Id { get; }
+    int Id { get; }
     DateTime Created { get; }
-    long? ServiceId { get; }
+    int? ServiceId { get; }
 }
 

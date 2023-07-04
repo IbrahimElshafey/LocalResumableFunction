@@ -67,7 +67,7 @@ internal partial class WaitsRepo : IWaitsRepo
         }
     }
 
-    public async Task<List<long>> GetMatchedFunctionsForCall(long pushedCallId, string methodUrn)
+    public async Task<List<int>> GetMatchedFunctionsForCall(int pushedCallId, string methodUrn)
     {
         try
         {
@@ -163,7 +163,7 @@ internal partial class WaitsRepo : IWaitsRepo
         }
     }
 
-    private async Task<long> GetMethodGroupId(string methodUrn)
+    private async Task<int> GetMethodGroupId(string methodUrn)
     {
         var methodGroup =
            await _context
@@ -178,7 +178,7 @@ internal partial class WaitsRepo : IWaitsRepo
         throw new Exception(error);
     }
 
-    public async Task RemoveFirstWaitIfExist(long methodIdentifierId)
+    public async Task RemoveFirstWaitIfExist(int methodIdentifierId)
     {
         try
         {
@@ -215,11 +215,11 @@ internal partial class WaitsRepo : IWaitsRepo
     }
 
 
-    public async Task CancelSubWaits(long parentId, long pushedCallId)
+    public async Task CancelSubWaits(int parentId, int pushedCallId)
     {
         await CancelWaits(parentId);
 
-        async Task CancelWaits(long pId)
+        async Task CancelWaits(int pId)
         {
             var waits = await _context
                 .Waits
@@ -235,7 +235,7 @@ internal partial class WaitsRepo : IWaitsRepo
         }
     }
 
-    private void CancelWait(Wait wait, long pushedCallId)
+    private void CancelWait(Wait wait, int pushedCallId)
     {
         wait.LoadUnmappedProps();
         wait.Cancel();
@@ -261,14 +261,14 @@ internal partial class WaitsRepo : IWaitsRepo
     }
 
 
-    public async Task CancelOpenedWaitsForState(long stateId)
+    public async Task CancelOpenedWaitsForState(int stateId)
     {
         await _context.Waits
               .Where(x => x.FunctionStateId == stateId && x.Status == WaitStatus.Waiting)
               .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, status => WaitStatus.Canceled));
     }
 
-    public async Task CancelFunctionWaits(long requestedByFunctionId, long functionStateId)
+    public async Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId)
     {
         var functionInstanceWaits =
             await _context.Waits

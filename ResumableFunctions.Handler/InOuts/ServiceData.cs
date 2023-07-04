@@ -10,16 +10,16 @@ public class ServiceData : IObjectWithLog, IEntityWithUpdate
     [IgnoreMember]
     [NotMapped]
     public List<LogRecord> Logs { get; } = new();
-    public long Id { get; internal set; }
+    public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
-    public long? ServiceId { get; internal set; }
+    public int? ServiceId { get; internal set; }
     public string AssemblyName { get; internal set; }
     public string Url { get; internal set; }
 
     [NotMapped]
     public string[] ReferencedDlls { get; internal set; }
     public DateTime Modified { get; internal set; }
-    public long ParentId { get; internal set; }
+    public int ParentId { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
 
     public void AddError(string message, Exception ex = null, string code = "")

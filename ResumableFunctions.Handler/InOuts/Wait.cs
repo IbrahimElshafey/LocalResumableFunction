@@ -6,7 +6,7 @@ namespace ResumableFunctions.Handler.InOuts;
 
 public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 {
-    public long Id { get; internal set; }
+    public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
     public string Name { get; internal set; }
 
@@ -21,7 +21,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     [NotMapped]
     public WaitExtraData ExtraData { get; internal set; }
     public byte[] ExtraDataValue { get; internal set; }
-    public long? ServiceId { get; set; }
+    public int? ServiceId { get; set; }
 
     public WaitType WaitType { get; internal set; }
     public DateTime Modified { get; internal set; }
@@ -30,7 +30,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 
     internal ResumableFunctionState FunctionState { get; set; }
 
-    internal long FunctionStateId { get; set; }
+    internal int FunctionStateId { get; set; }
 
 
     /// <summary>
@@ -38,7 +38,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     /// </summary>
     internal ResumableFunctionIdentifier RequestedByFunction { get; set; }
 
-    internal long RequestedByFunctionId { get; set; }
+    internal int RequestedByFunctionId { get; set; }
 
     /// <summary>
     ///     If not null this means that wait requested by a sub function
@@ -48,14 +48,14 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 
     internal List<Wait> ChildWaits { get; set; } = new();
 
-    internal long? ParentWaitId { get; set; }
+    internal int? ParentWaitId { get; set; }
     public string Path { get; internal set; }
 
     [NotMapped]
     internal ResumableFunction CurrentFunction { get; set; }
 
     internal bool CanBeParent => this is FunctionWait || this is WaitsGroup;
-    internal long? CallId { get; set; }
+    internal int? CallId { get; set; }
 
 
     internal async Task<Wait> GetNextWait()

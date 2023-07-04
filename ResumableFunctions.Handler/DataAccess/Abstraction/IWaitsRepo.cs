@@ -7,15 +7,15 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction;
 
 public interface IWaitsRepo
 {
-    Task CancelFunctionWaits(long requestedByFunctionId, long functionStateId);
-    Task CancelOpenedWaitsForState(long stateId);
-    Task CancelSubWaits(long parentId, long pushedCallId);
+    Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId);
+    Task CancelOpenedWaitsForState(int stateId);
+    Task CancelSubWaits(int parentId, int pushedCallId);
     Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait);
     Task<Wait> GetWaitParent(Wait wait);
-    Task<List<long>> GetMatchedFunctionsForCall(long pushedCallId, string methodUrn);
+    Task<List<int>> GetMatchedFunctionsForCall(int pushedCallId, string methodUrn);
     Task<List<ServiceData>> GetAffectedServicesForCall(string methodUrn);
-    Task RemoveFirstWaitIfExist(long methodIdentifierId);
+    Task RemoveFirstWaitIfExist(int methodIdentifierId);
     Task<bool> SaveWait(Wait newWait);
-    Task<MethodWait> GetMethodWait(long waitId, params Expression<Func<MethodWait, object>>[] includes);
-    Task<MethodInfo> GetRequestedByMethodInfo(long rootId);
+    Task<MethodWait> GetMethodWait(int waitId, params Expression<Func<MethodWait, object>>[] includes);
+    Task<MethodInfo> GetRequestedByMethodInfo(int rootId);
 }

@@ -240,7 +240,7 @@ public static class CoreExtensions
     //https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/constants
     public static bool IsConstantType(this Type type)
     {
-        var types = new[] { typeof(bool), typeof(byte), typeof(sbyte), typeof(char), typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(nint), typeof(nuint), typeof(long), typeof(ulong), typeof(short), typeof(ushort), typeof(string) };
+        var types = new[] { typeof(bool), typeof(byte), typeof(sbyte), typeof(char), typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(nint), typeof(nuint), typeof(int), typeof(uint), typeof(short), typeof(ushort), typeof(string) };
         return types.Contains(type);
     }
 

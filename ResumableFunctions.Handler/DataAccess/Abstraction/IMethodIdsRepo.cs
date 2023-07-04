@@ -6,10 +6,10 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
     {
         Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData);
         Task AddWaitMethodIdentifier(MethodData methodData);
-        Task<ResumableFunctionIdentifier> GetResumableFunction(long id);
+        Task<ResumableFunctionIdentifier> GetResumableFunction(int id);
         Task<ResumableFunctionIdentifier> GetResumableFunction(MethodData methodData);
-        Task<(long MethodId, long GroupId)> GetId(MethodWait methodWait);
-        Task<WaitMethodIdentifier> GetMethodIdentifierById(long? methodWaitMethodToWaitId);
+        Task<(int MethodId, int GroupId)> GetId(MethodWait methodWait);
+        Task<WaitMethodIdentifier> GetMethodIdentifierById(int? methodWaitMethodToWaitId);
         Task<bool> CanPublishFromExternal(string methodUrn);
     }
 }

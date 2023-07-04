@@ -37,7 +37,7 @@ namespace ResumableFunctions.Handler.Helpers
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            long scanTaskId = 0;
+            int scanTaskId = 0;
             try
             {
                 await using var handle = await _lockProvider.TryAcquireLockAsync(_settings.CurrentDbName + lockName);

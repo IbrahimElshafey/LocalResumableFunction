@@ -19,7 +19,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private readonly IWaitTemplatesRepo _templatesRepo;
     private readonly IServiceProvider _serviceProvider;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
-    private readonly IResumableFunctionsSettings _settings;
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly IServiceRepo _serviceRepo;
 
@@ -30,7 +29,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         IMethodIdsRepo methodIdentifierRepo,
         IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor,
-        IResumableFunctionsSettings settings,
         IBackgroundProcess backgroundJobClient,
         IServiceRepo serviceRepo,
         IWaitTemplatesRepo templatesRepo)
@@ -41,7 +39,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _methodIdentifierRepo = methodIdentifierRepo;
         _waitsRepository = waitsRepository;
         _backgroundJobExecutor = backgroundJobExecutor;
-        _settings = settings;
         _backgroundJobClient = backgroundJobClient;
         _serviceRepo = serviceRepo;
         _templatesRepo = templatesRepo;
@@ -49,7 +46,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
     public async Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait)
     {
-        var rootId = long.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
+        var rootId = int.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
         var resumableFunction =
             rootId != firstMatchedMethodWait.Id ?
             await _waitsRepository.GetRequestedByMethodInfo(rootId) :
@@ -77,8 +74,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 }
 
             });
-            //firstWaitClone.FunctionState.AddLog(
-            //    $"[{resumableFunction.GetFullName()}] started and wait [{firstMatchedMethodWait.Name}] to match.", LogType.Info);
 
             firstWaitClone.FunctionState.Logs.AddRange(firstWaitClone.FunctionState.Logs);
             firstWaitClone.FunctionState.Status =
@@ -108,7 +103,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
     }
 
-    public async Task RegisterFirstWait(long functionId)
+    public async Task RegisterFirstWait(int functionId)
     {
         MethodInfo resumableFunction = null;
         var functionName = "";
@@ -121,14 +116,19 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     var resumableFunctionId = await _methodIdentifierRepo.GetResumableFunction(functionId);
                     resumableFunction = resumableFunctionId.MethodInfo;
                     functionName = resumableFunction.Name;
-                    WriteMessage("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
+                    _logger.LogInformation("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
                     var firstWait = await GetFirstWait(resumableFunction, true);
+
                     if (firstWait != null)
-                        firstWait.FunctionState.AddLog(
+                    {
+                        await _serviceRepo.AddLog(
                             $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.");
-                    await _waitsRepository.SaveWait(firstWait);//first wait when register function
-                    WriteMessage($"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
-                    await _context.SaveChangesAsync();
+
+                        await _waitsRepository.SaveWait(firstWait);
+                        _logger.LogInformation(
+                            $"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
+                        await _context.SaveChangesAsync();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -172,10 +172,17 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
         await functionRunner.MoveNextAsync();
         var firstWait = functionRunner.Current;
+        
+        if (firstWait == null)
+        {
+            await _serviceRepo.AddErrorLog(null, $"Can't get first wait in function `{resumableFunction.GetFullName()}`.");
+            return null;
+        }
+
         var methodId = await _methodIdentifierRepo.GetResumableFunction(new MethodData(resumableFunction));
         if (removeIfExist)
         {
-            WriteMessage("First wait already exist it will be deleted and recreated since it may be changed.");
+            _logger.LogInformation("First wait already exist it will be deleted and recreated since it may be changed.");
             await _waitsRepository.RemoveFirstWaitIfExist(methodId.Id);
         }
         var functionState = new ResumableFunctionState
@@ -194,10 +201,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         return firstWait;
     }
 
-    private void WriteMessage(string message)
-    {
-        _logger.LogInformation(message);
-    }
 
     //public async Task DeactivateFirstWait(int functionId)
     //{
