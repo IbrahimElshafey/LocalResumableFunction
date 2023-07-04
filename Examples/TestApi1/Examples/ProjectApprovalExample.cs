@@ -61,7 +61,7 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     {
         await Task.Delay(1);
         yield return Wait<string, string>
-                ("Wait say hello external", new ExternalServiceClass().SayHello)
+                ("Wait say hello external", new ExternalServiceClass().SayHelloExport)
                 .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
                 .SetData((userName, helloMsg) => ExternalMethodStatus == $"Say hello called and user name is: {userName}");
 
