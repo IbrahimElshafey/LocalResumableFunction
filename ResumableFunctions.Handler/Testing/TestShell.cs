@@ -93,7 +93,7 @@ namespace ResumableFunctions.Handler.Testing
         {
             object input = null;
             var inputVisitor = new GenericVisitor();
-            inputVisitor.OnVisitCall(call =>
+            inputVisitor.OnVisitMethodCall(call =>
             {
                 input = Expression.Lambda(call.Arguments[0]).CompileFast().DynamicInvoke();
                 return call;

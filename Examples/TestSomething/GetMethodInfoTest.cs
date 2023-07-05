@@ -22,7 +22,7 @@ internal class GetMethodInfoTest
         MethodInfo mi = null;
         Type ownerType = null;
         var visitor = new GenericVisitor();
-        visitor.OnVisitCall(VisitMethod);
+        visitor.OnVisitMethodCall(VisitMethod);
         visitor.OnVisitConstant(VisitConstant);
         visitor.Visit(methodSelector);
         return (mi, ownerType);

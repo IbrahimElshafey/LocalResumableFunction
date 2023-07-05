@@ -5,7 +5,6 @@ using ResumableFunctions.Handler.Testing;
 using System.Diagnostics.Metrics;
 
 namespace Tests;
-
 public class ReplayInSubFunction
 {
     [Fact]

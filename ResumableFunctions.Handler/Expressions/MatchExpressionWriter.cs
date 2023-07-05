@@ -218,30 +218,38 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         }
     }
 
-    //not,member,paramter
     private void MarkMandatoryConstants()
     {
         var changeToBooleans = new GenericVisitor();
-        Expression partToCheck = null;
-        changeToBooleans.OnVisitBinary(VisitConstantPart);
+        Expression constantExpressionPart = null;
+        changeToBooleans.OnVisitBinary(VisitBinary);
+        changeToBooleans.OnVisitMethodCall(VisitMethodCall);
 
         foreach (var constPart in _constantParts)
         {
             if (constPart.IsMandatory || constPart.Operator != ExpressionType.Equal) continue;
 
-            partToCheck = constPart.ConstantExpression;
+            constantExpressionPart = constPart.ConstantExpression;
             var expression = changeToBooleans.Visit(_matchExpression.Body);
             var compiled = Lambda<Func<bool>>(expression).CompileFast();
             constPart.IsMandatory = !compiled();
         }
 
-        Expression VisitConstantPart(BinaryExpression node)
+        Expression VisitBinary(BinaryExpression node)
         {
-            if (node.Left == partToCheck || node.Right == partToCheck)
+            //change contsant part to false
+            if (node.Left == constantExpressionPart || node.Right == constantExpressionPart)
                 return Constant(false);
+            //check if 
             var canBeTranslated = _constantParts.Any(x => x.ConstantExpression == node.Left || x.ConstantExpression == node.Right);
             if (canBeTranslated) return Constant(true);
             return base.VisitBinary(node);
+        }
+        Expression VisitMethodCall(MethodCallExpression methodCallExpression)
+        {
+            if (methodCallExpression.Method.ReturnType == typeof(bool))
+                return Constant(true);
+            return base.VisitMethodCall(methodCallExpression);
         }
     }
 
@@ -249,6 +257,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
     {
         var changeToBools = new GenericVisitor();
         changeToBools.OnVisitBinary(VisitBinary);
+        changeToBools.OnVisitMethodCall(VisitMethodCall);
         var exp = changeToBools.Visit(_matchExpression.Body);
         var compiled = Lambda<Func<bool>>(exp).CompileFast();
         IsMandatoryPartFullMatch = compiled();
@@ -263,6 +272,13 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             if (canBeTranslated) return Constant(false);
             return base.VisitBinary(node);
         }
+        Expression VisitMethodCall(MethodCallExpression methodCallExpression)
+        {
+            if (methodCallExpression.Method.ReturnType == typeof(bool))
+                return Constant(false);
+            return base.VisitMethodCall(methodCallExpression);
+        }
+
     }
 
     private void GenerateMatchUsingJson()
