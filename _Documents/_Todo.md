@@ -1,5 +1,5 @@
 ﻿# Working On Now
-* Continue work on tests
+* Message Pack Private set serialization
 * Test Shell Enhancements
 
 * Connect to server exception log

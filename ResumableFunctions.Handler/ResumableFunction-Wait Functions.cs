@@ -43,8 +43,10 @@ public abstract partial class ResumableFunction
         return result;
     }
 
+    internal bool dependenciesAreSet = false;
     internal void InitializeDependencies(IServiceProvider serviceProvider)
     {
+        if (dependenciesAreSet) return;
         var setDependenciesMi = GetType().GetMethod(
             "SetDependencies", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
@@ -65,6 +67,7 @@ public abstract partial class ResumableFunction
         }
         //setDependenciesMi.Invoke(this, inputs);
         CallSetDependencies(inputs, setDependenciesMi, parameters);
+        dependenciesAreSet = true;
     }
 
     private void CallSetDependencies(object[] inputs, MethodInfo mi, ParameterInfo[] parameterTypes)

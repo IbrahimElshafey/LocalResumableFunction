@@ -1,16 +1,17 @@
-﻿using ResumableFunctions.Handler;
+﻿using Newtonsoft.Json;
+using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
 
-public class MatchWithInstanceMethodCall
+public class MatchUseSetDependencies
 {
     [Fact]
-    public async Task MatchWithInstanceMethodCall_Test()
+    public async Task MatchUseSetDependencies_Test()
     {
-        using var test = new TestShell(nameof(MatchWithInstanceMethodCall_Test), typeof(TestClass));
+        using var test = new TestShell(nameof(MatchUseSetDependencies_Test), typeof(TestClass));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();
@@ -30,12 +31,19 @@ public class MatchWithInstanceMethodCall
 
     public class TestClass : ResumableFunction
     {
+        [MessagePack.IgnoreMember]
+        public Dep1 dep1;//must be public if used in the expression trees and [MessagePack.IgnoreMember] to not serialize it
+        private void SetDependencies()
+        {
+            dep1 = new Dep1(5);
+        }
+
         [ResumableFunctionEntryPoint("MatchWithInstanceMethodCall")]
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return
                 Wait<string, string>("M6", Method6)
-                .MatchIf((input, output) => input == "Test" && InstanceCall(input, output));
+                .MatchIf((input, output) => input == "Test" && InstanceCall(input, output) && dep1.MethodIndep(input) > 0);
         }
 
         private bool InstanceCall(string input, string output)
@@ -44,6 +52,14 @@ public class MatchWithInstanceMethodCall
         }
 
         [PushCall("Method6")] public string Method6(string input) => input + "M6";
+    }
 
+    public class Dep1
+    {
+        public Dep1(int b)
+        {
+
+        }
+        public int MethodIndep(string input) => input.Length;
     }
 }

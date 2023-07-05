@@ -112,6 +112,7 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> CheckIfMatch()
         {
+            _methodWait.CurrentFunction.InitializeDependencies(_serviceProvider);
             var pushedCallId = _pushedCall.Id;
             try
             {
@@ -178,7 +179,6 @@ namespace ResumableFunctions.Handler.Core
                             $"Can't update function state `{_methodWait.FunctionStateId}` after method wait `{_methodWait}` matched.");
                     }
                 }
-
                 _methodWait.CurrentFunction.InitializeDependencies(_serviceProvider);
             }
             catch (DbUpdateConcurrencyException ex)
