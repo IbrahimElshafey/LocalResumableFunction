@@ -24,6 +24,7 @@ internal class Scanner
     private readonly string _currentServiceName;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IServiceRepo _serviceRepo;
+    private HashSet<string> _functionsUrns = new HashSet<string>();
 
     public Scanner(
         ILogger<Scanner> logger,
@@ -93,26 +94,34 @@ internal class Scanner
         var methodType = entryPointCheck.IsEntry ? MethodType.ResumableFunctionEntryPoint : MethodType.SubResumableFunction;
         serviceData.AddLog($"Register resumable function [{resumableFunctionMInfo.GetFullName()}] of type [{methodType}]");
 
-        var resumableFunctionIdentifier = await _methodIdentifierRepo
-            .AddResumableFunctionIdentifier(
-            new MethodData(resumableFunctionMInfo)
-            {
-                MethodType = methodType,
-                IsActive = entryPointCheck.IsActive
-            });
-        await _context.SaveChangesAsync();
-
-
-        switch (entryPointCheck)
+        var functionData = new MethodData(resumableFunctionMInfo)
         {
-            case { IsEntry: true, IsActive: true }:
-                _backgroundJobClient.Enqueue(
-                    () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
-                break;
+            MethodType = methodType,
+            IsActive = entryPointCheck.IsActive
+        };
+        if (_functionsUrns.Contains(functionData.MethodUrn))
+        {
+            await _serviceRepo.AddErrorLog(null,
+                $"Can't add method identifier for function `{resumableFunctionMInfo.GetFullName()}`" +
+                $" since same URN `{functionData.MethodUrn}` used for another function.", ErrorCodes.MethodValidation);
+            return;
+        }
+        else
+        {
+            _functionsUrns.Add(functionData.MethodUrn);
+            var resumableFunctionIdentifier = await _methodIdentifierRepo.AddResumableFunctionIdentifier(functionData);
+            await _context.SaveChangesAsync();
+            switch (entryPointCheck)
+            {
+                case { IsEntry: true, IsActive: true }:
+                    _backgroundJobClient.Enqueue(
+                        () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
+                    break;
 
-            case { IsEntry: true, IsActive: false }:
-                await _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id);
-                break;
+                case { IsEntry: true, IsActive: false }:
+                    await _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id);
+                    break;
+            }
         }
     }
 
@@ -162,7 +171,7 @@ internal class Scanner
     {
         try
         {
-            //Debugger.Launch();
+            var urns = new List<string>();
             var methodWaits = type
                 .GetMethods(GetBindingFlags())
                 .Where(method =>
@@ -172,12 +181,30 @@ internal class Scanner
                 if (ValidateMethod(method, serviceData))
                 {
                     var methodData = new MethodData(method) { MethodType = MethodType.MethodWait };
+
+                    if (UrnDuplication(methodData.MethodUrn, method.GetFullName())) continue;
+
                     await _methodIdentifierRepo.AddWaitMethodIdentifier(methodData);
                     serviceData?.AddLog($"Adding method identifier {methodData}");
                 }
                 else
-                    serviceData?.AddLog(
-                        $"Can't add method identifier `{method.GetFullName()}` since it does not match the criteria.");
+                    serviceData?.AddError(
+                        $"Can't add method identifier `{method.GetFullName()}` since it does not match the criteria.", null, ErrorCodes.MethodValidation);
+            }
+
+            bool UrnDuplication(string methodUrn, string methodName)
+            {
+                if (urns.Contains(methodUrn))
+                {
+                    serviceData?.AddError(
+                    $"Can't add method identifier `{methodName}` since same URN `{methodUrn}` used for another method in same class.", null, ErrorCodes.MethodValidation);
+                    return true;
+                }
+                else
+                {
+                    urns.Add(methodUrn);
+                    return false;
+                }
             }
         }
         catch (Exception ex)
@@ -187,7 +214,6 @@ internal class Scanner
             _logger.LogError(ex, errorMsg);
             throw;
         }
-
     }
 
     private bool ValidateMethod(MethodInfo method, ServiceData serviceData)
@@ -243,6 +269,7 @@ internal class Scanner
 
         async Task RegisterFunctions(string attributeId)
         {
+            var urns = new List<string>();
             var functions = type
                 .GetMethods(GetBindingFlags())
                 .Where(method => method
@@ -257,6 +284,9 @@ internal class Scanner
                     serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", null, ErrorCodes.MethodValidation);
             }
         }
+
+
+
 
     }
 

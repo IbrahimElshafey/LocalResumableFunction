@@ -1,6 +1,5 @@
 ﻿# Todo
 * Function to tests URNs
-* RegisterAssemblies (names, functions test)
 * Get instances for pushed call
 * Get matched waits for pushed call
 
