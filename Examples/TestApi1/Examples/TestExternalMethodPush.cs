@@ -14,7 +14,7 @@ namespace TestApi1.Examples
         {
             yield return
              Wait<string, string>("External method `Method123`", Method123)//Point 2
-                 .MatchIf((input, output) => input.StartsWith("M"))//Point 3
+                 .MatchIf((input, output) => input[0] == 'M')//Point 3
                  .SetData((input, output) => Result == output);//Point 4
             Console.WriteLine($"Output is :{Result}");
             Console.WriteLine("^^^Success for ResumableFunctionThatWaitExternal^^^");
