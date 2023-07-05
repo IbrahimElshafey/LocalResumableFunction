@@ -1,6 +1,8 @@
 ﻿# Write Unit Tests for basic scenarios:
 
-* Match expression with instance method call
+* Match expression that use dependencies
+
+
 * Sub functions tests
 	* Pushed call activate one instance,what if same function and sub fnction wait the same wait
 
