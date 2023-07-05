@@ -5,7 +5,6 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
-
 public class ReplayTests
 {
     [Fact]

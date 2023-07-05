@@ -22,8 +22,10 @@
     * GoToWithNewMatch [Done]
 
 * Replay in sub functions
+
 * Sub functions tests
 	* Pushed call activate one instance,what if same function and sub fnction wait the same wait
+
 * Test loops
 
 * Write test cases for expressions rewrite because it's critical part
