@@ -12,6 +12,28 @@ namespace TestSomething
         public void Test()
         {
             // Sample blob.
+            var model = new Model2
+            {
+                Items = new[] { 1, 10, 100, 1000 },
+                BB = (byte)10,
+                DT = DateTime.Today,
+                Comp = new { Po = new { X = 300, Y = 400 } }
+            };
+            model.SetName("Test");
+
+            var blob = MessagePackSerializer.Serialize(model, StandardResolverAllowPrivate.Options);
+            var json = MessagePackSerializer.ConvertToJson(blob);
+            // Dynamic ("untyped")
+            var dynamicModel = MessagePackSerializer.Deserialize<Model2>(blob, StandardResolverAllowPrivate.Options);
+
+           
+
+            //ContractlessStandardResolver();
+        }
+
+        private static void ContractlessStandardResolver()
+        {
+            // Sample blob.
             var model = new Model
             {
                 Name = "foobar",
@@ -22,10 +44,10 @@ namespace TestSomething
                 Comp = new { Po = new Point { X = 300, Y = 400 } }
             };
 
-            var blob = MessagePackSerializer.Serialize(model, ContractlessStandardResolver.Options);
+            var blob = MessagePackSerializer.Serialize(model, MessagePack.Resolvers.ContractlessStandardResolver.Options);
             var json = MessagePackSerializer.ConvertToJson(blob);
             // Dynamic ("untyped")
-            var dynamicModel = MessagePackSerializer.Deserialize<ExpandoObject>(blob, ContractlessStandardResolver.Options);
+            var dynamicModel = MessagePackSerializer.Deserialize<ExpandoObject>(blob, MessagePack.Resolvers.ContractlessStandardResolver.Options);
 
             // You can access the data using array/dictionary indexers, as shown above
             //Console.WriteLine(dynamicModel["Name"]); 

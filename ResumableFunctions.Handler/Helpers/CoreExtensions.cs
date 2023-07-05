@@ -37,8 +37,6 @@ public static class CoreExtensions
 
 
 
-        services.AddSingleton<BinaryToObjectConverterAbstract, BinaryToObjectConverter>();
-        //services.AddSingleton<HttpClient>();
         services.AddHttpClient();
         services.AddSingleton<HangfireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
