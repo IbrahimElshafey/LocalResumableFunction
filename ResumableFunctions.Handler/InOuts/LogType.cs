@@ -4,5 +4,6 @@ public enum LogType
 {
     Info,
     Warning,
-    Error
+    Error,
+    ImportantInfo,
 }

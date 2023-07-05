@@ -45,21 +45,15 @@ public abstract partial class ResumableFunction
 
     internal void InitializeDependencies(IServiceProvider serviceProvider)
     {
-        //todo:should I create new scope??
         var setDependenciesMi = GetType().GetMethod(
             "SetDependencies", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
         if (setDependenciesMi == null)
-        {
-            this.AddLog(
-                "No instance method like `void SetDependencies(Interface dep1,...)` found that set your dependencies.",
-                LogType.Warning);
             return;
-        }
 
         var parameters = setDependenciesMi.GetParameters();
-        var inputs = new object[parameters.Count()];
-        var matchSignature = setDependenciesMi.ReturnType == typeof(void) && parameters.Count() >= 1;
+        var inputs = new object[parameters.Length];
+        var matchSignature = setDependenciesMi.ReturnType == typeof(void) && parameters.Any();
         if (matchSignature)
         {
             for (var i = 0; i < parameters.Length; i++)
@@ -68,12 +62,6 @@ public abstract partial class ResumableFunction
                     serviceProvider.GetService(parameters[i].ParameterType) ??
                     ActivatorUtilities.CreateInstance(serviceProvider, parameters[i].ParameterType);
             }
-        }
-        else
-        {
-            this.AddLog(
-               "No instance method like `void SetDependencies(Interface dep1,...)` found that set your dependencies.",
-               LogType.Warning);
         }
         //setDependenciesMi.Invoke(this, inputs);
         CallSetDependencies(inputs, setDependenciesMi, parameters);

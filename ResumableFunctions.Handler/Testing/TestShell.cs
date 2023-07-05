@@ -1,48 +1,55 @@
-﻿using FastExpressionCompiler;
+﻿using System.Linq.Expressions;
+using System.Reflection;
+using System.Time;
+using FastExpressionCompiler;
 using Hangfire;
-using Microsoft.Data.SqlClient;
+using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ResumableFunctions.Handler;
+using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
+using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using System.Data;
-using System.Diagnostics;
-using System.Linq.Expressions;
-using System.Reflection;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using System.Threading;
-using ResumableFunctions.Handler.Expressions;
 
-namespace ResumableFunctions.Handler.TestShell
+namespace ResumableFunctions.Handler.Testing
 {
-    public class TestCase
+    public class TestShell:IDisposable
     {
         public IHost CurrentApp { get; private set; }
         private readonly HostApplicationBuilder _builder;
         private readonly Type[] _types;
         private readonly TestSettings _settings;
         private readonly string _testName;
-
-        public TestCase(string testName, params Type[] types)
+        private IDistributedSynchronizationHandle _lock;
+        private const string Server= "(localdb)\\MSSQLLocalDB";
+        public TestShell(string testName, params Type[] types)
         {
             _testName = testName;
             _settings = new TestSettings(testName);
             _builder = Host.CreateApplicationBuilder();
             _types = types;
         }
-
+        
         public static async Task DeleteDb(string dbName)
         {
             var dbConfig = new DbContextOptionsBuilder()
-                .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={dbName};");
+                .UseSqlServer(
+                    $"Server={Server};Database={dbName};Trusted_Connection=True;TrustServerCertificate=True;");
             var context = new DbContext(dbConfig.Options);
-            await context.Database.EnsureDeletedAsync();
+            try
+            {
+                await context.Database.EnsureDeletedAsync();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         public IServiceCollection RegisteredServices => _builder.Services;
@@ -52,6 +59,8 @@ namespace ResumableFunctions.Handler.TestShell
             await DeleteDb(_testName);
             _builder.Services.AddResumableFunctionsCore(_settings);
             CurrentApp = _builder.Build();
+            var lockProvider = CurrentApp.Services.GetService<IDistributedLockProvider>();
+            _lock = await lockProvider.AcquireLockAsync("Test827556");
             GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(CurrentApp.Services));
 
             using var scope = CurrentApp.Services.CreateScope();
@@ -60,19 +69,21 @@ namespace ResumableFunctions.Handler.TestShell
                 AssemblyName = _types[0].Assembly.GetName().Name,
                 ParentId = -1,
             };
-            await using var context = scope.ServiceProvider.GetService<FunctionDataContext>();
+            await using var context = scope.ServiceProvider.GetService<WaitsDataContext>();
             context.ServicesData.Add(serviceData);
             await context.SaveChangesAsync();
             _settings.CurrentServiceId = serviceData.Id;
             var scanner = scope.ServiceProvider.GetService<Scanner>();
             foreach (var type in _types)
-                await scanner.RegisterMethods(type, serviceData);
-            await scanner.RegisterMethods(typeof(LocalRegisteredMethods), serviceData);
+                await scanner.RegisterMethodsInType(type, serviceData);
+            await scanner.RegisterMethodsInType(typeof(LocalRegisteredMethods), serviceData);
+            await context.SaveChangesAsync();
 
             foreach (var type in _types)
                 if (type.IsSubclassOf(typeof(ResumableFunction)))
                     await scanner.RegisterResumableFunctionsInClass(type);
             await context.SaveChangesAsync();
+            await context.DisposeAsync();
         }
 
 
@@ -90,12 +101,11 @@ namespace ResumableFunctions.Handler.TestShell
             inputVisitor.Visit(methodSelector);
             if (input != null)
                 return await SimulateMethodCall(methodSelector, input, output);
-            else
-                throw new Exception("Can't get input");
+            
+            throw new Exception("Can't get input");
         }
 
-        public async Task<int> SimulateMethodCall<TClassType>(
-            Expression<Func<TClassType, object>> methodSelector,
+        public async Task<int> SimulateMethodCall<TClassType>(Expression<Func<TClassType, object>> methodSelector,
             object input,
             object output)
         {
@@ -120,7 +130,7 @@ namespace ResumableFunctions.Handler.TestShell
             return pushedCallId;
         }
 
-        private FunctionDataContext Context => CurrentApp.Services.GetService<FunctionDataContext>();
+        private WaitsDataContext Context => CurrentApp.Services.GetService<WaitsDataContext>();
         public async Task<List<ResumableFunctionState>> GetInstances<T>(bool includeNew = false)
         {
             var query = Context.FunctionStates.AsQueryable().AsNoTracking();
@@ -168,5 +178,11 @@ namespace ResumableFunctions.Handler.TestShell
                     .ToListAsync();
         }
 
+        public void Dispose()
+        {
+            _lock.Dispose();
+            Context?.Dispose();
+            CurrentApp?.Dispose();
+        }
     }
 }

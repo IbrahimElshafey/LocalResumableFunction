@@ -3,17 +3,17 @@ using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
+using System;
 using System.Collections;
-using System.Linq.Expressions;
-using System.Text;
+using System.Diagnostics.Metrics;
 
 namespace ResumableFunctions.Handler.UiService
 {
     internal class UiService : IUiService
     {
-        private readonly FunctionDataContext _context;
+        private readonly WaitsDataContext _context;
 
-        public UiService(FunctionDataContext context)
+        public UiService(WaitsDataContext context)
         {
             _context = context;
         }
@@ -22,25 +22,25 @@ namespace ResumableFunctions.Handler.UiService
         {
             var services =
                 await _context.ServicesData.CountAsync(x => x.ParentId == -1);
-            var resumableFunction =
+            var resumableFunctionsCount =
                 await _context.ResumableFunctionIdentifiers.CountAsync(x => x.Type == MethodType.ResumableFunctionEntryPoint);
-            var resumableFunctionsInstances = await _context.FunctionStates.CountAsync();
-            var methods = await _context.WaitMethodIdentifiers.CountAsync();
+            var resumableFunctionsInstances = await _context.FunctionStates.CountAsync() - resumableFunctionsCount;
+            var methodGroups = await _context.MethodsGroups.CountAsync();
             var pushedCalls = await _context.PushedCalls.CountAsync();
-            var latestLogErrors =
-                await
-                _context
-                .Logs
-                .OrderByDescending(x => x.Id)
-                .Take(20)
-                .CountAsync(x => x.Type == LogType.Error);
+            //var latestLogErrors =
+            //    await
+            //    _context
+            //    .Logs
+            //    .OrderByDescending(x => x.Id)
+            //    .Take(20)
+            //    .CountAsync(x => x.Type == LogType.Error);
             return new MainStatistics(
                 services,
-                resumableFunction,
+                resumableFunctionsCount,
                 resumableFunctionsInstances,
-                methods,
+                methodGroups,
                 pushedCalls,
-                latestLogErrors);
+                0);
         }
 
         public async Task<List<ServiceInfo>> GetServicesList()
@@ -51,14 +51,16 @@ namespace ResumableFunctions.Handler.UiService
                 .ServicesData
                 .Where(x => x.ParentId == -1)
                 .ToListAsync();
-            var childDllsErrors =
+
+            var serviceErrors =
                 await _context
-               .ServicesData
-               .Where(x => x.ParentId != -1)
-               .GroupBy(x => x.ParentId)
-               .Select(x => new { ServiceId = x.Key, ErrorsCount = x.Sum(x => x.ErrorCounter) })
+               .Logs
+               .Where(x => x.Type == LogType.Error)
+               .GroupBy(x => x.ServiceId)
+               .Select(x => new { ServiceId = x.Key, ErrorsCount = x.Count() })
                .ToDictionaryAsync(x => x.ServiceId);
-            var counts = await _context
+
+            var methodsCounts = await _context
                 .MethodIdentifiers
                 .GroupBy(x => x.ServiceId)
                 .Select(x => new
@@ -68,18 +70,29 @@ namespace ResumableFunctions.Handler.UiService
                     ServiceId = x.Key
                 })
                 .ToDictionaryAsync(x => x.ServiceId);
+
+            var pushedCalls = await _context
+                .PushedCalls
+                .GroupBy(x => x.ServiceId)
+                .Select(x => new { ServiceId = x.Key, PushedCalls = x.Count() })
+                .ToDictionaryAsync(x => x.ServiceId);
+
             foreach (var service in services)
             {
                 var item = new ServiceInfo(service.Id, service.AssemblyName, service.Url, service.ReferencedDlls, service.Created, service.Modified);
-                item.LogErrors = service.ErrorCounter;
-                if (childDllsErrors.ContainsKey(service.Id))
-                    item.LogErrors += childDllsErrors[service.Id].ErrorsCount;
-                if (counts.ContainsKey(service.Id))
+
+                if (serviceErrors.TryGetValue(service.Id, out var error))
+                    item.LogErrors = error.ErrorsCount;
+
+                if (methodsCounts.TryGetValue(service.Id, out var methodsCounter))
                 {
-                    var methodsCounter = counts[service.Id];
                     item.FunctionsCount = methodsCounter.FunctionsCount;
                     item.MethodsCount = methodsCounter.MethodsCount;
                 }
+
+                if (pushedCalls.TryGetValue(service.Id, out var pushedCallsCount))
+                    item.PushedCallsCount = pushedCallsCount.PushedCalls;
+
                 result.Add(item);
             }
             return result;
@@ -125,16 +138,55 @@ namespace ResumableFunctions.Handler.UiService
             return service;
         }
 
-        public Task<List<LogRecord>> GetServiceLogs(int serviceId)
+        public async Task<List<LogRecord>> GetServiceLogs(int serviceId)
         {
-            return _context
+            return await _context
                 .Logs
-                .Where(x => x.EntityId == serviceId && x.EntityType == nameof(ServiceData))
+                .Where(x => x.ServiceId == serviceId)
+                .OrderByDescending(x => x.Id)
+                .ToListAsync();
+        }
+
+        public async Task<List<LogRecord>> GetLogs(int page = 0)
+        {
+            return await _context
+                .Logs
+                .Where(x => x.Type != LogType.Info)
+                .OrderByDescending(x => x.Id)
+                .Skip(page * 100)
+                .Take(100)
                 .ToListAsync();
         }
 
         public async Task<List<FunctionInfo>> GetFunctionsInfo(int? serviceId)
         {
+            //var countsQuery =
+            //    await (from functionState in _context.FunctionStates.Include(x => x.ResumableFunctionIdentifier)
+            //           group functionState by functionState.ResumableFunctionIdentifierId
+            //    into g
+            //           select new
+            //           {
+            //               FunctionId = g.Key,
+            //               InProgress = g.Count(x => x.Status == FunctionStatus.InProgress),
+            //               Completed = g.Count(x => x.Status == FunctionStatus.Completed),
+            //               InError = g.Count(x => x.Status == FunctionStatus.InError)
+            //           }).ToListAsync();
+            //var functionWithFirstWait =
+            //    await (from function in _context.ResumableFunctionIdentifiers.Include(x => x.WaitsCreatedByFunction)
+            //           select new { function,FirstWait= function.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsNode).Name })
+            //    .ToListAsync();
+            //var result =
+            //    (from counts in countsQuery.DefaultIfEmpty()
+            //    from function in functionWithFirstWait
+            //    where counts.FunctionId == function.function.Id
+            //    select new FunctionInfo(
+            //        function.function,
+            //        function.FirstWait,
+            //        counts?.InProgress??0,
+            //        counts?.Completed ?? 0,
+            //        counts?.InError ?? 0
+            //    )).ToList();
+            //return result;
             return await _context.ResumableFunctionIdentifiers
               .Include(x => x.ActiveFunctionsStates)
               .Include(x => x.WaitsCreatedByFunction)
@@ -144,7 +196,8 @@ namespace ResumableFunctions.Handler.UiService
                       x.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsNode).Name,
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InProgress),
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.Completed),
-                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.Error)))
+                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InError)
+                      ))
               .ToListAsync();
         }
 
@@ -156,40 +209,42 @@ namespace ResumableFunctions.Handler.UiService
                 .GroupBy(x => x.MethodGroupToWaitId)
                 .Select(x => new
                 {
-                    Waiting = x.Count(x => x.Status == WaitStatus.Waiting),
-                    Completed = x.Count(x => x.Status == WaitStatus.Completed),
-                    Canceled = x.Count(x => x.Status == WaitStatus.Canceled),
-                    //LastWait = x.Max(x => x.Created),
-                    MethodGroupId = x.Key
+                    Waiting = (int?)x.Count(x => x.Status == WaitStatus.Waiting),
+                    Completed = (int?)x.Count(x => x.Status == WaitStatus.Completed),
+                    Canceled = (int?)x.Count(x => x.Status == WaitStatus.Canceled),
+                    MethodGroupId = (int?)x.Key
                 });
+
             var methodIdsQuery = _context
-                .WaitMethodIdentifiers
-                .GroupBy(x => x.MethodGroupId)
+                .MethodsGroups
+                .Include(x => x.WaitMethodIdentifiers)
                 .Select(x => new
                 {
-                    MethodGroupId = x.Key,
-                    MethodsCount = x.Count(),
-                    GroupCreated = x.First().MethodGroup.Created,
-                    GroupUrn = x.First().MethodGroup.MethodGroupUrn
+                    MethodGroupId = x.Id,
+                    MethodsCount = x.WaitMethodIdentifiers.Count,
+                    GroupCreated = x.Created,
+                    GroupUrn = x.MethodGroupUrn
                 });
-            var join = from wait in waitsQuery
-                       from methodId in methodIdsQuery
-                       where wait.MethodGroupId == methodId.MethodGroupId
-                       select new { wait, methodId };
+
+            var join =
+                from methodId in methodIdsQuery
+                join wait in waitsQuery on methodId.MethodGroupId equals wait.MethodGroupId into jo
+                from item in jo.DefaultIfEmpty()
+                select new { wait = item, methodId };
 
             return (await join.ToListAsync())
                 .Select(x => new MethodGroupInfo(
-                                     x.wait.MethodGroupId,
+                                     x.methodId.MethodGroupId,
                                      x.methodId.GroupUrn,
                                      x.methodId.MethodsCount,
-                                     x.wait.Waiting,
-                                     x.wait.Completed,
-                                     x.wait.Canceled,
+                                     x.wait?.Waiting ?? 0,
+                                     x.wait?.Completed ?? 0,
+                                     x.wait?.Canceled ?? 0,
                                      x.methodId.GroupCreated))
                 .ToList();
         }
 
-        public async Task<List<PushedCallInfo>> GetPushedCalls(int page = 0)
+        public async Task<List<PushedCallInfo>> GetPushedCalls(int page)
         {
             var counts =
                 _context
@@ -197,24 +252,25 @@ namespace ResumableFunctions.Handler.UiService
                 .GroupBy(x => x.PushedCallId)
                 .Select(x => new
                 {
-                    CallId = x.Key,
-                    All = x.Count(),
-                    Matched = x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.Matched),
-                    NotMatched = x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.NotMatched),
+                    CallId = (int?)x.Key,
+                    All = (int?)x.Count(),
+                    Matched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.Matched),
+                    NotMatched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.NotMatched),
                 });
-            var query = _context.PushedCalls
-                .Join(counts,
-                call => call.Id,
-                counter => counter.CallId,
-                (call, counter) =>
-                new PushedCallInfo(
-                    call,
-                    counter.All,
-                    counter.Matched,
-                    counter.NotMatched
-                ));
 
-            var result = await query.ToListAsync();
+            var query =
+                from call in _context.PushedCalls
+                orderby call.Id descending
+                join counter in counts on call.Id equals counter.CallId into joinResult
+                from item in joinResult.DefaultIfEmpty()
+                select new { item, call };
+            var result = (await query.ToListAsync())
+                .Select(x => new PushedCallInfo(
+                    x.call,
+                    x.item?.All ?? 0,
+                    x.item?.Matched ?? 0,
+                    x.item?.NotMatched ?? 0
+                )).ToList();
             result.ForEach(x => x.PushedCall.LoadUnmappedProps());
             return result;
         }
@@ -228,7 +284,7 @@ namespace ResumableFunctions.Handler.UiService
                  .Select(functionState => new FunctionInstanceInfo(
                      functionState,
                      functionState.Waits.First(wait => wait.IsNode && wait.Status == WaitStatus.Waiting),
-                     functionState.Waits.Count(),
+                     functionState.Waits.Count,
                      functionState.Id
                      ));
             var result = await query.ToListAsync();
@@ -242,12 +298,12 @@ namespace ResumableFunctions.Handler.UiService
             pushedCall.LoadUnmappedProps();
             var methodData = pushedCall.MethodData;
             var inputOutput = MessagePackSerializer.ConvertToJson(pushedCall.DataValue);
-            var callExpecetdMatches =
+            var callExpectedMatches =
                 await _context
                 .WaitsForCalls
                 .Where(x => x.PushedCallId == pushedCallId)
                 .ToListAsync();
-            var waitsIds = callExpecetdMatches.Select(x => x.WaitId).ToList();
+            var waitsIds = callExpectedMatches.Select(x => x.WaitId).ToList();
 
             var waits =
                 await (
@@ -269,7 +325,7 @@ namespace ResumableFunctions.Handler.UiService
                 .ToListAsync();
 
             var waitsForCall =
-                (from callMatch in callExpecetdMatches
+                (from callMatch in callExpectedMatches
                  from wait in waits
                  where callMatch.WaitId == wait.Id
                  select new MethodWaitDetails(
@@ -283,8 +339,8 @@ namespace ResumableFunctions.Handler.UiService
                     callMatch.InstanceUpdateStatus,
                     callMatch.ExecutionStatus,
                     new TemplateDisplay(
-                        wait.MatchExpressionValue, 
-                        wait.SetDataExpressionValue, 
+                        wait.MatchExpressionValue,
+                        wait.SetDataExpressionValue,
                         wait.InstanceMandatoryPartExpressionValue)
                     ))
                 .ToList();
@@ -326,6 +382,74 @@ namespace ResumableFunctions.Handler.UiService
                 );
         }
 
+        public async Task<List<MethodInGroupInfo>> GetMethodsInGroup(int groupId)
+        {
+            var groupUrn =
+                await _context
+                .MethodsGroups
+                .Where(x => x.Id == groupId)
+                .Select(x => x.MethodGroupUrn)
+                .FirstOrDefaultAsync();
+            var query =
+                from method in _context.WaitMethodIdentifiers
+                from service in _context.ServicesData
+                where method.ServiceId == service.Id && method.MethodGroupId == groupId
+                select new { method, ServiceName = service.AssemblyName };
+            return
+                (await query.ToListAsync())
+                .Select(x => new MethodInGroupInfo(
+                    x.ServiceName,
+                    x.method,
+                    groupUrn))
+                .ToList();
+        }
+
+        public async Task<List<MethodWaitDetails>> GetWaitsForGroup(int groupId)
+        {
+            var groupName =
+                await _context
+                    .MethodsGroups
+                    .Where(x => x.Id == groupId)
+                    .Select(x => x.MethodGroupUrn)
+                    .FirstOrDefaultAsync();
+            var query =
+                from methodWait in _context.MethodWaits.Include(x => x.RequestedByFunction)
+                from template in _context.WaitTemplates
+                where methodWait.TemplateId == template.Id && methodWait.MethodGroupToWaitId == groupId
+                select new
+                {
+                    methodWait,
+                    template.MatchExpressionValue,
+                    template.SetDataExpressionValue,
+                    template.InstanceMandatoryPartExpressionValue,
+                    methodWait.RequestedByFunction.RF_MethodUrn
+                };
+
+            var result =
+                (await query.ToListAsync())
+                .Select(x =>
+                    new MethodWaitDetails(
+                        x.methodWait.Name,
+                        x.methodWait.Status,
+                        x.RF_MethodUrn,
+                        x.methodWait.FunctionStateId,
+                        x.methodWait.Created,
+                        x.methodWait.MandatoryPart,
+                        MatchStatus.ExpectedMatch,
+                        InstanceUpdateStatus.NotUpdatedYet,
+                        ExecutionStatus.NotStartedYet,
+                        new TemplateDisplay(x.MatchExpressionValue, x.SetDataExpressionValue,
+                            x.InstanceMandatoryPartExpressionValue)
+                    )
+                    {
+                        CallId = x.methodWait.CallId,
+                        GroupName = groupName
+                    })
+                .ToList();
+
+            return result;
+        }
+
         private async Task SetWaitTemplates(List<Wait> waits)
         {
             var templatesIds = waits
@@ -349,6 +473,14 @@ namespace ResumableFunctions.Handler.UiService
                 if (wait is MethodWait mw && templates.ContainsKey(mw.TemplateId))
                     mw.Template = templates[mw.TemplateId];
             }
+        }
+
+        public async Task<List<ServiceData>> GetServices()
+        {
+            return
+                await _context.ServicesData
+                .Where(x => x.ParentId == -1)
+                .ToListAsync();
         }
     }
 }

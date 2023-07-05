@@ -10,7 +10,7 @@ public class LogRecord : IEntity
     public string Message { get; internal set; }
     public bool IsCustom { get; internal set; }
     public DateTime Created { get; internal set; }
-    public string Code { get; internal set; }
+    public int Code { get; internal set; }
     public int? ServiceId { get; set; }
 
     public override string ToString()

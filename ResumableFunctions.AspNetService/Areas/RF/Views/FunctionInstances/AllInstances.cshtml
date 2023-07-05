@@ -22,8 +22,8 @@
             <tr class="w3-indigo">
                 <th>ID</th>
                 <th>Status</th>
-                <th width="35%">Current State Object</th>
-                <th>Current Waiting For</th>
+                <th width="35%">State Object</th>
+                <th>Waiting For</th>
                 <th>History</th>
                 <th>Created</th>
                 <th>Updated</th>
@@ -40,7 +40,11 @@
                     </span>
                 </td>
                 <td>@instance.CurrentWait?.Name</td>
-                <td><a href="~/RF/FunctionInstances/FunctionInstance?instanceId=@instance.Id" class="w3-text-blue">@instance.WaitsCount Waits</a></td>
+                <td>
+                    <a target="_blank" href="~/RF/FunctionInstances/FunctionInstance?instanceId=@instance.Id" class="w3-text-blue">
+                        @instance.WaitsCount Waits
+                    </a>
+                </td>
                 <td>@instance.FunctionState.Created</td>
                 <td>@instance.FunctionState.Modified</td>
             </tr>

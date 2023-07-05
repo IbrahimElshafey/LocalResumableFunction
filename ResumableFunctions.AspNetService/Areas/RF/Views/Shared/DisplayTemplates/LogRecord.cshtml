@@ -1,9 +1,16 @@
-﻿@using ResumableFunctions.Handler.InOuts;
+﻿@using ResumableFunctions.Handler.Helpers;
+@using ResumableFunctions.Handler.InOuts;
 @model LogRecord
 @{
     var type = Model.TypeClass();
 }
 <div class="w3-panel @type.Class log-item-@Model.Type">
-    <h5><b>@type.Title [@Model.Created]</b></h5>
-    <p>@Html.Raw(Html.Encode(Model.Message).Replace("\n", "<br />"))</p>
+    <h5><b>@(ErrorCodes.NameOf(Model.Code) ?? type.Title) [@Model.Created]</b></h5>
+    <p>
+        <span style="white-space: pre-line">@Html.Raw(Html.Encode(Model.Message))</span>
+        @if (Model.EntityType == nameof(ResumableFunctionState))
+        {
+            <a class="function-instance-label" target="_blank" style="display:block;" href="~/RF/FunctionInstances/FunctionInstance?instanceId=@Model.EntityId">In Function Instance #@Model.EntityId</a>
+        }
+    </p>
 </div>

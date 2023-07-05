@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -23,12 +24,7 @@ public static class CoreExtensions
 
 
         // ReSharper disable once RedundantAssignment
-        services.AddDbContext<FunctionDataContext>(optionsBuilder => optionsBuilder = settings.WaitsDbConfig);
-        services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
-        services.AddScoped<IWaitsRepo, WaitsRepo>();
-        services.AddScoped<IServiceRepo, ServiceRepo>();
-        services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
-        services.AddScoped<IScanStateRepo, ScanStateRepo>();
+        ResolveDbInterfaces(services, settings);
 
         services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
         services.AddScoped<IRecycleBinService, RecycleBinService>();
@@ -42,7 +38,8 @@ public static class CoreExtensions
 
 
         services.AddSingleton<BinaryToObjectConverterAbstract, BinaryToObjectConverter>();
-        services.AddSingleton<HttpClient>();
+        //services.AddSingleton<HttpClient>();
+        services.AddHttpClient();
         services.AddSingleton<HangfireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
         services.AddSingleton(settings.DistributedLockProvider);
@@ -58,6 +55,19 @@ public static class CoreExtensions
         }
         else
             services.AddSingleton<IBackgroundProcess, NoBackgroundProcess>();
+    }
+
+    private static void ResolveDbInterfaces(IServiceCollection services, IResumableFunctionsSettings settings)
+    {
+        services.AddDbContext<WaitsDataContext>(optionsBuilder => optionsBuilder = settings.WaitsDbConfig);
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
+        services.AddScoped<IWaitsRepo, WaitsRepo>();
+        services.AddScoped<IServiceRepo, ServiceRepo>();
+        services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
+        services.AddScoped<IScanStateRepo, ScanStateRepo>();
+        services.AddScoped<IPushedCallsRepo, PushedCallsRepo>();
+        services.AddScoped<IWaitsForCallsRepo, WaitsForCallsRepo>();
     }
 
     public static void UseResumableFunctions(this IHost app)
@@ -230,7 +240,7 @@ public static class CoreExtensions
     //https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/constants
     public static bool IsConstantType(this Type type)
     {
-        var types = new[] { typeof(bool), typeof(byte), typeof(sbyte), typeof(char), typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(nint), typeof(nuint), typeof(long), typeof(ulong), typeof(short), typeof(ushort), typeof(string) };
+        var types = new[] { typeof(bool), typeof(byte), typeof(sbyte), typeof(char), typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(nint), typeof(nuint), typeof(int), typeof(uint), typeof(short), typeof(ushort), typeof(string) };
         return types.Contains(type);
     }
 
@@ -283,5 +293,25 @@ public static class CoreExtensions
                 ownerType = methodInfo.ReflectedType;
             return inCurrentType;
         }
+
+    }
+
+    public static string GetRealTypeName(this Type t)
+    {
+        if (!t.IsGenericType)
+            return t.Name;
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append(t.Name.Substring(0, t.Name.IndexOf('`')));
+        sb.Append('<');
+        bool appendComma = false;
+        foreach (Type arg in t.GetGenericArguments())
+        {
+            if (appendComma) sb.Append(',');
+            sb.Append(GetRealTypeName(arg));
+            appendComma = true;
+        }
+        sb.Append('>');
+        return sb.ToString();
     }
 }

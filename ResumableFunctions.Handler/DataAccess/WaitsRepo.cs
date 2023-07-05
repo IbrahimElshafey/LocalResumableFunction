@@ -11,21 +11,19 @@ namespace ResumableFunctions.Handler.DataAccess;
 internal partial class WaitsRepo : IWaitsRepo
 {
     private readonly ILogger<WaitsRepo> _logger;
-    private readonly FunctionDataContext _context;
+    private readonly WaitsDataContext _context;
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly IMethodIdsRepo _methodIdsRepo;
     private readonly IResumableFunctionsSettings _settings;
     private readonly IWaitTemplatesRepo _waitTemplatesRepo;
-    private readonly IServiceProvider _provider;
 
     public WaitsRepo(
         ILogger<WaitsRepo> logger,
         IBackgroundProcess backgroundJobClient,
-        FunctionDataContext context,
+        WaitsDataContext context,
         IMethodIdsRepo methodIdentifierRepo,
         IResumableFunctionsSettings settings,
-        IWaitTemplatesRepo waitTemplatesRepo,
-        IServiceProvider provider)
+        IWaitTemplatesRepo waitTemplatesRepo)
     {
         _logger = logger;
         _context = context;
@@ -33,7 +31,6 @@ internal partial class WaitsRepo : IWaitsRepo
         _methodIdsRepo = methodIdentifierRepo;
         _settings = settings;
         _waitTemplatesRepo = waitTemplatesRepo;
-        _provider = provider;
     }
 
     public async Task<List<ServiceData>> GetAffectedServicesForCall(string methodUrn)
@@ -214,40 +211,39 @@ internal partial class WaitsRepo : IWaitsRepo
         {
             _logger.LogError(ex, $"Error when RemoveFirstWaitIfExist for function `{methodIdentifierId}`");
         }
-
     }
 
 
-    public async Task CancelSubWaits(int parentId)
+    public async Task CancelSubWaits(int parentId, int pushedCallId)
     {
-        //todo: use path prop
         await CancelWaits(parentId);
 
         async Task CancelWaits(int pId)
         {
             var waits = await _context
                 .Waits
-                .Include(x => x.FunctionState)
                 .Where(x => x.ParentWaitId == pId && x.Status == WaitStatus.Waiting)
                 .ToListAsync();
+
             foreach (var wait in waits)
             {
-                CancelWait(wait);
+                CancelWait(wait, pushedCallId);
                 if (wait.CanBeParent)
                     await CancelWaits(wait.Id);
             }
         }
     }
 
-    private void CancelWait(Wait wait)
+    private void CancelWait(Wait wait, int pushedCallId)
     {
         wait.LoadUnmappedProps();
         wait.Cancel();
+        wait.CallId = pushedCallId;
         if (wait is MethodWait { Name: $"#{nameof(LocalRegisteredMethods.TimeWait)}#" })
         {
             _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
-        wait.FunctionState.AddLog($"Wait `{wait.Name}` canceled.");
+        //wait.FunctionState.AddLog($"Wait `{wait.Name}` canceled.");
     }
 
     public async Task<Wait> GetWaitParent(Wait wait)
@@ -284,7 +280,7 @@ internal partial class WaitsRepo : IWaitsRepo
         foreach (var wait in functionInstanceWaits)
         {
             wait.Cancel();
-            await CancelSubWaits(wait.Id);
+            await CancelSubWaits(wait.Id, -1);
         }
     }
 

@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace ResumableFunctions.Publisher;
 
-[Aspect(Scope.Global)]
+[Aspect(Scope.PerInstance)]
 public class PublishMethodAspect
 {
     private MethodCall _methodCall;
@@ -39,7 +39,7 @@ public class PublishMethodAspect
             MethodData = new MethodData
             {
                 MethodUrn = publishMethodAttribute.MethodIdentifier,
-                AssemblyName = metadata.DeclaringType.Assembly.FullName,
+                AssemblyName = "[External] " + Assembly.GetEntryAssembly()?.GetName().Name,
                 ClassName = metadata.DeclaringType.Name,
                 MethodName = metadata.Name,
             },

@@ -61,7 +61,7 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
     {
         await Task.Delay(1);
         yield return Wait<string, string>
-                ("Wait say hello external", new ExternalServiceClass().SayHello)
+                ("Wait say hello external", new ExternalServiceClass().SayHelloExport)
                 .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
                 .SetData((userName, helloMsg) => ExternalMethodStatus == $"Say hello called and user name is: {userName}");
 
@@ -103,7 +103,7 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
              .SetData((input, output) => CurrentProject == input);
 
         yield return
-               Wait<ApprovalDecision, bool>("Manager Five Approve Project", ManagerFiveApproveProject)
+               Wait<ApprovalDecision, bool>("Manager Five Approve Project", FiveApproveProject)
                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                    .SetData((input, output) => ManagerFiveApproval == output);
         Success(nameof(InterfaceMethod));
@@ -244,8 +244,8 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
         Console.ForegroundColor = ConsoleColor.White;
     }
 
-    [PushCall("IManagerFiveApproval.ManagerFiveApproveProject")]
-    public bool ManagerFiveApproveProject(ApprovalDecision args)
+    [PushCall("IManagerFiveApproval.ManagerFiveApproveProject",true)]
+    public bool FiveApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");
         return args.Decision;

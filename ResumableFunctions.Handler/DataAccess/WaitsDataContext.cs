@@ -6,13 +6,13 @@ using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;
-public sealed class FunctionDataContext : DbContext
+internal sealed class WaitsDataContext : DbContext
 {
-    private readonly ILogger<FunctionDataContext> _logger;
+    private readonly ILogger<WaitsDataContext> _logger;
     private readonly IResumableFunctionsSettings _settings;
 
-    public FunctionDataContext(
-        ILogger<FunctionDataContext> logger,
+    public WaitsDataContext(
+        ILogger<WaitsDataContext> logger,
         IResumableFunctionsSettings settings,
         IDistributedLockProvider lockProvider) : base(settings.WaitsDbConfig.Options)
     {
@@ -27,7 +27,7 @@ public sealed class FunctionDataContext : DbContext
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error when call `Database.EnsureCreated()` for `FunctionDataContext`");
+            _logger.LogError(ex, "Error when call `Database.EnsureCreated()` for `WaitsDataContext`");
         }
     }
 
@@ -135,8 +135,8 @@ public sealed class FunctionDataContext : DbContext
           .Property(x => x.MethodToWaitId)
           .HasColumnName(nameof(MethodWait.MethodToWaitId));
         methodWaitBuilder
-          .Property(x => x.MatchedByCallId)
-          .HasColumnName(nameof(MethodWait.MatchedByCallId));
+          .Property(x => x.CallId)
+          .HasColumnName(nameof(MethodWait.CallId));
 
         modelBuilder.Entity<WaitsGroup>()
            .Property(mw => mw.GroupMatchExpressionValue)

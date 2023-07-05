@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -17,17 +18,20 @@ namespace ResumableFunctions.Handler.Core
         private readonly IReplayWaitProcessor _replayWaitProcessor;
         private readonly IWaitsRepo _waitsRepo;
         private readonly IServiceProvider _serviceProvider;
-
         private readonly ILogger<ExpectedMatchesProcessor> _logger;
         private readonly IBackgroundProcess _backgroundJobClient;
-        private readonly FunctionDataContext _context;
+        private readonly IUnitOfWork _context;
         private readonly BackgroundJobExecutor _backgroundJobExecutor;
         private readonly IDistributedLockProvider _lockProvider;
+        private readonly IWaitsForCallsRepo _waitsForCallsRepo;
+        private readonly IMethodIdsRepo _methodIdsRepo;
+        private readonly IWaitTemplatesRepo _templatesRepo;
+        private readonly IPushedCallsRepo _pushedCallsRepo;
+        private readonly IServiceRepo _serviceRepo;
 
         private WaitForCall _waitCall;
         private MethodWait _methodWait;
         private PushedCall _pushedCall;
-        private readonly IResumableFunctionsSettings _settings;
 
         public ExpectedMatchesProcessor(
             IServiceProvider serviceProvider,
@@ -36,11 +40,15 @@ namespace ResumableFunctions.Handler.Core
             IRecycleBinService recycleBinService,
             IWaitsRepo waitsRepo,
             IBackgroundProcess backgroundJobClient,
-            FunctionDataContext context,
+            IUnitOfWork context,
             IReplayWaitProcessor replayWaitProcessor,
             BackgroundJobExecutor backgroundJobExecutor,
             IDistributedLockProvider lockProvider,
-            IResumableFunctionsSettings settings)
+            IWaitsForCallsRepo waitsForCallsRepo,
+            IMethodIdsRepo methodIdsRepo,
+            IWaitTemplatesRepo templatesRepo,
+            IPushedCallsRepo pushedCallsRepo,
+            IServiceRepo serviceRepo)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -52,25 +60,21 @@ namespace ResumableFunctions.Handler.Core
             _replayWaitProcessor = replayWaitProcessor;
             _backgroundJobExecutor = backgroundJobExecutor;
             _lockProvider = lockProvider;
-            _settings = settings;
+            _waitsForCallsRepo = waitsForCallsRepo;
+            _methodIdsRepo = methodIdsRepo;
+            _templatesRepo = templatesRepo;
+            _pushedCallsRepo = pushedCallsRepo;
+            _serviceRepo = serviceRepo;
         }
 
+        [DisplayName("Process Function Expected Matches where `FunctionId:{0}` and `PushedCallId:{1}`")]
         public async Task ProcessFunctionExpectedMatches(int functionId, int pushedCallId)
         {
             await _backgroundJobExecutor.Execute(
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
                 async () =>
                 {
-                    var waitsForCall =
-                        await _context
-                        .WaitsForCalls
-                        .Where(x =>
-                        x.PushedCallId == pushedCallId &&
-                        x.FunctionId == functionId &&
-                        x.ServiceId == _settings.CurrentServiceId &&
-                        (x.MatchStatus == MatchStatus.PartiallyMatched ||
-                         x.InstanceUpdateStatus == InstanceUpdateStatus.UpdateFailed))
-                        .ToListAsync();
+                    var waitsForCall = await _waitsForCallsRepo.GetWaitsForCall(pushedCallId, functionId);
 
                     _pushedCall = await LoadPushedCall(pushedCallId);
 
@@ -81,7 +85,7 @@ namespace ResumableFunctions.Handler.Core
 
 
                         var isSuccess = await Pipeline(
-                            SetInputOutput,
+                            DesrializeInputOutput,
                             CheckIfMatch,
                             CloneIfFirst,
                             UpdateFunctionData,
@@ -98,7 +102,7 @@ namespace ResumableFunctions.Handler.Core
                 $"Error when process wait `{_methodWait?.Id}` that may be a match for pushed call `{pushedCallId}` and function `{functionId}`");
         }
 
-        private Task<bool> SetInputOutput()
+        private Task<bool> DesrializeInputOutput()
         {
             _pushedCall.LoadUnmappedProps(_methodWait.MethodToWait.MethodInfo);
             _methodWait.Input = _pushedCall.Data.Input;
@@ -112,21 +116,31 @@ namespace ResumableFunctions.Handler.Core
             try
             {
                 var isMatch = _methodWait.IsMatched();
-                if (isMatch)
-                {
-                    _methodWait.FunctionState.AddLog(
-                        $"Wait matched [{_methodWait.Name}] for [{_methodWait.RequestedByFunction}].");
-                    await UpdateWaitRecord(x => x.MatchStatus = MatchStatus.Matched);
-                }
-                else
+                if (!isMatch)
                     await UpdateWaitRecord(x => x.MatchStatus = MatchStatus.NotMatched);
+                else
+                {
+                    var message =
+                        $"Wait `{_methodWait.Name}` matched in `{_methodWait.RequestedByFunction.RF_MethodUrn}`.";
+
+                    if (_methodWait.IsFirst)
+                        await _serviceRepo.AddLog(message);
+                    else
+                        _methodWait.FunctionState.AddLog(message);
+                    await UpdateWaitRecord(x => x.MatchStatus = MatchStatus.Matched);
+
+                }
                 return isMatch;
             }
             catch (Exception ex)
             {
                 var error =
-                    $"Error occurred when evaluate match for [{_methodWait.Name}] in [{_methodWait.RequestedByFunction}] when pushed call [{pushedCallId}].";
-                _methodWait.FunctionState.AddError(error, ex, Constants.MatchEvaluationError);
+                    $"Error occurred when evaluate match for `{_methodWait.Name}` " +
+                    $"in `{_methodWait.RequestedByFunction.RF_MethodUrn}` when pushed call `{pushedCallId}`.";
+                if (_methodWait.IsFirst)
+                    await _serviceRepo.AddErrorLog(ex, error, ErrorCodes.WaitProcessing);
+                else
+                    _methodWait.FunctionState.AddError(error, ex, ErrorCodes.WaitProcessing);
                 throw new Exception(error, ex);
             }
         }
@@ -146,14 +160,14 @@ namespace ResumableFunctions.Handler.Core
         private async Task<bool> UpdateFunctionData()
         {
             var pushedCallId = _pushedCall.Id;
-            _methodWait.MatchedByCallId = pushedCallId;
+            _methodWait.CallId = pushedCallId;
             try
             {
                 await using (await _lockProvider.AcquireLockAsync($"UpdateFunctionState_{_methodWait.FunctionStateId}"))
                 {
                     if (_methodWait.UpdateFunctionData())
                     {
-                        _context.Entry(_methodWait.FunctionState).State = EntityState.Modified;
+                        _context.MarkEntityAsModified(_methodWait.FunctionState);
                         await _context.SaveChangesAsync();
                         await UpdateWaitRecord(x => x.InstanceUpdateStatus = InstanceUpdateStatus.UpdateSuccessed);
                     }
@@ -172,7 +186,7 @@ namespace ResumableFunctions.Handler.Core
                 _methodWait.FunctionState.AddError(
                     $"Concurrency Exception occurred when process wait [{_methodWait.Name}]." +
                     $"\nProcessing this wait will be scheduled.",
-                    ex, Constants.ConcurrencyException);
+                    ex, ErrorCodes.ConcurrencyException);
                 _backgroundJobClient.Schedule(() =>
                         ProcessFunctionExpectedMatches(_methodWait.RequestedByFunctionId, pushedCallId),
                     TimeSpan.FromSeconds(10));
@@ -204,7 +218,7 @@ namespace ResumableFunctions.Handler.Core
                             {
                                 currentWait.FunctionState.AddLog($"Wait `{currentWait.Name}` is completed.");
                                 currentWait.Status = WaitStatus.Completed;
-                                await _waitsRepo.CancelSubWaits(currentWait.Id);
+                                await _waitsRepo.CancelSubWaits(currentWait.Id, _pushedCall.Id);
                                 await GoNext(parent, currentWait);
                             }
                             else
@@ -251,7 +265,7 @@ namespace ResumableFunctions.Handler.Core
                 {
                     var errorMsg = $"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).";
                     _logger.LogWarning(errorMsg);
-                    currentWait.FunctionState.AddError(errorMsg, null, Constants.ProceedToNextWaitParentNull);
+                    currentWait.FunctionState.AddError(errorMsg, null, ErrorCodes.WaitProcessing);
                     return;
                 }
 
@@ -269,7 +283,7 @@ namespace ResumableFunctions.Handler.Core
                 nextWait.ParentWaitId = currentWait.ParentWaitId;
                 currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
                 nextWait.FunctionState = currentWait.FunctionState;
-                _context.Entry(nextWait.FunctionState).State = EntityState.Modified;
+                _context.MarkEntityAsModified(nextWait.FunctionState);
                 nextWait.RequestedByFunctionId = currentWait.RequestedByFunctionId;
 
                 await SaveTheNewWait(nextWait);
@@ -279,7 +293,7 @@ namespace ResumableFunctions.Handler.Core
             {
                 var errorMessage = $"Error when proceed to next wait after {currentWait}";
                 _logger.LogError(ex, errorMessage);
-                currentWait.FunctionState.AddError(errorMessage, ex, Constants.ProceedToNextWaitError);
+                currentWait.FunctionState.AddError(errorMessage, ex, ErrorCodes.WaitProcessing);
                 throw;
             }
         }
@@ -289,7 +303,7 @@ namespace ResumableFunctions.Handler.Core
             if (nextWait is ReplayRequest replayRequest)
             {
                 var replayResult = await _replayWaitProcessor.ReplayWait(replayRequest);
-                _context.Entry(replayResult.Wait.FunctionState).State = EntityState.Modified;
+                _context.MarkEntityAsModified(replayResult.Wait.FunctionState);
                 if (replayResult is { ProceedExecution: true, Wait: not null })
                     await ProceedToNextWait(replayResult.Wait);
             }
@@ -311,12 +325,7 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<MethodWait> LoadWait(int waitId)
         {
-            var methodWait = await _context
-                    .MethodWaits
-                    .Include(x => x.RequestedByFunction)
-                    .Include(x => x.FunctionState)
-                    .Where(x => x.Status == WaitStatus.Waiting)
-                    .FirstOrDefaultAsync(x => x.Id == waitId);
+            var methodWait = await _waitsRepo.GetMethodWait(waitId, x => x.RequestedByFunction, x => x.FunctionState);
 
             if (methodWait == null)
             {
@@ -325,10 +334,7 @@ namespace ResumableFunctions.Handler.Core
                 throw new Exception(error);
             }
 
-            methodWait.MethodToWait = await
-                _context
-                .WaitMethodIdentifiers
-                .FindAsync(methodWait.MethodToWaitId);
+            methodWait.MethodToWait = await _methodIdsRepo.GetMethodIdentifierById(methodWait.MethodToWaitId);
 
             if (methodWait.MethodToWait == null)
             {
@@ -337,11 +343,7 @@ namespace ResumableFunctions.Handler.Core
                 throw new Exception(error);
             }
 
-            methodWait.Template = await
-               _context
-               .WaitTemplates
-               .Select(WaitTemplate.BasicMatchSelector)
-               .FirstAsync(x => x.Id == methodWait.TemplateId);
+            methodWait.Template = await _templatesRepo.GetWaitTemplateWithBasicMatch(methodWait.TemplateId);
             if (methodWait.Template == null)
             {
                 var error = $"No wait template exist for wait `{waitId}`.";
@@ -358,9 +360,7 @@ namespace ResumableFunctions.Handler.Core
         {
             try
             {
-                var pushedCall = await _context
-                   .PushedCalls
-                   .FindAsync(pushedCallId);
+                var pushedCall = await _pushedCallsRepo.GetById(pushedCallId);
 
                 if (pushedCall != null) return pushedCall;
 

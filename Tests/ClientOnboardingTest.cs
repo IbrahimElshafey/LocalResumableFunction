@@ -3,7 +3,7 @@ using ClientOnboarding.Services;
 using ClientOnboarding.Workflow;
 using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
@@ -12,7 +12,7 @@ namespace Tests
         [Fact]
         public async Task Test_ClientOnBoarding_NoSimulate()
         {
-            var test = new TestCase(
+            using var test = new TestShell(
                 nameof(Test_ClientOnBoarding_NoSimulate),
                 typeof(ClientOnboardingService),
                 typeof(ClientOnboardingWorkflow));
@@ -31,7 +31,7 @@ namespace Tests
             currentInstance = await RoundCheck(test, 3, true);
         }
 
-        private async Task<ClientOnboardingWorkflow> RoundCheck(TestCase test, int round, bool finished = false)
+        private async Task<ClientOnboardingWorkflow> RoundCheck(TestShell test, int round, bool finished = false)
         {
             var pushedCalls = await test.GetPushedCalls();
             Assert.Equal(round, pushedCalls.Count);

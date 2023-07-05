@@ -42,7 +42,7 @@ namespace TestApi1.Controllers
         [HttpPost(nameof(ManagerFiveApproveProject))]
         public bool ManagerFiveApproveProject(ApprovalDecision args)
         {
-            return example.ManagerFiveApproveProject(args);
+            return example.FiveApproveProject(args);
         }
     }
 }

@@ -18,7 +18,7 @@ namespace TestApi1.Examples
         }
 
         [PushCall("CodeInDllTest.SayHello")]
-        public string SayHello(string userName)
+        public string SayHelloExport(string userName)
         {
             return userName;
         }

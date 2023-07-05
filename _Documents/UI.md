@@ -1,14 +1,10 @@
-﻿# Hot todos
-* Methods in group view
-* All logs View
-* Waits for method group view
-
-
-# UI project
-* Errors Overview Page
-* Waits tree
-	* Is Replay
-	* Extra Data
+﻿# UI project
+* Tables problem on small screens
+* Services View
+	* Add Other Errors View
+	* Add Scan Overview View
+	* Wait Status InError not shown in views
+* Filters and search in all views
 	
 
 

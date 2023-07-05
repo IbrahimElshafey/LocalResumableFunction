@@ -1,26 +1,26 @@
-﻿# Hot Todo Core functions
-* TaskList
-* Remove direct use for DbContext
-* Function Name must not duplicate
-* What are best practices for HTTPClient use `services.AddSingleton<HttpClient>();`
-* Replace HttpHangfire with abstraction to enable queue based communication between services
-* Sql server settings (password,username) or connection string
+﻿# Working On Now
+* Continue work on tests
+* Test Shell Enhancements
 
-* Tests
-* UI
-
-* Use IMaterializationInterceptor to set entity dependencies
-* If register first wait failed for function make it halted
+* Connect to server exception log
 * If service scan failed make it halted
+* Method URN name must not duplicate in same class
+* Function URN name must not duplicate in same class
 
-
-
-# Eid Vaction Wok on (ordered by priority)
-* Hot Todos
-* Finalize UI v1
-* Write unit tests
-
-* Video Records & Documentation
-
+# Workin on version 1.0.8
+* UI V1
 * Background Cleaning Job
-* Publisher project
+* ResumableFunctions.Publisher
+* Review Concurrency problems
+* Advanced Sample
+* Update Documentation and Record Videos
+
+
+# Version 2
+* Roslyn Analyzer
+* Auto-generate code for test
+* Performance Analysis
+* Encryption option for sensitive data
+* Use pull mode to get calls from a queue
+* Function priority
+* Queue based communication between services

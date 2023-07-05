@@ -6,26 +6,26 @@ namespace ResumableFunctions.AspNetService.DisplayObject
     {
         public MainMenuDisplay Menu { get; private set; }
 
-        internal void SetMenu(MainStatistics mainStatistics)
+        internal void SetMenu()
         {
             Menu = new MainMenuDisplay
             {
                 Items = new[]
                     {
                         new MainMenuItem(
-                            $"Services ({mainStatistics.Services})",
+                            $"Services",
                             $"/RF/Home/{PartialNames.ServicesList}"),
                         new MainMenuItem(
-                            $"Resumable Functions ({mainStatistics.ResumableFunctions}) & ({mainStatistics.ResumableFunctionsInstances}) Instances",
-                             $"/RF/ServiceDetails/{PartialNames.ResumableFunctions}"),
+                            $"Resumable Functions",
+                             $"/RF/Home/{PartialNames.ResumableFunctions}"),
                         new MainMenuItem(
-                            $"Methods ({mainStatistics.ResumableFunctions})",
-                            $"/RF/ServiceDetails/{PartialNames.MethodsList}"),
+                            $"Method Groups",
+                            $"/RF/Home/{PartialNames.MethodsList}"),
                         new MainMenuItem(
-                            $"Pushed Calls ({mainStatistics.PushedCalls})",
+                            $"Pushed Calls",
                             $"/RF/Home/{PartialNames.PushedCalls}"),
                         new MainMenuItem(
-                            $"Logs ({mainStatistics.LatestLogErrors} New Error)",
+                            "Logs",
                             $"/RF/Home/{PartialNames.LatestLogs}"),
                 }
             };

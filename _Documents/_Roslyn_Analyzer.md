@@ -3,6 +3,9 @@
 * [PushCallAttribute] 
 	* muthod must have one input that is serializable
 	* MethodUrn must not be null if attribute applied
+* Validate input output type serialization
+* Function URN name must not duplicate
+* Method URN name must not duplicate in same class
 
 # Validate Wait Requests
 * Props used in Match and SetData expressions must be public and have getter and setter

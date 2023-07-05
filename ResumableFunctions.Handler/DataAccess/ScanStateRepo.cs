@@ -7,10 +7,10 @@ namespace ResumableFunctions.Handler.DataAccess;
 
 internal class ScanStateRepo : IScanStateRepo
 {
-    private readonly FunctionDataContext _context;
+    private readonly WaitsDataContext _context;
     private readonly IDistributedLockProvider _lockProvider;
 
-    public ScanStateRepo(FunctionDataContext context, IDistributedLockProvider lockProvider)
+    public ScanStateRepo(WaitsDataContext context, IDistributedLockProvider lockProvider)
     {
         _context = context;
         _lockProvider = lockProvider;

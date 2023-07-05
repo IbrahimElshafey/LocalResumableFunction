@@ -4,12 +4,19 @@ using Medallion.Threading.WaitHandles;
 using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.InOuts;
 
-namespace ResumableFunctions.Handler.TestShell
+namespace ResumableFunctions.Handler.Testing
 {
     internal class TestSettings : IResumableFunctionsSettings
     {
 
         private readonly string _testName;
+        private const string Server = "(localdb)\\MSSQLLocalDB";
+
+
+        public IResumableFunctionsSettings CleanDatabaseEvery(TimeSpan time)
+        {
+            return this;
+        }
 
         public TestSettings(string testName)
         {
@@ -19,7 +26,7 @@ namespace ResumableFunctions.Handler.TestShell
 
         public DbContextOptionsBuilder WaitsDbConfig =>
             new DbContextOptionsBuilder()
-            .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={_testName};");
+            .UseSqlServer($"Server={Server};Database={_testName};Trusted_Connection=True;TrustServerCertificate=True;");
 
         public string CurrentServiceUrl => null;
 

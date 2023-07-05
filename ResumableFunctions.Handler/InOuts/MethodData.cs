@@ -42,8 +42,8 @@ namespace ResumableFunctions.Handler.InOuts
             ClassName = methodInfo.DeclaringType?.FullName;
             MethodName = methodInfo.Name;
             MethodSignature = CalcSignature(methodInfo);
-            MethodHash = GetMethodHash(MethodName, ClassName, AssemblyName, MethodSignature);
             MethodUrn = GetMethodUrn(methodInfo);
+            MethodHash = GetMethodHash();
             CanPublishFromExternal = GetCanPublishFromExternal(methodInfo);
         }
 
@@ -75,7 +75,7 @@ namespace ResumableFunctions.Handler.InOuts
                     attribute.TypeId == PushCallAttribute.AttributeId
                 );
 
-            return (trackId as ITrackingIdetifier)?.MethodUrn;
+            return (trackId as ITrackingIdentifier)?.MethodUrn;
         }
 
         internal MethodInfo MethodInfo
@@ -97,33 +97,21 @@ namespace ResumableFunctions.Handler.InOuts
             var parameterInfos = value.GetParameters();
             var inputs = parameterInfos.Length != 0
                 ? parameterInfos
-                    .Select(x => x.ParameterType.Name)
+                    .Select(x => x.ParameterType.GetRealTypeName())
                     .Aggregate((x, y) => $"{x}#{y}")
                 : string.Empty;
             if (value is MethodInfo methodInfo)
-                return $"{methodInfo.ReturnType.Name}#{inputs}";
+                return $"{methodInfo.ReturnType.GetRealTypeName()}#{inputs}";
             return inputs;
         }
 
-        internal static byte[] GetMethodHash(string MethodName, string ClassName, string AssemblyName, string MethodSignature)
+        private byte[] GetMethodHash()
         {
-            var input = string.Concat(MethodName, ClassName, AssemblyName, MethodSignature);
+            var input = string.Concat(MethodUrn, ClassName, AssemblyName, MethodSignature);
             using var md5 = MD5.Create();
             var inputBytes = Encoding.ASCII.GetBytes(input);
             return md5.ComputeHash(inputBytes);
         }
-
-        //internal MethodIdentifier ToMethodIdentifier()
-        //{
-        //    return new MethodIdentifier
-        //    {
-        //        MethodName = MethodName,
-        //        MethodSignature = MethodSignature,
-        //        AssemblyName = AssemblyName,
-        //        ClassName = ClassName,
-        //        MethodHash = MethodHash
-        //    };
-        //}
 
         public override string ToString()
         {

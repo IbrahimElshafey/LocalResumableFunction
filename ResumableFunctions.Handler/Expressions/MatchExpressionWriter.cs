@@ -192,7 +192,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
 
             if (result is DateTime date)
             {
-                return (New(typeof(DateTime).GetConstructor(new[] { typeof(long) }), Constant(date.Ticks)), true, date);
+                return (New(typeof(DateTime).GetConstructor(new[] { typeof(int) }), Constant(date.Ticks)), true, date);
             }
 
             if (result is Guid guid)

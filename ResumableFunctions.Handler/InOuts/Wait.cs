@@ -21,6 +21,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     [NotMapped]
     public WaitExtraData ExtraData { get; internal set; }
     public byte[] ExtraDataValue { get; internal set; }
+
     public int? ServiceId { get; set; }
 
     public WaitType WaitType { get; internal set; }
@@ -55,6 +56,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     internal ResumableFunction CurrentFunction { get; set; }
 
     internal bool CanBeParent => this is FunctionWait || this is WaitsGroup;
+    internal int? CallId { get; set; }
 
 
     internal async Task<Wait> GetNextWait()
@@ -65,7 +67,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         if (functionRunner.ResumableFunctionExistInCode is false)
         {
             var errorMsg = $"Resumable function ({RequestedByFunction.MethodName}) not exist in code";
-            FunctionState.AddError(errorMsg, null, Constants.MethodNotInCode);
+            FunctionState.AddError(errorMsg, null, ErrorCodes.MethodValidation);
             throw new Exception(errorMsg);
         }
 
@@ -83,8 +85,8 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         catch (Exception ex)
         {
             FunctionState.AddError(
-                $"An error occurred after resuming execution after wait `{this}`.", ex, Constants.ProceedToNextWaitError);
-            FunctionState.Status = FunctionStatus.Error;
+                $"An error occurred after resuming execution after wait `{this}`.", ex, ErrorCodes.WaitProcessing);
+            FunctionState.Status = FunctionStatus.InError;
             throw;
         }
         finally
@@ -97,7 +99,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
             FunctionState.Logs.AddRange(CurrentFunction.Logs);
             FunctionState.Status =
               CurrentFunction.HasErrors() || FunctionState.HasErrors() ?
-              FunctionStatus.Error :
+              FunctionStatus.InError :
               FunctionStatus.InProgress;
         }
     }
@@ -184,8 +186,8 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         if (isNameDuplicated)
         {
             FunctionState.AddLog(
-                $"The wait named [{Name}] is duplicated in function body,fix it to not cause a problem. If it's a loop concat the  index to the name",
-                LogType.Warning);
+                $"The wait named `{Name}` is duplicated in function `{RequestedByFunction?.MethodName}` body,fix it to not cause a problem. If it's a loop concat the  index to the name",
+                LogType.Warning, ErrorCodes.WaitValidation);
         }
 
         var hasErrors = FunctionState.HasErrors();

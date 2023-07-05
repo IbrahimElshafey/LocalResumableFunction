@@ -9,13 +9,13 @@ namespace ResumableFunctions.Handler.DataAccess;
 internal class MethodIdsRepo : IMethodIdsRepo
 {
     private readonly ILogger<MethodIdsRepo> _logger;
-    private readonly FunctionDataContext _context;
+    private readonly WaitsDataContext _context;
     private readonly IDistributedLockProvider _lockProvider;
     private readonly IResumableFunctionsSettings _settings;
 
     public MethodIdsRepo(
         ILogger<MethodIdsRepo> logger,
-        FunctionDataContext context,
+        WaitsDataContext context,
         IDistributedLockProvider lockProvider,
         IResumableFunctionsSettings settings)
     {
@@ -30,7 +30,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
         var resumableFunctionIdentifier =
            await _context
                .ResumableFunctionIdentifiers
-               .FirstOrDefaultAsync(x => x.Id == id && x.ServiceId == _settings.CurrentServiceId);
+               .FirstOrDefaultAsync(x => x.Id == id);
         if (resumableFunctionIdentifier != null)
             return resumableFunctionIdentifier;
         var error = $"Can't find resumable function with ID `{id}` in database.";
@@ -79,7 +79,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
     public async Task AddWaitMethodIdentifier(MethodData methodData)
     {
         await using var waitHandle =
-            await _lockProvider.AcquireLockAsync($"WaitMethod_{methodData.MethodUrn}");
+            await _lockProvider.AcquireLockAsync($"MethodGroup_{methodData.MethodUrn}");
         var methodGroup =
             await _context
                 .MethodsGroups
@@ -144,5 +144,23 @@ internal class MethodIdsRepo : IMethodIdsRepo
             .Select(x => new { x.Id, x.MethodGroupId });
         var methodId = await methodIdQry.FirstAsync();
         return (methodId.Id, methodId.MethodGroupId);
+    }
+
+    public async Task<WaitMethodIdentifier> GetMethodIdentifierById(int? methodToWaitId)
+    {
+        return 
+            await _context
+            .WaitMethodIdentifiers
+            .FindAsync(methodToWaitId);
+    }
+
+    public async Task<bool> CanPublishFromExternal(string methodUrn)
+    {
+       return await _context
+            .MethodsGroups
+            .Include(x => x.WaitMethodIdentifiers)
+            .Where(x => x.MethodGroupUrn == methodUrn)
+            .SelectMany(x => x.WaitMethodIdentifiers)
+            .AnyAsync(x => x.CanPublishFromExternal);
     }
 }

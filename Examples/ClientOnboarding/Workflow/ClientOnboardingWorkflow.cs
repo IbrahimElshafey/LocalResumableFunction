@@ -1,4 +1,5 @@
-﻿using ClientOnboarding.InOuts;
+﻿using System.Linq.Expressions;
+using ClientOnboarding.InOuts;
 using ClientOnboarding.Services;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
@@ -28,7 +29,7 @@ namespace ClientOnboarding.Workflow
             {
                 _service.InformUserAboutRejection(RegistrationForm.UserId);
             }
-            else if (OwnerApprovalInput.Decision is true)
+            else if (OwnerApprovalInput.Decision)
             {
                 _service.SendWelcomePackage(RegistrationForm.UserId);
                 ClientMeetingId = _service.SetupInitalMeetingAndAgenda(RegistrationForm.UserId);
@@ -43,10 +44,10 @@ namespace ClientOnboarding.Workflow
         private MethodWait<RegistrationForm, RegistrationResult> WaitUserRegistration()
         {
             return Wait<RegistrationForm, RegistrationResult>("Wait User Registration", _service.ClientFillsForm)
-                            .MatchIf((regForm, regResult) => regResult.FormId > 0)
-                            .SetData((regForm, regResult) =>
-                            RegistrationForm == regForm &&
-                            RegistrationResult == regResult);
+                    .MatchIf((regForm, regResult) => regResult.FormId > 0)
+                    .SetData((regForm, regResult) =>
+                        RegistrationForm == regForm &&
+                        RegistrationResult == regResult);
         }
 
         private MethodWait<OwnerApproveClientInput, OwnerApproveClientResult> WaitOwnerApproveClient()
@@ -61,8 +62,8 @@ namespace ClientOnboarding.Workflow
         private MethodWait<int, MeetingResult> WaitMeetingResult()
         {
             return Wait<int, MeetingResult>("Wait Meeting Result", _service.SendMeetingResult)
-                               .MatchIf((meetingId, meetingResult) => meetingId == ClientMeetingId.MeetingId)
-                               .SetData((meetingId, meetingResult) => MeetingResult == meetingResult);
+                   .MatchIf((meetingId, meetingResult) => meetingId == ClientMeetingId.MeetingId)
+                   .SetData((meetingId, meetingResult) => MeetingResult == meetingResult);
         }
 
         public RegistrationForm RegistrationForm { get; set; }

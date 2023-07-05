@@ -2,7 +2,7 @@ using ClientOnboarding.InOuts;
 using ClientOnboarding.Services;
 using ClientOnboarding.Workflow;
 using Microsoft.Extensions.DependencyInjection;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
@@ -11,7 +11,7 @@ namespace Tests
         [Fact]
         public async Task Test_ClientOnBoarding_SimulateCalls()
         {
-            var test = new TestCase(
+            using var test = new TestShell(
                 nameof(Test_ClientOnBoarding_SimulateCalls),
                 typeof(ClientOnboardingService),
                 typeof(ClientOnboardingWorkflow));

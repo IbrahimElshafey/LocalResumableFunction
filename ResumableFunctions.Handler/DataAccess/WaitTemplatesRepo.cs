@@ -8,7 +8,7 @@ namespace ResumableFunctions.Handler.DataAccess;
 
 internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 {
-    private readonly FunctionDataContext _context;
+    private readonly WaitsDataContext _context;
     private readonly IServiceScope _scope;
     private readonly IResumableFunctionsSettings _settings;
 
@@ -16,11 +16,10 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
     {
         _settings = settings;
         _scope = provider.CreateScope();
-        _context = _scope.ServiceProvider.GetService<FunctionDataContext>();
+        _context = _scope.ServiceProvider.GetService<WaitsDataContext>();
     }
 
-    public async Task<WaitTemplate> AddNewTemplate(
-        WaitExpressionsHash hashResult,
+    public async Task<WaitTemplate> AddNewTemplate(WaitExpressionsHash hashResult,
         object currentFunctionInstance,
         int funcId,
         int groupId,
@@ -70,7 +69,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             .MethodWaits
             .Where(x =>
                 x.Status == WaitStatus.Waiting &&
-                x.MethodGroupToWaitId == methodGroupId&&
+                x.MethodGroupToWaitId == methodGroupId &&
                 x.ServiceId == _settings.CurrentServiceId)
             .Select(x => x.TemplateId)
             .Distinct()
@@ -95,6 +94,15 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         var waitTemplate = await _context.WaitTemplates.FindAsync(templateId);
         waitTemplate?.LoadExpressions();
         return waitTemplate;
+    }
+
+    public async Task<WaitTemplate> GetWaitTemplateWithBasicMatch(int methodWaitTemplateId)
+    {
+        return 
+            await _context
+            .WaitTemplates
+            .Select(WaitTemplate.BasicMatchSelector)
+            .FirstAsync(x => x.Id == methodWaitTemplateId);
     }
 
     public void Dispose()

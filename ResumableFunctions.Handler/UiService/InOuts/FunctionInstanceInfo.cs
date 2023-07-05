@@ -9,7 +9,8 @@ namespace ResumableFunctions.Handler.UiService.InOuts
             FunctionStatus.New => "black",
             FunctionStatus.InProgress => "yellow",
             FunctionStatus.Completed => "green",
-            FunctionStatus.Error => "red",
+            FunctionStatus.InError => "red",
+            _ => throw new ArgumentOutOfRangeException()
         };
     }
 }

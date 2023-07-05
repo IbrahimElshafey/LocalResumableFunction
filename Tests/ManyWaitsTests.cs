@@ -7,7 +7,7 @@ using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.TestShell;
+using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
@@ -16,7 +16,7 @@ namespace Tests
         [Fact]
         public async Task WaitThreeMethodsAtStart_Test()
         {
-            var test = new TestCase(nameof(WaitThreeMethodsAtStart_Test), typeof(WaitManyMethods));
+            using var test = new TestShell(nameof(WaitThreeMethodsAtStart_Test), typeof(WaitManyMethods));
             await test.ScanTypes();
             var errors = await test.GetLogs();
             Assert.Empty(errors);
@@ -48,7 +48,7 @@ namespace Tests
         [Fact]
         public async Task WaitTwoMethodsAfterFirst_Test()
         {
-            var test = new TestCase(nameof(WaitTwoMethodsAfterFirst_Test), typeof(WaitManyMethods));
+            using var test = new TestShell(nameof(WaitTwoMethodsAfterFirst_Test), typeof(WaitManyMethods));
             await test.ScanTypes();
             var errors = await test.GetLogs();
             Assert.Empty(errors);
@@ -85,7 +85,7 @@ namespace Tests
         [Fact]
         public async Task WaitFirstInThreeAtStart_Test()
         {
-            var test = new TestCase(nameof(WaitFirstInThreeAtStart_Test), typeof(WaitManyMethods));
+            using var test = new TestShell(nameof(WaitFirstInThreeAtStart_Test), typeof(WaitManyMethods));
             await test.ScanTypes();
             var errors = await test.GetLogs();
             Assert.Empty(errors);
@@ -119,7 +119,7 @@ namespace Tests
         [Fact]
         public async Task WaitManyMethodsWithExpression_Test()
         {
-            var test = new TestCase(nameof(WaitManyMethodsWithExpression_Test), typeof(WaitManyMethodsWithExpression));
+            using var test = new TestShell(nameof(WaitManyMethodsWithExpression_Test), typeof(WaitManyMethodsWithExpression));
             await test.ScanTypes();
             var errors = await test.GetLogs();
             Assert.Empty(errors);

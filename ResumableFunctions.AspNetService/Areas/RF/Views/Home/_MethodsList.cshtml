@@ -2,7 +2,7 @@
 @model List<MethodGroupInfo>
 <div class="w3-margin">
     <header class="w3-text-indigo">
-        <h2 class="w3-margin-top"><b>Methods Groups</b></h2>
+        <h2 class="w3-margin-top"><b>MethodGroups Groups</b></h2>
     </header>
     <div class="w3-container">
         <div class="w3-row-padding w3-margin"
@@ -31,28 +31,32 @@
         </div>
         <table class="w3-table-all">
             <thead>
-                <tr class="w3-indigo">
-                    <th>Method Group URN</th>
-                    <th>Methods</th>
-                    <th>Active Waits</th>
-                    <th>Completed Waits</th>
-                    <th>Canceled Waits</th>
-                    <th>Registration Date</th>
-                </tr>
+            <tr class="w3-indigo">
+                <th>Method Group URN</th>
+                <th>MethodGroups</th>
+                <th>Active Waits</th>
+                <th>Completed Waits</th>
+                <th>Canceled Waits</th>
+                <th>Registration Date</th>
+            </tr>
             </thead>
             @foreach (var item in Model)
             {
                 <tr>
                     <td>
-                        <span> @item.URN</span>
-                        <span>
-                            <a href="~/RF/PushedCall" class="w3-text-blue">
-                                (@(item.ActiveWaits + item.CompletedWaits + item.CanceledWaits) Waits)
-                            </a>
-                        </span>
+                        <span>@item.URN #@item.Id</span>
+                        @if (item.AllWaitsCount > 0)
+                        {
+                            <span>
+                                <a href="~/RF/MethodsGroup/MethodWaits?groupId=@item.Id" target="_blank" class="w3-text-blue">
+                                    (@(item.AllWaitsCount) Waits)
+                                </a>
+                            </span>
+                        }
                     </td>
                     <td>
-                        <a href="~/rfui/MethodsInGroup" class="w3-text-blue">@item.MethodsCount</a>
+                        @*href="~/RF/MethodsGroup/MethodsInGroup"*@
+                        <a onclick="LoadMethods(@item.Id)" target="_blank" class="w3-text-blue">@item.MethodsCount</a>
                     </td>
                     <td>
                         @item.ActiveWaits
@@ -67,5 +71,18 @@
                 </tr>
             }
         </table>
+    </div>
+
+    <div id="id01" class="w3-modal">
+        <div class="w3-modal-content" style="width: 90%;height:auto;">
+            <div class="w3-container">
+                <span onclick="CloseMethodsModal()" class="w3-button w3-display-topright">&times;</span>
+                <div id="methods-in-group">
+                    <div class="progress-bar">
+                        <div class="progress-bar-value"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

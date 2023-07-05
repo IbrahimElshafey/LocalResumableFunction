@@ -1,0 +1,71 @@
+﻿@model List<ResumableFunctions.Handler.UiService.InOuts.MethodWaitDetails>
+<div class="w3-container w3-margin">
+    <header class="w3-text-blue-gray">
+        <h2 class="w3-margin-top">
+            <b>
+                Waits for method group <span class="w3-text-indigo">
+                    `@Model.FirstOrDefault()?.GroupName`
+                </span>
+            </b>
+        </h2>
+    </header>
+
+    <br />
+    <table class="w3-table-all w3-padding-32" style="width: 100%;table-layout: fixed;">
+        
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>
+                    <ul>
+                        <li>
+                            <b>Name: </b>
+                            <span>@item.Name</span>
+                        </li>
+                        <li>
+                            <b>In Instance: </b>
+                            <a href="~/RF/FunctionInstances/FunctionInstance?instanceId=@item.InstanceId"
+                               target="_blank"
+                               class="w3-text-blue">
+                                @item.FunctionName
+                            </a>
+                        </li>
+                        <li>
+                            <b>Status: </b>
+                            <span class="@item.Status">@item.Status </span>
+                            @if (item.CallId > 0)
+                            {
+                                <a class="w3-text-blue" target="_blank" href="~/RF/PushedCall/Details?pushedCallId=@item.CallId">
+                                    By Call
+                                </a>
+                            }
+                        </li>
+                        <li>
+                            <b>Mandatory Parts: </b>
+                            <span>@item.MandatoryPart</span>
+                        </li>
+                    </ul>
+                </td>
+
+                <td>
+                    <ul>
+                        <li>
+                            <b>Match If: </b> @item.MatchExpression
+                        </li>
+                        <li>
+                            <b>Set Data: </b> @Html.Raw(item.SetDataExpression)
+                        </li>
+                        <li>
+                            <b>Mandatory Parts: </b> @item.MandatoryPartExpression
+                        </li>
+                        <li>
+                            <b>Created: </b> @item.Created
+                        </li>
+                       
+                    </ul>
+                </td>
+            </tr>
+        }
+    </table>
+</div>

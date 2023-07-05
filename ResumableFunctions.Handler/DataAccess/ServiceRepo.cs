@@ -8,14 +8,14 @@ using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-public class ServiceRepo : IServiceRepo
+internal class ServiceRepo : IServiceRepo
 {
-    private readonly FunctionDataContext _context;
+    private readonly WaitsDataContext _context;
     private readonly IResumableFunctionsSettings _settings;
     private readonly ILogger<ServiceRepo> _logger;
 
     public ServiceRepo(
-        FunctionDataContext context,
+        WaitsDataContext context,
         IResumableFunctionsSettings settings,
         ILogger<ServiceRepo> logger)
     {
@@ -46,16 +46,15 @@ public class ServiceRepo : IServiceRepo
     public async Task<bool> ShouldScanAssembly(string assemblyPath)
     {
         var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
-        var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName);
+        var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName) ??
+                          await AddNewServiceData(currentAssemblyName);
 
-        if (serviceData == null)
-        {
-            serviceData = await AddNewServiceData(currentAssemblyName);
-        }
-        else if (serviceData.ParentId != _settings.CurrentServiceId)
+        var notRoot = serviceData.Id != _settings.CurrentServiceId;
+        var notInCurrent = serviceData.ParentId != _settings.CurrentServiceId;
+        if (notInCurrent && notRoot)
         {
             var rootService = _context.ServicesData.Local.FirstOrDefault(x => x.Id == _settings.CurrentServiceId);
-            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to this service because it's used in another service.", null, Constants.DllExistInAnotherService);
+            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to service `{Assembly.GetEntryAssembly()?.GetName().Name}` because it's used in another service.", null, ErrorCodes.Scan);
             return false;
         }
 
@@ -64,7 +63,7 @@ public class ServiceRepo : IServiceRepo
         {
             var message = $"Assembly file ({assemblyPath}) not exist.";
             _logger.LogError(message);
-            serviceData.AddError(message, null, Constants.FileNotExist);
+            serviceData.AddError(message, null, ErrorCodes.Scan);
             return false;
         }
 
@@ -89,7 +88,7 @@ public class ServiceRepo : IServiceRepo
 
         if (isReferenceResumableFunction is false)
         {
-            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].", null, Constants.DllNotReferenceRequiredDll);
+            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].", null, ErrorCodes.Scan);
             return false;
         }
 
@@ -100,13 +99,28 @@ public class ServiceRepo : IServiceRepo
         if (shouldScan is false)
             serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].");
         if (_settings.ForceRescan)
-            serviceData.AddLog("Will be scanned because force rescan is enabled in Debug mode.", LogType.Warning);
+            serviceData.AddLog(
+                $"Dll `{currentAssemblyName}` Will be scanned because force rescan is enabled.", LogType.Warning, ErrorCodes.Scan);
         return shouldScan || _settings.ForceRescan;
     }
 
     public async Task<ServiceData> GetServiceData(string assemblyName)
     {
         return await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assemblyName);
+    }
+
+    public async Task AddErrorLog(Exception ex, string errorMsg, int errorCode = 0)
+    {
+        _logger.LogError(ex, errorMsg);
+        _context.Logs.Add(new LogRecord
+        {
+            EntityId = _settings.CurrentServiceId,
+            EntityType = nameof(ServiceData),
+            Message = $"{errorMsg}\n{ex}",
+            Type = LogType.Error,
+            Code = errorCode
+        });
+        await _context.SaveChangesAsync();
     }
 
     private async Task<ServiceData> AddNewServiceData(string currentAssemblyName)
@@ -124,4 +138,16 @@ public class ServiceRepo : IServiceRepo
         return newServiceData;
     }
 
+    public async Task AddLog(string msg, LogType logType = LogType.Info, int errorCode = 0)
+    {
+        _context.Logs.Add(new LogRecord
+        {
+            EntityId = _settings.CurrentServiceId,
+            EntityType = nameof(ServiceData),
+            Message = msg,
+            Type = logType,
+            Code = errorCode
+        });
+        await _context.SaveChangesAsync();
+    }
 }

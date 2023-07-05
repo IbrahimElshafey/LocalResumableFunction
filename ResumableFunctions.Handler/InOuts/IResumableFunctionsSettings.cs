@@ -16,5 +16,7 @@ namespace ResumableFunctions.Handler.InOuts
 
         public bool ForceRescan { get; set; }
         string CurrentDbName { get; set; }
+
+        IResumableFunctionsSettings CleanDatabaseEvery(TimeSpan time);
     }
 }

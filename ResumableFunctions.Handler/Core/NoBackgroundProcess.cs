@@ -54,15 +54,4 @@ internal class NoBackgroundProcess : IBackgroundProcess
             return default;
         }
     }
-
-    //private Expression TranslateConstants(Expression methodCall)
-    //{
-    //    var translateConstVisitor = new GenericVisitor();
-    //    translateConstVisitor.OnVisitMember(me =>
-    //    {
-    //        var value = Expression.Lambda(me).CompileFast().DynamicInvoke();
-    //        return Expression.Constant(value);
-    //    });
-    //    return translateConstVisitor.Visit(methodCall);
-    //}
 }

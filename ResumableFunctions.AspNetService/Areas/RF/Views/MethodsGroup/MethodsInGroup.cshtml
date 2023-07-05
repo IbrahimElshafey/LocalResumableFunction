@@ -1,0 +1,48 @@
+﻿@model List<ResumableFunctions.Handler.UiService.InOuts.MethodInGroupInfo>
+<header class="w3-text-blue-gray w3-col l10 w3-margin">
+    <h2 class="w3-margin-top">
+        <b>Methods in group <span class="w3-text-indigo">`@Model.FirstOrDefault()?.GroupUrn`</span></b>
+    </h2>
+</header>
+<div class="w3-container">
+    <table class="w3-table-all">
+        <thead>
+            <tr class="w3-indigo">
+                <th>Service</th>
+                <th>Class Name</th>
+                <th>Method</th>
+                <th>Publish From External</th>
+                <th>Created</th>
+                <th>Modified</th>
+            </tr>
+        </thead>
+        @foreach (var item in Model)
+        {
+            var method = item.Method;
+            var inputOutput = item.Method.MethodSignature.Split('#');
+            <tr>
+                <td>@item.ServiceName</td>
+                <td>@method.ClassName</td>
+                <td>
+                    <span class="w3-text-blue">@inputOutput[0] </span>
+                    <span class="w3-text-teal">@method.MethodName</span>
+                    <span class="w3-text-brown">(</span>
+                    <span class="w3-text-blue">@inputOutput[1]</span>
+                    <span class="w3-text-brown"> input )</span>
+                </td>
+                <td>@method.CanPublishFromExternal</td>
+                <td>@method.Created</td>
+                @if (method.Modified == DateTime.MinValue)
+                {
+                    <td>Not Updated</td>
+                }
+                else
+                {
+                    <td>@method.Modified</td>
+                }
+            </tr>
+        }
+    </table>
+    <br />
+    <br />
+</div>

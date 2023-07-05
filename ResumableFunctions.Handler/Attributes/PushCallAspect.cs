@@ -9,7 +9,7 @@ namespace ResumableFunctions.Handler.Attributes
 {
 
 
-    [Aspect(Scope.Global, Factory = typeof(HangfireActivator))]
+    [Aspect(Scope.PerInstance, Factory = typeof(HangfireActivator))]
     public class PushCallAspect
     {
         private PushedCall _pushedCall;
