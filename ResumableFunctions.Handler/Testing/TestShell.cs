@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using System.Time;
+using AspectInjector.Broker;
 using FastExpressionCompiler;
 using Hangfire;
 using Medallion.Threading;
@@ -15,10 +16,11 @@ using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ResumableFunctions.Handler.Testing
 {
-    public class TestShell:IDisposable
+    public class TestShell : IDisposable
     {
         public IHost CurrentApp { get; private set; }
         private readonly HostApplicationBuilder _builder;
@@ -26,7 +28,7 @@ namespace ResumableFunctions.Handler.Testing
         private readonly TestSettings _settings;
         private readonly string _testName;
         private IDistributedSynchronizationHandle _lock;
-        private const string Server= "(localdb)\\MSSQLLocalDB";
+        private const string Server = "(localdb)\\MSSQLLocalDB";
         public TestShell(string testName, params Type[] types)
         {
             _testName = testName;
@@ -34,7 +36,7 @@ namespace ResumableFunctions.Handler.Testing
             _builder = Host.CreateApplicationBuilder();
             _types = types;
         }
-        
+
         public static async Task DeleteDb(string dbName)
         {
             var dbConfig = new DbContextOptionsBuilder()
@@ -86,6 +88,23 @@ namespace ResumableFunctions.Handler.Testing
             await context.DisposeAsync();
         }
 
+        public async Task<string> RoundCheck(int expectedPushedCallsCount, int waitsCount, int completedInstancesCount)
+        {
+
+            if (await HasErrors()) 
+                return "Has Log Errors";
+
+            if (await GetPushedCallsCount() != expectedPushedCallsCount) 
+                return $"Pushed calls count not equal {expectedPushedCallsCount}";
+
+            if (await GetWaitsCount() != waitsCount)
+                return $"Waits count not equal {expectedPushedCallsCount}";
+
+            if (await GetCompletedInstancesCount() != completedInstancesCount)
+                return $"Completed instances count not equal {expectedPushedCallsCount}";
+
+            return string.Empty;
+        }
 
         public async Task<int> SimulateMethodCall<TClassType>(
            Expression<Func<TClassType, object>> methodSelector,
@@ -101,7 +120,7 @@ namespace ResumableFunctions.Handler.Testing
             inputVisitor.Visit(methodSelector);
             if (input != null)
                 return await SimulateMethodCall(methodSelector, input, output);
-            
+
             throw new Exception("Can't get input");
         }
 
@@ -148,6 +167,11 @@ namespace ResumableFunctions.Handler.Testing
             return instances;
         }
 
+        public async Task<int> GetCompletedInstancesCount()
+        {
+            return await Context.FunctionStates.CountAsync(x => x.Status == FunctionStatus.Completed);
+        }
+
         public async Task<List<PushedCall>> GetPushedCalls()
         {
             var calls = await Context.PushedCalls.AsNoTracking().ToListAsync();
@@ -156,6 +180,11 @@ namespace ResumableFunctions.Handler.Testing
                 call.LoadUnmappedProps();
             }
             return calls;
+        }
+
+        public async Task<int> GetPushedCallsCount()
+        {
+            return await Context.PushedCalls.CountAsync();
         }
 
 
@@ -169,6 +198,11 @@ namespace ResumableFunctions.Handler.Testing
             return await query.OrderBy(x => x.Id).ToListAsync();
         }
 
+        public async Task<int> GetWaitsCount()
+        {
+            return await Context.Waits.CountAsync(x => !x.IsFirst);
+        }
+
         public async Task<List<LogRecord>> GetLogs(LogType logType = LogType.Error)
         {
             return
@@ -176,6 +210,15 @@ namespace ResumableFunctions.Handler.Testing
                     .Where(x => x.Type == logType)
                     .AsNoTracking()
                     .ToListAsync();
+        }
+
+        public async Task<bool> HasErrors()
+        {
+            return
+                await Context.Logs
+                    .Where(x => x.Type == LogType.Error)
+                    .AsNoTracking()
+                    .AnyAsync();
         }
 
         public void Dispose()
