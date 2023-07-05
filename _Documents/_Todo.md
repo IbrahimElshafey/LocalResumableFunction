@@ -8,10 +8,10 @@
 * Function URN name must not duplicate in same class
 
 # Workin on version 1.0.8
-* Background Cleaning Job
-* Review Concurrency problems
 * UI V1
+* Background Cleaning Job
 * ResumableFunctions.Publisher
+* Review Concurrency problems
 * Advanced Sample
 * Update Documentation and Record Videos
 
