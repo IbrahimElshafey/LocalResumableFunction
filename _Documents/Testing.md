@@ -1,6 +1,12 @@
-﻿# Write Unit Tests for basic scenarios:
+﻿# Test Shell Todo
+* Function to tests URNs
+
+* Get instances for pushed call
+* Get matched waits for pushed call
 
 
+
+# Write Unit Tests for basic scenarios:
 * Sub functions tests
 	* Pushed call activate one instance,what if same function and sub fnction wait the same wait
 
@@ -22,3 +28,6 @@
 * We can't mock Resumable function class dependencies and use the mocks because of attributes checks
 * Could we fake dll and then mock faked instances?
 * No Fakes or Mokes libraries you should write your fake implementation for your interfaces
+
+# Generate test code for resumable function
+* I plan to auto-generate code for test

@@ -1,5 +1,4 @@
 # Prepare how to use?
-* Use github pages to create a web site2
 * Update readme with bard help
 
 * Write complex use cases

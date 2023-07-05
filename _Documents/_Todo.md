@@ -1,9 +1,8 @@
 ﻿# Working On Now
+* Function to tests URNs
+
 
 * Message Pack private setter props serialization
-
-
-
 
 # Workin on version 1.0.8
 * UI V1
