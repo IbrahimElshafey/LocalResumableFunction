@@ -9,6 +9,6 @@ public interface IServiceRepo
     Task<bool> ShouldScanAssembly(string assemblyPath);
     Task<ServiceData> GetServiceData(string assemblyName);
 
-    Task AddErrorLog(Exception ex, string errorMsg);
-    Task AddLog(string msg, LogType logType = LogType.Info);
+    Task AddErrorLog(Exception ex, string errorMsg, int errorCode = 0);
+    Task AddLog(string msg, LogType logType = LogType.Info, int errorCode = 0);
 }

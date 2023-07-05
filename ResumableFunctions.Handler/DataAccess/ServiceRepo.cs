@@ -54,7 +54,7 @@ internal class ServiceRepo : IServiceRepo
         if (notInCurrent && notRoot)
         {
             var rootService = _context.ServicesData.Local.FirstOrDefault(x => x.Id == _settings.CurrentServiceId);
-            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to service `{Assembly.GetEntryAssembly()?.GetName().Name}` because it's used in another service.", null, Constants.DllExistInAnotherService);
+            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to service `{Assembly.GetEntryAssembly()?.GetName().Name}` because it's used in another service.", null, ErrorCodes.Scan);
             return false;
         }
 
@@ -63,7 +63,7 @@ internal class ServiceRepo : IServiceRepo
         {
             var message = $"Assembly file ({assemblyPath}) not exist.";
             _logger.LogError(message);
-            serviceData.AddError(message, null, Constants.FileNotExist);
+            serviceData.AddError(message, null, ErrorCodes.Scan);
             return false;
         }
 
@@ -88,7 +88,7 @@ internal class ServiceRepo : IServiceRepo
 
         if (isReferenceResumableFunction is false)
         {
-            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].", null, Constants.DllNotReferenceRequiredDll);
+            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].", null, ErrorCodes.Scan);
             return false;
         }
 
@@ -99,7 +99,8 @@ internal class ServiceRepo : IServiceRepo
         if (shouldScan is false)
             serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].");
         if (_settings.ForceRescan)
-            serviceData.AddLog($"Dll `{currentAssemblyName}` Will be scanned because force rescan is enabled.", LogType.Warning);
+            serviceData.AddLog(
+                $"Dll `{currentAssemblyName}` Will be scanned because force rescan is enabled.", LogType.Warning, ErrorCodes.Scan);
         return shouldScan || _settings.ForceRescan;
     }
 
@@ -108,15 +109,16 @@ internal class ServiceRepo : IServiceRepo
         return await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assemblyName);
     }
 
-    public async Task AddErrorLog(Exception ex, string errorMsg)
+    public async Task AddErrorLog(Exception ex, string errorMsg, int errorCode = 0)
     {
         _logger.LogError(ex, errorMsg);
         _context.Logs.Add(new LogRecord
         {
             EntityId = _settings.CurrentServiceId,
             EntityType = nameof(ServiceData),
-            Message = errorMsg + ex,
-            Type = LogType.Error
+            Message = $"{errorMsg}\n{ex}",
+            Type = LogType.Error,
+            Code = errorCode
         });
         await _context.SaveChangesAsync();
     }
@@ -136,14 +138,15 @@ internal class ServiceRepo : IServiceRepo
         return newServiceData;
     }
 
-    public async Task AddLog(string msg, LogType logType = LogType.Info)
+    public async Task AddLog(string msg, LogType logType = LogType.Info, int errorCode = 0)
     {
         _context.Logs.Add(new LogRecord
         {
             EntityId = _settings.CurrentServiceId,
             EntityType = nameof(ServiceData),
             Message = msg,
-            Type = logType
+            Type = logType,
+            Code = errorCode
         });
         await _context.SaveChangesAsync();
     }

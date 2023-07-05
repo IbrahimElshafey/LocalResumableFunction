@@ -195,27 +195,27 @@ internal class Scanner
         var result = true;
         if (method.IsGenericMethod)
         {
-            serviceData?.AddError($"`{method.GetFullName()}` must not be generic.", null, Constants.MethodMustNotBeGeneric);
+            serviceData?.AddError($"`{method.GetFullName()}` must not be generic.", null, ErrorCodes.MethodValidation);
             result = false;
         }
         if (method.ReturnType == typeof(void))
         {
-            serviceData?.AddError($"`{method.GetFullName()}` must return a value, void is not allowed.", null, Constants.MethodMustReturnValue);
+            serviceData?.AddError($"`{method.GetFullName()}` must return a value, void is not allowed.", null, ErrorCodes.MethodValidation);
             result = false;
         }
         if (method.IsAsyncMethod() && method.ReturnType.GetGenericTypeDefinition() != typeof(Task<>))
         {
-            serviceData?.AddError($"`{method.GetFullName()}` async method must return Task<T> object.", null, Constants.AsyncMethodMustBeTask);
+            serviceData?.AddError($"`{method.GetFullName()}` async method must return Task<T> object.", null, ErrorCodes.MethodValidation);
             result = false;
         }
         if (method.IsStatic)
         {
-            serviceData?.AddError($"`{method.GetFullName()}` must be instance method.", null, Constants.MethodMustBeInstance);
+            serviceData?.AddError($"`{method.GetFullName()}` must be instance method.", null, ErrorCodes.MethodValidation);
             result = false;
         }
         if (method.GetParameters().Length != 1)
         {
-            serviceData?.AddError($"`{method.GetFullName()}` must have only one parameter.", null, Constants.MethodMustHaveOneInput);
+            serviceData?.AddError($"`{method.GetFullName()}` must have only one parameter.", null, ErrorCodes.MethodValidation);
             result = false;
         }
         return result;
@@ -254,7 +254,7 @@ internal class Scanner
                 if (ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
                     await RegisterResumableFunction(resumableFunctionInfo, serviceData);
                 else
-                    serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", null, Constants.CantRegisterFunction);
+                    serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", null, ErrorCodes.MethodValidation);
             }
         }
 
@@ -270,7 +270,7 @@ internal class Scanner
 
         serviceData.AddLog(
             $"No instance method like `void SetDependencies(Interface dep1,...)` found in class `{type.FullName}` that set your dependencies.",
-            LogType.Warning);
+            LogType.Warning, ErrorCodes.Scan);
     }
 
 
@@ -290,7 +290,7 @@ internal class Scanner
         {
             var errorMsg =
                 $"The resumable function [{resumableFunction.GetFullName()}] must be async.";
-            serviceData.AddError(errorMsg, null, Constants.FunctionMustBeAsync);
+            serviceData.AddError(errorMsg, null, ErrorCodes.MethodValidation);
             _logger.LogError(errorMsg);
             result = false;
         }
@@ -299,13 +299,13 @@ internal class Scanner
             var errorMsg =
                 $"The resumable function [{resumableFunction.GetFullName()}] must match the signature `IAsyncEnumerable<Wait> {resumableFunction.Name}()`.\n" +
                 $"Must have no parameter and return type must be `IAsyncEnumerable<Wait>`";
-            serviceData.AddError(errorMsg, null, Constants.FunctionNotMatchSignature);
+            serviceData.AddError(errorMsg, null, ErrorCodes.MethodValidation);
             _logger.LogError(errorMsg);
             result = false;
         }
 
         if (!resumableFunction.IsStatic) return result;
-        serviceData.AddError($"Resumable function `{resumableFunction.GetFullName()}` must be instance method.", null, Constants.MethodMustBeInstance);
+        serviceData.AddError($"Resumable function `{resumableFunction.GetFullName()}` must be instance method.", null, ErrorCodes.MethodValidation);
         return false;
     }
 

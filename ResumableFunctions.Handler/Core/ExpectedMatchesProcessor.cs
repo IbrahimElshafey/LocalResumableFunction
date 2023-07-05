@@ -138,9 +138,9 @@ namespace ResumableFunctions.Handler.Core
                     $"Error occurred when evaluate match for `{_methodWait.Name}` " +
                     $"in `{_methodWait.RequestedByFunction.RF_MethodUrn}` when pushed call `{pushedCallId}`.";
                 if (_methodWait.IsFirst)
-                    await _serviceRepo.AddErrorLog(ex, error);
+                    await _serviceRepo.AddErrorLog(ex, error, ErrorCodes.WaitProcessing);
                 else
-                    _methodWait.FunctionState.AddError(error, ex, Constants.MatchEvaluationError);
+                    _methodWait.FunctionState.AddError(error, ex, ErrorCodes.WaitProcessing);
                 throw new Exception(error, ex);
             }
         }
@@ -186,7 +186,7 @@ namespace ResumableFunctions.Handler.Core
                 _methodWait.FunctionState.AddError(
                     $"Concurrency Exception occurred when process wait [{_methodWait.Name}]." +
                     $"\nProcessing this wait will be scheduled.",
-                    ex, Constants.ConcurrencyException);
+                    ex, ErrorCodes.ConcurrencyException);
                 _backgroundJobClient.Schedule(() =>
                         ProcessFunctionExpectedMatches(_methodWait.RequestedByFunctionId, pushedCallId),
                     TimeSpan.FromSeconds(10));
@@ -265,7 +265,7 @@ namespace ResumableFunctions.Handler.Core
                 {
                     var errorMsg = $"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).";
                     _logger.LogWarning(errorMsg);
-                    currentWait.FunctionState.AddError(errorMsg, null, Constants.ProceedToNextWaitParentNull);
+                    currentWait.FunctionState.AddError(errorMsg, null, ErrorCodes.WaitProcessing);
                     return;
                 }
 
@@ -293,7 +293,7 @@ namespace ResumableFunctions.Handler.Core
             {
                 var errorMessage = $"Error when proceed to next wait after {currentWait}";
                 _logger.LogError(ex, errorMessage);
-                currentWait.FunctionState.AddError(errorMessage, ex, Constants.ProceedToNextWaitError);
+                currentWait.FunctionState.AddError(errorMessage, ex, ErrorCodes.WaitProcessing);
                 throw;
             }
         }

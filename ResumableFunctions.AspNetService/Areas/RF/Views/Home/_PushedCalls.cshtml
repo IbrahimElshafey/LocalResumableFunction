@@ -39,11 +39,11 @@
                     <tr class="w3-indigo">
                         <th>Method</th>
                         <th>Input & Output</th>
-                        <th>Processing</th>
-                        <th>Expected</th>
+                      @*  <th>Processing</th>
+                        <th>Expected</th>*@
                         <th>Matched</th>
                         <th>Not Matched</th>
-                        <th>Pushed</th>
+                        <th width="120px">Pushed</th>
                     </tr>
                 </thead>
                 @foreach (var item in Model)
@@ -60,12 +60,12 @@
                             </ul>
                         </td>
                         <td class="JsonObject">@MessagePackSerializer.ConvertToJson(item.PushedCall.DataValue)</td>
-                        <td>
+                      @*  <td>
                             @((item.MatchedCount + item.NotMatchedCount) == item.ExpectedMatchCount ?
                                 "Finished" :
                                 "In Progress")
                         </td>
-                        <td>@item.ExpectedMatchCount</td>
+                        <td>@item.ExpectedMatchCount</td>*@
                         <td>@item.MatchedCount</td>
                         <td>@item.NotMatchedCount</td>
                         <td>@item.PushedCall.Created</td>

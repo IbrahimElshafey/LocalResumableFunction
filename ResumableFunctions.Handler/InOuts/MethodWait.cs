@@ -76,7 +76,7 @@ public class MethodWait : Wait
         {
             var error = $"An error occurred when try evaluate match expression for wait [{Name}]." +
                         ex.Message;
-            FunctionState.AddError(error, ex, Constants.MatchEvaluationError);
+            FunctionState.AddError(error, ex, ErrorCodes.WaitProcessing);
             throw new Exception(error, ex);
         }
     }
@@ -92,13 +92,13 @@ public class MethodWait : Wait
                     $"You didn't set the `MatchExpression` for wait [{Name}] that is not a first wait," +
                     $"This will lead to no match for all calls," +
                     $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchExpression`," +
-                    $"or use MatchAll() method.", null, Constants.SetDataEvaluationError);
+                    $"or use MatchAll() method.", null, ErrorCodes.WaitValidation);
                 break;
             case true when MatchExpression == null:
                 FunctionState.AddLog(
                     $"You didn't set the `MatchExpression` for first wait [{Name}]," +
                     $"This will lead to all calls will be matched.",
-                    LogType.Warning);
+                    LogType.Warning, ErrorCodes.WaitValidation);
                 break;
         }
 
@@ -106,7 +106,7 @@ public class MethodWait : Wait
             FunctionState.AddLog(
                 $"You didn't set the `SetDataExpression` for wait [{Name}], " +
                 $"The execution will not continue, " +
-                $"Please use `NoSetData()` if this is intended.", LogType.Warning);
+                $"Please use `NoSetData()` if this is intended.", LogType.Warning, ErrorCodes.WaitValidation);
         return base.IsValidWaitRequest();
     }
 

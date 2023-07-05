@@ -3,8 +3,10 @@ using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using System.Threading;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.Core
 {
@@ -16,13 +18,16 @@ namespace ResumableFunctions.Handler.Core
         private readonly ILogger<CallPusher> _logger;
         private readonly IPushedCallsRepo _pushedCallsRepo;
         private readonly IMethodIdsRepo _methodIdsRepo;
+        private readonly IServiceRepo _serviceRepo;
 
         public CallPusher(
             IUnitOfWork context,
             IBackgroundProcess backgroundJobClient,
-            ICallProcessor processor, 
+            ICallProcessor processor,
             ILogger<CallPusher> logger,
-            IPushedCallsRepo pushedCallsRepo, IMethodIdsRepo methodIdsRepo)
+            IPushedCallsRepo pushedCallsRepo,
+            IMethodIdsRepo methodIdsRepo,
+            IServiceRepo serviceRepo)
         {
             _context = context;
             _backgroundJobClient = backgroundJobClient;
@@ -30,31 +35,44 @@ namespace ResumableFunctions.Handler.Core
             _logger = logger;
             _pushedCallsRepo = pushedCallsRepo;
             _methodIdsRepo = methodIdsRepo;
+            _serviceRepo = serviceRepo;
         }
 
         public async Task<int> PushCall(PushedCall pushedCall)
         {
-            _pushedCallsRepo.Add(pushedCall);
-            await _context.SaveChangesAsync();
-            _backgroundJobClient.Enqueue(() => _processor.InitialProcessPushedCall(pushedCall.Id, pushedCall.MethodData.MethodUrn));
-            return pushedCall.Id;
+            try
+            {
+                _pushedCallsRepo.Add(pushedCall);
+                await _context.SaveChangesAsync();
+                _backgroundJobClient.Enqueue(() => _processor.InitialProcessPushedCall(pushedCall.Id, pushedCall.MethodData.MethodUrn));
+                return pushedCall.Id;
+            }
+            catch (Exception ex)
+            {
+                var error = $"Can't handle pushed call `{pushedCall}`";
+                await _serviceRepo.AddErrorLog(ex, error, ErrorCodes.PushedCall);
+                throw new Exception(error, ex);
+            }
         }
-        static readonly SemaphoreSlim SemaphoreSlim = new(1, 1);
         public async Task<int> PushExternalCall(PushedCall pushedCall, string serviceName)
         {
-            await SemaphoreSlim.WaitAsync();
             try
             {
                 var methodUrn = pushedCall.MethodData.MethodUrn;
-                if (await _methodIdsRepo.CanPublishFromExternal(methodUrn)) return await PushCall(pushedCall);
+                if (await _methodIdsRepo.CanPublishFromExternal(methodUrn))
+                    return await PushCall(pushedCall);
                 var errorMsg =
-                    $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}].";
+                    $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}]." +
+                    $"\nPushed call was `{pushedCall}`";
                 _logger.LogError(errorMsg);
-                throw new Exception(errorMsg);
+                await _serviceRepo.AddLog(errorMsg, LogType.Warning, ErrorCodes.PushedCall);
+                return -1;
             }
-            finally
+            catch (Exception ex)
             {
-                SemaphoreSlim.Release();
+                var error = $"Can't handle external pushed call `{pushedCall}`";
+                await _serviceRepo.AddErrorLog(ex, error, ErrorCodes.PushedCall);
+                throw new Exception(error, ex);
             }
         }
     }

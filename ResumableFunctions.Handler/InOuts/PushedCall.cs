@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
+using Newtonsoft.Json;
 using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
@@ -48,5 +49,17 @@ public class PushedCall : IEntityWithDelete, IOnSaveEntity
         var genericInputOutPut = typeof(GInputOutput<,>).MakeGenericType(inputType, outputType);
         dynamic data = converter.ConvertToObject(dataBytes, genericInputOutPut);
         return InputOutput.FromGeneric(data);
+    }
+
+    public override string ToString()
+    {
+        return JsonConvert.SerializeObject(
+            this,
+            Formatting.None,
+            new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.Ignore
+            });
     }
 }
