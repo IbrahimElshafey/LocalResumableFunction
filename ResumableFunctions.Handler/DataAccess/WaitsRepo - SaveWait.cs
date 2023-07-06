@@ -180,7 +180,7 @@ internal partial class WaitsRepo
         SetNodeType(wait);
         if (isExistLocal || !notAddStatus) return Task.CompletedTask;
 
-        Console.WriteLine($"==> Add Wait [{wait.Name}] with type [{wait.WaitType}]");
+        _logger.LogInformation($"Add Wait [{wait.Name}] with type [{wait.WaitType}]");
         if (wait is WaitsGroup waitGroup)
         {
             waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);

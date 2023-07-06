@@ -306,8 +306,7 @@ internal partial class WaitsRepo : IWaitsRepo
         var isNode = waitToReplay.IsRootNode || waitToReplay.ParentWait?.WaitType == WaitType.FunctionWait;
         if (isNode is false)
         {
-            var error =
-                 $"Wait to replay [{replayWait.Name}] must be a node.";
+            var error = $"Wait to replay [{replayWait.Name}] must be a node.";
             _logger.LogError(error);
             throw new Exception(error);
         }
