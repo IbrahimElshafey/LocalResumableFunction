@@ -13,11 +13,15 @@
 * Update Documentation and Record Videos
 
 
-# Version 2
+# Later Versions
+* Security and IUserContext
+* Fast logging
+* UI V2
 * Roslyn Analyzer
 * Auto-generate code for test
-* Performance Analysis
+* Performance Monitoring
 * Encryption option for sensitive data
 * Use pull mode to get calls from a queue
+	* Queue based communication between services
 * Function priority
-* Queue based communication between services
+* Localization

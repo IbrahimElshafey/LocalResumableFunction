@@ -8,13 +8,20 @@
 * Use IMaterializationInterceptor to set entity dependencies
 
 # Enhancements
+* Services Registry is separate
+* Pushed Call is separate
+* Security and IUserContext
+* Fast logging
+	* Separate DB for log
+	* Custom implementation for logging (IResumableFunctionLogging)
+	* https://www.influxdata.com/
 * Parameter check lib use
 * Resumable function hooks
 	* After Resumed
 	* On Error Occurred
 * Function priority/Matched Waits priority
 	* How hangfire handle priority
-* Performance Analysis
+* Performance Analysis/Monitoring
 * Store options
 	* Use Queue Service to Handle Pushed Calls
 		* Kafka,RbbittMQ or ActiveMQ
@@ -30,3 +37,4 @@
 	* Wait
 	* WaitForCalls
 	* Logs
+* Localization
