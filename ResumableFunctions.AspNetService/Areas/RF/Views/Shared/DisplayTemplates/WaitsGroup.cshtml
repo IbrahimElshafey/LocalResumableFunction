@@ -2,7 +2,7 @@
 @using ResumableFunctions.Handler.Expressions
 @model WaitsGroup
 <li>
-    <div class="w3-card w3-pale-blue w3-padding w3-round">
+    <div class="w3-card w3-pale-blue w3-padding w3-round" onclick="toggleView('waits-in-group-@Model.Id')">
         <h5 class="w3-text-indigo"><b>@Model.Name</b></h5>
         <span>@Model.WaitType</span>
         <span class="@Model.Status">@Model.Status</span>
@@ -13,7 +13,7 @@
         }
         <p></p>
     </div>
-    <ul class="w3-ul">
+    <ul id="waits-in-group-@Model.Id" class="w3-ul w3-hide">
         @foreach (var wait in Model.ChildWaits)
         {
             @Html.DisplayFor(x=>wait,wait.GetType().Name)

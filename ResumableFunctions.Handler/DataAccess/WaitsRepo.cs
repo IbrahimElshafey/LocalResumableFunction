@@ -286,6 +286,7 @@ internal partial class WaitsRepo : IWaitsRepo
 
     public async Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait)
     {
+        //todo:must be node in it's function
         var waitToReplay =
             await _context.Waits
             .OrderByDescending(x => x.Id)
@@ -293,8 +294,7 @@ internal partial class WaitsRepo : IWaitsRepo
             .FirstOrDefaultAsync(x =>
                 x.RequestedByFunctionId == replayWait.RequestedByFunctionId &&
                 x.FunctionStateId == replayWait.FunctionState.Id &&
-                x.Name == replayWait.Name &&
-                x.IsNode);
+                x.Name == replayWait.Name);
 
         if (waitToReplay == null)
         {

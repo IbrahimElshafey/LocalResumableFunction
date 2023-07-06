@@ -104,7 +104,6 @@ public class MethodWait : Wait
         if (SetDataExpression == null)
             FunctionState.AddLog(
                 $"You didn't set the `SetDataExpression` for wait [{Name}], " +
-                $"The execution will not continue, " +
                 $"Please use `NoSetData()` if this is intended.", LogType.Warning, StatusCodes.WaitValidation);
         return base.IsValidWaitRequest();
     }

@@ -23,7 +23,6 @@ public class TimeWait : Wait
         {
             _timeMethodWait.Name = $"#{nameof(LocalRegisteredMethods.TimeWait)}#";
             _timeMethodWait.CurrentFunction = CurrentFunction;
-            _timeMethodWait.IsNode = IsNode;
             _timeMethodWait.IsFirst = IsFirst;
             _timeMethodWait.WasFirst = WasFirst;
             _timeMethodWait.IsNode = IsNode;
