@@ -8,6 +8,10 @@ namespace ResumableFunctions.Handler;
 public abstract partial class ResumableFunction : IObjectWithLog
 {
 
+    public void Log(string message) => this.AddLog(message, LogType.Info, Helpers.StatusCodes.Custom);
+    public void Warning(string message) => this.AddLog(message, LogType.Warning, Helpers.StatusCodes.Custom);
+    public void Error(string message, Exception ex = null) => this.AddError(message, Helpers.StatusCodes.Custom, ex);
+
     [IgnoreMember]
     public int ErrorCounter { get; set; }
 

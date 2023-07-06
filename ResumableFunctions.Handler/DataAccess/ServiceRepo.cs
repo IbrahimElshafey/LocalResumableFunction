@@ -27,7 +27,7 @@ internal class ServiceRepo : IServiceRepo
     public async Task UpdateDllScanDate(ServiceData dll)
     {
         await _context.Entry(dll).ReloadAsync();
-        dll.AddLog($"Update last scan date for service [{dll.AssemblyName}] to [{DateTime.Now}].");
+        dll.AddLog($"Update last scan date for service [{dll.AssemblyName}] to [{DateTime.Now}].", LogType.Info, StatusCodes.Scanning);
         dll.Modified = DateTime.Now;
         await _context.SaveChangesAsync();
     }
@@ -54,7 +54,7 @@ internal class ServiceRepo : IServiceRepo
         if (notInCurrent && notRoot)
         {
             var rootService = _context.ServicesData.Local.FirstOrDefault(x => x.Id == _settings.CurrentServiceId);
-            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to service `{Assembly.GetEntryAssembly()?.GetName().Name}` because it's used in another service.", null, ErrorCodes.Scan);
+            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to service `{Assembly.GetEntryAssembly()?.GetName().Name}` because it's used in another service.", StatusCodes.Scanning, null);
             return false;
         }
 
@@ -63,7 +63,7 @@ internal class ServiceRepo : IServiceRepo
         {
             var message = $"Assembly file ({assemblyPath}) not exist.";
             _logger.LogError(message);
-            serviceData.AddError(message, null, ErrorCodes.Scan);
+            serviceData.AddError(message, StatusCodes.Scanning, null);
             return false;
         }
 
@@ -88,19 +88,19 @@ internal class ServiceRepo : IServiceRepo
 
         if (isReferenceResumableFunction is false)
         {
-            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].", null, ErrorCodes.Scan);
+            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].", StatusCodes.Scanning, null);
             return false;
         }
 
         var lastBuildDate = File.GetLastWriteTime(assemblyPath);
         serviceData.Url = _settings.CurrentServiceUrl;
-        serviceData.AddLog($"Check last scan date for assembly [{currentAssemblyName}].");
+        serviceData.AddLog($"Check last scan date for assembly [{currentAssemblyName}].", LogType.Info, StatusCodes.Scanning);
         var shouldScan = lastBuildDate > serviceData.Modified;
         if (shouldScan is false)
-            serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].");
+            serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].", LogType.Info, StatusCodes.Scanning);
         if (_settings.ForceRescan)
             serviceData.AddLog(
-                $"Dll `{currentAssemblyName}` Will be scanned because force rescan is enabled.", LogType.Warning, ErrorCodes.Scan);
+                $"Dll `{currentAssemblyName}` Will be scanned because force rescan is enabled.", LogType.Warning, StatusCodes.Scanning);
         return shouldScan || _settings.ForceRescan;
     }
 
@@ -133,7 +133,7 @@ internal class ServiceRepo : IServiceRepo
             ParentId = parentId
         };
         _context.ServicesData.Add(newServiceData);
-        newServiceData.AddLog($"Assembly [{currentAssemblyName}] will be scanned.");
+        newServiceData.AddLog($"Assembly [{currentAssemblyName}] will be scanned.", LogType.Info, StatusCodes.Scanning);
         await _context.SaveChangesAsync();
         return newServiceData;
     }

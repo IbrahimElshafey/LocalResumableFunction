@@ -5,7 +5,7 @@
     var type = Model.TypeClass();
 }
 <div class="w3-panel @type.Class log-item-@Model.Type">
-    <h5><b>@(ErrorCodes.NameOf(Model.Code) ?? type.Title) [@Model.Created]</b></h5>
+    <h5><b>@(StatusCodes.NameOf(Model.Code) ?? type.Title) [@Model.Created]</b></h5>
     <p>
         <span style="white-space: pre-line">@Html.Raw(Html.Encode(Model.Message))</span>
         @if (Model.EntityType == nameof(ResumableFunctionState))

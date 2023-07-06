@@ -125,9 +125,9 @@ namespace ResumableFunctions.Handler.Core
                         $"Wait `{_methodWait.Name}` matched in `{_methodWait.RequestedByFunction.RF_MethodUrn}`.";
 
                     if (_methodWait.IsFirst)
-                        await _serviceRepo.AddLog(message);
+                        await _serviceRepo.AddLog(message, LogType.Info, StatusCodes.WaitProcessing);
                     else
-                        _methodWait.FunctionState.AddLog(message);
+                        _methodWait.FunctionState.AddLog(message, LogType.Info, StatusCodes.WaitProcessing);
                     await UpdateWaitRecord(x => x.MatchStatus = MatchStatus.Matched);
 
                 }
@@ -139,9 +139,9 @@ namespace ResumableFunctions.Handler.Core
                     $"Error occurred when evaluate match for `{_methodWait.Name}` " +
                     $"in `{_methodWait.RequestedByFunction.RF_MethodUrn}` when pushed call `{pushedCallId}`.";
                 if (_methodWait.IsFirst)
-                    await _serviceRepo.AddErrorLog(ex, error, ErrorCodes.WaitProcessing);
+                    await _serviceRepo.AddErrorLog(ex, error, StatusCodes.WaitProcessing);
                 else
-                    _methodWait.FunctionState.AddError(error, ex, ErrorCodes.WaitProcessing);
+                    _methodWait.FunctionState.AddError(error, StatusCodes.WaitProcessing, ex);
                 throw new Exception(error, ex);
             }
         }
@@ -186,7 +186,7 @@ namespace ResumableFunctions.Handler.Core
                 _methodWait.FunctionState.AddError(
                     $"Concurrency Exception occurred when process wait [{_methodWait.Name}]." +
                     $"\nProcessing this wait will be scheduled.",
-                    ex, ErrorCodes.ConcurrencyException);
+                    StatusCodes.WaitProcessing, ex);
                 _backgroundJobClient.Schedule(() =>
                         ProcessFunctionExpectedMatches(_methodWait.RequestedByFunctionId, pushedCallId),
                     TimeSpan.FromSeconds(10));
@@ -216,7 +216,7 @@ namespace ResumableFunctions.Handler.Core
                         case FunctionWait:
                             if (currentWait.IsCompleted())
                             {
-                                currentWait.FunctionState.AddLog($"Wait `{currentWait.Name}` is completed.");
+                                currentWait.FunctionState.AddLog($"Wait `{currentWait.Name}` is completed.", LogType.Info, StatusCodes.WaitProcessing);
                                 currentWait.Status = WaitStatus.Completed;
                                 await _waitsRepo.CancelSubWaits(currentWait.Id, _pushedCall.Id);
                                 await GoNext(parent, currentWait);
@@ -252,7 +252,7 @@ namespace ResumableFunctions.Handler.Core
                     await ProceedToNextWait(currentWait);
                     break;
                 case WaitsGroup:
-                    parent.FunctionState.AddLog($"Wait group ({parent.Name}) to complete.");
+                    parent.FunctionState.AddLog($"Wait group ({parent.Name}) to complete.", LogType.Info, StatusCodes.WaitProcessing);
                     break;
             }
         }
@@ -265,7 +265,7 @@ namespace ResumableFunctions.Handler.Core
                 {
                     var errorMsg = $"Can't proceed to next ,Parent wait [{currentWait.ParentWait.Name}] status is not (Waiting).";
                     _logger.LogWarning(errorMsg);
-                    currentWait.FunctionState.AddError(errorMsg, null, ErrorCodes.WaitProcessing);
+                    currentWait.FunctionState.AddError(errorMsg, StatusCodes.WaitProcessing, null);
                     return;
                 }
 
@@ -293,7 +293,7 @@ namespace ResumableFunctions.Handler.Core
             {
                 var errorMessage = $"Error when proceed to next wait after {currentWait}";
                 _logger.LogError(ex, errorMessage);
-                currentWait.FunctionState.AddError(errorMessage, ex, ErrorCodes.WaitProcessing);
+                currentWait.FunctionState.AddError(errorMessage, StatusCodes.WaitProcessing, ex);
                 throw;
             }
         }
@@ -317,7 +317,7 @@ namespace ResumableFunctions.Handler.Core
             _logger.LogInformation($"Final exit for function instance `{currentWait.FunctionStateId}`");
             currentWait.Status = WaitStatus.Completed;
             currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
-            currentWait.FunctionState.AddLog("Function instance completed.");
+            currentWait.FunctionState.AddLog("Function instance completed.", LogType.Info, StatusCodes.WaitProcessing);
             currentWait.FunctionState.Status = FunctionStatus.Completed;
             await _waitsRepo.CancelOpenedWaitsForState(currentWait.FunctionStateId);
             await _recycleBinService.RecycleFunction(currentWait.FunctionStateId);

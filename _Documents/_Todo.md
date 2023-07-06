@@ -8,12 +8,14 @@
 * UI V1
 * Background Cleaning Job
 * ResumableFunctions.Publisher
-* Review Concurrency problems
+* Review Concurrency
 * Advanced Sample
 * Update Documentation and Record Videos
 
 
 # Later Versions
+* Services Registry is separate
+* Pushed Call is separate
 * Security and IUserContext
 * Fast logging
 * UI V2
@@ -25,3 +27,4 @@
 	* Queue based communication between services
 * Function priority
 * Localization
+* How to migrate to the new version

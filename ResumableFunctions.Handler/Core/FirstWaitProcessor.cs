@@ -100,7 +100,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         catch (Exception ex)
         {
             var error = $"Error when try to clone first wait for function [{resumableFunction.GetFullName()}]";
-            await _serviceRepo.AddErrorLog(ex, error, ErrorCodes.FirstWait);
+            await _serviceRepo.AddErrorLog(ex, error, StatusCodes.FirstWait);
             throw new Exception(error, ex);
         }
     }
@@ -136,7 +136,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 catch (Exception ex)
                 {
                     if (resumableFunction != null)
-                        await _serviceRepo.AddErrorLog(ex, ErrorMsg(), ErrorCodes.FirstWait);
+                        await _serviceRepo.AddErrorLog(ex, ErrorMsg(), StatusCodes.FirstWait);
 
                     await _waitsRepository.RemoveFirstWaitIfExist(functionId);
                     throw;
@@ -156,7 +156,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         {
 
             var errorMsg = $"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]";
-            await _serviceRepo.AddErrorLog(null, errorMsg, ErrorCodes.FirstWait);
+            await _serviceRepo.AddErrorLog(null, errorMsg, StatusCodes.FirstWait);
 
             throw new NullReferenceException(errorMsg);
         }
@@ -168,7 +168,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         {
             var message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
             _logger.LogWarning(message);
-            await _serviceRepo.AddErrorLog(null, message, ErrorCodes.FirstWait);
+            await _serviceRepo.AddErrorLog(null, message, StatusCodes.FirstWait);
 
             throw new NullReferenceException(message);
         }
@@ -178,7 +178,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
         if (firstWait == null)
         {
-            await _serviceRepo.AddErrorLog(null, $"Can't get first wait in function `{resumableFunction.GetFullName()}`.", ErrorCodes.FirstWait);
+            await _serviceRepo.AddErrorLog(null, $"Can't get first wait in function `{resumableFunction.GetFullName()}`.", StatusCodes.FirstWait);
             return null;
         }
 

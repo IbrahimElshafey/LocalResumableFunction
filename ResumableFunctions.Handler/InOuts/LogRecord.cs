@@ -8,7 +8,6 @@ public class LogRecord : IEntity
     public string EntityType { get; internal set; }
     public LogType Type { get; internal set; } = LogType.Info;
     public string Message { get; internal set; }
-    public bool IsCustom { get; internal set; }
     public DateTime Created { get; internal set; }
     public int Code { get; internal set; }
     public int? ServiceId { get; set; }
