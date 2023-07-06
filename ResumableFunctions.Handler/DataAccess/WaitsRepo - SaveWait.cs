@@ -177,7 +177,7 @@ internal partial class WaitsRepo
     {
         var isExistLocal = _context.Waits.Local.Contains(wait);
         var notAddStatus = _context.Entry(wait).State != EntityState.Added;
-        wait.ActionOnWaitsTree(w => w.IsNode = w.ParentWait == null && w.ParentWaitId == null);
+        SetNodeType(wait);
         if (isExistLocal || !notAddStatus) return Task.CompletedTask;
 
         Console.WriteLine($"==> Add Wait [{wait.Name}] with type [{wait.WaitType}]");
@@ -192,5 +192,10 @@ internal partial class WaitsRepo
         }
         _context.Waits.Add(wait);
         return Task.CompletedTask;
+    }
+
+    private void SetNodeType(Wait wait)
+    {
+        wait.ActionOnWaitsTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
     }
 }

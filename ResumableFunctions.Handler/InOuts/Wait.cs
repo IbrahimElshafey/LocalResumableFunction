@@ -15,7 +15,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     public bool WasFirst { get; internal set; }
     public int StateBeforeWait { get; internal set; }
     public int StateAfterWait { get; internal set; }
-    public bool IsNode { get; internal set; }
+    public bool IsRootNode { get; internal set; }
     public bool IsReplay { get; internal set; }
 
     [NotMapped]
@@ -160,7 +160,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         IsFirst = fromWait.IsFirst;
         StateBeforeWait = fromWait.StateBeforeWait;
         StateAfterWait = fromWait.StateAfterWait;
-        IsNode = fromWait.IsNode;
+        IsRootNode = fromWait.IsRootNode;
         IsReplay = fromWait.IsReplay;
         ExtraData = fromWait.ExtraData;
         WaitType = fromWait.WaitType;

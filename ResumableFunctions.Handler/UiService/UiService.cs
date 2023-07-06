@@ -193,7 +193,7 @@ namespace ResumableFunctions.Handler.UiService
               .Where(x => x.Type == MethodType.ResumableFunctionEntryPoint)
               .Select(x => new FunctionInfo(
                       x,
-                      x.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsNode).Name,
+                      x.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsRootNode).Name,
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InProgress),
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.Completed),
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InError)
@@ -283,7 +283,7 @@ namespace ResumableFunctions.Handler.UiService
                  .Include(x => x.Waits)
                  .Select(functionState => new FunctionInstanceInfo(
                      functionState,
-                     functionState.Waits.First(wait => wait.IsNode && wait.Status == WaitStatus.Waiting),
+                     functionState.Waits.First(wait => wait.IsRootNode && wait.Status == WaitStatus.Waiting),
                      functionState.Waits.Count,
                      functionState.Id
                      ));
@@ -366,7 +366,7 @@ namespace ResumableFunctions.Handler.UiService
                 .Where(x => x.FunctionStateId == instanceId)
                 .ToListAsync();
             await SetWaitTemplates(waits);
-            var waitsNodes = new ArrayList(waits.Where(x => x.IsNode).ToList());
+            var waitsNodes = new ArrayList(waits.Where(x => x.IsRootNode).ToList());
             return new FunctionInstanceDetails(
                 instanceId,
                 instance.ResumableFunctionIdentifier.Id,

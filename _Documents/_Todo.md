@@ -1,6 +1,5 @@
 ﻿# Working On Now
 * Log for replay
-* TestTimeWait wait not shown
 * Function to tests URNs
 
 

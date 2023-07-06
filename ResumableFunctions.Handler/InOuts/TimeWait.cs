@@ -25,7 +25,7 @@ public class TimeWait : Wait
             _timeMethodWait.CurrentFunction = CurrentFunction;
             _timeMethodWait.IsFirst = IsFirst;
             _timeMethodWait.WasFirst = WasFirst;
-            _timeMethodWait.IsNode = IsNode;
+            _timeMethodWait.IsRootNode = IsRootNode;
             _timeMethodWait.ParentWait = ParentWait;
             _timeMethodWait.FunctionState = FunctionState;
             _timeMethodWait.RequestedByFunctionId = RequestedByFunctionId;
