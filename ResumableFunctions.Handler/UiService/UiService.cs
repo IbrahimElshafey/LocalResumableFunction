@@ -255,7 +255,9 @@ namespace ResumableFunctions.Handler.UiService
                     CallId = (int?)x.Key,
                     All = (int?)x.Count(),
                     Matched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.Matched),
-                    NotMatched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.NotMatched),
+                    NotMatched = (int?)x.Count(waitForCall => 
+                        waitForCall.MatchStatus == MatchStatus.NotMatched||
+                        waitForCall.MatchStatus == MatchStatus.DuplicationCanceled),
                 });
 
             var query =

@@ -13,7 +13,7 @@
         }
         <p></p>
     </div>
-    <ul id="waits-in-group-@Model.Id" class="w3-ul w3-hide">
+    <ul id="waits-in-group-@Model.Id" class="w3-ul w3-hide w3-show">
         @foreach (var wait in Model.ChildWaits)
         {
             @Html.DisplayFor(x=>wait,wait.GetType().Name)

@@ -152,6 +152,7 @@ namespace ResumableFunctions.Handler.Core
             {
                 _methodWait = await _firstWaitProcessor.CloneFirstWait(_methodWait);
                 _waitCall.WaitId = _methodWait.Id;
+                _methodWait.FunctionState.Status = FunctionStatus.InProgress;
                 await _context.SaveChangesAsync();
             }
             return true;
