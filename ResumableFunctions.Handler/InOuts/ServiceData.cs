@@ -22,13 +22,13 @@ public class ServiceData : IObjectWithLog, IEntityWithUpdate
     public int ParentId { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
 
-    public void AddError(string message, Exception ex = null, int code = 0)
+    public void AddError(string message, int code, Exception ex = null)
     {
-        (this as IObjectWithLog).AddError(message, ex, code);
+        (this as IObjectWithLog).AddError(message, code, ex);
         Logs.Last().EntityId = ParentId == -1 ? Id : ParentId;
     }
 
-    public void AddLog(string message, LogType logType = LogType.Info, int code = 0)
+    public void AddLog(string message, LogType logType, int code)
     {
         (this as IObjectWithLog).AddLog(message, logType, code);
         Logs.Last().EntityId = ParentId == -1 ? Id : ParentId;

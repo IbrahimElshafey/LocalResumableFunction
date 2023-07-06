@@ -13,7 +13,6 @@ public abstract partial class ResumableFunction
         {
             Name = name,
             WaitType = WaitType.MethodWait,
-            IsNode = true,
             CurrentFunction = this,
         };
     }
@@ -24,7 +23,6 @@ public abstract partial class ResumableFunction
         {
             Name = name,
             WaitType = WaitType.MethodWait,
-            IsNode = true,
             CurrentFunction = this,
         };
     }
@@ -37,14 +35,12 @@ public abstract partial class ResumableFunction
         {
             Name = name,
             ChildWaits = manyMethodsWait.Select(x => (Wait)x).ToList(),
-            IsNode = true,
             WaitType = WaitType.GroupWaitAll,
             CurrentFunction = this,
         };
         foreach (var item in result.ChildWaits)
         {
             item.ParentWaitId = result.Id;
-            item.IsNode = false;
         }
 
         return result;
@@ -56,14 +52,12 @@ public abstract partial class ResumableFunction
         {
             Name = name,
             ChildWaits = waits.ToList(),
-            IsNode = true,
             WaitType = WaitType.GroupWaitAll,
             CurrentFunction = this,
         };
         foreach (var item in result.ChildWaits)
         {
             item.ParentWaitId = result.Id;
-            item.IsNode = false;
         }
 
         return result;

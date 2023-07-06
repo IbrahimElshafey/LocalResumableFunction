@@ -16,8 +16,8 @@ namespace Tests
         [Fact]
         public async Task WaitThreeMethodsAtStart_Test()
         {
-            using var test = new TestShell(nameof(WaitThreeMethodsAtStart_Test), typeof(WaitManyMethods));
-            await test.ScanTypes();
+            using var test = new TestShell(nameof(WaitThreeMethodsAtStart_Test),typeof(WaitManyMethods));
+            await test.ScanTypes("WaitThreeAtStart");
             var errors = await test.GetLogs();
             Assert.Empty(errors);
 
@@ -65,7 +65,7 @@ namespace Tests
             var waits = await test.GetWaits();
             Assert.Equal(4, waits.Count);
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Completed).Count());
-            Assert.Equal(2, waits.Where(x => x.IsNode).Count());
+            Assert.Equal(2, waits.Where(x => x.IsRootNode).Count());
 
             wms = new WaitManyMethods();
             wms.Method4("1");
@@ -79,7 +79,7 @@ namespace Tests
             waits = await test.GetWaits();
             Assert.Equal(8, waits.Count);
             Assert.Equal(8, waits.Where(x => x.Status == WaitStatus.Completed).Count());
-            Assert.Equal(4, waits.Where(x => x.IsNode).Count());
+            Assert.Equal(4, waits.Where(x => x.IsRootNode).Count());
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace Tests
             Assert.Equal(4, waits.Count);
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
-            Assert.Equal(1, waits.Count(x => x.IsNode));
+            Assert.Equal(1, waits.Count(x => x.IsRootNode));
 
             //round two
             wms.Method8("1");
@@ -113,7 +113,7 @@ namespace Tests
             Assert.Equal(8, waits.Count);
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Completed).Count());
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Canceled).Count());
-            Assert.Equal(2, waits.Where(x => x.IsNode).Count());
+            Assert.Equal(2, waits.Where(x => x.IsRootNode).Count());
         }
 
         [Fact]
@@ -136,7 +136,7 @@ namespace Tests
             Assert.Equal(4, waits.Count);
             Assert.Equal(3, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(1, waits.Count(x => x.Status == WaitStatus.Canceled));
-            Assert.Equal(1, waits.Count(x => x.IsNode));
+            Assert.Equal(1, waits.Count(x => x.IsRootNode));
 
 
             wms.Method3("1");
@@ -150,7 +150,7 @@ namespace Tests
             Assert.Equal(8, waits.Count);
             Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
-            Assert.Equal(2, waits.Count(x => x.IsNode));
+            Assert.Equal(2, waits.Count(x => x.IsRootNode));
         }
     }
 

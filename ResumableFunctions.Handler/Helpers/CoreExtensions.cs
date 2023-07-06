@@ -37,8 +37,6 @@ public static class CoreExtensions
 
 
 
-        services.AddSingleton<BinaryToObjectConverterAbstract, BinaryToObjectConverter>();
-        //services.AddSingleton<HttpClient>();
         services.AddHttpClient();
         services.AddSingleton<HangfireHttpClient>();
         services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
@@ -254,7 +252,7 @@ public static class CoreExtensions
         MethodInfo mi = null;
         Type ownerType = null;
         var visitor = new GenericVisitor();
-        visitor.OnVisitCall(VisitMethod);
+        visitor.OnVisitMethodCall(VisitMethod);
         visitor.OnVisitConstant(VisitConstant);
         visitor.Visit(methodSelector);
         return (mi, ownerType);

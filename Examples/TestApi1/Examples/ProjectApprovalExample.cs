@@ -22,7 +22,7 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
          Wait<Project, bool>("Project Submitted", ProjectSubmitted)//Point 2
              .MatchIf((project, output) => output && !project.IsResubmit)//Point 3
              .SetData((project, output) => CurrentProject == project);//Point 4
-        this.AddLog("###After Project Submitted");
+        Log("###After Project Submitted");
         //throw new NotImplementedException("Exception after first wait match.");
         await AskManagerToApprove("Manager One", CurrentProject.Id);
         //throw new Exception("Critical exception aftrer AskManagerToApprove");
@@ -33,7 +33,7 @@ public class ProjectApprovalExample : ResumableFunction, IManagerFiveApproval
 
         if (ManagerOneApproval is false)
         {
-            this.AddLog("Go back and ask applicant to resubmitt project.");
+            Log("Go back and ask applicant to resubmitt project.");
             await AskApplicantToResubmittProject(CurrentProject.Id);
             yield return GoBackTo<Project, bool>("Project Submitted", (project, output) => output && project.IsResubmit && project.Id == CurrentProject.Id);
         }

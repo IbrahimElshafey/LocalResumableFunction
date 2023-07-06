@@ -50,7 +50,7 @@ namespace ResumableFunctions.Handler.Core
             catch (Exception ex)
             {
                 var error = $"Can't handle pushed call `{pushedCall}`";
-                await _serviceRepo.AddErrorLog(ex, error, ErrorCodes.PushedCall);
+                await _serviceRepo.AddErrorLog(ex, error, StatusCodes.PushedCall);
                 throw new Exception(error, ex);
             }
         }
@@ -65,13 +65,13 @@ namespace ResumableFunctions.Handler.Core
                     $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}]." +
                     $"\nPushed call was `{pushedCall}`";
                 _logger.LogError(errorMsg);
-                await _serviceRepo.AddLog(errorMsg, LogType.Warning, ErrorCodes.PushedCall);
+                await _serviceRepo.AddLog(errorMsg, LogType.Warning, StatusCodes.PushedCall);
                 return -1;
             }
             catch (Exception ex)
             {
                 var error = $"Can't handle external pushed call `{pushedCall}`";
-                await _serviceRepo.AddErrorLog(ex, error, ErrorCodes.PushedCall);
+                await _serviceRepo.AddErrorLog(ex, error, StatusCodes.PushedCall);
                 throw new Exception(error, ex);
             }
         }

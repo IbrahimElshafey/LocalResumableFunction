@@ -10,15 +10,14 @@ public abstract partial class ResumableFunction
 {
     protected FunctionWait Wait(string name, Func<IAsyncEnumerable<Wait>> function)
     {
-        var result = new FunctionWait
+        return new FunctionWait
         {
             Name = name,
-            IsNode = true,
+            //IsNode = true,
             WaitType = WaitType.FunctionWait,
             FunctionInfo = function.Method,
             CurrentFunction = this,
         };
-        return result;
     }
 
     protected WaitsGroup Wait(string name, params Func<IAsyncEnumerable<Wait>>[] subFunctions)
@@ -27,7 +26,7 @@ public abstract partial class ResumableFunction
         {
             ChildWaits = new List<Wait>(new Wait[subFunctions.Length]),
             Name = name,
-            IsNode = true,
+            //IsNode = true,
             WaitType = WaitType.GroupWaitAll,
             CurrentFunction = this,
         };
@@ -35,7 +34,7 @@ public abstract partial class ResumableFunction
         {
             var currentFunction = subFunctions[index];
             var currentFuncResult = Wait($"#{currentFunction.Method.Name}#", currentFunction);
-            currentFuncResult.IsNode = false;
+            //currentFuncResult.IsNode = false;
             currentFuncResult.ParentWait = result;
             result.ChildWaits[index] = currentFuncResult;
         }
@@ -43,8 +42,10 @@ public abstract partial class ResumableFunction
         return result;
     }
 
+    internal bool dependenciesAreSet;
     internal void InitializeDependencies(IServiceProvider serviceProvider)
     {
+        if (dependenciesAreSet) return;
         var setDependenciesMi = GetType().GetMethod(
             "SetDependencies", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
@@ -65,6 +66,7 @@ public abstract partial class ResumableFunction
         }
         //setDependenciesMi.Invoke(this, inputs);
         CallSetDependencies(inputs, setDependenciesMi, parameters);
+        dependenciesAreSet = true;
     }
 
     private void CallSetDependencies(object[] inputs, MethodInfo mi, ParameterInfo[] parameterTypes)

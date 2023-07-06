@@ -130,7 +130,6 @@ internal partial class WaitsRepo
         }
 
         functionWait.FirstWait = functionRunner.Current;
-        //functionWait.FirstWait.StateAfterWait = functionRunner.GetState();
         functionWait.FirstWait.FunctionState = functionWait.FunctionState;
         functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
         functionWait.FirstWait.ParentWait = functionWait;
@@ -154,7 +153,7 @@ internal partial class WaitsRepo
         var timeWaitMethod = timeWait.TimeWaitMethod;
 
         var methodId = await _methodIdsRepo.GetId(timeWaitMethod);
-        
+
         var timeWaitInput = new TimeWaitInput
         {
             TimeMatchId = timeWait.UniqueMatchId,
@@ -178,9 +177,10 @@ internal partial class WaitsRepo
     {
         var isExistLocal = _context.Waits.Local.Contains(wait);
         var notAddStatus = _context.Entry(wait).State != EntityState.Added;
+        SetNodeType(wait);
         if (isExistLocal || !notAddStatus) return Task.CompletedTask;
 
-        Console.WriteLine($"==> Add Wait [{wait.Name}] with type [{wait.WaitType}]");
+        _logger.LogInformation($"Add Wait [{wait.Name}] with type [{wait.WaitType}]");
         if (wait is WaitsGroup waitGroup)
         {
             waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
@@ -192,5 +192,10 @@ internal partial class WaitsRepo
         }
         _context.Waits.Add(wait);
         return Task.CompletedTask;
+    }
+
+    private void SetNodeType(Wait wait)
+    {
+        wait.ActionOnWaitsTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
     }
 }

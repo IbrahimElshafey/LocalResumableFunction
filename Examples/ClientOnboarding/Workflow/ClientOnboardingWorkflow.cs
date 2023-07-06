@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using ClientOnboarding.InOuts;
 using ClientOnboarding.Services;
+using MessagePack;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts;

@@ -24,6 +24,7 @@ internal class Scanner
     private readonly string _currentServiceName;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IServiceRepo _serviceRepo;
+    private HashSet<string> _functionsUrns = new HashSet<string>();
 
     public Scanner(
         ILogger<Scanner> logger,
@@ -80,7 +81,7 @@ internal class Scanner
         return assemblyPaths;
     }
 
-    private BindingFlags GetBindingFlags() =>
+    internal BindingFlags GetBindingFlags() =>
         BindingFlags.DeclaredOnly |
         BindingFlags.Public |
         BindingFlags.NonPublic |
@@ -91,28 +92,36 @@ internal class Scanner
     {
         var entryPointCheck = EntryPointCheck(resumableFunctionMInfo);
         var methodType = entryPointCheck.IsEntry ? MethodType.ResumableFunctionEntryPoint : MethodType.SubResumableFunction;
-        serviceData.AddLog($"Register resumable function [{resumableFunctionMInfo.GetFullName()}] of type [{methodType}]");
+        serviceData.AddLog($"Register resumable function [{resumableFunctionMInfo.GetFullName()}] of type [{methodType}]", LogType.Info, StatusCodes.Scanning);
 
-        var resumableFunctionIdentifier = await _methodIdentifierRepo
-            .AddResumableFunctionIdentifier(
-            new MethodData(resumableFunctionMInfo)
-            {
-                MethodType = methodType,
-                IsActive = entryPointCheck.IsActive
-            });
-        await _context.SaveChangesAsync();
-
-
-        switch (entryPointCheck)
+        var functionData = new MethodData(resumableFunctionMInfo)
         {
-            case { IsEntry: true, IsActive: true }:
-                _backgroundJobClient.Enqueue(
-                    () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
-                break;
+            MethodType = methodType,
+            IsActive = entryPointCheck.IsActive
+        };
+        if (_functionsUrns.Contains(functionData.MethodUrn))
+        {
+            await _serviceRepo.AddErrorLog(null,
+                $"Can't add method identifier for function `{resumableFunctionMInfo.GetFullName()}`" +
+                $" since same URN `{functionData.MethodUrn}` used for another function.", StatusCodes.MethodValidation);
+            return;
+        }
+        else
+        {
+            _functionsUrns.Add(functionData.MethodUrn);
+            var resumableFunctionIdentifier = await _methodIdentifierRepo.AddResumableFunctionIdentifier(functionData);
+            await _context.SaveChangesAsync();
+            switch (entryPointCheck)
+            {
+                case { IsEntry: true, IsActive: true }:
+                    _backgroundJobClient.Enqueue(
+                        () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
+                    break;
 
-            case { IsEntry: true, IsActive: false }:
-                await _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id);
-                break;
+                case { IsEntry: true, IsActive: false }:
+                    await _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id);
+                    break;
+            }
         }
     }
 
@@ -162,7 +171,7 @@ internal class Scanner
     {
         try
         {
-            //Debugger.Launch();
+            var urns = new List<string>();
             var methodWaits = type
                 .GetMethods(GetBindingFlags())
                 .Where(method =>
@@ -172,22 +181,39 @@ internal class Scanner
                 if (ValidateMethod(method, serviceData))
                 {
                     var methodData = new MethodData(method) { MethodType = MethodType.MethodWait };
+
+                    if (UrnDuplication(methodData.MethodUrn, method.GetFullName())) continue;
+
                     await _methodIdentifierRepo.AddWaitMethodIdentifier(methodData);
-                    serviceData?.AddLog($"Adding method identifier {methodData}");
+                    serviceData?.AddLog($"Adding method identifier {methodData}", LogType.Info, StatusCodes.Scanning);
                 }
                 else
-                    serviceData?.AddLog(
-                        $"Can't add method identifier `{method.GetFullName()}` since it does not match the criteria.");
+                    serviceData?.AddError(
+                        $"Can't add method identifier `{method.GetFullName()}` since it does not match the criteria.", StatusCodes.MethodValidation, null);
+            }
+
+            bool UrnDuplication(string methodUrn, string methodName)
+            {
+                if (urns.Contains(methodUrn))
+                {
+                    serviceData?.AddError(
+                    $"Can't add method identifier `{methodName}` since same URN `{methodUrn}` used for another method in same class.", StatusCodes.MethodValidation, null);
+                    return true;
+                }
+                else
+                {
+                    urns.Add(methodUrn);
+                    return false;
+                }
             }
         }
         catch (Exception ex)
         {
             var errorMsg = $"Error when adding a method identifier of type `MethodWait` in type `{type.FullName}`";
-            serviceData?.AddError(errorMsg, ex);
+            serviceData?.AddError(errorMsg, StatusCodes.Scanning, ex);
             _logger.LogError(ex, errorMsg);
             throw;
         }
-
     }
 
     private bool ValidateMethod(MethodInfo method, ServiceData serviceData)
@@ -195,27 +221,27 @@ internal class Scanner
         var result = true;
         if (method.IsGenericMethod)
         {
-            serviceData?.AddError($"`{method.GetFullName()}` must not be generic.", null, ErrorCodes.MethodValidation);
+            serviceData?.AddError($"`{method.GetFullName()}` must not be generic.", StatusCodes.MethodValidation, null);
             result = false;
         }
         if (method.ReturnType == typeof(void))
         {
-            serviceData?.AddError($"`{method.GetFullName()}` must return a value, void is not allowed.", null, ErrorCodes.MethodValidation);
+            serviceData?.AddError($"`{method.GetFullName()}` must return a value, void is not allowed.", StatusCodes.MethodValidation, null);
             result = false;
         }
         if (method.IsAsyncMethod() && method.ReturnType.GetGenericTypeDefinition() != typeof(Task<>))
         {
-            serviceData?.AddError($"`{method.GetFullName()}` async method must return Task<T> object.", null, ErrorCodes.MethodValidation);
+            serviceData?.AddError($"`{method.GetFullName()}` async method must return Task<T> object.", StatusCodes.MethodValidation, null);
             result = false;
         }
         if (method.IsStatic)
         {
-            serviceData?.AddError($"`{method.GetFullName()}` must be instance method.", null, ErrorCodes.MethodValidation);
+            serviceData?.AddError($"`{method.GetFullName()}` must be instance method.", StatusCodes.MethodValidation, null);
             result = false;
         }
         if (method.GetParameters().Length != 1)
         {
-            serviceData?.AddError($"`{method.GetFullName()}` must have only one parameter.", null, ErrorCodes.MethodValidation);
+            serviceData?.AddError($"`{method.GetFullName()}` must have only one parameter.", StatusCodes.MethodValidation, null);
             result = false;
         }
         return result;
@@ -227,39 +253,39 @@ internal class Scanner
         var serviceData = await _serviceRepo.GetServiceData(type.Assembly.GetName().Name);
 
         CheckSetDependenciesMethodExist(type, serviceData);
-        serviceData.AddLog($"Try to find resumable functions in type [{type.FullName}]");
+        serviceData.AddLog($"Try to find resumable functions in type [{type.FullName}]", LogType.Info, StatusCodes.Scanning);
 
         var hasCtorLess = type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
             null, Type.EmptyTypes, null) == null;
         if (hasCtorLess)
         {
-            serviceData.AddError($"You must define parameter-less constructor for type `{type.FullName}` to enable serialization for it.");
+            serviceData.AddError($"You must define parameter-less constructor for type `{type.FullName}` to enable serialization for it.", StatusCodes.Scanning, null);
             return;
         }
-
-        await RegisterFunctions(SubResumableFunctionAttribute.AttributeId);
+        
+        await RegisterFunctions(SubResumableFunctionAttribute.AttributeId, type, serviceData);
         await _context.SaveChangesAsync();
-        await RegisterFunctions(ResumableFunctionEntryPointAttribute.AttributeId);
-
-        async Task RegisterFunctions(string attributeId)
-        {
-            var functions = type
-                .GetMethods(GetBindingFlags())
-                .Where(method => method
-                    .GetCustomAttributes()
-                    .Any(attribute => attribute.TypeId == attributeId));
-
-            foreach (var resumableFunctionInfo in functions)
-            {
-                if (ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
-                    await RegisterResumableFunction(resumableFunctionInfo, serviceData);
-                else
-                    serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", null, ErrorCodes.MethodValidation);
-            }
-        }
-
+        await RegisterFunctions(ResumableFunctionEntryPointAttribute.AttributeId, type, serviceData);
     }
 
+
+    internal async Task RegisterFunctions(string attributeId, Type type, ServiceData serviceData)
+    {
+        var urns = new List<string>();
+        var functions = type
+            .GetMethods(GetBindingFlags())
+            .Where(method => method
+                .GetCustomAttributes()
+                .Any(attribute => attribute.TypeId == attributeId));
+
+        foreach (var resumableFunctionInfo in functions)
+        {
+            if (ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
+                await RegisterResumableFunction(resumableFunctionInfo, serviceData);
+            else
+                serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", StatusCodes.MethodValidation, null);
+        }
+    }
     private void CheckSetDependenciesMethodExist(Type type, ServiceData serviceData)
     {
 
@@ -270,7 +296,7 @@ internal class Scanner
 
         serviceData.AddLog(
             $"No instance method like `void SetDependencies(Interface dep1,...)` found in class `{type.FullName}` that set your dependencies.",
-            LogType.Warning, ErrorCodes.Scan);
+            LogType.Warning, StatusCodes.Scanning);
     }
 
 
@@ -283,14 +309,14 @@ internal class Scanner
         return (resumableFunctionAttribute != null, isFunctionActive);
     }
 
-    private bool ValidateResumableFunctionSignature(MethodInfo resumableFunction, ServiceData serviceData)
+    internal bool ValidateResumableFunctionSignature(MethodInfo resumableFunction, ServiceData serviceData)
     {
         var result = true;
         if (!resumableFunction.IsAsyncMethod())
         {
             var errorMsg =
                 $"The resumable function [{resumableFunction.GetFullName()}] must be async.";
-            serviceData.AddError(errorMsg, null, ErrorCodes.MethodValidation);
+            serviceData.AddError(errorMsg, StatusCodes.MethodValidation, null);
             _logger.LogError(errorMsg);
             result = false;
         }
@@ -299,13 +325,13 @@ internal class Scanner
             var errorMsg =
                 $"The resumable function [{resumableFunction.GetFullName()}] must match the signature `IAsyncEnumerable<Wait> {resumableFunction.Name}()`.\n" +
                 $"Must have no parameter and return type must be `IAsyncEnumerable<Wait>`";
-            serviceData.AddError(errorMsg, null, ErrorCodes.MethodValidation);
+            serviceData.AddError(errorMsg, StatusCodes.MethodValidation, null);
             _logger.LogError(errorMsg);
             result = false;
         }
 
         if (!resumableFunction.IsStatic) return result;
-        serviceData.AddError($"Resumable function `{resumableFunction.GetFullName()}` must be instance method.", null, ErrorCodes.MethodValidation);
+        serviceData.AddError($"Resumable function `{resumableFunction.GetFullName()}` must be instance method.", StatusCodes.MethodValidation, null);
         return false;
     }
 

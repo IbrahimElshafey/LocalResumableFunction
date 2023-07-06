@@ -6,28 +6,28 @@ using System.Threading.Tasks;
 
 namespace ResumableFunctions.Handler.Helpers
 {
-    public static class ErrorCodes
+    public static class StatusCodes
     {
         public const int MethodValidation = 1;
-        public const int Scan = 2;
-        public const int ConcurrencyException = 3;
+        public const int Scanning = 2;
         public const int WaitProcessing = 4;
         public const int Replay = 5;
         public const int PushedCall = 6;
         public const int FirstWait = 7;
         public const int WaitValidation = 8;
+        public const int Custom = -1000;
 
         public static Dictionary<int, string> ErrorCodeNames = new Dictionary<int, string>
         {
             {0, null},
-            {MethodValidation, "Method Validation"},
-            {Scan, "While Scanning Types"},
-            {ConcurrencyException, "Concurrency Exception"},
-            {WaitProcessing, "Wait Processing"},
-            {Replay, "Replay"},
-            {PushedCall, "Pushed Call"},
-            {FirstWait, "First Wait"},
-            {WaitValidation, "Wait Validation"},
+            {MethodValidation, "While Method Validation"},
+            {Scanning, "While Scanning Types"},
+            {WaitProcessing, "While Wait Processing"},
+            {Replay, "While Replay a wait"},
+            {PushedCall, "When Process Pushed Call"},
+            {FirstWait, "While First Wait Processing"},
+            {WaitValidation, "While Wait Request Validation"},
+            {Custom, "Author Custom Log"},
         };
 
         public static string NameOf(int errorCode) => ErrorCodeNames[errorCode];

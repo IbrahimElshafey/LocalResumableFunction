@@ -289,18 +289,26 @@ internal partial class WaitsRepo : IWaitsRepo
         var waitToReplay =
             await _context.Waits
             .OrderByDescending(x => x.Id)
+            .Include(x => x.ParentWait)
             .Include(x => x.RequestedByFunction)
             .FirstOrDefaultAsync(x =>
                 x.RequestedByFunctionId == replayWait.RequestedByFunctionId &&
                 x.FunctionStateId == replayWait.FunctionState.Id &&
-                x.Name == replayWait.Name &&
-                x.IsNode);
+                x.Name == replayWait.Name);
 
         if (waitToReplay == null)
         {
-            Console.WriteLine(
-                $"Can't replay not exiting wait [{replayWait.Name}] in function [{replayWait?.RequestedByFunction}].");
-            return null;
+            var error =
+                  $"Can't replay not exiting wait [{replayWait.Name}] in function [{replayWait?.RequestedByFunction}].";
+            _logger.LogError(error);
+            throw new Exception(error);
+        }
+        var isNode = waitToReplay.IsRootNode || waitToReplay.ParentWait?.WaitType == WaitType.FunctionWait;
+        if (isNode is false)
+        {
+            var error = $"Wait to replay [{replayWait.Name}] must be a node.";
+            _logger.LogError(error);
+            throw new Exception(error);
         }
         await _context.SaveChangesAsync();
         return waitToReplay;

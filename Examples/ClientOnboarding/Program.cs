@@ -9,7 +9,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddControllers()
-    .AddResumableFunctions(new SqlServerResumableFunctionsSettings().SetCurrentServiceUrl("https://localhost:7262"));
+    .AddResumableFunctions(
+        new SqlServerResumableFunctionsSettings(null, "TwoFunctionsAtFirst_Test")
+        .SetCurrentServiceUrl("https://localhost:7262"));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -37,8 +39,5 @@ try
 catch (Exception ex)
 {
     Debug.Write(ex);
-    Console.WriteLine(ex);
-    Console.WriteLine(ex.Message);
-    Console.WriteLine(ex.StackTrace);
     throw;
 }

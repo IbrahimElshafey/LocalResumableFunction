@@ -63,7 +63,7 @@ public class GenericVisitor : ExpressionVisitor
               ex => visitMember((MemberExpression)ex)));
     }
 
-    internal void OnVisitCall(Func<MethodCallExpression, Expression> visitCall)
+    internal void OnVisitMethodCall(Func<MethodCallExpression, Expression> visitCall)
     {
         _visitors.Add(
           new VisitNodeFunction(

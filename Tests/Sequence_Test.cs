@@ -12,17 +12,17 @@ public class Sequence
     {
         using var test = new TestShell(nameof(SequenceFunction_Test), typeof(SequenceFunction));
         await test.ScanTypes();
-        await RoundTest(0, test);
+        Assert.Empty(await test.RoundCheck(0, 0, 0));
 
         var function = new SequenceFunction();
         function.Method1("in1");
-        await RoundTest(1, test);
+        Assert.Empty(await test.RoundCheck(1, 2, 0));
 
         function.Method2("in2");
-        await RoundTest(2, test);
+        Assert.Empty(await test.RoundCheck(2, 3, 0));
 
         function.Method3("in3");
-        await RoundTest(3, test, true);
+        Assert.Empty(await test.RoundCheck(3, 3, 1));
     }
 
     private async Task RoundTest(int round, TestShell test, bool isFinal = false)

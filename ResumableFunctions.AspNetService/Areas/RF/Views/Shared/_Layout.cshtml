@@ -1949,6 +1949,16 @@
             var methodsDiv = document.querySelector('#methods-in-group');
             methodsDiv.innerHTML = `<div class="progress-bar"><div class="progress-bar-value"></div></div>`;
         }
+
+        function toggleView(id) {
+          console.log(id);
+          var x = document.getElementById(id);
+          if (x.className.indexOf("w3-show") == -1) {
+            x.className += " w3-show";
+          } else { 
+            x.className = x.className.replace(" w3-show", "");
+          }
+        }
     </script>
 </head>
 <body class="w3-light-grey">

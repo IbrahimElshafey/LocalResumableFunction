@@ -17,7 +17,7 @@ public static class ObjectWithLogBehavior
 {
     public static bool HasErrors(this IObjectWithLog _this) => _this.Logs.Any(x => x.Type == LogType.Error);
 
-    public static void AddLog(this IObjectWithLog _this, string message, LogType logType = LogType.Info, int code = 0)
+    internal static void AddLog(this IObjectWithLog _this, string message, LogType logType, int code)
     {
         var logRecord = new LogRecord
         {
@@ -30,7 +30,7 @@ public static class ObjectWithLogBehavior
         _this.Logs.Add(logRecord);
         //_logger.LogInformation(message, logRecord);
     }
-    public static void AddError(this IObjectWithLog _this, string message, Exception ex = null, int code = 0)
+    internal static void AddError(this IObjectWithLog _this, string message, int code, Exception ex = null)
     {
         var logRecord = new LogRecord
         {

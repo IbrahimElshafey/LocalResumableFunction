@@ -15,7 +15,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     public bool WasFirst { get; internal set; }
     public int StateBeforeWait { get; internal set; }
     public int StateAfterWait { get; internal set; }
-    public bool IsNode { get; internal set; }
+    public bool IsRootNode { get; internal set; }
     public bool IsReplay { get; internal set; }
 
     [NotMapped]
@@ -67,7 +67,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         if (functionRunner.ResumableFunctionExistInCode is false)
         {
             var errorMsg = $"Resumable function ({RequestedByFunction.MethodName}) not exist in code";
-            FunctionState.AddError(errorMsg, null, ErrorCodes.MethodValidation);
+            FunctionState.AddError(errorMsg, StatusCodes.MethodValidation, null);
             throw new Exception(errorMsg);
         }
 
@@ -76,7 +76,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
             var waitExist = await functionRunner.MoveNextAsync();
             if (waitExist)
             {
-                Console.WriteLine($"Get next wait [{functionRunner.Current.Name}] after [{Name}]");
+                FunctionState.AddLog($"Get next wait [{functionRunner.Current.Name}] after [{Name}]", LogType.Info, StatusCodes.WaitProcessing);
                 return functionRunner.Current;
             }
 
@@ -85,17 +85,13 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         catch (Exception ex)
         {
             FunctionState.AddError(
-                $"An error occurred after resuming execution after wait `{this}`.", ex, ErrorCodes.WaitProcessing);
+                $"An error occurred after resuming execution after wait `{this}`.", StatusCodes.WaitProcessing, ex);
             FunctionState.Status = FunctionStatus.InError;
             throw;
         }
         finally
         {
-            CurrentFunction.Logs.ForEach(log =>
-            {
-                log.IsCustom = true;
-                log.EntityType = nameof(ResumableFunctionState);
-            });
+            CurrentFunction.Logs.ForEach(log => log.EntityType = nameof(ResumableFunctionState));
             FunctionState.Logs.AddRange(CurrentFunction.Logs);
             FunctionState.Status =
               CurrentFunction.HasErrors() || FunctionState.HasErrors() ?
@@ -164,7 +160,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         IsFirst = fromWait.IsFirst;
         StateBeforeWait = fromWait.StateBeforeWait;
         StateAfterWait = fromWait.StateAfterWait;
-        IsNode = fromWait.IsNode;
+        IsRootNode = fromWait.IsRootNode;
         IsReplay = fromWait.IsReplay;
         ExtraData = fromWait.ExtraData;
         WaitType = fromWait.WaitType;
@@ -187,7 +183,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         {
             FunctionState.AddLog(
                 $"The wait named `{Name}` is duplicated in function `{RequestedByFunction?.MethodName}` body,fix it to not cause a problem. If it's a loop concat the  index to the name",
-                LogType.Warning, ErrorCodes.WaitValidation);
+                LogType.Warning, StatusCodes.WaitValidation);
         }
 
         var hasErrors = FunctionState.HasErrors();

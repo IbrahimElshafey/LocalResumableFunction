@@ -12,7 +12,7 @@ public abstract partial class ResumableFunction
             TimeToWait = timeToWait,
             UniqueMatchId = Guid.NewGuid().ToString(),
             CurrentFunction = this,
-            IsNode = true,
+            //IsNode = true,
         };
     }
 
