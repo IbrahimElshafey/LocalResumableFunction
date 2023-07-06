@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Time;
 using AspectInjector.Broker;
@@ -56,7 +57,7 @@ namespace ResumableFunctions.Handler.Testing
 
         public IServiceCollection RegisteredServices => _builder.Services;
 
-        public async Task ScanTypes()
+        public async Task ScanTypes(params string[] functionsToIncludeInTest)
         {
             await DeleteDb(_testName);
             _builder.Services.AddResumableFunctionsCore(_settings);
@@ -83,18 +84,42 @@ namespace ResumableFunctions.Handler.Testing
 
             foreach (var type in _types)
                 if (type.IsSubclassOf(typeof(ResumableFunction)))
-                    await scanner.RegisterResumableFunctionsInClass(type);
+                {
+                    await scanner.RegisterFunctions(SubResumableFunctionAttribute.AttributeId, type, serviceData);
+                    await context.SaveChangesAsync();
+                    await RegisterResumableFunctions(functionsToIncludeInTest, serviceData, scanner, type);
+                }
             await context.SaveChangesAsync();
             await context.DisposeAsync();
+        }
+
+        private static async Task RegisterResumableFunctions(string[] functionsToIncludeInTest, ServiceData serviceData, Scanner scanner, Type type)
+        {
+            var functions =
+                type.GetMethods(scanner.GetBindingFlags())
+                .Where(method => method
+                    .GetCustomAttributes()
+                    .Any(attribute =>
+                        attribute is ResumableFunctionEntryPointAttribute entryPointAttribute &&
+                        (functionsToIncludeInTest.Length == 0 || functionsToIncludeInTest.Contains(entryPointAttribute.MethodUrn))
+                        )
+                    );
+            foreach (var resumableFunctionInfo in functions)
+            {
+                if (scanner.ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
+                    await scanner.RegisterResumableFunction(resumableFunctionInfo, serviceData);
+                else
+                    serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", StatusCodes.MethodValidation, null);
+            }
         }
 
         public async Task<string> RoundCheck(int expectedPushedCallsCount, int waitsCount, int completedInstancesCount)
         {
 
-            if (await HasErrors()) 
+            if (await HasErrors())
                 return "Has Log Errors";
 
-            if (await GetPushedCallsCount() != expectedPushedCallsCount) 
+            if (await GetPushedCallsCount() != expectedPushedCallsCount)
                 return $"Pushed calls count not equal {expectedPushedCallsCount}";
 
             if (await GetWaitsCount() != waitsCount)

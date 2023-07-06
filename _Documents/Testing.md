@@ -1,5 +1,4 @@
 ﻿# Test Shell Todo
-* Function to tests URNs
 
 * Get instances for pushed call
 * Get matched waits for pushed call

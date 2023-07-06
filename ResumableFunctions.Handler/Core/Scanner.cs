@@ -81,7 +81,7 @@ internal class Scanner
         return assemblyPaths;
     }
 
-    private BindingFlags GetBindingFlags() =>
+    internal BindingFlags GetBindingFlags() =>
         BindingFlags.DeclaredOnly |
         BindingFlags.Public |
         BindingFlags.NonPublic |
@@ -262,34 +262,30 @@ internal class Scanner
             serviceData.AddError($"You must define parameter-less constructor for type `{type.FullName}` to enable serialization for it.", StatusCodes.Scanning, null);
             return;
         }
-
-        await RegisterFunctions(SubResumableFunctionAttribute.AttributeId);
+        
+        await RegisterFunctions(SubResumableFunctionAttribute.AttributeId, type, serviceData);
         await _context.SaveChangesAsync();
-        await RegisterFunctions(ResumableFunctionEntryPointAttribute.AttributeId);
-
-        async Task RegisterFunctions(string attributeId)
-        {
-            var urns = new List<string>();
-            var functions = type
-                .GetMethods(GetBindingFlags())
-                .Where(method => method
-                    .GetCustomAttributes()
-                    .Any(attribute => attribute.TypeId == attributeId));
-
-            foreach (var resumableFunctionInfo in functions)
-            {
-                if (ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
-                    await RegisterResumableFunction(resumableFunctionInfo, serviceData);
-                else
-                    serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", StatusCodes.MethodValidation, null);
-            }
-        }
-
-
-
-
+        await RegisterFunctions(ResumableFunctionEntryPointAttribute.AttributeId, type, serviceData);
     }
 
+
+    internal async Task RegisterFunctions(string attributeId, Type type, ServiceData serviceData)
+    {
+        var urns = new List<string>();
+        var functions = type
+            .GetMethods(GetBindingFlags())
+            .Where(method => method
+                .GetCustomAttributes()
+                .Any(attribute => attribute.TypeId == attributeId));
+
+        foreach (var resumableFunctionInfo in functions)
+        {
+            if (ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
+                await RegisterResumableFunction(resumableFunctionInfo, serviceData);
+            else
+                serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", StatusCodes.MethodValidation, null);
+        }
+    }
     private void CheckSetDependenciesMethodExist(Type type, ServiceData serviceData)
     {
 
@@ -313,7 +309,7 @@ internal class Scanner
         return (resumableFunctionAttribute != null, isFunctionActive);
     }
 
-    private bool ValidateResumableFunctionSignature(MethodInfo resumableFunction, ServiceData serviceData)
+    internal bool ValidateResumableFunctionSignature(MethodInfo resumableFunction, ServiceData serviceData)
     {
         var result = true;
         if (!resumableFunction.IsAsyncMethod())

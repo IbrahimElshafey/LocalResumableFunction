@@ -1,6 +1,7 @@
 ﻿# Working On Now
-* Log for replay
-* Function to tests URNs
+* Review Log for replay
+* Background Cleaning Job
+* ResumableFunctions.Publisher
 
 
 * Message Pack private setter props serialization

@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
-        new SqlServerResumableFunctionsSettings(null, "FunctionLevels_Test"));
+        new SqlServerResumableFunctionsSettings(null, "WaitThreeMethodsAtStart_Test"));
 
 builder.Services.AddControllers();
 
