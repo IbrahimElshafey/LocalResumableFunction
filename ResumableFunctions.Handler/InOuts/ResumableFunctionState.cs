@@ -11,13 +11,13 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
 
     [IgnoreMember]
     [NotMapped]
-    public List<LogRecord> Logs { get; } = new();
+    public List<LogRecord> Logs { get; set; } = new();
     public int Id { get; internal set; }
     public int? ServiceId { get; set; }
     public string UserDefinedId { get; internal set; }
     public DateTime Created { get; internal set; }
     /// <summary>
-    /// Serailized class instance that contain the resumable function instance data
+    /// Serialized class instance that contain the resumable function instance data
     /// </summary>
     [NotMapped]
     public object StateObject { get; internal set; }

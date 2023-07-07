@@ -83,18 +83,26 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     bool expressionsLoaded;
     internal void LoadExpressions(bool forceReload = false)
     {
-        var serializer = new ExpressionSerializer();
-        if (expressionsLoaded && !forceReload) return;
+        try
+        {
+            var serializer = new ExpressionSerializer();
+            if (expressionsLoaded && !forceReload) return;
 
-        if (MatchExpressionValue != null)
-            MatchExpression = (LambdaExpression)serializer.Deserialize(MatchExpressionValue).ToExpression();
-        if (SetDataExpressionValue != null)
-            SetDataExpression = (LambdaExpression)serializer.Deserialize(SetDataExpressionValue).ToExpression();
-        if (CallMandatoryPartExpressionValue != null)
-            CallMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(CallMandatoryPartExpressionValue).ToExpression();
-        if (InstanceMandatoryPartExpressionValue != null)
-            InstanceMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(InstanceMandatoryPartExpressionValue).ToExpression();
+            if (MatchExpressionValue != null)
+                MatchExpression = (LambdaExpression)serializer.Deserialize(MatchExpressionValue).ToExpression();
+            if (SetDataExpressionValue != null)
+                SetDataExpression = (LambdaExpression)serializer.Deserialize(SetDataExpressionValue).ToExpression();
+            if (CallMandatoryPartExpressionValue != null)
+                CallMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(CallMandatoryPartExpressionValue).ToExpression();
+            if (InstanceMandatoryPartExpressionValue != null)
+                InstanceMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(InstanceMandatoryPartExpressionValue).ToExpression();
 
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
         expressionsLoaded = true;
     }
 

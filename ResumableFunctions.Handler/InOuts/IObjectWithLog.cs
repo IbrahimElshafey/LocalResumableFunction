@@ -11,7 +11,7 @@ public interface IObjectWithLog
 
     [IgnoreMember]
     [NotMapped]
-    public List<LogRecord> Logs { get; }
+    public List<LogRecord> Logs { get; set; }
 }
 public static class ObjectWithLogBehavior
 {

@@ -10,7 +10,7 @@ internal class CallProcessor : ICallProcessor
 {
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly ILogger<ReplayWaitProcessor> _logger;
-    private readonly IExpectedMatchesProcessor _expectedMatchesProcessor;
+    private readonly IWaitsProcessor _waitsProcessor;
     private readonly IWaitsRepo _waitsRepository;
     private readonly HangfireHttpClient _hangFireHttpClient;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
@@ -19,7 +19,7 @@ internal class CallProcessor : ICallProcessor
 
     public CallProcessor(
         ILogger<ReplayWaitProcessor> logger,
-        IExpectedMatchesProcessor expectedMatchesProcessor,
+        IWaitsProcessor waitsProcessor,
         IWaitsRepo waitsRepository,
         IBackgroundProcess backgroundJobClient,
         HangfireHttpClient hangFireHttpClient,
@@ -28,7 +28,7 @@ internal class CallProcessor : ICallProcessor
         IScanStateRepo scanStateRepo)
     {
         _logger = logger;
-        _expectedMatchesProcessor = expectedMatchesProcessor;
+        _waitsProcessor = waitsProcessor;
         _waitsRepository = waitsRepository;
         _backgroundJobClient = backgroundJobClient;
         _hangFireHttpClient = hangFireHttpClient;
@@ -75,7 +75,7 @@ internal class CallProcessor : ICallProcessor
                 var matchedFunctionsIds = await _waitsRepository.GetMatchedFunctionsForCall(pushedCallId, methodUrn);
                 foreach (var functionId in matchedFunctionsIds)
                 {
-                    _backgroundJobClient.Enqueue(() => _expectedMatchesProcessor.ProcessFunctionExpectedMatches(functionId, pushedCallId));
+                    _backgroundJobClient.Enqueue(() => _waitsProcessor.ProcessFunctionExpectedWaitMatches(functionId, pushedCallId));
                 }
             },
             $"Error when call `ServiceProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");

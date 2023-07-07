@@ -110,7 +110,7 @@ public class SubFunctionsTest
             yield return Wait<string, string>("M2", Method2).MatchAll();
         }
 
-        [PushCall("Method1")] public string Method1(string input) => input + "M1";
+        [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
     }
 
@@ -146,7 +146,7 @@ public class SubFunctionsTest
             yield return Wait<string, string>("M1", Method1).MatchAll();
         }
 
-        [PushCall("Method1")] public string Method1(string input) => input + "M1";
+        [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
 
     }
 }

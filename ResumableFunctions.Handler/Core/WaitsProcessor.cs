@@ -11,14 +11,14 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Core
 {
-    internal class ExpectedMatchesProcessor : IExpectedMatchesProcessor
+    internal class WaitsProcessor : IWaitsProcessor
     {
         private readonly IFirstWaitProcessor _firstWaitProcessor;
         private readonly IRecycleBinService _recycleBinService;
         private readonly IReplayWaitProcessor _replayWaitProcessor;
         private readonly IWaitsRepo _waitsRepo;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILogger<ExpectedMatchesProcessor> _logger;
+        private readonly ILogger<WaitsProcessor> _logger;
         private readonly IBackgroundProcess _backgroundJobClient;
         private readonly IUnitOfWork _context;
         private readonly BackgroundJobExecutor _backgroundJobExecutor;
@@ -33,9 +33,9 @@ namespace ResumableFunctions.Handler.Core
         private MethodWait _methodWait;
         private PushedCall _pushedCall;
 
-        public ExpectedMatchesProcessor(
+        public WaitsProcessor(
             IServiceProvider serviceProvider,
-            ILogger<ExpectedMatchesProcessor> logger,
+            ILogger<WaitsProcessor> logger,
             IFirstWaitProcessor firstWaitProcessor,
             IRecycleBinService recycleBinService,
             IWaitsRepo waitsRepo,
@@ -68,7 +68,7 @@ namespace ResumableFunctions.Handler.Core
         }
 
         [DisplayName("Process Function Expected Matches where `FunctionId:{0}` and `PushedCallId:{1}`")]
-        public async Task ProcessFunctionExpectedMatches(int functionId, int pushedCallId)
+        public async Task ProcessFunctionExpectedWaitMatches(int functionId, int pushedCallId)
         {
             await _backgroundJobExecutor.Execute(
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
@@ -189,7 +189,7 @@ namespace ResumableFunctions.Handler.Core
                     $"\nProcessing this wait will be scheduled.",
                     StatusCodes.WaitProcessing, ex);
                 _backgroundJobClient.Schedule(() =>
-                        ProcessFunctionExpectedMatches(_methodWait.RequestedByFunctionId, pushedCallId),
+                        ProcessFunctionExpectedWaitMatches(_methodWait.RequestedByFunctionId, pushedCallId),
                     TimeSpan.FromSeconds(10));
                 return false;
             }

@@ -122,11 +122,11 @@ namespace ResumableFunctions.Handler.Testing
             if (await GetPushedCallsCount() != expectedPushedCallsCount)
                 return $"Pushed calls count not equal {expectedPushedCallsCount}";
 
-            if (await GetWaitsCount() != waitsCount)
-                return $"Waits count not equal {expectedPushedCallsCount}";
+            if (waitsCount != -1 && await GetWaitsCount() != waitsCount)
+                return $"Waits count not equal {waitsCount}";
 
             if (await GetCompletedInstancesCount() != completedInstancesCount)
-                return $"Completed instances count not equal {expectedPushedCallsCount}";
+                return $"Completed instances count not equal {completedInstancesCount}";
 
             return string.Empty;
         }

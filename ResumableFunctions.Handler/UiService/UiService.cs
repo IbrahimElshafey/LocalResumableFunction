@@ -255,8 +255,8 @@ namespace ResumableFunctions.Handler.UiService
                     CallId = (int?)x.Key,
                     All = (int?)x.Count(),
                     Matched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.Matched),
-                    NotMatched = (int?)x.Count(waitForCall => 
-                        waitForCall.MatchStatus == MatchStatus.NotMatched||
+                    NotMatched = (int?)x.Count(waitForCall =>
+                        waitForCall.MatchStatus == MatchStatus.NotMatched ||
                         waitForCall.MatchStatus == MatchStatus.DuplicationCanceled),
                 });
 
@@ -368,7 +368,7 @@ namespace ResumableFunctions.Handler.UiService
                 .Where(x => x.FunctionStateId == instanceId)
                 .ToListAsync();
             await SetWaitTemplates(waits);
-            var waitsNodes = new ArrayList(waits.Where(x => x.IsRootNode).ToList());
+            var waitsNodes = new ArrayList(waits.Where(x => x.ParentWait == null).ToList());
             return new FunctionInstanceDetails(
                 instanceId,
                 instance.ResumableFunctionIdentifier.Id,

@@ -11,7 +11,7 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
-    public partial class ManyWaitsTests
+    public class ManyWaitsTests
     {
         [Fact]
         public async Task WaitThreeMethodsAtStart_Test()
@@ -168,8 +168,8 @@ namespace Tests
             Console.WriteLine("Three method done");
         }
 
-        [PushCall("Method1")]
-        public string Method1(string input) => "Method1 Call";
+        [PushCall("RequestAdded")]
+        public string Method1(string input) => "RequestAdded Call";
         [PushCall("Method2")]
         public string Method2(string input) => "Method2 Call";
         [PushCall("Method3")] public string Method3(string input) => "Method3 Call";
@@ -211,8 +211,8 @@ namespace Tests
             Console.WriteLine("WaitFirstInThree");
         }
 
-        [PushCall("Method1")]
-        public string Method1(string input) => "Method1 Call";
+        [PushCall("RequestAdded")]
+        public string Method1(string input) => "RequestAdded Call";
         [PushCall("Method2")]
         public string Method2(string input) => "Method2 Call";
         [PushCall("Method3")] public string Method3(string input) => "Method3 Call";

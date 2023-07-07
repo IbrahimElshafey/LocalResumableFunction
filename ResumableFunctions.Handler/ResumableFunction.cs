@@ -1,90 +1,69 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
+using System.Reflection;
+using FastExpressionCompiler;
 using MessagePack;
+using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
 
-public abstract partial class ResumableFunction : IObjectWithLog
+public abstract partial class ResumableFunction
 {
+    public T Computed<T>(T value) => default;
+    internal MethodInfo CurrentResumableFunction { get; set; }
 
     public void Log(string message) => this.AddLog(message, LogType.Info, Helpers.StatusCodes.Custom);
     public void Warning(string message) => this.AddLog(message, LogType.Warning, Helpers.StatusCodes.Custom);
     public void Error(string message, Exception ex = null) => this.AddError(message, Helpers.StatusCodes.Custom, ex);
 
-    [IgnoreMember]
-    public int ErrorCounter { get; set; }
+    [IgnoreMember] public int ErrorCounter { get; set; }
 
-    [IgnoreMember]
-    [NotMapped]
-    public List<LogRecord> Logs { get; } = new();
+    [IgnoreMember] [NotMapped] public List<LogRecord> Logs { get; set; } = new();
 
-    /// <summary>
-    ///     Go back to code after the wait.
-    /// </summary>
-    protected ReplayRequest GoBackAfter(string name)
+    private bool _dependenciesAreSet;
+    internal void InitializeDependencies(IServiceProvider serviceProvider)
     {
-        return new ReplayRequest
+        if (_dependenciesAreSet) return;
+        var setDependenciesMi = GetType().GetMethod(
+            "SetDependencies", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+        if (setDependenciesMi == null)
+            return;
+
+        var parameters = setDependenciesMi.GetParameters();
+        var inputs = new object[parameters.Length];
+        var matchSignature = setDependenciesMi.ReturnType == typeof(void) && parameters.Any();
+        if (matchSignature)
         {
-            Name = name,
-            ReplayType = ReplayType.GoAfter,
-            CurrentFunction = this,
-        };
+            for (var i = 0; i < parameters.Length; i++)
+            {
+                inputs[i] =
+                    serviceProvider.GetService(parameters[i].ParameterType) ??
+                    ActivatorUtilities.CreateInstance(serviceProvider, parameters[i].ParameterType);
+            }
+        }
+        CallSetDependencies(inputs, setDependenciesMi, parameters);
+        _dependenciesAreSet = true;
     }
 
-    /// <summary>
-    ///     Go back to code before the wait and re-wait it again.
-    /// </summary>
-    protected ReplayRequest GoBackBefore(string name)
+    private void CallSetDependencies(object[] inputs, MethodInfo mi, ParameterInfo[] parameterTypes)
     {
-        return new ReplayRequest
+        var instance = Expression.Parameter(GetType(), "instance");
+        var depsParams = parameterTypes.Select(x => Expression.Parameter(x.ParameterType)).ToList();
+        var parameters = new List<ParameterExpression>
         {
-            Name = name,
-            ReplayType = ReplayType.GoBefore,
-            CurrentFunction = this
+            instance
         };
-    }
-
-    /// <summary>
-    ///     Go back to code before method wait and re-wait it again with new match condition.
-    /// </summary>
-    protected ReplayRequest GoBackBefore<TInput, TOutput>(string name,
-        Expression<Func<TInput, TOutput, bool>> newMatchExpression)
-    {
-        return new ReplayRequest
+        parameters.AddRange(depsParams);
+        var call = Expression.Call(instance, mi, depsParams);
+        var lambda = Expression.Lambda(call, parameters);
+        var compiledFunction = lambda.CompileFast();
+        var paramsAll = new List<object>(inputs.Length)
         {
-            Name = name,
-            ReplayType = ReplayType.GoBeforeWithNewMatch,
-            MatchExpression = newMatchExpression,
-            CurrentFunction = this,
+            this
         };
-    }
-
-    /// <summary>
-    ///     Go back to wait and re-wait it again.
-    /// </summary>
-    protected ReplayRequest GoBackTo(string name)
-    {
-        return new ReplayRequest
-        {
-            Name = name,
-            ReplayType = ReplayType.GoTo,
-            CurrentFunction = this
-        };
-    }
-
-    /// <summary>
-    ///     Go back to wait and re-wait it again with new match condition.
-    /// </summary>
-    protected ReplayRequest GoBackTo<TInput, TOutput>(string name,
-        Expression<Func<TInput, TOutput, bool>> newMatchExpression)
-    {
-        return new ReplayRequest
-        {
-            Name = name,
-            ReplayType = ReplayType.GoToWithNewMatch,
-            MatchExpression = newMatchExpression,
-            CurrentFunction = this,
-        };
+        paramsAll.AddRange(inputs);
+        compiledFunction.DynamicInvoke(paramsAll.ToArray());
     }
 }

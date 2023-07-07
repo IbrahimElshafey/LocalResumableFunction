@@ -1,6 +1,9 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using FastExpressionCompiler;
+using ResumableFunctions.Handler.Helpers;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Expressions;
@@ -15,27 +18,56 @@ public class WaitExpressionsHash : ExpressionVisitor
     {
         try
         {
-            var sb = new StringBuilder();
-            if (matchExpression != null)
-            {
-                MatchExpression =
-                    (LambdaExpression)ChangeInputAndOutputNames(matchExpression);
-                sb.Append(matchExpression.ToCSharpString());
-            }
-            if (setDataExpression != null)
-            {
-                SetDataExpression =
-                    (LambdaExpression)ChangeInputAndOutputNames(setDataExpression);
-                sb.Append(setDataExpression.ToCSharpString());
-            }
-            var data = Encoding.Unicode.GetBytes(sb.ToString());
-            Hash = MD5.HashData(data);
+            MatchExpression = matchExpression;
+            SetDataExpression = setDataExpression;
+            CalcComputedPartsInMatchExpression();
+            CalcHash();
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             throw;
         }
+    }
+
+    private void CalcComputedPartsInMatchExpression()
+    {
+        var changeComputedParts = new GenericVisitor();
+        var computedMethodInfo = typeof(ResumableFunction).GetMethod("Computed").GetGenericMethodDefinition();
+        changeComputedParts.OnVisitMethodCall(OnVisitMethodCall);
+        MatchExpression = (LambdaExpression)changeComputedParts.Visit(MatchExpression);
+        Expression OnVisitMethodCall(MethodCallExpression methodCallExpression)
+        {
+            if (methodCallExpression.Method.GetGenericMethodDefinition() != computedMethodInfo)
+                return base.VisitMethodCall(methodCallExpression);
+            
+            var arg = 
+                Lambda<Func<object>>(Convert(methodCallExpression.Arguments[0],typeof(object)))
+                    .CompileFast()
+                    .Invoke();
+            return Constant(arg);
+        }
+    }
+
+    private void CalcHash()
+    {
+        var sb = new StringBuilder();
+        if (MatchExpression != null)
+        {
+            MatchExpression =
+                (LambdaExpression)ChangeInputAndOutputNames(MatchExpression);
+            sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
+        }
+
+        if (SetDataExpression != null)
+        {
+            SetDataExpression =
+                (LambdaExpression)ChangeInputAndOutputNames(SetDataExpression);
+            sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
+        }
+
+        var data = Encoding.Unicode.GetBytes(sb.ToString());
+        Hash = MD5.HashData(data);
     }
 
     private Expression ChangeInputAndOutputNames(LambdaExpression expression)

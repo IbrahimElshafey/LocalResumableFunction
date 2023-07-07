@@ -92,11 +92,11 @@ public partial class MatchExpressionWriter : ExpressionVisitor
     private void CalcConstantInExpression()
     {
         MatchExpression = _matchExpression;
-        var constantTranslationVisior = new GenericVisitor();
-        constantTranslationVisior.OnVisitBinary(TryEvaluateBinaryParts);
-        constantTranslationVisior.OnVisitUnary(VisitNotEqual);
+        var constantTranslationVisitor = new GenericVisitor();
+        constantTranslationVisitor.OnVisitBinary(TryEvaluateBinaryParts);
+        constantTranslationVisitor.OnVisitUnary(VisitNotEqual);
         //aaa
-        _matchExpression = (LambdaExpression)constantTranslationVisior.Visit(_matchExpression);
+        _matchExpression = (LambdaExpression)constantTranslationVisitor.Visit(_matchExpression);
 
         Expression TryEvaluateBinaryParts(BinaryExpression node)
         {

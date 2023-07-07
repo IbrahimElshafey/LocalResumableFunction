@@ -242,6 +242,12 @@ internal sealed class WaitsDataContext : DbContext
             HandleSoftDelete(entry);
             ExcludeFalseAddEntries(entry);
             OnSaveEntity(entry);
+            //if (entry.Entity is Wait wait)
+            //    if (wait.FunctionState == null && wait?.ParentWait?.FunctionState != null)
+            //    {
+            //        wait.FunctionState = wait.ParentWait.FunctionState;
+            //        wait.FunctionStateId = wait.ParentWait.FunctionStateId;
+            //    }
         }
     }
 
@@ -282,7 +288,7 @@ internal sealed class WaitsDataContext : DbContext
                 .Where(x => x.Entity is Wait { Path: null })
                 .Select(x => (Wait)x.Entity)
                 .ToList();
-            foreach (var wait in waitsWithNoPath) 
+            foreach (var wait in waitsWithNoPath)
                 wait.Path = GetWaitPath(wait);
 
             await base.SaveChangesAsync(cancellationToken);

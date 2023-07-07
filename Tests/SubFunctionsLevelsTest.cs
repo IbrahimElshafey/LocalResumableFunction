@@ -79,7 +79,7 @@ public class SubFunctionsLevelsTest
             yield return Wait<string, string>("M2", Method3).MatchAll();
         }
 
-        [PushCall("Method1")] public string Method1(string input) => input + "M1";
+        [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
         [PushCall("Method3")] public string Method3(string input) => input + "M3";
     }

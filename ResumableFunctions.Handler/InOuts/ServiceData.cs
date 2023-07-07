@@ -9,7 +9,7 @@ public class ServiceData : IObjectWithLog, IEntityWithUpdate
 
     [IgnoreMember]
     [NotMapped]
-    public List<LogRecord> Logs { get; } = new();
+    public List<LogRecord> Logs { get; set; } = new();
     public int Id { get; internal set; }
     public DateTime Created { get; internal set; }
     public int? ServiceId { get; internal set; }

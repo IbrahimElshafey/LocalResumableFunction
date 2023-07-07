@@ -66,14 +66,9 @@ public class WaitsGroup : Wait
     public Wait When(Expression<Func<WaitsGroup, bool>> matchCountFilter)
     {
         WaitType = WaitType.GroupWaitWithExpression;
-        var assembly = CurrentFunction?.GetType().Assembly;
-        if (assembly != null)
-        {
-            var serializer = new ExpressionSerializer();
-            GroupMatchExpression = matchCountFilter;
-            GroupMatchExpressionValue = serializer.Serialize(GroupMatchExpression.ToExpressionSlim());
-        }
-
+        var serializer = new ExpressionSerializer();
+        GroupMatchExpression = matchCountFilter;
+        GroupMatchExpressionValue = serializer.Serialize(GroupMatchExpression.ToExpressionSlim());
         return this;
     }
     public Wait All()

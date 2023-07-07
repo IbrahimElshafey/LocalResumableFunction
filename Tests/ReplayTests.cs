@@ -219,7 +219,7 @@ public class ReplayTests
             await Task.Delay(100);
         }
 
-        [PushCall("Method1")] public string Method1(string input) => input + "M1";
+        [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
     }
     public class GoAfterFunction : ResumableFunction
@@ -237,7 +237,7 @@ public class ReplayTests
             await Task.Delay(100);
         }
 
-        [PushCall("Method1")] public string Method1(string input) => input + "M1";
+        [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
     }
 
     public class GoBeforeFunction : ResumableFunction
@@ -258,7 +258,7 @@ public class ReplayTests
             await Task.Delay(100);
         }
 
-        [PushCall("Method1")] public string Method1(string input) => input + "M1";
+        [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
     }
 
@@ -283,7 +283,7 @@ public class ReplayTests
             await Task.Delay(100);
         }
 
-        [PushCall("Method1")] public string Method1(string input) => input + "M1";
+        [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
     }
     public class ReplayGoToFunction : ResumableFunction
@@ -307,7 +307,7 @@ public class ReplayTests
             await Task.Delay(100);
         }
 
-        [PushCall("Method1")] public string Method1(string input) => input + "M1";
+        [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
     }
 }

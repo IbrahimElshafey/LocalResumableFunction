@@ -73,7 +73,7 @@ internal partial class WaitsRepo
 
         async Task SetWaitTemplate()
         {
-            WaitTemplate waitTemplate = null;
+            WaitTemplate waitTemplate;
             if (methodWait.TemplateId == default)
             {
                 waitTemplate =
@@ -178,18 +178,22 @@ internal partial class WaitsRepo
         var isExistLocal = _context.Waits.Local.Contains(wait);
         var notAddStatus = _context.Entry(wait).State != EntityState.Added;
         SetNodeType(wait);
+
+
         if (isExistLocal || !notAddStatus) return Task.CompletedTask;
 
         _logger.LogInformation($"Add Wait [{wait.Name}] with type [{wait.WaitType}]");
-        if (wait is WaitsGroup waitGroup)
+        switch (wait)
         {
-            waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
+            case WaitsGroup waitGroup:
+                waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
+                break;
+            case MethodWait { MethodToWaitId: > 0 } methodWait:
+                //Bug:I forgot why I added this??!!
+                methodWait.MethodToWait = null;
+                break;
         }
-        if (wait is MethodWait { MethodToWaitId: > 0 } methodWait)
-        {
-            //Bug:does this may cause a problem
-            methodWait.MethodToWait = null;
-        }
+
         _context.Waits.Add(wait);
         return Task.CompletedTask;
     }
