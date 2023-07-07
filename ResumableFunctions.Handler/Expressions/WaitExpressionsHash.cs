@@ -38,14 +38,16 @@ public class WaitExpressionsHash : ExpressionVisitor
         MatchExpression = (LambdaExpression)changeComputedParts.Visit(MatchExpression);
         Expression OnVisitMethodCall(MethodCallExpression methodCallExpression)
         {
-            if (methodCallExpression.Method.GetGenericMethodDefinition() != computedMethodInfo)
-                return base.VisitMethodCall(methodCallExpression);
-            
-            var arg = 
-                Lambda<Func<object>>(Convert(methodCallExpression.Arguments[0],typeof(object)))
-                    .CompileFast()
-                    .Invoke();
-            return Constant(arg);
+            if (methodCallExpression.Method.IsGenericMethod &&
+                methodCallExpression.Method.GetGenericMethodDefinition() == computedMethodInfo)
+            {
+                var arg =
+                    Lambda<Func<object>>(Convert(methodCallExpression.Arguments[0], typeof(object)))
+                        .CompileFast()
+                        .Invoke();
+                return Constant(arg);
+            }
+            return base.VisitMethodCall(methodCallExpression);
         }
     }
 

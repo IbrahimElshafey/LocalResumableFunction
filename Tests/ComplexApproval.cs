@@ -37,7 +37,7 @@ public class ComplexApproval
 
         instance.ChefFinalApproval(requestId);
         var errors = await test.GetLogs();
-        Assert.Empty(await test.RoundCheck(14, -1, 1));
+        Assert.Empty(await test.RoundCheck(14, 23, 1));
     }
 
 
