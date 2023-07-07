@@ -19,7 +19,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         _context = _scope.ServiceProvider.GetService<WaitsDataContext>();
     }
 
-    public async Task<WaitTemplate> AddNewTemplate(WaitExpressionsHash hashResult,
+    public async Task<WaitTemplate> AddNewTemplate(
+        WaitExpressionsHash hashResult,
         object currentFunctionInstance,
         int funcId,
         int groupId,

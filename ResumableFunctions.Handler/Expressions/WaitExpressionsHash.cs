@@ -10,9 +10,9 @@ namespace ResumableFunctions.Handler.Expressions;
 
 public class WaitExpressionsHash : ExpressionVisitor
 {
-    public byte[] Hash { get; internal set; }
-    public LambdaExpression MatchExpression { get; internal set; }
-    public LambdaExpression SetDataExpression { get; internal set; }
+    public byte[] Hash { get; private set; }
+    public LambdaExpression MatchExpression { get; private set; }
+    public LambdaExpression SetDataExpression { get; private set; }
 
     public WaitExpressionsHash(LambdaExpression matchExpression, LambdaExpression setDataExpression)
     {

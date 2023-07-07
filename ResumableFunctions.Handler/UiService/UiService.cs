@@ -332,6 +332,7 @@ namespace ResumableFunctions.Handler.UiService
                  where callMatch.WaitId == wait.Id
                  select new MethodWaitDetails(
                     wait.Name,
+                    wait.Id,
                     wait.Status,
                     wait.RF_MethodUrn,
                     wait.FunctionStateId,
@@ -432,6 +433,7 @@ namespace ResumableFunctions.Handler.UiService
                 .Select(x =>
                     new MethodWaitDetails(
                         x.methodWait.Name,
+                        x.methodWait.Id,
                         x.methodWait.Status,
                         x.RF_MethodUrn,
                         x.methodWait.FunctionStateId,

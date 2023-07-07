@@ -16,4 +16,18 @@ public class WaitForCall : IEntityWithUpdate
 
     public DateTime Modified { get; internal set; }
     public string ConcurrencyToken { get; internal set; }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is WaitForCall wfc)
+        {
+            return wfc.WaitId == WaitId && wfc.FunctionId == FunctionId && wfc.StateId == StateId;
+        }
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return $"{WaitId}-{FunctionId}-{StateId}".GetHashCode();
+    }
 }

@@ -37,12 +37,12 @@
             <tr>
                 <td>
                     <ul>
-                        <li><b>Name: </b>@wait.Name</li>
+                        <li><b>Name: </b>@wait.Name #@wait.Id</li>
                         <li><b>Status: </b><span class="@wait.Status">@wait.Status</span></li>
                         <li>
                             <b>In Function Instance: </b>
                             <a target="_blank" href="~/RF/FunctionInstances/FunctionInstance?instanceId=@wait.InstanceId" class="w3-text-blue">
-                                @wait.FunctionName (@wait.InstanceId)
+                                @wait.FunctionName #@wait.InstanceId
                             </a>
                         </li>
                         <li><b>Match If: </b>@wait.MatchExpression</li>

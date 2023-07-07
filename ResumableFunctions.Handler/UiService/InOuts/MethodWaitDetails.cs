@@ -7,19 +7,20 @@ namespace ResumableFunctions.Handler.UiService.InOuts
 {
     public class MethodWaitDetails
     {
-        public MethodWaitDetails(
-        string name,
-        WaitStatus status,
-        string functionName,
-        int instanceId,
-        DateTime created,
-        string mandatoryPart,
-        MatchStatus matchStatus,
-        InstanceUpdateStatus instanceUpdateStatus,
-        ExecutionStatus executionStatus,
-        TemplateDisplay templateDisplay)
+        public MethodWaitDetails(string name,
+            int id,
+            WaitStatus status,
+            string functionName,
+            int instanceId,
+            DateTime created,
+            string mandatoryPart,
+            MatchStatus matchStatus,
+            InstanceUpdateStatus instanceUpdateStatus,
+            ExecutionStatus executionStatus,
+            TemplateDisplay templateDisplay)
         {
             Name = name;
+            Id = id;
             Status = status;
             FunctionName = functionName;
             InstanceId = instanceId;
@@ -42,6 +43,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public string MatchExpression { get; }
         public MatchStatus MatchStatus { get; }
         public string Name { get; }
+        public int Id { get; }
         public string SetDataExpression { get; }
         public WaitStatus Status { get; }
         public int? CallId { get; set; }

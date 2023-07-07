@@ -71,7 +71,7 @@ internal partial class WaitsRepo : IWaitsRepo
     {
         try
         {
-            var matchedWaitsIds = new List<WaitForCall>();
+            var matchedWaitsIds = new HashSet<WaitForCall>();
             var pushedCall = await _context
                 .PushedCalls
                 .Select(x => new PushedCall { Id = x.Id, DataValue = x.DataValue })
