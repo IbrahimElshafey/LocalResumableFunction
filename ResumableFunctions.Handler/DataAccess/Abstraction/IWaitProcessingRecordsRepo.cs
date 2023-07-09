@@ -4,6 +4,5 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction;
 
 public interface IWaitProcessingRecordsRepo
 {
-    WaitProcessingRecord Add(WaitProcessingRecord waitProcessingRecord);
-    Task<List<WaitProcessingRecord>> GetWaitsForCall(int pushedCallId, int functionId);
+    Task<WaitProcessingRecord> Add(WaitProcessingRecord waitProcessingRecord);
 }

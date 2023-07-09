@@ -45,7 +45,7 @@ internal sealed class WaitsDataContext : DbContext
     public DbSet<FunctionWait> FunctionWaits { get; set; }
 
     public DbSet<PushedCall> PushedCalls { get; set; }
-    public DbSet<WaitProcessingRecord> WaitsForCalls { get; set; }
+    public DbSet<WaitProcessingRecord> WaitProcessingRecords { get; set; }
 
 
     public DbSet<ServiceData> ServicesData { get; set; }

@@ -1,5 +1,4 @@
 ﻿@using ResumableFunctions.Handler.InOuts;
-@using ResumableFunctions.Handler.UiService.InOuts;
 @model MethodWait
 <li>
     <div class="w3-card w3-white w3-padding w3-round">
@@ -25,14 +24,17 @@
                 </tr>
             }
             <tr>
-                <td><b class="w3-text-blue-gray">Created: </b></td>
-                <td>@Model.Created</td>
+                <td colspan="2">
+                    <b class="w3-text-blue-gray">Created: </b>
+                    @Model.Created
+                    @if (Model.Modified != DateTime.MinValue)
+                    {
+                        <b class="w3-text-blue-gray">Modified: </b>
+                        @Model.Modified
+                    }
+                </td>
 
-                @if (Model.Modified != DateTime.MinValue)
-                {
-                    <td><b class="w3-text-blue-gray">Modified: </b></td>
-                    <td>@Model.Modified</td>
-                }
+               
             </tr>
         </table>
     </div>

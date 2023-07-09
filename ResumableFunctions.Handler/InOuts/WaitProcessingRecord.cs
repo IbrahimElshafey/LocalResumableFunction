@@ -9,6 +9,7 @@ public class WaitProcessingRecord : IEntityWithUpdate
     public int? ServiceId { get; set; }
     public int FunctionId { get; internal set; }
     public int StateId { get; internal set; }
+    public int TemplateId { get; internal set; }
     public MatchStatus MatchStatus { get; internal set; } = MatchStatus.ExpectedMatch;
     public InstanceUpdateStatus InstanceUpdateStatus { get; internal set; } = InstanceUpdateStatus.NotUpdatedYet;
     public ExecutionStatus ExecutionStatus { get; internal set; } = ExecutionStatus.NotStartedYet;

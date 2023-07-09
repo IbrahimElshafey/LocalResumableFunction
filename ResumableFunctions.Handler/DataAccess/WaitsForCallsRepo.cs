@@ -14,22 +14,10 @@ internal class WaitProcessingRecordsRepo : IWaitProcessingRecordsRepo
         _context = context;
     }
 
-    public WaitProcessingRecord Add(WaitProcessingRecord waitProcessingRecord)
+    public async Task<WaitProcessingRecord> Add(WaitProcessingRecord waitProcessingRecord)
     {
-        _context.WaitsForCalls.Add(waitProcessingRecord);
+        _context.WaitProcessingRecords.Add(waitProcessingRecord);
+        await _context.SaveChangesAsync();
         return waitProcessingRecord;
-    }
-
-    public async Task<List<WaitProcessingRecord>> GetWaitsForCall(int pushedCallId, int functionId)
-    {
-        return
-            await _context
-                .WaitsForCalls
-                .Where(x =>
-                    x.PushedCallId == pushedCallId &&
-                    x.FunctionId == functionId &&
-                    (x.MatchStatus == MatchStatus.PartiallyMatched ||
-                     x.InstanceUpdateStatus == InstanceUpdateStatus.UpdateFailed))
-                .ToListAsync();
     }
 }
