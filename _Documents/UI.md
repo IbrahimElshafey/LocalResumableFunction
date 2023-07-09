@@ -1,5 +1,6 @@
 ﻿# UI project
 * Tables problem on small screens
+* Wait templates for method group
 * Services View
 	* Add Other Errors View
 	* Add Scan Overview View

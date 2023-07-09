@@ -19,7 +19,7 @@ public abstract partial class ResumableFunction
 
     [IgnoreMember] public int ErrorCounter { get; set; }
 
-    [IgnoreMember] [NotMapped] public List<LogRecord> Logs { get; set; } = new();
+    [IgnoreMember][NotMapped] public List<LogRecord> Logs { get; set; } = new();
 
     private bool _dependenciesAreSet;
     internal void InitializeDependencies(IServiceProvider serviceProvider)

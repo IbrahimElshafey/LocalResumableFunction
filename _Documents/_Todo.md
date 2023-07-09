@@ -1,4 +1,10 @@
 ﻿# Working On Now
+* Error when use local variable in match expression or set data expression
+* Kill wait template duplication when use local variable
+* Enhance InitialProcessPushedCall
+	* Will get affected wait templates
+	* Will group them by service Id
+	* Will send the group to each service to check
 * Review Log for replay
 * Background Cleaning Job
 * ResumableFunctions.Publisher
