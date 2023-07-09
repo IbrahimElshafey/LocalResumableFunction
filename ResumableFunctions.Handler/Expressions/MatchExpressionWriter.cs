@@ -10,8 +10,6 @@ public partial class MatchExpressionWriter : ExpressionVisitor
 {
     private LambdaExpression _matchExpression;
     private ParameterExpression _functionInstanceArg;
-    private ParameterExpression _inputArg;
-    private ParameterExpression _outputArg;
     private readonly object _currentFunctionInstance;
     private readonly List<ConstantPart> _constantParts = new();
 
@@ -31,7 +29,8 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             return;
         }
         _currentFunctionInstance = instance;
-        ChangeInputOutputParamsNames();
+        CheckLocalFields();
+        ChangeSignature();
         CalcConstantInExpression();
         MarkMandatoryConstants();
 
@@ -44,14 +43,31 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         }
     }
 
-    private void ChangeInputOutputParamsNames()
+    private void CheckLocalFields()
+    {
+        var fieldVistor = new GenericVisitor();
+        fieldVistor.OnVisitMember(exp =>
+        {
+            if (exp.ToString().Contains("<>c__DisplayClass"))
+            {
+                var name = exp.Member.Name;
+                throw new Exception(
+                    $"Can't use local variable `{name}` in match expression `{ExpressionExtensions.ToCSharpString(_matchExpression)}`, " +
+                    $"please warp it in method `{nameof(ResumableFunction.LocalValue)}({name})`");
+            }
+            //todo:check if member is serializable
+            //have public getter and setter
+            //not field
+            return exp;
+        });
+        fieldVistor.Visit(_matchExpression);
+    }
+
+    private void ChangeSignature()
     {
         var expression = _matchExpression;
         _functionInstanceArg = Parameter(_currentFunctionInstance.GetType(), "functionInstance");
-        _inputArg = Parameter(expression.Parameters[0].Type, "input");
-        _outputArg = Parameter(expression.Parameters[1].Type, "output");
         var changeParameterVisitor = new GenericVisitor();
-        changeParameterVisitor.OnVisitParameter(ChangeParameters);
         changeParameterVisitor.OnVisitConstant(OnVisitFunctionInstance);
         var updatedBoy = (LambdaExpression)changeParameterVisitor.Visit(_matchExpression);
         var functionType = typeof(Func<,,,>)
@@ -64,22 +80,9 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         _matchExpression = Lambda(
             functionType,
             updatedBoy.Body,
-            _inputArg,
-            _outputArg,
+            expression.Parameters[0],
+            expression.Parameters[1],
             _functionInstanceArg);
-
-        Expression ChangeParameters(ParameterExpression node)
-        {
-            //rename output
-            var isOutput = node == _matchExpression.Parameters[1];
-            if (isOutput) return _outputArg;
-
-            //rename input
-            var isInput = node == _matchExpression.Parameters[0];
-            if (isInput) return _inputArg;
-
-            return base.VisitParameter(node);
-        }
 
         Expression OnVisitFunctionInstance(ConstantExpression node)
         {
