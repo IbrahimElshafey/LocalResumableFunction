@@ -92,7 +92,7 @@ internal partial class CallProcessor : ICallProcessor
         {
             var actionUrl =
                 $"{service.ServiceUrl}api/ResumableFunctions/ServiceProcessPushedCall";
-            await _hangFireHttpClient.EnqueueGetRequestIfFail(actionUrl);
+            await _hangFireHttpClient.EnqueuePostRequestIfFail(actionUrl, service);
         }
         catch (Exception ex)
         {
