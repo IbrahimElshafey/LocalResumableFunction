@@ -64,6 +64,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         return result;
     }
 
+
     public async Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId)
     {
         var templateIds = await _context

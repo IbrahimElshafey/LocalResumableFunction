@@ -19,6 +19,7 @@ public class PushedCall : IEntityWithDelete, IOnSaveEntity
     public DateTime Created { get; internal set; }
 
     public bool IsDeleted { get; internal set; }
+    public int? TemplatesCount { get; internal set; }
 
     public void OnSave()
     {

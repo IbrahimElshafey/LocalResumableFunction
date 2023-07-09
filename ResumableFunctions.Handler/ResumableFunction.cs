@@ -10,7 +10,7 @@ namespace ResumableFunctions.Handler;
 
 public abstract partial class ResumableFunction
 {
-    public T Computed<T>(T value) => default;
+    public T LocalValue<T>(T value) => default;
     internal MethodInfo CurrentResumableFunction { get; set; }
 
     public void Log(string message) => this.AddLog(message, LogType.Info, Helpers.StatusCodes.Custom);

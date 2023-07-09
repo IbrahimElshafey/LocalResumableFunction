@@ -19,13 +19,13 @@ public class ComplexApproval
         var requestId = instance.RequestAdded("New Request");
         instance.MemberApproveRequest(new RequestTopicIndex(requestId, 0, MemberRole.MemberOne));
         instance.MemberApproveRequest(new RequestTopicIndex(requestId, 0, MemberRole.MemberTwo));
-        instance.ChefSkipTopic(new RequestTopicIndex(requestId, 0, MemberRole.MemberTwo));
+        instance.ChefSkipTopic(new RequestTopicIndex(requestId, 0, MemberRole.Chef));
 
         instance.MemberApproveRequest(new RequestTopicIndex(requestId, 0, MemberRole.Chef));
 
         instance.MemberApproveRequest(new RequestTopicIndex(requestId, 1, MemberRole.MemberTwo));
         instance.MemberApproveRequest(new RequestTopicIndex(requestId, 1, MemberRole.MemberThree));
-        instance.ChefSkipTopic(new RequestTopicIndex(requestId, 1, MemberRole.MemberTwo));
+        instance.ChefSkipTopic(new RequestTopicIndex(requestId, 1, MemberRole.Chef));
 
         instance.MemberApproveRequest(new RequestTopicIndex(requestId, 1, MemberRole.Chef));
 
@@ -123,7 +123,7 @@ public class ComplexApproval
                     .MatchIf((topicIndex, decision) =>
                         topicIndex.RequestId == RequestId &&
                         topicIndex.TopicIndex == CurrentTopicIndex &&
-                        topicIndex.MemberRole == Computed(currentMember))
+                        topicIndex.MemberRole == LocalValue(currentMember))
                     .NoSetData();
             }
 

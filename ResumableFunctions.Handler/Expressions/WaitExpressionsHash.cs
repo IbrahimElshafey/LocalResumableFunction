@@ -20,7 +20,7 @@ public class WaitExpressionsHash : ExpressionVisitor
         {
             MatchExpression = matchExpression;
             SetDataExpression = setDataExpression;
-            CalcComputedPartsInMatchExpression();
+            CalcLocalValuePartsInMatchExpression();
             CalcHash();
         }
         catch (Exception e)
@@ -30,16 +30,19 @@ public class WaitExpressionsHash : ExpressionVisitor
         }
     }
 
-    private void CalcComputedPartsInMatchExpression()
+    private void CalcLocalValuePartsInMatchExpression()
     {
         var changeComputedParts = new GenericVisitor();
-        var computedMethodInfo = typeof(ResumableFunction).GetMethod("Computed").GetGenericMethodDefinition();
+        var localValueMethodInfo = 
+            typeof(ResumableFunction)
+            .GetMethod(nameof(ResumableFunction.LocalValue))
+            .GetGenericMethodDefinition();
         changeComputedParts.OnVisitMethodCall(OnVisitMethodCall);
         MatchExpression = (LambdaExpression)changeComputedParts.Visit(MatchExpression);
         Expression OnVisitMethodCall(MethodCallExpression methodCallExpression)
         {
             if (methodCallExpression.Method.IsGenericMethod &&
-                methodCallExpression.Method.GetGenericMethodDefinition() == computedMethodInfo)
+                methodCallExpression.Method.GetGenericMethodDefinition() == localValueMethodInfo)
             {
                 var arg =
                     Lambda<Func<object>>(Convert(methodCallExpression.Arguments[0], typeof(object)))

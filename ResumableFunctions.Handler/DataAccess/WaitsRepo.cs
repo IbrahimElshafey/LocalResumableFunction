@@ -115,8 +115,7 @@ internal partial class WaitsRepo : IWaitsRepo
 
             _context.WaitsForCalls.AddRange(matchedWaitsIds);
             await _context.SaveChangesAsync();
-            var functionIds = matchedWaitsIds.Select(x => x.FunctionId).Distinct().ToList();
-            return functionIds;
+            return matchedWaitsIds.Select(x => x.FunctionId).Distinct().ToList();
         }
         catch (Exception ex)
         {
@@ -130,6 +129,8 @@ internal partial class WaitsRepo : IWaitsRepo
     {
         var methodGroupId = await GetMethodGroupId(methodUrn);
         var templates = await _waitTemplatesRepo.GetWaitTemplates(methodGroupId);
+        //Todo:Same method Id and hash are same templates
+        pushedCall.TemplatesCount = templates?.Count;
 
         foreach (var template in templates)
         {
@@ -142,8 +143,8 @@ internal partial class WaitsRepo : IWaitsRepo
                 var parts = (object[])getMandatoryFunc.DynamicInvoke(methodData.Input, methodData.Output);
                 var mandatory = string.Join("#", parts);
                 Expression<Func<MethodWait, bool>> query = wait =>
-                    wait.MethodGroupToWaitId == methodGroupId &&
                     wait.Status == WaitStatus.Waiting &&
+                    wait.MethodGroupToWaitId == methodGroupId &&
                     wait.ServiceId == _settings.CurrentServiceId &&
                     wait.MethodToWaitId == template.MethodId &&
                     wait.RequestedByFunctionId == template.FunctionId &&
@@ -153,11 +154,11 @@ internal partial class WaitsRepo : IWaitsRepo
             else
             {
                 Expression<Func<MethodWait, bool>> query = wait =>
-                    wait.MethodGroupToWaitId == methodGroupId &&
                     wait.Status == WaitStatus.Waiting &&
+                    wait.MethodGroupToWaitId == methodGroupId &&
                     wait.ServiceId == _settings.CurrentServiceId &&
-                    wait.RequestedByFunctionId == template.FunctionId &&
-                    wait.MethodToWaitId == template.MethodId;
+                    wait.MethodToWaitId == template.MethodId &&
+                    wait.RequestedByFunctionId == template.FunctionId;
                 yield return (query, false);
             }
         }
