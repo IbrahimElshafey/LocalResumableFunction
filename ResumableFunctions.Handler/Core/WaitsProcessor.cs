@@ -23,13 +23,13 @@ namespace ResumableFunctions.Handler.Core
         private readonly IUnitOfWork _context;
         private readonly BackgroundJobExecutor _backgroundJobExecutor;
         private readonly IDistributedLockProvider _lockProvider;
-        private readonly IWaitsForCallsRepo _waitsForCallsRepo;
+        private readonly IWaitProcessingRecordsRepo _waitProcessingRecordsRepo;
         private readonly IMethodIdsRepo _methodIdsRepo;
         private readonly IWaitTemplatesRepo _templatesRepo;
         private readonly IPushedCallsRepo _pushedCallsRepo;
         private readonly IServiceRepo _serviceRepo;
 
-        private WaitForCall _waitCall;
+        private WaitProcessingRecord _waitCall;
         private MethodWait _methodWait;
         private PushedCall _pushedCall;
 
@@ -44,7 +44,7 @@ namespace ResumableFunctions.Handler.Core
             IReplayWaitProcessor replayWaitProcessor,
             BackgroundJobExecutor backgroundJobExecutor,
             IDistributedLockProvider lockProvider,
-            IWaitsForCallsRepo waitsForCallsRepo,
+            IWaitProcessingRecordsRepo waitsForCallsRepo,
             IMethodIdsRepo methodIdsRepo,
             IWaitTemplatesRepo templatesRepo,
             IPushedCallsRepo pushedCallsRepo,
@@ -60,49 +60,87 @@ namespace ResumableFunctions.Handler.Core
             _replayWaitProcessor = replayWaitProcessor;
             _backgroundJobExecutor = backgroundJobExecutor;
             _lockProvider = lockProvider;
-            _waitsForCallsRepo = waitsForCallsRepo;
+            _waitProcessingRecordsRepo = waitsForCallsRepo;
             _methodIdsRepo = methodIdsRepo;
             _templatesRepo = templatesRepo;
             _pushedCallsRepo = pushedCallsRepo;
             _serviceRepo = serviceRepo;
         }
 
-        [DisplayName("Process Function Expected Matches where `FunctionId:{0}` and `PushedCallId:{1}`")]
-        public async Task ProcessFunctionExpectedWaitMatches(int functionId, int pushedCallId)
+        [DisplayName("Process Function Expected Matches where `FunctionId:{0}`, `PushedCallId:{1}`, `MethodGroupId:{2}`")]
+        public async Task ProcessFunctionExpectedWaitMatches(int functionId, int pushedCallId, int methodGroupId)
         {
             await _backgroundJobExecutor.Execute(
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
                 async () =>
                 {
-                    var waitsForCall = await _waitsForCallsRepo.GetWaitsForCall(pushedCallId, functionId);
-
                     _pushedCall = await LoadPushedCall(pushedCallId);
-
-                    foreach (var expectedMatch in waitsForCall)
+                    var waitTemplates = await _templatesRepo.GetWaitTemplates(methodGroupId, functionId);
+                    var matchExist = false;
+                    if (waitTemplates == null)
+                        return;
+                    foreach (var template in waitTemplates)
                     {
-                        _waitCall = expectedMatch;
-                        _methodWait = await LoadWait(expectedMatch.WaitId);
+                        var waits = await _waitsRepo.GetWaitsForTemplate(
+                            template,
+                            template.GetMandatoryPart(_pushedCall.DataValue),
+                            x => x.RequestedByFunction,
+                            x => x.FunctionState);
+                        if (waits == null)
+                            continue;
+                        foreach (var wait in waits)
+                        {
+                            await LoadWaitProps(wait);
+                            wait.Template = template;
+                            _waitCall =
+                                await _waitProcessingRecordsRepo.Add(
+                                    new WaitProcessingRecord
+                                    {
+                                        FunctionId = functionId,
+                                        PushedCallId = pushedCallId,
+                                        ServiceId = template.ServiceId,
+                                        WaitId = wait.Id,
+                                        StateId = wait.FunctionStateId,
+                                        TemplateId = template.Id
+                                    });
 
+                            _methodWait = wait;
 
-                        var isSuccess = await Pipeline(
-                            DesrializeInputOutput,
-                            CheckIfMatch,
-                            CloneIfFirst,
-                            UpdateFunctionData,
-                            ResumeExecution);
+                            var isSuccess = await Pipeline(
+                                DeserializeInputOutput,
+                                CheckIfMatch,
+                                CloneIfFirst,
+                                UpdateFunctionData,
+                                ResumeExecution);
 
-                        if (!isSuccess) continue;
+                            if (!isSuccess) continue;
 
-                        waitsForCall.ForEach(x =>
-                            x.MatchStatus = x.MatchStatus == MatchStatus.PartiallyMatched ? MatchStatus.DuplicationCanceled : x.MatchStatus);
-                        await _context.SaveChangesAsync();
-                        break;
+                            matchExist = true;
+                            break;
+                        }
+
+                        if (matchExist) break;
                     }
                 },
                 $"Error when process wait `{_methodWait?.Id}` that may be a match for pushed call `{pushedCallId}` and function `{functionId}`");
         }
 
-        private Task<bool> DesrializeInputOutput()
+        private async Task LoadWaitProps(MethodWait methodWait)
+        {
+
+            methodWait.MethodToWait = await _methodIdsRepo.GetMethodIdentifierById(methodWait.MethodToWaitId);
+
+            if (methodWait.MethodToWait == null)
+            {
+                var error = $"No method exist that linked to wait `{methodWait.MethodToWaitId}`.";
+                _logger.LogError(error);
+                throw new Exception(error);
+            }
+            methodWait.FunctionState.LoadUnmappedProps(methodWait.RequestedByFunction.InClassType);
+            methodWait.LoadUnmappedProps();
+        }
+
+        private Task<bool> DeserializeInputOutput()
         {
             _pushedCall.LoadUnmappedProps(_methodWait.MethodToWait.MethodInfo);
             _methodWait.Input = _pushedCall.Data.Input;
@@ -188,8 +226,9 @@ namespace ResumableFunctions.Handler.Core
                     $"Concurrency Exception occurred when process wait [{_methodWait.Name}]." +
                     $"\nProcessing this wait will be scheduled.",
                     StatusCodes.WaitProcessing, ex);
+
                 _backgroundJobClient.Schedule(() =>
-                        ProcessFunctionExpectedWaitMatches(_methodWait.RequestedByFunctionId, pushedCallId),
+                        ProcessFunctionExpectedWaitMatches(_methodWait.RequestedByFunctionId, pushedCallId, _methodWait.MethodGroupToWaitId),
                     TimeSpan.FromSeconds(10));
                 return false;
             }
@@ -374,7 +413,7 @@ namespace ResumableFunctions.Handler.Core
                 throw new Exception($"Error when process pushed method [{pushedCallId}] and wait [{_methodWait.Id}].", ex);
             }
         }
-        private async Task UpdateWaitRecord(Action<WaitForCall> action, [CallerMemberName] string calledBy = "")
+        private async Task UpdateWaitRecord(Action<WaitProcessingRecord> action, [CallerMemberName] string calledBy = "")
         {
             try
             {

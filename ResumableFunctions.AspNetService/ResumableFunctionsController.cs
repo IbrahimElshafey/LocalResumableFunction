@@ -30,10 +30,12 @@ namespace ResumableFunctions.AspNetService
         }
 
 
-        [HttpGet(nameof(ServiceProcessPushedCall))]
-        public async Task<int> ServiceProcessPushedCall(int pushedCallId, string methodUrn)
+
+
+        [HttpPost(nameof(ServiceProcessPushedCall))]
+        public async Task<int> ServiceProcessPushedCall(AffectedService service)
         {
-            await _callProcessor.ServiceProcessPushedCall(pushedCallId, methodUrn);
+            await _callProcessor.ServiceProcessPushedCall(service);
             return 0;
         }
 

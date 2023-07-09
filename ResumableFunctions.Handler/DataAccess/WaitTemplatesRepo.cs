@@ -65,6 +65,23 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
     }
 
 
+    public async Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId, int functionId)
+    {
+        var waitTemplatesQry = _context
+            .WaitTemplates
+            .Where(template =>
+                template.FunctionId == functionId &&
+                template.MethodGroupId == methodGroupId &&
+                template.ServiceId == _settings.CurrentServiceId);
+
+        var result = await
+            waitTemplatesQry
+            .AsNoTracking()
+            .ToListAsync();
+
+        result.ForEach(x => x.LoadExpressions());
+        return result;
+    }
     public async Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId)
     {
         var templateIds = await _context
@@ -100,7 +117,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
     public async Task<WaitTemplate> GetWaitTemplateWithBasicMatch(int methodWaitTemplateId)
     {
-        return 
+        return
             await _context
             .WaitTemplates
             .Select(WaitTemplate.BasicMatchSelector)

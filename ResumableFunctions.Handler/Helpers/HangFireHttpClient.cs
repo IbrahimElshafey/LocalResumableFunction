@@ -1,4 +1,8 @@
 ﻿using System.ComponentModel;
+using System.Text.Json.Nodes;
+using System.Text;
+using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.Helpers
@@ -23,7 +27,18 @@ namespace ResumableFunctions.Handler.Helpers
             {
                 _backgroundJobClient.Schedule(() => HttpGet(url), TimeSpan.FromSeconds(3));
             }
+        }
 
+        public async Task EnqueuePostRequestIfFail(string url, object payload)
+        {
+            try
+            {
+                await HttpPost(url, payload);
+            }
+            catch (Exception)
+            {
+                _backgroundJobClient.Schedule(() => HttpPost(url, payload), TimeSpan.FromSeconds(3));
+            }
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
@@ -32,6 +47,16 @@ namespace ResumableFunctions.Handler.Helpers
         {
             var client = _httpClientFactory.CreateClient();
             var response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+        }
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DisplayName("HTTP POST `{0}`")]
+        public async Task HttpPost(string url, object payload)
+        {
+            var client = _httpClientFactory.CreateClient();
+            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(url, content);
             response.EnsureSuccessStatusCode();
         }
     }

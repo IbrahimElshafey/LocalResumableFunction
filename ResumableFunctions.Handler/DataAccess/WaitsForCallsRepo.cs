@@ -5,24 +5,19 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal class WaitsForCallsRepo : IWaitsForCallsRepo
+internal class WaitProcessingRecordsRepo : IWaitProcessingRecordsRepo
 {
     private readonly WaitsDataContext _context;
 
-    public WaitsForCallsRepo(WaitsDataContext context)
+    public WaitProcessingRecordsRepo(WaitsDataContext context)
     {
         _context = context;
     }
-    public async Task<List<WaitForCall>> GetWaitsForCall(int pushedCallId, int functionId)
+
+    public async Task<WaitProcessingRecord> Add(WaitProcessingRecord waitProcessingRecord)
     {
-        return
-            await _context
-                .WaitsForCalls
-                .Where(x =>
-                    x.PushedCallId == pushedCallId &&
-                    x.FunctionId == functionId &&
-                    (x.MatchStatus == MatchStatus.PartiallyMatched ||
-                     x.InstanceUpdateStatus == InstanceUpdateStatus.UpdateFailed))
-                .ToListAsync();
+        _context.WaitProcessingRecords.Add(waitProcessingRecord);
+        await _context.SaveChangesAsync();
+        return waitProcessingRecord;
     }
 }

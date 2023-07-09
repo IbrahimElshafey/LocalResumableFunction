@@ -1,14 +1,15 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
-public class WaitForCall : IEntityWithUpdate
+public class WaitProcessingRecord : IEntityWithUpdate
 {
     public int Id { get; internal set; }
-    public PushedCall PushedCall { get; internal set; }
+    public PushedCall PushedCall { get; internal set; }//todo:remove
     public int PushedCallId { get; internal set; }
     public int WaitId { get; internal set; }
     public int? ServiceId { get; set; }
     public int FunctionId { get; internal set; }
     public int StateId { get; internal set; }
+    public int TemplateId { get; internal set; }
     public MatchStatus MatchStatus { get; internal set; } = MatchStatus.ExpectedMatch;
     public InstanceUpdateStatus InstanceUpdateStatus { get; internal set; } = InstanceUpdateStatus.NotUpdatedYet;
     public ExecutionStatus ExecutionStatus { get; internal set; } = ExecutionStatus.NotStartedYet;
@@ -19,7 +20,7 @@ public class WaitForCall : IEntityWithUpdate
 
     public override bool Equals(object obj)
     {
-        if (obj is WaitForCall wfc)
+        if (obj is WaitProcessingRecord wfc)
         {
             return wfc.WaitId == WaitId && wfc.FunctionId == FunctionId && wfc.StateId == StateId;
         }

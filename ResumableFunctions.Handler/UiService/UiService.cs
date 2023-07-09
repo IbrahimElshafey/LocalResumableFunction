@@ -248,7 +248,7 @@ namespace ResumableFunctions.Handler.UiService
         {
             var counts =
                 _context
-                .WaitsForCalls
+                .WaitProcessingRecords
                 .GroupBy(x => x.PushedCallId)
                 .Select(x => new
                 {
@@ -256,8 +256,7 @@ namespace ResumableFunctions.Handler.UiService
                     All = (int?)x.Count(),
                     Matched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.Matched),
                     NotMatched = (int?)x.Count(waitForCall =>
-                        waitForCall.MatchStatus == MatchStatus.NotMatched ||
-                        waitForCall.MatchStatus == MatchStatus.DuplicationCanceled),
+                        waitForCall.MatchStatus == MatchStatus.NotMatched),
                 });
 
             var query =
@@ -302,7 +301,7 @@ namespace ResumableFunctions.Handler.UiService
             var inputOutput = MessagePackSerializer.ConvertToJson(pushedCall.DataValue);
             var callExpectedMatches =
                 await _context
-                .WaitsForCalls
+                .WaitProcessingRecords
                 .Where(x => x.PushedCallId == pushedCallId)
                 .ToListAsync();
             var waitsIds = callExpectedMatches.Select(x => x.WaitId).ToList();

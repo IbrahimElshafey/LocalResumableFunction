@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.InOuts;
 using System.ComponentModel;
 
 namespace ResumableFunctions.Handler.Core;
-internal class CallProcessor : ICallProcessor
+internal partial class CallProcessor : ICallProcessor
 {
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly ILogger<ReplayWaitProcessor> _logger;
@@ -37,7 +37,6 @@ internal class CallProcessor : ICallProcessor
         _scanStateRepo = scanStateRepo;
     }
 
-    //todo: enhance this method
     [DisplayName("Initial Process Pushed Call `{0}` for MethodUrn `{1}`")]
     public async Task InitialProcessPushedCall(int pushedCallId, string methodUrn)
     {
@@ -46,19 +45,22 @@ internal class CallProcessor : ICallProcessor
                 $"InitialProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
                 async () =>
                 {
-                    var services = await _waitsRepository.GetAffectedServicesForCall(methodUrn);
+                    var services = await _waitsRepository.GetAffectedServices(methodUrn);
                     if (services == null || services.Any() is false)
                     {
+                        _logger.LogWarning($"There is no service affected by pushed call `{methodUrn}:{pushedCallId}`");
                         return;
                     }
 
                     foreach (var service in services)
                     {
-                        var isLocal = service.Id == _settings.CurrentServiceId;
+                        service.PushedCallId = pushedCallId;
+                        service.MethodUrn = methodUrn;
+                        var isLocal = service.ServiceId == _settings.CurrentServiceId;
                         if (isLocal)
-                            await ServiceProcessPushedCall(pushedCallId, methodUrn);
+                            await ServiceProcessPushedCall(service);
                         else
-                            await CallOwnerService(service, pushedCallId, methodUrn);
+                            await CallOwnerService(service);
                     }
                 },
                 $"Error when call `InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
@@ -67,33 +69,34 @@ internal class CallProcessor : ICallProcessor
     }
 
     [DisplayName("Current Service Process Pushed Call `{0}` for MethodUrn: `{1}`")]
-    public async Task ServiceProcessPushedCall(int pushedCallId, string methodUrn)
+    public async Task ServiceProcessPushedCall(AffectedService service)
     {
+        var pushedCallId = service.PushedCallId;
         await _backgroundJobExecutor.Execute(
             $"ServiceProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
-            async () =>
+            () =>
             {
-                var matchedFunctionsIds = await _waitsRepository.GetMatchedFunctionsForCall(pushedCallId, methodUrn);
-                foreach (var functionId in matchedFunctionsIds)
+                foreach (var functionId in service.AffectedFunctionsIds)
                 {
-                    _backgroundJobClient.Enqueue(() => _waitsProcessor.ProcessFunctionExpectedWaitMatches(functionId, pushedCallId));
+                    _backgroundJobClient.Enqueue(
+                        () => _waitsProcessor.ProcessFunctionExpectedWaitMatches(functionId, pushedCallId, service.MethodGroupId));
                 }
+                return Task.CompletedTask;
             },
-            $"Error when call `ServiceProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
+            $"Error when call `ServiceProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{service.MethodUrn})` in service `{_settings.CurrentServiceId}`");
     }
 
-
-    private async Task CallOwnerService(ServiceData service, int pushedCallId, string methodUrn)
+    private async Task CallOwnerService(AffectedService service)
     {
         try
         {
             var actionUrl =
-                $"{service.Url}api/ResumableFunctions/ServiceProcessPushedCall?pushedCallId={pushedCallId}&methodUrn={methodUrn}";
-            await _hangFireHttpClient.EnqueueGetRequestIfFail(actionUrl);
+                $"{service.ServiceUrl}api/ResumableFunctions/ServiceProcessPushedCall";
+            await _hangFireHttpClient.EnqueuePostRequestIfFail(actionUrl, service);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error when try to call owner service for pushed call ({pushedCallId}).");
+            _logger.LogError(ex, $"Error when try to call owner service for pushed call ({service.PushedCallId}).");
         }
     }
 }
