@@ -33,11 +33,48 @@ internal partial class WaitsRepo : IWaitsRepo
         _waitTemplatesRepo = waitTemplatesRepo;
     }
 
+    public async Task<List<AffectedService>> GetAffectedServices(string methodUrn)
+    {
+        var methodGroupId = await GetMethodGroupId(methodUrn);
+
+        var methodWaitsQuery = _context
+                   .MethodWaits
+                   .Where(x =>
+                       x.Status == WaitStatus.Waiting &&
+                       x.MethodGroupToWaitId == methodGroupId);
+
+        if (methodUrn.StartsWith("###LocalRegisteredMethods."))
+        {
+            methodWaitsQuery = methodWaitsQuery.Where(x => x.ServiceId == _settings.CurrentServiceId);
+        }
+
+        var affectedFunctions =
+            await (methodWaitsQuery
+           .Select(x => new { RequestedByFunctionId = x.RequestedByFunctionId, ServiceId = x.ServiceId })
+           .Distinct()
+           .GroupBy(x => x.ServiceId))
+           .ToListAsync();
+
+        return (
+              from service in await _context.ServicesData.Where(x =>x.ParentId==-1).ToListAsync()
+              from affectedFunction in affectedFunctions
+              where service.Id == affectedFunction.Key
+              select new AffectedService
+              {
+                  ServiceId = service.Id,
+                  ServiceUrl = service.Url,
+                  ServiceName = service.AssemblyName,
+                  MethodGroupId = methodGroupId,
+                  AffectedFunctionsIds = affectedFunction.Select(x => x.RequestedByFunctionId).ToList(),
+              }
+              )
+              .ToList();
+    }
     public async Task<List<ServiceData>> GetAffectedServicesForCall(string methodUrn)
     {
         try
         {
-            if (methodUrn.StartsWith("LocalRegisteredMethods."))
+            if (methodUrn.StartsWith("###LocalRegisteredMethods."))
             {
                 return new List<ServiceData> { new() { Id = _settings.CurrentServiceId } };
             }
@@ -71,7 +108,7 @@ internal partial class WaitsRepo : IWaitsRepo
     {
         try
         {
-            var matchedWaitsIds = new HashSet<WaitForCall>();
+            var matchedWaitsIds = new HashSet<WaitProcessingRecord>();
             var pushedCall = await _context
                 .PushedCalls
                 .Select(x => new PushedCall { Id = x.Id, DataValue = x.DataValue })
@@ -85,7 +122,7 @@ internal partial class WaitsRepo : IWaitsRepo
                     .MethodWaits
                     .Where(queryClause.Clause)
                     .OrderBy(x => x.IsFirst)
-                    .Select(x => new WaitForCall
+                    .Select(x => new WaitProcessingRecord
                     {
                         WaitId = x.Id,
                         FunctionId = x.RequestedByFunctionId,
@@ -334,5 +371,29 @@ internal partial class WaitsRepo : IWaitsRepo
             return waits.First(x => x.Id == rootId);
         }
         return null;
+    }
+
+    public async Task<List<MethodWait>> GetWaitsForTemplate(WaitTemplate template, string mandatoryPart, params Expression<Func<MethodWait, object>>[] includes)
+    {
+        var query = _context
+            .MethodWaits
+            .Where(wait =>
+                    wait.Status == WaitStatus.Waiting &&
+                    wait.MethodGroupToWaitId == template.MethodGroupId &&
+                    wait.ServiceId == _settings.CurrentServiceId &&
+                    wait.MethodToWaitId == template.MethodId &&
+                    wait.RequestedByFunctionId == template.FunctionId);
+        foreach (var include in includes)
+        {
+            query = query.Include(include);
+        }
+        if (mandatoryPart != null)
+        {
+            query = query.Where(wait => wait.MandatoryPart == mandatoryPart);
+        }
+        return
+            await query
+            .OrderBy(x => x.IsFirst)
+            .ToListAsync();
     }
 }

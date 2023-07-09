@@ -5,15 +5,22 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal class WaitsForCallsRepo : IWaitsForCallsRepo
+internal class WaitProcessingRecordsRepo : IWaitProcessingRecordsRepo
 {
     private readonly WaitsDataContext _context;
 
-    public WaitsForCallsRepo(WaitsDataContext context)
+    public WaitProcessingRecordsRepo(WaitsDataContext context)
     {
         _context = context;
     }
-    public async Task<List<WaitForCall>> GetWaitsForCall(int pushedCallId, int functionId)
+
+    public WaitProcessingRecord Add(WaitProcessingRecord waitProcessingRecord)
+    {
+        _context.WaitsForCalls.Add(waitProcessingRecord);
+        return waitProcessingRecord;
+    }
+
+    public async Task<List<WaitProcessingRecord>> GetWaitsForCall(int pushedCallId, int functionId)
     {
         return
             await _context

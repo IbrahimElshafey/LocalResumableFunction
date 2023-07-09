@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.InOuts;
 using System.ComponentModel;
 
 namespace ResumableFunctions.Handler.Core;
-internal class CallProcessor : ICallProcessor
+internal partial class CallProcessor : ICallProcessor
 {
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly ILogger<ReplayWaitProcessor> _logger;
@@ -37,7 +37,7 @@ internal class CallProcessor : ICallProcessor
         _scanStateRepo = scanStateRepo;
     }
 
-    //todo: enhance this method
+
     [DisplayName("Initial Process Pushed Call `{0}` for MethodUrn `{1}`")]
     public async Task InitialProcessPushedCall(int pushedCallId, string methodUrn)
     {
@@ -81,7 +81,6 @@ internal class CallProcessor : ICallProcessor
             },
             $"Error when call `ServiceProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
     }
-
 
     private async Task CallOwnerService(ServiceData service, int pushedCallId, string methodUrn)
     {

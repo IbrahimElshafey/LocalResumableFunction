@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
+using System.Runtime;
 using System.Security.Cryptography;
 using System.Text;
+using FastExpressionCompiler;
 using ResumableFunctions.Handler.Expressions;
 
 namespace ResumableFunctions.Handler.InOuts;
@@ -130,5 +132,19 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             CallMandatoryPartExpressionValue = serializer.Serialize(CallMandatoryPartExpression.ToExpressionSlim());
         if (InstanceMandatoryPartExpression != null)
             InstanceMandatoryPartExpressionValue = serializer.Serialize(InstanceMandatoryPartExpression.ToExpressionSlim());
+    }
+
+    internal string GetMandatoryPart(byte[] pushedCallDataValue)
+    {
+        if (CallMandatoryPartExpression != null)
+        {
+            var inputType = CallMandatoryPartExpression.Parameters[0].Type;
+            var outputType = CallMandatoryPartExpression.Parameters[1].Type;
+            var methodData = PushedCall.GetMethodData(inputType, outputType, pushedCallDataValue);
+            var getMandatoryFunc = CallMandatoryPartExpression.CompileFast();
+            var parts = (object[])getMandatoryFunc.DynamicInvoke(methodData.Input, methodData.Output);
+            return string.Join("#", parts);
+        }
+        return null;
     }
 }

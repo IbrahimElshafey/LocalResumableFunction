@@ -14,8 +14,10 @@ public interface IWaitsRepo
     Task<Wait> GetWaitParent(Wait wait);
     Task<List<int>> GetMatchedFunctionsForCall(int pushedCallId, string methodUrn);
     Task<List<ServiceData>> GetAffectedServicesForCall(string methodUrn);
+    Task<List<AffectedService>> GetAffectedServices(string methodUrn);
     Task RemoveFirstWaitIfExist(int methodIdentifierId);
     Task<bool> SaveWait(Wait newWait);
     Task<MethodWait> GetMethodWait(int waitId, params Expression<Func<MethodWait, object>>[] includes);
     Task<MethodInfo> GetRequestedByMethodInfo(int rootId);
+    Task<List<MethodWait>> GetWaitsForTemplate(WaitTemplate template, string mandatoryPart, params Expression<Func<MethodWait, object>>[] includes);
 }

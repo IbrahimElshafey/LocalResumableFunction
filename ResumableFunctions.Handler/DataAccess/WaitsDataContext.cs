@@ -45,7 +45,7 @@ internal sealed class WaitsDataContext : DbContext
     public DbSet<FunctionWait> FunctionWaits { get; set; }
 
     public DbSet<PushedCall> PushedCalls { get; set; }
-    public DbSet<WaitForCall> WaitsForCalls { get; set; }
+    public DbSet<WaitProcessingRecord> WaitsForCalls { get; set; }
 
 
     public DbSet<ServiceData> ServicesData { get; set; }
@@ -111,7 +111,7 @@ internal sealed class WaitsDataContext : DbContext
            .HasForeignKey(waitForCall => waitForCall.PushedCallId)
            .HasConstraintName("FK_Waits_For_Call");
 
-        var waitForCallBuilder = modelBuilder.Entity<WaitForCall>();
+        var waitForCallBuilder = modelBuilder.Entity<WaitProcessingRecord>();
         waitForCallBuilder.HasIndex(x => x.ServiceId, "WaitForCall_ServiceId_Idx");
         waitForCallBuilder.HasIndex(x => x.FunctionId, "WaitForCall_FunctionId_Idx");
     }

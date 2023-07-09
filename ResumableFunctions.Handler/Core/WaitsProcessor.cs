@@ -11,7 +11,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Core
 {
-    internal class WaitsProcessor : IWaitsProcessor
+    internal partial class WaitsProcessor : IWaitsProcessor
     {
         private readonly IFirstWaitProcessor _firstWaitProcessor;
         private readonly IRecycleBinService _recycleBinService;
@@ -23,13 +23,13 @@ namespace ResumableFunctions.Handler.Core
         private readonly IUnitOfWork _context;
         private readonly BackgroundJobExecutor _backgroundJobExecutor;
         private readonly IDistributedLockProvider _lockProvider;
-        private readonly IWaitsForCallsRepo _waitsForCallsRepo;
+        private readonly IWaitProcessingRecordsRepo _waitProcessingRecordsRepo;
         private readonly IMethodIdsRepo _methodIdsRepo;
         private readonly IWaitTemplatesRepo _templatesRepo;
         private readonly IPushedCallsRepo _pushedCallsRepo;
         private readonly IServiceRepo _serviceRepo;
 
-        private WaitForCall _waitCall;
+        private WaitProcessingRecord _waitCall;
         private MethodWait _methodWait;
         private PushedCall _pushedCall;
 
@@ -44,7 +44,7 @@ namespace ResumableFunctions.Handler.Core
             IReplayWaitProcessor replayWaitProcessor,
             BackgroundJobExecutor backgroundJobExecutor,
             IDistributedLockProvider lockProvider,
-            IWaitsForCallsRepo waitsForCallsRepo,
+            IWaitProcessingRecordsRepo waitsForCallsRepo,
             IMethodIdsRepo methodIdsRepo,
             IWaitTemplatesRepo templatesRepo,
             IPushedCallsRepo pushedCallsRepo,
@@ -60,7 +60,7 @@ namespace ResumableFunctions.Handler.Core
             _replayWaitProcessor = replayWaitProcessor;
             _backgroundJobExecutor = backgroundJobExecutor;
             _lockProvider = lockProvider;
-            _waitsForCallsRepo = waitsForCallsRepo;
+            _waitProcessingRecordsRepo = waitsForCallsRepo;
             _methodIdsRepo = methodIdsRepo;
             _templatesRepo = templatesRepo;
             _pushedCallsRepo = pushedCallsRepo;
@@ -74,7 +74,7 @@ namespace ResumableFunctions.Handler.Core
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
                 async () =>
                 {
-                    var waitsForCall = await _waitsForCallsRepo.GetWaitsForCall(pushedCallId, functionId);
+                    var waitsForCall = await _waitProcessingRecordsRepo.GetWaitsForCall(pushedCallId, functionId);
 
                     _pushedCall = await LoadPushedCall(pushedCallId);
 
@@ -189,8 +189,11 @@ namespace ResumableFunctions.Handler.Core
                     $"\nProcessing this wait will be scheduled.",
                     StatusCodes.WaitProcessing, ex);
                 _backgroundJobClient.Schedule(() =>
-                        ProcessFunctionExpectedWaitMatches(_methodWait.RequestedByFunctionId, pushedCallId),
-                    TimeSpan.FromSeconds(10));
+                       ProcessFunctionExpectedWaitMatches(_methodWait.RequestedByFunctionId, pushedCallId),
+                   TimeSpan.FromSeconds(10));
+                //_backgroundJobClient.Schedule(() =>
+                //        ProcessFunctionExpectedWaitMatchesV2(_methodWait.RequestedByFunctionId, pushedCallId, _methodWait.MethodGroupToWaitId),
+                //    TimeSpan.FromSeconds(10));
                 return false;
             }
 
@@ -374,7 +377,7 @@ namespace ResumableFunctions.Handler.Core
                 throw new Exception($"Error when process pushed method [{pushedCallId}] and wait [{_methodWait.Id}].", ex);
             }
         }
-        private async Task UpdateWaitRecord(Action<WaitForCall> action, [CallerMemberName] string calledBy = "")
+        private async Task UpdateWaitRecord(Action<WaitProcessingRecord> action, [CallerMemberName] string calledBy = "")
         {
             try
             {

@@ -65,7 +65,7 @@ public static class CoreExtensions
         services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
         services.AddScoped<IScanStateRepo, ScanStateRepo>();
         services.AddScoped<IPushedCallsRepo, PushedCallsRepo>();
-        services.AddScoped<IWaitsForCallsRepo, WaitsForCallsRepo>();
+        services.AddScoped<IWaitProcessingRecordsRepo, WaitProcessingRecordsRepo>();
     }
 
     public static void UseResumableFunctions(this IHost app)

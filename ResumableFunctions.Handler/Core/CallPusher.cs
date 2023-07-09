@@ -44,7 +44,7 @@ namespace ResumableFunctions.Handler.Core
             {
                 _pushedCallsRepo.Add(pushedCall);
                 await _context.SaveChangesAsync();
-                _backgroundJobClient.Enqueue(() => _processor.InitialProcessPushedCall(pushedCall.Id, pushedCall.MethodData.MethodUrn));
+                _backgroundJobClient.Enqueue(() => _processor.InitialProcessPushedCallV2(pushedCall.Id, pushedCall.MethodData.MethodUrn));
                 return pushedCall.Id;
             }
             catch (Exception ex)

@@ -37,6 +37,13 @@ namespace ResumableFunctions.AspNetService
             return 0;
         }
 
+        [HttpPost(nameof(ServiceProcessPushedCallV2))]
+        public async Task<int> ServiceProcessPushedCallV2(AffectedService service)
+        {
+            await _callProcessor.ServiceProcessPushedCallV2(service);
+            return 0;
+        }
+
         [HttpPost(nameof(ExternalCall))]
         public async Task<int> ExternalCall()
         {
