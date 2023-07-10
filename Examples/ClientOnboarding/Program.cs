@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
-        new SqlServerResumableFunctionsSettings(null, "TwoFunctionsAtFirst_Test")
+        new SqlServerResumableFunctionsSettings()
         .SetCurrentServiceUrl("https://localhost:7262"));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

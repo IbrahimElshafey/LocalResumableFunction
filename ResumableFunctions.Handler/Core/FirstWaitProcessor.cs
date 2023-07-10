@@ -69,7 +69,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                         new TimeWaitInput
                         {
                             TimeMatchId = firstMatchedMethodWait.MandatoryPart,
-                            Description = $"`{timeWait.Name}` in function `{firstMatchedMethodWait.RequestedByFunction.RF_MethodUrn}:{firstMatchedMethodWait.FunctionState.Id}`"
+                            RequestedByFunctionId = firstMatchedMethodWait.RequestedByFunctionId,
+                            Description = $"`{timeWait.Name}` in function `{firstMatchedMethodWait.RequestedByFunction.RF_MethodUrn}:{firstMatchedMethodWait.FunctionState.Id}`"//Todo:bug: not same description as first wait
                         }), timeWait.TimeToWait);
                     timeWait.TimeWaitMethod.MandatoryPart = firstMatchedMethodWait.MandatoryPart;
                     timeWait.IgnoreJobCreation = true;

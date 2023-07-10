@@ -157,6 +157,7 @@ internal partial class WaitsRepo
         var timeWaitInput = new TimeWaitInput
         {
             TimeMatchId = timeWait.UniqueMatchId,
+            RequestedByFunctionId = timeWait.RequestedByFunctionId,
             Description = $"`{timeWait.Name}` in function `{timeWait.RequestedByFunction.RF_MethodUrn}:{timeWait.FunctionState.Id}`"
         };
         if (!timeWait.IgnoreJobCreation)
