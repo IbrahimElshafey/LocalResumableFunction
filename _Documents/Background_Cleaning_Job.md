@@ -1,19 +1,11 @@
-﻿# Background Cleaning Job
+﻿# Tables that must be cleanded
 * Delete soft deleted rows
-* Delete completed function instance from DB
-	* It's logs
+* Delete completed function instances from DB
+	* Logs
 	* Waits
-* Deleted completed pushed call and it's records
-* Delete old logs for scan sessions
+	* WaitProcessingRecords
+* Deleted completed pushed call
 * Delete unused WaitTemplates
 	* Wait templates that has no active waits
 * Delete unused Method Identifires 
 	* Not exist in code
-
-# Tables that must be cleanded
-* FunctionStates
-	* Logs
-	* Waits
-* PushedCalls
-	* WaitsForCalls
-* WaitTemplates

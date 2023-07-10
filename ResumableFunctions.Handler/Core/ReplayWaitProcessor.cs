@@ -43,18 +43,28 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         switch (replayRequest.ReplayType)
         {
             case ReplayType.GoAfter:
+                replayRequest.FunctionState?.AddLog(
+                    $"Try to go back after wait `{oldWaitForReplay.Name}`.", LogType.Info, StatusCodes.Replay);
                 return new(oldWaitForReplay, true);
 
             case ReplayType.GoBefore:
+                replayRequest.FunctionState?.AddLog(
+                    $"Try to go back before wait `{oldWaitForReplay.Name}`.", LogType.Info, StatusCodes.Replay);
                 return new(await ReplayGoBefore(oldWaitForReplay), false);
 
             case ReplayType.GoBeforeWithNewMatch:
+                replayRequest.FunctionState?.AddLog(
+                    $"Try to go back before wait `{oldWaitForReplay.Name}` with new match.", LogType.Info, StatusCodes.Replay);
                 return new(await ReplayGoBeforeWithNewMatch(replayRequest, oldWaitForReplay), false);
 
             case ReplayType.GoTo:
+                replayRequest.FunctionState?.AddLog(
+                    $"Try go to wait `{oldWaitForReplay.Name}`.", LogType.Info, StatusCodes.Replay);
                 return new(await GetWaitDuplicationAsync(oldWaitForReplay), false);
 
             case ReplayType.GoToWithNewMatch:
+                replayRequest.FunctionState?.AddLog(
+                    $"Try go to wait `{oldWaitForReplay.Name}` with new match.", LogType.Info, StatusCodes.Replay);
                 return new(await GetWaitDuplicationWithNewMatch(replayRequest, oldWaitForReplay), false);
 
             default:

@@ -24,7 +24,7 @@ public class ReplayTests
         var instances = await test.GetInstances<GoAfterFunction>();
         Assert.Equal(1, instances.Count);
         Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
-        Assert.Equal(1, (instances[0].StateObject as GoAfterFunction).Counter);
+        Assert.Equal(2, (instances[0].StateObject as GoAfterFunction).Counter);
 
         var waits = await test.GetWaits();
         Assert.Equal(1, waits.Count);
@@ -232,7 +232,7 @@ public class ReplayTests
                 Wait<string, string>("M1", Method1);
 
             Counter++;
-            if (Counter < 1)
+            if (Counter < 2)
                 yield return GoBackAfter("M1");
             await Task.Delay(100);
         }

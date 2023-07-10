@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
-        new SqlServerResumableFunctionsSettings(null, "ComplexApproval_Test"));
+        new SqlServerResumableFunctionsSettings(null, "ReplayInSubFunction_Test"));
 
 builder.Services.AddControllers();
 

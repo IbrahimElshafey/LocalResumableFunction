@@ -317,8 +317,8 @@ namespace ResumableFunctions.Handler.Core
                         await FinalExit(currentWait);
                     return;
                 }
-
-                _logger.LogInformation($"Get next wait [{nextWait.Name}] after [{currentWait.Name}]");
+                var replaySuffix = nextWait is ReplayRequest ? " - Replay" : "";
+                _logger.LogInformation($"Get next wait [{nextWait.Name}{replaySuffix}] after [{currentWait.Name}]");
 
                 nextWait.ParentWaitId = currentWait.ParentWaitId;
                 currentWait.FunctionState.StateObject = currentWait.CurrentFunction;

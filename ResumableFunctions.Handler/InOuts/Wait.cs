@@ -76,7 +76,8 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
             var waitExist = await functionRunner.MoveNextAsync();
             if (waitExist)
             {
-                FunctionState.AddLog($"Get next wait [{functionRunner.Current.Name}] after [{Name}]", LogType.Info, StatusCodes.WaitProcessing);
+                var replaySuffix = functionRunner.Current is ReplayRequest ? " - Replay" : "";
+                FunctionState.AddLog($"Get next wait [{functionRunner.Current.Name}{replaySuffix}] after [{Name}]", LogType.Info, StatusCodes.WaitProcessing);
                 return functionRunner.Current;
             }
 

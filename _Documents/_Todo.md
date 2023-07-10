@@ -1,5 +1,4 @@
 ﻿# Working On Now
-* Review Log for replay
 * Background Cleaning Job
 * ResumableFunctions.Publisher
 
