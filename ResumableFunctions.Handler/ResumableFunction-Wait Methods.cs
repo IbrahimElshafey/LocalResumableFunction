@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
@@ -6,26 +7,32 @@ namespace ResumableFunctions.Handler;
 public abstract partial class ResumableFunction
 {
 
-    protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(string name, Func<TInput, TOutput> method)
+    protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(Func<TInput, TOutput> method,
+        string name = null,
+        [CallerLineNumber] int inCodeLine = 0)
     {
         return new MethodWait<TInput, TOutput>(method)
         {
-            Name = name,
+            Name = name ?? method.Method.Name,
             WaitType = WaitType.MethodWait,
             CurrentFunction = this,
+            InCodeLine = inCodeLine
         };
     }
 
-    protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(string name, Func<TInput, Task<TOutput>> method)
+    protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(Func<TInput, Task<TOutput>> method,
+        string name = null,
+        [CallerLineNumber] int inCodeLine = 0)
     {
         return new MethodWait<TInput, TOutput>(method)
         {
-            Name = name,
+            Name = name ?? method.Method.Name,
             WaitType = WaitType.MethodWait,
             CurrentFunction = this,
+            InCodeLine = inCodeLine
         };
     }
-    
+
     protected WaitsGroup Wait(string name, params Wait[] waits)
     {
         var result = new WaitsGroup

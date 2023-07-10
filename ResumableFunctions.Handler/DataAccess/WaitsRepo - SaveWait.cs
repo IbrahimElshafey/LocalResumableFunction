@@ -64,7 +64,7 @@ internal partial class WaitsRepo
         var methodId = await _methodIdsRepo.GetId(methodWait);
         var funcId = methodWait.RequestedByFunctionId;
         var waitExpressionsHash = new ExpressionsHashCalculator(methodWait.MatchExpression, methodWait.SetDataExpression);
-        var expressionsHash = waitExpressionsHash.FinalHash;
+        var expressionsHash = waitExpressionsHash.Hash;
         await SetWaitTemplate();
         methodWait.MethodToWaitId = methodId.MethodId;
         methodWait.MethodGroupToWaitId = methodId.GroupId;
@@ -78,8 +78,9 @@ internal partial class WaitsRepo
             {
                 waitTemplate =
                     await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, methodId.GroupId) ??
-                    await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, methodWait.CurrentFunction, funcId,
-                        methodId.GroupId, methodId.MethodId);
+                    await _waitTemplatesRepo.AddNewTemplate(
+                        waitExpressionsHash, methodWait.CurrentFunction, funcId,
+                        methodId.GroupId, methodId.MethodId, methodWait.InCodeLine);
             }
             else
             {

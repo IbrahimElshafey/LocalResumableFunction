@@ -56,9 +56,9 @@ namespace Tests
             {
 
                 yield return
-                    Wait<string, string>("M1", Method1)
+                    Wait<string, string>(Method1, "M1")
                     .MatchIf((input, output) => LocalValue(_dynamicProp) > 1);
-                yield return Wait<string, string>("M2", Method2)
+                yield return Wait<string, string>(Method2, "M2")
                     .MatchIf((input, output) => LocalValue(_dynamicProp) > 1);
                 await Task.Delay(100);
             }

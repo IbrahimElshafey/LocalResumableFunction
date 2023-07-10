@@ -13,7 +13,7 @@ namespace TestApi1.Examples
         public async IAsyncEnumerable<Wait> ResumableFunctionThatWaitExternal()
         {
             yield return
-             Wait<string, string>("External method `Method123`", Method123)
+             Wait<string, string>(Method123, "External method `Method123`")
                  .MatchIf((input, output) => input[0] == 'M')
                  .SetData((input, output) => Result == output);
             Console.WriteLine($"Output is :{Result}");

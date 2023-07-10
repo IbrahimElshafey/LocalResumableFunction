@@ -8,6 +8,11 @@ using ResumableFunctions.Handler.Helpers;
 namespace ResumableFunctions.Handler.InOuts;
 public class MethodWait : Wait
 {
+    internal MethodWait()
+    {
+
+    }
+
     [NotMapped]
     public LambdaExpression SetDataExpression { get; protected set; }
 
@@ -36,7 +41,7 @@ public class MethodWait : Wait
 
     [NotMapped]
     public object Output { get; set; }
-
+    public int InCodeLine { get; internal set; }
 
     public bool UpdateFunctionData()
     {
@@ -131,9 +136,9 @@ public class MethodWait : Wait
 
 public class MethodWait<TInput, TOutput> : MethodWait
 {
-    public MethodWait(Func<TInput, Task<TOutput>> method) => Initiate(method.Method);
-    public MethodWait(Func<TInput, TOutput> method) => Initiate(method.Method);
-    public MethodWait(MethodInfo methodInfo) => Initiate(methodInfo);
+    internal MethodWait(Func<TInput, Task<TOutput>> method) => Initiate(method.Method);
+    internal MethodWait(Func<TInput, TOutput> method) => Initiate(method.Method);
+    internal MethodWait(MethodInfo methodInfo) => Initiate(methodInfo);
 
     private void Initiate(MethodInfo method)
     {

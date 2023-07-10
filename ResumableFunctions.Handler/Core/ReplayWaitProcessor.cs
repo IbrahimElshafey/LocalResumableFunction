@@ -102,7 +102,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                     replayRequest.RequestedByFunctionId,
                     methodWaitToReplay.MethodGroupToWaitId,
                     methodWaitToReplay.MethodToWaitId ?? 0,
-                    replayRequest.CurrentFunction);
+                    replayRequest.CurrentFunction,
+                    methodWaitToReplay.InCodeLine);
                 duplicateWait.TemplateId = template.Id;
                 await _waitsRepo.SaveWait(duplicateWait);
                 return duplicateWait;
@@ -122,13 +123,14 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         int funcId,
         int groupId,
         int methodId,
-        object functionInstance)
+        object functionInstance,
+        int inCodeLine)
     {
         var waitExpressionsHash = new ExpressionsHashCalculator(matchExpression, setDataExpression);
-        var expressionsHash = waitExpressionsHash.FinalHash;
+        var expressionsHash = waitExpressionsHash.Hash;
         var waitTemplate =
             await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, groupId) ??
-            await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, functionInstance, funcId, groupId, methodId);
+            await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, functionInstance, funcId, groupId, methodId, inCodeLine);
         return waitTemplate;
     }
 
@@ -200,7 +202,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                      oldMethodWait.RequestedByFunctionId,
                      oldMethodWait.MethodGroupToWaitId,
                      oldMethodWait.MethodToWaitId ?? 0,
-                     replayWait.CurrentFunction);
+                     replayWait.CurrentFunction,
+                     oldMethodWait.InCodeLine);
 
                 methodWaitToReplay.FunctionState = replayWait.FunctionState;
                 methodWaitToReplay.FunctionStateId = replayWait.FunctionStateId;

@@ -45,9 +45,9 @@ public class ReplayInSubFunction
         [ResumableFunctionEntryPoint("ReplayInSubFunctions")]
         public async IAsyncEnumerable<Wait> Test()
         {
-            yield return Wait<string, string>("M6", Method6);
+            yield return Wait<string, string>(Method6, "M6");
             yield return Wait("Wait Two Paths", PathOneFunction, PathTwoFunction);
-            yield return Wait<string, string>("M5", Method5).MatchAll();
+            yield return Wait<string, string>(Method5, "M5").MatchAll();
         }
         public int Counter1 { get; set; }
         public int Counter2 { get; set; }
@@ -56,11 +56,11 @@ public class ReplayInSubFunction
         public async IAsyncEnumerable<Wait> PathOneFunction()
         {
             yield return
-                   Wait<string, string>("M1", Method1).MatchAll();
+                   Wait<string, string>(Method1, "M1").MatchAll();
 
             Counter1 += 10;
             yield return
-                Wait<string, string>("M2", Method2).MatchAll();
+                Wait<string, string>(Method2, "M2").MatchAll();
 
             Counter1 += 3;
 
@@ -74,11 +74,11 @@ public class ReplayInSubFunction
         public async IAsyncEnumerable<Wait> PathTwoFunction()
         {
             yield return
-                  Wait<string, string>("M3", Method3).MatchAll();
+                  Wait<string, string>(Method3, "M3").MatchAll();
 
             Counter2 += 10;
             yield return
-                Wait<string, string>("M4", Method4).MatchAll();
+                Wait<string, string>(Method4, "M4").MatchAll();
 
             Counter2 += 3;
 

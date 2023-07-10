@@ -19,19 +19,20 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         _context = _scope.ServiceProvider.GetService<WaitsDataContext>();
     }
 
-    public async Task<WaitTemplate> AddNewTemplate(
-        ExpressionsHashCalculator hashResult,
+    public async Task<WaitTemplate> AddNewTemplate(ExpressionsHashCalculator hashResult,
         object currentFunctionInstance,
         int funcId,
         int groupId,
-        int methodId)
+        int methodId,
+        int inCodeLine)
     {
         var waitTemplate = new WaitTemplate
         {
             MethodId = methodId,
             FunctionId = funcId,
             MethodGroupId = groupId,
-            Hash = hashResult.FinalHash,
+            Hash = hashResult.Hash,
+            InCodeLine = inCodeLine
         };
 
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
@@ -45,7 +46,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         waitTemplate.SetDataExpression = setDataWriter.SetDataExpression;
 
         _context.WaitTemplates.Add(waitTemplate);
-        await DeleteUnusedTemplateSiblings(waitTemplate);
+        
         await _context.SaveChangesAsync();
         return waitTemplate;
     }
@@ -58,7 +59,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             .Where(template =>
                 template.MethodGroupId == waitTemplate.MethodGroupId &&
                 template.MethodId == waitTemplate.MethodId &&
-                template.FunctionId == waitTemplate.FunctionId
+                template.FunctionId == waitTemplate.FunctionId &&
+                template.InCodeLine == waitTemplate.InCodeLine
             )
             .Select(x => x.Id)
             .ToListAsync();

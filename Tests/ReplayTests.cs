@@ -208,11 +208,11 @@ public class ReplayTests
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return
-                Wait<string, string>("M1", Method1);
+                Wait<string, string>(Method1, "M1");
 
             Counter += 10;
             yield return
-                Wait<string, string>("M2", Method2).MatchAll();
+                Wait<string, string>(Method2, "M2").MatchAll();
 
             if (Counter < 20)
                 yield return GoBackBefore<string, string>("M2", (input, output) => input == "Back");
@@ -229,7 +229,7 @@ public class ReplayTests
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return
-                Wait<string, string>("M1", Method1);
+                Wait<string, string>(Method1, "M1");
 
             Counter++;
             if (Counter < 2)
@@ -247,11 +247,11 @@ public class ReplayTests
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return
-                Wait<string, string>("M1", Method1);
+                Wait<string, string>(Method1, "M1");
 
             Counter += 10;
             yield return
-                Wait<string, string>("M2", Method2).MatchAll();
+                Wait<string, string>(Method2, "M2").MatchAll();
 
             if (Counter < 20)
                 yield return GoBackBefore("M2");
@@ -269,11 +269,11 @@ public class ReplayTests
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return
-                Wait<string, string>("M1", Method1);
+                Wait<string, string>(Method1, "M1");
 
             Counter += 10;
             yield return
-                Wait<string, string>("M2", Method2).MatchAll();
+                Wait<string, string>(Method2, "M2").MatchAll();
 
             Counter += 3;
 
@@ -293,11 +293,11 @@ public class ReplayTests
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return
-                Wait<string, string>("M1", Method1);
+                Wait<string, string>(Method1, "M1");
 
             Counter += 10;
             yield return
-                Wait<string, string>("M2", Method2).MatchAll();
+                Wait<string, string>(Method2, "M2").MatchAll();
 
             Counter += 3;
 

@@ -9,13 +9,13 @@ public class TestLoopsExample : ProjectApprovalExample
     {
         await Task.Delay(10);
         yield return
-            Wait<Project, bool>("Project Submitted", ProjectSubmitted)
+            Wait<Project, bool>(ProjectSubmitted, "Project Submitted")
                 .SetData((input, output) => CurrentProject == input);
 
         for (; Counter < 3; Counter++)
         {
             yield return
-                Wait<ApprovalDecision, bool>($"Wait Manager Approval {Counter + 1}", ManagerOneApproveProject)
+                Wait<ApprovalDecision, bool>(ManagerOneApproveProject, $"Wait Manager Approval {Counter + 1}")
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .SetData((input, output) => ManagerOneApproval == output);
         }

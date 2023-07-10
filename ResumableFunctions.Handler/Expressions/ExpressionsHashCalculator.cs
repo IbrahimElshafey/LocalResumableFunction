@@ -11,7 +11,7 @@ namespace ResumableFunctions.Handler.Expressions;
 public class ExpressionsHashCalculator : ExpressionVisitor
 {
     private int _localValuePartsCount = 0;
-    public byte[] FinalHash { get; private set; }
+    public byte[] Hash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
     public LambdaExpression SetDataExpression { get; private set; }
 
@@ -23,7 +23,7 @@ public class ExpressionsHashCalculator : ExpressionVisitor
             SetDataExpression = setDataExpression;
             //CalcInitialHash();
             CalcLocalValueParts();
-            CalcFinalHash();
+            CalcHash();
         }
         catch (Exception e)
         {
@@ -72,7 +72,7 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     //{
     //    if (_localValuePartsCount == 0)
     //    {
-    //        FinalHash = InitialHash; 
+    //        Hash = InitialHash; 
     //        return;
     //    }
 
@@ -85,28 +85,26 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     //        sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
 
     //    var data = Encoding.Unicode.GetBytes(sb.ToString());
-    //    FinalHash = MD5.HashData(data);
+    //    Hash = MD5.HashData(data);
     //}
 
-    private void CalcInitialHash()
+    private void CalcHash()
     {
         var sb = new StringBuilder();
         if (MatchExpression != null)
         {
-            MatchExpression =
-                (LambdaExpression)ChangeInputAndOutputNames(MatchExpression);
+            MatchExpression = (LambdaExpression)ChangeInputAndOutputNames(MatchExpression);
             sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
         }
 
         if (SetDataExpression != null)
         {
-            SetDataExpression =
-                (LambdaExpression)ChangeInputAndOutputNames(SetDataExpression);
+            SetDataExpression = (LambdaExpression)ChangeInputAndOutputNames(SetDataExpression);
             sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
         }
 
         var data = Encoding.Unicode.GetBytes(sb.ToString());
-        InitialHash = MD5.HashData(data);
+        Hash = MD5.HashData(data);
     }
 
     private Expression ChangeInputAndOutputNames(LambdaExpression expression)

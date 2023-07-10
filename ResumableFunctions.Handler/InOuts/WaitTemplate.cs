@@ -80,6 +80,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
 
 
     public int? ServiceId { get; set; }
+    public int InCodeLine { get; internal set; }
 
     bool expressionsLoaded;
     internal void LoadExpressions(bool forceReload = false)
