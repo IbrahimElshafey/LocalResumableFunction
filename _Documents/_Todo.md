@@ -1,4 +1,5 @@
 ﻿# Working On Now
+* Use same dll in two different services must be allowed
 * Background Cleaning Job
 * ResumableFunctions.Publisher
 

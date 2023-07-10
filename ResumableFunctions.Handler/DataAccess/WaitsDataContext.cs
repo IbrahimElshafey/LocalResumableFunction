@@ -57,7 +57,7 @@ internal sealed class WaitsDataContext : DbContext
     {
         ConfigureResumableFunctionState(modelBuilder.Entity<ResumableFunctionState>());
         ConfigureMethodIdentifier(modelBuilder);
-        ConfigurePushedCalls(modelBuilder);
+        ConfigureWaitProcessingRecords(modelBuilder);
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
         ConfigureWaits(modelBuilder);
         ConfigureMethodWaitTemplate(modelBuilder);
@@ -72,7 +72,6 @@ internal sealed class WaitsDataContext : DbContext
     {
         modelBuilder.Entity<Wait>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<ResumableFunctionState>().HasQueryFilter(p => !p.IsDeleted);
-        modelBuilder.Entity<PushedCall>().HasQueryFilter(p => !p.IsDeleted);
     }
 
     private void ConfigurConcurrencyToken(ModelBuilder modelBuilder)
@@ -89,31 +88,15 @@ internal sealed class WaitsDataContext : DbContext
         }
     }
 
-    private void ConfigureServiceData(EntityTypeBuilder<ServiceData> entityTypeBuilder)
+    private void ConfigureServiceData(EntityTypeBuilder<ServiceData> serviceDataBuilder)
     {
-        //entityTypeBuilder.Property(x => x.Modified).HasDefaultValue(DateTime.MinValue);
-        entityTypeBuilder.HasIndex(x => x.AssemblyName);
-
-        //entityTypeBuilder
-        //    .HasMany(x => x.Waits)
-        //    .WithOne(wait => wait.Service)
-        //    .HasForeignKey(x => x.ServiceId)
-        //    .HasConstraintName("FK_Waits_For_Service");
+        serviceDataBuilder.HasIndex(x => x.AssemblyName);
     }
 
-    private void ConfigurePushedCalls(ModelBuilder modelBuilder)
+    private void ConfigureWaitProcessingRecords(ModelBuilder modelBuilder)
     {
-        var pushedCallBuilder = modelBuilder.Entity<PushedCall>();
-
-        pushedCallBuilder
-           .HasMany(x => x.WaitsForCall)
-           .WithOne(waitForCall => waitForCall.PushedCall)
-           .HasForeignKey(waitForCall => waitForCall.PushedCallId)
-           .HasConstraintName("FK_Waits_For_Call");
-
-        var waitForCallBuilder = modelBuilder.Entity<WaitProcessingRecord>();
-        waitForCallBuilder.HasIndex(x => x.ServiceId, "WaitForCall_ServiceId_Idx");
-        waitForCallBuilder.HasIndex(x => x.FunctionId, "WaitForCall_FunctionId_Idx");
+        var waitProcessingRecordBuilder = modelBuilder.Entity<WaitProcessingRecord>();
+        waitProcessingRecordBuilder.HasIndex(x => x.PushedCallId, "WaitForPushedCall_Idx");
     }
 
     private void ConfigureWaits(ModelBuilder modelBuilder)

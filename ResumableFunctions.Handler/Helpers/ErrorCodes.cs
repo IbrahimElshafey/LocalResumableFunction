@@ -15,6 +15,7 @@ namespace ResumableFunctions.Handler.Helpers
         public const int PushedCall = 6;
         public const int FirstWait = 7;
         public const int WaitValidation = 8;
+        public const int DataCleaning = 9;
         public const int Custom = -1000;
 
         public static Dictionary<int, string> StatusCodeNames = new Dictionary<int, string>

@@ -16,7 +16,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public int MethodId { get; internal set; }
     public int MethodGroupId { get; internal set; }
     public MethodsGroup MethodGroup { get; internal set; }
-    public byte[] BaseHash { get; internal set; }
+    public byte[] Hash { get; internal set; }
     public DateTime Created { get; internal set; }
     public bool IsMandatoryPartFullMatch { get; internal set; }
 
@@ -61,7 +61,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             MethodGroupId = waitTemplate.MethodGroupId,
             IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
             ServiceId = waitTemplate.ServiceId,
-            BaseHash = waitTemplate.BaseHash
+            Hash = waitTemplate.Hash
         };
 
     [NotMapped]

@@ -126,7 +126,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     if (firstWait != null)
                     {
                         await _serviceRepo.AddLog(
-                            $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.");
+                            $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.", LogType.Info, StatusCodes.FirstWait);
 
                         await _waitsRepository.SaveWait(firstWait);
                         _logger.LogInformation(

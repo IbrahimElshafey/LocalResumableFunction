@@ -13,10 +13,6 @@ namespace ResumableFunctions.Handler.Testing
         private const string Server = "(localdb)\\MSSQLLocalDB";
 
 
-        public IResumableFunctionsSettings CleanDatabaseEvery(TimeSpan time)
-        {
-            return this;
-        }
 
         public TestSettings(string testName)
         {
@@ -38,5 +34,7 @@ namespace ResumableFunctions.Handler.Testing
 
         public IDistributedLockProvider DistributedLockProvider =>
             new WaitHandleDistributedSynchronizationProvider();
+
+        public CleanDatabaseSettings CleanDbSettings => new CleanDatabaseSettings();
     }
 }

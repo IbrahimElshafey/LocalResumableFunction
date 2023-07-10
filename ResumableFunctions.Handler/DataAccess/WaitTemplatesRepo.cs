@@ -31,7 +31,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             MethodId = methodId,
             FunctionId = funcId,
             MethodGroupId = groupId,
-            BaseHash = hashResult.Hash,
+            Hash = hashResult.Hash,
         };
 
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
@@ -59,7 +59,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
                 x.FunctionId == funcId &&
                 x.ServiceId == _settings.CurrentServiceId)
             .ToListAsync())
-            .FirstOrDefault(x => x.BaseHash.SequenceEqual(hash));
+            .FirstOrDefault(x => x.Hash.SequenceEqual(hash));
         result?.LoadExpressions();
         return result;
     }

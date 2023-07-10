@@ -14,7 +14,6 @@ namespace ResumableFunctions.Handler.Core
     internal class WaitsProcessor : IWaitsProcessor
     {
         private readonly IFirstWaitProcessor _firstWaitProcessor;
-        private readonly IRecycleBinService _recycleBinService;
         private readonly IReplayWaitProcessor _replayWaitProcessor;
         private readonly IWaitsRepo _waitsRepo;
         private readonly IServiceProvider _serviceProvider;
@@ -37,7 +36,6 @@ namespace ResumableFunctions.Handler.Core
             IServiceProvider serviceProvider,
             ILogger<WaitsProcessor> logger,
             IFirstWaitProcessor firstWaitProcessor,
-            IRecycleBinService recycleBinService,
             IWaitsRepo waitsRepo,
             IBackgroundProcess backgroundJobClient,
             IUnitOfWork context,
@@ -53,7 +51,6 @@ namespace ResumableFunctions.Handler.Core
             _serviceProvider = serviceProvider;
             _logger = logger;
             _firstWaitProcessor = firstWaitProcessor;
-            _recycleBinService = recycleBinService;
             _waitsRepo = waitsRepo;
             _backgroundJobClient = backgroundJobClient;
             _context = context;
@@ -360,7 +357,6 @@ namespace ResumableFunctions.Handler.Core
             currentWait.FunctionState.AddLog("Function instance completed.", LogType.Info, StatusCodes.WaitProcessing);
             currentWait.FunctionState.Status = FunctionStatus.Completed;
             await _waitsRepo.CancelOpenedWaitsForState(currentWait.FunctionStateId);
-            await _recycleBinService.RecycleFunction(currentWait.FunctionStateId);
         }
 
         private async Task<MethodWait> LoadWait(int waitId)

@@ -27,13 +27,14 @@ public static class CoreExtensions
         ResolveDbInterfaces(services, settings);
 
         services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
-        services.AddScoped<IRecycleBinService, RecycleBinService>();
         services.AddScoped<IReplayWaitProcessor, ReplayWaitProcessor>();
         services.AddScoped<IWaitsProcessor, WaitsProcessor>();
         services.AddScoped<ICallProcessor, CallProcessor>();
         services.AddScoped<ICallPusher, CallPusher>();
         services.AddScoped<Scanner>();
         services.AddScoped<BackgroundJobExecutor>();
+
+        services.AddTransient<IDataCleaning, DataCleaning>();
 
 
 
