@@ -68,7 +68,7 @@ internal partial class CallProcessor : ICallProcessor
             _backgroundJobClient.Schedule(() => InitialProcessPushedCall(pushedCallId, methodUrn), TimeSpan.FromSeconds(3));
     }
 
-    [DisplayName("Current Service Process Pushed Call `{0}` for MethodUrn: `{1}`")]
+    [DisplayName("{0}")]
     public async Task ServiceProcessPushedCall(AffectedService service)
     {
         var pushedCallId = service.PushedCallId;
@@ -91,7 +91,7 @@ internal partial class CallProcessor : ICallProcessor
         try
         {
             var actionUrl =
-                $"{service.ServiceUrl}api/ResumableFunctions/ServiceProcessPushedCall";
+                $"{service.ServiceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ServiceProcessPushedCallAction}";
             await _hangFireHttpClient.EnqueuePostRequestIfFail(actionUrl, service);
         }
         catch (Exception ex)

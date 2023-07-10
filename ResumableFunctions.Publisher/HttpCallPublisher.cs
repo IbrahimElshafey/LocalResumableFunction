@@ -41,7 +41,7 @@ namespace ResumableFunctions.Publisher
             {
                 var serviceUrl = _settings.ServicesRegistry[methodCall.ServiceName];
                 var actionUrl =
-                    $"{serviceUrl}api/ResumableFunctions/ExternalCall";
+                    $"{serviceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ExternalCallAction}";
                 var body = MessagePackSerializer.Serialize(methodCall, ContractlessStandardResolver.Options);
                 //create a System.Net.Http.MultiPartFormDataContent
                 var client = _httpClientFactory.CreateClient();
@@ -53,7 +53,7 @@ namespace ResumableFunctions.Publisher
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error occured when Publish method call {methodCall}");
+                _logger.LogError(ex, $"Error occured when publish method call {methodCall}");
             }
 
         }

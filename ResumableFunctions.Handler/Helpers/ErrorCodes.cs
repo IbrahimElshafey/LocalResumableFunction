@@ -17,7 +17,7 @@ namespace ResumableFunctions.Handler.Helpers
         public const int WaitValidation = 8;
         public const int Custom = -1000;
 
-        public static Dictionary<int, string> ErrorCodeNames = new Dictionary<int, string>
+        public static Dictionary<int, string> StatusCodeNames = new Dictionary<int, string>
         {
             {0, null},
             {MethodValidation, "While Method Validation"},
@@ -30,6 +30,6 @@ namespace ResumableFunctions.Handler.Helpers
             {Custom, "Author Custom Log"},
         };
 
-        public static string NameOf(int errorCode) => ErrorCodeNames[errorCode];
+        public static string NameOf(int errorCode) => StatusCodeNames[errorCode];
     }
 }

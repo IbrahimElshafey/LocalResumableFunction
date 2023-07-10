@@ -1,9 +1,4 @@
 ﻿# Working On Now
-* Enhance InitialProcessPushedCall
-	* Will get affected wait templates
-	* Will group them by service Id
-	* Will send wait templates group to each service to check
-* Magic strings
 * Review Log for replay
 * Background Cleaning Job
 * ResumableFunctions.Publisher

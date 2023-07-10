@@ -11,35 +11,38 @@ using System.Linq.CompilerServices.TypeSystem;
 namespace ResumableFunctions.AspNetService
 {
     [ApiController]
-    [Route($"api/ResumableFunctions")]
+    [Route(Constants.ResumableFunctionsControllerUrl)]
     //[ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionsController : ControllerBase
     {
         public readonly ICallPusher _callPusher;
         public readonly ICallProcessor _callProcessor;
+        private readonly IBackgroundProcess _backgroundProcess;
         private readonly ILogger<ResumableFunctionsController> _logger;
 
         public ResumableFunctionsController(
             ILogger<ResumableFunctionsController> logger,
             ICallPusher callPusher,
-            ICallProcessor callProcessor)
+            ICallProcessor callProcessor,
+            IBackgroundProcess backgroundProcess)
         {
             _logger = logger;
             _callPusher = callPusher;
             _callProcessor = callProcessor;
+            _backgroundProcess = backgroundProcess;
         }
 
 
 
 
-        [HttpPost(nameof(ServiceProcessPushedCall))]
-        public async Task<int> ServiceProcessPushedCall(AffectedService service)
+        [HttpPost(Constants.ServiceProcessPushedCallAction)]
+        public int ServiceProcessPushedCall(AffectedService service)
         {
-            await _callProcessor.ServiceProcessPushedCall(service);
+            _backgroundProcess.Enqueue(() => _callProcessor.ServiceProcessPushedCall(service));
             return 0;
         }
 
-        [HttpPost(nameof(ExternalCall))]
+        [HttpPost(Constants.ExternalCallAction)]
         public async Task<int> ExternalCall()
         {
             try

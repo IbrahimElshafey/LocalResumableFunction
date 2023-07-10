@@ -9,4 +9,9 @@ public class AffectedService
     public string ServiceName { get; set; }
     public string ServiceUrl { get; set; }  
     public List<int> AffectedFunctionsIds { get; set; }
+
+    public override string ToString()
+    {
+        return $"Service `{ServiceName}` processing pushed call `{MethodUrn}:{PushedCallId}`";
+    }
 }

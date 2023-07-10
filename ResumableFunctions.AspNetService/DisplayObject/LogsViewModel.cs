@@ -11,7 +11,7 @@ namespace ResumableFunctions.AspNetService.DisplayObject
     internal class LogsViewModel
     {
         public List<LogRecord> Logs { get; }
-        public Dictionary<int, string> ErrorCodes => Handler.Helpers.StatusCodes.ErrorCodeNames;
+        public Dictionary<int, string> StatusCodes => Handler.Helpers.StatusCodes.StatusCodeNames;
         public List<ServiceData> Services { get; }
     }
 }

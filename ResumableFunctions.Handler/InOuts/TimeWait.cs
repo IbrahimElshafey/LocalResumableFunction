@@ -11,7 +11,7 @@ public class TimeWait : Wait
     {
         _timeMethodWait =
            new MethodWait<TimeWaitInput, bool>(typeof(LocalRegisteredMethods)
-               .GetMethod("TimeWait"));
+               .GetMethod(nameof(LocalRegisteredMethods.TimeWait)));
     }
 
     public TimeSpan TimeToWait { get; internal set; }
@@ -21,7 +21,7 @@ public class TimeWait : Wait
     {
         get
         {
-            _timeMethodWait.Name = $"#{nameof(LocalRegisteredMethods.TimeWait)}#";
+            _timeMethodWait.Name = Constants.TimeWaitName;
             _timeMethodWait.CurrentFunction = CurrentFunction;
             _timeMethodWait.IsFirst = IsFirst;
             _timeMethodWait.WasFirst = WasFirst;

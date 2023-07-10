@@ -6,7 +6,7 @@ namespace ResumableFunctions.Handler.Helpers
 {
     public class LocalRegisteredMethods
     {
-        [PushCall("###LocalRegisteredMethods.TimeWait")]
+        [PushCall(Constants.TimeWaitMethodUrn)]
         [DisplayName("{0}")]
         public bool TimeWait(TimeWaitInput timeWaitInput)
         {

@@ -112,14 +112,14 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         var functionName = "";
         await _backgroundJobExecutor.Execute(
             $"FirstWaitProcessor_RegisterFirstWait_{functionId}",
-            (Func<Task>)(async () =>
+            async () =>
             {
                 try
                 {
                     var resumableFunctionId = await _methodIdentifierRepo.GetResumableFunction(functionId);
                     resumableFunction = resumableFunctionId.MethodInfo;
                     functionName = resumableFunction.Name;
-                    _logger.LogInformation("START RESUMABLE FUNCTION AND REGISTER FIRST WAIT");
+                    _logger.LogInformation($"Trying Start Resumable Function `{resumableFunctionId.RF_MethodUrn}` And Register First Wait");
                     var firstWait = await GetFirstWait(resumableFunction, true);
 
                     if (firstWait != null)
@@ -142,7 +142,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     throw;
                 }
 
-            }),
+            },
             ErrorMsg(), true);
         string ErrorMsg() => $"Error when try to register first wait for function [{functionName}:{functionId}]";
     }

@@ -43,7 +43,7 @@ internal partial class WaitsRepo : IWaitsRepo
                        x.Status == WaitStatus.Waiting &&
                        x.MethodGroupToWaitId == methodGroupId);
 
-        if (methodUrn.StartsWith("###LocalRegisteredMethods."))
+        if (methodUrn == Constants.TimeWaitMethodUrn)
         {
             methodWaitsQuery = methodWaitsQuery.Where(x => x.ServiceId == _settings.CurrentServiceId);
         }
@@ -91,28 +91,32 @@ internal partial class WaitsRepo : IWaitsRepo
     {
         try
         {
-            var firstWaitInDb = await LoadWaitTree(
-                x =>
-                   x.IsFirst &&
-                   x.RequestedByFunctionId == methodIdentifierId &&
-                   x.Status == WaitStatus.Waiting);
+            var firstWaitItems =
+                 await _context.Waits
+                .Where(x =>
+                    x.IsFirst &&
+                    x.RequestedByFunctionId == methodIdentifierId)
+                .ToListAsync();
 
-            if (firstWaitInDb != null)
+            if (firstWaitItems != null)
             {
-                firstWaitInDb.ActionOnWaitsTree(wait =>
+                foreach (var wait in firstWaitItems)
                 {
                     wait.IsDeleted = true;
-                    if (wait is MethodWait { Name: $"#{nameof(LocalRegisteredMethods.TimeWait)}#" })
+                    if (wait is MethodWait { Name: Constants.TimeWaitName })
                     {
                         wait.LoadUnmappedProps();
                         _backgroundJobClient.Delete(wait.ExtraData.JobId);
                     }
-                });
+                }
                 //load entity to delete it , concurrency control token and FKs
-                var functionState = await _context
+                if (firstWaitItems.FirstOrDefault()?.FunctionStateId is int stateId)
+                {
+                    var functionState = await _context
                     .FunctionStates
-                    .FirstAsync(x => x.Id == firstWaitInDb.FunctionStateId);
-                _context.FunctionStates.Remove(functionState);
+                    .FirstAsync(x => x.Id == stateId);
+                    _context.FunctionStates.Remove(functionState);
+                }
                 await _context.SaveChangesAsync();
             }
         }
@@ -148,7 +152,7 @@ internal partial class WaitsRepo : IWaitsRepo
         wait.LoadUnmappedProps();
         wait.Cancel();
         wait.CallId = pushedCallId;
-        if (wait is MethodWait { Name: $"#{nameof(LocalRegisteredMethods.TimeWait)}#" })
+        if (wait is MethodWait { Name: Constants.TimeWaitName })
         {
             _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
@@ -223,26 +227,6 @@ internal partial class WaitsRepo : IWaitsRepo
         return waitToReplay;
     }
 
-    public async Task<Wait> LoadWaitTree(Expression<Func<Wait, bool>> expression)
-    {
-        var rootId =
-            await _context
-            .Waits
-            .Where(expression)
-            .Select(x => x.Id)
-            .FirstOrDefaultAsync();
-
-        if (rootId != default)
-        {
-            var waits =
-                await _context
-                .Waits
-                .Where(x => x.Path.StartsWith($"/{rootId}"))
-                .ToListAsync();
-            return waits.First(x => x.Id == rootId);
-        }
-        return null;
-    }
 
     public async Task<List<MethodWait>> GetWaitsForTemplate(
         WaitTemplate template,
