@@ -31,8 +31,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             MethodId = methodId,
             FunctionId = funcId,
             MethodGroupId = groupId,
-            FinalHash = hashResult.FinalHash,
-            InitialHash = hashResult.InitialHash,
+            Hash = hashResult.FinalHash,
         };
 
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
@@ -53,6 +52,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
     private async Task DeleteUnusedTemplateSiblings(WaitTemplate waitTemplate)
     {
+        //todo:problem for waits in same group?
         var templateSiblings =
             await _context.WaitTemplates
             .Where(template =>
@@ -89,7 +89,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
                 x.FunctionId == funcId &&
                 x.ServiceId == _settings.CurrentServiceId)
             .ToListAsync())
-            .FirstOrDefault(x => x.FinalHash.SequenceEqual(hash));
+            .FirstOrDefault(x => x.Hash.SequenceEqual(hash));
         result?.LoadExpressions();
         return result;
     }

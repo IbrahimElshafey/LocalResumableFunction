@@ -11,7 +11,6 @@ namespace ResumableFunctions.Handler.Expressions;
 public class ExpressionsHashCalculator : ExpressionVisitor
 {
     private int _localValuePartsCount = 0;
-    public byte[] InitialHash { get; private set; }
     public byte[] FinalHash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
     public LambdaExpression SetDataExpression { get; private set; }
@@ -22,7 +21,7 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         {
             MatchExpression = matchExpression;
             SetDataExpression = setDataExpression;
-            CalcInitialHash();
+            //CalcInitialHash();
             CalcLocalValueParts();
             CalcFinalHash();
         }
@@ -69,25 +68,26 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         }
     }
 
-    private void CalcFinalHash()
-    {
-        if (_localValuePartsCount == 0)
-        {
-            FinalHash = InitialHash; 
-            return;
-        }
+    //private void CalcFinalHash()
+    //{
+    //    if (_localValuePartsCount == 0)
+    //    {
+    //        FinalHash = InitialHash; 
+    //        return;
+    //    }
 
 
-        var sb = new StringBuilder();
-        if (MatchExpression != null)
-            sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
+    //    var sb = new StringBuilder();
+    //    if (MatchExpression != null)
+    //        sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
 
-        if (SetDataExpression != null)
-            sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
+    //    if (SetDataExpression != null)
+    //        sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
 
-        var data = Encoding.Unicode.GetBytes(sb.ToString());
-        FinalHash = MD5.HashData(data);
-    }
+    //    var data = Encoding.Unicode.GetBytes(sb.ToString());
+    //    FinalHash = MD5.HashData(data);
+    //}
+
     private void CalcInitialHash()
     {
         var sb = new StringBuilder();
