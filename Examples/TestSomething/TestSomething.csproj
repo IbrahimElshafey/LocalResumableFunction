@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ResumableFunctions.Handler\ResumableFunctions.Handler.csproj" />
-    <ProjectReference Include="..\ClientOnboarding\ClientOnboarding.csproj" />
   </ItemGroup>
 
 </Project>

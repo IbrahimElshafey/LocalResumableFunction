@@ -46,7 +46,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         waitTemplate.SetDataExpression = setDataWriter.SetDataExpression;
 
         _context.WaitTemplates.Add(waitTemplate);
-        
+
         await _context.SaveChangesAsync();
         return waitTemplate;
     }
@@ -64,7 +64,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             )
             .Select(x => x.Id)
             .ToListAsync();
-        if (templateSiblings?.Any() is true)
+        if (templateSiblings.Any())
         {
             var templatesToDelete =
                 templateSiblings.Except(
@@ -108,6 +108,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
         var result = await
             waitTemplatesQry
+            .OrderByDescending(x => x.Id)
             .AsNoTracking()
             .ToListAsync();
 

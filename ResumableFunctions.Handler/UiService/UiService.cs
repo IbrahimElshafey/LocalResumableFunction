@@ -5,7 +5,6 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
 using System;
 using System.Collections;
-using System.Diagnostics.Metrics;
 
 namespace ResumableFunctions.Handler.UiService
 {
