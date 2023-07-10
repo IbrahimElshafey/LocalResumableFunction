@@ -10,7 +10,9 @@ namespace ResumableFunctions.Handler.Expressions;
 
 public class ExpressionsHashCalculator : ExpressionVisitor
 {
-    public byte[] Hash { get; private set; }
+    private int _localValuePartsCount = 0;
+    public byte[] InitialHash { get; private set; }
+    public byte[] FinalHash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
     public LambdaExpression SetDataExpression { get; private set; }
 
@@ -20,8 +22,9 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         {
             MatchExpression = matchExpression;
             SetDataExpression = setDataExpression;
+            CalcInitialHash();
             CalcLocalValueParts();
-            CalcHash();
+            CalcFinalHash();
         }
         catch (Exception e)
         {
@@ -42,8 +45,8 @@ public class ExpressionsHashCalculator : ExpressionVisitor
             MatchExpression = (LambdaExpression)changeComputedParts.Visit(MatchExpression);
         if (SetDataExpression != null)
             SetDataExpression = (LambdaExpression)changeComputedParts.Visit(SetDataExpression);
-        
-        
+
+
         Expression OnVisitMethodCall(MethodCallExpression methodCallExpression)
         {
             if (methodCallExpression.Method.IsGenericMethod &&
@@ -54,7 +57,10 @@ public class ExpressionsHashCalculator : ExpressionVisitor
                         .CompileFast()
                         .Invoke();
                 if (arg.CanBeConstant())//todo:DateTime and Guid
+                {
+                    _localValuePartsCount++;
                     return Constant(arg);
+                }
                 else
                     throw new Exception(
                         $"The local value expression `{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}` can't be be convertred to constant type.");
@@ -63,7 +69,26 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         }
     }
 
-    private void CalcHash()
+    private void CalcFinalHash()
+    {
+        if (_localValuePartsCount == 0)
+        {
+            FinalHash = InitialHash; 
+            return;
+        }
+
+
+        var sb = new StringBuilder();
+        if (MatchExpression != null)
+            sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
+
+        if (SetDataExpression != null)
+            sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
+
+        var data = Encoding.Unicode.GetBytes(sb.ToString());
+        FinalHash = MD5.HashData(data);
+    }
+    private void CalcInitialHash()
     {
         var sb = new StringBuilder();
         if (MatchExpression != null)
@@ -81,7 +106,7 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         }
 
         var data = Encoding.Unicode.GetBytes(sb.ToString());
-        Hash = MD5.HashData(data);
+        InitialHash = MD5.HashData(data);
     }
 
     private Expression ChangeInputAndOutputNames(LambdaExpression expression)

@@ -243,8 +243,8 @@ public static class CoreExtensions
         return types.Contains(type);
     }
 
-    public static bool CanBeConstant(this object ob)=>
-        ob != null && ob.GetType().IsConstantType();
+    public static bool CanBeConstant(this object ob) =>
+        ob != null && (ob.GetType().IsConstantType() || ob.GetType().IsEnum);
 
     public static MethodInfo GetMethodInfo<T>(Expression<Func<T, object>> methodSelector) =>
         GetMethodInfoWithType(methodSelector).MethodInfo;

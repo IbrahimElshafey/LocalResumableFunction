@@ -64,7 +64,7 @@ internal partial class WaitsRepo
         var methodId = await _methodIdsRepo.GetId(methodWait);
         var funcId = methodWait.RequestedByFunctionId;
         var waitExpressionsHash = new ExpressionsHashCalculator(methodWait.MatchExpression, methodWait.SetDataExpression);
-        var expressionsHash = waitExpressionsHash.Hash;
+        var expressionsHash = waitExpressionsHash.FinalHash;
         await SetWaitTemplate();
         methodWait.MethodToWaitId = methodId.MethodId;
         methodWait.MethodGroupToWaitId = methodId.GroupId;
