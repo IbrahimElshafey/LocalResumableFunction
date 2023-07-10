@@ -8,13 +8,13 @@ using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Expressions;
 
-public class WaitExpressionsHash : ExpressionVisitor
+public class ExpressionsHashCalculator : ExpressionVisitor
 {
     public byte[] Hash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
     public LambdaExpression SetDataExpression { get; private set; }
 
-    public WaitExpressionsHash(LambdaExpression matchExpression, LambdaExpression setDataExpression)
+    public ExpressionsHashCalculator(LambdaExpression matchExpression, LambdaExpression setDataExpression)
     {
         try
         {
@@ -42,6 +42,8 @@ public class WaitExpressionsHash : ExpressionVisitor
             MatchExpression = (LambdaExpression)changeComputedParts.Visit(MatchExpression);
         if (SetDataExpression != null)
             SetDataExpression = (LambdaExpression)changeComputedParts.Visit(SetDataExpression);
+        
+        
         Expression OnVisitMethodCall(MethodCallExpression methodCallExpression)
         {
             if (methodCallExpression.Method.IsGenericMethod &&
@@ -51,7 +53,11 @@ public class WaitExpressionsHash : ExpressionVisitor
                     Lambda<Func<object>>(Convert(methodCallExpression.Arguments[0], typeof(object)))
                         .CompileFast()
                         .Invoke();
-                return Constant(arg);
+                if (arg.CanBeConstant())//todo:DateTime and Guid
+                    return Constant(arg);
+                else
+                    throw new Exception(
+                        $"The local value expression `{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}` can't be be convertred to constant type.");
             }
             return base.VisitMethodCall(methodCallExpression);
         }

@@ -20,7 +20,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
     }
 
     public async Task<WaitTemplate> AddNewTemplate(
-        WaitExpressionsHash hashResult,
+        ExpressionsHashCalculator hashResult,
         object currentFunctionInstance,
         int funcId,
         int groupId,
@@ -45,8 +45,37 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         waitTemplate.SetDataExpression = setDataWriter.SetDataExpression;
 
         _context.WaitTemplates.Add(waitTemplate);
+        await DeleteUnusedTemplateSiblings(waitTemplate);
         await _context.SaveChangesAsync();
         return waitTemplate;
+    }
+
+    private async Task DeleteUnusedTemplateSiblings(WaitTemplate waitTemplate)
+    {
+        var templateSiblings =
+            await _context.WaitTemplates
+            .Where(template =>
+                template.MethodGroupId == waitTemplate.MethodGroupId &&
+                template.MethodId == waitTemplate.MethodId &&
+                template.FunctionId == waitTemplate.FunctionId
+            )
+            .Select(x => x.Id)
+            .ToListAsync();
+        if (templateSiblings?.Any() is true)
+        {
+            var templatesToDelete =
+                templateSiblings.Except(
+                   await _context.MethodWaits
+                   .Where(mw =>
+                        mw.Status == WaitStatus.Waiting &&
+                        templateSiblings.Contains(mw.TemplateId))
+                   .Select(x => x.TemplateId)
+                   .Distinct()
+                   .ToListAsync());
+            await _context.WaitTemplates
+                .Where(template => templatesToDelete.Contains(template.Id))
+                .ExecuteDeleteAsync();
+        }
     }
 
     public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)

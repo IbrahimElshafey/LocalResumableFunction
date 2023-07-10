@@ -81,7 +81,6 @@ public class WaitTemplate : IEntity, IOnSaveEntity
 
     public int? ServiceId { get; set; }
 
-
     bool expressionsLoaded;
     internal void LoadExpressions(bool forceReload = false)
     {
