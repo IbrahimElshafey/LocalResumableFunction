@@ -3,7 +3,8 @@
     public interface IDataCleaning
     {
         Task DeleteCompletedFunctionInstances();
-        //todo: Task DeleteUnusedWaitTemplates();
+        Task DeactivateUnusedWaitTemplates();
+        Task DeleteDeactivatedWaitTemplates();
         Task DeleteSoftDeletedRows();
         Task DeleteOldPushedCalls();
         //todo: Task DeleteUnusedMethodidentifiers();

@@ -10,7 +10,7 @@ namespace ResumableFunctions.Handler.Expressions;
 
 public class ExpressionsHashCalculator : ExpressionVisitor
 {
-    private int _localValuePartsCount = 0;
+    private int _localValuePartsCount;
     public byte[] Hash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
     public LambdaExpression SetDataExpression { get; private set; }

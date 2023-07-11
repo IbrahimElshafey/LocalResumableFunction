@@ -37,7 +37,8 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             FunctionId = waitTemplate.FunctionId,
             MethodId = waitTemplate.MethodId,
             MethodGroupId = waitTemplate.MethodGroupId,
-            ServiceId = waitTemplate.ServiceId
+            ServiceId = waitTemplate.ServiceId,
+            IsActive = waitTemplate.IsActive,
         };
 
     public static Expression<Func<WaitTemplate, WaitTemplate>> CallMandatoryPartSelector =>
@@ -49,7 +50,8 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             MethodId = waitTemplate.MethodId,
             MethodGroupId = waitTemplate.MethodGroupId,
             IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
-            ServiceId = waitTemplate.ServiceId
+            ServiceId = waitTemplate.ServiceId,
+            IsActive = waitTemplate.IsActive,
         };
     public static Expression<Func<WaitTemplate, WaitTemplate>> InstanceMandatoryPartSelector =>
         waitTemplate => new WaitTemplate
@@ -61,7 +63,8 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             MethodGroupId = waitTemplate.MethodGroupId,
             IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
             ServiceId = waitTemplate.ServiceId,
-            Hash = waitTemplate.Hash
+            Hash = waitTemplate.Hash,
+            IsActive= waitTemplate.IsActive,
         };
 
     [NotMapped]
@@ -81,6 +84,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
 
     public int? ServiceId { get; set; }
     public int InCodeLine { get; internal set; }
+    public int IsActive { get; internal set; } = 1;
 
     bool expressionsLoaded;
     internal void LoadExpressions(bool forceReload = false)

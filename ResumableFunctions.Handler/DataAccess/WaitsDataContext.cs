@@ -131,11 +131,15 @@ internal sealed class WaitsDataContext : DbContext
 
     private void ConfigureMethodWaitTemplate(ModelBuilder modelBuilder)
     {
-        var entityBuilder = modelBuilder.Entity<WaitTemplate>();
-        entityBuilder.Property(x => x.MatchExpressionValue);
-        entityBuilder.Property(x => x.CallMandatoryPartExpressionValue);
-        entityBuilder.Property(x => x.InstanceMandatoryPartExpressionValue);
-        entityBuilder.Property(x => x.SetDataExpressionValue);
+        var waitTemplateBuilder = modelBuilder.Entity<WaitTemplate>();
+        waitTemplateBuilder.Property(x => x.MatchExpressionValue);
+        waitTemplateBuilder.Property(x => x.CallMandatoryPartExpressionValue);
+        waitTemplateBuilder.Property(x => x.InstanceMandatoryPartExpressionValue);
+        waitTemplateBuilder.Property(x => x.SetDataExpressionValue);
+        waitTemplateBuilder
+           .HasIndex(x => x.IsActive)
+           .HasFilter($"{nameof(WaitTemplate.IsActive)} = 1")
+           .HasDatabaseName("Index_ActiveWaits");
         modelBuilder.Entity<MethodsGroup>()
             .HasMany(x => x.WaitTemplates)
             .WithOne(x => x.MethodGroup)

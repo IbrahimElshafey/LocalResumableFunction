@@ -73,13 +73,34 @@ namespace ResumableFunctions.Handler.DataAccess
             await AddLog("Delete soft deleted rows completed.");
         }
 
+        public async Task DeactivateUnusedWaitTemplates()
+        {
+            await AddLog("Start to deactivate unused wait templates.");
+            var activeWaitTemplate =
+                _context.MethodWaits
+                .Where(x => x.Status == WaitStatus.Waiting)
+                .Select(x => x.TemplateId)
+                .Distinct();
+            await _context.WaitTemplates
+                .Where(waitTemplate => !activeWaitTemplate.Contains(waitTemplate.Id))
+                .ExecuteUpdateAsync(x => x.SetProperty(x => x.IsActive, -1));
+            await AddLog("Deactivate unused wait templates completed.");
+        }
+
         private async Task AddLog(string message)
         {
             await _serviceRepo.AddLog(message, LogType.Info, StatusCodes.DataCleaning);
         }
+
         private async Task AddError(string message, Exception ex = null)
         {
             await _serviceRepo.AddErrorLog(ex, message, StatusCodes.DataCleaning);
+        }
+
+        public Task DeleteDeactivatedWaitTemplates()
+        {
+            //todo:DeleteDeactivatedWaitTemplates
+            return Task.CompletedTask;
         }
     }
 }

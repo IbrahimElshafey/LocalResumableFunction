@@ -32,7 +32,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             FunctionId = funcId,
             MethodGroupId = groupId,
             Hash = hashResult.Hash,
-            InCodeLine = inCodeLine
+            InCodeLine = inCodeLine,
+            IsActive = 1,
         };
 
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
@@ -51,7 +52,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         return waitTemplate;
     }
 
-    private async Task DeleteUnusedTemplateSiblings(WaitTemplate waitTemplate)
+    public async Task DeactivateUnusedTemplateSiblings(WaitTemplate waitTemplate)
     {
         //todo:problem for waits in same group?
         var templateSiblings =
@@ -77,7 +78,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
                    .ToListAsync());
             await _context.WaitTemplates
                 .Where(template => templatesToDelete.Contains(template.Id))
-                .ExecuteDeleteAsync();
+                .ExecuteUpdateAsync(x => x.SetProperty(x => x.IsActive, -1));
         }
     }
 
@@ -89,7 +90,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             .Where(x =>
                 x.MethodGroupId == groupId &&
                 x.FunctionId == funcId &&
-                x.ServiceId == _settings.CurrentServiceId)
+                x.ServiceId == _settings.CurrentServiceId &&
+                x.IsActive == 1)
             .ToListAsync())
             .FirstOrDefault(x => x.Hash.SequenceEqual(hash));
         result?.LoadExpressions();
@@ -104,7 +106,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             .Where(template =>
                 template.FunctionId == functionId &&
                 template.MethodGroupId == methodGroupId &&
-                template.ServiceId == _settings.CurrentServiceId);
+                template.ServiceId == _settings.CurrentServiceId &&
+                template.IsActive == 1);
 
         var result = await
             waitTemplatesQry
@@ -115,31 +118,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         result.ForEach(x => x.LoadExpressions());
         return result;
     }
-    public async Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId)
-    {
-        var templateIds = await _context
-            .MethodWaits
-            .Where(x =>
-                x.Status == WaitStatus.Waiting &&
-                x.MethodGroupToWaitId == methodGroupId &&
-                x.ServiceId == _settings.CurrentServiceId)
-            .Select(x => x.TemplateId)
-            .Distinct()
-            .ToListAsync();
 
-        var waitTemplatesQry = _context
-            .WaitTemplates
-            .Select(WaitTemplate.CallMandatoryPartSelector)
-            .Where(x => templateIds.Contains(x.Id));
-
-        var result = await
-            waitTemplatesQry
-            .AsNoTracking()
-            .ToListAsync();
-
-        result.ForEach(x => x.LoadExpressions());
-        return result;
-    }
 
     public async Task<WaitTemplate> GetById(int templateId)
     {
