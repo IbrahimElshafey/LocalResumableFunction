@@ -167,6 +167,7 @@ namespace ResumableFunctions.Handler.Testing
                     {
                         MethodUrn = pushResultAttribute.MethodUrn,
                         CanPublishFromExternal = pushResultAttribute.CanPublishFromExternal,
+                        IsLocalOnly = pushResultAttribute.IsLocalOnly,
                     },
                 });
             await Context.SaveChangesAsync();

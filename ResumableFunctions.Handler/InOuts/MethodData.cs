@@ -20,6 +20,7 @@ namespace ResumableFunctions.Handler.InOuts
             byte[] methodHash,
             string methodUrn,
             bool canPublishFromExternal,
+            bool isLocalOnly,
             bool isActive)
         {
             AssemblyName = assemblyName;
@@ -29,12 +30,14 @@ namespace ResumableFunctions.Handler.InOuts
             MethodHash = methodHash;
             MethodUrn = methodUrn;
             CanPublishFromExternal = canPublishFromExternal;
+            IsLocalOnly = isLocalOnly;
             IsActive = isActive;
         }
         public MethodData()
         {
 
         }
+
         public MethodData(MethodInfo methodInfo)
         {
             if (methodInfo == null) return;
@@ -44,18 +47,19 @@ namespace ResumableFunctions.Handler.InOuts
             MethodSignature = CalcSignature(methodInfo);
             MethodUrn = GetMethodUrn(methodInfo);
             MethodHash = GetMethodHash();
-            CanPublishFromExternal = GetCanPublishFromExternal(methodInfo);
+            SetGroupProps(methodInfo);
         }
 
-        private bool GetCanPublishFromExternal(MethodInfo methodInfo)
+        private void SetGroupProps(MethodInfo methodInfo)
         {
-            var wma = methodInfo
+            var pushCallAttribute = methodInfo
               .GetCustomAttributes()
-              .FirstOrDefault(
-              attribute => attribute is PushCallAttribute
-              ) as PushCallAttribute;
+              .FirstOrDefault(attribute => attribute is PushCallAttribute) as PushCallAttribute;
 
-            return wma?.CanPublishFromExternal ?? false;
+            if (pushCallAttribute == null) return;
+
+            CanPublishFromExternal = pushCallAttribute.CanPublishFromExternal;
+            IsLocalOnly = pushCallAttribute.IsLocalOnly;
         }
 
         public string MethodUrn { get; set; }
@@ -90,6 +94,7 @@ namespace ResumableFunctions.Handler.InOuts
 
         public MethodType MethodType { get; internal set; }
         public bool CanPublishFromExternal { get; internal set; }
+        public bool IsLocalOnly { get; internal set; }
         public bool IsActive { get; internal set; } = true;
 
         internal static string CalcSignature(MethodBase value)

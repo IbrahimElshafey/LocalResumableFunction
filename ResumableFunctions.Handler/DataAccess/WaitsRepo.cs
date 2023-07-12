@@ -35,24 +35,24 @@ internal partial class WaitsRepo : IWaitsRepo
 
     public async Task<List<AffectedService>> GetAffectedServices(string methodUrn)
     {
-        var methodGroupId = await GetMethodGroupId(methodUrn);
+        var methodGroup = await GetMethodGroup(methodUrn);
 
         var methodWaitsQuery = _context
                    .MethodWaits
                    .Where(x =>
                        x.Status == WaitStatus.Waiting &&
-                       x.MethodGroupToWaitId == methodGroupId);
+                       x.MethodGroupToWaitId == methodGroup.Id);
 
-        if (methodUrn == Constants.TimeWaitMethodUrn)
+        if (methodGroup.IsLocalOnly)
         {
             methodWaitsQuery = methodWaitsQuery.Where(x => x.ServiceId == _settings.CurrentServiceId);
         }
 
         var affectedFunctions =
-            await (methodWaitsQuery
+            await methodWaitsQuery
            .Select(x => new { x.RequestedByFunctionId, x.ServiceId })
            .Distinct()
-           .GroupBy(x => x.ServiceId))
+           .GroupBy(x => x.ServiceId)
            .ToListAsync();
 
         return (
@@ -64,7 +64,7 @@ internal partial class WaitsRepo : IWaitsRepo
                   ServiceId = service.Id,
                   ServiceUrl = service.Url,
                   ServiceName = service.AssemblyName,
-                  MethodGroupId = methodGroupId,
+                  MethodGroupId = methodGroup.Id,
                   AffectedFunctionsIds = affectedFunction.Select(x => x.RequestedByFunctionId).ToList(),
               }
               )
@@ -72,13 +72,13 @@ internal partial class WaitsRepo : IWaitsRepo
     }
 
 
-    private async Task<int> GetMethodGroupId(string methodUrn)
+    private async Task<MethodsGroup> GetMethodGroup(string methodUrn)
     {
         var methodGroup =
            await _context
                .MethodsGroups
+               .AsNoTracking()
                .Where(x => x.MethodGroupUrn == methodUrn)
-               .Select(x => x.Id)
                .FirstOrDefaultAsync();
         if (methodGroup != default)
             return methodGroup;

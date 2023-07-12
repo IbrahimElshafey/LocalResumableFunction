@@ -4,7 +4,7 @@
 
 * Use RequestedByFunctionId prop in TimeWaitInput to refine match for time waits
 * Message Pack private setter props serialization
-* Add LocalOnly to PushCallAttribute
+* Add to method group
 	* CanPublishFromExternal
 	* IsLocalOnly
 

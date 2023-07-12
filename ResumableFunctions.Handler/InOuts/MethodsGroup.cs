@@ -4,6 +4,8 @@ public class MethodsGroup : IEntity
 {
     public int Id { get; internal set; }
     public string MethodGroupUrn { get; internal set; }
+    public bool CanPublishFromExternal { get; internal set; }
+    public bool IsLocalOnly { get; internal set; }
     public List<WaitMethodIdentifier> WaitMethodIdentifiers { get; internal set; } = new();
     public List<MethodWait> WaitRequestsForGroup { get; internal set; }
 

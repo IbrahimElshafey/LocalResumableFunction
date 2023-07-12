@@ -100,11 +100,14 @@ internal class MethodIdsRepo : IMethodIdsRepo
 
         var toAdd = new WaitMethodIdentifier();
         toAdd.FillFromMethodData(methodData);
-        var isChildAdd =
-            methodGroup != null;
+        var isChildAdd = methodGroup != null;
 
         if (isChildAdd)
         {
+            if (methodGroup.IsLocalOnly != methodData.IsLocalOnly)
+                throw new Exception(ErrorTemplate(nameof(MethodsGroup.IsLocalOnly),methodGroup.IsLocalOnly));
+            if (methodGroup.CanPublishFromExternal != methodData.CanPublishFromExternal)
+                throw new Exception(ErrorTemplate(nameof(MethodsGroup.CanPublishFromExternal), methodGroup.CanPublishFromExternal));
             methodGroup.WaitMethodIdentifiers?.Add(toAdd);
         }
         else
@@ -112,11 +115,16 @@ internal class MethodIdsRepo : IMethodIdsRepo
             var group = new MethodsGroup
             {
                 MethodGroupUrn = methodData.MethodUrn,
+                CanPublishFromExternal = methodData.CanPublishFromExternal,
+                IsLocalOnly = methodData.IsLocalOnly,
             };
             group.WaitMethodIdentifiers.Add(toAdd);
             _context.MethodsGroups.Add(group);
             await _context.SaveChangesAsync();
         }
+        string ErrorTemplate(string propName, bool propValue) =>
+            $"Error When register method {methodData.MethodName}," +
+            $"Method group `{methodGroup.MethodGroupUrn}` property {propName} was `{propValue}` and can't be changed";
     }
 
 
@@ -148,7 +156,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
 
     public async Task<WaitMethodIdentifier> GetMethodIdentifierById(int? methodToWaitId)
     {
-        return 
+        return
             await _context
             .WaitMethodIdentifiers
             .FindAsync(methodToWaitId);
@@ -156,11 +164,9 @@ internal class MethodIdsRepo : IMethodIdsRepo
 
     public async Task<bool> CanPublishFromExternal(string methodUrn)
     {
-       return await _context
-            .MethodsGroups
-            .Include(x => x.WaitMethodIdentifiers)
-            .Where(x => x.MethodGroupUrn == methodUrn)
-            .SelectMany(x => x.WaitMethodIdentifiers)
-            .AnyAsync(x => x.CanPublishFromExternal);
+        return await _context
+             .MethodsGroups
+             .Where(x => x.MethodGroupUrn == methodUrn)
+             .AnyAsync(x => x.CanPublishFromExternal);
     }
 }

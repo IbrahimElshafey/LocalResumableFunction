@@ -43,7 +43,7 @@ public class PublishMethodAspect
                 ClassName = metadata.DeclaringType.Name,
                 MethodName = metadata.Name,
             },
-            ServiceName = publishMethodAttribute.ServiceName
+            ServiceName = publishMethodAttribute.ToService
         };
         if (args.Length > 0)
             _methodCall.Input = args[0];

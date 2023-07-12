@@ -38,6 +38,7 @@ namespace ResumableFunctions.Handler.Attributes
                 {
                     MethodUrn = pushResultAttribute.MethodUrn,
                     CanPublishFromExternal = pushResultAttribute.CanPublishFromExternal,
+                    IsLocalOnly = pushResultAttribute.IsLocalOnly,
                 },
             };
             if (args.Length > 0)
