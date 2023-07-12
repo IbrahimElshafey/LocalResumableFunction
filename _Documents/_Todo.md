@@ -1,7 +1,5 @@
 ﻿# Working On Now
-* Delete Unused Template Siblings UI problem
 * Use same dll in two different services must be allowed
-* Background Cleaning Job
 * ResumableFunctions.Publisher
 
 * Use RequestedByFunctionId prop in TimeWaitInput to refine match for time waits
@@ -9,7 +7,6 @@
 
 # Workin on version 1.0.8
 * UI V1
-* Background Cleaning Job
 * ResumableFunctions.Publisher
 * Review Concurrency
 * Advanced Sample
