@@ -2,11 +2,9 @@
 * Use same dll in two different services must be allowed
 * ResumableFunctions.Publisher
 
+
 * Use RequestedByFunctionId prop in TimeWaitInput to refine match for time waits
 * Message Pack private setter props serialization
-* Add to method group
-	* CanPublishFromExternal
-	* IsLocalOnly
 
 # Workin on version 1.0.8
 * UI V1
