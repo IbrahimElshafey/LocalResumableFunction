@@ -34,7 +34,7 @@ public static class CoreExtensions
         services.AddScoped<Scanner>();
         services.AddScoped<BackgroundJobExecutor>();
 
-        services.AddTransient<IDataCleaning, DataCleaning>();
+        services.AddTransient<IDatabaseCleaning, DatabaseCleaning>();
 
 
 

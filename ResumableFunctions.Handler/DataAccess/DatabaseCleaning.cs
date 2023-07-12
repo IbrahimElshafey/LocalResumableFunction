@@ -1,18 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using System.Reflection.Emit;
 
 namespace ResumableFunctions.Handler.DataAccess
 {
-    internal class DataCleaning : IDataCleaning
+    internal class DatabaseCleaning : IDatabaseCleaning
     {
         private readonly WaitsDataContext _context;
         private readonly IServiceRepo _serviceRepo;
         private readonly IResumableFunctionsSettings _setting;
 
-        public DataCleaning(
+        public DatabaseCleaning(
             WaitsDataContext context,
             IServiceRepo serviceRepo,
             IResumableFunctionsSettings setting)
@@ -20,60 +20,66 @@ namespace ResumableFunctions.Handler.DataAccess
             _context = context;
             _serviceRepo = serviceRepo;
             _setting = setting;
+            RecurringJob.AddOrUpdate(",]", () => CleanCompletedFunctionInstances(), Cron.Daily);
         }
 
-        public async Task DeleteCompletedFunctionInstances()
+        public async Task CleanCompletedFunctionInstances()
         {
             await AddLog("Start to delete compeleted functions instances.");
-            var dateThreshold = DateTime.Now.Subtract(_setting.CleanDbSettings.CompletedInstanceRetentionPeriod);
+            var dateThreshold = DateTime.Now.Subtract(_setting.CleanDbSettings.CompletedInstanceRetention);
 
             var instanceIds =
                 await _context.FunctionStates
                 .Where(instance => instance.Status == FunctionStatus.Completed && instance.Modified > dateThreshold)
                 .Select(x => x.Id)
                 .ToListAsync();
-
-            await _context.Waits
+            if (instanceIds.Any())
+            {
+                await _context.Waits
               .Where(wait => instanceIds.Contains(wait.FunctionStateId))
               .ExecuteDeleteAsync();
-            await _context.FunctionStates
-                .Where(functionState => instanceIds.Contains(functionState.Id))
-                .ExecuteDeleteAsync();
-            await _context.Logs
-                .Where(logItem => instanceIds.Contains((int)logItem.EntityId) && logItem.EntityType == nameof(ResumableFunctionState))
-                .ExecuteDeleteAsync();
-            await _context.WaitProcessingRecords
-                .Where(waitProcessingRecord => instanceIds.Contains(waitProcessingRecord.StateId))
-                .ExecuteDeleteAsync();
+                await _context.FunctionStates
+                    .Where(functionState => instanceIds.Contains(functionState.Id))
+                    .ExecuteDeleteAsync();
+                await _context.Logs
+                    .Where(logItem => instanceIds.Contains((int)logItem.EntityId) && logItem.EntityType == nameof(ResumableFunctionState))
+                    .ExecuteDeleteAsync();
+                await _context.WaitProcessingRecords
+                    .Where(waitProcessingRecord => instanceIds.Contains(waitProcessingRecord.StateId))
+                    .ExecuteDeleteAsync();
 
+            }
             await AddLog("Delete compeleted functions instances completed.");
         }
 
-        public async Task DeleteOldPushedCalls()
+        public async Task CleanOldPushedCalls()
         {
             await AddLog("Start to delete old pushed calls.");
-            var dateThreshold = DateTime.Now.Subtract(_setting.CleanDbSettings.PushedCallRetentionPeriod);
+            var dateThreshold = DateTime.Now.Subtract(_setting.CleanDbSettings.PushedCallRetention);
             await _context.PushedCalls
                 .Where(instance => instance.Created > dateThreshold)
                 .ExecuteDeleteAsync();
             await AddLog("Delete compeleted functions instances completed.");
         }
 
-        public async Task DeleteSoftDeletedRows()
+        public async Task CleanSoftDeletedRows()
         {
             await AddLog("Start to delete soft deleted rows.");
+
             await _context.Waits
              .Where(instance => instance.IsDeleted)
              .IgnoreQueryFilters()
              .ExecuteDeleteAsync();
+
             await _context.FunctionStates
             .Where(instance => instance.IsDeleted)
             .IgnoreQueryFilters()
             .ExecuteDeleteAsync();
+
             await AddLog("Delete soft deleted rows completed.");
         }
 
-        public async Task DeactivateUnusedWaitTemplates()
+        public async Task MarkInactiveWaitTemplates()
         {
             await AddLog("Start to deactivate unused wait templates.");
             var activeWaitTemplate =
@@ -83,8 +89,20 @@ namespace ResumableFunctions.Handler.DataAccess
                 .Distinct();
             await _context.WaitTemplates
                 .Where(waitTemplate => !activeWaitTemplate.Contains(waitTemplate.Id))
-                .ExecuteUpdateAsync(x => x.SetProperty(x => x.IsActive, -1));
+                .ExecuteUpdateAsync(template => template
+                    .SetProperty(x => x.IsActive, -1)
+                    .SetProperty(x => x.DeactivationDate, DateTime.Now));
             await AddLog("Deactivate unused wait templates completed.");
+        }
+
+        public async Task CleanInactiveWaitTemplates()
+        {
+            await AddLog("Start to delete deactivated wait templates.");
+            var dateThreshold = DateTime.Now.Subtract(_setting.CleanDbSettings.DeactivatedWaitTemplateRetention);
+            await _context.WaitTemplates
+                .Where(template => template.IsActive == -1 && template.DeactivationDate > dateThreshold)
+                .ExecuteDeleteAsync();
+            await AddLog("Delete deactivated wait templates completed.");
         }
 
         private async Task AddLog(string message)
@@ -95,12 +113,6 @@ namespace ResumableFunctions.Handler.DataAccess
         private async Task AddError(string message, Exception ex = null)
         {
             await _serviceRepo.AddErrorLog(ex, message, StatusCodes.DataCleaning);
-        }
-
-        public Task DeleteDeactivatedWaitTemplates()
-        {
-            //todo:DeleteDeactivatedWaitTemplates
-            return Task.CompletedTask;
         }
     }
 }

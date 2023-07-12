@@ -84,18 +84,25 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
     public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
     {
-        var result = (await _context
+        var waitTemplate = (await _context
             .WaitTemplates
             .Select(WaitTemplate.InstanceMandatoryPartSelector)
             .Where(x =>
                 x.MethodGroupId == groupId &&
                 x.FunctionId == funcId &&
-                x.ServiceId == _settings.CurrentServiceId &&
-                x.IsActive == 1)
+                x.ServiceId == _settings.CurrentServiceId)
             .ToListAsync())
             .FirstOrDefault(x => x.Hash.SequenceEqual(hash));
-        result?.LoadExpressions();
-        return result;
+        if (waitTemplate != null)
+        {
+            waitTemplate.LoadExpressions();
+            if (waitTemplate.IsActive == -1)
+            {
+                waitTemplate.IsActive = 1;
+                await _context.SaveChangesAsync();
+            }
+        }
+        return waitTemplate;
     }
 
 

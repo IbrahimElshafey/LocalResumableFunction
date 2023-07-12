@@ -18,6 +18,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public MethodsGroup MethodGroup { get; internal set; }
     public byte[] Hash { get; internal set; }
     public DateTime Created { get; internal set; }
+    public DateTime DeactivationDate { get; internal set; }
     public bool IsMandatoryPartFullMatch { get; internal set; }
 
     internal string MatchExpressionValue { get; set; }

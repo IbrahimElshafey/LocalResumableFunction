@@ -7,6 +7,11 @@ namespace ResumableFunctions.Handler.Core;
 
 internal class NoBackgroundProcess : IBackgroundProcess
 {
+    public void AddOrUpdateRecurringJob([NotNull] string recurringJobId, [InstantHandle, NotNull] Expression<Func<Task>> methodCall, [NotNull] Func<string> cronExpression)
+    {
+        throw new NotImplementedException();
+    }
+
     public bool Delete([NotNull] string jobId)
     {
         return true;
