@@ -8,6 +8,6 @@
         Task CleanSoftDeletedRows();
         Task CleanOldPushedCalls();
         
-        //todo: Task DeleteUnusedMethodidentifiers();
+        //todo: Task DeleteInactiveMethodidentifiers();
     }
 }

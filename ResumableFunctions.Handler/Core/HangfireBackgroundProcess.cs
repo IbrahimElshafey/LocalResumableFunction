@@ -1,4 +1,6 @@
-﻿using System.Linq.Expressions;
+﻿using System.Linq.CompilerServices.TypeSystem;
+using System.Linq.Expressions;
+using System.Runtime;
 using Hangfire;
 using Hangfire.Annotations;
 using ResumableFunctions.Handler.Core.Abstraction;
@@ -12,9 +14,18 @@ internal class HangfireBackgroundProcess : IBackgroundProcess
     {
         _backgroundJobClient = backgroundJobClient;
     }
+
+    public void AddOrUpdateRecurringJob<TClass>(
+        [NotNull] string recurringJobId, 
+        [InstantHandle][NotNull] Expression<Func<TClass, Task>> methodCall,
+        [NotNull] string cronExpression)
+    {
+        RecurringJob.AddOrUpdate(recurringJobId, methodCall, cronExpression);
+    }
+
     public bool Delete([NotNull] string jobId)
     {
-       return _backgroundJobClient.Delete(jobId);
+        return _backgroundJobClient.Delete(jobId);
     }
 
     public string Enqueue([InstantHandle, NotNull] Expression<Func<Task>> methodCall)

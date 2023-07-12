@@ -31,10 +31,10 @@ public static class CoreExtensions
         services.AddScoped<IWaitsProcessor, WaitsProcessor>();
         services.AddScoped<ICallProcessor, CallProcessor>();
         services.AddScoped<ICallPusher, CallPusher>();
+        services.AddScoped<ICleaningJob, CleaningJob>();
         services.AddScoped<Scanner>();
         services.AddScoped<BackgroundJobExecutor>();
 
-        services.AddTransient<IDatabaseCleaning, DatabaseCleaning>();
 
 
 
@@ -66,6 +66,7 @@ public static class CoreExtensions
         services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
         services.AddScoped<IScanStateRepo, ScanStateRepo>();
         services.AddScoped<IPushedCallsRepo, PushedCallsRepo>();
+        services.AddScoped<IDatabaseCleaning, DatabaseCleaning>();
         services.AddScoped<IWaitProcessingRecordsRepo, WaitProcessingRecordsRepo>();
     }
 
@@ -80,8 +81,12 @@ public static class CoreExtensions
     {
         using var scope = app.Services.CreateScope();
         var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundProcess>();
+        
         var scanner = scope.ServiceProvider.GetService<Scanner>();
         backgroundJobClient.Enqueue(() => scanner.Start());
+        
+        var cleaningJob = scope.ServiceProvider.GetService<ICleaningJob>();
+        cleaningJob.ScheduleCleaningJob();
     }
 
 

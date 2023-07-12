@@ -29,6 +29,7 @@ namespace ResumableFunctions.Handler.Helpers
             {FirstWait, "While First Wait Processing"},
             {WaitValidation, "While Wait Request Validation"},
             {Custom, "Author Custom Log"},
+            {DataCleaning, "Database Cleaning"},
         };
 
         public static string NameOf(int errorCode) => StatusCodeNames[errorCode];

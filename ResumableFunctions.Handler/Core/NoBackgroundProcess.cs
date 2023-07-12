@@ -1,13 +1,18 @@
 ﻿using System.Linq.Expressions;
 using FastExpressionCompiler;
 using Hangfire.Annotations;
+using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.Core;
 
 internal class NoBackgroundProcess : IBackgroundProcess
 {
-    public void AddOrUpdateRecurringJob([NotNull] string recurringJobId, [InstantHandle, NotNull] Expression<Func<Task>> methodCall, [NotNull] Func<string> cronExpression)
+
+    public void AddOrUpdateRecurringJob<TClass>(
+        [NotNull] string recurringJobId,
+        [InstantHandle, NotNull] Expression<Func<TClass, Task>> methodCall,
+        [NotNull] string cronExpression)
     {
         throw new NotImplementedException();
     }

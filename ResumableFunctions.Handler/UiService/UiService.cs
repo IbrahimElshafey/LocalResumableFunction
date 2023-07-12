@@ -150,7 +150,7 @@ namespace ResumableFunctions.Handler.UiService
         {
             return await _context
                 .Logs
-                .Where(x => x.Type != LogType.Info)
+                //.Where(x => x.Type != LogType.Info)
                 .OrderByDescending(x => x.Id)
                 .Skip(page * 100)
                 .Take(100)
