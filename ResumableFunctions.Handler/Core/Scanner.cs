@@ -175,7 +175,7 @@ internal class Scanner
             var methodWaits = type
                 .GetMethods(GetBindingFlags())
                 .Where(method =>
-                        method.GetCustomAttributes().Any(x => x.TypeId == PushCallAttribute.AttributeId));
+                        method.GetCustomAttributes().Any(x => x is PushCallAttribute));
             foreach (var method in methodWaits)
             {
                 if (ValidateMethod(method, serviceData))
@@ -263,20 +263,20 @@ internal class Scanner
             return;
         }
         
-        await RegisterFunctions(SubResumableFunctionAttribute.AttributeId, type, serviceData);
+        await RegisterFunctions(typeof(SubResumableFunctionAttribute), type, serviceData);
         await _context.SaveChangesAsync();
-        await RegisterFunctions(ResumableFunctionEntryPointAttribute.AttributeId, type, serviceData);
+        await RegisterFunctions(typeof(ResumableFunctionEntryPointAttribute), type, serviceData);
     }
 
 
-    internal async Task RegisterFunctions(string attributeId, Type type, ServiceData serviceData)
+    internal async Task RegisterFunctions(Type attributeType, Type type, ServiceData serviceData)
     {
         var urns = new List<string>();
         var functions = type
             .GetMethods(GetBindingFlags())
             .Where(method => method
                 .GetCustomAttributes()
-                .Any(attribute => attribute.TypeId == attributeId));
+                .Any(attribute => attribute.GetType()== attributeType));
 
         foreach (var resumableFunctionInfo in functions)
         {
@@ -304,7 +304,7 @@ internal class Scanner
     {
         var resumableFunctionAttribute =
             (ResumableFunctionEntryPointAttribute)resumableFunction.GetCustomAttributes()
-            .FirstOrDefault(attribute => attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId);
+            .FirstOrDefault(attribute => attribute is ResumableFunctionEntryPointAttribute);
         var isFunctionActive = resumableFunctionAttribute is { IsActive: true };
         return (resumableFunctionAttribute != null, isFunctionActive);
     }

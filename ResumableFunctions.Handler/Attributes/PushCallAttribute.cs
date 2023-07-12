@@ -6,17 +6,21 @@ namespace ResumableFunctions.Handler.Attributes
     [Injection(typeof(PushCallAspect), Inherited = true)]
     public class PushCallAttribute : Attribute, ITrackingIdentifier
     {
-        public PushCallAttribute(string methodUrn, bool canPublishFromExternal = false)
+        public PushCallAttribute(
+            string methodUrn, 
+            bool canPublishFromExternal = false,
+            bool isLocalOnly = false)
         {
             MethodUrn = methodUrn;
             CanPublishFromExternal = canPublishFromExternal;
+            IsLocalOnly = isLocalOnly;
         }
 
         public string MethodUrn { get; }
         public bool CanPublishFromExternal { get; }
+        public bool IsLocalOnly { get; }
 
-        public const string AttributeId = nameof(PushCallAttribute) + "1f220128-d0f7-4dac-ad81-ff942d68942c";
-        public override object TypeId => AttributeId;
+        public override object TypeId => "1f220128-d0f7-4dac-ad81-ff942d68942c";
 
         public override string ToString()
         {

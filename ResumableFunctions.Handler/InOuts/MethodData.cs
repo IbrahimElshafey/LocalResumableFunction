@@ -52,7 +52,7 @@ namespace ResumableFunctions.Handler.InOuts
             var wma = methodInfo
               .GetCustomAttributes()
               .FirstOrDefault(
-              attribute => attribute.TypeId == PushCallAttribute.AttributeId
+              attribute => attribute is PushCallAttribute
               ) as PushCallAttribute;
 
             return wma?.CanPublishFromExternal ?? false;
@@ -70,9 +70,9 @@ namespace ResumableFunctions.Handler.InOuts
                 .GetCustomAttributes()
                 .FirstOrDefault(
                 attribute =>
-                    attribute.TypeId == ResumableFunctionEntryPointAttribute.AttributeId ||
-                    attribute.TypeId == SubResumableFunctionAttribute.AttributeId ||
-                    attribute.TypeId == PushCallAttribute.AttributeId
+                    attribute is ResumableFunctionEntryPointAttribute ||
+                    attribute is SubResumableFunctionAttribute ||
+                    attribute is PushCallAttribute
                 );
 
             return (trackId as ITrackingIdentifier)?.MethodUrn;

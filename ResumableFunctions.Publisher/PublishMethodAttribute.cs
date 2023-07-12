@@ -23,5 +23,5 @@ public sealed class PublishMethodAttribute : Attribute
     /// </summary>
     public string MethodIdentifier { get; }
     public string ServiceName { get; }
-    public override object TypeId => nameof(PublishMethodAttribute);
+    public override object TypeId => "c0a6b0c2-c79f-427b-a66a-8df59076e3ff";
 }

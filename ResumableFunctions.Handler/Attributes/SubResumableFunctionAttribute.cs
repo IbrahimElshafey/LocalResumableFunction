@@ -4,8 +4,7 @@
 public sealed class SubResumableFunctionAttribute : Attribute, ITrackingIdentifier
 {
 
-    public const string AttributeId = nameof(SubResumableFunctionAttribute);
-    public override object TypeId => AttributeId;
+    public override object TypeId => "dadf0bab-d93e-4435-b70a-07ee8a9a3e2f";
     public string MethodUrn { get; }
 
     public SubResumableFunctionAttribute(string methodUrn)
