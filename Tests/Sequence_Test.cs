@@ -45,9 +45,9 @@ public class Sequence
         [ResumableFunctionEntryPoint("ThreeMethodsSequence")]
         public async IAsyncEnumerable<Wait> ThreeMethodsSequence()
         {
-            yield return Wait<string, string>("M1", Method1);
-            yield return Wait<string, string>("M2", Method2).MatchAll();
-            yield return Wait<string, string>("M3", Method3).MatchAll();
+            yield return Wait<string, string>(Method1, "M1");
+            yield return Wait<string, string>(Method2, "M2").MatchAll();
+            yield return Wait<string, string>(Method3, "M3").MatchAll();
             await Task.Delay(100);
         }
 

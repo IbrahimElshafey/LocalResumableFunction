@@ -8,18 +8,20 @@ using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Expressions;
 
-public class WaitExpressionsHash : ExpressionVisitor
+public class ExpressionsHashCalculator : ExpressionVisitor
 {
+    private int _localValuePartsCount;
     public byte[] Hash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
     public LambdaExpression SetDataExpression { get; private set; }
 
-    public WaitExpressionsHash(LambdaExpression matchExpression, LambdaExpression setDataExpression)
+    public ExpressionsHashCalculator(LambdaExpression matchExpression, LambdaExpression setDataExpression)
     {
         try
         {
             MatchExpression = matchExpression;
             SetDataExpression = setDataExpression;
+            //CalcInitialHash();
             CalcLocalValueParts();
             CalcHash();
         }
@@ -42,6 +44,8 @@ public class WaitExpressionsHash : ExpressionVisitor
             MatchExpression = (LambdaExpression)changeComputedParts.Visit(MatchExpression);
         if (SetDataExpression != null)
             SetDataExpression = (LambdaExpression)changeComputedParts.Visit(SetDataExpression);
+
+
         Expression OnVisitMethodCall(MethodCallExpression methodCallExpression)
         {
             if (methodCallExpression.Method.IsGenericMethod &&
@@ -51,26 +55,51 @@ public class WaitExpressionsHash : ExpressionVisitor
                     Lambda<Func<object>>(Convert(methodCallExpression.Arguments[0], typeof(object)))
                         .CompileFast()
                         .Invoke();
-                return Constant(arg);
+                if (arg.CanBeConstant())//todo:DateTime and Guid
+                {
+                    _localValuePartsCount++;
+                    return Constant(arg);
+                }
+                else
+                    throw new Exception(
+                        $"The local value expression `{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}` can't be be convertred to constant type.");
             }
             return base.VisitMethodCall(methodCallExpression);
         }
     }
+
+    //private void CalcFinalHash()
+    //{
+    //    if (_localValuePartsCount == 0)
+    //    {
+    //        Hash = InitialHash; 
+    //        return;
+    //    }
+
+
+    //    var sb = new StringBuilder();
+    //    if (MatchExpression != null)
+    //        sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
+
+    //    if (SetDataExpression != null)
+    //        sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
+
+    //    var data = Encoding.Unicode.GetBytes(sb.ToString());
+    //    Hash = MD5.HashData(data);
+    //}
 
     private void CalcHash()
     {
         var sb = new StringBuilder();
         if (MatchExpression != null)
         {
-            MatchExpression =
-                (LambdaExpression)ChangeInputAndOutputNames(MatchExpression);
+            MatchExpression = (LambdaExpression)ChangeInputAndOutputNames(MatchExpression);
             sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
         }
 
         if (SetDataExpression != null)
         {
-            SetDataExpression =
-                (LambdaExpression)ChangeInputAndOutputNames(SetDataExpression);
+            SetDataExpression = (LambdaExpression)ChangeInputAndOutputNames(SetDataExpression);
             sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
         }
 

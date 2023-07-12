@@ -101,13 +101,13 @@ public class SubFunctionsTest
         [SubResumableFunction("SubFunction1")]
         public async IAsyncEnumerable<Wait> SubFunction1()
         {
-            yield return Wait<string, string>("M1", Method1).MatchAll();
+            yield return Wait<string, string>(Method1, "M1").MatchAll();
         }
 
         [SubResumableFunction("SubFunction2")]
         public async IAsyncEnumerable<Wait> SubFunction2()
         {
-            yield return Wait<string, string>("M2", Method2).MatchAll();
+            yield return Wait<string, string>(Method2, "M2").MatchAll();
         }
 
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
@@ -119,14 +119,14 @@ public class SubFunctionsTest
         [ResumableFunctionEntryPoint("FunctionAfterFirst")]
         public async IAsyncEnumerable<Wait> Test()
         {
-            yield return Wait<string, string>("M2", Method2);
+            yield return Wait<string, string>(Method2, "M2");
             yield return Wait("Wait sub function2", SubFunction2);
             await Task.Delay(100);
         }
         [SubResumableFunction("SubFunction2")]
         public async IAsyncEnumerable<Wait> SubFunction2()
         {
-            yield return Wait<string, string>("M3", Method3).MatchAll();
+            yield return Wait<string, string>(Method3, "M3").MatchAll();
         }
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
         [PushCall("Method3")] public string Method3(string input) => input + "M3";
@@ -143,7 +143,7 @@ public class SubFunctionsTest
         [SubResumableFunction("SubFunction")]
         public async IAsyncEnumerable<Wait> SubFunction()
         {
-            yield return Wait<string, string>("M1", Method1).MatchAll();
+            yield return Wait<string, string>(Method1, "M1").MatchAll();
         }
 
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";

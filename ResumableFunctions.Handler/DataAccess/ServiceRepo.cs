@@ -109,7 +109,7 @@ internal class ServiceRepo : IServiceRepo
         return await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assemblyName);
     }
 
-    public async Task AddErrorLog(Exception ex, string errorMsg, int errorCode = 0)
+    public async Task AddErrorLog(Exception ex, string errorMsg, int errorCode)
     {
         _logger.LogError(ex, errorMsg);
         _context.Logs.Add(new LogRecord
@@ -138,7 +138,7 @@ internal class ServiceRepo : IServiceRepo
         return newServiceData;
     }
 
-    public async Task AddLog(string msg, LogType logType = LogType.Info, int errorCode = 0)
+    public async Task AddLog(string msg, LogType logType, int errorCode)
     {
         _context.Logs.Add(new LogRecord
         {

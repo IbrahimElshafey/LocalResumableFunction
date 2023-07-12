@@ -97,6 +97,8 @@ namespace ResumableFunctions.Handler.InOuts
             }
         }
 
+        public CleanDatabaseSettings CleanDbSettings => new CleanDatabaseSettings();
+
         private void CreateEmptyHangfireDb(string hangfireDbName)
         {
             _connectionBuilder["Database"] = hangfireDbName;
@@ -111,11 +113,6 @@ namespace ResumableFunctions.Handler.InOuts
             {
                 //todo:log error
             }
-        }
-
-        public IResumableFunctionsSettings CleanDatabaseEvery(TimeSpan time)
-        {
-            return this;
         }
     }
 }

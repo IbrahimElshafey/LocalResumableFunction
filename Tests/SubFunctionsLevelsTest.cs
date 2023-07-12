@@ -62,21 +62,21 @@ public class SubFunctionsLevelsTest
         [SubResumableFunction("SubFunction1")]
         public async IAsyncEnumerable<Wait> SubFunction1()
         {
-            yield return Wait<string, string>("M1", Method1).MatchAll();
+            yield return Wait<string, string>(Method1, "M1").MatchAll();
             yield return Wait("Wait sub function2", SubFunction2);
         }
 
         [SubResumableFunction("SubFunction2")]
         public async IAsyncEnumerable<Wait> SubFunction2()
         {
-            yield return Wait<string, string>("M2", Method2).MatchAll();
+            yield return Wait<string, string>(Method2, "M2").MatchAll();
             yield return Wait("Wait sub function3", SubFunction3);
         }
 
         [SubResumableFunction("SubFunction3")]
         public async IAsyncEnumerable<Wait> SubFunction3()
         {
-            yield return Wait<string, string>("M2", Method3).MatchAll();
+            yield return Wait<string, string>(Method3, "M2").MatchAll();
         }
 
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";

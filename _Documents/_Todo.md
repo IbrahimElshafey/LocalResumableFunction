@@ -1,4 +1,6 @@
 ﻿# Working On Now
+* Delete Unused Template Siblings UI problem
+* Use same dll in two different services must be allowed
 * Background Cleaning Job
 * ResumableFunctions.Publisher
 

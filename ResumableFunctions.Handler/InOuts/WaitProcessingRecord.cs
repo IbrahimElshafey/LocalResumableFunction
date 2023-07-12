@@ -3,7 +3,6 @@
 public class WaitProcessingRecord : IEntityWithUpdate
 {
     public int Id { get; internal set; }
-    public PushedCall PushedCall { get; internal set; }//todo:remove
     public int PushedCallId { get; internal set; }
     public int WaitId { get; internal set; }
     public int? ServiceId { get; set; }

@@ -9,20 +9,20 @@ public class ReplayGoBackToExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> TestReplay_GoBackToGroup()
     {
         yield return
-            Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
+            Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         WriteMessage("Wait first manager of three to approve");
         yield return Wait(
             "Wait first approval in three managers",
-            new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerOneApproval == input.Decision),
-            new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerTwoApproval == input.Decision),
-            new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == input.Decision)
         ).First();
@@ -43,12 +43,12 @@ public class ReplayGoBackToExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> TestReplay_GoBackTo()
     {
         yield return
-            Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
+            Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
-        yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
+        yield return Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
             .SetData((input, output) => ManagerOneApproval == input.Decision);
 
@@ -67,12 +67,12 @@ public class ReplayGoBackToExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> TestReplay_GoBackToNewMatch()
     {
         yield return
-            Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
+            Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
-        yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
+        yield return Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
             .SetData((input, output) => ManagerOneApproval == input.Decision);
 

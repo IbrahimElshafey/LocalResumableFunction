@@ -37,7 +37,7 @@ namespace Tests
         [ResumableFunctionEntryPoint("Test")]
         public async IAsyncEnumerable<Wait> Test()
         {
-            yield return Wait<string, string>("Wait Method", MethodToWait)
+            yield return Wait<string, string>(MethodToWait, "Wait Method")
                 .MatchIf((input, output) => input.Length > 3)
                 .SetData((input, output) => MethodOutput == output);
             await Task.Delay(100);
@@ -58,7 +58,7 @@ namespace Tests
         public async IAsyncEnumerable<Wait> ExceptionAtStart()
         {
             throw new Exception("Can't get any wait");
-            yield return Wait<string, string>("Wait Method", MethodToWait)
+            yield return Wait<string, string>(MethodToWait, "Wait Method")
                 .MatchIf((input, output) => input.Length > 3);
             await Task.Delay(100);
         }

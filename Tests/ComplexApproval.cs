@@ -54,7 +54,7 @@ public class ComplexApproval
         public async IAsyncEnumerable<Wait> ComplexApproval()
         {
             yield return
-                Wait<string, int>("Request Added", RequestAdded)
+                Wait<string, int>(RequestAdded, "Request Added")
                     .SetData((request, requestId) => RequestId == requestId);
 
             for (; CurrentTopicIndex < TopicsCount; CurrentTopicIndex++)
@@ -75,7 +75,7 @@ public class ComplexApproval
         {
             AskMemberToApproveTopic(RequestId, CurrentTopicIndex, MemberRole.Chef);
             return
-                Wait<RequestTopicIndex, string>($"Chef Topic {CurrentTopicIndex} Approval", MemberApproveRequest)
+                Wait<RequestTopicIndex, string>(MemberApproveRequest, $"Chef Topic {CurrentTopicIndex} Approval")
                     .MatchIf((topicIndex, decision) =>
                         topicIndex.RequestId == RequestId &&
                         topicIndex.TopicIndex == CurrentTopicIndex &&
@@ -91,7 +91,7 @@ public class ComplexApproval
         private async Task<Wait> FinalApproval()
         {
             await AskChefToApproveRequest(RequestId);
-            return Wait<int, bool>("Chef Final Approval", ChefFinalApproval)
+            return Wait<int, bool>(ChefFinalApproval, "Chef Final Approval")
                 .MatchIf((requestId, decision) => requestId == RequestId)
                 .SetData((requestId, decision) => FinalDecision == decision);
         }
@@ -105,7 +105,7 @@ public class ComplexApproval
         private MethodWait ChefSkipTopic()
         {
             return Wait<RequestTopicIndex, string>
-                ($"Chef Skip Topic {CurrentTopicIndex} Approval", ChefSkipTopic)
+                (ChefSkipTopic, $"Chef Skip Topic {CurrentTopicIndex} Approval")
                 .MatchIf((topicIndex, decision) =>
                     topicIndex.RequestId == RequestId &&
                     topicIndex.TopicIndex == CurrentTopicIndex);
@@ -119,7 +119,7 @@ public class ComplexApproval
                 var currentMember = (MemberRole)memberIndex;
                 AskMemberToApproveTopic(RequestId, CurrentTopicIndex, currentMember);
                 waits[memberIndex] =
-                    Wait<RequestTopicIndex, string>($"{currentMember} Topic {CurrentTopicIndex} Approval", MemberApproveRequest)
+                    Wait<RequestTopicIndex, string>(MemberApproveRequest, $"{currentMember} Topic {CurrentTopicIndex} Approval")
                     .MatchIf((topicIndex, decision) =>
                         topicIndex.RequestId == RequestId &&
                         topicIndex.TopicIndex == CurrentTopicIndex &&

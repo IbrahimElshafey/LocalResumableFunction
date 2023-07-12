@@ -10,13 +10,13 @@ public class WaitSameEventAgain : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> Test_WaitSameEventAgain()
     {
         yield return
-            Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
+            Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
 
-        Wait ManagerApproval() => Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
+        Wait ManagerApproval() => Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
             .SetData((input, output) => ManagerOneApproval == input.Decision);
         yield return ManagerApproval();

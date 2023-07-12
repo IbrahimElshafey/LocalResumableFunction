@@ -12,13 +12,13 @@ namespace ReferenceLibrary
         public async IAsyncEnumerable<Wait> TestFunctionInDll()
         {
             yield return Wait<string, string>
-                ("Wait say hello", SayHello)
+                (SayHello, "Wait say hello")
                 .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
                 .SetData((userName, helloMsg) => UserName == userName)
                 //.NoSetData()
                 ;
             yield return Wait<string, string>
-               ("Wait say goodby", SayGoodby)
+               (SayGoodby, "Wait say goodby")
                .MatchIf((userName, helloMsg) => userName == UserName)
                .SetData((userName, helloMsg) => UserName == userName)
                //.NoSetData()

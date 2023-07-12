@@ -19,19 +19,21 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         _context = _scope.ServiceProvider.GetService<WaitsDataContext>();
     }
 
-    public async Task<WaitTemplate> AddNewTemplate(
-        WaitExpressionsHash hashResult,
+    public async Task<WaitTemplate> AddNewTemplate(ExpressionsHashCalculator hashResult,
         object currentFunctionInstance,
         int funcId,
         int groupId,
-        int methodId)
+        int methodId,
+        int inCodeLine)
     {
         var waitTemplate = new WaitTemplate
         {
             MethodId = methodId,
             FunctionId = funcId,
             MethodGroupId = groupId,
-            BaseHash = hashResult.Hash,
+            Hash = hashResult.Hash,
+            InCodeLine = inCodeLine,
+            IsActive = 1,
         };
 
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
@@ -45,13 +47,44 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         waitTemplate.SetDataExpression = setDataWriter.SetDataExpression;
 
         _context.WaitTemplates.Add(waitTemplate);
+
         await _context.SaveChangesAsync();
         return waitTemplate;
     }
 
+    public async Task DeactivateUnusedTemplateSiblings(WaitTemplate waitTemplate)
+    {
+        //todo:problem for waits in same group?
+        var templateSiblings =
+            await _context.WaitTemplates
+            .Where(template =>
+                template.MethodGroupId == waitTemplate.MethodGroupId &&
+                template.MethodId == waitTemplate.MethodId &&
+                template.FunctionId == waitTemplate.FunctionId &&
+                template.InCodeLine == waitTemplate.InCodeLine
+            )
+            .Select(x => x.Id)
+            .ToListAsync();
+        if (templateSiblings.Any())
+        {
+            var templatesToDelete =
+                templateSiblings.Except(
+                   await _context.MethodWaits
+                   .Where(mw =>
+                        mw.Status == WaitStatus.Waiting &&
+                        templateSiblings.Contains(mw.TemplateId))
+                   .Select(x => x.TemplateId)
+                   .Distinct()
+                   .ToListAsync());
+            await _context.WaitTemplates
+                .Where(template => templatesToDelete.Contains(template.Id))
+                .ExecuteUpdateAsync(x => x.SetProperty(x => x.IsActive, -1));
+        }
+    }
+
     public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
     {
-        var result = (await _context
+        var waitTemplate = (await _context
             .WaitTemplates
             .Select(WaitTemplate.InstanceMandatoryPartSelector)
             .Where(x =>
@@ -59,9 +92,17 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
                 x.FunctionId == funcId &&
                 x.ServiceId == _settings.CurrentServiceId)
             .ToListAsync())
-            .FirstOrDefault(x => x.BaseHash.SequenceEqual(hash));
-        result?.LoadExpressions();
-        return result;
+            .FirstOrDefault(x => x.Hash.SequenceEqual(hash));
+        if (waitTemplate != null)
+        {
+            waitTemplate.LoadExpressions();
+            if (waitTemplate.IsActive == -1)
+            {
+                waitTemplate.IsActive = 1;
+                await _context.SaveChangesAsync();
+            }
+        }
+        return waitTemplate;
     }
 
 
@@ -72,41 +113,19 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             .Where(template =>
                 template.FunctionId == functionId &&
                 template.MethodGroupId == methodGroupId &&
-                template.ServiceId == _settings.CurrentServiceId);
+                template.ServiceId == _settings.CurrentServiceId &&
+                template.IsActive == 1);
 
         var result = await
             waitTemplatesQry
+            .OrderByDescending(x => x.Id)
             .AsNoTracking()
             .ToListAsync();
 
         result.ForEach(x => x.LoadExpressions());
         return result;
     }
-    public async Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId)
-    {
-        var templateIds = await _context
-            .MethodWaits
-            .Where(x =>
-                x.Status == WaitStatus.Waiting &&
-                x.MethodGroupToWaitId == methodGroupId &&
-                x.ServiceId == _settings.CurrentServiceId)
-            .Select(x => x.TemplateId)
-            .Distinct()
-            .ToListAsync();
 
-        var waitTemplatesQry = _context
-            .WaitTemplates
-            .Select(WaitTemplate.CallMandatoryPartSelector)
-            .Where(x => templateIds.Contains(x.Id));
-
-        var result = await
-            waitTemplatesQry
-            .AsNoTracking()
-            .ToListAsync();
-
-        result.ForEach(x => x.LoadExpressions());
-        return result;
-    }
 
     public async Task<WaitTemplate> GetById(int templateId)
     {

@@ -15,13 +15,13 @@ public class TestWaitManyExample : ProjectApprovalExample
         };
         yield return Wait(
             "Wait three methods at start",
-            new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerOneApproval == output),
-            new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerTwoApproval == output),
-            new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).All();
@@ -33,19 +33,19 @@ public class TestWaitManyExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> WaitThreeMethod()
     {
         yield return
-            Wait<Project, bool>("Project Submitted in WaitThreeMethod", ProjectSubmitted)
+            Wait<Project, bool>(ProjectSubmitted, "Project Submitted in WaitThreeMethod")
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
         WriteMessage("Wait three managers to approve");
         yield return Wait(
             "Wait three methods",
-            new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerOneApproval == output),
-            new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerTwoApproval == output),
-            new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).All();
@@ -57,19 +57,19 @@ public class TestWaitManyExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> WaitManyAndGroupExpressionDefined()
     {
         yield return
-            Wait<Project, bool>("Project Submitted in WaitManyAndGroupExpressionDefined", ProjectSubmitted)
+            Wait<Project, bool>(ProjectSubmitted, "Project Submitted in WaitManyAndGroupExpressionDefined")
                 .MatchIf((input, output) => output == true)
                 .SetData((input, output) => CurrentProject == input);
         WriteMessage("Wait two of three managers to approve");
         yield return Wait(
             "Wait many with complex match expression",
-            new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerOneApproval == output),
-            new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerTwoApproval == output),
-            new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+            Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).When(waitGroup => waitGroup.CompletedCount == 2);

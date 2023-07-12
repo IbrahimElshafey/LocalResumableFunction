@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
-public class PushedCall : IEntityWithDelete, IOnSaveEntity
+public class PushedCall : IEntity, IOnSaveEntity
 {
     public int Id { get; internal set; }
     [NotMapped]
@@ -14,12 +14,9 @@ public class PushedCall : IEntityWithDelete, IOnSaveEntity
     public InputOutput Data { get; internal set; } = new();
     public byte[] DataValue { get; internal set; }
     public int? ServiceId { get; set; }
-    public List<WaitProcessingRecord> WaitsForCall { get; internal set; } = new();
 
     public DateTime Created { get; internal set; }
 
-    public bool IsDeleted { get; internal set; }
-    public int? TemplatesCount { get; internal set; }
 
     public void OnSave()
     {

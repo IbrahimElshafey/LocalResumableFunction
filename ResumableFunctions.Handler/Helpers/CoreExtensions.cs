@@ -27,13 +27,14 @@ public static class CoreExtensions
         ResolveDbInterfaces(services, settings);
 
         services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
-        services.AddScoped<IRecycleBinService, RecycleBinService>();
         services.AddScoped<IReplayWaitProcessor, ReplayWaitProcessor>();
         services.AddScoped<IWaitsProcessor, WaitsProcessor>();
         services.AddScoped<ICallProcessor, CallProcessor>();
         services.AddScoped<ICallPusher, CallPusher>();
+        services.AddScoped<ICleaningJob, CleaningJob>();
         services.AddScoped<Scanner>();
         services.AddScoped<BackgroundJobExecutor>();
+
 
 
 
@@ -65,6 +66,7 @@ public static class CoreExtensions
         services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
         services.AddScoped<IScanStateRepo, ScanStateRepo>();
         services.AddScoped<IPushedCallsRepo, PushedCallsRepo>();
+        services.AddScoped<IDatabaseCleaning, DatabaseCleaning>();
         services.AddScoped<IWaitProcessingRecordsRepo, WaitProcessingRecordsRepo>();
     }
 
@@ -79,8 +81,12 @@ public static class CoreExtensions
     {
         using var scope = app.Services.CreateScope();
         var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundProcess>();
+        
         var scanner = scope.ServiceProvider.GetService<Scanner>();
         backgroundJobClient.Enqueue(() => scanner.Start());
+        
+        var cleaningJob = scope.ServiceProvider.GetService<ICleaningJob>();
+        cleaningJob.ScheduleCleaningJob();
     }
 
 
@@ -242,8 +248,8 @@ public static class CoreExtensions
         return types.Contains(type);
     }
 
-    public static bool CanBeConstant(this object ob)=>
-        ob != null && ob.GetType().IsConstantType();
+    public static bool CanBeConstant(this object ob) =>
+        ob != null && (ob.GetType().IsConstantType() || ob.GetType().IsEnum);
 
     public static MethodInfo GetMethodInfo<T>(Expression<Func<T, object>> methodSelector) =>
         GetMethodInfoWithType(methodSelector).MethodInfo;

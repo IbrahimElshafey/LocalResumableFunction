@@ -9,7 +9,7 @@ public class TestTimeExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> TimeWaitTest()
     {
         yield return
-            Wait<Project, bool>("Project Submitted in TimeWaitTest", ProjectSubmitted)
+            Wait<Project, bool>(ProjectSubmitted, "Project Submitted in TimeWaitTest")
                 .MatchIf((input, output) => output == true)
                 .SetData((project, outputResult) => CurrentProject == project);
 
@@ -17,7 +17,7 @@ public class TestTimeExample : ProjectApprovalExample
         const string waitManagerOneApprovalInSeconds = "Wait manager one approval in 2 days";
         yield return Wait(
                 waitManagerOneApprovalInSeconds,
-                new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
+                Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .SetData((input, output) => ManagerOneApproval == output),
                 Wait(TimeSpan.FromDays(2), "Two Days")

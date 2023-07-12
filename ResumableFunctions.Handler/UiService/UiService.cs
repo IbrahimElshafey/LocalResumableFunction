@@ -5,7 +5,6 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
 using System;
 using System.Collections;
-using System.Diagnostics.Metrics;
 
 namespace ResumableFunctions.Handler.UiService
 {
@@ -151,7 +150,7 @@ namespace ResumableFunctions.Handler.UiService
         {
             return await _context
                 .Logs
-                .Where(x => x.Type != LogType.Info)
+                //.Where(x => x.Type != LogType.Info)
                 .OrderByDescending(x => x.Id)
                 .Skip(page * 100)
                 .Take(100)
