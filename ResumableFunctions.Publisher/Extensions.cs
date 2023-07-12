@@ -9,6 +9,7 @@ namespace ResumableFunctions.Publisher
     {
         public static void AddResumableFunctionsPublisher(this IServiceCollection services, IPublisherSettings settings)
         {
+            services.AddSingleton<IFailedRequestHandler, FailedRequestHandler>();
             services.AddSingleton(typeof(IPublisherSettings), settings);
             services.AddHttpClient();
             services.AddSingleton(typeof(ICallPublisher), settings.CallPublisherType);

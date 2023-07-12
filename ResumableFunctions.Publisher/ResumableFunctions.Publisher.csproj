@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspectInjector" Version="2.8.1" />
+    <PackageReference Include="LiteDB" Version="5.0.16" />
     <PackageReference Include="MessagePack" Version="2.5.108" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />

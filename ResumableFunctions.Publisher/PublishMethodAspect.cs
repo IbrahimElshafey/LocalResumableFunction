@@ -42,6 +42,8 @@ public class PublishMethodAspect
                 AssemblyName = "[External] " + Assembly.GetEntryAssembly()?.GetName().Name,
                 ClassName = metadata.DeclaringType.Name,
                 MethodName = metadata.Name,
+                //InputType = (metadata as MethodInfo).ReturnType.Name,
+                //OutputType = (metadata as MethodInfo).GetParameters()[0].ParameterType.Name
             },
             ServiceName = publishMethodAttribute.ToService
         };
