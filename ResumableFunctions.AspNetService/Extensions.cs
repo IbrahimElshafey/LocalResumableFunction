@@ -21,10 +21,10 @@ namespace ResumableFunctions.AspNetService
         }
 
         
-        public static void RegisterCurrentService(this WebApplication app)
+        public static void UseResumableFunctions(this WebApplication app)
         {
-           
-            app.UseResumableFunctions();
+
+            CoreExtensions.UseResumableFunctions(app);
             app.UseHangfireDashboard();
             app.MapRazorPages();
             app.UseStaticFiles();

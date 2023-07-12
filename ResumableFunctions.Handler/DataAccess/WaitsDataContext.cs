@@ -21,7 +21,6 @@ internal sealed class WaitsDataContext : DbContext
         try
         {
             var database = Database.GetDbConnection().Database;
-            settings.CurrentDbName = database;
             using var loc = lockProvider.AcquireLock(database);
             Database.EnsureCreated();
         }

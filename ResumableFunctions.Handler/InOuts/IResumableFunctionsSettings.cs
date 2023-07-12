@@ -15,7 +15,7 @@ namespace ResumableFunctions.Handler.InOuts
         public string[] DllsToScan { get; }
 
         public bool ForceRescan { get; set; }
-        string CurrentDbName { get; set; }
+        string CurrentDbName { get; }
 
         CleanDatabaseSettings CleanDbSettings { get; }
     }

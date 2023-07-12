@@ -43,6 +43,7 @@ namespace ResumableFunctions.Handler.InOuts
         private void SetWaitsDbConfig(string waitsDbName)
         {
             waitsDbName ??= "ResumableFunctionsData";
+            CurrentDbName = waitsDbName;
             _connectionBuilder["Database"] = waitsDbName;
             WaitsDbConfig = new DbContextOptionsBuilder().UseSqlServer(_connectionBuilder.ConnectionString);
         }
@@ -50,11 +51,11 @@ namespace ResumableFunctions.Handler.InOuts
         private void SetHangfireConfig(string dbName)
         {
             var hangfireDbName = dbName ?? $"{Assembly.GetEntryAssembly().GetName().Name}_HangfireDb".Replace(".", "_");
-            
+
             CreateEmptyHangfireDb(hangfireDbName);
-            
+
             _connectionBuilder["Database"] = hangfireDbName;
-           
+
             HangfireConfig = GlobalConfiguration
                 .Configuration
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
@@ -97,7 +98,8 @@ namespace ResumableFunctions.Handler.InOuts
             }
         }
 
-        public CleanDatabaseSettings CleanDbSettings => new CleanDatabaseSettings();
+        private CleanDatabaseSettings _cleanDbSettings = new CleanDatabaseSettings();
+        public CleanDatabaseSettings CleanDbSettings => _cleanDbSettings;
 
         private void CreateEmptyHangfireDb(string hangfireDbName)
         {

@@ -13,7 +13,7 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-app.RegisterCurrentService();
+app.UseResumableFunctions();
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();

@@ -19,7 +19,7 @@ builder.Services.AddScoped<IClientOnboardingService, ClientOnboardingService>();
 //builder.Services.AddScoped<ClientOnboardingWorkflow>();
 
 var app = builder.Build();
-app.RegisterCurrentService();
+app.UseResumableFunctions();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

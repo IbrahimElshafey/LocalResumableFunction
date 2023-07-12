@@ -40,7 +40,7 @@ public static class CoreExtensions
 
         services.AddHttpClient();
         services.AddSingleton<HangfireHttpClient>();
-        services.AddSingleton(typeof(IResumableFunctionsSettings), settings);
+        services.AddSingleton(settings);
         services.AddSingleton(settings.DistributedLockProvider);
 
 

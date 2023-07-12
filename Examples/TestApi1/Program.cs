@@ -6,9 +6,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 var settings = new SqlServerResumableFunctionsSettings();
-settings.CleanDbSettings.CompletedInstanceRetention = TimeSpan.FromSeconds(1);
-settings.CleanDbSettings.DeactivatedWaitTemplateRetention = TimeSpan.FromSeconds(1);
-settings.CleanDbSettings.PushedCallRetention = TimeSpan.FromSeconds(1);
+//settings.CleanDbSettings.CompletedInstanceRetention = TimeSpan.FromSeconds(3);
+//settings.CleanDbSettings.DeactivatedWaitTemplateRetention = TimeSpan.FromSeconds(3);
+//settings.CleanDbSettings.PushedCallRetention = TimeSpan.FromSeconds(3);
+//builder.Configuration.
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
@@ -22,7 +23,7 @@ builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
-app.RegisterCurrentService();
+app.UseResumableFunctions();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

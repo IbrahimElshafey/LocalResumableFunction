@@ -29,7 +29,7 @@ namespace ResumableFunctions.Handler.DataAccess
 
             var instanceIds =
                 await _context.FunctionStates
-                .Where(instance => instance.Status == FunctionStatus.Completed && instance.Modified > dateThreshold)
+                .Where(instance => instance.Status == FunctionStatus.Completed && instance.Modified < dateThreshold)
                 .Select(x => x.Id)
                 .ToListAsync();
             int count = 0;
@@ -64,7 +64,7 @@ namespace ResumableFunctions.Handler.DataAccess
             var dateThreshold = DateTime.Now.Subtract(_setting.CleanDbSettings.PushedCallRetention);
             var count =
                 await _context.PushedCalls
-                .Where(instance => instance.Created > dateThreshold)
+                .Where(instance => instance.Created < dateThreshold)
                 .ExecuteDeleteAsync();
             await AddLog($"Delete `{count}` old pushed calls.");
         }
@@ -107,7 +107,7 @@ namespace ResumableFunctions.Handler.DataAccess
             await AddLog("Start to delete deactivated wait templates.");
             var dateThreshold = DateTime.Now.Subtract(_setting.CleanDbSettings.DeactivatedWaitTemplateRetention);
             var count = await _context.WaitTemplates
-                .Where(template => template.IsActive == -1 && template.DeactivationDate > dateThreshold)
+                .Where(template => template.IsActive == -1 && template.DeactivationDate < dateThreshold)
                 .ExecuteDeleteAsync();
             await AddLog($"Delete `{count}` deactivated wait templates done.");
         }
