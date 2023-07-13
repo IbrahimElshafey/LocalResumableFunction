@@ -1,4 +1,4 @@
-﻿namespace ResumableFunctions.Publisher
+﻿namespace ResumableFunctions.Publisher.InOuts
 {
     public class FailedRequest
     {

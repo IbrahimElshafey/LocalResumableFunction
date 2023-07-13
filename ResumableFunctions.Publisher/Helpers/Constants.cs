@@ -1,4 +1,4 @@
-﻿namespace ResumableFunctions.Publisher
+﻿namespace ResumableFunctions.Publisher.Helpers
 {
     public static class Constants
     {

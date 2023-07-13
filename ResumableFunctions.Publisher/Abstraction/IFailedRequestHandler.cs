@@ -1,4 +1,6 @@
-﻿namespace ResumableFunctions.Publisher
+﻿using ResumableFunctions.Publisher.InOuts;
+
+namespace ResumableFunctions.Publisher.Abstraction
 {
     public interface IFailedRequestHandler
     {

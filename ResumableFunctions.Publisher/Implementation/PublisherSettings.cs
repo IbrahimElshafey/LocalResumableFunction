@@ -1,4 +1,6 @@
-﻿namespace ResumableFunctions.Publisher
+﻿using ResumableFunctions.Publisher.Abstraction;
+
+namespace ResumableFunctions.Publisher.Implementation
 {
     public class PublisherSettings : IPublisherSettings
     {
@@ -7,7 +9,7 @@
         {
             ServicesRegistry = servicesRegistry;
             if (checkFailedRequestEvery != default)
-                _checkFailedRequestEvery = checkFailedRequestEvery;
+                CheckFailedRequestEvery = checkFailedRequestEvery;
         }
 
 
@@ -15,7 +17,6 @@
 
         public Dictionary<string, string> ServicesRegistry { get; }
 
-        private TimeSpan _checkFailedRequestEvery = TimeSpan.FromMinutes(30);
-        public TimeSpan CheckFailedRequestEvery => _checkFailedRequestEvery;
+        public TimeSpan CheckFailedRequestEvery { get; } = TimeSpan.FromMinutes(30);
     }
 }

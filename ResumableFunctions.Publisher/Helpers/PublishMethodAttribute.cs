@@ -1,6 +1,6 @@
 ﻿using AspectInjector.Broker;
 
-namespace ResumableFunctions.Publisher;
+namespace ResumableFunctions.Publisher.Helpers;
 
 /// <summary>
 ///     Add this to the method you want to 

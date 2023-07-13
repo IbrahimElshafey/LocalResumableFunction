@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
-namespace ResumableFunctions.Publisher
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using ResumableFunctions.Publisher.Abstraction;
+using ResumableFunctions.Publisher.Implementation;
+
+namespace ResumableFunctions.Publisher.Helpers
 {
     public static class Extensions
     {

@@ -1,9 +1,11 @@
 ﻿using MessagePack.Resolvers;
 using MessagePack;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Publisher.Abstraction;
+using ResumableFunctions.Publisher.Helpers;
 using ResumableFunctions.Publisher.InOuts;
 
-namespace ResumableFunctions.Publisher
+namespace ResumableFunctions.Publisher.Implementation
 {
     public class HttpCallPublisher : ICallPublisher
     {

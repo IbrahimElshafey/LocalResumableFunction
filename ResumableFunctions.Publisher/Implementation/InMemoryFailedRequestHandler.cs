@@ -1,8 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using ResumableFunctions.Publisher.InOuts;
 using System.Collections.Concurrent;
+using ResumableFunctions.Publisher.Abstraction;
 
-namespace ResumableFunctions.Publisher
+namespace ResumableFunctions.Publisher.Implementation
 {
     internal class InMemoryFailedRequestHandler : IFailedRequestHandler
     {
