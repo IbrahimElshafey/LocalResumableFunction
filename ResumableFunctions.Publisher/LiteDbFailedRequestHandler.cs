@@ -37,7 +37,7 @@
 //            }
 //        }
 
-//        public void HandleFailedRequestes()
+//        public void HandleFailedRequests()
 //        {
 //            _ = CallFailedRequests();
 //            async Task CallFailedRequests()

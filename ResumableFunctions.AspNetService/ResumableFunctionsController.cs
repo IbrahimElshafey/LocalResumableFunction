@@ -49,8 +49,8 @@ namespace ResumableFunctions.AspNetService
             {
                 var body = await Request.BodyReader.ReadAsync();
                 var bytes = body.Buffer.ToArray();
-                var serialzer = new BinaryToObjectConverter();
-                var externalCall = serialzer.ConvertToObject<ExternalCallArgs>(bytes);
+                var serializer = new BinaryToObjectConverter();
+                var externalCall = serializer.ConvertToObject<ExternalCallArgs>(bytes);
                 if (externalCall == null)
                     throw new ArgumentNullException(nameof(externalCall));
                 var pushedCall = new PushedCall

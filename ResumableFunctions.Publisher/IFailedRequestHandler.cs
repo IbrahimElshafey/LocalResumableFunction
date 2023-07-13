@@ -3,6 +3,6 @@
     public interface IFailedRequestHandler
     {
         void AddFailedRequest(FailedRequest failedRequest);
-        void HandleFailedRequestes();
+        void HandleFailedRequests();
     }
 }
