@@ -2,7 +2,7 @@
 {
     public class FailedRequest
     {
-        public int Id { get; internal set; }
+        public Guid Id { get; internal set; }
         public string ActionUrl { get; internal set; }
         public byte[] Body { get; internal set; }
         public DateTime Created { get; internal set; }

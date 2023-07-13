@@ -2,9 +2,6 @@
 using MessagePack;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Publisher.InOuts;
-using System.Net.Http.Json;
-using static System.Net.Mime.MediaTypeNames;
-using LiteDB;
 
 namespace ResumableFunctions.Publisher
 {
