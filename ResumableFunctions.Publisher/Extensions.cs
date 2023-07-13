@@ -18,6 +18,8 @@ namespace ResumableFunctions.Publisher
         public static void UseResumableFunctionsPublisher(this IHost app)
         {
             PublishMethodAspect.ServiceProvider = app.Services;
+            var failedRequestsHandler = app.Services.GetService<IFailedRequestHandler>();
+            failedRequestsHandler.HandleFailedRequestes();
         }
 
         public static bool IsAsyncMethod(this MethodBase method)

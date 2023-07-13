@@ -2,10 +2,11 @@
 {
     public class FailedRequest
     {
-        public int Id { get; set; }
-        public string ActionUrl { get; set; }
-        public byte[] Body { get; set; }
-        public DateTime Created { get; set; }
-        public int AttemptsCount { get; set; }
+        public int Id { get; internal set; }
+        public string ActionUrl { get; internal set; }
+        public byte[] Body { get; internal set; }
+        public DateTime Created { get; internal set; }
+        public int AttemptsCount { get; internal set; } = 1;
+        public DateTime LastAttemptDate { get; internal set; }
     }
 }

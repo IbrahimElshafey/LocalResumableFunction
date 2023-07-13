@@ -59,8 +59,8 @@ namespace ResumableFunctions.Publisher
                 var response = await client.PostAsync(actionUrl, new ByteArrayContent(body));
                 response.EnsureSuccessStatusCode();
                 var result = await response.Content.ReadAsStringAsync();
-                //result may be 1 or -1
-                //todo:[publisher] queue failed requests to be processed later here and in the below exception
+                if (!(result == "1" || result == "-1"))
+                    throw new Exception("Expected result must be 1 or -1");
             }
             catch (Exception ex)
             {
