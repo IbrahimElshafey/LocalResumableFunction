@@ -12,7 +12,6 @@
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Commands.md" />
     <None Include="$(MSBuildThisFileDirectory)Documentation_Plan.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\External Reading.md" />
-    <None Include="$(MSBuildThisFileDirectory)LongMethods.xlsx" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Aggregate Column Idea.md" />
     <None Include="$(MSBuildThisFileDirectory)Publisher.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Write Ahead Log.md" />

@@ -19,9 +19,12 @@ public class WaitProcessingRecord : IEntityWithUpdate
 
     public override bool Equals(object obj)
     {
-        if (obj is WaitProcessingRecord wfc)
+        if (obj is WaitProcessingRecord waitProcessingRecord)
         {
-            return wfc.WaitId == WaitId && wfc.FunctionId == FunctionId && wfc.StateId == StateId;
+            return 
+                waitProcessingRecord.WaitId == WaitId &&
+                waitProcessingRecord.FunctionId == FunctionId &&
+                waitProcessingRecord.StateId == StateId;
         }
         return base.Equals(obj);
     }

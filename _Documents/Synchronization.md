@@ -1,6 +1,5 @@
 ﻿# Concurrency Scenarios
-* Push call at same time [done]
-* Update [dbo].[WaitsForCalls] row
+* Update [dbo].[WaitProcessingRecord] row
 * [dbo].[MethodIdentifiers] is updatable
 * Different services may try to add same MethodGroup at same time 
 	* Uniqe index exception handel

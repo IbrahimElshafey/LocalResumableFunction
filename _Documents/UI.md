@@ -1,11 +1,11 @@
 ﻿# UI project
 * Tables problem on small screens
-* Wait templates for method group
+* Filters and search in all views
 * Services View
 	* Add Other Errors View
-	* Add Scan Overview View
+	* Add Scan Status View
 	* Wait Status InError not shown in views
-* Filters and search in all views
+* Wait templates for method group
 	
 
 

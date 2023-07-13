@@ -100,17 +100,28 @@ internal class MethodIdsRepo : IMethodIdsRepo
 
         var toAdd = new WaitMethodIdentifier();
         toAdd.FillFromMethodData(methodData);
-        var isChildAdd = methodGroup != null;
 
+        var isChildAdd = methodGroup != null;
         if (isChildAdd)
+            AddMethodIdToGroup();
+        else
+            await CreateNewMethodGroup();
+
+        string ErrorTemplate(string propName, bool propValue) =>
+            $"Error When register method {methodData.MethodName}," +
+            $"Method group `{methodGroup.MethodGroupUrn}` property {propName} was `{propValue}` and can't be changed";
+
+        void AddMethodIdToGroup()
         {
             if (methodGroup.IsLocalOnly != methodData.IsLocalOnly)
-                throw new Exception(ErrorTemplate(nameof(MethodsGroup.IsLocalOnly),methodGroup.IsLocalOnly));
+                throw new Exception(ErrorTemplate(nameof(MethodsGroup.IsLocalOnly), methodGroup.IsLocalOnly));
             if (methodGroup.CanPublishFromExternal != methodData.CanPublishFromExternal)
-                throw new Exception(ErrorTemplate(nameof(MethodsGroup.CanPublishFromExternal), methodGroup.CanPublishFromExternal));
+                throw new Exception(ErrorTemplate(nameof(MethodsGroup.CanPublishFromExternal),
+                    methodGroup.CanPublishFromExternal));
             methodGroup.WaitMethodIdentifiers?.Add(toAdd);
         }
-        else
+
+        async Task CreateNewMethodGroup()
         {
             var group = new MethodsGroup
             {
@@ -122,11 +133,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
             _context.MethodsGroups.Add(group);
             await _context.SaveChangesAsync();
         }
-        string ErrorTemplate(string propName, bool propValue) =>
-            $"Error When register method {methodData.MethodName}," +
-            $"Method group `{methodGroup.MethodGroupUrn}` property {propName} was `{propValue}` and can't be changed";
     }
-
 
 
     public async Task<(int MethodId, int GroupId)> GetId(MethodWait methodWait)

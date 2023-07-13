@@ -1,5 +1,4 @@
-﻿
-# Refactor
+﻿# Refactor
 * Refactor long methods
 * Optimize wait table indexes to enable fast wait insertion
 	* Remove index 
@@ -8,6 +7,7 @@
 * Use IMaterializationInterceptor to set entity dependencies [Bad Practice as I think]
 
 # Enhancements
+* Use same dll in two different services must be allowed
 * Use RequestedByFunctionId prop in TimeWaitInput to refine match for time waits
 * Message Pack private setter props serialization
 * Services Registry is separate
@@ -40,3 +40,10 @@
 	* WaitForCalls
 	* Logs
 * Localization
+
+# Later Versions
+* UI V2
+* Roslyn Analyzer
+* Auto-generate code for test
+* Performance Monitoring
+* How to migrate to the new version
