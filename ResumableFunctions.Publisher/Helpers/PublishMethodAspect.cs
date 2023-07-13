@@ -1,10 +1,11 @@
-﻿using AspectInjector.Broker;
+﻿using System.Reflection;
+using AspectInjector.Broker;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Publisher.Abstraction;
 using ResumableFunctions.Publisher.InOuts;
-using System.Reflection;
 
-namespace ResumableFunctions.Publisher;
+namespace ResumableFunctions.Publisher.Helpers;
 
 [Aspect(Scope.PerInstance)]
 public class PublishMethodAspect
@@ -42,6 +43,8 @@ public class PublishMethodAspect
                 AssemblyName = "[External] " + Assembly.GetEntryAssembly()?.GetName().Name,
                 ClassName = metadata.DeclaringType.Name,
                 MethodName = metadata.Name,
+                //InputType = (metadata as MethodInfo).ReturnType.Name,
+                //OutputType = (metadata as MethodInfo).GetParameters()[0].ParameterType.Name
             },
             ServiceName = publishMethodAttribute.ToService
         };

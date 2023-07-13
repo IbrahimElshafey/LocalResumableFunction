@@ -1,4 +1,6 @@
 using ResumableFunctions.Publisher;
+using ResumableFunctions.Publisher.Helpers;
+using ResumableFunctions.Publisher.Implementation;
 
 namespace TestPublisherApi;
 
@@ -18,7 +20,8 @@ internal class Program
             new PublisherSettings(new() {
                 { "TestApi1", "https://localhost:7140/" },
                 { "TestApi2", "https://localhost:7099/" },
-            }));
+            },
+            checkFailedRequestEvery: TimeSpan.FromSeconds(10)));
 
         var app = builder.Build();
         // Configure the HTTP request pipeline.

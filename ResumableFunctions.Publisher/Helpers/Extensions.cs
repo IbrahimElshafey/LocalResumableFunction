@@ -1,14 +1,18 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.CompilerServices;
-using Microsoft.Extensions.Http;
-namespace ResumableFunctions.Publisher
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using ResumableFunctions.Publisher.Abstraction;
+using ResumableFunctions.Publisher.Implementation;
+
+namespace ResumableFunctions.Publisher.Helpers
 {
     public static class Extensions
     {
         public static void AddResumableFunctionsPublisher(this IServiceCollection services, IPublisherSettings settings)
         {
+            //services.AddSingleton<IFailedRequestHandler, LiteDbFailedRequestHandler>();
+            services.AddSingleton<IFailedRequestHandler, InMemoryFailedRequestHandler>();
             services.AddSingleton(typeof(IPublisherSettings), settings);
             services.AddHttpClient();
             services.AddSingleton(typeof(ICallPublisher), settings.CallPublisherType);
@@ -17,6 +21,8 @@ namespace ResumableFunctions.Publisher
         public static void UseResumableFunctionsPublisher(this IHost app)
         {
             PublishMethodAspect.ServiceProvider = app.Services;
+            var failedRequestsHandler = app.Services.GetService<IFailedRequestHandler>();
+            failedRequestsHandler.HandleFailedRequests();
         }
 
         public static bool IsAsyncMethod(this MethodBase method)

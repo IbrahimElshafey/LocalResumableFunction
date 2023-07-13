@@ -15,6 +15,7 @@
     <None Include="$(MSBuildThisFileDirectory)LongMethods.xlsx" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Aggregate Column Idea.md" />
     <None Include="$(MSBuildThisFileDirectory)Publisher.md" />
+    <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Write Ahead Log.md" />
     <None Include="$(MSBuildThisFileDirectory)Testing.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\MVC_Use.md" />
     <None Include="$(MSBuildThisFileDirectory)Background_Cleaning_Job.md" />
@@ -26,8 +27,5 @@
     <None Include="$(MSBuildThisFileDirectory)Other_Wait_Types.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md" />
     <None Include="$(MSBuildThisFileDirectory)_Todo.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Reading and Ideas\" />
   </ItemGroup>
 </Project>

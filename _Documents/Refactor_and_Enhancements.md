@@ -5,9 +5,11 @@
 	* Remove index 
 		* [ParentWaitId] in [dbo].[Waits]
 * Replace HangfireHttpClient with abstraction to enable queue based communication between services
-* Use IMaterializationInterceptor to set entity dependencies
+* Use IMaterializationInterceptor to set entity dependencies [Bad Practice as I think]
 
 # Enhancements
+* Use RequestedByFunctionId prop in TimeWaitInput to refine match for time waits
+* Message Pack private setter props serialization
 * Services Registry is separate
 * Pushed Call is separate
 * Security and IUserContext

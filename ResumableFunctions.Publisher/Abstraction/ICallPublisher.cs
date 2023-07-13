@@ -1,6 +1,6 @@
 ﻿using ResumableFunctions.Publisher.InOuts;
 
-namespace ResumableFunctions.Publisher
+namespace ResumableFunctions.Publisher.Abstraction
 {
     public interface ICallPublisher
     {

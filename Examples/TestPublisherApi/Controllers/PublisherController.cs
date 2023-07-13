@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ResumableFunctions.Publisher;
+using ResumableFunctions.Publisher.Helpers;
 
 namespace TestPublisherApi.Controllers
 {

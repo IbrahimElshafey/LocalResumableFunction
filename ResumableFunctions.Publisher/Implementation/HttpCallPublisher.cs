@@ -1,23 +1,29 @@
 ﻿using MessagePack.Resolvers;
 using MessagePack;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Publisher.Abstraction;
+using ResumableFunctions.Publisher.Helpers;
 using ResumableFunctions.Publisher.InOuts;
-using System.Net.Http.Json;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace ResumableFunctions.Publisher
+namespace ResumableFunctions.Publisher.Implementation
 {
     public class HttpCallPublisher : ICallPublisher
     {
         private readonly IPublisherSettings _settings;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<HttpCallPublisher> _logger;
+        private readonly IFailedRequestHandler _failedRequestHandler;
 
-        public HttpCallPublisher(IPublisherSettings settings, IHttpClientFactory httpClientFactory, ILogger<HttpCallPublisher> logger)
+        public HttpCallPublisher(
+            IPublisherSettings settings,
+            IHttpClientFactory httpClientFactory,
+            ILogger<HttpCallPublisher> logger,
+            IFailedRequestHandler failedRequestHandler)
         {
             _settings = settings;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
+            _failedRequestHandler = failedRequestHandler;
         }
 
         public async Task Publish<TInput, TOutput>(Func<TInput, Task<TOutput>> methodToPush,
@@ -37,23 +43,28 @@ namespace ResumableFunctions.Publisher
 
         public async Task Publish(MethodCall methodCall)
         {
+            var failedRequest = new FailedRequest();
             try
             {
                 var serviceUrl = _settings.ServicesRegistry[methodCall.ServiceName];
                 var actionUrl =
                     $"{serviceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ExternalCallAction}";
+                failedRequest.ActionUrl = actionUrl;
+
                 var body = MessagePackSerializer.Serialize(methodCall, ContractlessStandardResolver.Options);
-                //create a System.Net.Http.MultiPartFormDataContent
+                failedRequest.Body = body;
+
                 var client = _httpClientFactory.CreateClient();
                 var response = await client.PostAsync(actionUrl, new ByteArrayContent(body));
                 response.EnsureSuccessStatusCode();
                 var result = await response.Content.ReadAsStringAsync();
-                //result may be 1 or -1
-                //todo:[publisher] queue failed requests to be processed later here and in the below exception
+                if (!(result == "1" || result == "-1"))
+                    throw new Exception("Expected result must be 1 or -1");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error occured when publish method call {methodCall}");
+                _logger.LogError(ex, $"Error occurred when publish method call {methodCall}");
+                _failedRequestHandler.AddFailedRequest(failedRequest);
             }
 
         }
