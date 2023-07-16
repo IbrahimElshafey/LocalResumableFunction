@@ -5,6 +5,7 @@ using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using System.Reflection;
 using System.Threading;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -58,14 +59,25 @@ namespace ResumableFunctions.Handler.Core
         {
             try
             {
+                var currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
+                if (serviceName != currentServiceName)
+                {
+                    await _serviceRepo.AddErrorLog(
+                        null,
+                        $"Pushed call target service `{serviceName}` but the current service is `{currentServiceName}`" +
+                        $"\nPushed call was `{pushedCall}`", 
+                        StatusCodes.PushedCall);
+                    return -1;
+                }
+
                 var methodUrn = pushedCall.MethodData.MethodUrn;
                 if (await _methodIdsRepo.CanPublishFromExternal(methodUrn))
                     return await PushCall(pushedCall);
-                var errorMsg =
-                    $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}]." +
-                    $"\nPushed call was `{pushedCall}`";
-                _logger.LogError(errorMsg);
-                await _serviceRepo.AddLog(errorMsg, LogType.Warning, StatusCodes.PushedCall);
+
+                await _serviceRepo.AddLog(
+                    $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}].\nPushed call was `{pushedCall}`",
+                    LogType.Warning,
+                    StatusCodes.PushedCall);
                 return -1;
             }
             catch (Exception ex)
