@@ -2,5 +2,6 @@
 * Update readme
 * UI Docs
 * Distributed Services and Resumable Function
-* Samples Update
+* Update sample to be more complex
+* Repo Samples Update
 * How to test your resumable functions?

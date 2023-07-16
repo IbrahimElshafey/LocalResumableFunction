@@ -3,13 +3,16 @@
 * Filters and search in all views
 * Services View
 	* Add Other Errors View
+		* Functions that have not start wait
+		* 
 	* Add Scan Status View
 	* Wait Status InError not shown in views
-* Wait templates for method group
+
 	
 
 
 # UI Actions [Will be in UI v2]
+* Wait templates for method group
 * Actions on Wait 
 	* Cancel (If Waiting)
 	* Replay Go To (If Completed/Canceled)

@@ -1,5 +1,5 @@
 **Project Status: Work in progress [here](https://github.com/IbrahimElshafey/ResumableFunctions/tree/main/_Documents)**
-* [What are Resumable Functions?](#what-are-resumable-functions)
+* [What are Resumable Functions?](#what-are-resumable-function)
 * [Why this project?](#why-this-project)
 * [Example](#example)
 * [**Start using the library NuGet package**](#start-using-the-library)
@@ -45,17 +45,17 @@ internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
 # Why this project?
 Server processing depends on fast response times for efficient use of processor and memory. This means that we can't write a single block of code (a method) that uses two or more long-running actions in the same code block. For example, we can't translate the following pseudocode into a single block of code:
 ```
-	VactionRequest()
-		when UserSubmitRequest();
-		SendRequestToManager();
-		wait ManagerResponse();
-		DoSomeStuffAfterManagerResponse();
+VactionRequest()
+    when UserSubmitRequest();
+    SendRequestToManager();
+    wait ManagerResponse();
+    DoSomeStuffAfterManagerResponse();
 ```
 We want to write code that reflects the business requirements so that a developer can hand it off to another developer without needing business documents to understand the code. The source code must be a source of truth about how project parts function. Handing off a project with hundreds of classes and methods to a new developer doesn't tell them how business flows, but a resumable function will simplify understanding of what happens under the hood.
 
 Business functions/methods must not call each other directly. For example, the method that submits a user request should not call the manager approval method directly. A traditional solution is to create Pub/Sub services that enable the system to be loosely coupled. However, if we used Pub/Sub loosely coupled services, it would be hard to trace what happened without implementing a complex architecture.
 
-This project aims to solve the above problems by using resumable functions. Resumable functions are functions that can be paused and resumed later. This allows us to write code that reflects the business requirements without sacrificing performance. It also makes the source code a source of truth about how project parts function, and it makes it easier for new developers to understand the code.
+This project aims to solve the above problems by using resumable functions. Resumable functions are functions that can be paused and resumed later. This allows us to write code that reflects the business requirements without sacrificing readability. It makes it easier to write distributed systems that are easy to understood when reading the source code.
 
 This project makes resumable functions a reality.
 
