@@ -1,3 +1,2 @@
 ﻿# Tables that must be cleanded
-* Delete unused Method Identifires 
-	* Not exist in code
+Delete unused Method Identifiers that do not exist in the code anymore.
