@@ -1,13 +1,20 @@
 ﻿# UI project
 * Tables problem on small screens
-* Filters and search in all views
 * Services View
-	* Add Other Errors View
-		* Functions that have not start wait
-		* 
-	* Add Scan Status View
-	* Wait Status InError not shown in views
-
+	* Review First wait registration error
+	* Add Scan Status To Services View
+* Wait Status InError not shown in views
+* Add service Id fliter to
+	* Resumable Functions
+	* Method Groups
+	* Pushed Calls
+	* Logs
+* Drop down with search for URNs in:
+	* Pushed Calls view
+	* Method Groups view
+	* Resumable Functions 
+* In Method Groups add link for pushed call for each group
+* Review Log for WaitProcessor
 	
 
 

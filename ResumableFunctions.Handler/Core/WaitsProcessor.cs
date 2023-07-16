@@ -72,7 +72,7 @@ namespace ResumableFunctions.Handler.Core
                 async () =>
                 {
                     _pushedCall = await LoadPushedCall(pushedCallId);
-                    var waitTemplates = await _templatesRepo.GetWaitTemplates(methodGroupId, functionId);
+                    var waitTemplates = await _templatesRepo.GetWaitTemplatesForFunction(methodGroupId, functionId);
                     var matchExist = false;
                     if (waitTemplates == null)
                         return;
@@ -271,10 +271,14 @@ namespace ResumableFunctions.Handler.Core
                 } while (currentWait != null);
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _methodWait.FunctionState.AddError(
+                  $"Exception occurred when try to resume execution after [{_methodWait.Name}].",
+                  //$"\nProcessing this wait will be scheduled.",
+                  StatusCodes.WaitProcessing, ex);
                 await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionFailed);
-                throw;
+                return false;
             }
             await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionSuccessed);
             return true;
