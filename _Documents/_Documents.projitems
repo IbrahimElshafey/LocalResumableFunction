@@ -9,8 +9,11 @@
     <Import_RootNamespace>_Documents</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Distributed_Services and_Resumable_Function.md" />
-    <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Resumable_Functions_UI.md" />
+    <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Testing.md" />
+    <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Configuration.md" />
+    <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Distributed_Services_and_Resumable_Function.md" />
+    <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Resumable_Functions_UI - Copy.md" />
+    <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Cleaning_Job.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Commands.md" />
     <None Include="$(MSBuildThisFileDirectory)Documentation_Plan.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\External Reading.md" />

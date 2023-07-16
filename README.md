@@ -3,9 +3,12 @@
 * [Why this project?](#why-this-project)
 * [Example](#example)
 * [**Start using the library NuGet package**](#start-using-the-library)
-* [Supported wait types and other features](#supported-wait-types)
-* [Distributed Services and Resumable Function](#distributed-services-and-resumable-function)
-* [Resumable Functions UI](#resumable-functions-ui)
+* [Supported Wait Types](#supported-wait-types)
+* [Resumable Functions UI](#https://github.com/IbrahimElshafey/ResumableFunctions/blob/main/_Documents/GitHubDocs/Resumable_Functions_UI.md)
+* [Distributed Services and Resumable Function](#https://github.com/IbrahimElshafey/ResumableFunctions/blob/main/_Documents/GitHubDocs/Distributed_Services_and_Resumable_Function.md)
+* [How to test your resumable functions?](#https://github.com/IbrahimElshafey/ResumableFunctions/blob/main/_Documents/GitHubDocs/Testing.md)
+* [Configuration](#https://github.com/IbrahimElshafey/ResumableFunctions/blob/main/_Documents/GitHubDocs/Configuration.md)
+* [Database Cleaning Job](#https://github.com/IbrahimElshafey/ResumableFunctions/blob/main/_Documents/GitHubDocs/Cleaning_Job.md)
 * [Samples](https://github.com/IbrahimElshafey/ResumableFunctionsSamples)
 * [How it works internally](#how-it-works-internally)
 # What Are Resumable Function?
@@ -230,8 +233,8 @@ public async IAsyncEnumerable<Wait> WaitTwoManagers()
 	.
 ```
 * `SubResumableFunction` Can wait another `SubResumableFunction` 
-* You can wait mixed group that contains `SubResumableFunction`s, `MethodWait`s and `WaitsGroup`s
-* You can GoBackTo a previous wait to wait it again.
+* You can wait **mixed group** that contains `SubResumableFunction`s, `MethodWait`s and `WaitsGroup`s
+* You can **GoBackTo** a previous wait to wait it again.
 ``` C#
 if (ManagerOneApproval is false)
 {
@@ -239,7 +242,7 @@ if (ManagerOneApproval is false)
 	yield return GoBackTo("ManagerOneApproveProject");
 }
 ```
-* You can GoBackAfter a previous wait.
+* You can **GoBackAfter** a previous wait.
 ``` C#
 yield return
 	Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
@@ -257,7 +260,7 @@ if (ManagerOneApproval is false)
 	yield return GoBackAfter(ProjectSumbitted);
 }
 ```
-* You can GoBackBefore a previous wait
+* You can **GoBackBefore** a previous wait
 ``` C#
 WriteMessage("Before project submitted.");
 yield return
@@ -280,63 +283,12 @@ if (ManagerOneApproval is false)
 			(input, output) => input.Id == CurrentProject.Id && input.IsResubmit == true);
 }
 ```
-# Distributed Services and Resumable Function
-**Work on docs**
-* You can wait method in another service
+* You can use **time waits**
 ``` C#
-//you will create empty implementation for method you want to wait from the external
-public class ExternalServiceClass
-{
-	//The [ExternalWaitMethod] attribute used to exactly point to external method you want to wait
-	//The class name is the full class name in the external service
-	//The AssemblyName is the assembly name for the external service
-	//The method name must be the same as the on in the external service
-	//The method return type name and input type name must be the same as the on in the external service
-	[ExternalWaitMethod(ClassName = "External.IManagerFiveApproval",AssemblyName ="SomeAssembly")]
-	public bool ManagerFiveApproveProject(ApprovalDecision args)
-	{
-		return default;
-	}
-}
-/// you can wait it in your code normally
 yield return
-	Wait<ApprovalDecision, bool>("Manager Five Approve Project External Method", 
-	new ExternalServiceClass().ManagerFiveApproveProject)//here
-		.MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-		.SetData((input, output) => ManagerFiveApproval == output);
+    Wait(TimeSpan.FromDays(2), "Wait Two Days")
+    .SetData(x => TimeWaitId == x.TimeMatchId);
 ```
-* You can use time waits
-``` C#
-const string waitManagerOneApprovalInSeconds = "Wait manager one approval in 2 days";
-yield return Wait(
-        waitManagerOneApprovalInSeconds,
-        new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-            .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-            .SetData((input, output) => ManagerOneApproval == output),
-        Wait(TimeSpan.FromDays(2))
-    .SetData(() => TimerMatched == true)
-).First();
-
-if (TimerMatched)
-{
-    WriteMessage("Timer matched");
-    TimerMatched = false;
-    yield return GoBackBefore(waitManagerOneApprovalInSeconds);
-}
-else
-{
-    WriteMessage($"Manager one approved project with decision ({ManagerOneApproval})");
-}
-```
-* Wait method in another service [browse exmaples folder in source code. I'll add docs later.]
-* Register third party method by fake signature,This will enable
-	* Use github web hooks for example
-	* Wait for google drive file change
-	* Http listener 
-	* More advanced scenarios
-
-# Resumable Functions UI
-**Work on docs**
 
 # How it works internally
 The library uses an IAsyncEnumerable generated state machine to implement a method that can be paused and resumed. An IAsyncEnumerable is a type that provides a sequence of values that can be enumerated asynchronously. A state machine is a data structure that keeps track of the current state of a system. In this case, the state machine keeps track of the current state of where function execution reached.
