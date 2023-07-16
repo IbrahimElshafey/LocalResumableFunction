@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ResumableFunctions.Publisher\ResumableFunctions.Publisher.csproj" />
+    <ProjectReference Include="..\..\ClassLibrary1\ResumableFunctions.Publisher.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,6 +2,9 @@
 using ResumableFunctions.Publisher.InOuts;
 using System.Collections.Concurrent;
 using ResumableFunctions.Publisher.Abstraction;
+using System.Net.Http;
+using System;
+using System.Threading.Tasks;
 
 namespace ResumableFunctions.Publisher.Implementation
 {
@@ -10,7 +13,7 @@ namespace ResumableFunctions.Publisher.Implementation
         private readonly IPublisherSettings _settings;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<InMemoryFailedRequestHandler> _logger;
-        private readonly ConcurrentBag<FailedRequest> _failedRequests = new();
+        private readonly ConcurrentBag<FailedRequest> _failedRequests = new ConcurrentBag<FailedRequest>();
         //private const string FileName = "FailedRequests.ser";
         public InMemoryFailedRequestHandler(
            IPublisherSettings settings,

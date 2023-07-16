@@ -4,6 +4,9 @@ using Microsoft.Extensions.Logging;
 using ResumableFunctions.Publisher.Abstraction;
 using ResumableFunctions.Publisher.Helpers;
 using ResumableFunctions.Publisher.InOuts;
+using System.Threading.Tasks;
+using System;
+using System.Net.Http;
 
 namespace ResumableFunctions.Publisher.Implementation
 {

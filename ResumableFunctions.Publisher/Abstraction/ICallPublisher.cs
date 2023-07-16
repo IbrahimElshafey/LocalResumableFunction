@@ -1,4 +1,6 @@
 ﻿using ResumableFunctions.Publisher.InOuts;
+using System;
+using System.Threading.Tasks;
 
 namespace ResumableFunctions.Publisher.Abstraction
 {

@@ -1,4 +1,7 @@
-﻿namespace ResumableFunctions.Publisher.Abstraction
+﻿using System;
+using System.Collections.Generic;
+
+namespace ResumableFunctions.Publisher.Abstraction
 {
     public interface IPublisherSettings
     {
