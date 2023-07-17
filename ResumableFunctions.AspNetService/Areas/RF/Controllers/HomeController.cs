@@ -52,7 +52,7 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
         }
 
         [ActionName(PartialNames.ResumableFunctions)]
-        public async Task<IActionResult> GetResumableFunctionsAsync(int serviceId = -1, string functionName = null)
+        public async Task<IActionResult> GetResumableFunctions(int serviceId = -1, string functionName = null)
         {
             return PartialView(
                 PartialNames.ResumableFunctions,
@@ -65,10 +65,18 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
                 });
         }
 
-        [ActionName(PartialNames.MethodsList)]
-        public async Task<IActionResult> GetMethodsListAsync(int serviceId)
+        [ActionName(PartialNames.MethodGroups)]
+        public async Task<IActionResult> GetMethodGroups(int serviceId = -1, string searchTerm = null)
         {
-            return PartialView(PartialNames.MethodsList, await _uiService.GetMethodGroupsSummary(serviceId));
+            return PartialView(
+                PartialNames.MethodGroups,
+                new MethodGroupsViewModel
+                {
+                    MethodGroups = await _uiService.GetMethodGroupsSummary(serviceId, searchTerm),
+                    SelectedService = serviceId,
+                    SearchTerm = searchTerm,
+                    Services = await _uiService.GetServices(),
+                });
         }
     }
 }

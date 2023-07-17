@@ -37,3 +37,13 @@ function searchFunctions() {
 function resetFunctionsView() {
     setMainPageView(`/RF/Home/_ResumableFunctionsList`);
 }
+
+function searchMethodGroups() {
+    var serviceId = document.getElementById("selectedService").value;
+    var searchTerm = document.getElementById("searchTerm").value;
+    setMainPageView(`/RF/Home/_MethodGroups?serviceId=${serviceId}&searchTerm=${searchTerm}`);
+}
+
+function resetMethodGroups() {
+    setMainPageView(`/RF/Home/_MethodGroups`);
+}

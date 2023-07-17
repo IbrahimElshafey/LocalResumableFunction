@@ -127,7 +127,7 @@ namespace ResumableFunctions.Handler.UiService
               .ToListAsync();
         }
 
-        public async Task<List<MethodGroupInfo>> GetMethodGroupsSummary(int? serviceId)
+        public async Task<List<MethodGroupInfo>> GetMethodGroupsSummary(int serviceId = -1, string searchTerm = null)
         {
             // int Id, string URN, int MethodsCount,int ActiveWaits,int CompletedWaits,int CanceledWaits
             var waitsQuery = _context
@@ -149,8 +149,23 @@ namespace ResumableFunctions.Handler.UiService
                     MethodGroupId = x.Id,
                     MethodsCount = x.WaitMethodIdentifiers.Count,
                     GroupCreated = x.Created,
-                    GroupUrn = x.MethodGroupUrn
+                    GroupUrn = x.MethodGroupUrn,
+                    x.ServiceId
                 });
+
+            if (serviceId != -1)
+            {
+                var methodGroupsToInclude =
+                    await _context.WaitMethodIdentifiers
+                    .Where(x=>x.ServiceId==serviceId)
+                    .Select(x => x.MethodGroupId)
+                    .Distinct()
+                    .ToListAsync();
+                methodIdsQuery = 
+                    methodIdsQuery.Where(x => methodGroupsToInclude.Contains(x.MethodGroupId));
+            }
+            if (searchTerm != null)
+                methodIdsQuery = methodIdsQuery.Where(x => x.GroupUrn.Contains(searchTerm));
 
             var join =
                 from methodId in methodIdsQuery

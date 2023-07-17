@@ -9,7 +9,7 @@ namespace ResumableFunctions.Handler.UiService
         Task<List<LogRecord>> GetLogs(int page = 0, int serviceId = -1, int statusCode = -1);
         Task<List<ServiceInfo>> GetServicesSummary();
         Task<List<FunctionInfo>> GetFunctionsSummary(int serviceId = -1, string functionName = null);
-        Task<List<MethodGroupInfo>> GetMethodGroupsSummary(int? serviceId);
+        Task<List<MethodGroupInfo>> GetMethodGroupsSummary(int serviceId = -1, string searchTerm = null);
         Task<List<PushedCallInfo>> GetPushedCalls(int page);
         Task<List<FunctionInstanceInfo>> GetFunctionInstances(int functionId);
         Task<PushedCallDetails> GetPushedCallDetails(int pushedCallId);

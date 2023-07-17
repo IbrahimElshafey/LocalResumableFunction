@@ -20,7 +20,7 @@ namespace ResumableFunctions.AspNetService.DisplayObject
                              $"/RF/Home/{PartialNames.ResumableFunctions}"),
                         new MainMenuItem(
                             $"Method Groups",
-                            $"/RF/Home/{PartialNames.MethodsList}"),
+                            $"/RF/Home/{PartialNames.MethodGroups}"),
                         new MainMenuItem(
                             $"Pushed Calls",
                             $"/RF/Home/{PartialNames.PushedCalls}"),

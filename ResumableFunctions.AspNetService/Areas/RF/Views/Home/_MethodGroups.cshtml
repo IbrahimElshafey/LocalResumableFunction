@@ -1,5 +1,5 @@
 ﻿@using ResumableFunctions.Handler.UiService.InOuts;
-@model List<MethodGroupInfo>
+@model MethodGroupsViewModel
 <div class="w3-margin">
     <header class="w3-text-indigo">
         <h2 class="w3-margin-top"><b>Method Groups</b></h2>
@@ -9,38 +9,44 @@
              style="margin-left: -16px !important;margin-right: -16px !important;">
             <div class="w3-col l5">
                 <b class="w3-text-indigo">Search</b>
-                <input class="w3-input w3-border" type="text" required="" placeholder="Search by Method URN">
+                <input value="@Model.SearchTerm" id="searchTerm" class="w3-input w3-border" type="text" required="" placeholder="Search by Method URN">
             </div>
             <div class="w3-col l3">
                 <b class="w3-text-indigo">Service</b>
-                <select class="w3-select" name="option">
-                    <option value="" disabled selected>Choose your option</option>
-                    <option value="1">All Services</option>
-                    <option value="2">Service 2</option>
-                    <option value="3">Service 3</option>
+                <select class="w3-select" name="selectedService" id="selectedService">
+                    <option value="" disabled selected>Choose a Service</option>
+                    @foreach (var service in Model.Services)
+                    {
+                        <option value="@service.Id"
+                            selected="@(service.Id==Model.SelectedService)">
+                            @service.AssemblyName
+                        </option>
+                    }
                 </select>
             </div>
             <div class="w3-col l2">
                 <span class="w3-text-light-gray">s</span>
-                <input type="button" class="w3-input w3-button w3-indigo" value="Search" />
+                <input type="button" class="w3-input w3-button w3-indigo" value="Search"
+                       onclick="searchMethodGroups()" />
             </div>
             <div class="w3-col l2">
                 <span class="w3-text-light-gray">s</span>
-                <input type="button" class="w3-input w3-button w3-indigo" value="Reset" />
+                <input type="button" class="w3-input w3-button w3-indigo" value="Reset"
+                       onclick="resetMethodGroups()" />
             </div>
         </div>
         <table class="w3-table-all">
             <thead>
-            <tr class="w3-indigo">
-                <th>Method Group URN</th>
-                <th>MethodGroups</th>
-                <th>Active Waits</th>
-                <th>Completed Waits</th>
-                <th>Canceled Waits</th>
-                <th>Registration Date</th>
-            </tr>
+                <tr class="w3-indigo">
+                    <th>Method Group URN</th>
+                    <th>MethodGroups</th>
+                    <th>Active Waits</th>
+                    <th>Completed Waits</th>
+                    <th>Canceled Waits</th>
+                    <th>Registration Date</th>
+                </tr>
             </thead>
-            @foreach (var item in Model)
+            @foreach (var item in Model.MethodGroups)
             {
                 <tr>
                     <td>
