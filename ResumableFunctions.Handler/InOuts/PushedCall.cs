@@ -16,13 +16,14 @@ public class PushedCall : IEntity, IOnSaveEntity
     public int? ServiceId { get; set; }
 
     public DateTime Created { get; internal set; }
-
+    public string MethodUrn { get; internal set; }
 
     public void OnSave()
     {
         var converter = new BinaryToObjectConverter();
         DataValue = converter.ConvertToBinary(Data);
         MethodDataValue = converter.ConvertToBinary(MethodData);
+        MethodUrn = MethodData?.MethodUrn;
     }
 
     public void LoadUnmappedProps(MethodInfo methodInfo = null)

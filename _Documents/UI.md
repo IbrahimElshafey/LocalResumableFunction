@@ -1,21 +1,16 @@
 ﻿# UI project
-* Add service Id fliter to
-	* Resumable Functions
-	* Method Groups
-	* Pushed Calls
-* Drop down with search for URNs in:
-	* Pushed Calls view
-	* Method Groups view
-	* Resumable Functions 
+* Local method must be registered many
+* Title Id
+
 * Date range filter for:
 	* Logs view
 	* Pushed Calls view
 * Infinite scroll for:
 	* Logs view
 	* Pushed Calls view
-* In Method Groups add link for pushed call for each group
+
 * Wait Status InError not shown in views
-* Tables problem on small screens
+* Tabels problem on small screens
 	
 
 

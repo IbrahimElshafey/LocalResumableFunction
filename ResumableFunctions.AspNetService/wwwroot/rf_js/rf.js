@@ -9,7 +9,8 @@ function resetLogs() {
     setMainPageView(`/RF/Home/_LatestLogs`);
 }
 
-function gotoViewPart(index,url) {
+function gotoViewPart(index, url) {
+    console.log('gotoViewPart');
     if (index == undefined)
         index = '0';
     var i, tablinks;
@@ -46,4 +47,14 @@ function searchMethodGroups() {
 
 function resetMethodGroups() {
     setMainPageView(`/RF/Home/_MethodGroups`);
+}
+
+function searchPushedCalls() {
+    var serviceId = document.getElementById("selectedService").value;
+    var searchTerm = document.getElementById("searchTerm").value;
+    setMainPageView(`/RF/Home/_PushedCalls?serviceId=${serviceId}&searchTerm=${searchTerm}`);
+}
+
+function resetPushedCalls() {
+    setMainPageView(`/RF/Home/_PushedCalls`);
 }

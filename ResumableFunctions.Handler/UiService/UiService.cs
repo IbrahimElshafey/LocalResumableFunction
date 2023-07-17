@@ -141,51 +141,51 @@ namespace ResumableFunctions.Handler.UiService
                     MethodGroupId = (int?)x.Key
                 });
 
-            var methodIdsQuery = _context
+            var methodGroupsQuery = _context
                 .MethodsGroups
                 .Include(x => x.WaitMethodIdentifiers)
                 .Select(x => new
                 {
-                    MethodGroupId = x.Id,
                     MethodsCount = x.WaitMethodIdentifiers.Count,
-                    GroupCreated = x.Created,
-                    GroupUrn = x.MethodGroupUrn,
-                    x.ServiceId
+                    Group = x,
                 });
 
             if (serviceId != -1)
             {
                 var methodGroupsToInclude =
                     await _context.WaitMethodIdentifiers
-                    .Where(x=>x.ServiceId==serviceId)
+                    .Where(x => x.ServiceId == serviceId)
                     .Select(x => x.MethodGroupId)
                     .Distinct()
                     .ToListAsync();
-                methodIdsQuery = 
-                    methodIdsQuery.Where(x => methodGroupsToInclude.Contains(x.MethodGroupId));
+                methodGroupsQuery =
+                    methodGroupsQuery.Where(x => methodGroupsToInclude.Contains(x.Group.Id));
             }
             if (searchTerm != null)
-                methodIdsQuery = methodIdsQuery.Where(x => x.GroupUrn.Contains(searchTerm));
+                methodGroupsQuery = methodGroupsQuery.Where(x => x.Group.MethodGroupUrn.Contains(searchTerm));
 
             var join =
-                from methodId in methodIdsQuery
-                join wait in waitsQuery on methodId.MethodGroupId equals wait.MethodGroupId into jo
+                from methodGroup in methodGroupsQuery
+                join wait in waitsQuery on methodGroup.Group.Id equals wait.MethodGroupId into jo
                 from item in jo.DefaultIfEmpty()
-                select new { wait = item, methodId };
+                select new { wait = item, methodGroup };
 
             return (await join.ToListAsync())
-                .Select(x => new MethodGroupInfo(
-                                     x.methodId.MethodGroupId,
-                                     x.methodId.GroupUrn,
-                                     x.methodId.MethodsCount,
-                                     x.wait?.Waiting ?? 0,
-                                     x.wait?.Completed ?? 0,
-                                     x.wait?.Canceled ?? 0,
-                                     x.methodId.GroupCreated))
+                .Select(x =>
+                    new MethodGroupInfo(
+                    x.methodGroup.Group,
+                    x.methodGroup.MethodsCount,
+                    x.wait?.Waiting ?? 0,
+                    x.wait?.Completed ?? 0,
+                    x.wait?.Canceled ?? 0,
+                    x.methodGroup.Group.Created))
                 .ToList();
         }
 
-        public async Task<List<PushedCallInfo>> GetPushedCalls(int page)
+        public async Task<List<PushedCallInfo>> GetPushedCalls(
+            int page = 0,
+            int serviceId = -1,
+            string searchTerm = null)
         {
             var counts =
                 _context
@@ -206,6 +206,14 @@ namespace ResumableFunctions.Handler.UiService
                 join counter in counts on call.Id equals counter.CallId into joinResult
                 from item in joinResult.DefaultIfEmpty()
                 select new { item, call };
+
+            query = query.Skip(page * 100).Take(100);
+
+            if (serviceId > -1)
+                query = query.Where(x => x.call.ServiceId == serviceId);
+            if (searchTerm != null)
+                query = query.Where(x => x.call.MethodUrn.Contains(searchTerm));
+
             var result = (await query.ToListAsync())
                 .Select(x => new PushedCallInfo(
                     x.call,
@@ -213,6 +221,7 @@ namespace ResumableFunctions.Handler.UiService
                     x.item?.Matched ?? 0,
                     x.item?.NotMatched ?? 0
                 )).ToList();
+
             result.ForEach(x => x.PushedCall.LoadUnmappedProps());
             return result;
         }

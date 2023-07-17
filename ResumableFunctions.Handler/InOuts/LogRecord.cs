@@ -26,8 +26,8 @@ public class LogRecord : IEntity
     {
         switch (Type)
         {
-            case LogType.Info: return ("w3-sand", "Info");
-            case LogType.Error: return ("w3-pale-green", "Error");
+            case LogType.Info: return ("w3-pale-blue", "Info");
+            case LogType.Error: return ("w3-deep-orange", "Error");
             case LogType.Warning: return ("w3-amber", "Warning");
         }
         return ("w3-gray", "Undefined");

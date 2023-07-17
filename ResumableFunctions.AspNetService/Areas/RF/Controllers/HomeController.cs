@@ -32,19 +32,27 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
 
 
         [ActionName(PartialNames.PushedCalls)]
-        public async Task<IActionResult> PushedCalls()
+        public async Task<IActionResult> PushedCalls(int serviceId = -1, string searchTerm = null)
         {
-            return PartialView(PartialNames.PushedCalls, await _uiService.GetPushedCalls(0));
+            return PartialView(
+                PartialNames.PushedCalls,
+                new PushedCallsViewMode
+                {
+                    Calls = await _uiService.GetPushedCalls(0, serviceId, searchTerm),
+                    Services = await _uiService.GetServices(),
+                    SelectedService = serviceId,
+                    SearchTerm = searchTerm
+                });
         }
 
         [ActionName(PartialNames.LatestLogs)]
-        public async Task<IActionResult> LatestLogs(int page = 0, int serviceId = -1, int statusCode = -1)
+        public async Task<IActionResult> LatestLogs(int serviceId = -1, int statusCode = -1)
         {
             return PartialView(
                 PartialNames.LatestLogs,
                 new LogsViewModel
                 {
-                    Logs = await _uiService.GetLogs(page, serviceId, statusCode),
+                    Logs = await _uiService.GetLogs(0, serviceId, statusCode),
                     Services = await _uiService.GetServices(),
                     SelectedService = serviceId,
                     SelectedStatusCode = statusCode

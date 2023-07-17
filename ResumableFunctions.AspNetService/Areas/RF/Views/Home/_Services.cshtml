@@ -43,19 +43,21 @@
                     </td>
                     <td>
                         <a href="~/RF#view=4" class="w3-text-@(service.LogErrors == 0 ? "green" :"red")"
-                       onclick="gotoViewPart(4,'/RF/Home/_LatestLogs?serviceId=@service.Id')">
+                        onclick="gotoViewPart(4,'/RF/Home/_LatestLogs?serviceId=@service.Id')">
                             @(service.LogErrors == 0 ? "No Errors" : $"{service.LogErrors} Error")
                         </a>
                     </td>
                     <td>
                         <a href="~/RF#view=1" class="w3-text-blue"
-                       onclick="gotoViewPart(1,'/RF/Home/_ResumableFunctionsList?serviceId=@service.Id')">@service.FunctionsCount</a>
+                        onclick="gotoViewPart(1,'/RF/Home/_ResumableFunctionsList?serviceId=@service.Id')">@service.FunctionsCount</a>
                     </td>
                     <td>
-                        <a href="~/RF#view=2" class="w3-text-blue" onclick="gotoViewPart(2,'/RF/Home/_MethodGroups?serviceId=@service.Id')">@service.MethodsCount</a>
+                        <a href="~/RF#view=2" class="w3-text-blue"
+                        onclick="gotoViewPart(2,'/RF/Home/_MethodGroups?serviceId=@service.Id')">@service.MethodsCount</a>
                     </td>
                     <td>
-                        <a href="~/RF?serviceId=@service.Id#view=3" class="w3-text-blue">@service.PushedCallsCount</a>
+                        <a href="~/RF?#view=3" class="w3-text-blue"
+                       onclick="gotoViewPart(3,'/RF/Home/_PushedCalls?serviceId=@service.Id')">@service.PushedCallsCount</a>
                     </td>
                     <td>
                         @if (@service.IsScanRunning)
@@ -67,7 +69,7 @@
                             <span class="w3-text-green">Scan Completed</span>
                         }
                     </td>
-                   
+
                     <td>
                         @service.Registration
                     </td>
