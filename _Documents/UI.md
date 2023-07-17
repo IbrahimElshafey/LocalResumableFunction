@@ -1,6 +1,6 @@
 ﻿# UI project
 * Local method must be registered many
-* Title Id
+* Set params in Hash and enable reload
 
 * Date range filter for:
 	* Logs view

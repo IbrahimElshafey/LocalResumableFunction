@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>Resumable Functions</title>
+    <title>@ViewBag.Title</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -1883,7 +1883,7 @@
 
 
         function openViewPart(index) {
-            console.log(index);
+            console.log('openViewPart');
             if (index == undefined)
                 index = '0';
             var i, tablinks;
@@ -1899,11 +1899,12 @@
             var currentButton = document.getElementById('tab-link-' + index);
             currentButton.className += " w3-indigo";
             var viewUrl = currentButton.getAttribute('data-view-link');
-            setMainPageView(viewUrl,index)
+            setMainPageView(viewUrl,title(index))
             window.location.hash = "#view=" + index;
         }
 
-        function setMainPageView(viewUrl){
+        function setMainPageView(viewUrl,title){
+            document.title = title;
             fetch(viewUrl)
                 .then((response) => { return response.text(); })
                 .then((result) => {
@@ -1911,6 +1912,16 @@
                     homeDiv.innerHTML = result;
                     JsonObjectRender();
                 });
+        }
+
+        function title(index){
+            switch(index.toString()) {
+            case "0": return "Services";
+            case "1": return "Functions";
+            case "2": return "Method Groups";
+            case "3": return "Pushed Calls";
+            case "4": return "Logs";
+            }
         }
 
         function hashParts() {

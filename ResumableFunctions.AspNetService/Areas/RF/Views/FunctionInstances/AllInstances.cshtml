@@ -1,5 +1,8 @@
 ﻿@using MessagePack;
 @model FunctionInstancesModel
+@{
+    ViewBag.Title = $"All Instances for `{Model.FunctionName}`";
+}
 <div class="w3-container w3-margin">
     <header class="w3-text-blue-gray">
         <h2 class="w3-margin-top">

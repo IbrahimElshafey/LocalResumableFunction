@@ -1,6 +1,9 @@
 ﻿@using ResumableFunctions.Handler.UiService.InOuts;
 @using ResumableFunctions.Handler.InOuts
 @model FunctionInstanceDetails
+@{
+    ViewBag.Title = $"Function Instance `{Model.InstanceId}` {Model.FunctionUrn}";
+}
 <style>
     .function-instance-label {
         display:none !important;
