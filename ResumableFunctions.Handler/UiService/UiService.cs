@@ -17,50 +17,25 @@ namespace ResumableFunctions.Handler.UiService
             _context = context;
         }
 
-        public async Task<MainStatistics> GetMainStatistics()
-        {
-            var services =
-                await _context.ServicesData.CountAsync(x => x.ParentId == -1);
-            var resumableFunctionsCount =
-                await _context.ResumableFunctionIdentifiers.CountAsync(x => x.Type == MethodType.ResumableFunctionEntryPoint);
-            var resumableFunctionsInstances = await _context.FunctionStates.CountAsync() - resumableFunctionsCount;
-            var methodGroups = await _context.MethodsGroups.CountAsync();
-            var pushedCalls = await _context.PushedCalls.CountAsync();
-            //var latestLogErrors =
-            //    await
-            //    _context
-            //    .Logs
-            //    .OrderByDescending(x => x.Id)
-            //    .Take(20)
-            //    .CountAsync(x => x.Type == LogType.Error);
-            return new MainStatistics(
-                services,
-                resumableFunctionsCount,
-                resumableFunctionsInstances,
-                methodGroups,
-                pushedCalls,
-                0);
-        }
+       
 
         public async Task<List<ServiceInfo>> GetServicesList()
         {
             var result = new List<ServiceInfo>();
-            var services = await
-                _context
-                .ServicesData
+            var services = 
+                await _context.ServicesData
                 .Where(x => x.ParentId == -1)
                 .ToListAsync();
 
             var serviceErrors =
-                await _context
-               .Logs
+                await _context.Logs
                .Where(x => x.Type == LogType.Error)
                .GroupBy(x => x.ServiceId)
                .Select(x => new { ServiceId = x.Key, ErrorsCount = x.Count() })
                .ToDictionaryAsync(x => x.ServiceId);
 
-            var methodsCounts = await _context
-                .MethodIdentifiers
+            var methodsCounts = 
+                await _context.MethodIdentifiers
                 .GroupBy(x => x.ServiceId)
                 .Select(x => new
                 {
@@ -70,29 +45,38 @@ namespace ResumableFunctions.Handler.UiService
                 })
                 .ToDictionaryAsync(x => x.ServiceId);
 
-            var pushedCalls = await _context
-                .PushedCalls
+            var pushedCalls = 
+                await _context.PushedCalls
                 .GroupBy(x => x.ServiceId)
                 .Select(x => new { ServiceId = x.Key, PushedCalls = x.Count() })
                 .ToDictionaryAsync(x => x.ServiceId);
 
+            var scanStatus =
+                await _context.ScanStates
+                .Select(x => x.ServiceId)
+                .Distinct()
+                .ToListAsync();
+
             foreach (var service in services)
             {
-                var item = new ServiceInfo(service.Id, service.AssemblyName, service.Url, service.ReferencedDlls, service.Created, service.Modified);
+                var serviceInfo = new ServiceInfo(service.Id, service.AssemblyName, service.Url, service.ReferencedDlls, service.Created, service.Modified);
 
                 if (serviceErrors.TryGetValue(service.Id, out var error))
-                    item.LogErrors = error.ErrorsCount;
+                    serviceInfo.LogErrors = error.ErrorsCount;
 
                 if (methodsCounts.TryGetValue(service.Id, out var methodsCounter))
                 {
-                    item.FunctionsCount = methodsCounter.FunctionsCount;
-                    item.MethodsCount = methodsCounter.MethodsCount;
+                    serviceInfo.FunctionsCount = methodsCounter.FunctionsCount;
+                    serviceInfo.MethodsCount = methodsCounter.MethodsCount;
                 }
 
                 if (pushedCalls.TryGetValue(service.Id, out var pushedCallsCount))
-                    item.PushedCallsCount = pushedCallsCount.PushedCalls;
+                    serviceInfo.PushedCallsCount = pushedCallsCount.PushedCalls;
 
-                result.Add(item);
+                if (scanStatus.Contains(service.Id))
+                    serviceInfo.IsScanRunning = true;
+
+                result.Add(serviceInfo);
             }
             return result;
         }

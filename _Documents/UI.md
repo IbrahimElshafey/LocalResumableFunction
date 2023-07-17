@@ -1,7 +1,5 @@
 ﻿# UI project
-* Tables problem on small screens
 * Services View
-	* Review First wait registration error
 	* Add Scan Status To Services View
 * Wait Status InError not shown in views
 * Add service Id fliter to
@@ -14,7 +12,7 @@
 	* Method Groups view
 	* Resumable Functions 
 * In Method Groups add link for pushed call for each group
-* Review Log for WaitProcessor
+* Tables problem on small screens
 	
 
 
