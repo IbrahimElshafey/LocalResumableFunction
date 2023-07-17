@@ -1,5 +1,5 @@
 ﻿@using ResumableFunctions.Handler.UiService.InOuts;
-@model List<FunctionInfo>
+@model FunctionsViewModel
 <div class="w3-margin">
     <header class="w3-text-indigo">
         <h2 class="w3-margin-top"><b>Resumable Functions</b></h2>
@@ -9,24 +9,30 @@
              style="margin-left: -16px !important;margin-right: -16px !important;">
             <div class="w3-col l5">
                 <b class="w3-text-indigo">Search</b>
-                <input class="w3-input w3-border" type="text" required="" placeholder="Search by Function Name">
+                <input value="@Model.SearchTerm" id="functionSearchTerm" class="w3-input w3-border" type="text" required="" placeholder="Search by Function URN">
             </div>
             <div class="w3-col l3">
                 <b class="w3-text-indigo">Service</b>
-                <select class="w3-select" name="option">
-                    <option value="" disabled selected>Choose your option</option>
-                    <option value="1">All Services</option>
-                    <option value="2">Service 2</option>
-                    <option value="3">Service 3</option>
+                <select class="w3-select" name="selectedService" id="selectedService">
+                    <option value="" disabled selected>Choose a Service</option>
+                    @foreach (var service in Model.Services)
+                    {
+                        <option value="@service.Id"
+                            selected="@(service.Id==Model.SelectedService)">
+                            @service.AssemblyName
+                        </option>
+                    }
                 </select>
             </div>
             <div class="w3-col l2">
                 <span class="w3-text-light-gray">s</span>
-                <input type="button" class="w3-input w3-button w3-indigo" value="Search" />
+                <input type="button" class="w3-input w3-button w3-indigo" value="Search"
+                       onclick="searchFunctions()" />
             </div>
             <div class="w3-col l2">
                 <span class="w3-text-light-gray">s</span>
-                <input type="button" class="w3-input w3-button w3-indigo" value="Reset" />
+                <input type="button" class="w3-input w3-button w3-indigo" value="Reset"
+                       onclick="resetFunctionsView()" />
             </div>
         </div>
         <table class="w3-table-all">
@@ -41,17 +47,19 @@
                     <th width="120">Last Updated</th>
                 </tr>
             </thead>
-            @for (var i = 0; i < Model.Count; i++)
+            @for (var i = 0; i < Model.Functions.Count; i++)
             {
-                var function = Model[i];
+                var function = Model.Functions[i];
 
                 <tr>
                     <td>
                         <ul>
                             <li>
                                 <a target="_blank" href="~/RF/FunctionInstances/AllInstances?functionId=@function.FunctionIdentifier.Id&functionName=@function.FunctionIdentifier.MethodName"
-                                   class="w3-text-blue">@function.FunctionIdentifier.RF_MethodUrn 
-                                    (@(function.Completed+function.Failed+function.InProgress+1) Instance)</a>
+                               class="w3-text-blue">
+                                    @function.FunctionIdentifier.RF_MethodUrn
+                                    (@(function.Completed + function.Failed + function.InProgress + 1) Instance)
+                                </a>
                             </li>
                             <li><b>Method Name: </b>@function.FunctionIdentifier.MethodName #@function.FunctionIdentifier.Id</li>
                             <li><b>Class Name: </b>@function.FunctionIdentifier.ClassName</li>

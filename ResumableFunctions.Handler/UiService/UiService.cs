@@ -17,12 +17,12 @@ namespace ResumableFunctions.Handler.UiService
             _context = context;
         }
 
-       
 
-        public async Task<List<ServiceInfo>> GetServicesList()
+
+        public async Task<List<ServiceInfo>> GetServicesSummary()
         {
             var result = new List<ServiceInfo>();
-            var services = 
+            var services =
                 await _context.ServicesData
                 .Where(x => x.ParentId == -1)
                 .ToListAsync();
@@ -34,7 +34,7 @@ namespace ResumableFunctions.Handler.UiService
                .Select(x => new { ServiceId = x.Key, ErrorsCount = x.Count() })
                .ToDictionaryAsync(x => x.ServiceId);
 
-            var methodsCounts = 
+            var methodsCounts =
                 await _context.MethodIdentifiers
                 .GroupBy(x => x.ServiceId)
                 .Select(x => new
@@ -45,7 +45,7 @@ namespace ResumableFunctions.Handler.UiService
                 })
                 .ToDictionaryAsync(x => x.ServiceId);
 
-            var pushedCalls = 
+            var pushedCalls =
                 await _context.PushedCalls
                 .GroupBy(x => x.ServiceId)
                 .Select(x => new { ServiceId = x.Key, PushedCalls = x.Count() })
@@ -81,96 +81,39 @@ namespace ResumableFunctions.Handler.UiService
             return result;
         }
 
-        public async Task<ServiceStatistics> GetServiceStatistics(int serviceId)
-        {
-            //name,error counts,functions count,methods count
-            var service = await _context.ServicesData.FindAsync(serviceId);
-            var counts = await _context
-               .MethodIdentifiers
-               .Where(x => x.ServiceId == serviceId)
-               .GroupBy(x => x.ServiceId)
-               .Select(x => new
-               {
-                   FunctionsCount = x.Count(x => x.Type == MethodType.ResumableFunctionEntryPoint),
-                   MethodsCount = x.Count(x => x.Type == MethodType.MethodWait),
-                   Id = x.Key
-               })
-               .FirstOrDefaultAsync();
-            return new ServiceStatistics(
-                service.Id,
-                service.AssemblyName,
-                service.ErrorCounter + await _context
-                    .ServicesData
-                    .Where(x => x.ParentId == serviceId)
-                    .Select(x => x.ErrorCounter)
-                    .SumAsync(),
-                counts?.FunctionsCount ?? 0,
-                counts?.MethodsCount ?? 0);
-        }
 
-        public async Task<ServiceData> GetServiceInfo(int serviceId)
+        public async Task<List<LogRecord>> GetLogs(int page = 0, int serviceId = -1, int statusCode = -1)
         {
-            var service = await _context.ServicesData.FindAsync(serviceId);
-            var dlls = await _context
-                .ServicesData
-                .Where(x => x.ParentId == serviceId)
-                .Select(x => new { x.AssemblyName, x.ErrorCounter })
-                .ToListAsync();
-            service.ReferencedDlls = dlls.Select(x => x.AssemblyName).ToArray();
-            //service.ErrorCounter += dlls.Sum(x => x.ErrorCounter);
-            return service;
-        }
+            var query = _context.Logs.AsQueryable();
 
-        public async Task<List<LogRecord>> GetServiceLogs(int serviceId)
-        {
-            return await _context
-                .Logs
-                .Where(x => x.ServiceId == serviceId)
-                .OrderByDescending(x => x.Id)
-                .ToListAsync();
-        }
+            if (serviceId != -1)
+                query = query.Where(x => x.ServiceId == serviceId);
 
-        public async Task<List<LogRecord>> GetLogs(int page = 0)
-        {
-            return await _context
-                .Logs
-                .Where(x => x.Type != LogType.Info)
+            if (statusCode != -1)
+                query = query.Where(x => x.StatusCode == statusCode);
+
+            if (serviceId == -1 && statusCode == -1)
+                query = _context.Logs.Where(x => x.Type != LogType.Info);
+
+            return await
+                query
                 .OrderByDescending(x => x.Id)
                 .Skip(page * 100)
                 .Take(100)
                 .ToListAsync();
         }
 
-        public async Task<List<FunctionInfo>> GetFunctionsInfo(int? serviceId)
+        public async Task<List<FunctionInfo>> GetFunctionsSummary(int serviceId = -1, string functionName = null)
         {
-            //var countsQuery =
-            //    await (from functionState in _context.FunctionStates.Include(x => x.ResumableFunctionIdentifier)
-            //           group functionState by functionState.ResumableFunctionIdentifierId
-            //    into g
-            //           select new
-            //           {
-            //               FunctionId = g.Key,
-            //               InProgress = g.Count(x => x.Status == FunctionStatus.InProgress),
-            //               Completed = g.Count(x => x.Status == FunctionStatus.Completed),
-            //               InError = g.Count(x => x.Status == FunctionStatus.InError)
-            //           }).ToListAsync();
-            //var functionWithFirstWait =
-            //    await (from function in _context.ResumableFunctionIdentifiers.Include(x => x.WaitsCreatedByFunction)
-            //           select new { function,FirstWait= function.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsNode).Name })
-            //    .ToListAsync();
-            //var result =
-            //    (from counts in countsQuery.DefaultIfEmpty()
-            //    from function in functionWithFirstWait
-            //    where counts.FunctionId == function.function.Id
-            //    select new FunctionInfo(
-            //        function.function,
-            //        function.FirstWait,
-            //        counts?.InProgress??0,
-            //        counts?.Completed ?? 0,
-            //        counts?.InError ?? 0
-            //    )).ToList();
-            //return result;
-            return await _context.ResumableFunctionIdentifiers
+            var query = _context.ResumableFunctionIdentifiers.AsNoTracking();
+
+            if (serviceId != -1)
+                query = query.Where(x => x.ServiceId == serviceId);
+
+            if (functionName != null)
+                query = query.Where(x => x.RF_MethodUrn.Contains(functionName));
+
+            return await query
               .Include(x => x.ActiveFunctionsStates)
               .Include(x => x.WaitsCreatedByFunction)
               .Where(x => x.Type == MethodType.ResumableFunctionEntryPoint)
@@ -184,7 +127,7 @@ namespace ResumableFunctions.Handler.UiService
               .ToListAsync();
         }
 
-        public async Task<List<MethodGroupInfo>> GetMethodsInfo(int? serviceId)
+        public async Task<List<MethodGroupInfo>> GetMethodGroupsSummary(int? serviceId)
         {
             // int Id, string URN, int MethodsCount,int ActiveWaits,int CompletedWaits,int CanceledWaits
             var waitsQuery = _context
@@ -332,7 +275,7 @@ namespace ResumableFunctions.Handler.UiService
             return new PushedCallDetails(inputOutput, methodData, waitsForCall);
         }
 
-        public async Task<FunctionInstanceDetails> GetInstanceDetails(int instanceId)
+        public async Task<FunctionInstanceDetails> GetFunctionInstanceDetails(int instanceId)
         {
             var instance =
                 await _context
@@ -389,7 +332,7 @@ namespace ResumableFunctions.Handler.UiService
                 .ToList();
         }
 
-        public async Task<List<MethodWaitDetails>> GetWaitsForGroup(int groupId)
+        public async Task<List<MethodWaitDetails>> GetWaitsInGroup(int groupId)
         {
             var groupName =
                 await _context
@@ -465,6 +408,7 @@ namespace ResumableFunctions.Handler.UiService
         {
             return
                 await _context.ServicesData
+                .Select(x => new ServiceData { Id = x.Id, AssemblyName = x.AssemblyName, ParentId = x.ParentId })
                 .Where(x => x.ParentId == -1)
                 .ToListAsync();
         }

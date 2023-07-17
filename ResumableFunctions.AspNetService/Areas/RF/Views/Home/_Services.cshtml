@@ -42,12 +42,14 @@
                         }
                     </td>
                     <td>
-                        <a href="~/RF?serviceId=@service.Id#view=4" class="w3-text-@(service.LogErrors == 0 ? "green" :"red")">
+                        <a href="~/RF#view=4" class="w3-text-@(service.LogErrors == 0 ? "green" :"red")"
+                       onclick="gotoViewPart(4,'/RF/Home/_LatestLogs?serviceId=@service.Id')">
                             @(service.LogErrors == 0 ? "No Errors" : $"{service.LogErrors} Error")
                         </a>
                     </td>
                     <td>
-                        <a href="~/RF?serviceId=@service.Id#view=1" class="w3-text-blue">@service.FunctionsCount</a>
+                        <a href="~/RF#view=1" class="w3-text-blue"
+                       onclick="gotoViewPart(1,'/RF/Home/_ResumableFunctionsList?serviceId=@service.Id')">@service.FunctionsCount</a>
                     </td>
                     <td>
                         <a href="~/RF?serviceId=@service.Id#view=2" class="w3-text-blue">@service.MethodsCount</a>

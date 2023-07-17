@@ -1,5 +1,5 @@
 ﻿@using ResumableFunctions.Handler.InOuts;
-@model List<LogRecord>
+@model LogsViewModel
 <div class="w3-margin">
     <header class="w3-text-indigo">
         <h2 class="w3-margin-top"><b>Latest Log Errors</b></h2>
@@ -9,34 +9,41 @@
              style="margin-left: -16px !important;margin-right: -16px !important;">
             <div class="w3-col l3">
                 <b class="w3-text-indigo">Service</b>
-                <select class="w3-select" name="option">
-                    <option value="" disabled selected>Choose your option</option>
-                    <option value="1">All Services</option>
-                    <option value="2">Service 2</option>
-                    <option value="3">Service 3</option>
+                <select class="w3-select" name="selectedService" id="selectedService">
+                    <option value="" disabled selected>Choose a Service</option>
+                    @foreach (var service in Model.Services)
+                    {
+                        <option value="@service.Id"
+                            selected="@(service.Id==Model.SelectedService)">
+                            @service.AssemblyName
+                        </option>
+                    }
                 </select>
             </div>
             <div class="w3-col l3">
-                <b class="w3-text-indigo">Error Code</b>
-                <select class="w3-select" name="option">
-                    <option value="" disabled selected>Choose your option</option>
-                    <option value="1">All Services</option>
-                    <option value="2">Service 2</option>
-                    <option value="3">Service 3</option>
+                <b class="w3-text-indigo">Status Code</b>
+                <select class="w3-select" name="selectedStatusCode" id="selectedStatusCode">
+                    <option value="" disabled selected>Choose a Status Code</option>
+                    @foreach (var statusCode in Model.StatusCodes)
+                    {
+                        <option value="@statusCode.Key" selected="@(statusCode.Key==Model.SelectedStatusCode)">@statusCode.Value</option>
+                    }
                 </select>
             </div>
             <div class="w3-col l1">
-                <span class="w3-text-light-gray">s</span>
-                <input type="button" class="w3-input w3-button w3-indigo" value="Search" />
+                <span class="w3-text-light-gray">~</span>
+                <input type="button" class="w3-input w3-button w3-indigo" value="Search"
+                       onclick="searchLogs()" />
             </div>
             <div class="w3-col l1">
-                <span class="w3-text-light-gray">s</span>
-                <input type="button" class="w3-input w3-button w3-indigo" value="Reset" />
+                <span class="w3-text-light-gray">~</span>
+                <input type="button" class="w3-input w3-button w3-indigo" value="Reset"
+                       onclick="resetLogs()" />
             </div>
-            <div class="w3-col l1">
-                <span class="w3-text-light-gray">s</span>
+            @*<div class="w3-col l1">
+                <span class="w3-text-light-gray">~</span>
                 <input type="button" class="w3-input w3-button w3-indigo" value="Clear Logs" />
-            </div>
+            </div>*@
 
         </div>
         <div class="w3-row">
@@ -51,10 +58,11 @@
             </div>
         </div>
         <div>
-            @for (var i = 0; i < Model.Count; i++)
+            @for (var i = 0; i < Model.Logs.Count; i++)
             {
-                @Html.DisplayFor(x => Model[i])
+                @Html.DisplayFor(x => Model.Logs[i])
             }
         </div>
     </div>
 </div>
+

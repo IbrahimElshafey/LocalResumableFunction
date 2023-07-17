@@ -27,7 +27,7 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
         [ActionName(PartialNames.ServicesList)]
         public async Task<IActionResult> ServicesView()
         {
-            return PartialView(PartialNames.ServicesList, new ServicesListModel(await _uiService.GetServicesList()));
+            return PartialView(PartialNames.ServicesList, new ServicesListModel(await _uiService.GetServicesSummary()));
         }
 
 
@@ -38,21 +38,37 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
         }
 
         [ActionName(PartialNames.LatestLogs)]
-        public async Task<IActionResult> LatestLogs()
+        public async Task<IActionResult> LatestLogs(int page = 0, int serviceId = -1, int statusCode = -1)
         {
-            return PartialView(PartialNames.LatestLogs, await _uiService.GetLogs());
+            return PartialView(
+                PartialNames.LatestLogs,
+                new LogsViewModel
+                {
+                    Logs = await _uiService.GetLogs(page, serviceId, statusCode),
+                    Services = await _uiService.GetServices(),
+                    SelectedService = serviceId,
+                    SelectedStatusCode = statusCode
+                });
         }
 
         [ActionName(PartialNames.ResumableFunctions)]
-        public async Task<IActionResult> GetResumableFunctionsAsync(int serviceId)
+        public async Task<IActionResult> GetResumableFunctionsAsync(int serviceId = -1, string functionName = null)
         {
-            return PartialView(PartialNames.ResumableFunctions, await _uiService.GetFunctionsInfo(serviceId));
+            return PartialView(
+                PartialNames.ResumableFunctions,
+                new FunctionsViewModel
+                {
+                    Functions = await _uiService.GetFunctionsSummary(serviceId, functionName),
+                    SelectedService = serviceId,
+                    SearchTerm = functionName,
+                    Services = await _uiService.GetServices(),
+                });
         }
 
         [ActionName(PartialNames.MethodsList)]
         public async Task<IActionResult> GetMethodsListAsync(int serviceId)
         {
-            return PartialView(PartialNames.MethodsList, await _uiService.GetMethodsInfo(serviceId));
+            return PartialView(PartialNames.MethodsList, await _uiService.GetMethodGroupsSummary(serviceId));
         }
     }
 }

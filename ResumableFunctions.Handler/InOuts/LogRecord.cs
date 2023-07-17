@@ -9,7 +9,7 @@ public class LogRecord : IEntity
     public LogType Type { get; internal set; } = LogType.Info;
     public string Message { get; internal set; }
     public DateTime Created { get; internal set; }
-    public int Code { get; internal set; }
+    public int StatusCode { get; internal set; }
     public int? ServiceId { get; set; }
 
     public override string ToString()
@@ -18,7 +18,7 @@ public class LogRecord : IEntity
                $"Message: {Message}\n" +
                $"EntityType: {EntityType}\n" +
                $"EntityId: {EntityId}\n" +
-               $"Code: {Code}\n"
+               $"Code: {StatusCode}\n"
                ;
     }
 
@@ -26,8 +26,8 @@ public class LogRecord : IEntity
     {
         switch (Type)
         {
-            case LogType.Info: return ("w3-gray", "Info");
-            case LogType.Error: return ("w3-deep-orange", "Error");
+            case LogType.Info: return ("w3-sand", "Info");
+            case LogType.Error: return ("w3-pale-green", "Error");
             case LogType.Warning: return ("w3-amber", "Warning");
         }
         return ("w3-gray", "Undefined");

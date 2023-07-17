@@ -1841,6 +1841,7 @@
             }
         }
     </style>
+
     <script>
         if (!library)
             var library = {};
@@ -1898,6 +1899,11 @@
             var currentButton = document.getElementById('tab-link-' + index);
             currentButton.className += " w3-indigo";
             var viewUrl = currentButton.getAttribute('data-view-link');
+            setMainPageView(viewUrl,index)
+            window.location.hash = "#view=" + index;
+        }
+
+        function setMainPageView(viewUrl){
             fetch(viewUrl)
                 .then((response) => { return response.text(); })
                 .then((result) => {
@@ -1905,8 +1911,6 @@
                     homeDiv.innerHTML = result;
                     JsonObjectRender();
                 });
-            window.location.hash = "#view=" + index;
-
         }
 
         function hashParts() {
@@ -1961,6 +1965,7 @@
           }
         }
     </script>
+    <script src="/_content/ResumableFunctions.AspNetService/rf_js/rf.js"></script>
 </head>
 <body class="w3-light-grey">
 

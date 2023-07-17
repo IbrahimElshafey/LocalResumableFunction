@@ -11,7 +11,7 @@ public static class ObjectWithLogBehavior
             EntityType = _this.GetType().Name,
             Type = logType,
             Message = message,
-            Code = code,
+            StatusCode = code,
             Created = DateTime.Now,
         };
         _this.Logs.Add(logRecord);
@@ -24,7 +24,7 @@ public static class ObjectWithLogBehavior
             EntityType = _this.GetType().Name,
             Type = LogType.Error,
             Message = message,
-            Code = code,
+            StatusCode = code,
             Created = DateTime.Now,
         };
         _this.Logs.Add(logRecord);

@@ -118,7 +118,7 @@ internal class ServiceRepo : IServiceRepo
             EntityType = nameof(ServiceData),
             Message = $"{errorMsg}\n{ex}",
             Type = LogType.Error,
-            Code = errorCode
+            StatusCode = errorCode
         });
         await _context.SaveChangesAsync();
     }
@@ -146,7 +146,7 @@ internal class ServiceRepo : IServiceRepo
             EntityType = nameof(ServiceData),
             Message = msg,
             Type = logType,
-            Code = errorCode
+            StatusCode = errorCode
         });
         await _context.SaveChangesAsync();
     }

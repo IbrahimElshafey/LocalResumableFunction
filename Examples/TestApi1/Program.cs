@@ -17,7 +17,6 @@ builder.Services
         .SetCurrentServiceUrl("https://localhost:7140/")
         //.SetDllsToScan("ReferenceLibrary")
         );
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

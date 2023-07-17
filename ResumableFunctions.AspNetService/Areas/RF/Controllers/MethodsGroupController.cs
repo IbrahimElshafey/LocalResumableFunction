@@ -27,7 +27,7 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
         [ActionName("MethodWaits")]
         public async Task<IActionResult> MethodWaits(int groupId)
         {
-            return View("MethodWaits", await _uiService.GetWaitsForGroup(groupId));
+            return View("MethodWaits", await _uiService.GetWaitsInGroup(groupId));
         }
     }
 }
