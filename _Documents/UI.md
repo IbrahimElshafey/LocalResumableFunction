@@ -1,15 +1,10 @@
 ﻿# UI project
-* Local method must be registered many
 * Set params in Hash and enable reload
-
-
-
 * Wait Status InError not shown in views
-* Tabels problem on small screens
-	
 
 
 # UI Actions [Will be in UI v2]
+* Tabels problem on small screens
 * Wait templates for method group
 * Actions on Wait 
 	* Cancel (If Waiting)
