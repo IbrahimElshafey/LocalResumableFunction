@@ -98,8 +98,8 @@ namespace ResumableFunctions.Handler.UiService
             return await
                 query
                 .OrderByDescending(x => x.Id)
-                .Skip(page * 100)
-                .Take(100)
+                //.Skip(page * 100)
+                //.Take(100)
                 .ToListAsync();
         }
 
@@ -207,7 +207,7 @@ namespace ResumableFunctions.Handler.UiService
                 from item in joinResult.DefaultIfEmpty()
                 select new { item, call };
 
-            query = query.Skip(page * 100).Take(100);
+            //query = query.Skip(page * 100).Take(100);
 
             if (serviceId > -1)
                 query = query.Where(x => x.call.ServiceId == serviceId);

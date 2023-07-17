@@ -1,9 +1,13 @@
-﻿# UI project
+﻿# UI V1
 * Set params in Hash and enable reload
 * Wait Status InError not shown in views
 
 
-# UI Actions [Will be in UI v2]
+* Infinite scroll for:
+	* Logs view
+	* Pushed Calls view
+
+# UI V2
 * Tabels problem on small screens
 * Wait templates for method group
 * Actions on Wait 
@@ -21,8 +25,5 @@
 	* Return failed instancs
 	* Stop resumable function creation of new instances
 * Date range filter for:
-	* Logs view
-	* Pushed Calls view
-* Infinite scroll for:
 	* Logs view
 	* Pushed Calls view
