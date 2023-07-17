@@ -2,12 +2,7 @@
 * Local method must be registered many
 * Set params in Hash and enable reload
 
-* Date range filter for:
-	* Logs view
-	* Pushed Calls view
-* Infinite scroll for:
-	* Logs view
-	* Pushed Calls view
+
 
 * Wait Status InError not shown in views
 * Tabels problem on small screens
@@ -30,3 +25,9 @@
 	* Wait methods in same method group must have the same signature
 	* Return failed instancs
 	* Stop resumable function creation of new instances
+* Date range filter for:
+	* Logs view
+	* Pushed Calls view
+* Infinite scroll for:
+	* Logs view
+	* Pushed Calls view

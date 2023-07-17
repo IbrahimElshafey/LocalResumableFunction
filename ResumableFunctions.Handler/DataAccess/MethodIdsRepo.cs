@@ -86,7 +86,9 @@ internal class MethodIdsRepo : IMethodIdsRepo
                 .Include(x => x.WaitMethodIdentifiers)
                 .FirstOrDefaultAsync(x => x.MethodGroupUrn == methodData.MethodUrn);
         var methodInDb = methodGroup?.WaitMethodIdentifiers?
-            .FirstOrDefault(x => x.MethodHash.SequenceEqual(methodData.MethodHash));
+            .FirstOrDefault(x =>
+            x.MethodHash.SequenceEqual(methodData.MethodHash) &&
+            x.ServiceId == _settings.CurrentServiceId);
 
         var isUpdate =
             methodGroup != null &&
@@ -97,42 +99,43 @@ internal class MethodIdsRepo : IMethodIdsRepo
             return;
         }
 
-
         var toAdd = new WaitMethodIdentifier();
         toAdd.FillFromMethodData(methodData);
 
         var isChildAdd = methodGroup != null;
         if (isChildAdd)
-            AddMethodIdToGroup();
+            AddMethodIdToGroup(methodData, methodGroup, toAdd);
         else
-            await CreateNewMethodGroup();
+            await CreateNewMethodGroup(methodData, toAdd);
+
+
+    }
+
+    private async Task CreateNewMethodGroup(MethodData methodData, WaitMethodIdentifier toAdd)
+    {
+        var group = new MethodsGroup
+        {
+            MethodGroupUrn = methodData.MethodUrn,
+            CanPublishFromExternal = methodData.CanPublishFromExternal,
+            IsLocalOnly = methodData.IsLocalOnly,
+        };
+        group.WaitMethodIdentifiers.Add(toAdd);
+        _context.MethodsGroups.Add(group);
+        await _context.SaveChangesAsync();
+    }
+
+    private static void AddMethodIdToGroup(MethodData methodData, MethodsGroup methodGroup, WaitMethodIdentifier toAdd)
+    {
+        if (methodGroup.IsLocalOnly != methodData.IsLocalOnly)
+            throw new Exception(ErrorTemplate(nameof(MethodsGroup.IsLocalOnly), methodGroup.IsLocalOnly));
+        if (methodGroup.CanPublishFromExternal != methodData.CanPublishFromExternal)
+            throw new Exception(ErrorTemplate(nameof(MethodsGroup.CanPublishFromExternal),
+                methodGroup.CanPublishFromExternal));
+        methodGroup.WaitMethodIdentifiers?.Add(toAdd);
 
         string ErrorTemplate(string propName, bool propValue) =>
-            $"Error When register method {methodData.MethodName}," +
-            $"Method group `{methodGroup.MethodGroupUrn}` property {propName} was `{propValue}` and can't be changed";
-
-        void AddMethodIdToGroup()
-        {
-            if (methodGroup.IsLocalOnly != methodData.IsLocalOnly)
-                throw new Exception(ErrorTemplate(nameof(MethodsGroup.IsLocalOnly), methodGroup.IsLocalOnly));
-            if (methodGroup.CanPublishFromExternal != methodData.CanPublishFromExternal)
-                throw new Exception(ErrorTemplate(nameof(MethodsGroup.CanPublishFromExternal),
-                    methodGroup.CanPublishFromExternal));
-            methodGroup.WaitMethodIdentifiers?.Add(toAdd);
-        }
-
-        async Task CreateNewMethodGroup()
-        {
-            var group = new MethodsGroup
-            {
-                MethodGroupUrn = methodData.MethodUrn,
-                CanPublishFromExternal = methodData.CanPublishFromExternal,
-                IsLocalOnly = methodData.IsLocalOnly,
-            };
-            group.WaitMethodIdentifiers.Add(toAdd);
-            _context.MethodsGroups.Add(group);
-            await _context.SaveChangesAsync();
-        }
+           $"Error When register method {methodData.MethodName}," +
+           $"Method group `{methodGroup.MethodGroupUrn}` property {propName} was `{propValue}` and can't be changed";
     }
 
 
