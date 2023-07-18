@@ -4,10 +4,12 @@ using ResumableFunctions.Handler.InOuts;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var settings = new SqlServerResumableFunctionsSettings(null, "DeleteUnusedTemplateSiblings_Test").SetCurrentServiceUrl("https://localhost:7219/");
-settings.CleanDbSettings.CompletedInstanceRetention = TimeSpan.FromSeconds(3);
-settings.CleanDbSettings.DeactivatedWaitTemplateRetention = TimeSpan.FromSeconds(3);
-settings.CleanDbSettings.PushedCallRetention = TimeSpan.FromSeconds(3);
+var settings = 
+    new SqlServerResumableFunctionsSettings(null, "MixedWaitsGroup_Test")
+    .SetCurrentServiceUrl("https://localhost:7219/");
+//settings.CleanDbSettings.CompletedInstanceRetention = TimeSpan.FromSeconds(3);
+//settings.CleanDbSettings.DeactivatedWaitTemplateRetention = TimeSpan.FromSeconds(3);
+//settings.CleanDbSettings.PushedCallRetention = TimeSpan.FromSeconds(3);
 builder.Services
     .AddControllers()
     .AddResumableFunctions(settings);
