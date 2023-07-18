@@ -1,6 +1,7 @@
 ﻿using Hangfire;
 using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts
 {
@@ -15,7 +16,8 @@ namespace ResumableFunctions.Handler.InOuts
         public string[] DllsToScan { get; }
 
         public bool ForceRescan { get; set; }
-        string CurrentDbName { get; }
+        string CurrentWaitsDbName { get; }
+        string CurrentServiceName => Assembly.GetEntryAssembly().GetName().Name;
 
         CleanDatabaseSettings CleanDbSettings { get; }
     }

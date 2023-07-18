@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
-       new SqlServerResumableFunctionsSettings(null,"WaitsDb","Rf_HangfireDb")
+       new SqlServerResumableFunctionsSettings()
         .SetCurrentServiceUrl("https://localhost:7140/")
         //.SetDllsToScan("ReferenceLibrary")
         );

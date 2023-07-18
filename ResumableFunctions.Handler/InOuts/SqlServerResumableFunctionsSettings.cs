@@ -43,7 +43,7 @@ namespace ResumableFunctions.Handler.InOuts
         private void SetWaitsDbConfig(string waitsDbName)
         {
             waitsDbName ??= "ResumableFunctionsData";
-            CurrentDbName = waitsDbName;
+            CurrentWaitsDbName = waitsDbName;
             _connectionBuilder["Database"] = waitsDbName;
             WaitsDbConfig = new DbContextOptionsBuilder().UseSqlServer(_connectionBuilder.ConnectionString);
         }
@@ -87,7 +87,7 @@ namespace ResumableFunctions.Handler.InOuts
 
 
         public int CurrentServiceId { get; set; } = -1;
-        public string CurrentDbName { get; set; }
+        public string CurrentWaitsDbName { get; set; }
 
         public IDistributedLockProvider DistributedLockProvider
         {

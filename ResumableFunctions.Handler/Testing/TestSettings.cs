@@ -29,7 +29,7 @@ namespace ResumableFunctions.Handler.Testing
         public string[] DllsToScan => null;
 
         public bool ForceRescan { get; set; } = true;
-        public string CurrentDbName { get; set; }
+        public string CurrentWaitsDbName { get; set; }
         public int CurrentServiceId { get; set; } = -1;
 
         public IDistributedLockProvider DistributedLockProvider =>
