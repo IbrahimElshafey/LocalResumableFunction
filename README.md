@@ -236,6 +236,14 @@ public async IAsyncEnumerable<Wait> WaitTwoManagers()
 	.
 ```
 * `SubResumableFunction` Can wait another `SubResumableFunction` 
+```C#
+[SubResumableFunction("SubFunction1")]
+public async IAsyncEnumerable<Wait> SubFunction1()
+{
+    yield return Wait<string, string>(Method1, "M1").MatchAll();
+    yield return Wait("Wait sub function2", SubFunction2);
+}
+```
 * You can wait **mixed group** that contains `SubResumableFunction`s, `MethodWait`s and `WaitsGroup`s
 ```C#
 yield return Wait("Wait Many Types Group",
