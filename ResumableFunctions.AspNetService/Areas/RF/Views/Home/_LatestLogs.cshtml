@@ -41,8 +41,8 @@
                        onclick="resetLogs()" />
             </div>
             @*<div class="w3-col l1">
-                <span class="w3-text-light-gray">~</span>
-                <input type="button" class="w3-input w3-button w3-indigo" value="Clear Logs" />
+            <span class="w3-text-light-gray">~</span>
+            <input type="button" class="w3-input w3-button w3-indigo" value="Clear Logs" />
             </div>*@
 
         </div>
@@ -57,12 +57,21 @@
                 <label>Hide/Show Infos</label>
             </div>
         </div>
-        <div>
-            @for (var i = 0; i < Model.Logs.Count; i++)
-            {
-                @Html.DisplayFor(x => Model.Logs[i])
-            }
-        </div>
+        @if (Model.Logs.Any())
+        {
+            <div>
+                @for (var i = 0; i < Model.Logs.Count; i++)
+                {
+                    @Html.DisplayFor(x => Model.Logs[i])
+                }
+            </div>
+        }
+        else
+        {
+            <div class="w3-display-middle w3-padding-64">
+                <h1 class="w3-text-red">No Logs</h1>
+            </div>
+        }
     </div>
 </div>
 

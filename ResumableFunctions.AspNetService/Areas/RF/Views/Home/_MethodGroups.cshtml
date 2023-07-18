@@ -35,56 +35,66 @@
                        onclick="resetMethodGroups()" />
             </div>
         </div>
-        <table class="w3-table-all">
-            <thead>
-                <tr class="w3-indigo">
-                    <th>Method Group URN</th>
-                    <th>MethodGroups</th>
-                    <th>Active Waits</th>
-                    <th>Completed Waits</th>
-                    <th>Canceled Waits</th>
-                    <th>Registration Date</th>
-                </tr>
-            </thead>
-            @foreach (var item in Model.MethodGroups)
-            {
-                <tr>
-                    <td>
-                        <ul>
-                            <li>
-                                <span>@item.Group.MethodGroupUrn #@item.Group.Id</span>
-                                @if (item.AllWaitsCount > 0)
-                                {
-                                    <span>
-                                        <a href="~/RF/MethodsGroup/MethodWaits?groupId=@item.Group.Id" target="_blank" class="w3-text-blue">
-                                            (@(item.AllWaitsCount) Waits)
-                                        </a>
-                                    </span>
-                                }
-                            </li>
-                            <li>
-                                @(item.Group.IsLocalOnly ? "Local" : "Shared"), @(item.Group.CanPublishFromExternal ? "External" : "Internal")
-                            </li>
-                        </ul>
+        @if (Model.MethodGroups.Any())
+        {
+            <table class="w3-table-all">
+                <thead>
+                    <tr class="w3-indigo">
+                        <th>Method Group URN</th>
+                        <th>Methods</th>
+                        <th>Active Waits</th>
+                        <th>Completed Waits</th>
+                        <th>Canceled Waits</th>
+                        <th>Registration Date</th>
+                    </tr>
+                </thead>
+                @foreach (var item in Model.MethodGroups)
+                {
+                    <tr>
+                        <td>
+                            <ul>
+                                <li>
+                                    <span>@item.Group.MethodGroupUrn #@item.Group.Id</span>
+                                    @if (item.AllWaitsCount > 0)
+                                    {
+                                        <span>
+                                            <a href="~/RF/MethodsGroup/MethodWaits?groupId=@item.Group.Id" target="_blank" class="w3-text-blue">
+                                                (@(item.AllWaitsCount) Waits)
+                                            </a>
+                                        </span>
+                                    }
+                                </li>
+                                <li>
+                                    @(item.Group.IsLocalOnly ? "Local" : "Shared"), @(item.Group.CanPublishFromExternal ? "External" : "Internal")
+                                </li>
+                            </ul>
 
-                    </td>
-                    <td>
-                        @*href="~/RF/MethodsGroup/MethodsInGroup"*@
-                        <a onclick="LoadMethods(@item.Group.Id)" target="_blank" class="w3-text-blue">@item.MethodsCount</a>
-                    </td>
-                    <td>
-                        @item.ActiveWaits
-                    </td>
-                    <td>
-                        @item.CompletedWaits
-                    </td>
-                    <td>
-                        @item.CanceledWaits
-                    </td>
-                    <td>@item.Created</td>
-                </tr>
-            }
-        </table>
+                        </td>
+                        <td>
+                            @*href="~/RF/MethodsGroup/MethodsInGroup"*@
+                            <a onclick="LoadMethods(@item.Group.Id)" target="_blank" class="w3-text-blue">@item.MethodsCount</a>
+                        </td>
+                        <td>
+                            @item.ActiveWaits
+                        </td>
+                        <td>
+                            @item.CompletedWaits
+                        </td>
+                        <td>
+                            @item.CanceledWaits
+                        </td>
+                        <td>@item.Created</td>
+                    </tr>
+                }
+            </table>
+        }
+        else
+        {
+            <div class="w3-display-middle w3-padding-64">
+                <h1 class="w3-text-red">No Method Groups</h1>
+            </div>
+        }
+
     </div>
 
     <div id="id01" class="w3-modal">

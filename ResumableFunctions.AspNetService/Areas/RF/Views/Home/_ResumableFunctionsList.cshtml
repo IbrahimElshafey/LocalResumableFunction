@@ -35,7 +35,9 @@
                        onclick="resetFunctionsView()" />
             </div>
         </div>
-        <table class="w3-table-all">
+        @if (Model.Functions.Any())
+        {
+             <table class="w3-table-all">
             <thead>
                 <tr class="w3-indigo">
                     <th width="45%">Function</th>
@@ -119,5 +121,13 @@
                 </tr>
             }
         </table>
+        }
+        else
+        {
+            <div class="w3-display-middle w3-padding-64">
+                <h1 class="w3-text-red">No Functions</h1>
+            </div>
+        }
+       
     </div>
 </div>

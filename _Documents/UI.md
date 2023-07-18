@@ -1,11 +1,10 @@
 ﻿# UI V1
-* Set params in Hash and enable reload
-* Wait Status InError not shown in views
-
 
 * Infinite scroll for:
 	* Logs view
 	* Pushed Calls view
+	* Waits for method group
+	* Function Instances
 
 # UI V2
 * Tabels problem on small screens

@@ -135,7 +135,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
 
         string ErrorTemplate(string propName, bool propValue) =>
            $"Error When register method {methodData.MethodName}," +
-           $"Method group `{methodGroup.MethodGroupUrn}` property {propName} was `{propValue}` and can't be changed";
+           $"Method group `{methodGroup.MethodGroupUrn}` property `{propName}` was `{propValue}` and can't be changed";
     }
 
 

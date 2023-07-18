@@ -1882,7 +1882,7 @@
         }
 
 
-        function openViewPart(index) {
+        function openViewPart(index,resetHash) {
             console.log('openViewPart');
             if (index == undefined)
                 index = '0';
@@ -1899,9 +1899,26 @@
             var currentButton = document.getElementById('tab-link-' + index);
             currentButton.className += " w3-indigo";
             var viewUrl = currentButton.getAttribute('data-view-link');
-            setMainPageView(viewUrl,title(index))
-            window.location.hash = "#view=" + index;
+           
+            console.log(resetHash);
+            if(resetHash==true)
+            { 
+                window.location.hash = '';
+                setMainPageView(viewUrl, title(index));
+            }
+            else
+                setMainPageView(`${viewUrl}?${window.location.hash.substr(1)}`, title(index));
+
+            setOrUpdateHashParameter('view',index)
         }
+
+         //document ready
+        document.addEventListener("DOMContentLoaded", function () {
+            var isMenuElement = document.getElementById('is-menu-page');
+            if (isMenuElement && isMenuElement.value)
+                openViewPart(hashParts().view);
+            JsonObjectRender();
+        });
 
         function setMainPageView(viewUrl,title){
             document.title = title;
@@ -1912,6 +1929,13 @@
                     homeDiv.innerHTML = result;
                     JsonObjectRender();
                 });
+        }
+
+        function setOrUpdateHashParameter(hashParameterName, hashParameterValue) {
+            let theURL = new URL(window.location.href);
+            theURL.search = window.location.hash.substring(1);
+            theURL.searchParams.set(hashParameterName, hashParameterValue);
+            window.location.hash = theURL.searchParams;
         }
 
         function title(index){
@@ -1935,13 +1959,7 @@
             return result;
         }
 
-        //document ready
-        document.addEventListener("DOMContentLoaded", function () {
-            var isMenuElement = document.getElementById('is-menu-page');
-            if (isMenuElement && isMenuElement.value)
-                openViewPart(hashParts().view);
-            JsonObjectRender();
-        });
+       
 
         function toggleShow(selector) {
             document.querySelectorAll(selector).forEach(function (el) {
