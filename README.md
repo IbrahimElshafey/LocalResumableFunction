@@ -163,7 +163,9 @@ builder.Services
 * Change `WeatherForecastController.cs` file contect with content [here](https://raw.githubusercontent.com/IbrahimElshafey/ResumableFunctionsSamples/Main/RequestApproval/Controllers/RequestApprovalController.cs).
 * Rename `WeatherForecastController.cs` to `RequestApprovalController.cs`
 * Set Breakpoint at lines `52,54` in file `RequestApprovalController.cs`
-* Run the app and from swagger UI call `UserSubmitRequest` the breakpoint at 54 will be hit if `(Id > 0)`
+* Change `launchUrl` in Properties\launchSettings.json to RF instead of swagger
+* Run the app now,The RF UI will appear
+* Open Swagger UI call `UserSubmitRequest` the breakpoint at 54 will be hit if `(Id > 0)`
 * Continue excecution the browse to `<current-service-url>/RF` to show resumable functions UI.
 * From swagger Ui call `ManagerApproval` action with the `ManagerApprovalTaskId` you copied before and `Accept` for Decision prop.
 * The breakpoint at 56 will be hit.
@@ -235,6 +237,16 @@ public async IAsyncEnumerable<Wait> WaitTwoManagers()
 ```
 * `SubResumableFunction` Can wait another `SubResumableFunction` 
 * You can wait **mixed group** that contains `SubResumableFunction`s, `MethodWait`s and `WaitsGroup`s
+```C#
+yield return Wait("Wait Many Types Group",
+    Wait("Wait three methods in Group",
+        Wait<string, string>(Method1, "Method 1"),
+        Wait<string, string>(Method2, "Method 2"),
+        Wait<string, string>(Method3, "Method 3")
+    ),
+    Wait("Wait sub function", SubFunction),
+    Wait<string, string>(Method5, "Wait Method M5"));
+```
 * You can **GoBackTo** a previous wait to wait it again.
 ``` C#
 if (ManagerOneApproval is false)

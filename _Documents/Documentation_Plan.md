@@ -1,6 +1,4 @@
-# Prepare how to use?
-* Start using the library sample update
-
+# Write docs for
 * Configuration
 * Resumable Functions UI
 * How to test your resumable functions?

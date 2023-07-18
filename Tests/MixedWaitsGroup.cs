@@ -29,7 +29,7 @@ namespace Tests
             [ResumableFunctionEntryPoint("MixedWaitsGroup")]
             public async IAsyncEnumerable<Wait> WaitThreeAtStart()
             {
-                yield return Wait("Wait Many Types",
+                yield return Wait("Wait Many Types Group",
                     Wait("Wait three methods in Group",
                         Wait<string, string>(Method1, "Method 1"),
                         Wait<string, string>(Method2, "Method 2"),
