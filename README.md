@@ -1,5 +1,5 @@
 **Project Status: Work in progress [here](https://github.com/IbrahimElshafey/ResumableFunctions/tree/main/_Documents)**
-* [What are Resumable Functions?](#what-are-resumable-function)
+* [What are Resumable Functions?](#what-are-resumable-functions)
 * [Why this project?](#why-this-project)
 * [Example](#example)
 * [**Start using the library NuGet package**](#start-using-the-library)
