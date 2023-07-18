@@ -7,7 +7,7 @@
             var menuItem = Model.Items[i];
             <button id="tab-link-@i" data-view-link="@(menuItem.PartialViewUrl)"
                     class="w3-bar-item w3-button tablink w3-border-bottom w3-border-indigo"
-                    onclick="openViewPart('@i')">
+                    onclick="openViewPart('@i',true)">
                 @menuItem.DisplayName
             </button>
         }

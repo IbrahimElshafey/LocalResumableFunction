@@ -1,17 +1,13 @@
-﻿# UI project
-* Tables problem on small screens
-* Filters and search in all views
-* Services View
-	* Add Other Errors View
-		* Functions that have not start wait
-		* 
-	* Add Scan Status View
-	* Wait Status InError not shown in views
+﻿# UI V1
 
-	
+* Infinite scroll for:
+	* Logs view
+	* Pushed Calls view
+	* Waits for method group
+	* Function Instances
 
-
-# UI Actions [Will be in UI v2]
+# UI V2
+* Tabels problem on small screens
 * Wait templates for method group
 * Actions on Wait 
 	* Cancel (If Waiting)
@@ -27,3 +23,6 @@
 	* Wait methods in same method group must have the same signature
 	* Return failed instancs
 	* Stop resumable function creation of new instances
+* Date range filter for:
+	* Logs view
+	* Pushed Calls view

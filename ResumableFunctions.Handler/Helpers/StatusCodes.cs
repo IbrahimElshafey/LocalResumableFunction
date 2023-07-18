@@ -20,7 +20,7 @@ namespace ResumableFunctions.Handler.Helpers
 
         public static Dictionary<int, string> StatusCodeNames = new Dictionary<int, string>
         {
-            {0, null},
+            {-1, "Any"},
             {MethodValidation, "While Method Validation"},
             {Scanning, "While Scanning Types"},
             {WaitProcessing, "While Wait Processing"},

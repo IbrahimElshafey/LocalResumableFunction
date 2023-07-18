@@ -188,7 +188,11 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         }
 
         var hasErrors = FunctionState.HasErrors();
-        if (hasErrors) Status = WaitStatus.InError;
+        if (hasErrors)
+        {
+            Status = WaitStatus.InError;
+            FunctionState.Status = FunctionStatus.InError;
+        }
         return hasErrors is false;
     }
 

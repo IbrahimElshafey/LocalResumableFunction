@@ -1,4 +1,7 @@
 ﻿@model List<ResumableFunctions.Handler.UiService.InOuts.MethodInGroupInfo>
+@{
+    ViewBag.Title = $"Methods in Group";
+}
 <header class="w3-text-blue-gray w3-col l10 w3-margin">
     <h2 class="w3-margin-top">
         <b>Methods in group <span class="w3-text-indigo">`@Model.FirstOrDefault()?.GroupUrn`</span></b>

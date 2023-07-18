@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using System.Buffers;
 using System.Linq.CompilerServices.TypeSystem;
+using System.Reflection;
 
 namespace ResumableFunctions.AspNetService
 {
@@ -45,14 +47,21 @@ namespace ResumableFunctions.AspNetService
         [HttpPost(Constants.ExternalCallAction)]
         public async Task<int> ExternalCall()
         {
+            var body = await Request.BodyReader.ReadAsync();
+            var bytes = body.Buffer.ToArray();
+            var serializer = new BinaryToObjectConverter();
+            var externalCall = serializer.ConvertToObject<ExternalCallArgs>(bytes);
+            return await ExternalCallJson(externalCall);
+        }
+
+        [HttpPost(Constants.ExternalCallAction + "Json")]
+        public async Task<int> ExternalCallJson(ExternalCallArgs externalCall)
+        {
             try
             {
-                var body = await Request.BodyReader.ReadAsync();
-                var bytes = body.Buffer.ToArray();
-                var serializer = new BinaryToObjectConverter();
-                var externalCall = serializer.ConvertToObject<ExternalCallArgs>(bytes);
                 if (externalCall == null)
                     throw new ArgumentNullException(nameof(externalCall));
+
                 var pushedCall = new PushedCall
                 {
                     MethodData = externalCall.MethodData,

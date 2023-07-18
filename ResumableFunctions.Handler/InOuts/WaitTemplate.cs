@@ -29,45 +29,6 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     internal string SetDataExpressionValue { get;  set; }
 
 
-    public static Expression<Func<WaitTemplate, WaitTemplate>> BasicMatchSelector =>
-        waitTemplate => new WaitTemplate
-        {
-            MatchExpressionValue = waitTemplate.MatchExpressionValue,
-            SetDataExpressionValue = waitTemplate.SetDataExpressionValue,
-            Id = waitTemplate.Id,
-            FunctionId = waitTemplate.FunctionId,
-            MethodId = waitTemplate.MethodId,
-            MethodGroupId = waitTemplate.MethodGroupId,
-            ServiceId = waitTemplate.ServiceId,
-            IsActive = waitTemplate.IsActive,
-        };
-
-    public static Expression<Func<WaitTemplate, WaitTemplate>> CallMandatoryPartSelector =>
-        waitTemplate => new WaitTemplate
-        {
-            CallMandatoryPartExpressionValue = waitTemplate.CallMandatoryPartExpressionValue,
-            Id = waitTemplate.Id,
-            FunctionId = waitTemplate.FunctionId,
-            MethodId = waitTemplate.MethodId,
-            MethodGroupId = waitTemplate.MethodGroupId,
-            IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
-            ServiceId = waitTemplate.ServiceId,
-            IsActive = waitTemplate.IsActive,
-        };
-    public static Expression<Func<WaitTemplate, WaitTemplate>> InstanceMandatoryPartSelector =>
-        waitTemplate => new WaitTemplate
-        {
-            InstanceMandatoryPartExpressionValue = waitTemplate.InstanceMandatoryPartExpressionValue,
-            Id = waitTemplate.Id,
-            FunctionId = waitTemplate.FunctionId,
-            MethodId = waitTemplate.MethodId,
-            MethodGroupId = waitTemplate.MethodGroupId,
-            IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
-            ServiceId = waitTemplate.ServiceId,
-            Hash = waitTemplate.Hash,
-            IsActive= waitTemplate.IsActive,
-        };
-
     [NotMapped]
     public LambdaExpression MatchExpression { get; internal set; }
 

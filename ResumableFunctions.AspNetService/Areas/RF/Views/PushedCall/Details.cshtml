@@ -1,5 +1,8 @@
 ﻿@using MessagePack;
 @using ResumableFunctions.Handler.UiService.InOuts;
+@{
+    ViewBag.Title = $"Pushed Call `{Model.MethodData.MethodUrn}`";
+}
 @model PushedCallDetails
 <div class="w3-container w3-margin">
     <header class="w3-text-blue-gray">

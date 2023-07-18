@@ -1,7 +1,9 @@
-﻿namespace ResumableFunctions.Handler.UiService.InOuts
+﻿using ResumableFunctions.Handler.InOuts;
+
+namespace ResumableFunctions.Handler.UiService.InOuts
 {
     public record MethodGroupInfo(
-        int Id, string URN, int MethodsCount, int ActiveWaits, int CompletedWaits, int CanceledWaits, DateTime Created)
+        MethodsGroup Group, int MethodsCount, int ActiveWaits, int CompletedWaits, int CanceledWaits, DateTime Created)
     {
         public int AllWaitsCount => ActiveWaits + CompletedWaits + CanceledWaits;
     }

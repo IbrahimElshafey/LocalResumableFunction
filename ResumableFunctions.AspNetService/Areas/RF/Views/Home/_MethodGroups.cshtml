@@ -1,0 +1,112 @@
+﻿@using ResumableFunctions.Handler.UiService.InOuts;
+@model MethodGroupsViewModel
+<div class="w3-margin">
+    <header class="w3-text-indigo">
+        <h2 class="w3-margin-top"><b>Method Groups</b></h2>
+    </header>
+    <div class="w3-container">
+        <div class="w3-row-padding w3-margin"
+             style="margin-left: -16px !important;margin-right: -16px !important;">
+            <div class="w3-col l5">
+                <b class="w3-text-indigo">Search</b>
+                <input value="@Model.SearchTerm" id="searchTerm" class="w3-input w3-border" type="text" required="" placeholder="Search by Method URN">
+            </div>
+            <div class="w3-col l3">
+                <b class="w3-text-indigo">Service</b>
+                <select class="w3-select" name="selectedService" id="selectedService">
+                    <option value="" disabled selected>Choose a Service</option>
+                    @foreach (var service in Model.Services)
+                    {
+                        <option value="@service.Id"
+                            selected="@(service.Id==Model.SelectedService)">
+                            @service.AssemblyName
+                        </option>
+                    }
+                </select>
+            </div>
+            <div class="w3-col l2">
+                <span class="w3-text-light-gray">s</span>
+                <input type="button" class="w3-input w3-button w3-indigo" value="Search"
+                       onclick="searchMethodGroups()" />
+            </div>
+            <div class="w3-col l2">
+                <span class="w3-text-light-gray">s</span>
+                <input type="button" class="w3-input w3-button w3-indigo" value="Reset"
+                       onclick="resetMethodGroups()" />
+            </div>
+        </div>
+        @if (Model.MethodGroups.Any())
+        {
+            <table class="w3-table-all">
+                <thead>
+                    <tr class="w3-indigo">
+                        <th>Method Group URN</th>
+                        <th>Methods</th>
+                        <th>Active Waits</th>
+                        <th>Completed Waits</th>
+                        <th>Canceled Waits</th>
+                        <th>Registration Date</th>
+                    </tr>
+                </thead>
+                @foreach (var item in Model.MethodGroups)
+                {
+                    <tr>
+                        <td>
+                            <ul>
+                                <li>
+                                    <span>@item.Group.MethodGroupUrn #@item.Group.Id</span>
+                                    @if (item.AllWaitsCount > 0)
+                                    {
+                                        <span>
+                                            <a href="~/RF/MethodsGroup/MethodWaits?groupId=@item.Group.Id" target="_blank" class="w3-text-blue">
+                                                (@(item.AllWaitsCount) Waits)
+                                            </a>
+                                        </span>
+                                    }
+                                </li>
+                                <li>
+                                    @(item.Group.IsLocalOnly ? "Local" : "Shared"), @(item.Group.CanPublishFromExternal ? "External" : "Internal")
+                                </li>
+                            </ul>
+
+                        </td>
+                        <td>
+                            @*href="~/RF/MethodsGroup/MethodsInGroup"*@
+                            <a onclick="LoadMethods(@item.Group.Id)" target="_blank" class="w3-text-blue">@item.MethodsCount</a>
+                        </td>
+                        <td>
+                            @item.ActiveWaits
+                        </td>
+                        <td>
+                            @item.CompletedWaits
+                        </td>
+                        <td>
+                            @item.CanceledWaits
+                        </td>
+                        <td>@item.Created</td>
+                    </tr>
+                }
+            </table>
+        }
+        else
+        {
+            <div class="w3-display-middle w3-padding-64">
+                <h1 class="w3-text-red">No Method Groups</h1>
+            </div>
+        }
+
+    </div>
+
+    <div id="id01" class="w3-modal">
+        <div class="w3-modal-content" style="width: 90%;height:auto;">
+            <div class="w3-container">
+                <span onclick="CloseMethodsModal()" class="w3-button w3-display-topright">&times;</span>
+                <div id="methods-in-group">
+                    <div class="progress-bar">
+                        <div class="progress-bar-value"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-    <title>Resumable Functions</title>
+    <title>@ViewBag.Title</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -1841,6 +1841,7 @@
             }
         }
     </style>
+
     <script>
         if (!library)
             var library = {};
@@ -1881,8 +1882,8 @@
         }
 
 
-        function openViewPart(index) {
-            console.log(index);
+        function openViewPart(index,resetHash) {
+            console.log('openViewPart');
             if (index == undefined)
                 index = '0';
             var i, tablinks;
@@ -1898,6 +1899,29 @@
             var currentButton = document.getElementById('tab-link-' + index);
             currentButton.className += " w3-indigo";
             var viewUrl = currentButton.getAttribute('data-view-link');
+           
+            console.log(resetHash);
+            if(resetHash==true)
+            { 
+                window.location.hash = '';
+                setMainPageView(viewUrl, title(index));
+            }
+            else
+                setMainPageView(`${viewUrl}?${window.location.hash.substr(1)}`, title(index));
+
+            setOrUpdateHashParameter('view',index)
+        }
+
+         //document ready
+        document.addEventListener("DOMContentLoaded", function () {
+            var isMenuElement = document.getElementById('is-menu-page');
+            if (isMenuElement && isMenuElement.value)
+                openViewPart(hashParts().view);
+            JsonObjectRender();
+        });
+
+        function setMainPageView(viewUrl,title){
+            document.title = title;
             fetch(viewUrl)
                 .then((response) => { return response.text(); })
                 .then((result) => {
@@ -1905,8 +1929,23 @@
                     homeDiv.innerHTML = result;
                     JsonObjectRender();
                 });
-            window.location.hash = "#view=" + index;
+        }
 
+        function setOrUpdateHashParameter(hashParameterName, hashParameterValue) {
+            let theURL = new URL(window.location.href);
+            theURL.search = window.location.hash.substring(1);
+            theURL.searchParams.set(hashParameterName, hashParameterValue);
+            window.location.hash = theURL.searchParams;
+        }
+
+        function title(index){
+            switch(index.toString()) {
+            case "0": return "Services";
+            case "1": return "Functions";
+            case "2": return "Method Groups";
+            case "3": return "Pushed Calls";
+            case "4": return "Logs";
+            }
         }
 
         function hashParts() {
@@ -1920,13 +1959,7 @@
             return result;
         }
 
-        //document ready
-        document.addEventListener("DOMContentLoaded", function () {
-            var isMenuElement = document.getElementById('is-menu-page');
-            if (isMenuElement && isMenuElement.value)
-                openViewPart(hashParts().view);
-            JsonObjectRender();
-        });
+       
 
         function toggleShow(selector) {
             document.querySelectorAll(selector).forEach(function (el) {
@@ -1961,6 +1994,7 @@
           }
         }
     </script>
+    <script src="/_content/ResumableFunctions.AspNetService/rf_js/rf.js"></script>
 </head>
 <body class="w3-light-grey">
 

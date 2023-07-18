@@ -86,7 +86,19 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
     {
         var waitTemplate = (await _context
             .WaitTemplates
-            .Select(WaitTemplate.InstanceMandatoryPartSelector)
+            .Select(waitTemplate =>
+                    new WaitTemplate
+                    {
+                        InstanceMandatoryPartExpressionValue = waitTemplate.InstanceMandatoryPartExpressionValue,
+                        Id = waitTemplate.Id,
+                        FunctionId = waitTemplate.FunctionId,
+                        MethodId = waitTemplate.MethodId,
+                        MethodGroupId = waitTemplate.MethodGroupId,
+                        IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
+                        ServiceId = waitTemplate.ServiceId,
+                        Hash = waitTemplate.Hash,
+                        IsActive = waitTemplate.IsActive,
+                    })
             .Where(x =>
                 x.MethodGroupId == groupId &&
                 x.FunctionId == funcId &&
@@ -106,7 +118,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
     }
 
 
-    public async Task<List<WaitTemplate>> GetWaitTemplates(int methodGroupId, int functionId)
+    public async Task<List<WaitTemplate>> GetWaitTemplatesForFunction(int methodGroupId, int functionId)
     {
         var waitTemplatesQry = _context
             .WaitTemplates
@@ -139,7 +151,18 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         return
             await _context
             .WaitTemplates
-            .Select(WaitTemplate.BasicMatchSelector)
+            .Select(waitTemplate => 
+                new WaitTemplate
+                {
+                    MatchExpressionValue = waitTemplate.MatchExpressionValue,
+                    SetDataExpressionValue = waitTemplate.SetDataExpressionValue,
+                    Id = waitTemplate.Id,
+                    FunctionId = waitTemplate.FunctionId,
+                    MethodId = waitTemplate.MethodId,
+                    MethodGroupId = waitTemplate.MethodGroupId,
+                    ServiceId = waitTemplate.ServiceId,
+                    IsActive = waitTemplate.IsActive,
+                })
             .FirstAsync(x => x.Id == methodWaitTemplateId);
     }
 

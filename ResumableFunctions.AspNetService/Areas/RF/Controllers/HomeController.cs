@@ -27,32 +27,64 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
         [ActionName(PartialNames.ServicesList)]
         public async Task<IActionResult> ServicesView()
         {
-            return PartialView(PartialNames.ServicesList, new ServicesListModel(await _uiService.GetServicesList()));
+            return PartialView(PartialNames.ServicesList, new ServicesListModel(await _uiService.GetServicesSummary()));
         }
 
 
         [ActionName(PartialNames.PushedCalls)]
-        public async Task<IActionResult> PushedCalls()
+        public async Task<IActionResult> PushedCalls(int serviceId = -1, string searchTerm = null)
         {
-            return PartialView(PartialNames.PushedCalls, await _uiService.GetPushedCalls(0));
+            return PartialView(
+                PartialNames.PushedCalls,
+                new PushedCallsViewMode
+                {
+                    Calls = await _uiService.GetPushedCalls(0, serviceId, searchTerm),
+                    Services = await _uiService.GetServices(),
+                    SelectedService = serviceId,
+                    SearchTerm = searchTerm
+                });
         }
 
         [ActionName(PartialNames.LatestLogs)]
-        public async Task<IActionResult> LatestLogs()
+        public async Task<IActionResult> LatestLogs(int serviceId = -1, int statusCode = -1)
         {
-            return PartialView(PartialNames.LatestLogs, await _uiService.GetLogs());
+            return PartialView(
+                PartialNames.LatestLogs,
+                new LogsViewModel
+                {
+                    Logs = await _uiService.GetLogs(0, serviceId, statusCode),
+                    Services = await _uiService.GetServices(),
+                    SelectedService = serviceId,
+                    SelectedStatusCode = statusCode
+                });
         }
 
         [ActionName(PartialNames.ResumableFunctions)]
-        public async Task<IActionResult> GetResumableFunctionsAsync(int serviceId)
+        public async Task<IActionResult> GetResumableFunctions(int serviceId = -1, string functionName = null)
         {
-            return PartialView(PartialNames.ResumableFunctions, await _uiService.GetFunctionsInfo(serviceId));
+            return PartialView(
+                PartialNames.ResumableFunctions,
+                new FunctionsViewModel
+                {
+                    Functions = await _uiService.GetFunctionsSummary(serviceId, functionName),
+                    SelectedService = serviceId,
+                    SearchTerm = functionName,
+                    Services = await _uiService.GetServices(),
+                });
         }
 
-        [ActionName(PartialNames.MethodsList)]
-        public async Task<IActionResult> GetMethodsListAsync(int serviceId)
+        [ActionName(PartialNames.MethodGroups)]
+        public async Task<IActionResult> GetMethodGroups(int serviceId = -1, string searchTerm = null)
         {
-            return PartialView(PartialNames.MethodsList, await _uiService.GetMethodsInfo(serviceId));
+            return PartialView(
+                PartialNames.MethodGroups,
+                new MethodGroupsViewModel
+                {
+                    MethodGroups = await _uiService.GetMethodGroupsSummary(serviceId, searchTerm),
+                    SelectedService = serviceId,
+                    SearchTerm = searchTerm,
+                    Services = await _uiService.GetServices(),
+                });
         }
     }
 }

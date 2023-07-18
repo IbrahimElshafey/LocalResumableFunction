@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-
 namespace ResumableFunctions.AspNetService
 {
     public static class Extensions
@@ -28,6 +27,7 @@ namespace ResumableFunctions.AspNetService
             app.UseHangfireDashboard();
             app.MapRazorPages();
             app.UseStaticFiles();
+           
 
             app.UseRouting();
 
