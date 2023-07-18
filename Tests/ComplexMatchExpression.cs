@@ -28,7 +28,7 @@ public class ComplexMatchExpression
         Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
     }
 
-    public class TestClass : ResumableFunction
+    public class TestClass : ResumableFunctionsContainer
     {
         public int IntProp { get; set; } = 100;
 

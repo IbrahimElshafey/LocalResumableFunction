@@ -40,7 +40,7 @@ public class ReplayInSubFunction
         //Assert.Equal(1, waits.Count(x => x.Status == WaitStatus.Completed));
     }
 
-    public class TestClass : ResumableFunction
+    public class TestClass : ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("ReplayInSubFunctions")]
         public async IAsyncEnumerable<Wait> Test()

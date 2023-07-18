@@ -6,7 +6,7 @@
 }
 <style>
     .function-instance-label {
-        display:none !important;
+        display: none !important;
     }
 </style>
 <div class="w3-container w3-margin">
@@ -87,11 +87,21 @@
                 <label>Hide/Show @Model.Logs.Count(x=>x.Type==LogType.Info) Info</label>
             </div>
         </div>
-        <div class="w3-margin">
-            @foreach (var logItem in Model.Logs)
-            {
-                @Html.DisplayFor(x => logItem)
-            }
-        </div>
+        @if (Model.Logs.Any())
+        {
+            <div class="w3-margin">
+                @foreach (var logItem in Model.Logs)
+                {
+                    @Html.DisplayFor(x => logItem)
+                }
+            </div>
+        }
+        else
+        {
+            <div class="w3-margin w3-padding-64">
+                <h1 class="w3-text-red w3-center">No Logs</h1>
+            </div>
+        }
+
     </div>
 </div>

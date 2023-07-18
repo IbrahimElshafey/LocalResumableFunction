@@ -91,7 +91,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                     wait.Name += $"-Replay-{DateTime.Now.Ticks}";
                     wait.IsReplay = true;
                     wait.IsFirst = false;
-                    wait.CurrentFunction = (ResumableFunction)duplicateWait.FunctionState.StateObject;
+                    wait.CurrentFunction = (ResumableFunctionsContainer)duplicateWait.FunctionState.StateObject;
                     wait.Status = WaitStatus.Waiting;
                 });
 
@@ -153,7 +153,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             wait.Name += $"-Replay-{DateTime.Now.Ticks}";
             wait.IsReplay = true;
             wait.IsFirst = false;
-            wait.CurrentFunction = (ResumableFunction)duplicateWait.FunctionState.StateObject;
+            wait.CurrentFunction = (ResumableFunctionsContainer)duplicateWait.FunctionState.StateObject;
             wait.Status = WaitStatus.Waiting;
         });
         await _waitsRepo.SaveWait(duplicateWait);

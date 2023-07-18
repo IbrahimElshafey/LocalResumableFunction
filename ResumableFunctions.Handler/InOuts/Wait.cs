@@ -53,7 +53,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     public string Path { get; internal set; }
 
     [NotMapped]
-    internal ResumableFunction CurrentFunction { get; set; }
+    internal ResumableFunctionsContainer CurrentFunction { get; set; }
 
     internal bool CanBeParent => this is FunctionWait || this is WaitsGroup;
     internal int? CallId { get; set; }
@@ -236,6 +236,6 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         if (ExtraDataValue != null)
             ExtraData = converter.ConvertToObject<WaitExtraData>(ExtraDataValue);
         if (FunctionState?.StateObject != null && CurrentFunction == null)
-            CurrentFunction = (ResumableFunction)FunctionState.StateObject;
+            CurrentFunction = (ResumableFunctionsContainer)FunctionState.StateObject;
     }
 }

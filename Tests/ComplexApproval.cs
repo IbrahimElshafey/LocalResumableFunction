@@ -41,7 +41,7 @@ public class ComplexApproval
     }
 
 
-    public class Test : ResumableFunction
+    public class Test : ResumableFunctionsContainer
     {
 
         public const int CommitteeMembersCount = 3;

@@ -42,7 +42,7 @@ namespace Tests
             instance.Method2("#");
         }
 
-        public class Test : ResumableFunction
+        public class Test : ResumableFunctionsContainer
         {
             private int _dynamicProp;
 

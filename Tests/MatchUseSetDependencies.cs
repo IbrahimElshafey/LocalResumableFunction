@@ -29,7 +29,7 @@ public class MatchUseSetDependencies
         Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
     }
 
-    public class TestClass : ResumableFunction
+    public class TestClass : ResumableFunctionsContainer
     {
         [MessagePack.IgnoreMember]
         public Dep1 dep1;//must be public if used in the expression trees and [MessagePack.IgnoreMember] to not serialize it

@@ -1,7 +1,7 @@
 # Prepare how to use?
-* Update readme
-* UI Docs
-* Distributed Services and Resumable Function
-* Update sample to be more complex
-* Repo Samples Update
+* Start using the library smaple update
+* Configuration
+* Resumable Functions UI
 * How to test your resumable functions?
+* Distributed Services and Resumable Function
+* Database Cleaning Job

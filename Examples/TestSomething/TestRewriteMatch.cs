@@ -12,7 +12,7 @@ using ResumableFunctions.Handler.Expressions;
 
 namespace TestSomething
 {
-    public class TestRewriteMatch : ResumableFunction
+    public class TestRewriteMatch : ResumableFunctionsContainer
     {
         public int InstanceId { get; set; } = 5;
 

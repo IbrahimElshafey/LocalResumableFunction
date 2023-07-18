@@ -4,7 +4,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ClientOnboarding.Controllers;
 
-public class TimeWaitWorkflow : ResumableFunction
+public class TimeWaitWorkflow : ResumableFunctionsContainer
 {
     [ResumableFunctionEntryPoint("TestTimeWait")]
     public async IAsyncEnumerable<Wait> TestTimeWaitAtStart()

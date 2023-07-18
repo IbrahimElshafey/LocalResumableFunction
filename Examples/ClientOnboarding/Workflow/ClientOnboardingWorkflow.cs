@@ -9,7 +9,7 @@ using ResumableFunctions.Handler.InOuts;
 namespace ClientOnboarding.Workflow
 {
     //from:https://tallyfy.com/workflow-examples/#onboarding
-    public class ClientOnboardingWorkflow : ResumableFunction
+    public class ClientOnboardingWorkflow : ResumableFunctionsContainer
     {
         private IClientOnboardingService? _service;
 

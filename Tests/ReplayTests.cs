@@ -201,7 +201,7 @@ public class ReplayTests
         Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
     }
 
-    public class GoBeforeWithNewMatchFunction : ResumableFunction
+    public class GoBeforeWithNewMatchFunction : ResumableFunctionsContainer
     {
         public int Counter { get; set; }
         [ResumableFunctionEntryPoint("GoBeforeWithNewMatch")]
@@ -222,7 +222,7 @@ public class ReplayTests
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
     }
-    public class GoAfterFunction : ResumableFunction
+    public class GoAfterFunction : ResumableFunctionsContainer
     {
         public int Counter { get; set; }
         [ResumableFunctionEntryPoint("GoAfterFunction")]
@@ -240,7 +240,7 @@ public class ReplayTests
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
     }
 
-    public class GoBeforeFunction : ResumableFunction
+    public class GoBeforeFunction : ResumableFunctionsContainer
     {
         public int Counter { get; set; }
         [ResumableFunctionEntryPoint("GoBeforeFunction")]
@@ -262,7 +262,7 @@ public class ReplayTests
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
     }
 
-    public class GoToWithNewMatchFunction : ResumableFunction
+    public class GoToWithNewMatchFunction : ResumableFunctionsContainer
     {
         public int Counter { get; set; }
         [ResumableFunctionEntryPoint("ReplayGoToFunction")]
@@ -286,7 +286,7 @@ public class ReplayTests
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
     }
-    public class ReplayGoToFunction : ResumableFunction
+    public class ReplayGoToFunction : ResumableFunctionsContainer
     {
         public int Counter { get; set; }
         [ResumableFunctionEntryPoint("ReplayGoToFunction")]

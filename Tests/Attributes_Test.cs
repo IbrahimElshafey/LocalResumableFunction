@@ -16,7 +16,7 @@ public class Attributes_Test
         Assert.NotEmpty(errorLogs);
     }
 
-    public class AttributesUsageClass:ResumableFunction
+    public class AttributesUsageClass:ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("NotAsync")]
         public IAsyncEnumerable<Wait> NotAsync()

@@ -151,7 +151,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
     public async Task<Wait> GetFirstWait(MethodInfo resumableFunction, bool removeIfExist)
     {
-        var classInstance = (ResumableFunction)Activator.CreateInstance(resumableFunction.DeclaringType);
+        var classInstance = (ResumableFunctionsContainer)Activator.CreateInstance(resumableFunction.DeclaringType);
 
         if (classInstance == null)
         {

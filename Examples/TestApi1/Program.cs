@@ -5,7 +5,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-var settings = new SqlServerResumableFunctionsSettings();
 //settings.CleanDbSettings.CompletedInstanceRetention = TimeSpan.FromSeconds(3);
 //settings.CleanDbSettings.DeactivatedWaitTemplateRetention = TimeSpan.FromSeconds(3);
 //settings.CleanDbSettings.PushedCallRetention = TimeSpan.FromSeconds(3);
@@ -13,7 +12,7 @@ var settings = new SqlServerResumableFunctionsSettings();
 builder.Services
     .AddControllers()
     .AddResumableFunctions(
-       settings
+       new SqlServerResumableFunctionsSettings(null,"WaitsDb","Rf_HangfireDb")
         .SetCurrentServiceUrl("https://localhost:7140/")
         //.SetDllsToScan("ReferenceLibrary")
         );

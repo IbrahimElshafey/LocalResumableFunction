@@ -8,7 +8,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
 
-public abstract partial class ResumableFunction
+public abstract partial class ResumableFunctionsContainer
 {
     public T LocalValue<T>(T value) => default;
     internal MethodInfo CurrentResumableFunction { get; set; }

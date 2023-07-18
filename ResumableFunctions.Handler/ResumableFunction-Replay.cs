@@ -5,7 +5,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
 
-public abstract partial class ResumableFunction : IObjectWithLog
+public abstract partial class ResumableFunctionsContainer : IObjectWithLog
 {
     /// <summary>
     ///     Go back to code after the wait.

@@ -53,7 +53,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
                 var name = exp.Member.Name;
                 throw new Exception(
                     $"Can't use local variable `{name}` in match expression `{ExpressionExtensions.ToCSharpString(_matchExpression)}`, " +
-                    $"please warp it in method `{nameof(ResumableFunction.LocalValue)}({name})`");
+                    $"please warp it in method `{nameof(ResumableFunctionsContainer.LocalValue)}({name})`");
             }
             //todo:check if member is serializable
             //have public getter and setter

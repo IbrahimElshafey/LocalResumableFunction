@@ -40,7 +40,7 @@ public class Sequence
             Assert.Equal(3, waits.Where(x => x.Status == WaitStatus.Completed).Count());
     }
 
-    public class SequenceFunction : ResumableFunction
+    public class SequenceFunction : ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("ThreeMethodsSequence")]
         public async IAsyncEnumerable<Wait> ThreeMethodsSequence()

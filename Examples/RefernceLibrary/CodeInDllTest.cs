@@ -4,7 +4,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ReferenceLibrary
 {
-    public class CodeInDllTest : ResumableFunction
+    public class CodeInDllTest : ResumableFunctionsContainer
     {
         public string UserName { get; set; }
 

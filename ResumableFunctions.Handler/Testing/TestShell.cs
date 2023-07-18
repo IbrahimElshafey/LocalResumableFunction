@@ -82,7 +82,7 @@ namespace ResumableFunctions.Handler.Testing
             await context.SaveChangesAsync();
 
             foreach (var type in _types)
-                if (type.IsSubclassOf(typeof(ResumableFunction)))
+                if (type.IsSubclassOf(typeof(ResumableFunctionsContainer)))
                 {
                     await scanner.RegisterFunctions(typeof(SubResumableFunctionAttribute), type, serviceData);
                     await context.SaveChangesAsync();

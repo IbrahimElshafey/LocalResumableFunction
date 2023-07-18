@@ -42,7 +42,7 @@ namespace Tests
         }
     }
 
-    public class TimeWaitWorkflow : ResumableFunction
+    public class TimeWaitWorkflow : ResumableFunctionsContainer
     {
         public string TimeWaitId { get; set; }
 

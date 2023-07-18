@@ -2,7 +2,7 @@
 
 namespace ResumableFunctions.Handler;
 
-public abstract partial class ResumableFunction
+public abstract partial class ResumableFunctionsContainer
 {
     protected TimeWait Wait(TimeSpan timeToWait, string name = null)
     {

@@ -30,7 +30,7 @@ namespace Tests
 
     }
 
-    public class ExceptionAfterFirstWaitTest : ResumableFunction
+    public class ExceptionAfterFirstWaitTest : ResumableFunctionsContainer
     {
         public string? MethodOutput { get; set; }
 
@@ -50,7 +50,7 @@ namespace Tests
             return input?.Length.ToString();
         }
     }
-    public class ExceptionAtStartTest : ResumableFunction
+    public class ExceptionAtStartTest : ResumableFunctionsContainer
     {
         
 

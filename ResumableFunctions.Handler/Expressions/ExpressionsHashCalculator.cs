@@ -36,8 +36,8 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     {
         var changeComputedParts = new GenericVisitor();
         var localValueMethodInfo =
-            typeof(ResumableFunction)
-            .GetMethod(nameof(ResumableFunction.LocalValue))
+            typeof(ResumableFunctionsContainer)
+            .GetMethod(nameof(ResumableFunctionsContainer.LocalValue))
             .GetGenericMethodDefinition();
         changeComputedParts.OnVisitMethodCall(OnVisitMethodCall);
         if (MatchExpression != null)

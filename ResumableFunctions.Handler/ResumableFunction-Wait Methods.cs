@@ -4,7 +4,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
 
-public abstract partial class ResumableFunction
+public abstract partial class ResumableFunctionsContainer
 {
 
     protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(Func<TInput, TOutput> method,

@@ -4,7 +4,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace TestApi1.Examples
 {
-    public class TestExternalMethodPush : ResumableFunction
+    public class TestExternalMethodPush : ResumableFunctionsContainer
     {
 
         public string Result { get; set; }

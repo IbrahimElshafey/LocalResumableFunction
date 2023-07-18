@@ -119,7 +119,7 @@ public class MethodWait : Wait
         Template.LoadExpressions();
         MatchExpression = Template.MatchExpression;
         SetDataExpression = Template.SetDataExpression;
-        CurrentFunction = (ResumableFunction)FunctionState.StateObject;
+        CurrentFunction = (ResumableFunctionsContainer)FunctionState.StateObject;
     }
 
     public override void CopyCommonIds(Wait oldWait)

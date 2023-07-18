@@ -154,7 +154,7 @@ namespace Tests
         }
     }
 
-    public class WaitManyMethodsWithExpression : ResumableFunction
+    public class WaitManyMethodsWithExpression : ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("WaitManyWithExpression")]
         public async IAsyncEnumerable<Wait> WaitThreeAtStart()
@@ -174,7 +174,7 @@ namespace Tests
         public string Method2(string input) => "Method2 Call";
         [PushCall("Method3")] public string Method3(string input) => "Method3 Call";
     }
-    public class WaitManyMethods : ResumableFunction
+    public class WaitManyMethods : ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("WaitThreeAtStart")]
         public async IAsyncEnumerable<Wait> WaitThreeAtStart()

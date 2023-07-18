@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler;
 
-public abstract partial class ResumableFunction
+public abstract partial class ResumableFunctionsContainer
 {
     protected FunctionWait Wait(string name, Func<IAsyncEnumerable<Wait>> function)
     {

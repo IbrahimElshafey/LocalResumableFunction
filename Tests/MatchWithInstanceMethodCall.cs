@@ -28,7 +28,7 @@ public class MatchWithInstanceMethodCall
         Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
     }
 
-    public class TestClass : ResumableFunction
+    public class TestClass : ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("MatchWithInstanceMethodCall")]
         public async IAsyncEnumerable<Wait> Test()

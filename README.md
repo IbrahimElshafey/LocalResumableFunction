@@ -11,7 +11,7 @@
 * [Database Cleaning Job](https://github.com/IbrahimElshafey/ResumableFunctions/blob/main/_Documents/GitHubDocs/Cleaning_Job.md)
 * [Samples](https://github.com/IbrahimElshafey/ResumableFunctionsSamples)
 * [How it works internally](#how-it-works-internally)
-# What Are Resumable Function?
+# What Are Resumable Functions?
 A resumable function is a function that can be suspended and resumed at a later point in time. This is in contrast to traditional functions, which must be executed to completion before they can return.
 
 In the example below each `yield return` is a place for pause/resume function execution (explained later).
@@ -43,24 +43,24 @@ internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
 ```
 
 # Why this project?
-Server processing depends on fast response times for efficient use of processor and memory. This means that we can't write a single block of code (a method) that uses two or more long-running actions in the same code block. For example, we can't translate the following pseudocode into a single block of code:
+Server processing must be fast to be efficient with processor and memory resources. This means that we can't write a method that blocks for a long time, such as days. For example, the following pseudocode cannot be translated into a single block of code:
 ```
 VactionRequest()
-    when UserSubmitRequest();
+    wait UserSubmitRequest();
     SendRequestToManager();
-    wait ManagerResponse();
+    wait ManagerResponsetoTheRequest();
     DoSomeStuffAfterManagerResponse();
 ```
-We want to write code that reflects the business requirements so that a developer can hand it off to another developer without needing business documents to understand the code. The source code must be a source of truth about how project parts function. Handing off a project with hundreds of classes and methods to a new developer doesn't tell them how business flows, but a resumable function will simplify understanding of what happens under the hood.
+We want to write code that reflects the business requirements so that a developer can hand it off to another developer without needing business documents to understand the code. The source code must be a source of truth about how project parts operate. Handing off a project with hundreds of classes and methods to a new developer doesn't tell them how business flows, but a resumable function will simplify understanding of what happens under the hood.
 
-Business functions/methods must not call each other directly. For example, the method that submits a user request should not call the manager approval method directly. A traditional solution is to create Pub/Sub services that enable the system to be loosely coupled. However, if we used Pub/Sub loosely coupled services, it would be hard to trace what happened without implementing a complex architecture.
+Business functions/methods must not call each other directly. For example, the method that submits a user request should not call the manager approval method directly. A traditional solution is to create Pub/Sub services that enable the system to be loosely coupled. However, if we used Pub/Sub loosely coupled services, it would be hard to trace what happened without implementing a complex architecture and it will be very hard to get what happen when after an action completed.
 
-This project aims to solve the above problems by using resumable functions. Resumable functions are functions that can be paused and resumed later. This allows us to write code that reflects the business requirements without sacrificing readability. It makes it easier to write distributed systems/SOA/Micro Services that are easy to understood when reading the source code.
+This project aims to solve the above problems by using resumable functions. Resumable functions are functions that can be paused and resumed later. This allows us to write code that reflects the business requirements without sacrificing readability. It makes it easier to write distributed systems/SOA/Micro Services that are easy to understand when a developer reads the source code.
 
 This project makes resumable functions a reality.
 
 # Example
-The example shows how to use resumable functions to implement a client onboarding workflow. The workflow consists of the following steps:
+The example below shows how to use resumable functions to implement a client onboarding workflow. The workflow consists of the following steps:
 1. The user fills out a registration form.
 1. The system sends the registration for approval by owner.
 1. If the registration is approved, the system sends the welcome package.
@@ -70,7 +70,7 @@ The example shows how to use resumable functions to implement a client onboardin
 
 
 With resumable function you can write this scenario like below:
-Just a few lines of codes that tells what system do.
+Just a few lines of codes that tells what happen!
 ``` C#
 [ResumableFunctionEntryPoint("ClientOnboardingWorkflow.StartClientOnboardingWorkflow")]
 internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
@@ -96,13 +96,13 @@ internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
 }
 ```
 * The resumable function must match the signature `IAsyncEnumerable<Wait> FunctionName()`
-* The class that contains the resumable function must inherit `ResumableFunction`
+* The class that contains the resumable function must inherit `ResumableFunctionsContainer` class.
 ```C#
-public class ClientOnboardingWorkflow : ResumableFunction
+public class ClientOnboardingWorkflow : ResumableFunctionsContainer
 ```
 * Mark a method with `[ResumableFunctionEntryPoint]` to indicate that the method pauses and resumes based on waits inside.
-* The library will scan your DLL to find first waits for each resumable function to register/save it in database.
-* `ResumableFunctionEntryPoint` attributes takes `string methodUrn` mandatory to track the resumable function by the library.
+* The library will scan your DLL to find first waits for each resumable function to register/save it in the database.
+* `ResumableFunctionEntryPoint` attributes take `string methodUrn` mandatory to track the resumable function by the library so you can change the method name if you want.
 * The method `WaitUserRegistration` return a wait like below:
 ```C#
 private MethodWait<RegistrationForm, RegistrationResult> WaitUserRegistration()
@@ -114,8 +114,8 @@ private MethodWait<RegistrationForm, RegistrationResult> WaitUserRegistration()
                 RegistrationResult == regResult);
 }
 ```
-* The code translation is, We wait for the `ClientFillForm` method to be called, and if the match condition matches then the function will resume.
-* Library will save a (Wait Record) in database and pause the method execution until `ClientFillsForm` method called.
+* The code translation is, We wait for the `_service.ClientFillForm` method to be called and finished, and if the match condition matches then the resumable function will resume.
+* Library will save a wait record for `_service.ClientFillForm` in database and pause the resumable function execution until `ClientFillsForm` method called.
 * `ClientFillsForm` method must be taged with attribute `[PushCall]`
 ```C#
 [PushCall("ClientOnboardingService.ClientFillsForm")]
@@ -130,17 +130,18 @@ public RegistrationResult ClientFillsForm(RegistrationForm registrationForm)
 * The library serializes the class containing the resumable function, saves it to the database, and loads it when a method is called and matched.
 * The match expression evaluated against the method input and output and active instance data.
 * If a match occurred we update the class instance data using `SetData` expression, Note that the assignment operator is not allowed in expression trees so we use equal operator.
-* The execution will continue after setting data until the next wait.
+* The execution will continue after setting data until the next wait or finishing.
 * The next wait will be saved to the database in the same way.
-* The loop will continue until function 
+* The loop will continue until resumable function end.0
 * The method marked with `[PushCall]` must have one input paramter that is serializable, you can use value types and strings also.
 * You can mark any instance method with `[PushCall]` if it have one parameter.
+* We use [MessagePack](https://github.com/MessagePack-CSharp/MessagePack-CSharp) to serialize/deserialize ResumableFunctionsContainer instance.
 
 # Start using the library
 * Create new Web API project, Name it `RequestApproval`
 * Check `Enable OpenApi Support`
 * Change target framework to '.Net 7.0'
-* Add packages (Package Manager Consol)
+* Install Package
 ```
 Install-package ResumableFunctions.AspNetService
 ```
@@ -157,8 +158,8 @@ builder.Services
         .SetCurrentServiceUrl("<current-service-url>"));
 ```
 * After line `var app = builder.Build();` add line `app.UseResumableFunctions();`
-* This configuration uses LocalDb as data store for waits
-* This configuratio uses [Hangfire](https://github.com/HangfireIO/Hangfire) for background processing.
+* This configuration uses LocalDb to store waits data.
+* This configuration uses [Hangfire](https://github.com/HangfireIO/Hangfire) for background processing.
 * Change `WeatherForecastController.cs` file contect with content [here](https://raw.githubusercontent.com/IbrahimElshafey/ResumableFunctionsSamples/Main/RequestApproval/Controllers/RequestApprovalController.cs).
 * Rename `WeatherForecastController.cs` to `RequestApprovalController.cs`
 * Set Breakpoint at lines `52,54` in file `RequestApprovalController.cs`
@@ -203,7 +204,7 @@ builder.Services
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).All();
 ```
-* **Custom wait for a group**
+* **Custom wait for a group** with custom match expression that must be satisfied to mark the group as completed
 ``` C#
  yield return Wait(
             "Wait many with complex match expression",
@@ -218,7 +219,7 @@ builder.Services
                 .SetData((input, output) => ManagerThreeApproval == output)
         ).When(waitGroup => waitGroup.CompletedCount == 2);//wrtite any complex exprssion against waitGroup
 ```
-* You can wait a **resumable sub function** that is not an entry point
+* You can wait a **sub resumable function** that is not an entry point
 ``` C#
  yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers);
  ....
@@ -291,7 +292,7 @@ yield return
 ```
 
 # How it works internally
-The library uses an IAsyncEnumerable generated state machine to implement a method that can be paused and resumed. An IAsyncEnumerable is a type that provides a sequence of values that can be enumerated asynchronously. A state machine is a data structure that keeps track of the current state of a system. In this case, the state machine keeps track of the current state of where function execution reached.
+The library uses an [IAsyncEnumerable](https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=net-7.0) generated state machine to implement a method that can be paused and resumed. An IAsyncEnumerable is a type that provides a sequence of values that can be enumerated asynchronously. A state machine is a data structure that keeps track of the current state of a system. In this case, the state machine keeps track of the current state of where function execution reached.
 
 The library saves a serialized object of the class that contains the resumable function for each resumable function instance. The serialized object is restored when a wait is matched and the function is resumed.
 

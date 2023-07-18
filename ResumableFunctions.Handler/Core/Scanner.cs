@@ -146,7 +146,7 @@ internal class Scanner
                 {
                     await RegisterMethodsInType(type, serviceData);
                     //await RegisterExternalMethods(type);
-                    if (type.IsSubclassOf(typeof(ResumableFunction)))
+                    if (type.IsSubclassOf(typeof(ResumableFunctionsContainer)))
                         resumableFunctionClasses.Add(type);
                 }
 

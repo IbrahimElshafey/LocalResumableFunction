@@ -50,7 +50,7 @@ public class SubFunctionsLevelsTest
         Assert.Equal(12, waits.Count(x => x.Status == WaitStatus.Completed));
     }
 
-    public class FunctionLevels : ResumableFunction
+    public class FunctionLevels : ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("FunctionTwoLevels")]
         public async IAsyncEnumerable<Wait> Test()

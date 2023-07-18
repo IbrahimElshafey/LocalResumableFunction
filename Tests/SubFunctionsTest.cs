@@ -89,7 +89,7 @@ public class SubFunctionsTest
         Assert.Equal(10, waits.Count(x => x.Status == WaitStatus.Completed));
     }
 
-    public class TwoFunctionsAtFirst : ResumableFunction
+    public class TwoFunctionsAtFirst : ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("TwoFunctionsAtFirst")]
         public async IAsyncEnumerable<Wait> Test()
@@ -114,7 +114,7 @@ public class SubFunctionsTest
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
     }
 
-    public class FunctionAfterFirst : ResumableFunction
+    public class FunctionAfterFirst : ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("FunctionAfterFirst")]
         public async IAsyncEnumerable<Wait> Test()
@@ -131,7 +131,7 @@ public class SubFunctionsTest
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
         [PushCall("Method3")] public string Method3(string input) => input + "M3";
     }
-    public class SubFunctions : ResumableFunction
+    public class SubFunctions : ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("FunctionAtStart")]
         public async IAsyncEnumerable<Wait> FunctionAtStart()
