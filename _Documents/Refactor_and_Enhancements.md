@@ -20,17 +20,18 @@
 	* Logs
 
 # Data store enhancements
-* Store pushed calls in different store that:
+* Store pushed calls in different store that support:
 	* Fast insertion
 	* Fast query by key (No other query)
 	* May be a queue service Kafka,RbbittMQ or ActiveMQ
 	* May use pull mode to get pushed calls
-* Store waits in different store that:
-	* Support fats queries 
+* Store waits in different store that support:
+	* Fast queries 
 	* Fast wait insertion
 	* May be an option https://github.com/VelocityDB/VelocityDB
 * Fast logging
-	* Separate DB for log
+	* Separate data store for log
+	* Logs can be queried
 	* Custom implementation for logging (IResumableFunctionLogging)
 	* https://www.influxdata.com/
 
