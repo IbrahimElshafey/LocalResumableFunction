@@ -73,11 +73,11 @@ public static class CoreExtensions
     public static void UseResumableFunctions(this IHost app)
     {
         GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(app.Services));
-        StartScanProcess(app);
+        CreateScanAndCleanBackgroundTasks(app);
     }
 
 
-    private static void StartScanProcess(IHost app)
+    private static void CreateScanAndCleanBackgroundTasks(IHost app)
     {
         using var scope = app.Services.CreateScope();
         var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundProcess>();
