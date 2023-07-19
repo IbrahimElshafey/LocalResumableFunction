@@ -53,9 +53,9 @@ internal partial class WaitsRepo
             .FirstOrDefaultAsync(x => x.Id == waitId);
     }
 
-    public async Task<MethodInfo> GetRequestedByMethodInfo(int rootId)
+    public async Task<MethodInfo> GetRequestedByMethodInfo(int waitId)
     {
-        return (await _context.Waits.Include(x => x.RequestedByFunction).FirstAsync(x => x.Id == rootId))
+        return (await _context.Waits.Include(x => x.RequestedByFunction).FirstAsync(x => x.Id == waitId))
             .RequestedByFunction.MethodInfo;
     }
 

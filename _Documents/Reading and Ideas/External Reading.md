@@ -29,3 +29,12 @@ https://agirlamonggeeks.com/2019/06/04/cannot-implicitly-convert-type-abc-to-iab
 * How to: Examine and Instantiate Generic Types with Reflection
 https://learn.microsoft.com/en-us/dotnet/framework/reflection-and-codedom/how-to-examine-and-instantiate-generic-types-with-reflection
 
+# TCP Services in .NET core
+* https://github.com/grpc/grpc-dotnet
+* https://github.com/kekekeks/CoreRPC
+
+# YARP: Yet Another Reverse Proxy
+* https://microsoft.github.io/reverse-proxy/index.html
+* YARP is a library to help create reverse proxy servers that are high-performance, production-ready, and highly customizable.
+* YARP is a level 7 (HTTP) proxy. You are looking for a Level 4 (TCP) proxy.
+* A Heavy Lift: Bringing Kestrel + YARP to Azure App Services https://devblogs.microsoft.com/dotnet/bringing-kestrel-and-yarp-to-azure-app-services/

@@ -21,13 +21,13 @@ namespace ResumableFunctions.Handler.Helpers
         public static Dictionary<int, string> StatusCodeNames = new Dictionary<int, string>
         {
             {-1, "Any"},
-            {MethodValidation, "While Method Validation"},
-            {Scanning, "While Scanning Types"},
-            {WaitProcessing, "While Wait Processing"},
-            {Replay, "While Replay a wait"},
-            {PushedCall, "When Process Pushed Call"},
-            {FirstWait, "While First Wait Processing"},
-            {WaitValidation, "While Wait Request Validation"},
+            {MethodValidation, "Method Validation"},
+            {Scanning, "Scanning Types"},
+            {WaitProcessing, "Wait Processing"},
+            {Replay, "Replay a wait"},
+            {PushedCall, "Process Pushed Call"},
+            {FirstWait, "First Wait Processing"},
+            {WaitValidation, "Wait Request Validation"},
             {Custom, "Author Custom Log"},
             {DataCleaning, "Database Cleaning"},
         };
