@@ -5,6 +5,7 @@ using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
+//todo:it should be transient
 internal class ScanStateRepo : IScanStateRepo
 {
     private readonly WaitsDataContext _context;

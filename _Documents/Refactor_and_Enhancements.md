@@ -40,10 +40,4 @@
 	* WaitForCalls
 	* Logs
 * Localization
-
-# Later Versions
-* UI V2
-* Roslyn Analyzer
-* Auto-generate code for test
-* Performance Monitoring
 * How to migrate to the new version

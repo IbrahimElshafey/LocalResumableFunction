@@ -10,8 +10,8 @@ namespace ResumableFunctions.Handler;
 
 public abstract partial class ResumableFunctionsContainer
 {
-    public T LocalValue<T>(T value) => default;
-    internal MethodInfo CurrentResumableFunction { get; set; }
+    public T LocalValue<T>(T value) => value;
+    [IgnoreMember] internal MethodInfo CurrentResumableFunction { get; set; }
 
     public void Log(string message) => this.AddLog(message, LogType.Info, Helpers.StatusCodes.Custom);
     public void Warning(string message) => this.AddLog(message, LogType.Warning, Helpers.StatusCodes.Custom);

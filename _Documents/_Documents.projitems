@@ -9,6 +9,7 @@
     <Import_RootNamespace>_Documents</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Internals.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Testing.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Configuration.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Distributed_Services_and_Resumable_Function.md" />
