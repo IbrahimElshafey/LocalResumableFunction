@@ -8,6 +8,7 @@ public class SetDataExpressionWriter : ExpressionVisitor
 {
     private readonly ParameterExpression _functionInstanceArg;
     private readonly List<Expression> _setValuesExpressions = new();
+    public LambdaExpression SetDataExpression { get; protected set; }
 
     public SetDataExpressionWriter(LambdaExpression setDataExpression, Type funcType)
     {
@@ -15,6 +16,7 @@ public class SetDataExpressionWriter : ExpressionVisitor
             return;
         if (setDataExpression?.Parameters.Count == 3)
         {
+            SetDataExpression = setDataExpression;
             return;
         }
 
@@ -42,7 +44,6 @@ public class SetDataExpressionWriter : ExpressionVisitor
             _functionInstanceArg);
     }
 
-    public LambdaExpression SetDataExpression { get; protected set; }
 
     protected override Expression VisitBinary(BinaryExpression node)
     {

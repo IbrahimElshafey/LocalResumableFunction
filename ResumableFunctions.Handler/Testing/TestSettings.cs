@@ -36,5 +36,6 @@ namespace ResumableFunctions.Handler.Testing
             new WaitHandleDistributedSynchronizationProvider();
 
         public CleanDatabaseSettings CleanDbSettings => new CleanDatabaseSettings();
+        public WaitStatus WaitStatusIfProcessingError { get; set; } = WaitStatus.Waiting;
     }
 }

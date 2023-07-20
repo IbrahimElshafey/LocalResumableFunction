@@ -79,6 +79,10 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     {
         if (waitToReplay is MethodWait methodWaitToReplay)
         {
+            if (methodWaitToReplay.Template == null)
+            {
+                methodWaitToReplay.Template = await _waitTemplatesRepo.GetWaitTemplateWithBasicMatch(methodWaitToReplay.TemplateId);
+            }
             methodWaitToReplay.LoadExpressions();
 
             if (ReplayMatchIsSameSignature(replayRequest, methodWaitToReplay) is false)

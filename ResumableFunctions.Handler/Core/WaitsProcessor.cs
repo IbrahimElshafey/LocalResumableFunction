@@ -27,7 +27,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IWaitTemplatesRepo _templatesRepo;
         private readonly IPushedCallsRepo _pushedCallsRepo;
         private readonly IServiceRepo _serviceRepo;
-
+        private readonly IResumableFunctionsSettings _settings;
         private WaitProcessingRecord _waitCall;
         private MethodWait _methodWait;
         private PushedCall _pushedCall;
@@ -46,7 +46,8 @@ namespace ResumableFunctions.Handler.Core
             IMethodIdsRepo methodIdsRepo,
             IWaitTemplatesRepo templatesRepo,
             IPushedCallsRepo pushedCallsRepo,
-            IServiceRepo serviceRepo)
+            IServiceRepo serviceRepo,
+            IResumableFunctionsSettings settings)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -62,6 +63,7 @@ namespace ResumableFunctions.Handler.Core
             _templatesRepo = templatesRepo;
             _pushedCallsRepo = pushedCallsRepo;
             _serviceRepo = serviceRepo;
+            _settings = settings;
         }
 
         [DisplayName("Process Function Expected Matches where `FunctionId:{0}`, `PushedCallId:{1}`, `MethodGroupId:{2}`")]
@@ -210,6 +212,7 @@ namespace ResumableFunctions.Handler.Core
                     }
                     else
                     {
+                        _methodWait.Status = _settings.WaitStatusIfProcessingError;
                         await UpdateWaitRecord(x => x.InstanceUpdateStatus = InstanceUpdateStatus.UpdateFailed);
                         throw new Exception(
                             $"Can't update function state `{_methodWait.FunctionStateId}` after method wait `{_methodWait}` matched.");
@@ -277,6 +280,7 @@ namespace ResumableFunctions.Handler.Core
                   $"Exception occurred when try to resume execution after [{_methodWait.Name}].",
                   //$"\nProcessing this wait will be scheduled.",
                   StatusCodes.WaitProcessing, ex);
+                _methodWait.Status = _settings.WaitStatusIfProcessingError;
                 await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionFailed);
                 return false;
             }

@@ -34,6 +34,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowTestsUi", "ShowTestsUi\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResumableFunctions.Publisher", "ResumableFunctions.Publisher\ResumableFunctions.Publisher.csproj", "{5DC5160C-03F0-4C4D-92DA-856B56A3037B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RequestApproval", "Examples\RequestApproval\RequestApproval.csproj", "{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -84,6 +86,10 @@ Global
 		{5DC5160C-03F0-4C4D-92DA-856B56A3037B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5DC5160C-03F0-4C4D-92DA-856B56A3037B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5DC5160C-03F0-4C4D-92DA-856B56A3037B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -96,6 +102,7 @@ Global
 		{AACF6985-79DE-48A3-B381-9FD2C8B318AF} = {8AF132E9-5C5A-4D6C-B0FC-82FFCA700BA8}
 		{47154E1A-44E0-4016-89E4-42A79B16E87F} = {8AF132E9-5C5A-4D6C-B0FC-82FFCA700BA8}
 		{53A463A6-A5EA-42DC-8BBE-64D215274DFC} = {8AF132E9-5C5A-4D6C-B0FC-82FFCA700BA8}
+		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215} = {8AF132E9-5C5A-4D6C-B0FC-82FFCA700BA8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AE5D3544-A75E-4511-ADAF-BEE3DA168EE9}

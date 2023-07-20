@@ -68,25 +68,6 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         }
     }
 
-    //private void CalcFinalHash()
-    //{
-    //    if (_localValuePartsCount == 0)
-    //    {
-    //        Hash = InitialHash; 
-    //        return;
-    //    }
-
-
-    //    var sb = new StringBuilder();
-    //    if (MatchExpression != null)
-    //        sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
-
-    //    if (SetDataExpression != null)
-    //        sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
-
-    //    var data = Encoding.Unicode.GetBytes(sb.ToString());
-    //    Hash = MD5.HashData(data);
-    //}
 
     private void CalcHash()
     {
@@ -94,13 +75,15 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         if (MatchExpression != null)
         {
             MatchExpression = (LambdaExpression)ChangeInputAndOutputNames(MatchExpression);
-            sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
+            //sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
+            sb.Append(MatchExpression.ToString());
         }
 
         if (SetDataExpression != null)
         {
             SetDataExpression = (LambdaExpression)ChangeInputAndOutputNames(SetDataExpression);
-            sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
+            //sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
+            sb.Append(SetDataExpression.ToString());
         }
 
         var data = Encoding.Unicode.GetBytes(sb.ToString());

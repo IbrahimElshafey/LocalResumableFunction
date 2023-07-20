@@ -101,6 +101,8 @@ namespace ResumableFunctions.Handler.InOuts
         private CleanDatabaseSettings _cleanDbSettings = new CleanDatabaseSettings();
         public CleanDatabaseSettings CleanDbSettings => _cleanDbSettings;
 
+        public WaitStatus WaitStatusIfProcessingError { get; set; } = WaitStatus.Waiting;
+
         private void CreateEmptyHangfireDb(string hangfireDbName)
         {
             _connectionBuilder["Database"] = hangfireDbName;

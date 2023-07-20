@@ -20,5 +20,6 @@ namespace ResumableFunctions.Handler.InOuts
         string CurrentServiceName => Assembly.GetEntryAssembly().GetName().Name;
 
         CleanDatabaseSettings CleanDbSettings { get; }
+        WaitStatus WaitStatusIfProcessingError { get; }
     }
 }
