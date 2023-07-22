@@ -1,4 +1,7 @@
-**Project Status: Work in progress [here](https://github.com/IbrahimElshafey/ResumableFunctions/tree/main/_Documents)**
+## Intro Video in Arabic
+[![Intro Video in Arabic](https://img.youtube.com/vi/Oc9NjP0_0ig/0.jpg)](https://www.youtube.com/watch?v=Oc9NjP0_0ig)
+
+
 * [What are Resumable Functions?](#what-are-resumable-functions)
 * [Why this project?](#why-this-project)
 * [Example](#example)
@@ -160,16 +163,8 @@ builder.Services
 * After line `var app = builder.Build();` add line `app.UseResumableFunctions();`
 * This configuration uses LocalDb to store waits data.
 * This configuration uses [Hangfire](https://github.com/HangfireIO/Hangfire) for background processing.
-* Change `WeatherForecastController.cs` file contect with content [here](https://raw.githubusercontent.com/IbrahimElshafey/ResumableFunctionsSamples/Main/RequestApproval/Controllers/RequestApprovalController.cs).
-* Rename `WeatherForecastController.cs` to `RequestApprovalController.cs`
-* Set Breakpoint at lines `52,54` in file `RequestApprovalController.cs`
-* Change `launchUrl` in Properties\launchSettings.json to RF instead of swagger
-* Run the app now,The RF UI will appear
-* Open Swagger UI call `UserSubmitRequest` the breakpoint at 54 will be hit if `(Id > 0)`
-* Continue excecution the browse to `<current-service-url>/RF` to show resumable functions UI.
-* From swagger Ui call `ManagerApproval` action with the `ManagerApprovalTaskId` you copied before and `Accept` for Decision prop.
-* The breakpoint at 56 will be hit.
-* You done.
+* You now can write a resumable functions in your service.
+* See samples [here](https://github.com/IbrahimElshafey/ResumableFunctionsSamples) 
 
 # Supported Wait Types
 * Wait **single method** to match (similar to `await` in `async\await`)
