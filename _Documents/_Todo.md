@@ -1,3 +1,3 @@
 ﻿# Work on
 * Record Videos
-	* How to use Resyumable Functions?
+	* How to use Resumable Functions?
