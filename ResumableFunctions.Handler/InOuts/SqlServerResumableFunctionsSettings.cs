@@ -115,7 +115,7 @@ namespace ResumableFunctions.Handler.InOuts
             }
             catch (Exception ex)
             {
-                //todo:log error
+                throw new Exception($"Can't create empty Hangfire DB with name `{hangfireDbName}`.", ex);
             }
         }
     }
