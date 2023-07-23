@@ -18,7 +18,7 @@ internal class PushedCallsRepo : IPushedCallsRepo
             .FindAsync(pushedCallId);
     }
 
-    public void Add(PushedCall pushedCall)
+    public void Push(PushedCall pushedCall)
     {
         _context.PushedCalls.Add(pushedCall);
     }

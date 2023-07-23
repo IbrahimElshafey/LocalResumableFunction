@@ -24,7 +24,7 @@
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\MVC_Use.md" />
     <None Include="$(MSBuildThisFileDirectory)Background_Cleaning_Job.md" />
     <None Include="$(MSBuildThisFileDirectory)Versioning.md" />
-    <None Include="$(MSBuildThisFileDirectory)Synchronization.md" />
+    <None Include="$(MSBuildThisFileDirectory)Concurrency.md" />
     <None Include="$(MSBuildThisFileDirectory)UI.md" />
     <None Include="$(MSBuildThisFileDirectory)_Roslyn_Analyzer.md" />
     <None Include="$(MSBuildThisFileDirectory)Refactor_and_Enhancements.md" />

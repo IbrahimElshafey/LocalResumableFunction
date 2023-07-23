@@ -40,32 +40,35 @@ internal partial class CallProcessor : ICallProcessor
     [DisplayName("Initial Process Pushed Call `{0}` for MethodUrn `{1}`")]
     public async Task InitialProcessPushedCall(int pushedCallId, string methodUrn)
     {
-        if (await _scanStateRepo.IsScanFinished())
-            await _backgroundJobExecutor.Execute(
-                $"InitialProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
-                async () =>
-                {
-                    var services = await _waitsRepository.GetAffectedServices(methodUrn);
-                    if (services == null || services.Any() is false)
-                    {
-                        _logger.LogWarning($"There is no service affected by pushed call `{methodUrn}:{pushedCallId}`");
-                        return;
-                    }
-
-                    foreach (var service in services)
-                    {
-                        service.PushedCallId = pushedCallId;
-                        service.MethodUrn = methodUrn;
-                        var isLocal = service.ServiceId == _settings.CurrentServiceId;
-                        if (isLocal)
-                            await ServiceProcessPushedCall(service);
-                        else
-                            await CallOwnerService(service);
-                    }
-                },
-                $"Error when call `InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
-        else
+        if (!await _scanStateRepo.IsScanFinished())
+        {
             _backgroundJobClient.Schedule(() => InitialProcessPushedCall(pushedCallId, methodUrn), TimeSpan.FromSeconds(3));
+            return;
+        }
+        
+        await _backgroundJobExecutor.Execute(
+            $"InitialProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
+            async () =>
+            {
+                var services = await _waitsRepository.GetAffectedServicesAndFunctions(methodUrn);
+                if (services == null || services.Any() is false)
+                {
+                    _logger.LogWarning($"There are no services affected by pushed call `{methodUrn}:{pushedCallId}`");
+                    return;
+                }
+
+                foreach (var service in services)
+                {
+                    service.PushedCallId = pushedCallId;
+                    service.MethodUrn = methodUrn;
+                    var isLocal = service.ServiceId == _settings.CurrentServiceId;
+                    if (isLocal)
+                        await ServiceProcessPushedCall(service);
+                    else
+                        await CallOwnerService(service);
+                }
+            },
+            $"Error when call `InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
     }
 
     [DisplayName("{0}")]

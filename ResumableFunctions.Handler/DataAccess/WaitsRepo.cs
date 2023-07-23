@@ -33,7 +33,7 @@ internal partial class WaitsRepo : IWaitsRepo
         _waitTemplatesRepo = waitTemplatesRepo;
     }
 
-    public async Task<List<AffectedService>> GetAffectedServices(string methodUrn)
+    public async Task<List<AffectedService>> GetAffectedServicesAndFunctions(string methodUrn)
     {
         var methodGroup = await GetMethodGroup(methodUrn);
 

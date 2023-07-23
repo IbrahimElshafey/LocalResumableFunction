@@ -10,7 +10,7 @@ namespace ResumableFunctions.Publisher.Abstraction
             Func<TInput, Task<TOutput>> methodToPush,
             TInput input,
             TOutput output,
-            string methodIdetifier,
+            string methodUrn,
             string serviceName);
         Task Publish(MethodCall MethodCall);
     }

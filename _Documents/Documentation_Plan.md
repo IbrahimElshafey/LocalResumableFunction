@@ -1,6 +1,8 @@
 # Write docs for
-* Configuration
-* Resumable Functions UI
+* Compare two implementations arabic video% Arabic Video
+* Distributed Services and Resumable Function Arabic Video
 * How to test your resumable functions?
-* Distributed Services and Resumable Function
-* Database Cleaning Job
+* Write articles in 
+	* Code Project
+	* Medium
+	* c-sharpcorner.com

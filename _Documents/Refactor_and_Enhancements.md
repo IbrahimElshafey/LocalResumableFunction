@@ -6,12 +6,8 @@
 * Use IMaterializationInterceptor to set entity dependencies [Bad Practice as I think]
 
 # Enhancements
-* Use same dll in two different services must be allowed
 * Message Pack private setter props serialization
 * Parameter check lib use
-* Resumable function hooks
-	* After Resumed
-	* On Error Occurred
 * Use RequestedByFunctionId prop in TimeWaitInput to refine match for time waits
 * ID must be long for
 	* Pushed Call
@@ -22,7 +18,7 @@
 # Data store enhancements
 * Store pushed calls in different store that support:
 	* Fast insertion
-	* Fast query by key (No other query)
+	* Fast query by key (No other queries)
 	* May be a queue service Kafka,RbbittMQ or ActiveMQ
 	* May use pull mode to get pushed calls
 * Store waits in different store that support:
@@ -36,6 +32,9 @@
 	* https://www.influxdata.com/
 
 # New Features
+* Alternates is functions that trigger by the same pushed call but
+	* Only one instance activated after the first match
+	* Or one instance completed and other will be canceled
 * Services Registry is separate
 * Security and IUserContext
 * Function priority/Matched Waits priority
@@ -44,11 +43,13 @@
 * Encryption option for sensitive data
 	* Function state
 	* Match and SetData Expressions
-* Localization
-* Replace HangfireHttpClient with abstraction to enable queue based communication between services
 
 # May be good to use
 * How can I benefit from Azure Service Fabric
 	* https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-overview
 
 * How to migrate to the new version
+
+
+* Localization
+

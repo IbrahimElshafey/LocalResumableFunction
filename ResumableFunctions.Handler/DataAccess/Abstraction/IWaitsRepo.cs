@@ -12,7 +12,7 @@ public interface IWaitsRepo
     Task CancelSubWaits(int parentId, int pushedCallId);
     Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait);
     Task<Wait> GetWaitParent(Wait wait);
-    Task<List<AffectedService>> GetAffectedServices(string methodUrn);
+    Task<List<AffectedService>> GetAffectedServicesAndFunctions(string methodUrn);
     Task RemoveFirstWaitIfExist(int methodIdentifierId);
     Task<bool> SaveWait(Wait newWait);
     Task<MethodWait> GetMethodWait(int waitId, params Expression<Func<MethodWait, object>>[] includes);

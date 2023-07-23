@@ -43,7 +43,7 @@ namespace ResumableFunctions.Handler.Core
         {
             try
             {
-                _pushedCallsRepo.Add(pushedCall);
+                _pushedCallsRepo.Push(pushedCall);
                 await _context.SaveChangesAsync();
                 _backgroundJobClient.Enqueue(() => _processor.InitialProcessPushedCall(pushedCall.Id, pushedCall.MethodData.MethodUrn));
                 return pushedCall.Id;

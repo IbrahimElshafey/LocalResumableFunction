@@ -14,7 +14,6 @@ namespace ResumableFunctions.Publisher.Implementation
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<InMemoryFailedRequestHandler> _logger;
         private readonly ConcurrentBag<FailedRequest> _failedRequests = new ConcurrentBag<FailedRequest>();
-        //private const string FileName = "FailedRequests.ser";
         public InMemoryFailedRequestHandler(
            IPublisherSettings settings,
            IHttpClientFactory httpClientFactory,
@@ -41,19 +40,7 @@ namespace ResumableFunctions.Publisher.Implementation
 
         public void HandleFailedRequests()
         {
-            //ReadOldSavedRequests();
             _ = CallFailedRequests();
-        }
-
-        private void ReadOldSavedRequests()
-        {
-            //if (File.Exists(FileName))
-            //{
-            //    var oldRequestsBytes = File.ReadAllBytes(FileName);
-            //    _failedRequests =
-            //        MessagePackSerializer.Deserialize<ConcurrentBag<FailedRequest>>(oldRequestsBytes,
-            //            ContractlessStandardResolver.Options);
-            //}
         }
 
         // ReSharper disable once FunctionRecursiveOnAllPaths
@@ -92,7 +79,6 @@ namespace ResumableFunctions.Publisher.Implementation
                         }
                     }
                 }
-                //await SaveFailedRequests();
                 _logger.LogInformation("End handling failed requests.");
             }
             catch (Exception ex)
@@ -104,21 +90,6 @@ namespace ResumableFunctions.Publisher.Implementation
                 await Task.Delay(_settings.CheckFailedRequestEvery);
                 await CallFailedRequests();
             }
-        }
-
-        private async Task SaveFailedRequests()
-        {
-            //_logger.LogInformation("Save Failed Requests.");
-            //if (_failedRequests.Any())
-            //{
-            //    var body = MessagePackSerializer.Serialize(_failedRequests, ContractlessStandardResolver.Options);
-            //    await File.WriteAllBytesAsync("FailedRequests.ser", body);
-            //}
-            //else if (File.Exists(FileName))
-            //{
-            //    File.Delete(FileName);
-            //}
-            //_logger.LogInformation("Ending Save Failed Requests.");
         }
     }
 }
