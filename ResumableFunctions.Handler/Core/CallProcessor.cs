@@ -82,7 +82,7 @@ internal partial class CallProcessor : ICallProcessor
                 foreach (var functionId in service.AffectedFunctionsIds)
                 {
                     _backgroundJobClient.Enqueue(
-                        () => _waitsProcessor.ProcessFunctionExpectedWaitMatches(functionId, pushedCallId, service.MethodGroupId));
+                        () => _waitsProcessor.ProcessFunctionExpectedMatchedWaits(functionId, pushedCallId, service.MethodGroupId));
                 }
                 return Task.CompletedTask;
             },

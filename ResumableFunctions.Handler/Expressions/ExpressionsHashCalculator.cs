@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using FastExpressionCompiler;
 using ResumableFunctions.Handler.Helpers;
 using static System.Linq.Expressions.Expression;
@@ -55,14 +56,36 @@ public class ExpressionsHashCalculator : ExpressionVisitor
                     Lambda<Func<object>>(Convert(methodCallExpression.Arguments[0], typeof(object)))
                         .CompileFast()
                         .Invoke();
-                if (arg.CanBeConstant())//todo:DateTime and Guid
+                _localValuePartsCount++;
+                if (arg.CanBeConstant())
                 {
-                    _localValuePartsCount++;
                     return Constant(arg);
                 }
+                else if (arg is DateTime date)
+                {
+                    return New(typeof(DateTime).GetConstructor(new[] { typeof(long) }), Constant(date.Ticks));
+                }
+                else if (arg is Guid guid)
+                {
+                    return New(typeof(Guid).GetConstructor(new[] { typeof(string) }), Constant(guid.ToString()));
+                }
                 else
-                    throw new Exception(
-                        $"The local value expression `{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}` can't be be convertred to constant type.");
+                {
+                    try
+                    {
+                        return Call(
+                              typeof(JsonSerializer).GetMethod("Deserialize", 1, new[] { typeof(string), typeof(JsonSerializerOptions) }),
+                              Constant(JsonSerializer.Serialize(arg)),
+                              MakeMemberAccess(null, typeof(JsonSerializerOptions).GetProperty("Default"))
+                            );
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception(
+                        $"The local value expression `{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}` can't be be convertred to embedded value.", ex);
+                    }
+
+                }
             }
             return base.VisitMethodCall(methodCallExpression);
         }

@@ -1,5 +1,4 @@
 ﻿namespace TestSomething;
-
 internal class TimerTest
 {
     private int _time = 1000;

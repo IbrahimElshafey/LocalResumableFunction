@@ -52,36 +52,6 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         return waitTemplate;
     }
 
-    public async Task DeactivateUnusedTemplateSiblings(WaitTemplate waitTemplate)
-    {
-        //todo:problem for waits in same group?
-        var templateSiblings =
-            await _context.WaitTemplates
-            .Where(template =>
-                template.MethodGroupId == waitTemplate.MethodGroupId &&
-                template.MethodId == waitTemplate.MethodId &&
-                template.FunctionId == waitTemplate.FunctionId &&
-                template.InCodeLine == waitTemplate.InCodeLine
-            )
-            .Select(x => x.Id)
-            .ToListAsync();
-        if (templateSiblings.Any())
-        {
-            var templatesToDelete =
-                templateSiblings.Except(
-                   await _context.MethodWaits
-                   .Where(mw =>
-                        mw.Status == WaitStatus.Waiting &&
-                        templateSiblings.Contains(mw.TemplateId))
-                   .Select(x => x.TemplateId)
-                   .Distinct()
-                   .ToListAsync());
-            await _context.WaitTemplates
-                .Where(template => templatesToDelete.Contains(template.Id))
-                .ExecuteUpdateAsync(x => x.SetProperty(x => x.IsActive, -1));
-        }
-    }
-
     public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
     {
         var waitTemplate = (await _context

@@ -55,9 +55,6 @@ public partial class MatchExpressionWriter : ExpressionVisitor
                     $"Can't use local variable `{name}` in match expression `{ExpressionExtensions.ToCSharpString(_matchExpression)}`, " +
                     $"please warp it in method `{nameof(ResumableFunctionsContainer.LocalValue)}({name})`");
             }
-            //todo:check if member is serializable
-            //have public getter and setter
-            //not field
             return exp;
         });
         fieldVistor.Visit(_matchExpression);

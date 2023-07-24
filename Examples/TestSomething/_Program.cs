@@ -4,7 +4,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        switch (4)
+        switch (12)
         {
             case 1:
                 TestTreeCascadeAction(); break;
@@ -32,6 +32,9 @@ internal class Program
                 break;
             case 11:
                 new TimerTest().Run();
+                break;
+            case 12:
+                new ExpressionCanBeConst().Run();
                 break;
         }
 

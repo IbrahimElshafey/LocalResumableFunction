@@ -13,7 +13,7 @@ namespace ResumableFunctions.Publisher.Implementation
         private readonly IPublisherSettings _settings;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<InMemoryFailedRequestHandler> _logger;
-        private readonly ConcurrentBag<FailedRequest> _failedRequests = new ConcurrentBag<FailedRequest>();
+        private static readonly ConcurrentBag<FailedRequest> _failedRequests = new ConcurrentBag<FailedRequest>();
         public InMemoryFailedRequestHandler(
            IPublisherSettings settings,
            IHttpClientFactory httpClientFactory,
@@ -28,7 +28,6 @@ namespace ResumableFunctions.Publisher.Implementation
             try
             {
                 failedRequest.Created = DateTime.Now;
-                failedRequest.Id = Guid.NewGuid();
                 _failedRequests.Add(failedRequest);
             }
             catch (Exception ex)
@@ -73,7 +72,7 @@ namespace ResumableFunctions.Publisher.Implementation
                         {
                             request.AttemptsCount++;
                             _logger.LogInformation(
-                                $"Request `{request.Id}` failed again for `{request.AttemptsCount}` times");
+                                $"A request `{request.ActionUrl}` failed again for `{request.AttemptsCount}` times");
                             request.LastAttemptDate = DateTime.Now;
                             _failedRequests.Add(request);
                         }
