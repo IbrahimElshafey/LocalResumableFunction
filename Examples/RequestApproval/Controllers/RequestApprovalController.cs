@@ -55,6 +55,7 @@ namespace RequestApproval.Controllers
                 Console.WriteLine($"Request `{UserRequest.Id}` re-submitted.");
 
             ManagerApprovalTaskId = _service.AskManagerApproval(UserRequest.Id);
+            //throw new Exception("Exception after first wait");
             yield return WaitManagerApproval();
 
             switch (ManagerApprovalResult.Decision)
@@ -88,6 +89,15 @@ namespace RequestApproval.Controllers
             return Wait<ApproveRequestArgs, int>(_service.ManagerApproval, "Wait Manager Approval")
                     .MatchIf((approveRequestArgs, approvalId) => approvalId > 0 && approveRequestArgs.TaskId == ManagerApprovalTaskId)
                     .SetData((approveRequestArgs, approvalId) => ManagerApprovalResult == approveRequestArgs);
+        }
+
+        public override Task OnErrorOccurred(string message, Exception ex = null)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(message);
+            Console.WriteLine(ex?.Message);
+            Console.ResetColor();
+            return Task.CompletedTask;
         }
     }
     public class RequestApprovalService : IRequestApprovalService

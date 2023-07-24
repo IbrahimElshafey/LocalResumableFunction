@@ -10,6 +10,10 @@ namespace ResumableFunctions.Handler;
 
 public abstract partial class ResumableFunctionsContainer
 {
+    public virtual Task OnErrorOccurred(string message, Exception ex = null)
+    {
+        return Task.CompletedTask;
+    }
     public T LocalValue<T>(T value) => value;
     [IgnoreMember] internal MethodInfo CurrentResumableFunction { get; set; }
 

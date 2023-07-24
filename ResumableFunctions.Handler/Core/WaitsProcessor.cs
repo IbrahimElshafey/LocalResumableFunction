@@ -8,6 +8,7 @@ using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.Core
 {
@@ -179,6 +180,7 @@ namespace ResumableFunctions.Handler.Core
                     await _serviceRepo.AddErrorLog(ex, error, StatusCodes.WaitProcessing);
                 else
                     _methodWait.FunctionState.AddError(error, StatusCodes.WaitProcessing, ex);
+                await _methodWait.CurrentFunction?.OnErrorOccurred(error, ex);
                 throw new Exception(error, ex);
             }
         }
@@ -232,6 +234,10 @@ namespace ResumableFunctions.Handler.Core
                     TimeSpan.FromSeconds(10));
                 return false;
             }
+            catch (Exception ex)
+            {
+                await _methodWait.CurrentFunction?.OnErrorOccurred("Error when update function data.", ex);
+            }
 
             return true;
         }
@@ -276,12 +282,11 @@ namespace ResumableFunctions.Handler.Core
             }
             catch (Exception ex)
             {
-                _methodWait.FunctionState.AddError(
-                  $"Exception occurred when try to resume execution after [{_methodWait.Name}].",
-                  //$"\nProcessing this wait will be scheduled.",
-                  StatusCodes.WaitProcessing, ex);
+                var errorMsg = $"Exception occurred when try to resume execution after [{_methodWait.Name}].";
+                _methodWait.FunctionState.AddError(errorMsg, StatusCodes.WaitProcessing, ex);
                 _methodWait.Status = _settings.WaitStatusIfProcessingError;
                 await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionFailed);
+                await _methodWait.CurrentFunction?.OnErrorOccurred(errorMsg, ex);
                 return false;
             }
             await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionSuccessed);
