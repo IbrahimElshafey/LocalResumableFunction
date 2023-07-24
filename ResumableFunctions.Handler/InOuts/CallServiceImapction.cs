@@ -1,6 +1,6 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
-public class AffectedService
+public class CallServiceImapction
 {
     public int PushedCallId { get; set; }
     public string MethodUrn { get; set; }

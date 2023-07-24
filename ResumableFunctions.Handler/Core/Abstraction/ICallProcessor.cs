@@ -5,6 +5,6 @@ namespace ResumableFunctions.Handler.Core.Abstraction
     public interface ICallProcessor
     {
         Task InitialProcessPushedCall(int pushedCallId, string methodUrn);
-        Task ServiceProcessPushedCall(AffectedService service);
+        Task ServiceProcessPushedCall(CallServiceImapction service);
     }
 }

@@ -38,10 +38,10 @@ namespace ResumableFunctions.AspNetService
 
 
         [HttpPost(Constants.ServiceProcessPushedCallAction)]
-        public int ServiceProcessPushedCall(AffectedService service)
+        public int ServiceProcessPushedCall(CallServiceImapction service)
         {
             _backgroundProcess.Enqueue(() => _callProcessor.ServiceProcessPushedCall(service));
-            return 0;
+            return 1;
         }
 
         [HttpPost(Constants.ExternalCallAction)]

@@ -33,7 +33,7 @@ internal partial class WaitsRepo : IWaitsRepo
         _waitTemplatesRepo = waitTemplatesRepo;
     }
 
-    public async Task<List<AffectedService>> GetAffectedServicesAndFunctions(string methodUrn)
+    public async Task<List<CallServiceImapction>> GetAffectedServicesAndFunctions(string methodUrn)
     {
         var methodGroup = await GetMethodGroup(methodUrn);
 
@@ -59,7 +59,7 @@ internal partial class WaitsRepo : IWaitsRepo
               from service in await _context.ServicesData.Where(x => x.ParentId == -1).ToListAsync()
               from affectedFunction in affectedFunctions
               where service.Id == affectedFunction.Key
-              select new AffectedService
+              select new CallServiceImapction
               {
                   ServiceId = service.Id,
                   ServiceUrl = service.Url,
