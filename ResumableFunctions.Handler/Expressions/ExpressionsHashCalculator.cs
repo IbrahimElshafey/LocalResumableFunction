@@ -73,10 +73,13 @@ public class ExpressionsHashCalculator : ExpressionVisitor
                 {
                     try
                     {
-                        return Call(
-                              typeof(JsonSerializer).GetMethod("Deserialize", 1, new[] { typeof(string), typeof(JsonSerializerOptions) }),
-                              Constant(JsonSerializer.Serialize(arg)),
-                              MakeMemberAccess(null, typeof(JsonSerializerOptions).GetProperty("Default"))
+                        return 
+                            Call(
+                                typeof(JsonSerializer).GetMethod("Deserialize", 1, new[] { typeof(string), typeof(JsonSerializerOptions) }).MakeGenericMethod(arg.GetType()),
+                                Constant(JsonSerializer.Serialize(arg)),
+                                MakeMemberAccess(null,
+                                    typeof(JsonSerializerOptions).GetProperty("Default")
+                                )
                             );
                     }
                     catch (Exception ex)

@@ -1,8 +1,10 @@
 ﻿namespace TestSomething;
 
+using ResumableFunctions.Handler.Helpers;
 using System.Linq.Expressions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static System.Linq.Expressions.Expression;
 internal class ExpressionCanBeConst
 {
     internal void Run()
@@ -19,7 +21,17 @@ internal class ExpressionCanBeConst
                 MakeMemberAccess(null, typeof(JsonSerializerOptions).GetProperty("Default"))
             )
          */
-        Expression<Func<ComplexClass>> complex = () => JsonSerializer.Deserialize<ComplexClass>("{Id:1234,Name:'Ibrahim'}", JsonSerializerOptions.Default);
+        LambdaExpression x =
+            Lambda(
+                Call(
+                    typeof(JsonSerializer).GetMethod("Deserialize", 1, new[] { typeof(string), typeof(JsonSerializerOptions) }).MakeGenericMethod(typeof(ComplexClass)),
+                    Constant("""{"Id":1234,"Name":"Ibrahim"}"""),
+                    MakeMemberAccess(null,
+                        typeof(JsonSerializerOptions).GetProperty("Default")
+                    )
+                )
+            );
+        var value = x.Compile().DynamicInvoke();
     }
 
     public class ComplexClass

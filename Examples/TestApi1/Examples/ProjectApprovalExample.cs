@@ -84,7 +84,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
         await Task.Delay(1);
         yield return Wait<string, string>
                 (new ExternalServiceClass().SayGoodby, "Wait good by external")
-                .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
+                .MatchIf((userName, helloMsg) => userName[0] == 'M')
                 .SetData((userName, helloMsg) => ExternalMethodStatus == $"Say goodby called and user name is: {userName}");
         Success(nameof(ExternalMethodWaitGoodby));
     }
