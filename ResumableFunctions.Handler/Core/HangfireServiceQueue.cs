@@ -18,28 +18,26 @@ namespace ResumableFunctions.Handler.Core
             _backgroundJobClient = backgroundJobClient;
             _httpClientFactory = httpClientFactory;
         }
-
+        
+        [DisplayName("`{0}`")]
         public async Task EnqueueCallImpaction(CallServiceImapction callImapction)
         {
-            var actionUrl = $"{callImapction.ServiceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ServiceProcessPushedCallAction}";
             try
             {
-                await HttpPost(actionUrl, callImapction);
+                var actionUrl = $"{callImapction.ServiceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ServiceProcessPushedCallAction}";
+                await DirectHttpPost(actionUrl, callImapction);
             }
             catch (Exception)
             {
-                _backgroundJobClient.Schedule(() => HttpPost(actionUrl, callImapction), TimeSpan.FromSeconds(3));
+                _backgroundJobClient.Schedule(() => EnqueueCallImpaction(callImapction), TimeSpan.FromSeconds(3));
             }
         }
 
-
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        [DisplayName("HTTP POST `{0}`")]
-        public async Task HttpPost(string url, object payload)
+        private async Task DirectHttpPost(string actionUrl, object callImapction)
         {
             var client = _httpClientFactory.CreateClient();
-            var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync(url, content);
+            var content = new StringContent(JsonConvert.SerializeObject(callImapction), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(actionUrl, content);
             response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadAsStringAsync();
             if (!(result == "1" || result == "-1"))

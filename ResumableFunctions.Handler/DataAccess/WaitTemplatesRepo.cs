@@ -54,8 +54,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
 
     public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
     {
-        var waitTemplate = (await _context
-            .WaitTemplates
+        var waitTemplate = (await
+            _context.WaitTemplates
             .Select(waitTemplate =>
                     new WaitTemplate
                     {
@@ -121,7 +121,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         return
             await _context
             .WaitTemplates
-            .Select(waitTemplate => 
+            .Select(waitTemplate =>
                 new WaitTemplate
                 {
                     MatchExpressionValue = waitTemplate.MatchExpressionValue,

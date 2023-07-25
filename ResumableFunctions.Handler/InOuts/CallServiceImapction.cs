@@ -12,6 +12,6 @@ public class CallServiceImapction
 
     public override string ToString()
     {
-        return $"Service `{ServiceName}` processing pushed call `{MethodUrn}:{PushedCallId}`";
+        return $"Put pushed call `{MethodUrn}:{PushedCallId}` in the processing queue for service `{ServiceName}`.";
     }
 }
