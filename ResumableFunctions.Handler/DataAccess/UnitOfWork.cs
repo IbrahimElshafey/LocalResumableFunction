@@ -20,8 +20,7 @@ internal class UnitOfWork : IUnitOfWork
         return success;
     }
 
-    public void Dispose() =>
-        _context.Dispose();
+    public void Dispose() => _context.Dispose();
 
     public Task Rollback()
     {
