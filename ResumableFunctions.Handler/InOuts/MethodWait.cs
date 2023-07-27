@@ -56,11 +56,14 @@ public class MethodWait : Wait
             //setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
             //FunctionState.StateObject = CurrentFunction;
             //FunctionState.AddLog($"Function instance data updated after wait [{Name}] matched.", LogType.Info, StatusCodes.WaitProcessing);
+            if (SetDataCall == null) return true;
             var classType = Assembly.Load(SetDataCall.AssemblyName).GetType(SetDataCall.ClassName);
             var method =
                 classType.GetMethod(SetDataCall.MethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             var instance = classType == CurrentFunction.GetType() ? CurrentFunction : Activator.CreateInstance(classType);
             method.Invoke(instance, new object[] { Input, Output });
+            FunctionState.StateObject = CurrentFunction;
+            FunctionState.AddLog($"Function instance data updated after wait [{Name}] matched.", LogType.Info, StatusCodes.WaitProcessing);
             return true;
         }
         catch (Exception ex)
