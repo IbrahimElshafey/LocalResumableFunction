@@ -103,6 +103,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 var template = await AddWaitTemplateIfNotExist(
                     replayRequest.MatchExpression,
                     methodWaitToReplay.SetDataExpression,
+                    methodWaitToReplay.CancelMethodData,
                     replayRequest.RequestedByFunctionId,
                     methodWaitToReplay.MethodGroupToWaitId,
                     methodWaitToReplay.MethodToWaitId ?? 0,
@@ -124,18 +125,18 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     private async Task<WaitTemplate> AddWaitTemplateIfNotExist(
         LambdaExpression matchExpression,
         LambdaExpression setDataExpression,
+        MethodData cancelMethodData,
         int funcId,
         int groupId,
         int methodId,
         object functionInstance,
         int inCodeLine)
     {
-        var waitExpressionsHash = new ExpressionsHashCalculator(matchExpression, setDataExpression);
+        var waitExpressionsHash = new ExpressionsHashCalculator(matchExpression, setDataExpression, cancelMethodData);
         var expressionsHash = waitExpressionsHash.Hash;
-        var waitTemplate =
+        return 
             await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, groupId) ??
             await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, functionInstance, funcId, groupId, methodId, inCodeLine);
-        return waitTemplate;
     }
 
     private async Task<Wait> GetWaitDuplicationAsync(Wait oldWaitToReplay)
@@ -203,6 +204,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 var template = await AddWaitTemplateIfNotExist(
                      replayWait.MatchExpression,
                      methodWaitToReplay.SetDataExpression,
+                     methodWaitToReplay.CancelMethodData,
                      oldMethodWait.RequestedByFunctionId,
                      oldMethodWait.MethodGroupToWaitId,
                      oldMethodWait.MethodToWaitId ?? 0,

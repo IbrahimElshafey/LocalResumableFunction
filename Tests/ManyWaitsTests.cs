@@ -16,7 +16,7 @@ namespace Tests
         [Fact]
         public async Task WaitThreeMethodsAtStart_Test()
         {
-            using var test = new TestShell(nameof(WaitThreeMethodsAtStart_Test),typeof(WaitManyMethods));
+            using var test = new TestShell(nameof(WaitThreeMethodsAtStart_Test), typeof(WaitManyMethods));
             await test.ScanTypes("WaitThreeAtStart");
             var errors = await test.GetLogs();
             Assert.Empty(errors);

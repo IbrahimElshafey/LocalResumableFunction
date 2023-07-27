@@ -19,6 +19,9 @@ public class MethodWait : Wait
     [NotMapped]
     public LambdaExpression MatchExpression { get; protected set; }
 
+    [NotMapped]
+    public MethodData CancelMethodData { get; protected set; }
+
     public string MandatoryPart { get; internal set; }
 
     [NotMapped]
@@ -85,6 +88,20 @@ public class MethodWait : Wait
         }
     }
 
+    internal override void Cancel()
+    {
+        //call cancel method
+        if (CancelMethodData != null)
+        {
+            var classType = Assembly.Load(CancelMethodData.AssemblyName).GetType(CancelMethodData.ClassName);
+            var method =
+                classType.GetMethod(CancelMethodData.MethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var instance = classType == CurrentFunction.GetType() ? CurrentFunction : Activator.CreateInstance(classType);
+            method.Invoke(instance, new object[] { Input, Output });
+        }
+        base.Cancel();
+    }
+
     internal override bool IsValidWaitRequest()
     {
         if (IsReplay)
@@ -116,11 +133,12 @@ public class MethodWait : Wait
     internal void LoadExpressions()
     {
         CurrentFunction = (ResumableFunctionsContainer)FunctionState.StateObject;
-        
+
         if (Template == null) return;
-        Template.LoadExpressions();
+        Template.LoadUnmappedProps();
         MatchExpression = Template.MatchExpression;
         SetDataExpression = Template.SetDataExpression;
+        CancelMethodData = Template.CancelMethodData;
     }
 
     public override void CopyCommonIds(Wait oldWait)
@@ -163,6 +181,12 @@ public class MethodWait<TInput, TOutput> : MethodWait
     public MethodWait<TInput, TOutput> MatchIf(Expression<Func<TInput, TOutput, bool>> value)
     {
         MatchExpression = value;
+        return this;
+    }
+
+    public MethodWait<TInput, TOutput> WhenCancel(Action<TInput, TOutput> value)
+    {
+        CancelMethodData = new MethodData(value.Method);
         return this;
     }
 

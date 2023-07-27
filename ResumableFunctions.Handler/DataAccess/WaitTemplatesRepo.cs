@@ -19,7 +19,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         _context = _scope.ServiceProvider.GetService<WaitsDataContext>();
     }
 
-    public async Task<WaitTemplate> AddNewTemplate(ExpressionsHashCalculator hashResult,
+    public async Task<WaitTemplate> AddNewTemplate(
+        ExpressionsHashCalculator hashResult,
         object currentFunctionInstance,
         int funcId,
         int groupId,
@@ -34,6 +35,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             Hash = hashResult.Hash,
             InCodeLine = inCodeLine,
             IsActive = 1,
+            CancelMethodData = hashResult.CancelMethodData
         };
 
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
@@ -77,7 +79,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             .FirstOrDefault(x => x.Hash.SequenceEqual(hash));
         if (waitTemplate != null)
         {
-            waitTemplate.LoadExpressions();
+            waitTemplate.LoadUnmappedProps();
             if (waitTemplate.IsActive == -1)
             {
                 waitTemplate.IsActive = 1;
@@ -104,7 +106,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             .AsNoTracking()
             .ToListAsync();
 
-        result.ForEach(x => x.LoadExpressions());
+        result.ForEach(x => x.LoadUnmappedProps());
         return result;
     }
 
@@ -112,13 +114,13 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
     public async Task<WaitTemplate> GetById(int templateId)
     {
         var waitTemplate = await _context.WaitTemplates.FindAsync(templateId);
-        waitTemplate?.LoadExpressions();
+        waitTemplate?.LoadUnmappedProps();
         return waitTemplate;
     }
 
     public async Task<WaitTemplate> GetWaitTemplateWithBasicMatch(int methodWaitTemplateId)
     {
-        return
+        var template =
             await _context
             .WaitTemplates
             .Select(waitTemplate =>
@@ -132,8 +134,11 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
                     MethodGroupId = waitTemplate.MethodGroupId,
                     ServiceId = waitTemplate.ServiceId,
                     IsActive = waitTemplate.IsActive,
+                    CancelMethodDataValue = waitTemplate.CancelMethodDataValue,
                 })
             .FirstAsync(x => x.Id == methodWaitTemplateId);
+        template.LoadUnmappedProps();
+        return template;
     }
 
     public void Dispose()

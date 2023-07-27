@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using FastExpressionCompiler;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Expressions;
@@ -15,13 +16,15 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     public byte[] Hash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
     public LambdaExpression SetDataExpression { get; private set; }
+    public MethodData CancelMethodData { get; }
 
-    public ExpressionsHashCalculator(LambdaExpression matchExpression, LambdaExpression setDataExpression)
+    public ExpressionsHashCalculator(LambdaExpression matchExpression, LambdaExpression setDataExpression, MethodData cancelMethod)
     {
         try
         {
             MatchExpression = matchExpression;
             SetDataExpression = setDataExpression;
+            CancelMethodData = cancelMethod;
             //CalcInitialHash();
             CalcLocalValueParts();
             CalcHash();
@@ -36,7 +39,7 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     private void CalcLocalValueParts()
     {
         var changeComputedParts = new GenericVisitor();
-        var localValueMethodInfo =
+        var localValueWrapper =
             typeof(ResumableFunctionsContainer)
             .GetMethod(nameof(ResumableFunctionsContainer.LocalValue))
             .GetGenericMethodDefinition();
@@ -50,7 +53,7 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         Expression OnVisitMethodCall(MethodCallExpression methodCallExpression)
         {
             if (methodCallExpression.Method.IsGenericMethod &&
-                methodCallExpression.Method.GetGenericMethodDefinition() == localValueMethodInfo)
+                methodCallExpression.Method.GetGenericMethodDefinition() == localValueWrapper)
             {
                 var arg =
                     Lambda<Func<object>>(Convert(methodCallExpression.Arguments[0], typeof(object)))
@@ -71,29 +74,32 @@ public class ExpressionsHashCalculator : ExpressionVisitor
                 }
                 else
                 {
-                    try
-                    {
-                        return 
-                            Call(
-                                typeof(JsonSerializer).GetMethod("Deserialize", 1, new[] { typeof(string), typeof(JsonSerializerOptions) }).MakeGenericMethod(arg.GetType()),
-                                Constant(JsonSerializer.Serialize(arg)),
-                                MakeMemberAccess(null,
-                                    typeof(JsonSerializerOptions).GetProperty("Default")
-                                )
-                            );
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception(
-                        $"The local value expression `{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}` can't be be convertred to embedded value.", ex);
-                    }
-
+                    return SerializeValue(methodCallExpression, arg);
                 }
             }
             return base.VisitMethodCall(methodCallExpression);
         }
     }
 
+    private static Expression SerializeValue(MethodCallExpression methodCallExpression, object arg)
+    {
+        try
+        {
+            return
+                Call(
+                    typeof(JsonSerializer).GetMethod("Deserialize", 1, new[] { typeof(string), typeof(JsonSerializerOptions) }).MakeGenericMethod(arg.GetType()),
+                    Constant(JsonSerializer.Serialize(arg)),
+                    MakeMemberAccess(null,
+                        typeof(JsonSerializerOptions).GetProperty("Default")
+                    )
+                );
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(
+            $"The local value expression `{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}` can't be be convertred to embedded value.", ex);
+        }
+    }
 
     private void CalcHash()
     {
@@ -101,18 +107,20 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         if (MatchExpression != null)
         {
             MatchExpression = (LambdaExpression)ChangeInputAndOutputNames(MatchExpression);
-            //sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
             sb.Append(MatchExpression.ToString());
         }
 
         if (SetDataExpression != null)
         {
             SetDataExpression = (LambdaExpression)ChangeInputAndOutputNames(SetDataExpression);
-            //sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
             sb.Append(SetDataExpression.ToString());
         }
 
         var data = Encoding.Unicode.GetBytes(sb.ToString());
+        
+        if (CancelMethodData?.MethodHash != null)
+            data = data.Concat(CancelMethodData.MethodHash).ToArray();
+
         Hash = MD5.HashData(data);
     }
 

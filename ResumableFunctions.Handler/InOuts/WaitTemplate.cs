@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using FastExpressionCompiler;
 using ResumableFunctions.Handler.Expressions;
+using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
@@ -22,12 +23,14 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public bool IsMandatoryPartFullMatch { get; internal set; }
 
     internal string MatchExpressionValue { get; set; }
-
+    public byte[] CancelMethodDataValue { get; internal set; }
     internal string CallMandatoryPartExpressionValue { get; set; }
 
-    internal string InstanceMandatoryPartExpressionValue { get;  set; }
-    internal string SetDataExpressionValue { get;  set; }
+    internal string InstanceMandatoryPartExpressionValue { get; set; }
+    internal string SetDataExpressionValue { get; set; }
 
+    [NotMapped]
+    public MethodData CancelMethodData { get; internal set; }
 
     [NotMapped]
     public LambdaExpression MatchExpression { get; internal set; }
@@ -49,7 +52,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public int IsActive { get; internal set; } = 1;
 
     bool expressionsLoaded;
-    internal void LoadExpressions(bool forceReload = false)
+    internal void LoadUnmappedProps(bool forceReload = false)
     {
         try
         {
@@ -64,6 +67,11 @@ public class WaitTemplate : IEntity, IOnSaveEntity
                 CallMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(CallMandatoryPartExpressionValue).ToExpression();
             if (InstanceMandatoryPartExpressionValue != null)
                 InstanceMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(InstanceMandatoryPartExpressionValue).ToExpression();
+            if (CancelMethodDataValue != null)
+            {
+                var converter = new BinaryToObjectConverter();
+                CancelMethodData = converter.ConvertToObject<MethodData>(CancelMethodDataValue);
+            }
 
         }
         catch (Exception e)
@@ -98,6 +106,11 @@ public class WaitTemplate : IEntity, IOnSaveEntity
             CallMandatoryPartExpressionValue = serializer.Serialize(CallMandatoryPartExpression.ToExpressionSlim());
         if (InstanceMandatoryPartExpression != null)
             InstanceMandatoryPartExpressionValue = serializer.Serialize(InstanceMandatoryPartExpression.ToExpressionSlim());
+        if (CancelMethodData != null)
+        {
+            var converter = new BinaryToObjectConverter();
+            CancelMethodDataValue = converter.ConvertToBinary(CancelMethodData);
+        }
     }
 
     internal string GetMandatoryPart(byte[] pushedCallDataValue)

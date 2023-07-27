@@ -134,6 +134,7 @@ internal sealed class WaitsDataContext : DbContext
         waitTemplateBuilder.Property(x => x.MatchExpressionValue);
         waitTemplateBuilder.Property(x => x.CallMandatoryPartExpressionValue);
         waitTemplateBuilder.Property(x => x.InstanceMandatoryPartExpressionValue);
+        waitTemplateBuilder.Property(x => x.CancelMethodDataValue);
         waitTemplateBuilder.Property(x => x.SetDataExpressionValue);
         waitTemplateBuilder
            .HasIndex(x => x.IsActive)

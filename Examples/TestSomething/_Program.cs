@@ -4,7 +4,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        switch (12)
+        switch (13)
         {
             case 1:
                 TestTreeCascadeAction(); break;
@@ -35,6 +35,9 @@ internal class Program
                 break;
             case 12:
                 new ExpressionCanBeConst().Run();
+                break;
+            case 13:
+                new SerializeActionCall().Run();
                 break;
         }
 
