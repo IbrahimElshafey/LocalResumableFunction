@@ -42,25 +42,24 @@ public class TimeWait : Wait
         }
     }
 
-    public Wait SetData(Expression<Func<TimeWaitInput, bool>> setDataExp)
+    public Wait SetData(Action<TimeWaitInput, bool> setDataExp)
     {
 
         if (setDataExp != null)
         {
-            var functionType = typeof(Func<,,>)
-                .MakeGenericType(
-                 typeof(TimeWaitInput),
-                 typeof(bool),
-                 typeof(bool));
-            var inputParameter = setDataExp.Parameters[0];
-            var outputParameter = Expression.Parameter(typeof(bool), "output");
-            var setDataExpression = Expression.Lambda(
-                functionType,
-                setDataExp.Body,
-                inputParameter,
-                outputParameter);
-            _timeMethodWait
-                .SetData((Expression<Func<TimeWaitInput, bool, bool>>)setDataExpression);
+            //var functionType = typeof(Func<,,>)
+            //    .MakeGenericType(
+            //     typeof(TimeWaitInput),
+            //     typeof(bool),
+            //     typeof(bool));
+            //var inputParameter = setDataExp.Parameters[0];
+            //var outputParameter = Expression.Parameter(typeof(bool), "output");
+            //var setDataExpression = Expression.Lambda(
+            //    functionType,
+            //    setDataExp.Body,
+            //    inputParameter,
+            //    outputParameter);
+            _timeMethodWait.SetData(setDataExp);
         }
         return this;
     }

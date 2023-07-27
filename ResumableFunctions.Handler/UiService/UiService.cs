@@ -292,7 +292,6 @@ namespace ResumableFunctions.Handler.UiService
                     callMatch.ExecutionStatus,
                     new TemplateDisplay(
                         wait.MatchExpressionValue,
-                        wait.SetDataExpressionValue,
                         wait.InstanceMandatoryPartExpressionValue)
                     ))
                 .ToList();
@@ -391,8 +390,7 @@ namespace ResumableFunctions.Handler.UiService
                         MatchStatus.ExpectedMatch,
                         InstanceUpdateStatus.NotUpdatedYet,
                         ExecutionStatus.NotStartedYet,
-                        new TemplateDisplay(x.MatchExpressionValue, x.SetDataExpressionValue,
-                            x.InstanceMandatoryPartExpressionValue)
+                        new TemplateDisplay(x.MatchExpressionValue, x.InstanceMandatoryPartExpressionValue)
                     )
                     {
                         CallId = x.methodWait.CallId,

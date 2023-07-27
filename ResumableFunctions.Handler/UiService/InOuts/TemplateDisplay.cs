@@ -14,15 +14,15 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public string MandatoryPartExpression { get; }
 
         public TemplateDisplay(WaitTemplate waitTemplate):
-            this(waitTemplate.MatchExpressionValue, waitTemplate.SetDataCallValue, waitTemplate.InstanceMandatoryPartExpressionValue)
+            this(waitTemplate.MatchExpressionValue, waitTemplate.InstanceMandatoryPartExpressionValue)
         {
         }
 
-        public TemplateDisplay(string matchExpressionValue, string setDataExpressionValue, string instanceMandatoryPartExpressionValue)
+        public TemplateDisplay(string matchExpressionValue, string instanceMandatoryPartExpressionValue)
         {
             _serializer = new ExpressionSerializer();
             MatchExpression = GetMatch(matchExpressionValue);
-            SetDataExpression = GetSetData(setDataExpressionValue);
+            //SetDataExpression = GetSetData(setDataExpressionValue);
             MandatoryPartExpression = GetMandatoryParts(instanceMandatoryPartExpressionValue);
         }
 
@@ -43,23 +43,23 @@ namespace ResumableFunctions.Handler.UiService.InOuts
             result = result.Replace("(object)", "");
             return result;
         }
-        string GetSetData(string setDataExpressionValue)
-        {
-            if (setDataExpressionValue == null) return string.Empty;
-            var setDataExp = _serializer.Deserialize(setDataExpressionValue);
-            var result = new StringBuilder();
-            if (setDataExp is LambdaExpressionSlim lambdaExpression &&
-                lambdaExpression.Body is BlockExpressionSlim blockExpression)
-            {
-                foreach (var exp in blockExpression.Expressions)
-                {
-                    if (exp.NodeType == ExpressionType.Default) continue;
-                    var expStr = exp.ToCSharpString();
-                    result.AppendLine(expStr);
-                    result.AppendLine("<br>");
-                }
-            }
-            return result.ToString();
-        }
+        //string GetSetData(string setDataExpressionValue)
+        //{
+        //    if (setDataExpressionValue == null) return string.Empty;
+        //    var setDataExp = _serializer.Deserialize(setDataExpressionValue);
+        //    var result = new StringBuilder();
+        //    if (setDataExp is LambdaExpressionSlim lambdaExpression &&
+        //        lambdaExpression.Body is BlockExpressionSlim blockExpression)
+        //    {
+        //        foreach (var exp in blockExpression.Expressions)
+        //        {
+        //            if (exp.NodeType == ExpressionType.Default) continue;
+        //            var expStr = exp.ToCSharpString();
+        //            result.AppendLine(expStr);
+        //            result.AppendLine("<br>");
+        //        }
+        //    }
+        //    return result.ToString();
+        //}
     }
 }

@@ -124,7 +124,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     private async Task<WaitTemplate> AddWaitTemplateIfNotExist(
         LambdaExpression matchExpression,
-        LambdaExpression setDataExpression,
+        MethodData setDataCall,
         MethodData cancelMethodData,
         int funcId,
         int groupId,
@@ -132,7 +132,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         object functionInstance,
         int inCodeLine)
     {
-        var waitExpressionsHash = new ExpressionsHashCalculator(matchExpression, setDataExpression, cancelMethodData);
+        var waitExpressionsHash = new ExpressionsHashCalculator(matchExpression, setDataCall, cancelMethodData);
         var expressionsHash = waitExpressionsHash.Hash;
         return 
             await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, groupId) ??

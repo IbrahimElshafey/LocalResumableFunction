@@ -39,7 +39,7 @@ namespace Tests
         {
             yield return Wait<string, string>(MethodToWait, "Wait Method")
                 .MatchIf((input, output) => input.Length > 3)
-                .SetData((input, output) => MethodOutput == output);
+                .SetData((input, output) => MethodOutput = output);
             await Task.Delay(100);
             throw new Exception("Can't get any wait");
         }

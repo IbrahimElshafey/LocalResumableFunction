@@ -15,15 +15,15 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     private int _localValuePartsCount;
     public byte[] Hash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
-    public LambdaExpression SetDataExpression { get; private set; }
+    public MethodData SetDataCall { get; private set; }
     public MethodData CancelMethodData { get; }
 
-    public ExpressionsHashCalculator(LambdaExpression matchExpression, LambdaExpression setDataExpression, MethodData cancelMethod)
+    public ExpressionsHashCalculator(LambdaExpression matchExpression, MethodData setDataCall, MethodData cancelMethod)
     {
         try
         {
             MatchExpression = matchExpression;
-            SetDataExpression = setDataExpression;
+            SetDataCall = setDataCall;
             CancelMethodData = cancelMethod;
             //CalcInitialHash();
             CalcLocalValueParts();
@@ -46,8 +46,8 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         changeComputedParts.OnVisitMethodCall(OnVisitMethodCall);
         if (MatchExpression != null)
             MatchExpression = (LambdaExpression)changeComputedParts.Visit(MatchExpression);
-        if (SetDataExpression != null)
-            SetDataExpression = (LambdaExpression)changeComputedParts.Visit(SetDataExpression);
+        //if (SetDataCall != null)
+        //    SetDataCall = (LambdaExpression)changeComputedParts.Visit(SetDataCall);
 
 
         Expression OnVisitMethodCall(MethodCallExpression methodCallExpression)
@@ -110,18 +110,21 @@ public class ExpressionsHashCalculator : ExpressionVisitor
             sb.Append(MatchExpression.ToString());
         }
 
-        if (SetDataExpression != null)
-        {
-            SetDataExpression = (LambdaExpression)ChangeInputAndOutputNames(SetDataExpression);
-            sb.Append(SetDataExpression.ToString());
-        }
+        //if (SetDataCall != null)
+        //{
+        //    SetDataCall = (LambdaExpression)ChangeInputAndOutputNames(SetDataCall);
+        //    sb.Append(SetDataCall.ToString());
+        //}
 
-        var data = Encoding.Unicode.GetBytes(sb.ToString());
+        var data = Encoding.Unicode.GetBytes(sb.ToString()).ToList();
         
         if (CancelMethodData?.MethodHash != null)
-            data = data.Concat(CancelMethodData.MethodHash).ToArray();
+            data.AddRange(CancelMethodData.MethodHash);
 
-        Hash = MD5.HashData(data);
+        if (SetDataCall?.MethodHash != null)
+            data.AddRange(SetDataCall.MethodHash);
+
+        Hash = MD5.HashData(data.ToArray());
     }
 
     private Expression ChangeInputAndOutputNames(LambdaExpression expression)
