@@ -14,7 +14,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public string MandatoryPartExpression { get; }
 
         public TemplateDisplay(WaitTemplate waitTemplate):
-            this(waitTemplate.MatchExpressionValue, waitTemplate.SetDataExpressionValue, waitTemplate.InstanceMandatoryPartExpressionValue)
+            this(waitTemplate.MatchExpressionValue, waitTemplate.SetDataCallValue, waitTemplate.InstanceMandatoryPartExpressionValue)
         {
         }
 

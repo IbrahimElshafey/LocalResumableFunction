@@ -55,7 +55,7 @@ public class ComplexApproval
         {
             yield return
                 Wait<string, int>(RequestAdded, "Request Added")
-                    .SetData((request, requestId) => RequestId == requestId);
+                    .SetData((request, requestId) => RequestId = requestId);
 
             for (; CurrentTopicIndex < TopicsCount; CurrentTopicIndex++)
             {
@@ -93,7 +93,7 @@ public class ComplexApproval
             await AskChefToApproveRequest(RequestId);
             return Wait<int, bool>(ChefFinalApproval, "Chef Final Approval")
                 .MatchIf((requestId, decision) => requestId == RequestId)
-                .SetData((requestId, decision) => FinalDecision == decision);
+                .SetData((requestId, decision) => FinalDecision = decision);
         }
 
         private async Task AskChefToApproveRequest(int requestId)

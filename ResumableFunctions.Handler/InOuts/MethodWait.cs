@@ -14,7 +14,7 @@ public class MethodWait : Wait
     }
 
     [NotMapped]
-    public LambdaExpression SetDataExpression { get; protected set; }
+    public MethodData SetDataCall { get; protected set; }
 
     [NotMapped]
     public LambdaExpression MatchExpression { get; protected set; }
@@ -50,12 +50,17 @@ public class MethodWait : Wait
     {
         try
         {
-            LoadExpressions();
-            if (SetDataExpression == null) return true;
-            var setDataExpression = SetDataExpression.CompileFast();
-            setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
-            FunctionState.StateObject = CurrentFunction;
-            FunctionState.AddLog($"Function instance data updated after wait [{Name}] matched.", LogType.Info, StatusCodes.WaitProcessing);
+            //LoadExpressions();
+            //if (SetDataCall == null) return true;
+            //var setDataExpression = SetDataCall.CompileFast();
+            //setDataExpression.DynamicInvoke(Input, Output, CurrentFunction);
+            //FunctionState.StateObject = CurrentFunction;
+            //FunctionState.AddLog($"Function instance data updated after wait [{Name}] matched.", LogType.Info, StatusCodes.WaitProcessing);
+            var classType = Assembly.Load(SetDataCall.AssemblyName).GetType(SetDataCall.ClassName);
+            var method =
+                classType.GetMethod(SetDataCall.MethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var instance = classType == CurrentFunction.GetType() ? CurrentFunction : Activator.CreateInstance(classType);
+            method.Invoke(instance, new object[] { Input, Output });
             return true;
         }
         catch (Exception ex)
@@ -124,7 +129,7 @@ public class MethodWait : Wait
                 break;
         }
 
-        if (SetDataExpression == null)
+        if (SetDataCall == null)
             FunctionState.AddLog(
                 $"You didn't set the `SetDataExpression` for wait [{Name}], " +
                 $"Please use `NoSetData()` if this is intended.", LogType.Warning, StatusCodes.WaitValidation);
@@ -138,7 +143,7 @@ public class MethodWait : Wait
         if (Template == null) return;
         Template.LoadUnmappedProps();
         MatchExpression = Template.MatchExpression;
-        SetDataExpression = Template.SetDataExpression;
+        SetDataCall = Template.SetDataCall;
         CancelMethodData = Template.CancelMethodData;
     }
 
@@ -173,9 +178,9 @@ public class MethodWait<TInput, TOutput> : MethodWait
         Name = $"#{method.Name}#";
     }
 
-    public MethodWait<TInput, TOutput> SetData(Expression<Func<TInput, TOutput, bool>> value)
+    public MethodWait<TInput, TOutput> SetData(Action<TInput, TOutput> value)
     {
-        SetDataExpression = value;
+        SetDataCall = new MethodData(value.Method);
         return this;
     }
 
@@ -199,7 +204,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
 
     public MethodWait<TInput, TOutput> NoSetData()
     {
-        SetDataExpression = (Expression<Func<TInput, TOutput, bool>>)((x, y) => true);
+        SetDataCall = null;
         return this;
     }
 

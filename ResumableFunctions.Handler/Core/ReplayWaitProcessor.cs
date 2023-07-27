@@ -102,7 +102,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
                 var template = await AddWaitTemplateIfNotExist(
                     replayRequest.MatchExpression,
-                    methodWaitToReplay.SetDataExpression,
+                    methodWaitToReplay.SetDataCall,
                     methodWaitToReplay.CancelMethodData,
                     replayRequest.RequestedByFunctionId,
                     methodWaitToReplay.MethodGroupToWaitId,
@@ -203,7 +203,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
                 var template = await AddWaitTemplateIfNotExist(
                      replayWait.MatchExpression,
-                     methodWaitToReplay.SetDataExpression,
+                     methodWaitToReplay.SetDataCall,
                      methodWaitToReplay.CancelMethodData,
                      oldMethodWait.RequestedByFunctionId,
                      oldMethodWait.MethodGroupToWaitId,

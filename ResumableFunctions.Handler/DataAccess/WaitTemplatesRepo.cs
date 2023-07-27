@@ -45,8 +45,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         waitTemplate.IsMandatoryPartFullMatch = matchWriter.IsMandatoryPartFullMatch;
 
 
-        var setDataWriter = new SetDataExpressionWriter(hashResult.SetDataExpression, currentFunctionInstance.GetType());
-        waitTemplate.SetDataExpression = setDataWriter.SetDataExpression;
+        //var setDataWriter = new SetDataExpressionWriter(hashResult.SetDataExpression, currentFunctionInstance.GetType());
+        //waitTemplate.SetDataCall = setDataWriter.SetDataExpression;
 
         _context.WaitTemplates.Add(waitTemplate);
 
@@ -127,7 +127,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
                 new WaitTemplate
                 {
                     MatchExpressionValue = waitTemplate.MatchExpressionValue,
-                    SetDataExpressionValue = waitTemplate.SetDataExpressionValue,
+                    SetDataCallValue = waitTemplate.SetDataCallValue,
                     Id = waitTemplate.Id,
                     FunctionId = waitTemplate.FunctionId,
                     MethodId = waitTemplate.MethodId,

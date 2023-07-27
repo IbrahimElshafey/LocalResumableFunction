@@ -53,7 +53,7 @@ namespace RequestApproval.Controllers
             //method may be called in any time
             yield return Wait<Request, bool>(_service.UserSubmitRequest, WaitSubmitRequest)
                     .MatchIf((request, result) => request.Id > 0)
-                    .SetData((request, result) => UserRequest == request);
+                    .SetData((request, result) => UserRequest = request);
 
             //save satate in the class contains the resumable function
             ManagerApprovalTaskId = _service.AskManagerApproval(UserRequest.Id);
@@ -61,7 +61,7 @@ namespace RequestApproval.Controllers
             //wait another new method
             yield return Wait<ApproveRequestArgs, int>(_service.ManagerApproval, "Wait Manager Approval")
                     .MatchIf((approveRequestArgs, approvalId) => approvalId > 0 && approveRequestArgs.TaskId == ManagerApprovalTaskId)
-                    .SetData((approveRequestArgs, approvalId) => ManagerApprovalResult == approveRequestArgs);
+                    .SetData((approveRequestArgs, approvalId) => ManagerApprovalResult = approveRequestArgs);
 
             switch (ManagerApprovalResult.Decision)
             {
