@@ -29,9 +29,10 @@ namespace Tests
             public async IAsyncEnumerable<Wait> WaitThreeAtStart()
             {
                 yield return Wait("Wait three methods",
-                    Wait<string, string>(Method1, "Method 1").WhenCancel((x, y) => Counter++),
+                    Wait<string, string>(Method1, "Method 1").WhenCancel(() => Counter++),
                     Wait<string, string>(Method2, "Method 2")
-                    .WhenCancel((x, y) =>
+                    .MatchAll()
+                    .WhenCancel(() =>
                     {
                         Console.WriteLine("Method Two Cancel");
                         Counter++;
@@ -43,7 +44,7 @@ namespace Tests
                 Console.WriteLine("Three method done");
             }
 
-            private void IncrementCounter(string arg1, string arg2)
+            private void IncrementCounter()
             {
                 Counter++;
             }

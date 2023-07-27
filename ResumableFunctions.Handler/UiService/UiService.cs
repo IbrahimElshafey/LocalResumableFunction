@@ -424,7 +424,10 @@ namespace ResumableFunctions.Handler.UiService
             foreach (var wait in waits)
             {
                 if (wait is MethodWait mw && templates.ContainsKey(mw.TemplateId))
+                {
                     mw.Template = templates[mw.TemplateId];
+                    //mw.Template.LoadUnmappedProps();
+                }
             }
         }
 

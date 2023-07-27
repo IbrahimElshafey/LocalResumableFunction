@@ -97,7 +97,8 @@ public class MethodWait : Wait
             var method =
                 classType.GetMethod(CancelMethodData.MethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             var instance = classType == CurrentFunction.GetType() ? CurrentFunction : Activator.CreateInstance(classType);
-            method.Invoke(instance, new object[] { Input, Output });
+            method.Invoke(instance, null);
+            //method.Invoke(instance, new object[] { Input, Output });
         }
         base.Cancel();
     }
@@ -184,7 +185,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
         return this;
     }
 
-    public MethodWait<TInput, TOutput> WhenCancel(Action<TInput, TOutput> value)
+    public MethodWait<TInput, TOutput> WhenCancel(Action value)
     {
         CancelMethodData = new MethodData(value.Method);
         return this;
