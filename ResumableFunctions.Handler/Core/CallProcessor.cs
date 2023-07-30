@@ -37,7 +37,7 @@ internal partial class CallProcessor : ICallProcessor
         _scanStateRepo = scanStateRepo;
     }
 
-    [DisplayName("Initial Process Pushed Call `{0}` for MethodUrn `{1}`")]
+    [DisplayName("Initial Process Pushed Call [{0}] for MethodUrn [{1}]")]
     public async Task InitialProcessPushedCall(int pushedCallId, string methodUrn)
     {
         if (!await _scanStateRepo.IsScanFinished())
@@ -53,7 +53,7 @@ internal partial class CallProcessor : ICallProcessor
                 var servicesImpactions = await _waitsRepository.GetAffectedServicesAndFunctions(methodUrn);
                 if (servicesImpactions == null || servicesImpactions.Any() is false)
                 {
-                    _logger.LogWarning($"There are no services affected by pushed call `{methodUrn}:{pushedCallId}`");
+                    _logger.LogWarning($"There are no services affected by pushed call [{methodUrn}:{pushedCallId}]");
                     return;
                 }
 
@@ -68,7 +68,7 @@ internal partial class CallProcessor : ICallProcessor
                         await _serviceQueue.EnqueueCallImpaction(serviceImpaction);
                 }
             },
-            $"Error when call `InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
+            $"Error when call [InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})] in service [{_settings.CurrentServiceId}]");
     }
 
     [DisplayName("{0}")]
@@ -86,7 +86,7 @@ internal partial class CallProcessor : ICallProcessor
                 }
                 return Task.CompletedTask;
             },
-            $"Error when call `ServiceProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{service.MethodUrn})` in service `{_settings.CurrentServiceId}`");
+            $"Error when call [ServiceProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{service.MethodUrn})] in service [{_settings.CurrentServiceId}]");
     }
 
 }

@@ -12,13 +12,13 @@ public class WaitSameEventAgain : ProjectApprovalExample
         yield return
             Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf((input, output) => output == true)
-                .SetData((input, output) => CurrentProject = input);
+                .AfterMatch((input, output) => CurrentProject = input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
 
         Wait ManagerApproval() => Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-            .SetData((input, output) => ManagerOneApproval = input.Decision);
+            .AfterMatch((input, output) => ManagerOneApproval = input.Decision);
         yield return ManagerApproval();
 
         if (ManagerOneApproval is false)

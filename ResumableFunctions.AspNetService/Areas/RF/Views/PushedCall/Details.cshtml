@@ -1,7 +1,7 @@
 ﻿@using MessagePack;
 @using ResumableFunctions.Handler.UiService.InOuts;
 @{
-    ViewBag.Title = $"Pushed Call `{Model.MethodData.MethodUrn}`";
+    ViewBag.Title = $"Pushed Call [{Model.MethodData.MethodUrn}]";
 }
 @model PushedCallDetails
 <div class="w3-container w3-margin">
@@ -49,7 +49,6 @@
                             </a>
                         </li>
                         <li><b>Match If: </b>@wait.MatchExpression</li>
-                        <li><b>Set Data: </b>@Html.Raw(wait.SetDataExpression)</li>
                     </ul>
                 </td>
                 <td>
@@ -57,9 +56,9 @@
                         <li><b>Instance Mandatory Parts: </b>@wait.MandatoryPartExpression</li>
                         <li><b>Mandatory Part Values: </b>@wait.MandatoryPart</li>
                         <li><b>Created: </b>@wait.Created</li>
-                        <li><b>Match: </b><span class="@wait.MatchStatus">@wait.MatchStatus</span></li>
-                        <li><b>Instance Update Status: </b><span class="@wait.InstanceUpdateStatus">@wait.InstanceUpdateStatus</span></li>
-                        <li><b>Execution Status: </b><span class="@wait.ExecutionStatus">@wait.ExecutionStatus</span></li>
+                        <li><b>Match Status: </b><span class="@wait.MatchStatus">@wait.MatchStatus</span></li>
+                        <li><b>After Match: </b><span class="@wait.InstanceUpdateStatus">@wait.InstanceUpdateStatus</span></li>
+                        <li><b>Resume Function: </b><span class="@wait.ExecutionStatus">@wait.ExecutionStatus</span></li>
                     </ul>
                 </td>
             </tr>

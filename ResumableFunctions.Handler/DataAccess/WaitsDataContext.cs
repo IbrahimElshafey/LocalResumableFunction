@@ -26,7 +26,7 @@ internal sealed class WaitsDataContext : DbContext
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error when call `Database.EnsureCreated()` for `WaitsDataContext`");
+            _logger.LogError(ex, "Error when call [Database.EnsureCreated()] for [WaitsDataContext]");
         }
     }
 
@@ -134,8 +134,8 @@ internal sealed class WaitsDataContext : DbContext
         waitTemplateBuilder.Property(x => x.MatchExpressionValue);
         waitTemplateBuilder.Property(x => x.CallMandatoryPartExpressionValue);
         waitTemplateBuilder.Property(x => x.InstanceMandatoryPartExpressionValue);
-        waitTemplateBuilder.Property(x => x.CancelMethodDataValue);
-        waitTemplateBuilder.Property(x => x.SetDataCallValue);
+        waitTemplateBuilder.Property(x => x.CancelMethodActionValue);
+        waitTemplateBuilder.Property(x => x.AfterMatchActionValue);
         waitTemplateBuilder
            .HasIndex(x => x.IsActive)
            .HasFilter($"{nameof(WaitTemplate.IsActive)} = 1")
@@ -265,7 +265,7 @@ internal sealed class WaitsDataContext : DbContext
         {
             case > 0 when entityInService.ServiceId != _settings.CurrentServiceId:
                 _logger.LogError(
-                    $"Try to change `ServiceId` for entity `{entityInService.GetType().Name}:{entityInService.Id}`" +
+                    $"Try to change [ServiceId] for entity [{entityInService.GetType().Name}:{entityInService.Id}]" +
                     $" from {entityInService.ServiceId} to {_settings.CurrentServiceId}");
                 break;
             case > 0:

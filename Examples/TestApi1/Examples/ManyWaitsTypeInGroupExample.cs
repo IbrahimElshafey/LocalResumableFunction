@@ -10,21 +10,21 @@ public class ManyWaitsTypeInGroupExample : ProjectApprovalExample
         yield return
             Wait<Project, bool>(ProjectSubmitted, "Project Submitted")
                 .MatchIf((input, output) => output == true)
-                .SetData((input, output) => CurrentProject = input);
+                .AfterMatch((input, output) => CurrentProject = input);
         WriteMessage("Wait many types in same group");
         yield return
             Wait("Many waits types",
                 Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                    .SetData((input, output) => ManagerOneApproval = output),
+                    .AfterMatch((input, output) => ManagerOneApproval = output),
                 Wait(
                     "Wait Manager Two and Four",
                     Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                         .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                        .SetData((input, output) => ManagerTwoApproval = output),
+                        .AfterMatch((input, output) => ManagerTwoApproval = output),
                     Wait<ApprovalDecision, bool>(ManagerFourApproveProject)
                         .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                        .SetData((input, output) => ManagerFourApproval = output)
+                        .AfterMatch((input, output) => ManagerFourApproval = output)
                 ).All(),
                 Wait("Sub function Wait", ManagerThreeSubFunction));
         Success(nameof(ManyWaitsTypeInGroup));
@@ -40,11 +40,11 @@ public class ManyWaitsTypeInGroupExample : ProjectApprovalExample
         yield return
             Wait<ApprovalDecision, bool>(ManagerThreeApproveProject, "Manager Three Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval = output);
+                .AfterMatch((input, output) => ManagerThreeApproval = output);
         yield return
             Wait<ApprovalDecision, bool>(ManagerThreeApproveProject, "Manager Three Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval = output);
+                .AfterMatch((input, output) => ManagerThreeApproval = output);
         WriteMessage("End ManagerThreeSubFunction");
     }
 }

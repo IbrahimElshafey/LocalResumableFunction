@@ -46,7 +46,7 @@ namespace ClientOnboarding.Workflow
         {
             return Wait<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, "Wait User Registration")
                     .MatchIf((regForm, regResult) => regResult.FormId > 0)
-                    .SetData((regForm, regResult) =>
+                    .AfterMatch((regForm, regResult) =>
                     {
                         RegistrationForm = regForm;
                         RegistrationResult = regResult;
@@ -57,7 +57,7 @@ namespace ClientOnboarding.Workflow
         {
             return Wait<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, "Wait Owner Approve Client")
                             .MatchIf((approveClientInput, approveResult) => approveClientInput.TaskId == OwnerTaskId.Id)
-                            .SetData((approveClientInput, approveResult) =>
+                            .AfterMatch((approveClientInput, approveResult) =>
                             {
                                 OwnerTaskResult = approveResult;
                                 OwnerApprovalInput = approveClientInput;
@@ -68,7 +68,7 @@ namespace ClientOnboarding.Workflow
         {
             return Wait<int, MeetingResult>(_service.SendMeetingResult, "Wait Meeting Result")
                    .MatchIf((meetingId, meetingResult) => meetingId == ClientMeetingId.MeetingId)
-                   .SetData((meetingId, meetingResult) => MeetingResult = meetingResult);
+                   .AfterMatch((meetingId, meetingResult) => MeetingResult = meetingResult);
         }
 
         public RegistrationForm RegistrationForm { get; set; }

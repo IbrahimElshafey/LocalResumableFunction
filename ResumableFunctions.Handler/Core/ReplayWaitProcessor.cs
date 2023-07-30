@@ -44,31 +44,31 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         {
             case ReplayType.GoAfter:
                 replayRequest.FunctionState?.AddLog(
-                    $"Try to go back after wait `{oldWaitForReplay.Name}`.", LogType.Info, StatusCodes.Replay);
+                    $"Try to go back after wait [{oldWaitForReplay.Name}].", LogType.Info, StatusCodes.Replay);
                 return new(oldWaitForReplay, true);
 
             case ReplayType.GoBefore:
                 replayRequest.FunctionState?.AddLog(
-                    $"Try to go back before wait `{oldWaitForReplay.Name}`.", LogType.Info, StatusCodes.Replay);
+                    $"Try to go back before wait [{oldWaitForReplay.Name}].", LogType.Info, StatusCodes.Replay);
                 return new(await ReplayGoBefore(oldWaitForReplay), false);
 
             case ReplayType.GoBeforeWithNewMatch:
                 replayRequest.FunctionState?.AddLog(
-                    $"Try to go back before wait `{oldWaitForReplay.Name}` with new match.", LogType.Info, StatusCodes.Replay);
+                    $"Try to go back before wait [{oldWaitForReplay.Name}] with new match.", LogType.Info, StatusCodes.Replay);
                 return new(await ReplayGoBeforeWithNewMatch(replayRequest, oldWaitForReplay), false);
 
             case ReplayType.GoTo:
                 replayRequest.FunctionState?.AddLog(
-                    $"Try go to wait `{oldWaitForReplay.Name}`.", LogType.Info, StatusCodes.Replay);
+                    $"Try go to wait [{oldWaitForReplay.Name}].", LogType.Info, StatusCodes.Replay);
                 return new(await GetWaitDuplicationAsync(oldWaitForReplay), false);
 
             case ReplayType.GoToWithNewMatch:
                 replayRequest.FunctionState?.AddLog(
-                    $"Try go to wait `{oldWaitForReplay.Name}` with new match.", LogType.Info, StatusCodes.Replay);
+                    $"Try go to wait [{oldWaitForReplay.Name}] with new match.", LogType.Info, StatusCodes.Replay);
                 return new(await GetWaitDuplicationWithNewMatch(replayRequest, oldWaitForReplay), false);
 
             default:
-                var errorMsg = $"ReplayWait type not defined `{replayRequest}`.";
+                var errorMsg = $"ReplayWait type not defined [{replayRequest}].";
                 _logger.LogWarning(errorMsg);
                 oldWaitForReplay.FunctionState?.AddError(errorMsg, StatusCodes.Replay, null);
                 throw new Exception(errorMsg);
@@ -102,8 +102,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
                 var template = await AddWaitTemplateIfNotExist(
                     replayRequest.MatchExpression,
-                    methodWaitToReplay.SetDataCall,
-                    methodWaitToReplay.CancelMethodData,
+                    methodWaitToReplay.AfterMatchAction,
+                    methodWaitToReplay.CancelMethodAction,
                     replayRequest.RequestedByFunctionId,
                     methodWaitToReplay.MethodGroupToWaitId,
                     methodWaitToReplay.MethodToWaitId ?? 0,
@@ -124,7 +124,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     private async Task<WaitTemplate> AddWaitTemplateIfNotExist(
         LambdaExpression matchExpression,
-        MethodData setDataCall,
+        MethodData afterMatchAction,
         MethodData cancelMethodData,
         int funcId,
         int groupId,
@@ -132,7 +132,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         object functionInstance,
         int inCodeLine)
     {
-        var waitExpressionsHash = new ExpressionsHashCalculator(matchExpression, setDataCall, cancelMethodData);
+        var waitExpressionsHash = new ExpressionsHashCalculator(matchExpression, afterMatchAction, cancelMethodData);
         var expressionsHash = waitExpressionsHash.Hash;
         return 
             await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, groupId) ??
@@ -203,8 +203,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
                 var template = await AddWaitTemplateIfNotExist(
                      replayWait.MatchExpression,
-                     methodWaitToReplay.SetDataCall,
-                     methodWaitToReplay.CancelMethodData,
+                     methodWaitToReplay.AfterMatchAction,
+                     methodWaitToReplay.CancelMethodAction,
                      oldMethodWait.RequestedByFunctionId,
                      oldMethodWait.MethodGroupToWaitId,
                      oldMethodWait.MethodToWaitId ?? 0,

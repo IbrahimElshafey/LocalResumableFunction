@@ -131,7 +131,7 @@ public class SubFunctionsTest
             yield return Wait<string, string>(Method3, "M3")
                 .MatchAll()
                 //.SetData(InstanceCall);
-                .SetData((input, output) => Message = $"Input: {input}, Output: {output}");
+                .AfterMatch((input, output) => Message = $"Input: {input}, Output: {output}");
         }
 
         private void InstanceCall(string arg1, string arg2)

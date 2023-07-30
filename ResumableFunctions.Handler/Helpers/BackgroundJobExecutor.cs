@@ -54,7 +54,7 @@ namespace ResumableFunctions.Handler.Helpers
                     $"\nSource File Path: {sourceFilePath}\n" +
                     $"Line Number: {sourceLineNumber}";
                 errorMessage = errorMessage == null ?
-                    $"Error when execute `{methodName}`\n{codeInfo}" :
+                    $"Error when execute [{methodName}]\n{codeInfo}" :
                     $"{errorMessage}\n{codeInfo}";
                 _logger.LogError(ex, errorMessage);
                 throw;

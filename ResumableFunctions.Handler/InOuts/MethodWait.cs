@@ -14,13 +14,13 @@ public class MethodWait : Wait
     }
 
     [NotMapped]
-    public MethodData SetDataCall { get; protected set; }
+    public MethodData AfterMatchAction { get; protected set; }
 
     [NotMapped]
     public LambdaExpression MatchExpression { get; protected set; }
 
     [NotMapped]
-    public MethodData CancelMethodData { get; protected set; }
+    public MethodData CancelMethodAction { get; protected set; }
 
     public string MandatoryPart { get; internal set; }
 
@@ -46,24 +46,24 @@ public class MethodWait : Wait
     public object Output { get; set; }
     public int InCodeLine { get; internal set; }
 
-    public bool UpdateFunctionData()
+    public bool ExecuteAfterMatchAction()
     {
         try
         {
-            if (SetDataCall == null) return true;
-            var classType = Assembly.Load(SetDataCall.AssemblyName).GetType(SetDataCall.ClassName);
+            if (AfterMatchAction == null) return true;
+            var classType = Assembly.Load(AfterMatchAction.AssemblyName).GetType(AfterMatchAction.ClassName);
             var method =
-                classType.GetMethod(SetDataCall.MethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                classType.GetMethod(AfterMatchAction.MethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             //todo: must be instance method or 
             var instance = classType == CurrentFunction.GetType() ? CurrentFunction : Activator.CreateInstance(classType);
             method.Invoke(instance, new object[] { Input, Output });
             FunctionState.StateObject = CurrentFunction;
-            FunctionState.AddLog($"Function instance data updated after wait [{Name}] matched.", LogType.Info, StatusCodes.WaitProcessing);
+            FunctionState.AddLog($"After wait [{Name}] action executed.", LogType.Info, StatusCodes.WaitProcessing);
             return true;
         }
         catch (Exception ex)
         {
-            var error = $"An error occurred when try to update function data after method wait [{Name}] matched." + ex.Message;
+            var error = $"An error occurred when try to execute action after wait [{Name}] matched." + ex.Message;
             FunctionState.AddLog(error, LogType.Error, StatusCodes.WaitProcessing);
             throw new Exception(error, ex);
         }
@@ -94,14 +94,14 @@ public class MethodWait : Wait
     internal override void Cancel()
     {
         //call cancel method
-        if (CancelMethodData != null)
+        if (CancelMethodAction != null)
         {
-            var classType = Assembly.Load(CancelMethodData.AssemblyName).GetType(CancelMethodData.ClassName);
+            var classType = Assembly.Load(CancelMethodAction.AssemblyName).GetType(CancelMethodAction.ClassName);
             var method =
-                classType.GetMethod(CancelMethodData.MethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                classType.GetMethod(CancelMethodAction.MethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
             var instance = classType == CurrentFunction.GetType() ? CurrentFunction : Activator.CreateInstance(classType);
             method.Invoke(instance, null);
-            CurrentFunction?.AddLog($"Execute cancel method for wait `{Name}`", LogType.Info, StatusCodes.WaitProcessing);
+            CurrentFunction?.AddLog($"Execute cancel method for wait [{Name}]", LogType.Info, StatusCodes.WaitProcessing);
         }
         base.Cancel();
     }
@@ -114,23 +114,23 @@ public class MethodWait : Wait
         {
             case false when MatchExpression == null:
                 FunctionState.AddError(
-                    $"You didn't set the `MatchExpression` for wait [{Name}] that is not a first wait," +
+                    $"You didn't set the [{nameof(MatchExpression)}] for wait [{Name}] that is not a first wait," +
                     $"This will lead to no match for all calls," +
-                    $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the `MatchExpression`," +
-                    $"or use MatchAll() method.", StatusCodes.WaitValidation, null);
+                    $"You can use method MatchIf(Expression<Func<TInput, TOutput, bool>> value) to pass the [{nameof(MatchExpression)}]," +
+                    $"or use [MatchAll()] method.", StatusCodes.WaitValidation, null);
                 break;
             case true when MatchExpression == null:
                 FunctionState.AddLog(
-                    $"You didn't set the `MatchExpression` for first wait [{Name}]," +
+                    $"You didn't set the [{nameof(MatchExpression)}] for first wait [{Name}]," +
                     $"This will lead to all calls will be matched.",
                     LogType.Warning, StatusCodes.WaitValidation);
                 break;
         }
 
-        if (SetDataCall == null)
+        if (AfterMatchAction == null)
             FunctionState.AddLog(
-                $"You didn't set the `SetDataExpression` for wait [{Name}], " +
-                $"Please use `NoSetData()` if this is intended.", LogType.Warning, StatusCodes.WaitValidation);
+                $"You didn't set the [{nameof(AfterMatchAction)}] for wait [{Name}], " +
+                $"Please use [NothingAfterMatch()] if this is intended.", LogType.Warning, StatusCodes.WaitValidation);
         return base.IsValidWaitRequest();
     }
 
@@ -141,8 +141,8 @@ public class MethodWait : Wait
         if (Template == null) return;
         Template.LoadUnmappedProps();
         MatchExpression = Template.MatchExpression;
-        SetDataCall = Template.SetDataCall;
-        CancelMethodData = Template.CancelMethodData;
+        AfterMatchAction = Template.AfterMatchAction;
+        CancelMethodAction = Template.CancelMethodAction;
     }
 
     public override void CopyCommonIds(Wait oldWait)
@@ -170,15 +170,15 @@ public class MethodWait<TInput, TOutput> : MethodWait
 
         if (methodAttribute == null)
             throw new Exception(
-                $"You must add attribute `{nameof(PushCallAttribute)}` to method `{method.GetFullName()}`");
+                $"You must add attribute [{nameof(PushCallAttribute)}] to method [{method.GetFullName()}]");
 
         MethodData = new MethodData(method);
         Name = $"#{method.Name}#";
     }
 
-    public MethodWait<TInput, TOutput> SetData(Action<TInput, TOutput> value)
+    public MethodWait<TInput, TOutput> AfterMatch(Action<TInput, TOutput> value)
     {
-        SetDataCall = new MethodData(value.Method);
+        AfterMatchAction = new MethodData(value.Method);
         return this;
     }
 
@@ -190,7 +190,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
 
     public MethodWait<TInput, TOutput> WhenCancel(Action value)
     {
-        CancelMethodData = new MethodData(value.Method);
+        CancelMethodAction = new MethodData(value.Method);
         return this;
     }
 
@@ -200,9 +200,9 @@ public class MethodWait<TInput, TOutput> : MethodWait
         return this;
     }
 
-    public MethodWait<TInput, TOutput> NoSetData()
+    public MethodWait<TInput, TOutput> NothingAfterMatch()
     {
-        SetDataCall = null;
+        AfterMatchAction = null;
         return this;
     }
 

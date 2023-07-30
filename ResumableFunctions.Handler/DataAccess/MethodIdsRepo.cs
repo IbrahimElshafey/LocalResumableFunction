@@ -33,7 +33,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
                .FirstOrDefaultAsync(x => x.Id == id);
         if (resumableFunctionIdentifier != null)
             return resumableFunctionIdentifier;
-        var error = $"Can't find resumable function with ID `{id}` in database.";
+        var error = $"Can't find resumable function with ID [{id}] in database.";
         _logger.LogError(error);
         throw new NullReferenceException(error);
     }
@@ -135,7 +135,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
 
         string ErrorTemplate(string propName, bool propValue) =>
            $"Error When register method {methodData.MethodName}," +
-           $"Method group `{methodGroup.MethodGroupUrn}` property `{propName}` was `{propValue}` and can't be changed";
+           $"Method group [{methodGroup.MethodGroupUrn}] property [{propName}] was [{propValue}] and can't be changed";
     }
 
 

@@ -122,7 +122,7 @@ internal partial class WaitsRepo : IWaitsRepo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Error when RemoveFirstWaitIfExist for function `{methodIdentifierId}`");
+            _logger.LogError(ex, $"Error when RemoveFirstWaitIfExist for function [{methodIdentifierId}]");
         }
     }
 
@@ -158,7 +158,7 @@ internal partial class WaitsRepo : IWaitsRepo
         }
         if (wait.ParentWait != null)
             wait.ParentWait.CurrentFunction = wait.CurrentFunction;
-        //wait.FunctionState.AddLog($"Wait `{wait.Name}` canceled.");
+        //wait.FunctionState.AddLog($"Wait [{wait.Name}] canceled.");
     }
 
     public async Task<Wait> GetWaitParent(Wait wait)

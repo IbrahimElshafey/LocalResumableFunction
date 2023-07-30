@@ -14,7 +14,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
             DateTime created,
             string mandatoryPart,
             MatchStatus matchStatus,
-            InstanceUpdateStatus instanceUpdateStatus,
+            ExecutionStatus instanceUpdateStatus,
             ExecutionStatus executionStatus,
             TemplateDisplay templateDisplay)
         {
@@ -24,7 +24,6 @@ namespace ResumableFunctions.Handler.UiService.InOuts
             FunctionName = functionName;
             InstanceId = instanceId;
             MatchExpression = templateDisplay.MatchExpression;
-            SetDataExpression = templateDisplay.SetDataExpression;
             Created = created;
             MandatoryPart = mandatoryPart;
             MandatoryPartExpression = templateDisplay.MandatoryPartExpression;
@@ -36,14 +35,13 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public ExecutionStatus ExecutionStatus { get; }
         public string FunctionName { get; }
         public int InstanceId { get; }
-        public InstanceUpdateStatus InstanceUpdateStatus { get; }
+        public ExecutionStatus InstanceUpdateStatus { get; }
         public string MandatoryPart { get; }
         public string MandatoryPartExpression { get; }
         public string MatchExpression { get; }
         public MatchStatus MatchStatus { get; }
         public string Name { get; }
         public int Id { get; }
-        public string SetDataExpression { get; }
         public WaitStatus Status { get; }
         public int? CallId { get; set; }
         public string GroupName { get; set; }

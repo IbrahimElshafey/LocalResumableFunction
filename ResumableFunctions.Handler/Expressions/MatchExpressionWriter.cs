@@ -52,8 +52,8 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             {
                 var name = exp.Member.Name;
                 throw new Exception(
-                    $"Can't use local variable `{name}` in match expression `{ExpressionExtensions.ToCSharpString(_matchExpression)}`, " +
-                    $"please warp it in method `{nameof(ResumableFunctionsContainer.LocalValue)}({name})`");
+                    $"Can't use local variable [{name}] in match expression [{ExpressionExtensions.ToCSharpString(_matchExpression)}], " +
+                    $"please warp it in method [{nameof(ResumableFunctionsContainer.LocalValue)}({name})]");
             }
             return exp;
         });
@@ -111,7 +111,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             else if (right.IsCalculated)
                 _constantParts.Add(new(node.NodeType, left.Result, right.Result, right.Value, node.Right));
 
-            //translate bool prop like `&& input.IsHappy` to `&& input.IsHappy == true `
+            //translate bool prop like [&& input.IsHappy] to [&& input.IsHappy == true ]
             if (node.Left.Type == typeof(bool) &&
                 IsUseParameters(node.Left) &&
                 (node.Left is ParameterExpression || node.Left is MemberExpression) &&
@@ -147,7 +147,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
                 return ObjectAsConst(result);
 
             throw new NotSupportedException(
-                $"Can't use expression `{expression}` in match because it's evaluated to `NULL`.");
+                $"Can't use expression [{expression}] in match because it's evaluated to [NULL].");
 
         }
 
@@ -176,7 +176,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             catch (Exception ex)
             {
                 throw new NotSupportedException(message:
-                    $"Can't use expression `{expression}` in match because we can't compute its value.\n" +
+                    $"Can't use expression [{expression}] in match because we can't compute its value.\n" +
                     $"Exception: {ex}");
             }
         }
@@ -214,7 +214,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
                 ), true, json);
             }
             throw new NotSupportedException(message:
-                   $"Can't use value `{result}` in match because it type can't be serialized.\n");
+                   $"Can't use value [{result}] in match because it type can't be serialized.\n");
         }
     }
 

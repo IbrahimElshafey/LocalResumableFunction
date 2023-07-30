@@ -25,7 +25,7 @@ internal class BinaryToObjectConverter
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error when convert object of type `{obj?.GetType().FullName}` to binary", ex);
+            throw new Exception($"Error when convert object of type [{obj?.GetType().FullName}] to binary", ex);
         }
     }
 
@@ -49,7 +49,7 @@ internal class BinaryToObjectConverter
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error when convert bytes to `{typeof(T)}`", ex);
+            throw new Exception($"Error when convert bytes to [{typeof(T)}]", ex);
         }
     }
 
@@ -61,7 +61,7 @@ internal class BinaryToObjectConverter
         }
         catch (Exception ex)
         {
-            throw new Exception($"Error when convert bytes to `{typeof(T)}`", ex);
+            throw new Exception($"Error when convert bytes to [{typeof(T)}]", ex);
         }
     }
 }

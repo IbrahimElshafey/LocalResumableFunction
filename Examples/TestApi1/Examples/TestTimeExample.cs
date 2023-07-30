@@ -11,7 +11,7 @@ public class TestTimeExample : ProjectApprovalExample
         yield return
             Wait<Project, bool>(ProjectSubmitted, "Project Submitted in TimeWaitTest")
                 .MatchIf((input, output) => output == true)
-                .SetData((project, outputResult) => CurrentProject = project);
+                .AfterMatch((project, outputResult) => CurrentProject = project);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         const string waitManagerOneApprovalInSeconds = "Wait manager one approval in 2 days";
@@ -19,9 +19,9 @@ public class TestTimeExample : ProjectApprovalExample
                 waitManagerOneApprovalInSeconds,
                 Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                    .SetData((input, output) => ManagerOneApproval = output),
+                    .AfterMatch((input, output) => ManagerOneApproval = output),
                 Wait(TimeSpan.FromDays(2), "Two Days")
-                .SetData((_, _) => TimerMatched = true)
+                .AfterMatch((_, _) => TimerMatched = true)
         ).First();
 
         if (TimerMatched)

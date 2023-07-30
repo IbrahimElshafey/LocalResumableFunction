@@ -18,10 +18,10 @@ namespace TestSomething
         {
             var pushResultAttribute = triggers.OfType<PushToResumableFunctionEngineAttribute>().First();
            
-            Console.WriteLine($"Before executing method `{name}` with input `{args.Aggregate((x,y)=>$"{x},{y}")}` and attribute `{pushResultAttribute}`");
-            Console.WriteLine($"Instance is: `{instance}`");
-            Console.WriteLine($"Return type is: `{retType.FullName}`");
-            Console.WriteLine($"Metadata is: `{metadata.Name}` of type `{metadata.GetType().Name}`");
+            Console.WriteLine($"Before executing method [{name}] with input [{args.Aggregate((x,y)=>$"{x},{y}")}] and attribute [{pushResultAttribute}]");
+            Console.WriteLine($"Instance is: [{instance}]");
+            Console.WriteLine($"Return type is: [{retType.FullName}]");
+            Console.WriteLine($"Metadata is: [{metadata.Name}] of type [{metadata.GetType().Name}]");
         }
 
         [Advice(Kind.After)]
@@ -30,7 +30,7 @@ namespace TestSomething
            [Argument(Source.ReturnValue)] object result
            )
         {
-            Console.WriteLine($"Method `{name}` executed and result is `{result}`");
+            Console.WriteLine($"Method [{name}] executed and result is [{result}]");
         }
 
         

@@ -63,7 +63,7 @@ internal partial class WaitsRepo
     {
         var methodId = await _methodIdsRepo.GetId(methodWait);
         var funcId = methodWait.RequestedByFunctionId;
-        var waitExpressionsHash = new ExpressionsHashCalculator(methodWait.MatchExpression, methodWait.SetDataCall, methodWait.CancelMethodData);
+        var waitExpressionsHash = new ExpressionsHashCalculator(methodWait.MatchExpression, methodWait.AfterMatchAction, methodWait.CancelMethodAction);
         var expressionsHash = waitExpressionsHash.Hash;
         await SetWaitTemplate();
         methodWait.MethodToWaitId = methodId.MethodId;
@@ -159,7 +159,7 @@ internal partial class WaitsRepo
         {
             TimeMatchId = timeWait.UniqueMatchId,
             RequestedByFunctionId = timeWait.RequestedByFunctionId,
-            Description = $"`{timeWait.Name}` in function `{timeWait.RequestedByFunction.RF_MethodUrn}:{timeWait.FunctionState.Id}`"
+            Description = $"[{timeWait.Name}] in function [{timeWait.RequestedByFunction.RF_MethodUrn}:{timeWait.FunctionState.Id}]"
         };
         if (!timeWait.IgnoreJobCreation)
             timeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(

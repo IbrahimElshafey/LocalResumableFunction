@@ -86,7 +86,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         catch (Exception ex)
         {
             FunctionState.AddError(
-                $"An error occurred after resuming execution after wait `{this}`.", StatusCodes.WaitProcessing, ex);
+                $"An error occurred after resuming execution after wait [{this}].", StatusCodes.WaitProcessing, ex);
             FunctionState.Status = FunctionStatus.InError;
             throw;
         }
@@ -183,7 +183,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         if (isNameDuplicated)
         {
             FunctionState.AddLog(
-                $"The wait named `{Name}` is duplicated in function `{RequestedByFunction?.MethodName}` body,fix it to not cause a problem. If it's a loop concat the  index to the name",
+                $"The wait named [{Name}] is duplicated in function [{RequestedByFunction?.MethodName}] body,fix it to not cause a problem. If it's a loop concat the  index to the name",
                 LogType.Warning, StatusCodes.WaitValidation);
         }
 

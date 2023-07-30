@@ -44,7 +44,7 @@ namespace ResumableFunctions.Handler.Expressions
                 return (_inputOutput, Constant(path));
             if (path.StartsWith("functionInstance."))
                 return (_instance, Constant(path.Substring(17)));
-            throw new Exception($"Can't access to `{path}`");
+            throw new Exception($"Can't access to [{path}]");
         }
 
         public override Expression Visit(Expression node)

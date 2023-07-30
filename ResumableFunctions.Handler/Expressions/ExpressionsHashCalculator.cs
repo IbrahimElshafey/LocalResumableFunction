@@ -15,16 +15,19 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     private int _localValuePartsCount;
     public byte[] Hash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
-    public MethodData SetDataCall { get; private set; }
-    public MethodData CancelMethodData { get; }
+    public MethodData AfterMatchAction { get; }
+    public MethodData CancelMethodAction { get; }
 
-    public ExpressionsHashCalculator(LambdaExpression matchExpression, MethodData setDataCall, MethodData cancelMethod)
+    public ExpressionsHashCalculator(
+        LambdaExpression matchExpression,
+        MethodData afterMatchAction,
+        MethodData cancelAction)
     {
         try
         {
             MatchExpression = matchExpression;
-            SetDataCall = setDataCall;
-            CancelMethodData = cancelMethod;
+            AfterMatchAction = afterMatchAction;
+            CancelMethodAction = cancelAction;
             //CalcInitialHash();
             CalcLocalValueParts();
             CalcHash();
@@ -97,7 +100,7 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         catch (Exception ex)
         {
             throw new Exception(
-            $"The local value expression `{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}` can't be be convertred to embedded value.", ex);
+            $"The local value expression [{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}] can't be be convertred to embedded value.", ex);
         }
     }
 
@@ -118,11 +121,11 @@ public class ExpressionsHashCalculator : ExpressionVisitor
 
         var data = Encoding.Unicode.GetBytes(sb.ToString()).ToList();
         
-        if (CancelMethodData?.MethodHash != null)
-            data.AddRange(CancelMethodData.MethodHash);
+        if (CancelMethodAction?.MethodHash != null)
+            data.AddRange(CancelMethodAction.MethodHash);
 
-        if (SetDataCall?.MethodHash != null)
-            data.AddRange(SetDataCall.MethodHash);
+        if (AfterMatchAction?.MethodHash != null)
+            data.AddRange(AfterMatchAction.MethodHash);
 
         Hash = MD5.HashData(data.ToArray());
     }

@@ -269,7 +269,7 @@ namespace ResumableFunctions.Handler.UiService
                     wait.RequestedByFunction.RF_MethodUrn,
                     wait.FunctionStateId,
                     template.MatchExpressionValue,
-                    template.SetDataCallValue,
+                    template.AfterMatchActionValue,
                     template.InstanceMandatoryPartExpressionValue,
                     wait.MandatoryPart
                 })
@@ -288,7 +288,7 @@ namespace ResumableFunctions.Handler.UiService
                     callMatch.Created,
                     wait.MandatoryPart,
                     callMatch.MatchStatus,
-                    callMatch.InstanceUpdateStatus,
+                    callMatch.AfterMatchActionStatus,
                     callMatch.ExecutionStatus,
                     new TemplateDisplay(
                         wait.MatchExpressionValue,
@@ -371,7 +371,7 @@ namespace ResumableFunctions.Handler.UiService
                 {
                     methodWait,
                     template.MatchExpressionValue,
-                    template.SetDataCallValue,
+                    template.AfterMatchActionValue,
                     template.InstanceMandatoryPartExpressionValue,
                     methodWait.RequestedByFunction.RF_MethodUrn
                 };
@@ -388,7 +388,7 @@ namespace ResumableFunctions.Handler.UiService
                         x.methodWait.Created,
                         x.methodWait.MandatoryPart,
                         MatchStatus.ExpectedMatch,
-                        InstanceUpdateStatus.NotUpdatedYet,
+                        ExecutionStatus.NotStartedYet,
                         ExecutionStatus.NotStartedYet,
                         new TemplateDisplay(x.MatchExpressionValue, x.InstanceMandatoryPartExpressionValue)
                     )
@@ -414,7 +414,7 @@ namespace ResumableFunctions.Handler.UiService
                 .Select(template => new WaitTemplate
                 {
                     MatchExpressionValue = template.MatchExpressionValue,
-                    SetDataCallValue = template.SetDataCallValue,
+                    AfterMatchActionValue = template.AfterMatchActionValue,
                     InstanceMandatoryPartExpressionValue = template.CallMandatoryPartExpressionValue,
                     Id = template.Id
                 })

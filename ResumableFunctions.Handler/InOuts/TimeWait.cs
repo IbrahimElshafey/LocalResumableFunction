@@ -42,27 +42,14 @@ public class TimeWait : Wait
         }
     }
 
-    public Wait SetData(Action<TimeWaitInput, bool> setDataExp)
+    public Wait AfterMatch(Action<TimeWaitInput, bool> setDataExp)
     {
 
         if (setDataExp != null)
         {
-            //var functionType = typeof(Func<,,>)
-            //    .MakeGenericType(
-            //     typeof(TimeWaitInput),
-            //     typeof(bool),
-            //     typeof(bool));
-            //var inputParameter = setDataExp.Parameters[0];
-            //var outputParameter = Expression.Parameter(typeof(bool), "output");
-            //var setDataExpression = Expression.Lambda(
-            //    functionType,
-            //    setDataExp.Body,
-            //    inputParameter,
-            //    outputParameter);
-            _timeMethodWait.SetData(setDataExp);
+            _timeMethodWait.AfterMatch(setDataExp);
         }
         return this;
     }
-
 
 }

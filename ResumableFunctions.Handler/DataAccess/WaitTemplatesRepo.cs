@@ -35,7 +35,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             Hash = hashResult.Hash,
             InCodeLine = inCodeLine,
             IsActive = 1,
-            CancelMethodData = hashResult.CancelMethodData
+            CancelMethodAction = hashResult.CancelMethodAction
         };
 
         var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
@@ -48,7 +48,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         //var setDataWriter = new SetDataExpressionWriter(hashResult.SetDataExpression, currentFunctionInstance.GetType());
         //waitTemplate.SetDataCall = setDataWriter.SetDataExpression;
 
-        waitTemplate.SetDataCall = hashResult.SetDataCall;
+        waitTemplate.AfterMatchAction = hashResult.AfterMatchAction;
 
         _context.WaitTemplates.Add(waitTemplate);
 
@@ -129,14 +129,14 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
                 new WaitTemplate
                 {
                     MatchExpressionValue = waitTemplate.MatchExpressionValue,
-                    SetDataCallValue = waitTemplate.SetDataCallValue,
+                    AfterMatchActionValue = waitTemplate.AfterMatchActionValue,
                     Id = waitTemplate.Id,
                     FunctionId = waitTemplate.FunctionId,
                     MethodId = waitTemplate.MethodId,
                     MethodGroupId = waitTemplate.MethodGroupId,
                     ServiceId = waitTemplate.ServiceId,
                     IsActive = waitTemplate.IsActive,
-                    CancelMethodDataValue = waitTemplate.CancelMethodDataValue,
+                    CancelMethodActionValue = waitTemplate.CancelMethodActionValue,
                 })
             .FirstAsync(x => x.Id == methodWaitTemplateId);
         template.LoadUnmappedProps();

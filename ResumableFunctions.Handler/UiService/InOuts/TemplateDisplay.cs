@@ -10,7 +10,6 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         private readonly ExpressionSerializer _serializer;
       
         public string MatchExpression { get; }
-        public string SetDataExpression { get; }
         public string MandatoryPartExpression { get; }
 
         public TemplateDisplay(WaitTemplate waitTemplate):
@@ -22,7 +21,6 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         {
             _serializer = new ExpressionSerializer();
             MatchExpression = GetMatch(matchExpressionValue);
-            //SetDataExpression = GetSetData(setDataExpressionValue);
             MandatoryPartExpression = GetMandatoryParts(instanceMandatoryPartExpressionValue);
         }
 
@@ -34,6 +32,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
                 result = result.Substring(37);
             return result;
         }
+
         string GetMandatoryParts(string instanceMandatoryPartExpressionValue)
         {
             if (instanceMandatoryPartExpressionValue == null) return string.Empty;
@@ -43,23 +42,5 @@ namespace ResumableFunctions.Handler.UiService.InOuts
             result = result.Replace("(object)", "");
             return result;
         }
-        //string GetSetData(string setDataExpressionValue)
-        //{
-        //    if (setDataExpressionValue == null) return string.Empty;
-        //    var setDataExp = _serializer.Deserialize(setDataExpressionValue);
-        //    var result = new StringBuilder();
-        //    if (setDataExp is LambdaExpressionSlim lambdaExpression &&
-        //        lambdaExpression.Body is BlockExpressionSlim blockExpression)
-        //    {
-        //        foreach (var exp in blockExpression.Expressions)
-        //        {
-        //            if (exp.NodeType == ExpressionType.Default) continue;
-        //            var expStr = exp.ToCSharpString();
-        //            result.AppendLine(expStr);
-        //            result.AppendLine("<br>");
-        //        }
-        //    }
-        //    return result.ToString();
-        //}
     }
 }

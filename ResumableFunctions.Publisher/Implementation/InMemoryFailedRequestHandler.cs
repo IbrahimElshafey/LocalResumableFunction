@@ -48,7 +48,7 @@ namespace ResumableFunctions.Publisher.Implementation
             try
             {
                 _logger.LogInformation("Start handling failed requests.");
-                _logger.LogInformation($"Found `{_failedRequests.Count}` failed request.");
+                _logger.LogInformation($"Found [{_failedRequests.Count}] failed request.");
                 for (var i = 0; i < _failedRequests.Count; i++)
                 {
 
@@ -72,7 +72,7 @@ namespace ResumableFunctions.Publisher.Implementation
                         {
                             request.AttemptsCount++;
                             _logger.LogInformation(
-                                $"A request `{request.ActionUrl}` failed again for `{request.AttemptsCount}` times");
+                                $"A request [{request.ActionUrl}] failed again for [{request.AttemptsCount}] times");
                             request.LastAttemptDate = DateTime.Now;
                             _failedRequests.Add(request);
                         }

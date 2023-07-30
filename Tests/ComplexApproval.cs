@@ -55,7 +55,7 @@ public class ComplexApproval
         {
             yield return
                 Wait<string, int>(RequestAdded, "Request Added")
-                    .SetData((request, requestId) => RequestId = requestId);
+                    .AfterMatch((request, requestId) => RequestId = requestId);
 
             for (; CurrentTopicIndex < TopicsCount; CurrentTopicIndex++)
             {
@@ -80,7 +80,7 @@ public class ComplexApproval
                         topicIndex.RequestId == RequestId &&
                         topicIndex.TopicIndex == CurrentTopicIndex &&
                         topicIndex.MemberRole == MemberRole.Chef)
-                    .NoSetData();
+                    .NothingAfterMatch();
         }
 
         private void AskMemberToApproveTopic(int requestId, int currentTopicIndex, MemberRole memberRole)
@@ -93,7 +93,7 @@ public class ComplexApproval
             await AskChefToApproveRequest(RequestId);
             return Wait<int, bool>(ChefFinalApproval, "Chef Final Approval")
                 .MatchIf((requestId, decision) => requestId == RequestId)
-                .SetData((requestId, decision) => FinalDecision = decision);
+                .AfterMatch((requestId, decision) => FinalDecision = decision);
         }
 
         private async Task AskChefToApproveRequest(int requestId)
@@ -124,7 +124,7 @@ public class ComplexApproval
                         topicIndex.RequestId == RequestId &&
                         topicIndex.TopicIndex == CurrentTopicIndex &&
                         topicIndex.MemberRole == LocalValue(currentMember))
-                    .NoSetData();
+                    .NothingAfterMatch();
             }
 
             return Wait($"Wait All Committee to Approve Topic {CurrentTopicIndex}", waits);

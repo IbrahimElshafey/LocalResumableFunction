@@ -19,7 +19,7 @@ namespace ResumableFunctions.Handler.Core
             _httpClientFactory = httpClientFactory;
         }
         
-        [DisplayName("`{0}`")]
+        [DisplayName("[{0}]")]
         public async Task EnqueueCallImpaction(CallServiceImapction callImapction)
         {
             try

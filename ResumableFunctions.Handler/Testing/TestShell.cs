@@ -108,7 +108,7 @@ namespace ResumableFunctions.Handler.Testing
                 if (scanner.ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
                     await scanner.RegisterResumableFunction(resumableFunctionInfo, serviceData);
                 else
-                    serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", StatusCodes.MethodValidation, null);
+                    serviceData.AddError($"Can't register resumable function [{resumableFunctionInfo.GetFullName()}].", StatusCodes.MethodValidation, null);
             }
         }
 
@@ -120,14 +120,14 @@ namespace ResumableFunctions.Handler.Testing
 
             int callsCount = await GetPushedCallsCount();
             if (callsCount != expectedPushedCallsCount)
-                return $"Pushed calls count `{callsCount}` not equal `{expectedPushedCallsCount}`";
+                return $"Pushed calls count [{callsCount}] not equal [{expectedPushedCallsCount}]";
 
             if (waitsCount != -1 && await GetWaitsCount() is int existWaitsCount && existWaitsCount != waitsCount)
-                return $"Waits count `{existWaitsCount}` not equal `{waitsCount}`";
+                return $"Waits count [{existWaitsCount}] not equal [{waitsCount}]";
 
             int instnacesCount = await GetCompletedInstancesCount();
             if (instnacesCount != completedInstancesCount)
-                return $"Completed instances `{instnacesCount}` count not equal `{completedInstancesCount}`";
+                return $"Completed instances [{instnacesCount}] count not equal [{completedInstancesCount}]";
 
             return string.Empty;
         }
