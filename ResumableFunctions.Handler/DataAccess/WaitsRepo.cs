@@ -156,6 +156,8 @@ internal partial class WaitsRepo : IWaitsRepo
         {
             _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
+        if (wait.ParentWait != null)
+            wait.ParentWait.CurrentFunction = wait.CurrentFunction;
         //wait.FunctionState.AddLog($"Wait `{wait.Name}` canceled.");
     }
 
