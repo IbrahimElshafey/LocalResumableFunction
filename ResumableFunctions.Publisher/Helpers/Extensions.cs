@@ -12,7 +12,6 @@ namespace ResumableFunctions.Publisher.Helpers
     {
         public static void AddResumableFunctionsPublisher(this IServiceCollection services, IPublisherSettings settings)
         {
-            //services.AddSingleton<IFailedRequestHandler, LiteDbFailedRequestHandler>();
             services.AddSingleton<IFailedRequestHandler, InMemoryFailedRequestHandler>();
             services.AddSingleton(typeof(IPublisherSettings), settings);
             services.AddHttpClient();

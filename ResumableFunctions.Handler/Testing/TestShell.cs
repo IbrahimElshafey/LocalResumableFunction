@@ -118,14 +118,16 @@ namespace ResumableFunctions.Handler.Testing
             if (await HasErrors())
                 return "Has Log Errors";
 
-            if (await GetPushedCallsCount() != expectedPushedCallsCount)
-                return $"Pushed calls count not equal {expectedPushedCallsCount}";
+            int callsCount = await GetPushedCallsCount();
+            if (callsCount != expectedPushedCallsCount)
+                return $"Pushed calls count `{callsCount}` not equal `{expectedPushedCallsCount}`";
 
-            if (waitsCount != -1 && await GetWaitsCount() != waitsCount)
-                return $"Waits count not equal {waitsCount}";
+            if (waitsCount != -1 && await GetWaitsCount() is int existWaitsCount && existWaitsCount != waitsCount)
+                return $"Waits count `{existWaitsCount}` not equal `{waitsCount}`";
 
-            if (await GetCompletedInstancesCount() != completedInstancesCount)
-                return $"Completed instances count not equal {completedInstancesCount}";
+            int instnacesCount = await GetCompletedInstancesCount();
+            if (instnacesCount != completedInstancesCount)
+                return $"Completed instances `{instnacesCount}` count not equal `{completedInstancesCount}`";
 
             return string.Empty;
         }

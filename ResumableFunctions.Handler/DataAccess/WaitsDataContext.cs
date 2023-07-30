@@ -134,7 +134,8 @@ internal sealed class WaitsDataContext : DbContext
         waitTemplateBuilder.Property(x => x.MatchExpressionValue);
         waitTemplateBuilder.Property(x => x.CallMandatoryPartExpressionValue);
         waitTemplateBuilder.Property(x => x.InstanceMandatoryPartExpressionValue);
-        waitTemplateBuilder.Property(x => x.SetDataExpressionValue);
+        waitTemplateBuilder.Property(x => x.CancelMethodDataValue);
+        waitTemplateBuilder.Property(x => x.SetDataCallValue);
         waitTemplateBuilder
            .HasIndex(x => x.IsActive)
            .HasFilter($"{nameof(WaitTemplate.IsActive)} = 1")
@@ -219,10 +220,10 @@ internal sealed class WaitsDataContext : DbContext
 
     private void BeforeSaveData()
     {
-        var entries = ChangeTracker.Entries().ToList();
-        foreach (var entry in entries)
+        foreach (var entry in ChangeTracker.Entries())
         {
             SetDates(entry);
+            SetConcurrencyToken(entry);
             SetServiceId(entry);
             NeverUpdateFirstWait(entry);
             HandleSoftDelete(entry);
@@ -234,6 +235,17 @@ internal sealed class WaitsDataContext : DbContext
             //        wait.FunctionState = wait.ParentWait.FunctionState;
             //        wait.FunctionStateId = wait.ParentWait.FunctionStateId;
             //    }
+        }
+    }
+
+    private void SetConcurrencyToken(EntityEntry entityEntry)
+    {
+        switch (entityEntry.State)
+        {
+            case EntityState.Modified when entityEntry.Entity is IEntityWithUpdate:
+            case EntityState.Added when entityEntry.Entity is IEntityWithUpdate:
+                entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
+                break;
         }
     }
 

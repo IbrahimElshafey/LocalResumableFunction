@@ -7,6 +7,7 @@ using ResumableFunctions.Publisher.InOuts;
 using System.Threading.Tasks;
 using System;
 using System.Net.Http;
+using System.Reflection;
 
 namespace ResumableFunctions.Publisher.Implementation
 {
@@ -35,9 +36,16 @@ namespace ResumableFunctions.Publisher.Implementation
             string methodUrn,
             string serviceName)
         {
+            var minfo = methodToPush.Method;
             await Publish(new MethodCall
             {
-                MethodData = new MethodData { MethodUrn = methodUrn },
+                MethodData = new MethodData
+                {
+                    MethodUrn = methodUrn,
+                    AssemblyName = "[External] " + Assembly.GetEntryAssembly()?.GetName().Name,
+                    ClassName = minfo.DeclaringType.Name,
+                    MethodName = minfo.Name,
+                },
                 Input = input,
                 Output = output,
                 ServiceName = serviceName

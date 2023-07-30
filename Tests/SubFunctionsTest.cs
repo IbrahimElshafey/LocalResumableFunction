@@ -116,6 +116,8 @@ public class SubFunctionsTest
 
     public class FunctionAfterFirst : ResumableFunctionsContainer
     {
+        public string Message { get; set; }
+
         [ResumableFunctionEntryPoint("FunctionAfterFirst")]
         public async IAsyncEnumerable<Wait> Test()
         {
@@ -126,8 +128,17 @@ public class SubFunctionsTest
         [SubResumableFunction("SubFunction2")]
         public async IAsyncEnumerable<Wait> SubFunction2()
         {
-            yield return Wait<string, string>(Method3, "M3").MatchAll();
+            yield return Wait<string, string>(Method3, "M3")
+                .MatchAll()
+                //.SetData(InstanceCall);
+                .SetData((input, output) => Message = $"Input: {input}, Output: {output}");
         }
+
+        private void InstanceCall(string arg1, string arg2)
+        {
+            Message = $"Input: {arg1}, Output: {arg2}";
+        }
+
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
         [PushCall("Method3")] public string Method3(string input) => input + "M3";
     }

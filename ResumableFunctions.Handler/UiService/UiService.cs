@@ -269,7 +269,7 @@ namespace ResumableFunctions.Handler.UiService
                     wait.RequestedByFunction.RF_MethodUrn,
                     wait.FunctionStateId,
                     template.MatchExpressionValue,
-                    template.SetDataExpressionValue,
+                    template.SetDataCallValue,
                     template.InstanceMandatoryPartExpressionValue,
                     wait.MandatoryPart
                 })
@@ -292,7 +292,6 @@ namespace ResumableFunctions.Handler.UiService
                     callMatch.ExecutionStatus,
                     new TemplateDisplay(
                         wait.MatchExpressionValue,
-                        wait.SetDataExpressionValue,
                         wait.InstanceMandatoryPartExpressionValue)
                     ))
                 .ToList();
@@ -372,7 +371,7 @@ namespace ResumableFunctions.Handler.UiService
                 {
                     methodWait,
                     template.MatchExpressionValue,
-                    template.SetDataExpressionValue,
+                    template.SetDataCallValue,
                     template.InstanceMandatoryPartExpressionValue,
                     methodWait.RequestedByFunction.RF_MethodUrn
                 };
@@ -391,8 +390,7 @@ namespace ResumableFunctions.Handler.UiService
                         MatchStatus.ExpectedMatch,
                         InstanceUpdateStatus.NotUpdatedYet,
                         ExecutionStatus.NotStartedYet,
-                        new TemplateDisplay(x.MatchExpressionValue, x.SetDataExpressionValue,
-                            x.InstanceMandatoryPartExpressionValue)
+                        new TemplateDisplay(x.MatchExpressionValue, x.InstanceMandatoryPartExpressionValue)
                     )
                     {
                         CallId = x.methodWait.CallId,
@@ -416,7 +414,7 @@ namespace ResumableFunctions.Handler.UiService
                 .Select(template => new WaitTemplate
                 {
                     MatchExpressionValue = template.MatchExpressionValue,
-                    SetDataExpressionValue = template.SetDataExpressionValue,
+                    SetDataCallValue = template.SetDataCallValue,
                     InstanceMandatoryPartExpressionValue = template.CallMandatoryPartExpressionValue,
                     Id = template.Id
                 })
@@ -424,7 +422,10 @@ namespace ResumableFunctions.Handler.UiService
             foreach (var wait in waits)
             {
                 if (wait is MethodWait mw && templates.ContainsKey(mw.TemplateId))
+                {
                     mw.Template = templates[mw.TemplateId];
+                    //mw.Template.LoadUnmappedProps();
+                }
             }
         }
 

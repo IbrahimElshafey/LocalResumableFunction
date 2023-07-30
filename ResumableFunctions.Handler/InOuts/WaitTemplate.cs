@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Text;
 using FastExpressionCompiler;
 using ResumableFunctions.Handler.Expressions;
+using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts;
 
@@ -22,12 +23,14 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public bool IsMandatoryPartFullMatch { get; internal set; }
 
     internal string MatchExpressionValue { get; set; }
-
+    public byte[] CancelMethodDataValue { get; internal set; }
     internal string CallMandatoryPartExpressionValue { get; set; }
 
-    internal string InstanceMandatoryPartExpressionValue { get;  set; }
-    internal string SetDataExpressionValue { get;  set; }
+    internal string InstanceMandatoryPartExpressionValue { get; set; }
+    internal byte[] SetDataCallValue { get; set; }
 
+    [NotMapped]
+    public MethodData CancelMethodData { get; internal set; }
 
     [NotMapped]
     public LambdaExpression MatchExpression { get; internal set; }
@@ -41,7 +44,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
 
 
     [NotMapped]
-    public LambdaExpression SetDataExpression { get; internal set; }
+    public MethodData SetDataCall { get; internal set; }
 
 
     public int? ServiceId { get; set; }
@@ -49,21 +52,24 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public int IsActive { get; internal set; } = 1;
 
     bool expressionsLoaded;
-    internal void LoadExpressions(bool forceReload = false)
+    internal void LoadUnmappedProps(bool forceReload = false)
     {
         try
         {
             var serializer = new ExpressionSerializer();
+            var converter = new BinaryToObjectConverter();
             if (expressionsLoaded && !forceReload) return;
 
             if (MatchExpressionValue != null)
                 MatchExpression = (LambdaExpression)serializer.Deserialize(MatchExpressionValue).ToExpression();
-            if (SetDataExpressionValue != null)
-                SetDataExpression = (LambdaExpression)serializer.Deserialize(SetDataExpressionValue).ToExpression();
+            if (SetDataCallValue != null)
+                SetDataCall = converter.ConvertToObject<MethodData>(SetDataCallValue);
             if (CallMandatoryPartExpressionValue != null)
                 CallMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(CallMandatoryPartExpressionValue).ToExpression();
             if (InstanceMandatoryPartExpressionValue != null)
                 InstanceMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(InstanceMandatoryPartExpressionValue).ToExpression();
+            if (CancelMethodDataValue != null)
+                CancelMethodData = converter.ConvertToObject<MethodData>(CancelMethodDataValue);
 
         }
         catch (Exception e)
@@ -90,14 +96,17 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public void OnSave()
     {
         var serializer = new ExpressionSerializer();
+        var converter = new BinaryToObjectConverter();
         if (MatchExpression != null)
             MatchExpressionValue = serializer.Serialize(MatchExpression.ToExpressionSlim());
-        if (SetDataExpression != null)
-            SetDataExpressionValue = serializer.Serialize(SetDataExpression.ToExpressionSlim());
+        if (SetDataCall != null)
+            SetDataCallValue = converter.ConvertToBinary(SetDataCall);
         if (CallMandatoryPartExpression != null)
             CallMandatoryPartExpressionValue = serializer.Serialize(CallMandatoryPartExpression.ToExpressionSlim());
         if (InstanceMandatoryPartExpression != null)
             InstanceMandatoryPartExpressionValue = serializer.Serialize(InstanceMandatoryPartExpression.ToExpressionSlim());
+        if (CancelMethodData != null)
+            CancelMethodDataValue = converter.ConvertToBinary(CancelMethodData);
     }
 
     internal string GetMandatoryPart(byte[] pushedCallDataValue)

@@ -12,12 +12,12 @@ public class ReplayGoBackAfterExample : ProjectApprovalExample
         yield return
             Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf((input, output) => output == true)
-                .SetData((input, output) => CurrentProject == input);
+                .SetData((input, output) => CurrentProject = input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         yield return Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-            .SetData((input, output) => ManagerOneApproval == input.Decision);
+            .SetData((input, output) => ManagerOneApproval = input.Decision);
 
         if (ManagerOneApproval is false)
         {

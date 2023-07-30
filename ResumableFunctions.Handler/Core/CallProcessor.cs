@@ -12,7 +12,7 @@ internal partial class CallProcessor : ICallProcessor
     private readonly ILogger<ReplayWaitProcessor> _logger;
     private readonly IWaitsProcessor _waitsProcessor;
     private readonly IWaitsRepo _waitsRepository;
-    private readonly HangfireHttpClient _hangFireHttpClient;
+    private readonly IServiceQueue _serviceQueue;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IResumableFunctionsSettings _settings;
     private readonly IScanStateRepo _scanStateRepo;
@@ -22,7 +22,7 @@ internal partial class CallProcessor : ICallProcessor
         IWaitsProcessor waitsProcessor,
         IWaitsRepo waitsRepository,
         IBackgroundProcess backgroundJobClient,
-        HangfireHttpClient hangFireHttpClient,
+        IServiceQueue serviceQueue,
         BackgroundJobExecutor backgroundJobExecutor,
         IResumableFunctionsSettings settings,
         IScanStateRepo scanStateRepo)
@@ -31,7 +31,7 @@ internal partial class CallProcessor : ICallProcessor
         _waitsProcessor = waitsProcessor;
         _waitsRepository = waitsRepository;
         _backgroundJobClient = backgroundJobClient;
-        _hangFireHttpClient = hangFireHttpClient;
+        _serviceQueue = serviceQueue;
         _backgroundJobExecutor = backgroundJobExecutor;
         _settings = settings;
         _scanStateRepo = scanStateRepo;
@@ -50,29 +50,29 @@ internal partial class CallProcessor : ICallProcessor
             $"InitialProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
             async () =>
             {
-                var services = await _waitsRepository.GetAffectedServicesAndFunctions(methodUrn);
-                if (services == null || services.Any() is false)
+                var servicesImpactions = await _waitsRepository.GetAffectedServicesAndFunctions(methodUrn);
+                if (servicesImpactions == null || servicesImpactions.Any() is false)
                 {
                     _logger.LogWarning($"There are no services affected by pushed call `{methodUrn}:{pushedCallId}`");
                     return;
                 }
 
-                foreach (var service in services)
+                foreach (var serviceImpaction in servicesImpactions)
                 {
-                    service.PushedCallId = pushedCallId;
-                    service.MethodUrn = methodUrn;
-                    var isLocal = service.ServiceId == _settings.CurrentServiceId;
+                    serviceImpaction.PushedCallId = pushedCallId;
+                    serviceImpaction.MethodUrn = methodUrn;
+                    var isLocal = serviceImpaction.ServiceId == _settings.CurrentServiceId;
                     if (isLocal)
-                        await ServiceProcessPushedCall(service);
+                        await ServiceProcessPushedCall(serviceImpaction);
                     else
-                        await CallOwnerService(service);
+                        await _serviceQueue.EnqueueCallImpaction(serviceImpaction);
                 }
             },
             $"Error when call `InitialProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})` in service `{_settings.CurrentServiceId}`");
     }
 
     [DisplayName("{0}")]
-    public async Task ServiceProcessPushedCall(AffectedService service)
+    public async Task ServiceProcessPushedCall(CallServiceImapction service)
     {
         var pushedCallId = service.PushedCallId;
         await _backgroundJobExecutor.Execute(
@@ -82,24 +82,11 @@ internal partial class CallProcessor : ICallProcessor
                 foreach (var functionId in service.AffectedFunctionsIds)
                 {
                     _backgroundJobClient.Enqueue(
-                        () => _waitsProcessor.ProcessFunctionExpectedWaitMatches(functionId, pushedCallId, service.MethodGroupId));
+                        () => _waitsProcessor.ProcessFunctionExpectedMatchedWaits(functionId, pushedCallId, service.MethodGroupId));
                 }
                 return Task.CompletedTask;
             },
             $"Error when call `ServiceProcessPushedCall(pushedCallId:{pushedCallId}, methodUrn:{service.MethodUrn})` in service `{_settings.CurrentServiceId}`");
     }
 
-    private async Task CallOwnerService(AffectedService service)
-    {
-        try
-        {
-            var actionUrl =
-                $"{service.ServiceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ServiceProcessPushedCallAction}";
-            await _hangFireHttpClient.EnqueuePostRequestIfFail(actionUrl, service);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Error when try to call owner service for pushed call ({service.PushedCallId}).");
-        }
-    }
 }

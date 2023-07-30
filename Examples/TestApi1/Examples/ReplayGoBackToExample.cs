@@ -11,20 +11,20 @@ public class ReplayGoBackToExample : ProjectApprovalExample
         yield return
             Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf((input, output) => output == true)
-                .SetData((input, output) => CurrentProject == input);
+                .SetData((input, output) => CurrentProject = input);
 
         WriteMessage("Wait first manager of three to approve");
         yield return Wait(
             "Wait first approval in three managers",
             Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == input.Decision),
+                .SetData((input, output) => ManagerOneApproval = input.Decision),
             Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerTwoApproval == input.Decision),
+                .SetData((input, output) => ManagerTwoApproval = input.Decision),
             Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval == input.Decision)
+                .SetData((input, output) => ManagerThreeApproval = input.Decision)
         ).First();
 
         var approvals = ManagerOneApproval || ManagerTwoApproval || ManagerThreeApproval;
@@ -45,12 +45,12 @@ public class ReplayGoBackToExample : ProjectApprovalExample
         yield return
             Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf((input, output) => output == true)
-                .SetData((input, output) => CurrentProject == input);
+                .SetData((input, output) => CurrentProject = input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         yield return Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-            .SetData((input, output) => ManagerOneApproval == input.Decision);
+            .SetData((input, output) => ManagerOneApproval = input.Decision);
 
         if (ManagerOneApproval is false)
         {
@@ -69,12 +69,12 @@ public class ReplayGoBackToExample : ProjectApprovalExample
         yield return
             Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf((input, output) => output == true)
-                .SetData((input, output) => CurrentProject == input);
+                .SetData((input, output) => CurrentProject = input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         yield return Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-            .SetData((input, output) => ManagerOneApproval == input.Decision);
+            .SetData((input, output) => ManagerOneApproval = input.Decision);
 
         if (ManagerOneApproval is false)
         {

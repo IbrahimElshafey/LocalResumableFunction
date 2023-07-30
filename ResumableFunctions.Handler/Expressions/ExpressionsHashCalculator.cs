@@ -2,8 +2,10 @@
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using FastExpressionCompiler;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Expressions;
@@ -13,14 +15,16 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     private int _localValuePartsCount;
     public byte[] Hash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
-    public LambdaExpression SetDataExpression { get; private set; }
+    public MethodData SetDataCall { get; private set; }
+    public MethodData CancelMethodData { get; }
 
-    public ExpressionsHashCalculator(LambdaExpression matchExpression, LambdaExpression setDataExpression)
+    public ExpressionsHashCalculator(LambdaExpression matchExpression, MethodData setDataCall, MethodData cancelMethod)
     {
         try
         {
             MatchExpression = matchExpression;
-            SetDataExpression = setDataExpression;
+            SetDataCall = setDataCall;
+            CancelMethodData = cancelMethod;
             //CalcInitialHash();
             CalcLocalValueParts();
             CalcHash();
@@ -35,39 +39,67 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     private void CalcLocalValueParts()
     {
         var changeComputedParts = new GenericVisitor();
-        var localValueMethodInfo =
+        var localValueWrapper =
             typeof(ResumableFunctionsContainer)
             .GetMethod(nameof(ResumableFunctionsContainer.LocalValue))
             .GetGenericMethodDefinition();
         changeComputedParts.OnVisitMethodCall(OnVisitMethodCall);
         if (MatchExpression != null)
             MatchExpression = (LambdaExpression)changeComputedParts.Visit(MatchExpression);
-        if (SetDataExpression != null)
-            SetDataExpression = (LambdaExpression)changeComputedParts.Visit(SetDataExpression);
+        //if (SetDataCall != null)
+        //    SetDataCall = (LambdaExpression)changeComputedParts.Visit(SetDataCall);
 
 
         Expression OnVisitMethodCall(MethodCallExpression methodCallExpression)
         {
             if (methodCallExpression.Method.IsGenericMethod &&
-                methodCallExpression.Method.GetGenericMethodDefinition() == localValueMethodInfo)
+                methodCallExpression.Method.GetGenericMethodDefinition() == localValueWrapper)
             {
                 var arg =
                     Lambda<Func<object>>(Convert(methodCallExpression.Arguments[0], typeof(object)))
                         .CompileFast()
                         .Invoke();
-                if (arg.CanBeConstant())//todo:DateTime and Guid
+                _localValuePartsCount++;
+                if (arg.CanBeConstant())
                 {
-                    _localValuePartsCount++;
                     return Constant(arg);
                 }
+                else if (arg is DateTime date)
+                {
+                    return New(typeof(DateTime).GetConstructor(new[] { typeof(long) }), Constant(date.Ticks));
+                }
+                else if (arg is Guid guid)
+                {
+                    return New(typeof(Guid).GetConstructor(new[] { typeof(string) }), Constant(guid.ToString()));
+                }
                 else
-                    throw new Exception(
-                        $"The local value expression `{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}` can't be be convertred to constant type.");
+                {
+                    return SerializeValue(methodCallExpression, arg);
+                }
             }
             return base.VisitMethodCall(methodCallExpression);
         }
     }
 
+    private static Expression SerializeValue(MethodCallExpression methodCallExpression, object arg)
+    {
+        try
+        {
+            return
+                Call(
+                    typeof(JsonSerializer).GetMethod("Deserialize", 1, new[] { typeof(string), typeof(JsonSerializerOptions) }).MakeGenericMethod(arg.GetType()),
+                    Constant(JsonSerializer.Serialize(arg)),
+                    MakeMemberAccess(null,
+                        typeof(JsonSerializerOptions).GetProperty("Default")
+                    )
+                );
+        }
+        catch (Exception ex)
+        {
+            throw new Exception(
+            $"The local value expression `{ExpressionExtensions.ToCSharpString(methodCallExpression.Arguments[0])}` can't be be convertred to embedded value.", ex);
+        }
+    }
 
     private void CalcHash()
     {
@@ -75,19 +107,24 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         if (MatchExpression != null)
         {
             MatchExpression = (LambdaExpression)ChangeInputAndOutputNames(MatchExpression);
-            //sb.Append(ExpressionExtensions.ToCSharpString(MatchExpression));
             sb.Append(MatchExpression.ToString());
         }
 
-        if (SetDataExpression != null)
-        {
-            SetDataExpression = (LambdaExpression)ChangeInputAndOutputNames(SetDataExpression);
-            //sb.Append(ExpressionExtensions.ToCSharpString(SetDataExpression));
-            sb.Append(SetDataExpression.ToString());
-        }
+        //if (SetDataCall != null)
+        //{
+        //    SetDataCall = (LambdaExpression)ChangeInputAndOutputNames(SetDataCall);
+        //    sb.Append(SetDataCall.ToString());
+        //}
 
-        var data = Encoding.Unicode.GetBytes(sb.ToString());
-        Hash = MD5.HashData(data);
+        var data = Encoding.Unicode.GetBytes(sb.ToString()).ToList();
+        
+        if (CancelMethodData?.MethodHash != null)
+            data.AddRange(CancelMethodData.MethodHash);
+
+        if (SetDataCall?.MethodHash != null)
+            data.AddRange(SetDataCall.MethodHash);
+
+        Hash = MD5.HashData(data.ToArray());
     }
 
     private Expression ChangeInputAndOutputNames(LambdaExpression expression)

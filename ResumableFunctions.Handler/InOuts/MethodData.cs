@@ -79,7 +79,7 @@ namespace ResumableFunctions.Handler.InOuts
                     attribute is PushCallAttribute
                 );
 
-            return (trackId as ITrackingIdentifier)?.MethodUrn;
+            return (trackId as ITrackingIdentifier)?.MethodUrn ?? MethodInfo.Name;
         }
 
         internal MethodInfo MethodInfo

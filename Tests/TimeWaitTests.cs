@@ -51,7 +51,7 @@ namespace Tests
         {
             yield return
                 Wait(TimeSpan.FromDays(2), "Wait Two Days")
-                .SetData(x => TimeWaitId == x.TimeMatchId);
+                .SetData((x, _) => TimeWaitId = x.TimeMatchId);
             Console.WriteLine("Time wait at start matched.");
         }
     }

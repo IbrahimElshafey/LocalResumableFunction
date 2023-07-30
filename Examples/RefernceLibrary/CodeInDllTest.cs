@@ -13,14 +13,14 @@ namespace ReferenceLibrary
         {
             yield return Wait<string, string>
                 (SayHello, "Wait say hello")
-                .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
-                .SetData((userName, helloMsg) => UserName == userName)
+                //.MatchIf((userName, helloMsg) => userName.StartsWith("M"))
+                .SetData((userName, helloMsg) => UserName = userName)
                 //.NoSetData()
                 ;
             yield return Wait<string, string>
                (SayGoodby, "Wait say goodby")
                .MatchIf((userName, helloMsg) => userName == UserName)
-               .SetData((userName, helloMsg) => UserName == userName)
+               .SetData((userName, helloMsg) => UserName = userName)
                //.NoSetData()
                ;
             //yield return Wait<string, string>

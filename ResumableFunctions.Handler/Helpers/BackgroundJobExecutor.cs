@@ -61,6 +61,7 @@ namespace ResumableFunctions.Handler.Helpers
             }
             finally
             {
+                //if (isScanTask)//todo: why deleted??
                 await _scanStateRepo.RemoveScanState(scanTaskId);
             }
         }

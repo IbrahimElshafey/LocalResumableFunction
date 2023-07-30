@@ -26,7 +26,7 @@ namespace TestSomething
         {
             var methodWait = new MethodWait<string, int>(TestMethodOne)
                         .MatchIf((x, y) => y == InstanceId || x == (InstanceId + 10).ToString() && y <= Math.Max(10, 100))
-                        .SetData((input, output) => InstanceId == output);
+                        .SetData((input, output) => InstanceId = output);
             methodWait.CurrentFunction = this;
             return methodWait;
         }
@@ -51,7 +51,7 @@ namespace TestSomething
                        x.IsMan &&
                        x.Name == "Mohamed"
                        )
-                       .SetData((input, output) => InstanceId == output.TaskId);
+                       .SetData((input, output) => InstanceId = output.TaskId);
             methodWait.CurrentFunction = this;
             return methodWait;
         }

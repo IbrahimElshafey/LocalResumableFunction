@@ -1,6 +1,6 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
 
-public class AffectedService
+public class CallServiceImapction
 {
     public int PushedCallId { get; set; }
     public string MethodUrn { get; set; }
@@ -12,6 +12,6 @@ public class AffectedService
 
     public override string ToString()
     {
-        return $"Service `{ServiceName}` processing pushed call `{MethodUrn}:{PushedCallId}`";
+        return $"Put pushed call `{MethodUrn}:{PushedCallId}` in the processing queue for service `{ServiceName}`.";
     }
 }

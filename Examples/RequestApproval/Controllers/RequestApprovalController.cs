@@ -49,14 +49,19 @@ namespace RequestApproval.Controllers
         [ResumableFunctionEntryPoint("RequestApprovalWorkflow.RequestApprovalFlow")]
         internal async IAsyncEnumerable<Wait> RequestApprovalFlow()
         {
-            yield return WaitUserSubmitRequest();
+            //wait a method to be executed, If match expression satisified it will continue
+            //method may be called in any time
+            yield return Wait<Request, bool>(_service.UserSubmitRequest, WaitSubmitRequest)
+                    .MatchIf((request, result) => request.Id > 0)
+                    .SetData((request, result) => UserRequest = request);
 
-            if (ManagerApprovalTaskId != default)
-                Console.WriteLine($"Request `{UserRequest.Id}` re-submitted.");
-
+            //save satate in the class contains the resumable function
             ManagerApprovalTaskId = _service.AskManagerApproval(UserRequest.Id);
-            //throw new Exception("Exception after first wait");
-            yield return WaitManagerApproval();
+            
+            //wait another new method
+            yield return Wait<ApproveRequestArgs, int>(_service.ManagerApproval, "Wait Manager Approval")
+                    .MatchIf((approveRequestArgs, approvalId) => approvalId > 0 && approveRequestArgs.TaskId == ManagerApprovalTaskId)
+                    .SetData((approveRequestArgs, approvalId) => ManagerApprovalResult = approveRequestArgs);
 
             switch (ManagerApprovalResult.Decision)
             {
@@ -77,19 +82,7 @@ namespace RequestApproval.Controllers
             Console.WriteLine("RequestApprovalFlow Ended");
         }
 
-        private Wait WaitUserSubmitRequest()
-        {
-            return Wait<Request, bool>(_service.UserSubmitRequest, WaitSubmitRequest)
-                    .MatchIf((request, result) => request.Id > 0)
-                    .SetData((request, result) => UserRequest == request);
-        }
 
-        private Wait WaitManagerApproval()
-        {
-            return Wait<ApproveRequestArgs, int>(_service.ManagerApproval, "Wait Manager Approval")
-                    .MatchIf((approveRequestArgs, approvalId) => approvalId > 0 && approveRequestArgs.TaskId == ManagerApprovalTaskId)
-                    .SetData((approveRequestArgs, approvalId) => ManagerApprovalResult == approveRequestArgs);
-        }
 
         public override Task OnErrorOccurred(string message, Exception ex = null)
         {
