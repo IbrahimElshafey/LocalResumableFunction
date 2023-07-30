@@ -15,13 +15,13 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     private int _localValuePartsCount;
     public byte[] Hash { get; private set; }
     public LambdaExpression MatchExpression { get; private set; }
-    public MethodData AfterMatchAction { get; }
-    public MethodData CancelMethodAction { get; }
+    public string AfterMatchAction { get; }
+    public string CancelMethodAction { get; }
 
     public ExpressionsHashCalculator(
         LambdaExpression matchExpression,
-        MethodData afterMatchAction,
-        MethodData cancelAction)
+        string afterMatchAction,
+        string cancelAction)
     {
         try
         {
@@ -113,21 +113,13 @@ public class ExpressionsHashCalculator : ExpressionVisitor
             sb.Append(MatchExpression.ToString());
         }
 
-        //if (SetDataCall != null)
-        //{
-        //    SetDataCall = (LambdaExpression)ChangeInputAndOutputNames(SetDataCall);
-        //    sb.Append(SetDataCall.ToString());
-        //}
+        if (AfterMatchAction != null)
+            sb.Append(AfterMatchAction);
 
-        var data = Encoding.Unicode.GetBytes(sb.ToString()).ToList();
-        
-        if (CancelMethodAction?.MethodHash != null)
-            data.AddRange(CancelMethodAction.MethodHash);
+        if (CancelMethodAction != null)
+            sb.Append(CancelMethodAction);
 
-        if (AfterMatchAction?.MethodHash != null)
-            data.AddRange(AfterMatchAction.MethodHash);
-
-        Hash = MD5.HashData(data.ToArray());
+        Hash = MD5.HashData(Encoding.Unicode.GetBytes(sb.ToString()));
     }
 
     private Expression ChangeInputAndOutputNames(LambdaExpression expression)

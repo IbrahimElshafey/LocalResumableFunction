@@ -129,14 +129,14 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
                 new WaitTemplate
                 {
                     MatchExpressionValue = waitTemplate.MatchExpressionValue,
-                    AfterMatchActionValue = waitTemplate.AfterMatchActionValue,
+                    AfterMatchAction = waitTemplate.AfterMatchAction,
                     Id = waitTemplate.Id,
                     FunctionId = waitTemplate.FunctionId,
                     MethodId = waitTemplate.MethodId,
                     MethodGroupId = waitTemplate.MethodGroupId,
                     ServiceId = waitTemplate.ServiceId,
                     IsActive = waitTemplate.IsActive,
-                    CancelMethodActionValue = waitTemplate.CancelMethodActionValue,
+                    CancelMethodAction = waitTemplate.CancelMethodAction,
                 })
             .FirstAsync(x => x.Id == methodWaitTemplateId);
         template.LoadUnmappedProps();

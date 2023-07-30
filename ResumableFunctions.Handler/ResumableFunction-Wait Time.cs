@@ -6,13 +6,12 @@ public abstract partial class ResumableFunctionsContainer
 {
     protected TimeWait Wait(TimeSpan timeToWait, string name = null)
     {
-        return new TimeWait
+        return new TimeWait(this)
         {
             Name = name ?? $"#{nameof(TimeWait)}#",
             TimeToWait = timeToWait,
             UniqueMatchId = Guid.NewGuid().ToString(),
             CurrentFunction = this,
-            //IsNode = true,
         };
     }
 

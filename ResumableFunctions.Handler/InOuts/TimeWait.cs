@@ -7,11 +7,13 @@ public class TimeWait : Wait
 {
     private readonly MethodWait<TimeWaitInput, bool> _timeMethodWait;
 
-    internal TimeWait()
+    internal TimeWait(ResumableFunctionsContainer currentFunction)
     {
+        var timeWaitMethod = typeof(LocalRegisteredMethods)
+                        .GetMethod(nameof(LocalRegisteredMethods.TimeWait));
+
         _timeMethodWait =
-           new MethodWait<TimeWaitInput, bool>(typeof(LocalRegisteredMethods)
-               .GetMethod(nameof(LocalRegisteredMethods.TimeWait)));
+            new MethodWait<TimeWaitInput, bool>(timeWaitMethod) { CurrentFunction = currentFunction };
     }
 
     public TimeSpan TimeToWait { get; internal set; }
@@ -42,12 +44,12 @@ public class TimeWait : Wait
         }
     }
 
-    public Wait AfterMatch(Action<TimeWaitInput, bool> setDataExp)
+    public Wait AfterMatch(Action<TimeWaitInput, bool> AfterMatchAction)
     {
 
-        if (setDataExp != null)
+        if (AfterMatchAction != null)
         {
-            _timeMethodWait.AfterMatch(setDataExp);
+            _timeMethodWait.AfterMatch(AfterMatchAction);
         }
         return this;
     }

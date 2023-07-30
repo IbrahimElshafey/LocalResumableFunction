@@ -269,7 +269,7 @@ namespace ResumableFunctions.Handler.UiService
                     wait.RequestedByFunction.RF_MethodUrn,
                     wait.FunctionStateId,
                     template.MatchExpressionValue,
-                    template.AfterMatchActionValue,
+                    template.AfterMatchAction,
                     template.InstanceMandatoryPartExpressionValue,
                     wait.MandatoryPart
                 })
@@ -371,7 +371,7 @@ namespace ResumableFunctions.Handler.UiService
                 {
                     methodWait,
                     template.MatchExpressionValue,
-                    template.AfterMatchActionValue,
+                    template.AfterMatchAction,
                     template.InstanceMandatoryPartExpressionValue,
                     methodWait.RequestedByFunction.RF_MethodUrn
                 };
@@ -414,7 +414,7 @@ namespace ResumableFunctions.Handler.UiService
                 .Select(template => new WaitTemplate
                 {
                     MatchExpressionValue = template.MatchExpressionValue,
-                    AfterMatchActionValue = template.AfterMatchActionValue,
+                    AfterMatchAction = template.AfterMatchAction,
                     InstanceMandatoryPartExpressionValue = template.CallMandatoryPartExpressionValue,
                     Id = template.Id
                 })

@@ -132,6 +132,7 @@ public class SubFunctionsTest
                 .MatchAll()
                 //.SetData(InstanceCall);
                 .AfterMatch((input, output) => Message = $"Input: {input}, Output: {output}");
+                //.AfterMatch(TestMethodClass.AfterMatchExternal);
         }
 
         private void InstanceCall(string arg1, string arg2)
@@ -141,6 +142,10 @@ public class SubFunctionsTest
 
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
         [PushCall("Method3")] public string Method3(string input) => input + "M3";
+    }
+    public static class TestMethodClass
+    {
+        public static void AfterMatchExternal(string input, string outPut) => Console.WriteLine($"{input}#{outPut}");
     }
     public class SubFunctions : ResumableFunctionsContainer
     {

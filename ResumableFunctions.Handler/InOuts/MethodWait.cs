@@ -14,13 +14,12 @@ public class MethodWait : Wait
     }
 
     [NotMapped]
-    public MethodData AfterMatchAction { get; protected set; }
+    public string AfterMatchAction { get; protected set; }
 
     [NotMapped]
     public LambdaExpression MatchExpression { get; protected set; }
 
-    [NotMapped]
-    public MethodData CancelMethodAction { get; protected set; }
+    public string CancelMethodAction { get; protected set; }
 
     public string MandatoryPart { get; internal set; }
 
@@ -51,12 +50,16 @@ public class MethodWait : Wait
         try
         {
             if (AfterMatchAction == null) return true;
-            var classType = Assembly.Load(AfterMatchAction.AssemblyName).GetType(AfterMatchAction.ClassName);
+            var classType = CurrentFunction.GetType();
             var method =
-                classType.GetMethod(AfterMatchAction.MethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-            //todo: must be instance method or 
-            var instance = classType == CurrentFunction.GetType() ? CurrentFunction : Activator.CreateInstance(classType);
-            method.Invoke(instance, new object[] { Input, Output });
+                classType.GetMethod(AfterMatchAction, Flags());
+
+            if (method == null)
+                throw new NullReferenceException(
+                    $"Can't find method [{AfterMatchAction}] to be executed after" +
+                    $"matched wait [{Name}] in class [{classType.Name}]");
+
+            method.Invoke(CurrentFunction, new object[] { Input, Output });
             FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog($"After wait [{Name}] action executed.", LogType.Info, StatusCodes.WaitProcessing);
             return true;
@@ -68,6 +71,8 @@ public class MethodWait : Wait
             throw new Exception(error, ex);
         }
     }
+
+    protected BindingFlags Flags() => BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
     public bool IsMatched()
     {
@@ -96,9 +101,9 @@ public class MethodWait : Wait
         //call cancel method
         if (CancelMethodAction != null)
         {
-            var classType = Assembly.Load(CancelMethodAction.AssemblyName).GetType(CancelMethodAction.ClassName);
+            var classType = CurrentFunction.GetType();
             var method =
-                classType.GetMethod(CancelMethodAction.MethodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                classType.GetMethod(CancelMethodAction, Flags());
             var instance = classType == CurrentFunction.GetType() ? CurrentFunction : Activator.CreateInstance(classType);
             method.Invoke(instance, null);
             CurrentFunction?.AddLog($"Execute cancel method for wait [{Name}]", LogType.Info, StatusCodes.WaitProcessing);
@@ -131,6 +136,7 @@ public class MethodWait : Wait
             FunctionState.AddLog(
                 $"You didn't set the [{nameof(AfterMatchAction)}] for wait [{Name}], " +
                 $"Please use [NothingAfterMatch()] if this is intended.", LogType.Warning, StatusCodes.WaitValidation);
+
         return base.IsValidWaitRequest();
     }
 
@@ -176,9 +182,19 @@ public class MethodWait<TInput, TOutput> : MethodWait
         Name = $"#{method.Name}#";
     }
 
-    public MethodWait<TInput, TOutput> AfterMatch(Action<TInput, TOutput> value)
+    public MethodWait<TInput, TOutput> AfterMatch(Action<TInput, TOutput> afterMatchAction)
     {
-        AfterMatchAction = new MethodData(value.Method);
+        var instanceType = CurrentFunction.GetType();
+        if (afterMatchAction.Method.DeclaringType != instanceType)
+            throw new Exception(
+                $"For wait [{Name}] the [{nameof(AfterMatchAction)}] must be a method in class " +
+                $"[{instanceType.Name}] or inline lambda method.");
+        var hasOverload = instanceType.GetMethods(Flags()).Count(x => x.Name == afterMatchAction.Method.Name) > 1;
+        if (hasOverload)
+            throw new Exception(
+                $"For wait [{Name}] the [CancelMethod:{afterMatchAction.Method.Name}] must not be over-loaded.");
+
+        AfterMatchAction = afterMatchAction.Method.Name;
         return this;
     }
 
@@ -188,9 +204,19 @@ public class MethodWait<TInput, TOutput> : MethodWait
         return this;
     }
 
-    public MethodWait<TInput, TOutput> WhenCancel(Action value)
+    public MethodWait<TInput, TOutput> WhenCancel(Action cancelAction)
     {
-        CancelMethodAction = new MethodData(value.Method);
+        var instanceType = CurrentFunction.GetType();
+        if (cancelAction.Method.DeclaringType != instanceType)
+            throw new Exception(
+                $"For wait [{Name}] the [CancelMethod] must be a method in class " +
+                $"[{instanceType.Name}] or inline lambda method.");
+        var hasOverload = instanceType.GetMethods(Flags()).Count(x => x.Name == cancelAction.Method.Name) > 1;
+        if (hasOverload)
+            throw new Exception(
+                $"For wait [{Name}] the [CancelMethod:{cancelAction.Method.Name}] must not be over-loaded.");
+
+        CancelMethodAction = cancelAction.Method.Name;
         return this;
     }
 

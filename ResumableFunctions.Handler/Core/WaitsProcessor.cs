@@ -236,7 +236,7 @@ namespace ResumableFunctions.Handler.Core
             }
             catch (Exception ex)
             {
-                await _methodWait.CurrentFunction?.OnErrorOccurred("Error when update function data.", ex);
+                await _methodWait.CurrentFunction?.OnErrorOccurred("Error when execute after match action.", ex);
             }
 
             return true;
@@ -345,7 +345,7 @@ namespace ResumableFunctions.Handler.Core
             {
                 var errorMessage = $"Error when proceed to next wait after {currentWait}";
                 _logger.LogError(ex, errorMessage);
-                currentWait.FunctionState.AddError(errorMessage, StatusCodes.WaitProcessing, ex);
+                //currentWait.FunctionState.AddError(errorMessage, StatusCodes.WaitProcessing, ex);
                 throw;
             }
         }
