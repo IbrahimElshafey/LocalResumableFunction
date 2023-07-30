@@ -48,6 +48,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         //var setDataWriter = new SetDataExpressionWriter(hashResult.SetDataExpression, currentFunctionInstance.GetType());
         //waitTemplate.SetDataCall = setDataWriter.SetDataExpression;
 
+        waitTemplate.SetDataCall = hashResult.SetDataCall;
+
         _context.WaitTemplates.Add(waitTemplate);
 
         await _context.SaveChangesAsync();
