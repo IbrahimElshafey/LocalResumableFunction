@@ -256,6 +256,8 @@ namespace ResumableFunctions.Handler.Core
                             currentWait.Status = WaitStatus.Completed;
                             await GoNext(parent, methodWait);
                             await _context.SaveChangesAsync();
+                            if (parent != null)
+                                parent.CurrentFunction = methodWait.CurrentFunction;
                             break;
 
                         case WaitsGroup:
