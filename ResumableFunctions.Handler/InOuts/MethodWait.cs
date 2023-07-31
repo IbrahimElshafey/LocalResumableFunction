@@ -19,6 +19,7 @@ public class MethodWait : Wait
     [NotMapped]
     public LambdaExpression MatchExpression { get; protected set; }
 
+    [NotMapped]
     public string CancelMethodAction { get; protected set; }
 
     public string MandatoryPart { get; internal set; }
@@ -50,16 +51,8 @@ public class MethodWait : Wait
         try
         {
             if (AfterMatchAction == null) return true;
-            var classType = CurrentFunction.GetType();
-            var method =
-                classType.GetMethod(AfterMatchAction, Flags());
-
-            if (method == null)
-                throw new NullReferenceException(
-                    $"Can't find method [{AfterMatchAction}] to be executed after" +
-                    $"matched wait [{Name}] in class [{classType.Name}]");
-
-            method.Invoke(CurrentFunction, new object[] { Input, Output });
+            
+            MethodInvoker.CallAfterMatchAction(CurrentFunction, AfterMatchAction, Input, Output);
             FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog($"After wait [{Name}] action executed.", LogType.Info, StatusCodes.WaitProcessing);
             return true;
@@ -72,7 +65,7 @@ public class MethodWait : Wait
         }
     }
 
-    protected BindingFlags Flags() => BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+
 
     public bool IsMatched()
     {
@@ -98,14 +91,9 @@ public class MethodWait : Wait
 
     internal override void Cancel()
     {
-        //call cancel method
         if (CancelMethodAction != null)
         {
-            var classType = CurrentFunction.GetType();
-            var method =
-                classType.GetMethod(CancelMethodAction, Flags());
-            var instance = classType == CurrentFunction.GetType() ? CurrentFunction : Activator.CreateInstance(classType);
-            method.Invoke(instance, null);
+            MethodInvoker.CallCancelAction(CurrentFunction, CancelMethodAction);
             CurrentFunction?.AddLog($"Execute cancel method for wait [{Name}]", LogType.Info, StatusCodes.WaitProcessing);
         }
         base.Cancel();
@@ -159,7 +147,6 @@ public class MethodWait : Wait
             TemplateId = mw.TemplateId;
             MethodToWaitId = mw.MethodToWaitId;
         }
-
     }
 }
 

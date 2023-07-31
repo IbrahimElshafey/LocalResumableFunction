@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Helpers;
 
@@ -104,7 +105,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
     public virtual bool IsCompleted() => Status == WaitStatus.Completed;
 
 
-
+    protected BindingFlags Flags() => BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
     public virtual void CopyCommonIds(Wait oldWait)
     {
         FunctionState = oldWait.FunctionState;
@@ -132,7 +133,7 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
             case WaitsGroup waitsGroup:
                 result = new WaitsGroup
                 {
-                    GroupMatchExpressionValue = waitsGroup.GroupMatchExpressionValue
+                    GroupMatchFuncName = waitsGroup.GroupMatchFuncName
                 };
                 break;
             default:

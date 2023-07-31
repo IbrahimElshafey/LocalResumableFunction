@@ -121,8 +121,8 @@ internal sealed class WaitsDataContext : DbContext
           .HasColumnName(nameof(MethodWait.CallId));
 
         modelBuilder.Entity<WaitsGroup>()
-           .Property(mw => mw.GroupMatchExpressionValue)
-           .HasColumnName(nameof(WaitsGroup.GroupMatchExpressionValue));
+           .Property(mw => mw.GroupMatchFuncName)
+           .HasColumnName(nameof(WaitsGroup.GroupMatchFuncName));
 
         modelBuilder.Ignore<ReplayRequest>();
         modelBuilder.Ignore<TimeWait>();

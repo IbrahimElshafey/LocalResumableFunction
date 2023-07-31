@@ -39,6 +39,9 @@ internal class Program
             case 13:
                 new SerializeActionCall().Run();
                 break;
+            case 14:
+                new LambdaExamples().Run();
+                break;
         }
 
         Console.ReadLine();

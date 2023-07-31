@@ -53,7 +53,6 @@ public class WaitTemplate : IEntity, IOnSaveEntity
         try
         {
             var serializer = new ExpressionSerializer();
-            var converter = new BinaryToObjectConverter();
             if (expressionsLoaded && !forceReload) return;
 
             if (MatchExpressionValue != null)

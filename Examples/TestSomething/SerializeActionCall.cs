@@ -1,13 +1,12 @@
 ﻿namespace TestSomething;
 using System.Reflection;
-
 internal class SerializeActionCall
 {
     internal void Run()
     {
         GetFunc<int, int>(PlusTen);
         GetFunc<int, int>(x => x + 10);
-        
+
     }
 
     private void GetFunc<X, Y>(Func<X, Y> function)

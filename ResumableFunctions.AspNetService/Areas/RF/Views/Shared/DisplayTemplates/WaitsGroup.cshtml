@@ -7,9 +7,9 @@
         <span>@Model.WaitType</span>
         <span class="@Model.Status">@Model.Status</span>
         <br />
-        @if (Model.GroupMatchExpressionValue != null)
+        @if (Model.GroupMatchFuncName != null)
         {
-            <span><b>Match Exprssion: </b><span>@(new ExpressionSerializer().Deserialize(Model.GroupMatchExpressionValue).ToCSharpString())</span></span>
+            <span><b>Match Exprssion: </b><span>@(new ExpressionSerializer().Deserialize(Model.GroupMatchFuncName).ToCSharpString())</span></span>
         }
         <p></p>
     </div>
