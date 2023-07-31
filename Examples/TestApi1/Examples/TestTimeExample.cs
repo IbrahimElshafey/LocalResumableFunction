@@ -22,7 +22,7 @@ public class TestTimeExample : ProjectApprovalExample
                     .AfterMatch((input, output) => ManagerOneApproval = output),
                 Wait(TimeSpan.FromDays(2), "Two Days")
                 .AfterMatch((_, _) => TimerMatched = true)
-        ).First();
+        ).MatchAny();
 
         if (TimerMatched)
         {

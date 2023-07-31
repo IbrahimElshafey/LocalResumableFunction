@@ -144,7 +144,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
             Wait<ApprovalDecision, bool>(ManagerTwoApproveProject, "Manager Two Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerTwoApproval = output)
-        ).All();
+        ).MatchAll();
         WriteMessage("Two waits matched");
     }
 
@@ -161,7 +161,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
             Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerOneApproval = output)
-        ).First();
+        ).MatchAny();
         WriteMessage("One of two waits matched");
     }
 

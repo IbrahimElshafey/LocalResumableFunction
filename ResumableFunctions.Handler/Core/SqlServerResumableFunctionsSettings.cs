@@ -5,8 +5,10 @@ using Medallion.Threading;
 using Medallion.Threading.SqlServer;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.InOuts;
 
-namespace ResumableFunctions.Handler.InOuts
+namespace ResumableFunctions.Handler.Core
 {
     public class SqlServerResumableFunctionsSettings : IResumableFunctionsSettings
     {

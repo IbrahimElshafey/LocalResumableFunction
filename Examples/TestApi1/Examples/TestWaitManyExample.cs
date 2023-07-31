@@ -24,7 +24,7 @@ public class TestWaitManyExample : ProjectApprovalExample
             Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output)
-        ).All();
+        ).MatchAll();
         WriteMessage("Three waits matched.");
         Success(nameof(WaitThreeMethodAtStart));
     }
@@ -48,7 +48,7 @@ public class TestWaitManyExample : ProjectApprovalExample
             Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output)
-        ).All();
+        ).MatchAll();
         WriteMessage("Three waits matched.");
         Success(nameof(WaitThreeMethod));
     }

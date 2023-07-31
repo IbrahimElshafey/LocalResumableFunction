@@ -45,9 +45,6 @@ public class WaitsGroup : Wait
         return isFinished;
     }
 
-
-
-
     public Wait MatchIf(Func<WaitsGroup, bool> groupMatchFilter)
     {
         ValidateMethod(groupMatchFilter.Method, nameof(GroupMatchFuncName));
@@ -56,13 +53,13 @@ public class WaitsGroup : Wait
         return this;
     }
 
-    public Wait All()
+    public Wait MatchAll()
     {
         WaitType = WaitType.GroupWaitAll;
         return this;
     }
 
-    public Wait First()
+    public Wait MatchAny()
     {
         WaitType = WaitType.GroupWaitFirst;
         return this;

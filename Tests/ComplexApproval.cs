@@ -63,7 +63,7 @@ public class ComplexApproval
                     Wait($"Wait all committee approve topic {CurrentTopicIndex} or manager skip",
                         AllCommitteeApproveTopic(),
                         ChefSkipTopic())
-                        .First();
+                        .MatchAny();
 
                 yield return ChefTopicApproval();
             }

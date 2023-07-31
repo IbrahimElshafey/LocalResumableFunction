@@ -25,7 +25,7 @@ public class ReplayGoBackToExample : ProjectApprovalExample
             Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = input.Decision)
-        ).First();
+        ).MatchAny();
 
         var approvals = ManagerOneApproval || ManagerTwoApproval || ManagerThreeApproval;
         if (!approvals)

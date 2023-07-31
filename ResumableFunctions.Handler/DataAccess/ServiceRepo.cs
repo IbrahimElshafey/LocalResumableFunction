@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.DataAccess;
 

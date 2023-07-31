@@ -211,7 +211,7 @@ namespace Tests
                 Wait<string, string>(Method7, "Method 7"),
                 Wait<string, string>(Method8, "Method 8"),
                 Wait<string, string>(Method9, "Method 9")
-            ).First();
+            ).MatchAny();
             await Task.Delay(100);
             Console.WriteLine("WaitFirstInThree");
         }

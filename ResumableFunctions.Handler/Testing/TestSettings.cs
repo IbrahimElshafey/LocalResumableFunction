@@ -2,6 +2,7 @@
 using Medallion.Threading;
 using Medallion.Threading.WaitHandles;
 using Microsoft.EntityFrameworkCore;
+using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Testing

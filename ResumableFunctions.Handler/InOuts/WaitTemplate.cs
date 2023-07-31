@@ -87,7 +87,6 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public void OnSave()
     {
         var serializer = new ExpressionSerializer();
-        var converter = new BinaryToObjectConverter();
         if (MatchExpression != null)
             MatchExpressionValue = serializer.Serialize(MatchExpression.ToExpressionSlim());
         if (CallMandatoryPartExpression != null)

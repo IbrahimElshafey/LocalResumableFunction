@@ -39,7 +39,7 @@ namespace Tests
                     }),
                     Wait<string, string>(Method3, "Method 3").WhenCancel(IncrementCounter)
                     )
-                .First();
+                .MatchAny();
                 await Task.Delay(100);
                 Console.WriteLine("Three method done");
             }

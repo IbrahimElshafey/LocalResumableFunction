@@ -25,7 +25,7 @@ public class ManyWaitsTypeInGroupExample : ProjectApprovalExample
                     Wait<ApprovalDecision, bool>(ManagerFourApproveProject)
                         .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                         .AfterMatch((input, output) => ManagerFourApproval = output)
-                ).All(),
+                ).MatchAll(),
                 Wait("Sub function Wait", ManagerThreeSubFunction));
         Success(nameof(ManyWaitsTypeInGroup));
     }

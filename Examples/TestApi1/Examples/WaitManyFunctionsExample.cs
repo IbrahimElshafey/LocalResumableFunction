@@ -44,7 +44,7 @@ public class WaitManyFunctionsExample : ProjectApprovalExample
         WriteMessage("After project submitted.");
         yield return
             Wait("Wait multiple resumable functions", WaitManagerOneAndTwoSubFunction, ManagerThreeSubFunction)
-                .First();
+                .MatchAny();
         WriteMessage("After wait two functions.");
         Success(nameof(WaitFirstFunction));
     }
@@ -62,7 +62,7 @@ public class WaitManyFunctionsExample : ProjectApprovalExample
             Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerTwoApproval = output)
-        ).All();
+        ).MatchAll();
         WriteMessage("Two waits matched");
     }
 
