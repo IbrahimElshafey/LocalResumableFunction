@@ -32,7 +32,7 @@ namespace ResumableFunctions.Handler.Helpers
         private static MethodInfo GetMethodInfo(ref object instance, string methodName)
         {
             var classType = instance.GetType();
-            var methodInfo = classType.GetMethod(methodName);
+            var methodInfo = classType.GetMethod(methodName, Flags());
 
             if (methodInfo == null)
             {
@@ -40,12 +40,6 @@ namespace ResumableFunctions.Handler.Helpers
                 methodInfo = lambdasClass.GetMethod(methodName, Flags());
                 instance = Activator.CreateInstance(lambdasClass);
             }
-
-            //if (methodInfo.DeclaringType.Name.StartsWith("<>c__DisplayClass"))
-            //{
-            //    throw new Exception(
-            //       $"For method [{methodName}] in class [{classType.Name}] you can't reference local variables.");
-            //}
 
             if (methodInfo == null)
                 throw new NullReferenceException(

@@ -239,4 +239,24 @@ public abstract class Wait : IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
         if (FunctionState?.StateObject != null && CurrentFunction == null)
             CurrentFunction = (ResumableFunctionsContainer)FunctionState.StateObject;
     }
+
+    protected void ValidateMethod(MethodInfo method, string propName)
+    {
+        var instanceType = CurrentFunction.GetType();
+        if (method.DeclaringType.Name.StartsWith("<>c__DisplayClass"))
+        {
+            throw new Exception(
+               $"For method [{propName}:{method.Name}] in class [{instanceType.Name}] you can't reference local variables.");
+        }
+
+        if (method.DeclaringType != instanceType && method.DeclaringType.Name != "<>c")
+            throw new Exception(
+                $"For wait [{Name}] the [{propName}] must be a method in class " +
+                $"[{instanceType.Name}] or inline lambda method.");
+
+        var hasOverload = instanceType.GetMethods(Flags()).Count(x => x.Name == method.Name) > 1;
+        if (hasOverload)
+            throw new Exception(
+                $"For group wait [{Name}] the [GroupMatchFunc:{method.Name}] must not be over-loaded.");
+    }
 }

@@ -160,13 +160,15 @@ namespace Tests
         [ResumableFunctionEntryPoint("WaitManyWithExpression")]
         public async IAsyncEnumerable<Wait> WaitThreeAtStart()
         {
+            int x = 1;
             yield return Wait("Wait three methods",
                 Wait<string, string>(Method1, "Method 1"),
                 Wait<string, string>(Method2, "Method 2"),
                 Wait<string, string>(Method3, "Method 3")
             )
-            //.When(group => group.CompletedCount == 2 && Id == 10);
-            .When(group => group.CompletedCount == 2);
+            //.MatchIf(group => group.CompletedCount == 2 && Id == 10 && x == 1);
+            .MatchIf(group => group.CompletedCount == 2 && Id == 10);
+            //.MatchIf(group => group.CompletedCount == 2);
             await Task.Delay(100);
             Console.WriteLine("Three method done");
         }

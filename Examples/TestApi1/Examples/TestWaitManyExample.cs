@@ -72,7 +72,7 @@ public class TestWaitManyExample : ProjectApprovalExample
             Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output)
-        ).When(waitGroup => waitGroup.CompletedCount == 2);
+        ).MatchIf(waitGroup => waitGroup.CompletedCount == 2);
         WriteMessage("Two waits of three waits matched.");
         WriteMessage("WaitManyAndCountExpressionDefined ended.");
         Success(nameof(WaitManyAndGroupExpressionDefined));

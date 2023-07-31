@@ -48,18 +48,9 @@ public class WaitsGroup : Wait
 
 
 
-    public Wait When(Func<WaitsGroup, bool> groupMatchFilter)
+    public Wait MatchIf(Func<WaitsGroup, bool> groupMatchFilter)
     {
-        var instanceType = CurrentFunction.GetType();
-        if (groupMatchFilter.Method.DeclaringType != instanceType && groupMatchFilter.Method.DeclaringType.Name != "<>c")
-            throw new Exception(
-                $"For group wait [{Name}] the [{nameof(GroupMatchFuncName)}] must be a method in class " +
-                $"[{instanceType.Name}] or inline lambda method.");
-        var hasOverload = instanceType.GetMethods(Flags()).Count(x => x.Name == groupMatchFilter.Method.Name) > 1;
-        if (hasOverload)
-            throw new Exception(
-                $"For group wait [{Name}] the [GroupMatchFunc:{groupMatchFilter.Method.Name}] must not be over-loaded.");
-
+        ValidateMethod(groupMatchFilter.Method, nameof(GroupMatchFuncName));
         WaitType = WaitType.GroupWaitWithExpression;
         GroupMatchFuncName = groupMatchFilter.Method.Name;
         return this;

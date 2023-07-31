@@ -51,7 +51,7 @@ public class MethodWait : Wait
         try
         {
             if (AfterMatchAction == null) return true;
-            
+
             MethodInvoker.CallAfterMatchAction(CurrentFunction, AfterMatchAction, Input, Output);
             FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog($"After wait [{Name}] action executed.", LogType.Info, StatusCodes.WaitProcessing);
@@ -171,16 +171,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
 
     public MethodWait<TInput, TOutput> AfterMatch(Action<TInput, TOutput> afterMatchAction)
     {
-        var instanceType = CurrentFunction.GetType();
-        if (afterMatchAction.Method.DeclaringType != instanceType)
-            throw new Exception(
-                $"For wait [{Name}] the [{nameof(AfterMatchAction)}] must be a method in class " +
-                $"[{instanceType.Name}] or inline lambda method.");
-        var hasOverload = instanceType.GetMethods(Flags()).Count(x => x.Name == afterMatchAction.Method.Name) > 1;
-        if (hasOverload)
-            throw new Exception(
-                $"For wait [{Name}] the [CancelMethod:{afterMatchAction.Method.Name}] must not be over-loaded.");
-
+        ValidateMethod(afterMatchAction.Method, nameof(AfterMatchAction));
         AfterMatchAction = afterMatchAction.Method.Name;
         return this;
     }
@@ -193,16 +184,7 @@ public class MethodWait<TInput, TOutput> : MethodWait
 
     public MethodWait<TInput, TOutput> WhenCancel(Action cancelAction)
     {
-        var instanceType = CurrentFunction.GetType();
-        if (cancelAction.Method.DeclaringType != instanceType)
-            throw new Exception(
-                $"For wait [{Name}] the [CancelMethod] must be a method in class " +
-                $"[{instanceType.Name}] or inline lambda method.");
-        var hasOverload = instanceType.GetMethods(Flags()).Count(x => x.Name == cancelAction.Method.Name) > 1;
-        if (hasOverload)
-            throw new Exception(
-                $"For wait [{Name}] the [CancelMethod:{cancelAction.Method.Name}] must not be over-loaded.");
-
+        ValidateMethod(cancelAction.Method, nameof(CancelMethodAction));
         CancelMethodAction = cancelAction.Method.Name;
         return this;
     }
