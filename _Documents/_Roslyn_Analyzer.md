@@ -18,3 +18,17 @@
 * Go before the first wait with same match will create new separate function instance.
 * Replay Go Before found no waits!!
 * The wait named [{Name}] is duplicated in function body
+* Not allowed to create local varaibles in methods that have no resumable function attribute
+``` C#
+private MethodWait<OwnerApproveClientInput, OwnerApproveClientResult> WaitOwnerApproveClient()
+{
+    int y = 11;//Not allowed to create local varaibles in methods that have no resumable function attribute
+    return Wait<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, "Wait Owner Approve Client")
+                    .MatchIf((approveClientInput, approveResult) => approveClientInput.TaskId == OwnerTaskId.Id && y == 11)
+                    .AfterMatch((approveClientInput, approveResult) =>
+                    {
+                        OwnerTaskResult = approveResult;
+                        OwnerApprovalInput = approveClientInput;
+                    });
+}
+```

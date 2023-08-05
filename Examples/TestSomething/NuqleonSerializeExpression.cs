@@ -23,7 +23,7 @@ namespace TestSomething
                 obj.GetJsonSerializer,
                 obj.GetJsonDeserializer,
                 new Version("0.9"));
-            var testSerializer = new ExpressionSerializer();
+            var testSerializer = new ExpressionSerializerTest();
             var matchExp = testSerializer.Deserialize(match).ToExpression();
             var setDataExp = testSerializer.Deserialize(setData).ToExpression();
         }
@@ -37,7 +37,7 @@ namespace TestSomething
                 obj.GetJsonDeserializer,
                 new Version("0.9"));
             var expSlim = exp.ToExpressionSlim();
-            var testSerializer = new ExpressionSerializer();
+            var testSerializer = new ExpressionSerializerTest();
             var serailzed = testSerializer.Serialize(expSlim);
             var back = testSerializer.Deserialize(serailzed);
 

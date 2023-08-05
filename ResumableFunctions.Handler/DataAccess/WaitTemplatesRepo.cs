@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.InOuts;
+using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -19,39 +21,19 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         _context = _scope.ServiceProvider.GetService<WaitsDataContext>();
     }
 
-    public async Task<WaitTemplate> AddNewTemplate(
-        ExpressionsHashCalculator hashResult,
-        object currentFunctionInstance,
-        int funcId,
-        int groupId,
-        int methodId,
-        int inCodeLine)
+    public async Task<WaitTemplate> AddNewTemplate(byte[] hashResult, MethodWait methodWait)
     {
-        var waitTemplate = new WaitTemplate
-        {
-            MethodId = methodId,
-            FunctionId = funcId,
-            MethodGroupId = groupId,
-            Hash = hashResult.Hash,
-            InCodeLine = inCodeLine,
-            IsActive = 1,
-            CancelMethodData = hashResult.CancelMethodData
-        };
-
-        var matchWriter = new MatchExpressionWriter(hashResult.MatchExpression, currentFunctionInstance);
-        waitTemplate.MatchExpression = matchWriter.MatchExpression;
-        waitTemplate.CallMandatoryPartExpression = matchWriter.CallMandatoryPartExpression;
-        waitTemplate.InstanceMandatoryPartExpression = matchWriter.InstanceMandatoryPartExpression;
-        waitTemplate.IsMandatoryPartFullMatch = matchWriter.IsMandatoryPartFullMatch;
-
-
-        //var setDataWriter = new SetDataExpressionWriter(hashResult.SetDataExpression, currentFunctionInstance.GetType());
-        //waitTemplate.SetDataCall = setDataWriter.SetDataExpression;
-
-        _context.WaitTemplates.Add(waitTemplate);
-
-        await _context.SaveChangesAsync();
-        return waitTemplate;
+        return await AddNewTemplate(
+            hashResult,
+            methodWait.CurrentFunction,
+            methodWait.RequestedByFunctionId,
+            methodWait.MethodGroupToWaitId,
+            methodWait.MethodToWaitId,
+            methodWait.InCodeLine,
+            methodWait.CancelMethodAction,
+            methodWait.AfterMatchAction,
+            methodWait.MatchExpressionParts
+            );
     }
 
     public async Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId)
@@ -127,14 +109,14 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
                 new WaitTemplate
                 {
                     MatchExpressionValue = waitTemplate.MatchExpressionValue,
-                    SetDataCallValue = waitTemplate.SetDataCallValue,
+                    AfterMatchAction = waitTemplate.AfterMatchAction,
                     Id = waitTemplate.Id,
                     FunctionId = waitTemplate.FunctionId,
                     MethodId = waitTemplate.MethodId,
                     MethodGroupId = waitTemplate.MethodGroupId,
                     ServiceId = waitTemplate.ServiceId,
                     IsActive = waitTemplate.IsActive,
-                    CancelMethodDataValue = waitTemplate.CancelMethodDataValue,
+                    CancelMethodAction = waitTemplate.CancelMethodAction,
                 })
             .FirstAsync(x => x.Id == methodWaitTemplateId);
         template.LoadUnmappedProps();
@@ -145,5 +127,43 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
     {
         _context?.Dispose();
         _scope?.Dispose();
+    }
+
+    public async Task<WaitTemplate> AddNewTemplate(
+        byte[] hashResult,
+        object currentFunctionInstance,
+        int funcId,
+        int groupId,
+        int? methodId,
+        int inCodeLine,
+        string cancelMethodAction,
+        string afterMatchAction,
+        MatchExpressionParts matchExpressionParts
+        )
+    {
+        var waitTemplate = new WaitTemplate
+        {
+            MethodId = methodId,
+            FunctionId = funcId,
+            MethodGroupId = groupId,
+            Hash = hashResult,
+            InCodeLine = inCodeLine,
+            IsActive = 1,
+            CancelMethodAction = cancelMethodAction,
+            AfterMatchAction = afterMatchAction
+    };
+
+        if (matchExpressionParts != null)
+        {
+            waitTemplate.MatchExpression = matchExpressionParts.MatchExpression;
+            waitTemplate.CallMandatoryPartExpression = matchExpressionParts.CallMandatoryPartExpression;
+            waitTemplate.InstanceMandatoryPartExpression = matchExpressionParts.InstanceMandatoryPartExpression;
+            waitTemplate.IsMandatoryPartFullMatch = matchExpressionParts.IsMandatoryPartFullMatch;
+        }
+
+        _context.WaitTemplates.Add(waitTemplate);
+
+        await _context.SaveChangesAsync();
+        return waitTemplate;
     }
 }

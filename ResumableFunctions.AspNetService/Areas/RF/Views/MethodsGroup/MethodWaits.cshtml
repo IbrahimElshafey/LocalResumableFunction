@@ -7,7 +7,7 @@
         <h2 class="w3-margin-top">
             <b>
                 Waits for method group <span class="w3-text-indigo">
-                    `@Model.FirstOrDefault()?.GroupName`
+                    [@Model.FirstOrDefault()?.GroupName]
                 </span>
             </b>
         </h2>
@@ -55,9 +55,6 @@
                     <ul>
                         <li>
                             <b>Match If: </b> @item.MatchExpression
-                        </li>
-                        <li>
-                            <b>Set Data: </b> @Html.Raw(item.SetDataExpression)
                         </li>
                         <li>
                             <b>Mandatory Parts: </b> @item.MandatoryPartExpression

@@ -191,7 +191,7 @@
 //        //    classType.GetMethod(methodName, BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 //        //if (method == null)
 //        //{
-//        //    Console.WriteLine($"No method with name `{methodName}` in class `{classType.FullName}`.");
+//        //    Console.WriteLine($"No method with name [{methodName}] in class [{classType.FullName}].");
 //        //    return;
 //        //}
 //        //await _scanner.RegisterResumableFunction(method, MethodType.ResumableFunctionEntryPoint);

@@ -116,6 +116,8 @@ public class SubFunctionsTest
 
     public class FunctionAfterFirst : ResumableFunctionsContainer
     {
+        public string Message { get; set; }
+
         [ResumableFunctionEntryPoint("FunctionAfterFirst")]
         public async IAsyncEnumerable<Wait> Test()
         {
@@ -126,10 +128,32 @@ public class SubFunctionsTest
         [SubResumableFunction("SubFunction2")]
         public async IAsyncEnumerable<Wait> SubFunction2()
         {
-            yield return Wait<string, string>(Method3, "M3").MatchAll();
+            int x = 100;
+            yield return Wait<string, string>(Method3, "M3")
+                .MatchAll()
+                //.SetData(InstanceCall);
+                .AfterMatch((input, output) =>
+                {
+                    Message = $"Input: {input}, Output: {output}";
+                    if (x != 100)
+                        throw new Exception("Closure not saved for sub resumable function.");
+                });
+            //.AfterMatch(TestMethodClass.AfterMatchExternal);
+
+            Console.WriteLine(x);
         }
+
+        private void InstanceCall(string arg1, string arg2)
+        {
+            Message = $"Input: {arg1}, Output: {arg2}";
+        }
+
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
         [PushCall("Method3")] public string Method3(string input) => input + "M3";
+    }
+    public static class TestMethodClass
+    {
+        public static void AfterMatchExternal(string input, string outPut) => Console.WriteLine($"{input}#{outPut}");
     }
     public class SubFunctions : ResumableFunctionsContainer
     {

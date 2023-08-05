@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -54,7 +55,7 @@ internal class ServiceRepo : IServiceRepo
         if (notInCurrent && notRoot)
         {
             var rootService = _context.ServicesData.Local.FirstOrDefault(x => x.Id == _settings.CurrentServiceId);
-            rootService?.AddError($"Dll `{currentAssemblyName}` will not be added to service `{Assembly.GetEntryAssembly()?.GetName().Name}` because it's used in another service.", StatusCodes.Scanning, null);
+            rootService?.AddError($"Dll [{currentAssemblyName}] will not be added to service [{Assembly.GetEntryAssembly()?.GetName().Name}] because it's used in another service.", StatusCodes.Scanning, null);
             return false;
         }
 
@@ -100,7 +101,7 @@ internal class ServiceRepo : IServiceRepo
             serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].", LogType.Info, StatusCodes.Scanning);
         if (_settings.ForceRescan)
             serviceData.AddLog(
-                $"Dll `{currentAssemblyName}` Will be scanned because force rescan is enabled.", LogType.Warning, StatusCodes.Scanning);
+                $"Dll [{currentAssemblyName}] Will be scanned because force rescan is enabled.", LogType.Warning, StatusCodes.Scanning);
         return shouldScan || _settings.ForceRescan;
     }
 

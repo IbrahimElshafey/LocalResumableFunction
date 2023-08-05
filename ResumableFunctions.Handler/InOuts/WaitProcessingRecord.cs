@@ -10,7 +10,7 @@ public class WaitProcessingRecord : IEntityWithUpdate
     public int StateId { get; internal set; }
     public int TemplateId { get; internal set; }
     public MatchStatus MatchStatus { get; internal set; } = MatchStatus.ExpectedMatch;
-    public InstanceUpdateStatus InstanceUpdateStatus { get; internal set; } = InstanceUpdateStatus.NotUpdatedYet;
+    public ExecutionStatus AfterMatchActionStatus { get; internal set; } = ExecutionStatus.NotStartedYet;
     public ExecutionStatus ExecutionStatus { get; internal set; } = ExecutionStatus.NotStartedYet;
     public DateTime Created { get; internal set; }
 

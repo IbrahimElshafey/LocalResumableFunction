@@ -24,7 +24,7 @@ namespace ResumableFunctions.Handler.Expressions
         protected override Expression VisitMember(MemberExpression node)
         {
             var parameter = GetParamter(node.ToString());
-            if (CanConvert(node.Type))
+            if (CanConvertToString(node.Type))
             {
                 var getValueMi = typeof(ExpandoExtensions).GetMethods().First(x => x.Name == "Get" && x.IsGenericMethod).MakeGenericMethod(node.Type);
                 return Call(
@@ -44,7 +44,7 @@ namespace ResumableFunctions.Handler.Expressions
                 return (_inputOutput, Constant(path));
             if (path.StartsWith("functionInstance."))
                 return (_instance, Constant(path.Substring(17)));
-            throw new Exception($"Can't access to `{path}`");
+            throw new Exception($"Can't access to [{path}]");
         }
 
         public override Expression Visit(Expression node)
@@ -53,7 +53,7 @@ namespace ResumableFunctions.Handler.Expressions
             return base.Visit(node);
         }
 
-        private bool CanConvert(Type type)
+        private bool CanConvertToString(Type type)
         {
             return type.IsConstantType() || type == typeof(DateTime) || type == typeof(Guid) || type.IsEnum;
         }

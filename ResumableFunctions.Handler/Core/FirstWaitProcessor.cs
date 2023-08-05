@@ -57,7 +57,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         {
             var firstWaitClone = await GetFirstWait(resumableFunction, false);
             firstWaitClone.Status = WaitStatus.Temp;
-            firstWaitClone.ActionOnWaitsTree(waitClone =>
+            firstWaitClone.ActionOnChildrenTree(waitClone =>
             {
                 waitClone.IsFirst = false;
                 waitClone.WasFirst = true;
@@ -70,7 +70,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                         {
                             TimeMatchId = firstMatchedMethodWait.MandatoryPart,
                             RequestedByFunctionId = firstMatchedMethodWait.RequestedByFunctionId,
-                            Description = $"`{timeWait.Name}` in function `{firstMatchedMethodWait.RequestedByFunction.RF_MethodUrn}:{firstMatchedMethodWait.FunctionState.Id}`"//Todo:bug: not same description as first wait
+                            Description = $"[{timeWait.Name}] in function [{firstMatchedMethodWait.RequestedByFunction.RF_MethodUrn}:{firstMatchedMethodWait.FunctionState.Id}]"//Todo:bug: not same description as first wait
                         }), timeWait.TimeToWait);
                     timeWait.TimeWaitMethod.MandatoryPart = firstMatchedMethodWait.MandatoryPart;
                     timeWait.IgnoreJobCreation = true;
@@ -106,7 +106,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
     }
 
-    [DisplayName("Register First Wait for Function `{0}`")]
+    [DisplayName("Register First Wait for Function [{0}]")]
     public async Task RegisterFirstWait(int functionId)
     {
         MethodInfo resumableFunction = null;
@@ -120,7 +120,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                     var resumableFunctionId = await _methodIdentifierRepo.GetResumableFunction(functionId);
                     resumableFunction = resumableFunctionId.MethodInfo;
                     functionName = resumableFunction.Name;
-                    _logger.LogInformation($"Trying Start Resumable Function `{resumableFunctionId.RF_MethodUrn}` And Register First Wait");
+                    _logger.LogInformation($"Trying Start Resumable Function [{resumableFunctionId.RF_MethodUrn}] And Register First Wait");
                     var firstWait = await GetFirstWait(resumableFunction, true);
 
                     if (firstWait != null)
@@ -179,7 +179,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
         if (firstWait == null)
         {
-            await _serviceRepo.AddErrorLog(null, $"Can't get first wait in function `{resumableFunction.GetFullName()}`.", StatusCodes.FirstWait);
+            await _serviceRepo.AddErrorLog(null, $"Can't get first wait in function [{resumableFunction.GetFullName()}].", StatusCodes.FirstWait);
             return null;
         }
 
@@ -194,7 +194,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             ResumableFunctionIdentifier = methodId,
             StateObject = classInstance,
         };
-        firstWait.ActionOnWaitsTree(x =>
+        firstWait.ActionOnChildrenTree(x =>
         {
             x.RequestedByFunction = methodId;
             x.RequestedByFunctionId = methodId.Id;
@@ -234,6 +234,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     //                await _context.SaveChangesAsync();
     //            }
     //        },
-    //        $"Error when try to deactivate first wait for function `{functionId}`.", true);
+    //        $"Error when try to deactivate first wait for function [{functionId}].", true);
     //}
 }

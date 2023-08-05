@@ -17,33 +17,62 @@ namespace Tests
 
             var instance = new Test();
             instance.Method1("ss");
-            Assert.Empty(await test.RoundCheck(1, 4, 1));
+            instance.Method4("44");
+            Assert.Empty(await test.RoundCheck(2, 5, 1));
 
             instance = (await test.GetInstances<Test>()).FirstOrDefault()?.StateObject as Test;
             Assert.Equal(2, instance?.Counter);
         }
+
         public class Test : ResumableFunctionsContainer
         {
             public int Counter { get; set; }
-            [ResumableFunctionEntryPoint("WaitThreeAtStart")]
-            public async IAsyncEnumerable<Wait> WaitThreeAtStart()
+            [ResumableFunctionEntryPoint("TestCancelMethod")]
+            public async IAsyncEnumerable<Wait> TestCancelMethod()
             {
+                var dateTime = DateTime.Now;
+                int x = 2;
                 yield return Wait("Wait three methods",
-                    Wait<string, string>(Method1, "Method 1").WhenCancel(() => Counter++),
+                    Wait<string, string>(Method1, "Method 1")
+                        .MatchIf((_, _) => dateTime < new DateTime(2025, 1, 1))
+                        .WhenCancel(() => Counter += x - 1)
+                        .AfterMatch(StaticAfterMatch),
                     Wait<string, string>(Method2, "Method 2")
-                    .MatchAll()
-                    .WhenCancel(() =>
-                    {
-                        Console.WriteLine("Method Two Cancel");
-                        Counter++;
-                    }),
-                    Wait<string, string>(Method3, "Method 3").WhenCancel(IncrementCounter)
+                        .MatchAll()
+                        .WhenCancel(() =>
+                        {
+                            Console.WriteLine("Method Two Cancel");
+                            Counter += x;
+                        })
+                        ,
+                    Wait<string, string>(Method3, "Method 3")
+                        .WhenCancel(StaticIncrementCounter)
                     )
-                .First();
+                .MatchAny();
+
+                var ran = new Random(10).Next(10, 50);
+                yield return
+                    Wait<string, string>(Method4, "Method 4")
+                    .MatchIf((input, output) => input.Length > 1 && ran >= 10)
+                    .AfterMatch((_, _) =>
+                    {
+                        Console.WriteLine("After match");
+                        if (x != 2)
+                            throw new Exception("Closure continuation not restored.");
+                    });
                 await Task.Delay(100);
                 Console.WriteLine("Three method done");
             }
 
+            private static void StaticAfterMatch(string arg1, string arg2)
+            {
+                Console.WriteLine($"{arg1}:{arg2}");
+            }
+
+            private static void StaticIncrementCounter()
+            {
+                Console.WriteLine("Static call");
+            }
             private void IncrementCounter()
             {
                 Counter++;
@@ -52,6 +81,7 @@ namespace Tests
             [PushCall("Method1")] public string Method1(string input) => "Method1 Call";
             [PushCall("Method2")] public string Method2(string input) => "Method2 Call";
             [PushCall("Method3")] public string Method3(string input) => "Method3 Call";
+            [PushCall("Method4")] public string Method4(string input) => "Method4 Call";
         }
     }
 

@@ -14,7 +14,6 @@ public abstract partial class ResumableFunctionsContainer
     {
         return Task.CompletedTask;
     }
-    public T LocalValue<T>(T value) => value;
     [IgnoreMember] internal MethodInfo CurrentResumableFunction { get; set; }
 
     public void Log(string message) => this.AddLog(message, LogType.Info, Helpers.StatusCodes.Custom);
@@ -50,6 +49,7 @@ public abstract partial class ResumableFunctionsContainer
         CallSetDependencies(inputs, setDependenciesMi, parameters);
         _dependenciesAreSet = true;
     }
+
 
     private void CallSetDependencies(object[] inputs, MethodInfo mi, ParameterInfo[] parameterTypes)
     {

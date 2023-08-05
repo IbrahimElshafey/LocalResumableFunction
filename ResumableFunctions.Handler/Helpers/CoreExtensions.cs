@@ -5,6 +5,7 @@ using System.Text;
 using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
@@ -39,7 +40,7 @@ public static class CoreExtensions
 
 
         services.AddHttpClient();
-        services.AddSingleton<IServiceQueue,HangfireServiceQueue>();
+        services.AddSingleton<IServiceQueue, HangfireServiceQueue>();
         services.AddSingleton(settings);
         services.AddSingleton(settings.DistributedLockProvider);
 
@@ -81,10 +82,10 @@ public static class CoreExtensions
     {
         using var scope = app.Services.CreateScope();
         var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundProcess>();
-        
+
         var scanner = scope.ServiceProvider.GetService<Scanner>();
         backgroundJobClient.Enqueue(() => scanner.Start());
-        
+
         var cleaningJob = scope.ServiceProvider.GetService<ICleaningJob>();
         cleaningJob.ScheduleCleaningJob();
     }
@@ -248,8 +249,11 @@ public static class CoreExtensions
         return types.Contains(type);
     }
 
-    public static bool CanBeConstant(this object ob) =>
-        ob != null && (ob.GetType().IsConstantType() || ob.GetType().IsEnum);
+    public static bool CanConvertToSimpleString(this object ob)
+    {
+        var type = ob.GetType();
+        return ob != null && (type.IsConstantType() || type == typeof(DateTime) || type == typeof(Guid) || type.IsEnum);
+    }
 
     public static MethodInfo GetMethodInfo<T>(Expression<Func<T, object>> methodSelector) =>
         GetMethodInfoWithType(methodSelector).MethodInfo;
@@ -317,5 +321,52 @@ public static class CoreExtensions
         }
         sb.Append('>');
         return sb.ToString();
+    }
+
+    public static Expression ToConstantExpression(this object result)
+    {
+        if (result.GetType().IsConstantType())
+        {
+            return Constant(result);
+        }
+        //else if (expression.NodeType == ExpressionType.New)
+        //    return expression;
+
+        if (result is DateTime date)
+        {
+            return Constant(date.Ticks);
+        }
+
+        if (result is Guid guid)
+        {
+            return Constant(guid.ToString());
+        }
+
+        if (JsonConvert.SerializeObject(result) is string json)
+        {
+            return Constant(json);
+        }
+        throw new NotSupportedException(message:
+               $"Can't evaluate object [{result}] to constant expression.");
+    }
+
+    public static Type GetUnderlyingType(this MemberInfo member)
+    {
+        switch (member.MemberType)
+        {
+            case MemberTypes.Event:
+                return ((EventInfo)member).EventHandlerType;
+            case MemberTypes.Field:
+                return ((FieldInfo)member).FieldType;
+            case MemberTypes.Method:
+                return ((MethodInfo)member).ReturnType;
+            case MemberTypes.Property:
+                return ((PropertyInfo)member).PropertyType;
+            default:
+                throw new ArgumentException
+                (
+                 "Input MemberInfo must be if type EventInfo, FieldInfo, MethodInfo, or PropertyInfo"
+                );
+        }
     }
 }

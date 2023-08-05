@@ -14,7 +14,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
 
     public int Id { get; internal set; }
     public int FunctionId { get; internal set; }
-    public int MethodId { get; internal set; }
+    public int? MethodId { get; internal set; }
     public int MethodGroupId { get; internal set; }
     public MethodsGroup MethodGroup { get; internal set; }
     public byte[] Hash { get; internal set; }
@@ -23,14 +23,11 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public bool IsMandatoryPartFullMatch { get; internal set; }
 
     internal string MatchExpressionValue { get; set; }
-    public byte[] CancelMethodDataValue { get; internal set; }
     internal string CallMandatoryPartExpressionValue { get; set; }
 
     internal string InstanceMandatoryPartExpressionValue { get; set; }
-    internal byte[] SetDataCallValue { get; set; }
 
-    [NotMapped]
-    public MethodData CancelMethodData { get; internal set; }
+    public string CancelMethodAction { get; internal set; }
 
     [NotMapped]
     public LambdaExpression MatchExpression { get; internal set; }
@@ -43,8 +40,7 @@ public class WaitTemplate : IEntity, IOnSaveEntity
 
 
 
-    [NotMapped]
-    public MethodData SetDataCall { get; internal set; }
+    public string AfterMatchAction { get; internal set; }
 
 
     public int? ServiceId { get; set; }
@@ -57,19 +53,14 @@ public class WaitTemplate : IEntity, IOnSaveEntity
         try
         {
             var serializer = new ExpressionSerializer();
-            var converter = new BinaryToObjectConverter();
             if (expressionsLoaded && !forceReload) return;
 
             if (MatchExpressionValue != null)
                 MatchExpression = (LambdaExpression)serializer.Deserialize(MatchExpressionValue).ToExpression();
-            if (SetDataCallValue != null)
-                SetDataCall = converter.ConvertToObject<MethodData>(SetDataCallValue);
             if (CallMandatoryPartExpressionValue != null)
                 CallMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(CallMandatoryPartExpressionValue).ToExpression();
             if (InstanceMandatoryPartExpressionValue != null)
                 InstanceMandatoryPartExpression = (LambdaExpression)serializer.Deserialize(InstanceMandatoryPartExpressionValue).ToExpression();
-            if (CancelMethodDataValue != null)
-                CancelMethodData = converter.ConvertToObject<MethodData>(CancelMethodDataValue);
 
         }
         catch (Exception e)
@@ -96,30 +87,25 @@ public class WaitTemplate : IEntity, IOnSaveEntity
     public void OnSave()
     {
         var serializer = new ExpressionSerializer();
-        var converter = new BinaryToObjectConverter();
         if (MatchExpression != null)
             MatchExpressionValue = serializer.Serialize(MatchExpression.ToExpressionSlim());
-        if (SetDataCall != null)
-            SetDataCallValue = converter.ConvertToBinary(SetDataCall);
         if (CallMandatoryPartExpression != null)
             CallMandatoryPartExpressionValue = serializer.Serialize(CallMandatoryPartExpression.ToExpressionSlim());
         if (InstanceMandatoryPartExpression != null)
             InstanceMandatoryPartExpressionValue = serializer.Serialize(InstanceMandatoryPartExpression.ToExpressionSlim());
-        if (CancelMethodData != null)
-            CancelMethodDataValue = converter.ConvertToBinary(CancelMethodData);
     }
 
-    internal string GetMandatoryPart(byte[] pushedCallDataValue)
-    {
-        if (CallMandatoryPartExpression != null)
-        {
-            var inputType = CallMandatoryPartExpression.Parameters[0].Type;
-            var outputType = CallMandatoryPartExpression.Parameters[1].Type;
-            var methodData = PushedCall.GetMethodData(inputType, outputType, pushedCallDataValue);
-            var getMandatoryFunc = CallMandatoryPartExpression.CompileFast();
-            var parts = (object[])getMandatoryFunc.DynamicInvoke(methodData.Input, methodData.Output);
-            return string.Join("#", parts);
-        }
-        return null;
-    }
+    //internal string GetPushedCallMandatoryPart(byte[] pushedCallData)
+    //{
+    //    if (CallMandatoryPartExpression != null)
+    //    {
+    //        var inputType = CallMandatoryPartExpression.Parameters[0].Type;
+    //        var outputType = CallMandatoryPartExpression.Parameters[1].Type;
+    //        var methodData = PushedCall.GetMethodData(inputType, outputType, pushedCallData);
+    //        var getMandatoryFunc = CallMandatoryPartExpression.CompileFast();
+    //        var parts = (object[])getMandatoryFunc.DynamicInvoke(methodData.Input, methodData.Output);
+    //        return string.Join("#", parts);
+    //    }
+    //    return null;
+    //}
 }

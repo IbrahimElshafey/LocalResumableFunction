@@ -7,11 +7,13 @@ public class TimeWait : Wait
 {
     private readonly MethodWait<TimeWaitInput, bool> _timeMethodWait;
 
-    internal TimeWait()
+    internal TimeWait(ResumableFunctionsContainer currentFunction)
     {
+        var timeWaitMethod = typeof(LocalRegisteredMethods)
+                        .GetMethod(nameof(LocalRegisteredMethods.TimeWait));
+
         _timeMethodWait =
-           new MethodWait<TimeWaitInput, bool>(typeof(LocalRegisteredMethods)
-               .GetMethod(nameof(LocalRegisteredMethods.TimeWait)));
+            new MethodWait<TimeWaitInput, bool>(timeWaitMethod) { CurrentFunction = currentFunction };
     }
 
     public TimeSpan TimeToWait { get; internal set; }
@@ -31,6 +33,9 @@ public class TimeWait : Wait
             _timeMethodWait.RequestedByFunctionId = RequestedByFunctionId;
             _timeMethodWait.StateBeforeWait = StateBeforeWait;
             _timeMethodWait.StateAfterWait = StateAfterWait;
+            _timeMethodWait.SetClosure(Closure);
+            _timeMethodWait.CallerName = CallerName;
+            _timeMethodWait.InCodeLine = InCodeLine;
             _timeMethodWait.ExtraData =
                 new WaitExtraData
                 {
@@ -42,27 +47,14 @@ public class TimeWait : Wait
         }
     }
 
-    public Wait SetData(Action<TimeWaitInput, bool> setDataExp)
+    public Wait AfterMatch(Action<TimeWaitInput, bool> AfterMatchAction)
     {
 
-        if (setDataExp != null)
+        if (AfterMatchAction != null)
         {
-            //var functionType = typeof(Func<,,>)
-            //    .MakeGenericType(
-            //     typeof(TimeWaitInput),
-            //     typeof(bool),
-            //     typeof(bool));
-            //var inputParameter = setDataExp.Parameters[0];
-            //var outputParameter = Expression.Parameter(typeof(bool), "output");
-            //var setDataExpression = Expression.Lambda(
-            //    functionType,
-            //    setDataExp.Body,
-            //    inputParameter,
-            //    outputParameter);
-            _timeMethodWait.SetData(setDataExp);
+            _timeMethodWait.AfterMatch(AfterMatchAction);
         }
         return this;
     }
-
 
 }

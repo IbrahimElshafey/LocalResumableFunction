@@ -1,77 +1,86 @@
 ﻿using System.Linq.Expressions;
+using System.Reflection;
+using System.Xml.Linq;
 using FastExpressionCompiler;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Expressions;
 public partial class MatchExpressionWriter : ExpressionVisitor
 {
     private LambdaExpression _matchExpression;
-    private ParameterExpression _functionInstanceArg;
+
     private readonly object _currentFunctionInstance;
-    private readonly List<ConstantPart> _constantParts = new();
+    private readonly List<ExpressionPart> _expressionParts = new();
 
-    public LambdaExpression MatchExpression { get; private set; }
-    public LambdaExpression CallMandatoryPartExpression { get; private set; }
-    public LambdaExpression InstanceMandatoryPartExpression { get; private set; }
-    public bool IsMandatoryPartFullMatch { get; private set; }
 
-    public MatchExpressionWriter(LambdaExpression matchExpression, object instance)
+    public MatchExpressionParts MatchExpressionParts { get; }
+    public MatchExpressionWriter(LambdaExpression matchExpression, object functionInstance)
     {
+        MatchExpressionParts = new();
         _matchExpression = matchExpression;
         if (_matchExpression == null)
             return;
-        if (_matchExpression?.Parameters.Count == 3)
+        if (_matchExpression?.Parameters.Count == 4)
         {
-            MatchExpression = _matchExpression;
+            MatchExpressionParts.MatchExpression = _matchExpression;
             return;
         }
-        _currentFunctionInstance = instance;
-        CheckLocalFields();
-        ChangeSignature();
-        CalcConstantInExpression();
-        MarkMandatoryConstants();
+        _currentFunctionInstance = functionInstance;
 
-        if (_constantParts.Any(x => x.IsMandatory))
+        ChangeSignature();
+        FindExactMatchParts();
+        MarkMandatoryParts();
+        ReplaceLocalVariables();
+        if (_expressionParts.Any(x => x.IsMandatory))
         {
-            var mandatoryPartVisitor = new MandatoryPartVisitor(_matchExpression, _constantParts);
-            CallMandatoryPartExpression = mandatoryPartVisitor.CallMandatoryPartExpression;
-            InstanceMandatoryPartExpression = mandatoryPartVisitor.InstanceMandatoryPartExpression;
+            var mandatoryPartVisitor = new MandatoryPartExpressionsGenerator(_matchExpression, _expressionParts);
+            MatchExpressionParts.CallMandatoryPartExpression = mandatoryPartVisitor.CallMandatoryPartExpression;
+            MatchExpressionParts.InstanceMandatoryPartExpression = mandatoryPartVisitor.InstanceMandatoryPartExpression;
             SetIsMandatoryPartFullMatchValue();
         }
     }
 
-    private void CheckLocalFields()
+    private void ReplaceLocalVariables()
     {
-        var fieldVistor = new GenericVisitor();
-        fieldVistor.OnVisitMember(exp =>
+        var changeClosureVarsVisitor = new GenericVisitor();
+        Expression closure = null;
+        changeClosureVarsVisitor.OnVisitConstant(node =>
         {
-            if (exp.ToString().Contains("<>c__DisplayClass"))
+            if (node.Type.Name.StartsWith("<>c__DisplayClass"))
             {
-                var name = exp.Member.Name;
-                throw new Exception(
-                    $"Can't use local variable `{name}` in match expression `{ExpressionExtensions.ToCSharpString(_matchExpression)}`, " +
-                    $"please warp it in method `{nameof(ResumableFunctionsContainer.LocalValue)}({name})`");
+                closure = node;
+                return _matchExpression.Parameters[3];
             }
-            return exp;
+            return base.VisitConstant(node);
         });
-        fieldVistor.Visit(_matchExpression);
+        MatchExpressionParts.MatchExpression = (LambdaExpression)changeClosureVarsVisitor.Visit(MatchExpressionParts.MatchExpression);
+        if (closure != null)
+        {
+            var value = Lambda<Func<object>>(closure).CompileFast().Invoke();
+            if (value != null)
+                MatchExpressionParts.Closure = value;
+        }
     }
 
     private void ChangeSignature()
     {
         var expression = _matchExpression;
-        _functionInstanceArg = Parameter(_currentFunctionInstance.GetType(), "functionInstance");
+        var functionInstanceArg = Parameter(_currentFunctionInstance.GetType(), "functionInstance");
+        var closureType = GetClosureType();
+        var localVarsArg = Parameter(closureType, "locals");
         var changeParameterVisitor = new GenericVisitor();
-        changeParameterVisitor.OnVisitConstant(OnVisitFunctionInstance);
+        changeParameterVisitor.OnVisitConstant(OnVisitConstant);
         var updatedBoy = (LambdaExpression)changeParameterVisitor.Visit(_matchExpression);
-        var functionType = typeof(Func<,,,>)
+        var functionType = typeof(Func<,,,,>)
             .MakeGenericType(
                 updatedBoy.Parameters[0].Type,
                 updatedBoy.Parameters[1].Type,
                 _currentFunctionInstance.GetType(),
+                closureType,
                 typeof(bool));
 
         _matchExpression = Lambda(
@@ -79,91 +88,89 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             updatedBoy.Body,
             expression.Parameters[0],
             expression.Parameters[1],
-            _functionInstanceArg);
+            functionInstanceArg,
+            localVarsArg
+            );
 
-        Expression OnVisitFunctionInstance(ConstantExpression node)
+        Expression OnVisitConstant(ConstantExpression node)
         {
             if (node.Value == _currentFunctionInstance)
-                return _functionInstanceArg;
+                return functionInstanceArg;
             return base.VisitConstant(node);
         }
     }
 
-    private void CalcConstantInExpression()
+    private Type GetClosureType()
     {
-        MatchExpression = _matchExpression;
+        Type result = null;
+        var getClosureTypeVisitor = new GenericVisitor();
+        getClosureTypeVisitor.OnVisitConstant(OnVisitConstant);
+        getClosureTypeVisitor.StopWhen(_ => result != null);
+        getClosureTypeVisitor.Visit(_matchExpression);
+        Expression OnVisitConstant(ConstantExpression node)
+        {
+            if (node.Type.Name.StartsWith("<>c__DisplayClass"))
+                result = node.Type;
+            return base.VisitConstant(node);
+        }
+        return result ?? typeof(object);
+    }
+
+    //exact match may be in form:
+    // sub-expression that use input and output == expression that has a value
+    // value-part <BinaryOperator> !inputOrOutput
+    // value-part <BinaryOperator> !inputOrOutput
+    private void FindExactMatchParts()
+    {
+        MatchExpressionParts.MatchExpression = _matchExpression;
         var constantTranslationVisitor = new GenericVisitor();
-        constantTranslationVisitor.OnVisitBinary(TryEvaluateBinaryParts);
-        constantTranslationVisitor.OnVisitUnary(VisitNotEqual);
-        //aaa
+        constantTranslationVisitor.OnVisitBinary(VisitBinary);
         _matchExpression = (LambdaExpression)constantTranslationVisitor.Visit(_matchExpression);
 
-        Expression TryEvaluateBinaryParts(BinaryExpression node)
+        Expression VisitBinary(BinaryExpression node)
         {
-            var left = TryTranslateToConstant(node.Left);
-            var right = TryTranslateToConstant(node.Right);
-            if (left.IsCalculated && right.IsCalculated)
+            if (node.Type != typeof(bool))
+                return base.VisitBinary(node);
+
+            if (node.NodeType == ExpressionType.Equal)
             {
-                ;//ignore
+                //todo:replace IsUseParameters with UseUseParametersOnly
+                if (CanConvertToSimpleString(node.Left) && IsInputOutputExpression(node.Right, out _))
+                    _expressionParts.Add(new(node, node.Right, node.Left));
+                else if (CanConvertToSimpleString(node.Right) && IsInputOutputExpression(node.Left, out _))
+                    _expressionParts.Add(new(node, node.Left, node.Right));
             }
-            else if (left.IsCalculated)
-                _constantParts.Add(new(node.NodeType, right.Result, left.Result, left.Value, node.Left));
-            else if (right.IsCalculated)
-                _constantParts.Add(new(node.NodeType, left.Result, right.Result, right.Value, node.Right));
 
-            //translate bool prop like `&& input.IsHappy` to `&& input.IsHappy == true `
-            if (node.Left.Type == typeof(bool) &&
-                IsUseParameters(node.Left) &&
-                (node.Left is ParameterExpression || node.Left is MemberExpression) &&
-                node.Right is not ConstantExpression)
-                left.Result = MakeBinary(ExpressionType.Equal, node.Left, Constant(true));
-            if (node.Right.Type == typeof(bool) &&
-                IsUseParameters(node.Right) &&
-                (node.Right is ParameterExpression || node.Right is MemberExpression) &&
-                node.Left is not ConstantExpression)
-                right.Result = MakeBinary(ExpressionType.Equal, node.Right, Constant(true));
+            //translate bool prop like[&& input.IsHappy] to[&& input.IsHappy == true]
+            //translate bool prop like[&& !input.IsHappy] to[&& input.IsHappy == false]
+            if (IsInputOutputBoolean(node, node.Left, out Expression newExpression1))
+                return newExpression1;
+            if (IsInputOutputBoolean(node, node.Right, out Expression newExpression2))
+                return newExpression2;
 
-            return base.VisitBinary(MakeBinary(node.NodeType, left.Result, right.Result));
+            return base.VisitBinary(node);
         }
 
-        Expression VisitNotEqual(UnaryExpression node)
-        {
-            if (node.NodeType == ExpressionType.Not &&
-                IsUseParameters(node.Operand) &&
-                (node.Operand is MemberExpression || node.Operand is ParameterExpression))
-            {
-                return TryEvaluateBinaryParts(MakeBinary(ExpressionType.Equal, node.Operand, Constant(false)));
-            }
-            return base.VisitUnary(node);
-        }
 
-        (Expression Result, bool IsCalculated, object Value) TryTranslateToConstant(Expression expression)
+
+        bool CanConvertToSimpleString(Expression expression)
         {
             if (expression is ConstantExpression constantExpression)
-                return (constantExpression, true, constantExpression.Value);
-            if (IsUseParameters(expression)) return (expression, false, null);
+                return true;
+
+            var useInOut = IsInputOutputExpression(expression, out int inOutUseCount) || inOutUseCount > 0;
+            if (useInOut) return false;
+
             var result = GetExpressionValue(expression);
             if (result != null)
-                return ObjectAsConst(result);
+                return true && result.CanConvertToSimpleString();
 
             throw new NotSupportedException(
-                $"Can't use expression `{expression}` in match because it's evaluated to `NULL`.");
+                $"Can't use expression [{expression}] in match because it's evaluated to [NULL].");
 
         }
 
-        bool IsUseParameters(Expression expression)
-        {
-            var checkUseParamter = new GenericVisitor();
-            var isParamter = false;
-            checkUseParamter.OnVisitParameter(param =>
-            {
-                if (param.Name == "input" || param.Name == "output")
-                    isParamter = true || isParamter;
-                return param;
-            });
-            checkUseParamter.Visit(expression);
-            return isParamter;
-        }
+
 
         object GetExpressionValue(Expression expression)
         {
@@ -176,73 +183,92 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             catch (Exception ex)
             {
                 throw new NotSupportedException(message:
-                    $"Can't use expression `{expression}` in match because we can't compute its value.\n" +
+                    $"Can't use expression [{expression}] in match because we can't compute its value.\n" +
+                    $"Try to rewrite it in another form.\n" +
                     $"Exception: {ex}");
             }
         }
 
-        (Expression Result, bool IsCalculated, object Value) ObjectAsConst(object result)
-        {
-            if (result.GetType().IsConstantType())
-            {
-                return (Constant(result), true, result);
-            }
-            //else if (expression.NodeType == ExpressionType.New)
-            //    return expression;
 
-            if (result is DateTime date)
-            {
-                return (New(typeof(DateTime).GetConstructor(new[] { typeof(int) }), Constant(date.Ticks)), true, date);
-            }
-
-            if (result is Guid guid)
-            {
-                return (New(
-                    typeof(Guid).GetConstructor(new[] { typeof(string) }),
-                    Constant(guid.ToString())), true, guid);
-            }
-
-            if (JsonConvert.SerializeObject(result) is string json)
-            {
-                return (Convert(
-                    Call(
-                        typeof(JsonConvert).GetMethod("DeserializeObject", 0, new[] { typeof(string), typeof(Type) }),
-                        Constant(json),
-                        Constant(result.GetType(), typeof(Type))
-                    ),
-                    result.GetType()
-                ), true, json);
-            }
-            throw new NotSupportedException(message:
-                   $"Can't use value `{result}` in match because it type can't be serialized.\n");
-        }
     }
 
-    private void MarkMandatoryConstants()
+    private bool IsInputOutputBoolean(BinaryExpression node, Expression operand, out Expression newExpression)
     {
+        newExpression = null;
+        var booleanArthimaticOp = new[]
+        {
+            ExpressionType.And,
+            ExpressionType.Or,
+            ExpressionType.ExclusiveOr
+        };
+        var isLeft = node.Left == operand;
+        var otherOperand = isLeft ? node.Right : node.Left;
+        var isInputOutputBoolean =
+            operand.Type == typeof(bool) &&
+            IsInputOutputExpression(operand, out _) &&
+            (operand is ParameterExpression || operand is MemberExpression) &&
+            otherOperand is not ConstantExpression &&
+            !booleanArthimaticOp.Contains(node.NodeType);
+        var translatedBoolean = isInputOutputBoolean ? MakeBinary(ExpressionType.Equal, operand, Constant(true)) : null;
+
+        if (isInputOutputBoolean is false && operand is UnaryExpression unaryExpression)
+        {
+            isInputOutputBoolean =
+                unaryExpression.NodeType == ExpressionType.Not &&
+                IsInputOutputExpression(unaryExpression.Operand, out _) &&
+                (unaryExpression.Operand is MemberExpression || unaryExpression.Operand is ParameterExpression);
+            translatedBoolean = isInputOutputBoolean ? MakeBinary(ExpressionType.Equal, unaryExpression.Operand, Constant(false)) : null;
+        }
+
+        if (isInputOutputBoolean)
+        {
+            newExpression =
+                isLeft ?
+                base.VisitBinary(MakeBinary(node.NodeType, translatedBoolean, otherOperand)) :
+                base.VisitBinary(MakeBinary(node.NodeType, otherOperand, translatedBoolean));
+        }
+        return isInputOutputBoolean;
+    }
+
+
+    //change expression part to check to `false`
+    //change other simple expressions to `true`
+    private void MarkMandatoryParts()
+    {
+        Expression expressionToCheck = null;
+
         var changeToBooleans = new GenericVisitor();
-        Expression constantExpressionPart = null;
         changeToBooleans.OnVisitBinary(VisitBinary);
         changeToBooleans.OnVisitMethodCall(VisitMethodCall);
 
-        foreach (var constPart in _constantParts)
+        //Expression part is mandatory if is fasle and all other parts is true and compiled expression returns false
+        foreach (var expressionPart in _expressionParts)
         {
-            if (constPart.IsMandatory || constPart.Operator != ExpressionType.Equal) continue;
+            if (expressionPart.IsMandatory) continue;
 
-            constantExpressionPart = constPart.ConstantExpression;
+            expressionToCheck = expressionPart.Expression;
             var expression = changeToBooleans.Visit(_matchExpression.Body);
-            var compiled = Lambda<Func<bool>>(expression).CompileFast();
-            constPart.IsMandatory = !compiled();
+            try
+            {
+                var compiled = Lambda<Func<bool>>(expression).CompileFast();
+                expressionPart.IsMandatory = !compiled();
+            }
+            catch (Exception)
+            {
+                expressionPart.IsMandatory = false;
+            }
         }
 
         Expression VisitBinary(BinaryExpression node)
         {
-            //change contsant part to false
-            if (node.Left == constantExpressionPart || node.Right == constantExpressionPart)
+            if (node == expressionToCheck)
                 return Constant(false);
-            //check if 
-            var canBeTranslated = _constantParts.Any(x => x.ConstantExpression == node.Left || x.ConstantExpression == node.Right);
-            if (canBeTranslated) return Constant(true);
+            if (node.Left == expressionToCheck)
+                return base.VisitBinary(MakeBinary(node.NodeType, Constant(false), node.Right));
+            if (node.Right == expressionToCheck)
+                return base.VisitBinary(MakeBinary(node.NodeType, node.Left, Constant(false)));
+            else if (IsSimpleLogicalExpression(node))
+                return Constant(true);
             return base.VisitBinary(node);
         }
         Expression VisitMethodCall(MethodCallExpression methodCallExpression)
@@ -252,6 +278,8 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             return base.VisitMethodCall(methodCallExpression);
         }
     }
+
+
 
     private void SetIsMandatoryPartFullMatchValue()
     {
@@ -260,18 +288,19 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         changeToBools.OnVisitMethodCall(VisitMethodCall);
         var exp = changeToBools.Visit(_matchExpression.Body);
         var compiled = Lambda<Func<bool>>(exp).CompileFast();
-        IsMandatoryPartFullMatch = compiled();
+        MatchExpressionParts.IsMandatoryPartFullMatch = compiled();
+
+        //change mandatory parts to true and other to false
         Expression VisitBinary(BinaryExpression node)
         {
-            var isMandatory =
-                node.NodeType == ExpressionType.Equal &&
-                _constantParts.Any(x => x.IsMandatory && (x.PropPathExpression == node.Left || x.PropPathExpression == node.Right));
-            if (isMandatory)
+            if (_expressionParts.Any(x => x.Expression == node))
                 return Constant(true);
-            var canBeTranslated = _constantParts.Any(x => x.ConstantExpression == node.Left || x.ConstantExpression == node.Right);
-            if (canBeTranslated) return Constant(false);
+            if (IsSimpleLogicalExpression(node))
+                return Constant(false);
             return base.VisitBinary(node);
         }
+
+        //if  part is method call that return bool -> make it false
         Expression VisitMethodCall(MethodCallExpression methodCallExpression)
         {
             if (methodCallExpression.Method.ReturnType == typeof(bool))
@@ -281,82 +310,56 @@ public partial class MatchExpressionWriter : ExpressionVisitor
 
     }
 
-    private void GenerateMatchUsingJson()
+    private bool IsInputOutputExpression(Expression expression, out int inOutUseCount)
     {
-        //var _pushedCall = Parameter(typeof(JObject), "pushedCall");
-        //var usePushedCall = new GenericVisitor();
-        //usePushedCall.OnVisitParameter(VisitParameter);
-        //var updatedBoy = usePushedCall.Visit(MatchExpressionWithConstants.Body);
-        //JObjectMatchExpression = Lambda<Func<JObject, bool>>(updatedBoy, _pushedCall);
-        //Expression VisitParameter(ParameterExpression node)
-        //{
-        //    if (node.Type.IsConstantType())
-        //    {
-        //        var isOutput = node == MatchExpressionWithConstants.Parameters[1];
-        //        var castMethod = typeof(JToken).GetMethods().First(x => x.Name == "op_Explicit" && x.ReturnType == node.Type);
-        //        return
-        //            Convert(
-        //                    Property(_pushedCall, typeof(JObject).GetProperty("Item", new[] { typeof(string) }),
-        //                    Constant(isOutput ? "output" : "input")
-        //                ),
-        //                node.Type,
-        //                castMethod);
-        //    }
-        //    return base.VisitParameter(node);
-        //}
+        var checkUseParamter = new GenericVisitor();
+        var paramtersUseCount = 0;
+        var otherVars = 0;
+        //checkUseParamter.StopWhen(_ => paramtersUseCount != -1);
+        checkUseParamter.OnVisitParameter(param =>
+        {
+            if (param == _matchExpression.Parameters[0] || param == _matchExpression.Parameters[1])
+                paramtersUseCount += 1;
+            if (param == _matchExpression.Parameters[2] || param == _matchExpression.Parameters[3])
+                otherVars += 1;
+            return param;
+        });
+        checkUseParamter.OnVisitConstant(constant =>
+        {
+            if (constant.Type.Name.StartsWith("<>c__DisplayClass"))
+                otherVars += 1;
+            return constant;
+        });
+        checkUseParamter.Visit(expression);
+        bool UseInputOutputOnly = paramtersUseCount > 0 && otherVars == 0;
+        inOutUseCount = paramtersUseCount;
+        return UseInputOutputOnly;
     }
-
-
-    private Expression AccesUsingJToken(Expression propPathExpression, ParameterExpression pushedCall)
+    private bool IsSimpleLogicalExpression(BinaryExpression node)
     {
-        var useJobject = new GenericVisitor();
-        //useJobject.OnVisitParameter(VisitParameter);
-        //useJobject.OnVisitMember(VisitMember);
-        useJobject.AddVisitor(x => x is ParameterExpression || x is MemberExpression, VisitParameterOrMember);
-        return useJobject.Visit(propPathExpression);
-
-        Expression VisitParameterOrMember(Expression node)
+        var _booleanLogicalOps = new ExpressionType[]
+           {
+                ExpressionType.AndAlso,
+                ExpressionType.OrElse,
+                ExpressionType.Equal,
+                ExpressionType.NotEqual,
+                ExpressionType.LessThan,
+                ExpressionType.LessThanOrEqual,
+                ExpressionType.GreaterThan,
+                ExpressionType.GreaterThanOrEqual,
+                ExpressionType.And,
+                ExpressionType.Or,
+                ExpressionType.ExclusiveOr,
+           };
+        var logicalOpsCount = 0;
+        var countLogicalOpsVisitor = new GenericVisitor();
+        countLogicalOpsVisitor.OnVisitBinary(binaryNode =>
         {
-            var check = IsInputOrOutput(node);
-            if (check.IsInput || check.IsOutput)
-                return
-                Convert(
-                    Call(
-                        Call(
-                            pushedCall,
-                            typeof(JToken).GetMethod("SelectToken", new[] { typeof(string) }),
-                            Constant(node.ToString())
-                        ),
-                        typeof(JToken).GetMethod("ToObject", 0, new[] { typeof(Type) }),
-                        Constant(
-                            node.Type,
-                            typeof(Type)
-                        )
-                    ),
-                    node.Type
-                );
-            return base.Visit(node);
-
-            //Call(
-            //           typeof(JsonConvert).GetMethod("DeserializeObject", 0, new[] { typeof(string), typeof(Type) }),
-            //           Constant(json),
-            //           Constant(result.GetType(), typeof(Type))
-            //)
-        }
-
-        (bool IsInput, bool IsOutput) IsInputOrOutput(Expression expression)
-        {
-            var checkUseParamter = new GenericVisitor();
-            var isInput = false;
-            var isOutput = false;
-            checkUseParamter.OnVisitParameter(param =>
-            {
-                isInput = param == _matchExpression.Parameters[0] || isInput;
-                isOutput = param == _matchExpression.Parameters[1] || isOutput;
-                return param;
-            });
-            checkUseParamter.Visit(expression);
-            return (isInput, isOutput);
-        }
+            if (_booleanLogicalOps.Contains(binaryNode.NodeType) && binaryNode.Type == typeof(bool))
+                logicalOpsCount++;
+            return binaryNode;
+        });
+        countLogicalOpsVisitor.Visit(node);
+        return logicalOpsCount == 1 && node.Type == typeof(bool);
     }
 }

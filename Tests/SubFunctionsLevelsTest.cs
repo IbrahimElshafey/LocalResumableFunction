@@ -18,36 +18,38 @@ public class SubFunctionsLevelsTest
         Assert.Empty(logs);
 
         var instance = new FunctionLevels();
-        instance.Method1("m1");
-        instance.Method2("m2");
-        instance.Method3("m3");
+        instance.Method1("m1_1");
+        instance.Method4("m4_1");
+        instance.Method2("m2_1");
+        instance.Method3("m3_1");
 
         logs = await test.GetLogs();
         Assert.Empty(logs);
         var pushedCalls = await test.GetPushedCalls();
-        Assert.Equal(3, pushedCalls.Count);
+        Assert.Equal(4, pushedCalls.Count);
         var instances = await test.GetInstances<SubFunctionsTest.SubFunctions>(true);
         Assert.Equal(2, instances.Count);
         Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
         var waits = await test.GetWaits();
-        Assert.Equal(6, waits.Count);
-        Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
+        Assert.Equal(7, waits.Count);
+        Assert.Equal(7, waits.Count(x => x.Status == WaitStatus.Completed));
 
 
-        instance.Method1("m4");
-        instance.Method2("m5");
-        instance.Method3("m6");
+        instance.Method1("m1_2");
+        instance.Method4("m4_2");
+        instance.Method2("m2_2");
+        instance.Method3("m3_2");
 
         logs = await test.GetLogs();
         Assert.Empty(logs);
         pushedCalls = await test.GetPushedCalls();
-        Assert.Equal(6, pushedCalls.Count);
+        Assert.Equal(8, pushedCalls.Count);
         instances = await test.GetInstances<SubFunctionsTest.SubFunctions>(true);
         Assert.Equal(3, instances.Count);
         Assert.Equal(2, instances.Count(x => x.Status == FunctionStatus.Completed));
         waits = await test.GetWaits();
-        Assert.Equal(12, waits.Count);
-        Assert.Equal(12, waits.Count(x => x.Status == WaitStatus.Completed));
+        Assert.Equal(14, waits.Count);
+        Assert.Equal(14, waits.Count(x => x.Status == WaitStatus.Completed));
     }
 
     public class FunctionLevels : ResumableFunctionsContainer
@@ -62,7 +64,23 @@ public class SubFunctionsLevelsTest
         [SubResumableFunction("SubFunction1")]
         public async IAsyncEnumerable<Wait> SubFunction1()
         {
-            yield return Wait<string, string>(Method1, "M1").MatchAll();
+            int x = 10;
+            yield return Wait<string, string>(Method1, "M1")
+                .MatchAll()
+                .AfterMatch((_, _) =>
+                {
+                    if (x != 10)
+                        throw new Exception("Closure in sub function problem.");
+                });
+
+            x += 10;
+            yield return Wait<string, string>(Method4, "M4")
+                .MatchAll()
+                .AfterMatch((_, _) =>
+                {
+                    if (x != 20)
+                        throw new Exception("Closure restore in sub function problem.");
+                });
             yield return Wait("Wait sub function2", SubFunction2);
         }
 
@@ -82,5 +100,6 @@ public class SubFunctionsLevelsTest
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
         [PushCall("Method3")] public string Method3(string input) => input + "M3";
+        [PushCall("Method4")] public string Method4(string input) => input + "M4";
     }
 }

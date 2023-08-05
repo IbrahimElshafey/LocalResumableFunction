@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using MessagePack;
 using ResumableFunctions.Handler.InOuts;
 
@@ -10,34 +11,47 @@ public abstract partial class ResumableFunctionsContainer : IObjectWithLog
     /// <summary>
     ///     Go back to code after the wait.
     /// </summary>
-    protected ReplayRequest GoBackAfter(string name)
+    protected ReplayRequest GoBackAfter(
+        string name,
+        [CallerLineNumber] int inCodeLine = 0,
+        [CallerMemberName] string callerName = "")
     {
         return new ReplayRequest
         {
             Name = name,
             ReplayType = ReplayType.GoAfter,
             CurrentFunction = this,
+            InCodeLine = inCodeLine,
+            CallerName = callerName
         };
     }
 
     /// <summary>
     ///     Go back to code before the wait and re-wait it again.
     /// </summary>
-    protected ReplayRequest GoBackBefore(string name)
+    protected ReplayRequest GoBackBefore(
+        string name,
+        [CallerLineNumber] int inCodeLine = 0,
+        [CallerMemberName] string callerName = "")
     {
         return new ReplayRequest
         {
             Name = name,
             ReplayType = ReplayType.GoBefore,
-            CurrentFunction = this
+            CurrentFunction = this,
+            InCodeLine = inCodeLine,
+            CallerName = callerName
         };
     }
 
     /// <summary>
     ///     Go back to code before method wait and re-wait it again with new match condition.
     /// </summary>
-    protected ReplayRequest GoBackBefore<TInput, TOutput>(string name,
-        Expression<Func<TInput, TOutput, bool>> newMatchExpression)
+    protected ReplayRequest GoBackBefore<TInput, TOutput>(
+        string name,
+        Expression<Func<TInput, TOutput, bool>> newMatchExpression,
+        [CallerLineNumber] int inCodeLine = 0,
+        [CallerMemberName] string callerName = "")
     {
         return new ReplayRequest
         {
@@ -45,27 +59,37 @@ public abstract partial class ResumableFunctionsContainer : IObjectWithLog
             ReplayType = ReplayType.GoBeforeWithNewMatch,
             MatchExpression = newMatchExpression,
             CurrentFunction = this,
+            InCodeLine = inCodeLine,
+            CallerName = callerName
         };
     }
 
     /// <summary>
     ///     Go back to wait and re-wait it again.
     /// </summary>
-    protected ReplayRequest GoBackTo(string name)
+    protected ReplayRequest GoBackTo(
+        string name,
+        [CallerLineNumber] int inCodeLine = 0,
+        [CallerMemberName] string callerName = "")
     {
         return new ReplayRequest
         {
             Name = name,
             ReplayType = ReplayType.GoTo,
-            CurrentFunction = this
+            CurrentFunction = this,
+            InCodeLine = inCodeLine,
+            CallerName = callerName
         };
     }
 
     /// <summary>
     ///     Go back to wait and re-wait it again with new match condition.
     /// </summary>
-    protected ReplayRequest GoBackTo<TInput, TOutput>(string name,
-        Expression<Func<TInput, TOutput, bool>> newMatchExpression)
+    protected ReplayRequest GoBackTo<TInput, TOutput>(
+        string name,
+        Expression<Func<TInput, TOutput, bool>> newMatchExpression,
+        [CallerLineNumber] int inCodeLine = 0,
+        [CallerMemberName] string callerName = "")
     {
         return new ReplayRequest
         {
@@ -73,6 +97,8 @@ public abstract partial class ResumableFunctionsContainer : IObjectWithLog
             ReplayType = ReplayType.GoToWithNewMatch,
             MatchExpression = newMatchExpression,
             CurrentFunction = this,
+            InCodeLine = inCodeLine,
+            CallerName = callerName
         };
     }
 }

@@ -13,15 +13,28 @@
                         <a class="w3-text-blue" target="_blank" href="~/RF/PushedCall/Details?pushedCallId=@Model.CallId">By Call</a>
                     }
                 </td>
-
             </tr>
+            @if (Model.Closure is not null)
+            {
+                <tr>
+                    <td><b class="w3-text-blue-gray">Locals: </b></td>
+                    <td>
+                        <pre class="JsonObject">
+                            @Model.Closure
+                            </pre>
+                    </td>
+                </tr>
+            }
             @if (Model.Template != null)
             {
                 @Html.DisplayFor(x => x.Template, "TemplateDisplay")
-                <tr>
-                    <td><b class="w3-text-blue-gray">Mandatory Part Values: </b></td>
-                    <td>@Model.MandatoryPart</td>
-                </tr>
+                @if (!string.IsNullOrWhiteSpace(Model.MandatoryPart))
+                {
+                    <tr>
+                        <td><b class="w3-text-blue-gray">Mandatory Part Values: </b></td>
+                        <td>@Model.MandatoryPart</td>
+                    </tr>
+                }
             }
             <tr>
                 <td colspan="2">
@@ -34,7 +47,6 @@
                     }
                 </td>
 
-               
             </tr>
         </table>
     </div>

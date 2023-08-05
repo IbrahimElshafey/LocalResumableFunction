@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using FastExpressionCompiler;
 using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.InOuts;
@@ -8,7 +9,11 @@ namespace ResumableFunctions.Handler;
 
 public abstract partial class ResumableFunctionsContainer
 {
-    protected FunctionWait Wait(string name, Func<IAsyncEnumerable<Wait>> function)
+    protected FunctionWait Wait(
+        string name,
+        Func<IAsyncEnumerable<Wait>> function,
+        [CallerLineNumber] int inCodeLine = 0,
+        [CallerMemberName] string callerName = "")
     {
         return new FunctionWait
         {
@@ -16,6 +21,8 @@ public abstract partial class ResumableFunctionsContainer
             WaitType = WaitType.FunctionWait,
             FunctionInfo = function.Method,
             CurrentFunction = this,
+            CallerName = callerName,
+            InCodeLine = inCodeLine,
         };
     }
 

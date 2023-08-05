@@ -71,7 +71,7 @@ public class ReplayTests
         Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
 
     }
-    
+
     [Fact]
     public async Task GoBeforeWithNewMatch_Test()
     {
@@ -272,13 +272,15 @@ public class ReplayTests
                 Wait<string, string>(Method1, "M1");
 
             Counter += 10;
+            var x = 5;
             yield return
                 Wait<string, string>(Method2, "M2").MatchAll();
 
             Counter += 3;
+            x *= 2;
 
             if (Counter < 16)
-                yield return GoBackTo<string, string>("M2", (input, output) => input == "Back");
+                yield return GoBackTo<string, string>("M2", (input, output) => input == "Back" && x == 10);
 
             await Task.Delay(100);
         }

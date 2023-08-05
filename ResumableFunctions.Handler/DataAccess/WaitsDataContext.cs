@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;
@@ -26,7 +29,7 @@ internal sealed class WaitsDataContext : DbContext
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error when call `Database.EnsureCreated()` for `WaitsDataContext`");
+            _logger.LogError(ex, "Error when call [Database.EnsureCreated()] for [WaitsDataContext]");
         }
     }
 
@@ -112,6 +115,13 @@ internal sealed class WaitsDataContext : DbContext
             .HasFilter($"{nameof(Wait.Status)} = {(int)WaitStatus.Waiting}")
             .HasDatabaseName("Index_ActiveWaits");
 
+        waitBuilder
+            .Property(x => x.Closure)
+            .HasConversion(
+            x => JsonConvert.SerializeObject(x,
+                new JsonSerializerSettings { ContractResolver = IgnoreThisField.Instance }),
+            y => JsonConvert.DeserializeObject(y));
+
         var methodWaitBuilder = modelBuilder.Entity<MethodWait>();
         methodWaitBuilder
           .Property(x => x.MethodToWaitId)
@@ -121,8 +131,8 @@ internal sealed class WaitsDataContext : DbContext
           .HasColumnName(nameof(MethodWait.CallId));
 
         modelBuilder.Entity<WaitsGroup>()
-           .Property(mw => mw.GroupMatchExpressionValue)
-           .HasColumnName(nameof(WaitsGroup.GroupMatchExpressionValue));
+           .Property(mw => mw.GroupMatchFuncName)
+           .HasColumnName(nameof(WaitsGroup.GroupMatchFuncName));
 
         modelBuilder.Ignore<ReplayRequest>();
         modelBuilder.Ignore<TimeWait>();
@@ -134,8 +144,6 @@ internal sealed class WaitsDataContext : DbContext
         waitTemplateBuilder.Property(x => x.MatchExpressionValue);
         waitTemplateBuilder.Property(x => x.CallMandatoryPartExpressionValue);
         waitTemplateBuilder.Property(x => x.InstanceMandatoryPartExpressionValue);
-        waitTemplateBuilder.Property(x => x.CancelMethodDataValue);
-        waitTemplateBuilder.Property(x => x.SetDataCallValue);
         waitTemplateBuilder
            .HasIndex(x => x.IsActive)
            .HasFilter($"{nameof(WaitTemplate.IsActive)} = 1")
@@ -190,13 +198,18 @@ internal sealed class WaitsDataContext : DbContext
             .IsUnique();
     }
 
-    private void ConfigureResumableFunctionState(EntityTypeBuilder<ResumableFunctionState> entityTypeBuilder)
+    private void ConfigureResumableFunctionState(EntityTypeBuilder<ResumableFunctionState> stateTypeBuilder)
     {
-        entityTypeBuilder
+        stateTypeBuilder
             .HasMany(x => x.Waits)
             .WithOne(wait => wait.FunctionState)
             .HasForeignKey(x => x.FunctionStateId)
             .HasConstraintName("FK_WaitsForFunctionState");
+        //stateTypeBuilder
+        //    .Property(x => x.Closures)
+        //    .HasConversion(
+        //    x => JsonConvert.SerializeObject(x),
+        //    y => JsonConvert.DeserializeObject<Closures>(y));
     }
 
 
@@ -265,7 +278,7 @@ internal sealed class WaitsDataContext : DbContext
         {
             case > 0 when entityInService.ServiceId != _settings.CurrentServiceId:
                 _logger.LogError(
-                    $"Try to change `ServiceId` for entity `{entityInService.GetType().Name}:{entityInService.Id}`" +
+                    $"Try to change [ServiceId] for entity [{entityInService.GetType().Name}:{entityInService.Id}]" +
                     $" from {entityInService.ServiceId} to {_settings.CurrentServiceId}");
                 break;
             case > 0:

@@ -2,8 +2,8 @@
 using Medallion.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
-using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Helpers
 {
@@ -54,7 +54,7 @@ namespace ResumableFunctions.Handler.Helpers
                     $"\nSource File Path: {sourceFilePath}\n" +
                     $"Line Number: {sourceLineNumber}";
                 errorMessage = errorMessage == null ?
-                    $"Error when execute `{methodName}`\n{codeInfo}" :
+                    $"Error when execute [{methodName}]\n{codeInfo}" :
                     $"{errorMessage}\n{codeInfo}";
                 _logger.LogError(ex, errorMessage);
                 throw;

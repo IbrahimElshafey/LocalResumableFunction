@@ -19,52 +19,47 @@ namespace Tests
             instance.Method1("1");
             instance.Method1("1");
             instance.Method1("1");
-            instance.Method2("2");
-            instance.Method2("2");
-            instance.Method2("2");
+            instance.Method1("2");
+            instance.Method1("2");
+            instance.Method1("2");
             instance.Method1("#");
-            instance.Method2("#");
             instance.Method1("#");
-            instance.Method2("#");
             instance.Method1("#");
-            instance.Method2("#");
             instance.Method1("#");
-            instance.Method2("#");
             instance.Method1("#");
-            instance.Method2("#");
             instance.Method1("#");
-            instance.Method2("#");
             instance.Method1("#");
-            instance.Method2("#");
             instance.Method1("#");
-            instance.Method2("#");
             instance.Method1("#");
-            instance.Method2("#");
+            instance.Method1("#");
+            instance.Method1("#");
+            instance.Method1("#");
+            instance.Method1("#");
+            instance.Method1("#");
+            instance.Method1("#");
+            instance.Method1("#");
+            instance.Method1("#");
+            instance.Method1("#");
+            Assert.Empty(await test.RoundCheck(24, 24, 24));
         }
 
         public class Test : ResumableFunctionsContainer
         {
-            private int _dynamicProp;
-
-            public Test()
-            {
-                _dynamicProp = Random.Shared.Next(2, 100);
-            }
-
             [ResumableFunctionEntryPoint("DeleteUnusedTemplateSiblingsTest")]
-            public async IAsyncEnumerable<Wait> ThreeMethodsSequence()
+            public async IAsyncEnumerable<Wait> DeleteUnusedTemplateSiblingsTest()
             {
-
+                var x = 10;
+                var _dynamicProp = Random.Shared.Next(2, 100);
                 yield return
                     Wait<string, string>(Method1, "M1")
-                    .MatchIf((input, output) => LocalValue(_dynamicProp) > 1);
-                yield return Wait<string, string>(Method2, "M2")
-                    .MatchIf((input, output) => LocalValue(_dynamicProp) > 1);
+                    .MatchIf((input, output) => _dynamicProp > 1 && x == 10);
+                //.MatchIf((input, output) => _dynamicProp > 1);
                 await Task.Delay(100);
+                
+                Console.WriteLine(x);
             }
 
             [PushCall("Method1")] public string Method1(string input) => input + "M1";
-            [PushCall("Method2")] public string Method2(string input) => input + "M2";
         }
     }
 }

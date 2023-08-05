@@ -5,15 +5,18 @@
     var template = new TemplateDisplay(Model);
 }
 
-<tr>
-    <td><b class="w3-text-blue-gray">Match Expression: </b></td>
-    <td>@template.MatchExpression</td>
-</tr>
-<tr>
-    <td><b class="w3-text-blue-gray">Set Data: </b></td>
-    <td><span>@Html.Raw(template.SetDataExpression)</span></td>
-</tr>
-<tr>
-    <td><b class="w3-text-blue-gray">Call Mandatory Parts: </b></td>
-    <td>@template.MandatoryPartExpression</td>
-</tr>
+@if (!string.IsNullOrWhiteSpace(template.MatchExpression))
+{
+    <tr>
+        <td><b class="w3-text-blue-gray">Match Expression: </b></td>
+        <td>@template.MatchExpression</td>
+    </tr>
+}
+@if (!string.IsNullOrWhiteSpace(template.MandatoryPartExpression))
+{
+    <tr>
+        <td><b class="w3-text-blue-gray">Call Mandatory Parts: </b></td>
+        <td>@template.MandatoryPartExpression</td>
+    </tr>
+}
+

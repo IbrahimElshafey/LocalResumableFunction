@@ -4,7 +4,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        switch (13)
+        switch (12)
         {
             case 1:
                 TestTreeCascadeAction(); break;
@@ -38,6 +38,9 @@ internal class Program
                 break;
             case 13:
                 new SerializeActionCall().Run();
+                break;
+            case 14:
+                new LambdaExamples().Run();
                 break;
         }
 

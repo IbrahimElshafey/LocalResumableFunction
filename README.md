@@ -17,7 +17,7 @@
 # What Are Resumable Functions?
 A resumable function is a function that can be suspended and resumed at a later point in time. This is in contrast to traditional functions, which must be executed to completion before they can return.
 
-In the example below each `yield return` is a place for pause/resume function execution (explained later).
+In the example below each [yield return] is a place for pause/resume function execution (explained later).
 
 **Example** (this is not a pseudocode it's debuggable code):
 ``` C#

@@ -63,12 +63,11 @@ internal partial class WaitsRepo
     {
         var methodId = await _methodIdsRepo.GetId(methodWait);
         var funcId = methodWait.RequestedByFunctionId;
-        var waitExpressionsHash = new ExpressionsHashCalculator(methodWait.MatchExpression, methodWait.SetDataCall, methodWait.CancelMethodData);
-        var expressionsHash = waitExpressionsHash.Hash;
-        await SetWaitTemplate();
+        var expressionsHash = new ExpressionsHashCalculator(methodWait.MatchExpression, methodWait.AfterMatchAction, methodWait.CancelMethodAction).GetHash();
         methodWait.MethodToWaitId = methodId.MethodId;
         methodWait.MethodGroupToWaitId = methodId.GroupId;
 
+        await SetWaitTemplate();
         await AddWait(methodWait);
 
         async Task SetWaitTemplate()
@@ -78,9 +77,7 @@ internal partial class WaitsRepo
             {
                 waitTemplate =
                     await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, methodId.GroupId) ??
-                    await _waitTemplatesRepo.AddNewTemplate(
-                        waitExpressionsHash, methodWait.CurrentFunction, funcId,
-                        methodId.GroupId, methodId.MethodId, methodWait.InCodeLine);
+                    await _waitTemplatesRepo.AddNewTemplate(expressionsHash, methodWait);
             }
             else
             {
@@ -88,13 +85,6 @@ internal partial class WaitsRepo
             }
             methodWait.TemplateId = waitTemplate.Id;
             methodWait.Template = waitTemplate;
-            if (waitTemplate.InstanceMandatoryPartExpression != null)
-            {
-                var partIdFunc = waitTemplate.InstanceMandatoryPartExpression.CompileFast();
-                var parts = (object[])partIdFunc.DynamicInvoke(methodWait.CurrentFunction);
-                if (parts?.Any() == true)
-                    methodWait.MandatoryPart = string.Join("#", parts);
-            }
         }
     }
 
@@ -111,6 +101,8 @@ internal partial class WaitsRepo
             childWait.StateAfterWait = manyWaits.StateAfterWait;
             childWait.ParentWait = manyWaits;
             childWait.CurrentFunction = manyWaits.CurrentFunction;
+            //if (childWait.Closure == null)
+            //    childWait.SetClosure(manyWaits.Closure);
             await SaveWait(childWait);
         }
 
@@ -159,7 +151,7 @@ internal partial class WaitsRepo
         {
             TimeMatchId = timeWait.UniqueMatchId,
             RequestedByFunctionId = timeWait.RequestedByFunctionId,
-            Description = $"`{timeWait.Name}` in function `{timeWait.RequestedByFunction.RF_MethodUrn}:{timeWait.FunctionState.Id}`"
+            Description = $"[{timeWait.Name}] in function [{timeWait.RequestedByFunction.RF_MethodUrn}:{timeWait.FunctionState.Id}]"
         };
         if (!timeWait.IgnoreJobCreation)
             timeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
@@ -202,6 +194,6 @@ internal partial class WaitsRepo
 
     private void SetNodeType(Wait wait)
     {
-        wait.ActionOnWaitsTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
+        wait.ActionOnChildrenTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
     }
 }

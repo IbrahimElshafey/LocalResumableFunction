@@ -108,26 +108,31 @@ namespace ResumableFunctions.Handler.Testing
                 if (scanner.ValidateResumableFunctionSignature(resumableFunctionInfo, serviceData))
                     await scanner.RegisterResumableFunction(resumableFunctionInfo, serviceData);
                 else
-                    serviceData.AddError($"Can't register resumable function `{resumableFunctionInfo.GetFullName()}`.", StatusCodes.MethodValidation, null);
+                    serviceData.AddError($"Can't register resumable function [{resumableFunctionInfo.GetFullName()}].", StatusCodes.MethodValidation, null);
             }
         }
 
-        public async Task<string> RoundCheck(int expectedPushedCallsCount, int waitsCount, int completedInstancesCount)
+        public async Task<string> RoundCheck(
+            int expectedPushedCallsCount,
+            int waitsCount,
+            int completedInstancesCount)
         {
 
             if (await HasErrors())
-                return "Has Log Errors";
+            { 
+                return Context.Logs.First(x => x.Type == LogType.Error).Message;
+            }
 
             int callsCount = await GetPushedCallsCount();
             if (callsCount != expectedPushedCallsCount)
-                return $"Pushed calls count `{callsCount}` not equal `{expectedPushedCallsCount}`";
+                return $"Pushed calls count [{callsCount}] not equal [{expectedPushedCallsCount}]";
 
             if (waitsCount != -1 && await GetWaitsCount() is int existWaitsCount && existWaitsCount != waitsCount)
-                return $"Waits count `{existWaitsCount}` not equal `{waitsCount}`";
+                return $"Waits count [{existWaitsCount}] not equal [{waitsCount}]";
 
             int instnacesCount = await GetCompletedInstancesCount();
             if (instnacesCount != completedInstancesCount)
-                return $"Completed instances `{instnacesCount}` count not equal `{completedInstancesCount}`";
+                return $"Completed instances [{instnacesCount}] count not equal [{completedInstancesCount}]";
 
             return string.Empty;
         }

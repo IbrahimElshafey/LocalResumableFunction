@@ -17,6 +17,7 @@ public class HangfireActivator : JobActivator
 
     public static object GetInstance(Type type)
     {
+        if (serviceProvider == null) return null;
         var newServiceProvider = serviceProvider.CreateScope().ServiceProvider;
         return newServiceProvider.GetService(type) ??
             ActivatorUtilities.CreateInstance(newServiceProvider, type);

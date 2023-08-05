@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using FastExpressionCompiler;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
@@ -9,20 +10,13 @@ namespace ResumableFunctions.Handler.InOuts;
 
 public class WaitsGroup : Wait
 {
-    private LambdaExpression _countExpression;
 
     public WaitsGroup()
     {
-        WaitType = WaitType.GroupWaitAll;   
+        WaitType = WaitType.GroupWaitAll;
     }
 
-    [NotMapped]
-    public LambdaExpression GroupMatchExpression
-    {
-        get => _countExpression ?? GetGroupMatchExpression();
-        internal set => _countExpression = value;
-    }
-    internal string GroupMatchExpressionValue { get; set; }
+    public string GroupMatchFuncName { get; internal set; }
     public int CompletedCount => ChildWaits?.Count(x => x.Status == WaitStatus.Completed) ?? 0;
 
     public override bool IsCompleted()
@@ -38,9 +32,8 @@ public class WaitsGroup : Wait
                 isFinished = ChildWaits?.Any(x => x.Status == WaitStatus.Completed) is true;
                 break;
 
-            case WaitType.GroupWaitWithExpression when GroupMatchExpression != null:
-                var matchCompiled = (Func<WaitsGroup, bool>)GroupMatchExpression.CompileFast();
-                var isCompleted = matchCompiled(this);
+            case WaitType.GroupWaitWithExpression when GroupMatchFuncName != null:
+                var isCompleted = (bool)CallMethodByName(GroupMatchFuncName, this); ;
                 Status = isCompleted ? WaitStatus.Completed : Status;
                 return isCompleted;
 
@@ -52,32 +45,25 @@ public class WaitsGroup : Wait
     }
 
 
-
-    private LambdaExpression GetGroupMatchExpression()
-    {
-        if (GroupMatchExpressionValue != null)
-        {
-            var serializer = new ExpressionSerializer();
-            return (LambdaExpression)serializer.Deserialize(GroupMatchExpressionValue).ToExpression();
-        }
-        return null;
-    }
-
-    public Wait When(Expression<Func<WaitsGroup, bool>> matchCountFilter)
+    public Wait MatchIf(
+        Func<WaitsGroup, bool> groupMatchFilter,
+        [CallerLineNumber] int inCodeLine = 0,
+        [CallerMemberName] string callerName = "")
     {
         WaitType = WaitType.GroupWaitWithExpression;
-        var serializer = new ExpressionSerializer();
-        GroupMatchExpression = matchCountFilter;
-        GroupMatchExpressionValue = serializer.Serialize(GroupMatchExpression.ToExpressionSlim());
+        InCodeLine = inCodeLine;
+        CallerName = callerName;
+        GroupMatchFuncName = ValidateMethod(groupMatchFilter, nameof(GroupMatchFuncName));
         return this;
     }
-    public Wait All()
+
+    public Wait MatchAll()
     {
         WaitType = WaitType.GroupWaitAll;
         return this;
     }
 
-    public Wait First()
+    public Wait MatchAny()
     {
         WaitType = WaitType.GroupWaitFirst;
         return this;

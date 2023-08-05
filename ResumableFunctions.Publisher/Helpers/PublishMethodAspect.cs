@@ -53,10 +53,10 @@ namespace ResumableFunctions.Publisher.Helpers
             if (args.Length > 0)
                 _methodCall.Input = args[0];
 
-            //Console.WriteLine($"Before executing method `{name}` with input `{args.Aggregate((x,y)=>$"{x},{y}")}` and attribute `{pushResultAttribute}`");
-            //Console.WriteLine($"Instance is: `{instance}`");
-            //Console.WriteLine($"Return type is: `{retType.FullName}`");
-            //Console.WriteLine($"Metadata is: `{metadata.Name}` of type `{metadata.GetType().Name}`");
+            //Console.WriteLine($"Before executing method [{name}] with input [{args.Aggregate((x,y)=>$"{x},{y}")}] and attribute [{pushResultAttribute}]");
+            //Console.WriteLine($"Instance is: [{instance}]");
+            //Console.WriteLine($"Return type is: [{retType.FullName}]");
+            //Console.WriteLine($"Metadata is: [{metadata.Name}] of type [{metadata.GetType().Name}]");
         }
 
         [Advice(Kind.After)]

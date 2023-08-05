@@ -50,7 +50,7 @@ namespace ResumableFunctions.Handler.Core
             }
             catch (Exception ex)
             {
-                var error = $"Can't handle pushed call `{pushedCall}`";
+                var error = $"Can't handle pushed call [{pushedCall}]";
                 await _serviceRepo.AddErrorLog(ex, error, StatusCodes.PushedCall);
                 throw new Exception(error, ex);
             }
@@ -64,8 +64,8 @@ namespace ResumableFunctions.Handler.Core
                 {
                     await _serviceRepo.AddErrorLog(
                         null,
-                        $"Pushed call target service `{serviceName}` but the current service is `{currentServiceName}`" +
-                        $"\nPushed call was `{pushedCall}`", 
+                        $"Pushed call target service [{serviceName}] but the current service is [{currentServiceName}]" +
+                        $"\nPushed call was [{pushedCall}]", 
                         StatusCodes.PushedCall);
                     return -1;
                 }
@@ -75,14 +75,14 @@ namespace ResumableFunctions.Handler.Core
                     return await PushCall(pushedCall);
 
                 await _serviceRepo.AddLog(
-                    $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}].\nPushed call was `{pushedCall}`",
+                    $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}].\nPushed call was [{pushedCall}]",
                     LogType.Warning,
                     StatusCodes.PushedCall);
                 return -1;
             }
             catch (Exception ex)
             {
-                var error = $"Can't handle external pushed call `{pushedCall}`";
+                var error = $"Can't handle external pushed call [{pushedCall}]";
                 await _serviceRepo.AddErrorLog(ex, error, StatusCodes.PushedCall);
                 throw new Exception(error, ex);
             }

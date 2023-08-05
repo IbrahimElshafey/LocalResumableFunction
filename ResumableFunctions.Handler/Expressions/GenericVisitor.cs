@@ -5,6 +5,8 @@ namespace ResumableFunctions.Handler.Expressions;
 public class GenericVisitor : ExpressionVisitor
 {
     private readonly List<VisitNodeFunction> _visitors = new();
+    private Func<Expression, bool> _stopCondition;
+
     public void AddVisitor(
         Func<Expression, bool> whenExpressionMatch,
         Func<Expression, Expression> visitFunction)
@@ -16,6 +18,7 @@ public class GenericVisitor : ExpressionVisitor
 
     public override Expression Visit(Expression node)
     {
+        if (_stopCondition?.Invoke(node) is true) return node;
         foreach (var visitor in _visitors)
         {
             if (visitor.WhenExpressionMatch(node))
@@ -69,6 +72,11 @@ public class GenericVisitor : ExpressionVisitor
           new VisitNodeFunction(
              ex => ex is MethodCallExpression,
               ex => visitCall((MethodCallExpression)ex)));
+    }
+
+    internal void StopWhen(Func<Expression,bool> stopCondition)
+    {
+        _stopCondition = stopCondition;
     }
 
     private class VisitNodeFunction

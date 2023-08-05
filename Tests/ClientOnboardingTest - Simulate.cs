@@ -14,7 +14,7 @@ namespace Tests
             using var test = new TestShell(
                 nameof(Test_ClientOnBoarding_SimulateCalls),
                 typeof(ClientOnboardingService),
-                typeof(ClientOnboardingWorkflow));
+                typeof(ClientOnboardingWorkflowPublic));
 
             test.RegisteredServices.AddScoped<IClientOnboardingService, ClientOnboardingServiceFake>();
 
@@ -29,14 +29,14 @@ namespace Tests
 
             await test.SimulateMethodCall<ClientOnboardingService>(
                 x => x.OwnerApproveClient,
-                new OwnerApproveClientInput { TaskId = instance.OwnerTaskId.Id, Decision = true },
+                new OwnerApproveClientInput { TaskId = instance.OwnerTaskId, Decision = true },
                 new OwnerApproveClientResult { OwnerApprovalId = 9000 });
             instance = await RoundCheck(test, 2);
 
             await test.SimulateMethodCall<ClientOnboardingService>(
                x => x.SendMeetingResult,
-               instance.ClientMeetingId.MeetingId,
-               new MeetingResult { MeetingId = instance.ClientMeetingId.MeetingId, MeetingResultId = 155, ClientAcceptTheDeal = true, ClientRejectTheDeal = false });
+               instance.ClientMeetingId,
+               new MeetingResult { MeetingId = instance.ClientMeetingId, MeetingResultId = 155, ClientAcceptTheDeal = true, ClientRejectTheDeal = false });
             instance = await RoundCheck(test, 3, true);
         }
     }

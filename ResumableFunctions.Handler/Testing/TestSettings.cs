@@ -2,6 +2,7 @@
 using Medallion.Threading;
 using Medallion.Threading.WaitHandles;
 using Microsoft.EntityFrameworkCore;
+using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.Testing
@@ -36,6 +37,6 @@ namespace ResumableFunctions.Handler.Testing
             new WaitHandleDistributedSynchronizationProvider();
 
         public CleanDatabaseSettings CleanDbSettings => new CleanDatabaseSettings();
-        public WaitStatus WaitStatusIfProcessingError { get; set; } = WaitStatus.Waiting;
+        public WaitStatus WaitStatusIfProcessingError { get; set; } = WaitStatus.InError;
     }
 }

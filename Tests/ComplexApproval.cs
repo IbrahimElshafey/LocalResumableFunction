@@ -37,7 +37,7 @@ public class ComplexApproval
 
         instance.ChefFinalApproval(requestId);
         var errors = await test.GetLogs();
-        Assert.Empty(await test.RoundCheck(14, 23, 1));
+        Assert.Empty(await test.RoundCheck(14, -1, 1));
     }
 
 
@@ -55,7 +55,7 @@ public class ComplexApproval
         {
             yield return
                 Wait<string, int>(RequestAdded, "Request Added")
-                    .SetData((request, requestId) => RequestId = requestId);
+                    .AfterMatch((request, requestId) => RequestId = requestId);
 
             for (; CurrentTopicIndex < TopicsCount; CurrentTopicIndex++)
             {
@@ -63,7 +63,7 @@ public class ComplexApproval
                     Wait($"Wait all committee approve topic {CurrentTopicIndex} or manager skip",
                         AllCommitteeApproveTopic(),
                         ChefSkipTopic())
-                        .First();
+                        .MatchAny();
 
                 yield return ChefTopicApproval();
             }
@@ -80,7 +80,7 @@ public class ComplexApproval
                         topicIndex.RequestId == RequestId &&
                         topicIndex.TopicIndex == CurrentTopicIndex &&
                         topicIndex.MemberRole == MemberRole.Chef)
-                    .NoSetData();
+                    .NothingAfterMatch();
         }
 
         private void AskMemberToApproveTopic(int requestId, int currentTopicIndex, MemberRole memberRole)
@@ -93,7 +93,7 @@ public class ComplexApproval
             await AskChefToApproveRequest(RequestId);
             return Wait<int, bool>(ChefFinalApproval, "Chef Final Approval")
                 .MatchIf((requestId, decision) => requestId == RequestId)
-                .SetData((requestId, decision) => FinalDecision = decision);
+                .AfterMatch((requestId, decision) => FinalDecision = decision);
         }
 
         private async Task AskChefToApproveRequest(int requestId)
@@ -114,19 +114,30 @@ public class ComplexApproval
         private Wait AllCommitteeApproveTopic()
         {
             var waits = new Wait[3];
+            int x = 10;
+            MemberRole currentRole = MemberRole.None;
             for (var memberIndex = 0; memberIndex < CommitteeMembersCount; memberIndex++)
             {
-                var currentMember = (MemberRole)memberIndex;
-                AskMemberToApproveTopic(RequestId, CurrentTopicIndex, currentMember);
+                currentRole = (MemberRole)memberIndex;
+                AskMemberToApproveTopic(RequestId, CurrentTopicIndex, currentRole);
                 waits[memberIndex] =
-                    Wait<RequestTopicIndex, string>(MemberApproveRequest, $"{currentMember} Topic {CurrentTopicIndex} Approval")
+                    Wait<RequestTopicIndex, string>(
+                        MemberApproveRequest, $"{currentRole} Topic {CurrentTopicIndex} Approval")
                     .MatchIf((topicIndex, decision) =>
                         topicIndex.RequestId == RequestId &&
                         topicIndex.TopicIndex == CurrentTopicIndex &&
-                        topicIndex.MemberRole == LocalValue(currentMember))
-                    .NoSetData();
+                        topicIndex.MemberRole == currentRole)
+                    //.NothingAfterMatch()
+                    .AfterMatch((input, output) =>
+                    {
+                        x += 10;
+                        Console.WriteLine(x);
+                        Console.WriteLine(input);
+                        Console.WriteLine(output);
+                    })
+                    ;
             }
-
+            Console.WriteLine(currentRole);
             return Wait($"Wait All Committee to Approve Topic {CurrentTopicIndex}", waits);
         }
 

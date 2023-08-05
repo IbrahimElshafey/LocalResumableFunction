@@ -1,9 +1,10 @@
 ﻿using Hangfire;
 using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
+using ResumableFunctions.Handler.InOuts;
 using System.Reflection;
 
-namespace ResumableFunctions.Handler.InOuts
+namespace ResumableFunctions.Handler.Core.Abstraction
 {
     public interface IResumableFunctionsSettings
     {

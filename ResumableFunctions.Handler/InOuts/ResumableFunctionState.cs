@@ -33,11 +33,19 @@ public class ResumableFunctionState : IObjectWithLog, IEntityWithUpdate, IEntity
     public string ConcurrencyToken { get; internal set; }
 
     public bool IsDeleted { get; internal set; }
+    //public Closures Closures { get; internal set; } = new();
 
     public void OnSave()
     {
         var converter = new BinaryToObjectConverter();
         StateObjectValue = converter.ConvertToBinary(StateObject);
+        //foreach (var wait in Waits)
+        //{
+        //    if (wait is MethodWait mw && mw.Closure != null)
+        //    {
+        //        Closures[mw.RequestedByFunctionId] = mw.Closure;
+        //    }
+        //}
     }
 
     public void LoadUnmappedProps(Type stateObjectType)

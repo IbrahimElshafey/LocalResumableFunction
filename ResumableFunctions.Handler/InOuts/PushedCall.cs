@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 using System.Reflection;
+using FastExpressionCompiler;
 using Newtonsoft.Json;
 using ResumableFunctions.Handler.Helpers;
 
@@ -17,6 +19,20 @@ public class PushedCall : IEntity, IOnSaveEntity
 
     public DateTime Created { get; internal set; }
     public string MethodUrn { get; internal set; }
+
+    internal string GetMandatoryPart(LambdaExpression CallMandatoryPartExpression)
+    {
+        if (CallMandatoryPartExpression != null)
+        {
+            var inputType = CallMandatoryPartExpression.Parameters[0].Type;
+            var outputType = CallMandatoryPartExpression.Parameters[1].Type;
+            var methodData = GetMethodData(inputType, outputType, DataValue);
+            var getMandatoryFunc = CallMandatoryPartExpression.CompileFast();
+            var parts = (object[])getMandatoryFunc.DynamicInvoke(methodData.Input, methodData.Output);
+            return string.Join("#", parts);
+        }
+        return null;
+    }
 
     public void OnSave()
     {
@@ -42,7 +58,7 @@ public class PushedCall : IEntity, IOnSaveEntity
         MethodData = converter.ConvertToObject<MethodData>(MethodDataValue);
     }
 
-    public static InputOutput GetMethodData(Type inputType, Type outputType, byte[] dataBytes)
+    private static InputOutput GetMethodData(Type inputType, Type outputType, byte[] dataBytes)
     {
         var converter = new BinaryToObjectConverter();
         var genericInputOutPut = typeof(GInputOutput<,>).MakeGenericType(inputType, outputType);

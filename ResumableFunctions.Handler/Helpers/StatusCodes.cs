@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -33,5 +36,20 @@ namespace ResumableFunctions.Handler.Helpers
         };
 
         public static string NameOf(int errorCode) => StatusCodeNames[errorCode];
+    }
+
+    public class IgnoreThisField : DefaultContractResolver
+    {
+        public static IgnoreThisField Instance { get; } = new IgnoreThisField();
+
+        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+        {
+            JsonProperty property = base.CreateProperty(member, memberSerialization);
+            if (member.Name.EndsWith("__this") || member.Name.Contains("<>"))
+            {
+                property.Ignored = true;
+            }
+            return property;
+        }
     }
 }

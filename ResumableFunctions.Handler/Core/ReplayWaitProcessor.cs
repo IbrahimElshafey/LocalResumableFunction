@@ -37,6 +37,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
         oldWaitForReplay.Status = oldWaitForReplay.Status == WaitStatus.Waiting ? WaitStatus.Canceled : oldWaitForReplay.Status;
         oldWaitForReplay.CurrentFunction = replayRequest.CurrentFunction;
+        oldWaitForReplay.InCodeLine = replayRequest.InCodeLine;
+        oldWaitForReplay.CallerName = replayRequest.CallerName;
 
         await _waitsRepo.CancelFunctionWaits(oldWaitForReplay.RequestedByFunctionId, oldWaitForReplay.FunctionStateId);
 
@@ -44,31 +46,31 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         {
             case ReplayType.GoAfter:
                 replayRequest.FunctionState?.AddLog(
-                    $"Try to go back after wait `{oldWaitForReplay.Name}`.", LogType.Info, StatusCodes.Replay);
+                    $"Try to go back after wait [{oldWaitForReplay.Name}].", LogType.Info, StatusCodes.Replay);
                 return new(oldWaitForReplay, true);
 
             case ReplayType.GoBefore:
                 replayRequest.FunctionState?.AddLog(
-                    $"Try to go back before wait `{oldWaitForReplay.Name}`.", LogType.Info, StatusCodes.Replay);
+                    $"Try to go back before wait [{oldWaitForReplay.Name}].", LogType.Info, StatusCodes.Replay);
                 return new(await ReplayGoBefore(oldWaitForReplay), false);
 
             case ReplayType.GoBeforeWithNewMatch:
                 replayRequest.FunctionState?.AddLog(
-                    $"Try to go back before wait `{oldWaitForReplay.Name}` with new match.", LogType.Info, StatusCodes.Replay);
+                    $"Try to go back before wait [{oldWaitForReplay.Name}] with new match.", LogType.Info, StatusCodes.Replay);
                 return new(await ReplayGoBeforeWithNewMatch(replayRequest, oldWaitForReplay), false);
 
             case ReplayType.GoTo:
                 replayRequest.FunctionState?.AddLog(
-                    $"Try go to wait `{oldWaitForReplay.Name}`.", LogType.Info, StatusCodes.Replay);
-                return new(await GetWaitDuplicationAsync(oldWaitForReplay), false);
+                    $"Try go to wait [{oldWaitForReplay.Name}].", LogType.Info, StatusCodes.Replay);
+                return new(await GetWaitDuplication(oldWaitForReplay), false);
 
             case ReplayType.GoToWithNewMatch:
                 replayRequest.FunctionState?.AddLog(
-                    $"Try go to wait `{oldWaitForReplay.Name}` with new match.", LogType.Info, StatusCodes.Replay);
+                    $"Try go to wait [{oldWaitForReplay.Name}] with new match.", LogType.Info, StatusCodes.Replay);
                 return new(await GetWaitDuplicationWithNewMatch(replayRequest, oldWaitForReplay), false);
 
             default:
-                var errorMsg = $"ReplayWait type not defined `{replayRequest}`.";
+                var errorMsg = $"ReplayWait type not defined [{replayRequest}].";
                 _logger.LogWarning(errorMsg);
                 oldWaitForReplay.FunctionState?.AddError(errorMsg, StatusCodes.Replay, null);
                 throw new Exception(errorMsg);
@@ -77,20 +79,20 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     private async Task<MethodWait> GetWaitDuplicationWithNewMatch(ReplayRequest replayRequest, Wait waitToReplay)
     {
-        if (waitToReplay is MethodWait methodWaitToReplay)
+        if (waitToReplay is MethodWait oldMethodWaitToReplay)
         {
-            if (methodWaitToReplay.Template == null)
+            if (oldMethodWaitToReplay.Template == null)
             {
-                methodWaitToReplay.Template = await _waitTemplatesRepo.GetWaitTemplateWithBasicMatch(methodWaitToReplay.TemplateId);
+                oldMethodWaitToReplay.Template = await _waitTemplatesRepo.GetWaitTemplateWithBasicMatch(oldMethodWaitToReplay.TemplateId);
             }
-            methodWaitToReplay.LoadExpressions();
+            oldMethodWaitToReplay.LoadExpressions();
 
-            if (ReplayMatchIsSameSignature(replayRequest, methodWaitToReplay) is false)
+            if (ReplayMatchIsSameSignature(replayRequest, oldMethodWaitToReplay) is false)
                 return null;
 
             if (waitToReplay.DuplicateWait() is MethodWait duplicateWait)
             {
-                duplicateWait.ActionOnWaitsTree(wait =>
+                duplicateWait.ActionOnChildrenTree(wait =>
                 {
                     wait.Name += $"-Replay-{DateTime.Now.Ticks}";
                     wait.IsReplay = true;
@@ -102,13 +104,14 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
                 var template = await AddWaitTemplateIfNotExist(
                     replayRequest.MatchExpression,
-                    methodWaitToReplay.SetDataCall,
-                    methodWaitToReplay.CancelMethodData,
+                    oldMethodWaitToReplay.AfterMatchAction,
+                    oldMethodWaitToReplay.CancelMethodAction,
                     replayRequest.RequestedByFunctionId,
-                    methodWaitToReplay.MethodGroupToWaitId,
-                    methodWaitToReplay.MethodToWaitId ?? 0,
+                    oldMethodWaitToReplay.MethodGroupToWaitId,
+                    oldMethodWaitToReplay.MethodToWaitId ?? 0,
                     replayRequest.CurrentFunction,
-                    methodWaitToReplay.InCodeLine);
+                    oldMethodWaitToReplay.InCodeLine,
+                    duplicateWait);
                 duplicateWait.TemplateId = template.Id;
                 await _waitsRepo.SaveWait(duplicateWait);
                 return duplicateWait;
@@ -124,22 +127,40 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     private async Task<WaitTemplate> AddWaitTemplateIfNotExist(
         LambdaExpression matchExpression,
-        MethodData setDataCall,
-        MethodData cancelMethodData,
+        string afterMatchAction,
+        string cancelMethodAction,
         int funcId,
         int groupId,
         int methodId,
         object functionInstance,
-        int inCodeLine)
+        int inCodeLine,
+        MethodWait newReplayWait)
     {
-        var waitExpressionsHash = new ExpressionsHashCalculator(matchExpression, setDataCall, cancelMethodData);
-        var expressionsHash = waitExpressionsHash.Hash;
-        return 
+
+        var matchExpressionParts =
+            new MatchExpressionWriter(matchExpression, functionInstance).MatchExpressionParts;
+        newReplayWait.SetClosure(matchExpressionParts.Closure);
+        newReplayWait.MandatoryPart = matchExpressionParts.GetInstanceMandatoryPart(functionInstance);
+        
+        var expressionsHash =
+            new ExpressionsHashCalculator(matchExpressionParts.MatchExpression, afterMatchAction, cancelMethodAction)
+            .GetHash();
+        
+        return
             await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, groupId) ??
-            await _waitTemplatesRepo.AddNewTemplate(waitExpressionsHash, functionInstance, funcId, groupId, methodId, inCodeLine);
+            await _waitTemplatesRepo.AddNewTemplate(
+                expressionsHash,
+                functionInstance,
+                funcId,
+                groupId,
+                methodId,
+                inCodeLine,
+                cancelMethodAction,
+                afterMatchAction,
+                matchExpressionParts);
     }
 
-    private async Task<Wait> GetWaitDuplicationAsync(Wait oldWaitToReplay)
+    private async Task<Wait> GetWaitDuplication(Wait oldWaitToReplay)
     {
         if (oldWaitToReplay.WasFirst)
         {
@@ -153,7 +174,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
 
         var duplicateWait = oldWaitToReplay.DuplicateWait();
-        duplicateWait.ActionOnWaitsTree(wait =>
+        duplicateWait.ActionOnChildrenTree(wait =>
         {
             wait.Name += $"-Replay-{DateTime.Now.Ticks}";
             wait.IsReplay = true;
@@ -203,13 +224,14 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
                 var template = await AddWaitTemplateIfNotExist(
                      replayWait.MatchExpression,
-                     methodWaitToReplay.SetDataCall,
-                     methodWaitToReplay.CancelMethodData,
+                     methodWaitToReplay.AfterMatchAction,
+                     methodWaitToReplay.CancelMethodAction,
                      oldMethodWait.RequestedByFunctionId,
                      oldMethodWait.MethodGroupToWaitId,
                      oldMethodWait.MethodToWaitId ?? 0,
                      replayWait.CurrentFunction,
-                     oldMethodWait.InCodeLine);
+                     oldMethodWait.InCodeLine,
+                     methodWaitToReplay);
 
                 methodWaitToReplay.FunctionState = replayWait.FunctionState;
                 methodWaitToReplay.FunctionStateId = replayWait.FunctionStateId;
@@ -252,7 +274,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         if (hasWait)
         {
             var waitToReplay = runner.Current;
-            waitToReplay.ActionOnWaitsTree(wait =>
+            waitToReplay.ActionOnChildrenTree(wait =>
             {
                 wait.Name += $"-Replay-{DateTime.Now.Ticks}";
                 wait.IsReplay = true;

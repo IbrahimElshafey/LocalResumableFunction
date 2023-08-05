@@ -26,7 +26,7 @@ namespace TestSomething
         {
             var methodWait = new MethodWait<string, int>(TestMethodOne)
                         .MatchIf((x, y) => y == InstanceId || x == (InstanceId + 10).ToString() && y <= Math.Max(10, 100))
-                        .SetData((input, output) => InstanceId = output);
+                        .AfterMatch((input, output) => InstanceId = output);
             methodWait.CurrentFunction = this;
             return methodWait;
         }
@@ -51,7 +51,7 @@ namespace TestSomething
                        x.IsMan &&
                        x.Name == "Mohamed"
                        )
-                       .SetData((input, output) => InstanceId = output.TaskId);
+                       .AfterMatch((input, output) => InstanceId = output.TaskId);
             methodWait.CurrentFunction = this;
             return methodWait;
         }
@@ -97,7 +97,7 @@ namespace TestSomething
             var dynamicPushedCall = pushedCall.ToExpando();
             //input.Id == InstanceId + 20 && output.EnumProp == StackBehaviour.Popi_popi_popi && input.IsMan && input.Name == localVariable
             var wait = WaitMethodTwo();
-            var matchRewriter = new MatchExpressionWriter(wait.MatchExpression, this);
+            //var matchRewriter = new MatchExpressionWriter(wait.MatchExpression, this);
             //Expression<Func<ExpandoObject, ExpandoObject, bool>> matchDynamic = (inputOutput, instance) =>
             //inputOutput.Get<int>("input.Id") == instance.Get<int>("InstanceId") + 20 && (bool)instance.Get("uuu");
             //var matchDynamic = matchRewriter.MatchExpressionDynamic;
@@ -105,48 +105,48 @@ namespace TestSomething
             //var resu = matchDynComp.Invoke(dynamicPushedCall, instanceDynamic);
 
           
-            MandatoryPartExpression(matchRewriter, dynamicPushedCall, pushedCall);
+            //MandatoryPartExpression(matchRewriter, dynamicPushedCall, pushedCall);
         }
 
         private void MandatoryPartExpression(MatchExpressionWriter matchRewriter, ExpandoObject dynamicPushedCall, InputOutput pushedCall)
         {
-            var callMandatoryPartExpression = matchRewriter.CallMandatoryPartExpression;
-            var compiled = callMandatoryPartExpression.CompileFast();
-            var result = compiled.DynamicInvoke(pushedCall.Input, pushedCall.Output);
+            //var callMandatoryPartExpression = matchRewriter.CallMandatoryPartExpression;
+            //var compiled = callMandatoryPartExpression.CompileFast();
+            //var result = compiled.DynamicInvoke(pushedCall.Input, pushedCall.Output);
 
-            //new[] { ((int)output.EnumProp).ToString(), input.Id.ToString(), input.IsMan.ToString() }
-            //var mandatoryDynExps = matchRewriter.CallMandatoryPartExpressionDynamic;
-            //var mandatoryDynExpsCompiled = mandatoryDynExps.CompileFast();
-            //var dynresult2 = mandatoryDynExpsCompiled.DynamicInvoke(dynamicPushedCall);
+            ////new[] { ((int)output.EnumProp).ToString(), input.Id.ToString(), input.IsMan.ToString() }
+            ////var mandatoryDynExps = matchRewriter.CallMandatoryPartExpressionDynamic;
+            ////var mandatoryDynExpsCompiled = mandatoryDynExps.CompileFast();
+            ////var dynresult2 = mandatoryDynExpsCompiled.DynamicInvoke(dynamicPushedCall);
 
-            var instanceMandexp = matchRewriter.InstanceMandatoryPartExpression;
-            var instanceMandexpComp = instanceMandexp.CompileFast();
-            var dynresult3 = (object[])instanceMandexpComp.DynamicInvoke(this);
-            var id = string.Join("#", dynresult3);
+            //var instanceMandexp = matchRewriter.InstanceMandatoryPartExpression;
+            //var instanceMandexpComp = instanceMandexp.CompileFast();
+            //var dynresult3 = (object[])instanceMandexpComp.DynamicInvoke(this);
+            //var id = string.Join("#", dynresult3);
         }
 
         private void TestWithBasicTypes()
         {
-            var wait1 = WaitMethodOne();
-            var matchRewrite1 = new MatchExpressionWriter(wait1.MatchExpression, this);
-            var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.MatchExpression.CompileFast();
-            var exprssionAsString1 = matchRewrite1.MatchExpression.ToString();
-            var result = method1.Invoke("12345", 5, this);
-            result = method1.Invoke("123456", 6, this);
+            //var wait1 = WaitMethodOne();
+            //var matchRewrite1 = new MatchExpressionWriter(wait1.MatchExpression, this);
+            //var method1 = (Func<string, int, TestRewriteMatch, bool>)matchRewrite1.MatchExpression.CompileFast();
+            //var exprssionAsString1 = matchRewrite1.MatchExpression.ToString();
+            //var result = method1.Invoke("12345", 5, this);
+            //result = method1.Invoke("123456", 6, this);
 
 
-            var pushedCall1 = JsonConvert.DeserializeObject<JObject>("""
-                {
-                    "input":"12345",
-                    "output":5
-                }
-                """);
-            var pushedCall2 = JsonConvert.DeserializeObject<JObject>("""
-                {
-                    "input":"123456",
-                    "output":6
-                }
-                """);
+            //var pushedCall1 = JsonConvert.DeserializeObject<JObject>("""
+            //    {
+            //        "input":"12345",
+            //        "output":5
+            //    }
+            //    """);
+            //var pushedCall2 = JsonConvert.DeserializeObject<JObject>("""
+            //    {
+            //        "input":"123456",
+            //        "output":6
+            //    }
+            //    """);
             //var jsonCompiled = (Func<JObject, bool>)matchRewrite1.MatchExpressionWithJson.CompileFast();
             //result = jsonCompiled.Invoke(pushedCall1);
             //result = jsonCompiled.Invoke(pushedCall2);

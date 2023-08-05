@@ -10,8 +10,15 @@ namespace ResumableFunctions.Handler.Expressions
             // REVIEW: Nuqleon.Json has an odd asymmetry in Serialize and Deserialize signatures,
             //         due to the inability to overload by return type. However, it seems odd we
             //         have to go serialize string and subsequently parse into Expression.
-
-            return o => Json.Expression.Parse(new JsonSerializer(type).Serialize(o), ensureTopLevelObjectOrArray: false);
+            try
+            {
+                return o => Json.Expression.Parse(new JsonSerializer(type).Serialize(o), ensureTopLevelObjectOrArray: false);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return null;
+            }
         }
 
         protected override Func<Json.Expression, object> GetConstantDeserializer(Type type)

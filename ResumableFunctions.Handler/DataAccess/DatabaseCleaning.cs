@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
@@ -38,22 +39,22 @@ namespace ResumableFunctions.Handler.DataAccess
                 count = await _context.Waits
                   .Where(wait => instanceIds.Contains(wait.FunctionStateId))
                   .ExecuteDeleteAsync();
-                await AddLog($"Delete `{count}` waits related to completed functions instances done.");
+                await AddLog($"Delete [{count}] waits related to completed functions instances done.");
 
                 count = await _context.FunctionStates
                     .Where(functionState => instanceIds.Contains(functionState.Id))
                     .ExecuteDeleteAsync();
-                await AddLog($"Delete `{count}` compeleted functions instances done.");
+                await AddLog($"Delete [{count}] compeleted functions instances done.");
 
                 count = await _context.Logs
                     .Where(logItem => instanceIds.Contains((int)logItem.EntityId) && logItem.EntityType == nameof(ResumableFunctionState))
                     .ExecuteDeleteAsync();
-                await AddLog($"Delete `{count}` logs related to completed functions instances done.");
+                await AddLog($"Delete [{count}] logs related to completed functions instances done.");
 
                 count = await _context.WaitProcessingRecords
                     .Where(waitProcessingRecord => instanceIds.Contains(waitProcessingRecord.StateId))
                     .ExecuteDeleteAsync();
-                await AddLog($"Delete `{count}` wait processing record related to completed functions instances done.");
+                await AddLog($"Delete [{count}] wait processing record related to completed functions instances done.");
             }
             await AddLog("Delete compeleted functions instances completed.");
         }
@@ -66,7 +67,7 @@ namespace ResumableFunctions.Handler.DataAccess
                 await _context.PushedCalls
                 .Where(instance => instance.Created < dateThreshold)
                 .ExecuteDeleteAsync();
-            await AddLog($"Delete `{count}` old pushed calls.");
+            await AddLog($"Delete [{count}] old pushed calls.");
         }
 
         public async Task CleanSoftDeletedRows()
@@ -77,13 +78,13 @@ namespace ResumableFunctions.Handler.DataAccess
              .Where(instance => instance.IsDeleted)
              .IgnoreQueryFilters()
              .ExecuteDeleteAsync();
-            await AddLog($"Delete `{count}` soft deleted waits done.");
+            await AddLog($"Delete [{count}] soft deleted waits done.");
 
             count = await _context.FunctionStates
             .Where(instance => instance.IsDeleted)
             .IgnoreQueryFilters()
             .ExecuteDeleteAsync();
-            await AddLog($"Delete `{count}` soft deleted function state done.");
+            await AddLog($"Delete [{count}] soft deleted function state done.");
         }
 
         public async Task MarkInactiveWaitTemplates()
@@ -99,7 +100,7 @@ namespace ResumableFunctions.Handler.DataAccess
                 .ExecuteUpdateAsync(template => template
                     .SetProperty(x => x.IsActive, -1)
                     .SetProperty(x => x.DeactivationDate, DateTime.Now));
-            await AddLog($"Deactivate `{count}` unused wait templates done.");
+            await AddLog($"Deactivate [{count}] unused wait templates done.");
         }
 
         public async Task CleanInactiveWaitTemplates()
@@ -109,7 +110,7 @@ namespace ResumableFunctions.Handler.DataAccess
             var count = await _context.WaitTemplates
                 .Where(template => template.IsActive == -1 && template.DeactivationDate < dateThreshold)
                 .ExecuteDeleteAsync();
-            await AddLog($"Delete `{count}` deactivated wait templates done.");
+            await AddLog($"Delete [{count}] deactivated wait templates done.");
         }
 
         private async Task AddLog(string message)

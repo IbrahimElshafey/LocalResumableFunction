@@ -1,5 +1,6 @@
 using ClientOnboarding.Services;
 using ResumableFunctions.AspNetService;
+using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.InOuts;
 using System.Diagnostics;
 
