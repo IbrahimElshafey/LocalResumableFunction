@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.Attributes
 {
@@ -20,6 +21,7 @@ namespace ResumableFunctions.Handler.Attributes
             _callPusher = callPusher;
             _logger = logger;
         }
+
         [Advice(Kind.Before)]
         public void OnEntry(
             [Argument(Source.Arguments)] object[] args,
@@ -29,6 +31,17 @@ namespace ResumableFunctions.Handler.Attributes
         {
             var pushResultAttribute = triggers.OfType<PushCallAttribute>().First();
 
+            if (string.IsNullOrWhiteSpace(pushResultAttribute.MethodUrn))
+                throw new Exception(
+                        $"For method [{metadata.GetFullName()}] MethodUrn must not be empty for attribute [{nameof(PushCallAttribute)}]");
+            if (args.Length > 1)
+                throw new Exception(
+                    $"You can't apply attribute [{nameof(PushCallAttribute)}] to method " +
+                    $"[{metadata.GetFullName()}] since it takes more than one parameter.");
+            if (metadata is MethodInfo mi && mi.ReturnType == typeof(void))
+                throw new Exception(
+                    $"You can't apply attribute [{nameof(PushCallAttribute)}] to method " +
+                    $"[{metadata.GetFullName()}] since return type is void, you can change it to object and return null.");
             _pushedCall = new PushedCall
             {
                 MethodData = new MethodData(metadata as MethodInfo)
@@ -40,6 +53,7 @@ namespace ResumableFunctions.Handler.Attributes
             };
             if (args.Length > 0)
                 _pushedCall.Data.Input = args[0];
+           
         }
 
         [Advice(Kind.After)]

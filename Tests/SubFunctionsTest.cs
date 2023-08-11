@@ -1,8 +1,8 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
-using static Tests.Sequence;
 
 namespace Tests;
 
@@ -21,14 +21,7 @@ public class SubFunctionsTest
         instance.Method2("m2");
         instance.Method3("m3");
 
-        var pushedCalls = await test.GetPushedCalls();
-        Assert.Equal(2, pushedCalls.Count);
-        var instances = await test.GetInstances<SubFunctions>(true);
-        Assert.Equal(2, instances.Count);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
-        var waits = await test.GetWaits(null, true);
-        Assert.Equal(4, waits.Count);
-        Assert.Equal(3, waits.Count(x => x.Status == WaitStatus.Completed));
+        Assert.Empty(await test.RoundCheck(2,3,1));
     }
 
     [Fact]
@@ -47,7 +40,7 @@ public class SubFunctionsTest
         Assert.Single(pushedCalls);
         var instances = await test.GetInstances<SubFunctions>(true);
         Assert.Equal(2, instances.Count);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         var waits = await test.GetWaits(null, true);
         Assert.Equal(4, waits.Count);
         Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Completed));
@@ -70,7 +63,7 @@ public class SubFunctionsTest
         Assert.Equal(2, pushedCalls.Count);
         var instances = await test.GetInstances<SubFunctions>(true);
         Assert.Equal(2, instances.Count);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         var waits = await test.GetWaits(null, true);
         Assert.Equal(10, waits.Count);
         Assert.Equal(5, waits.Count(x => x.Status == WaitStatus.Completed));
@@ -83,7 +76,7 @@ public class SubFunctionsTest
         Assert.Equal(4, pushedCalls.Count);
         instances = await test.GetInstances<SubFunctions>(true);
         Assert.Equal(3, instances.Count);
-        Assert.Equal(2, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(2, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         waits = await test.GetWaits(null, true);
         Assert.Equal(15, waits.Count);
         Assert.Equal(10, waits.Count(x => x.Status == WaitStatus.Completed));
@@ -101,13 +94,13 @@ public class SubFunctionsTest
         [SubResumableFunction("SubFunction1")]
         public async IAsyncEnumerable<Wait> SubFunction1()
         {
-            yield return Wait<string, string>(Method1, "M1").MatchAll();
+            yield return Wait<string, string>(Method1, "M1").MatchAny();
         }
 
         [SubResumableFunction("SubFunction2")]
         public async IAsyncEnumerable<Wait> SubFunction2()
         {
-            yield return Wait<string, string>(Method2, "M2").MatchAll();
+            yield return Wait<string, string>(Method2, "M2").MatchAny();
         }
 
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
@@ -130,16 +123,16 @@ public class SubFunctionsTest
         {
             int x = 100;
             yield return Wait<string, string>(Method3, "M3")
-                .MatchAll()
-                //.SetData(InstanceCall);
-                .AfterMatch((input, output) =>
-                {
-                    Message = $"Input: {input}, Output: {output}";
-                    if (x != 100)
-                        throw new Exception("Closure not saved for sub resumable function.");
-                });
-            //.AfterMatch(TestMethodClass.AfterMatchExternal);
-
+                .MatchAny()
+                .AfterMatch(InstanceCall)
+                //.AfterMatch(TestMethodClass.AfterMatchExternal)
+                //.AfterMatch((input, output) =>
+                //{
+                //    Message = $"Input: {input}, Output: {output}";
+                //    if (x != 100)
+                //        throw new Exception("Closure not saved for sub resumable function.")
+                //})
+                ;
             Console.WriteLine(x);
         }
 
@@ -167,7 +160,7 @@ public class SubFunctionsTest
         [SubResumableFunction("SubFunction")]
         public async IAsyncEnumerable<Wait> SubFunction()
         {
-            yield return Wait<string, string>(Method1, "M1").MatchAll();
+            yield return Wait<string, string>(Method1, "M1").MatchAny();
         }
 
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";

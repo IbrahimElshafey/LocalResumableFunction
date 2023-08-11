@@ -5,7 +5,6 @@ using ResumableFunctions.Publisher.Abstraction;
 using System.Net.Http;
 using System;
 using System.Threading.Tasks;
-
 namespace ResumableFunctions.Publisher.Implementation
 {
     internal class InMemoryFailedRequestHandler : IFailedRequestHandler
@@ -37,13 +36,18 @@ namespace ResumableFunctions.Publisher.Implementation
             }
         }
 
-        public void HandleFailedRequests()
+        public async void HandleFailedRequests()
         {
-            _ = CallFailedRequests();
+            while (true)
+            {
+                await Task.Delay(_settings.CheckFailedRequestEvery);
+                if (_failedRequests.Count > 0)
+                    CallFailedRequests();
+            }
         }
 
         // ReSharper disable once FunctionRecursiveOnAllPaths
-        private async Task CallFailedRequests()
+        private void CallFailedRequests()
         {
             try
             {
@@ -51,32 +55,7 @@ namespace ResumableFunctions.Publisher.Implementation
                 _logger.LogInformation($"Found [{_failedRequests.Count}] failed request.");
                 for (var i = 0; i < _failedRequests.Count; i++)
                 {
-
-                    FailedRequest request = null;
-                    try
-                    {
-                        if (_failedRequests.TryTake(out request))
-                        {
-                            var client = _httpClientFactory.CreateClient();
-                            var response =
-                                await client.PostAsync(request.ActionUrl, new ByteArrayContent(request.Body));
-                            response.EnsureSuccessStatusCode();
-                            var result = await response.Content.ReadAsStringAsync();
-                            if (!(result == "1" || result == "-1"))
-                                throw new Exception("Expected result must be 1 or -1");
-                        }
-                    }
-                    catch (Exception)
-                    {
-                        if (request != null)
-                        {
-                            request.AttemptsCount++;
-                            _logger.LogInformation(
-                                $"A request [{request.ActionUrl}] failed again for [{request.AttemptsCount}] times");
-                            request.LastAttemptDate = DateTime.Now;
-                            _failedRequests.Add(request);
-                        }
-                    }
+                    _ = CallRequest();
                 }
                 _logger.LogInformation("End handling failed requests.");
             }
@@ -84,10 +63,34 @@ namespace ResumableFunctions.Publisher.Implementation
             {
                 _logger.LogError(ex, "Error when handling failed requests.");
             }
-            finally
+        }
+
+        private async Task CallRequest()
+        {
+            FailedRequest request = null;
+            try
             {
-                await Task.Delay(_settings.CheckFailedRequestEvery);
-                await CallFailedRequests();
+                if (_failedRequests.TryTake(out request))
+                {
+                    var client = _httpClientFactory.CreateClient();
+                    var response =
+                        await client.PostAsync(request.ActionUrl, new ByteArrayContent(request.Body));
+                    response.EnsureSuccessStatusCode();
+                    var result = await response.Content.ReadAsStringAsync();
+                    if (!(result == "1" || result == "-1"))
+                        throw new Exception("Expected result must be 1 or -1");
+                }
+            }
+            catch (Exception)
+            {
+                if (request != null)
+                {
+                    request.AttemptsCount++;
+                    _logger.LogError(
+                        $"A request [{request.ActionUrl}] failed again for [{request.AttemptsCount}] times");
+                    request.LastAttemptDate = DateTime.Now;
+                    _failedRequests.Add(request);
+                }
             }
         }
     }

@@ -1,11 +1,6 @@
-using System.Reflection;
-using ClientOnboarding.InOuts;
-using ClientOnboarding.Services;
-using ClientOnboarding.Workflow;
-using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
@@ -204,8 +199,8 @@ namespace Tests
         {
             yield return Wait<string, string>(Method4, "Method 4");
             yield return Wait("Two Methods After First",
-                Wait<string, string>(Method5, "Method 5").MatchAll(),
-                Wait<string, string>(Method6, "Method 6").MatchAll()
+                Wait<string, string>(Method5, "Method 5").MatchAny(),
+                Wait<string, string>(Method6, "Method 6").MatchAny()
             );
             await Task.Delay(100);
         }

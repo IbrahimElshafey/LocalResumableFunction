@@ -2,7 +2,7 @@
 
 public class CallServiceImapction
 {
-    public int PushedCallId { get; set; }
+    public long PushedCallId { get; set; }
     public string MethodUrn { get; set; }
     public int MethodGroupId { get; set; }
     public int ServiceId { get; set; }

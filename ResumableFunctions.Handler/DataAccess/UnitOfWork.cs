@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
-using ResumableFunctions.Handler.InOuts;
 
 namespace ResumableFunctions.Handler.DataAccess;
 

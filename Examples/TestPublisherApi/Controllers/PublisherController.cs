@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using ResumableFunctions.Publisher;
 using ResumableFunctions.Publisher.Helpers;
 
 namespace TestPublisherApi.Controllers
@@ -24,11 +23,18 @@ namespace TestPublisherApi.Controllers
             return $"{nameof(Method123)} called with input [{input}]";
         }
 
-        [HttpGet(nameof(Method456))]
-        [PublishMethod("PublisherController.Method456", ToService = "TestApi2")]//not exist in TestApi2
-        public string Method456(string input)
+        [HttpGet(nameof(MethodNotExist))]
+        [PublishMethod("PublisherController.MethodNotExist", ToService = "TestApi2")]//not exist in TestApi2
+        public string MethodNotExist(string input)
         {
-            return $"{nameof(Method456)} called with input [{input}]";
+            return $"{nameof(MethodNotExist)} called with input [{input}]";
+        }
+
+        [HttpGet(nameof(TwoParamsMethod))]
+        [PublishMethod("PublisherController.TwoParamsMethod", ToService = "TestApi1")]
+        public string TwoParamsMethod(string input,string t2)
+        {
+            return $"{nameof(TwoParamsMethod)} called with input [{input}]";
         }
     }
 }

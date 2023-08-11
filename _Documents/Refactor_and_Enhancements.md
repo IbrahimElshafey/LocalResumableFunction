@@ -9,11 +9,7 @@
 * Message Pack private setter props serialization
 * Parameter check lib use
 * Use RequestedByFunctionId prop in TimeWaitInput to refine match for time waits
-* ID must be long for
-	* Pushed Call
-	* Wait
-	* WaitForCalls
-	* Logs
+
 
 # Data store enhancements
 * Store pushed calls in different store that support:
@@ -25,31 +21,42 @@
 	* Fast queries 
 	* Fast wait insertion
 	* May be an option https://github.com/VelocityDB/VelocityDB
+* InMemory DBs
+	* May I use https://ignite.apache.org/docs/latest/ which is a distributed database for high-performance computing with in-memory speed.
+	* https://hazelcast.com/clients/dotnet/
+	* https://www.couchbase.com/
 * Fast logging
 	* Separate data store for log
-	* Logs can be queried
+	* Logs can be queried by
+		* Date
+		* Service Id
+		* EntityName, EntityId
+		* Status
 	* Custom implementation for logging (IResumableFunctionLogging)
 	* https://www.influxdata.com/
 
 # New Features
+* Target multiple runtimes
 * Alternates is functions that trigger by the same pushed call but
-	* Only one instance activated after the first match
-	* Or one instance completed and other will be canceled
-* Services Registry is separate
+	* Only one instance activated
+	* Only one instance completed and other will be canceled
+* Services registry is separate service
 * Security and IUserContext
 * Function priority/Matched Waits priority
 	* How hangfire handle priority
 * Performance Analysis/Monitoring
+	* Pushed calls that is not necessary
+	* How long processing a pushed call takes?
 * Encryption option for sensitive data
 	* Function state
 	* Match and SetData Expressions
+* Localization
 
 # May be good to use
 * How can I benefit from Azure Service Fabric
 	* https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-overview
 
-* How to migrate to the new version
 
-
-* Localization
+# Questions
+* How to check that pushed calls processed by all affected services?
 

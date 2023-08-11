@@ -2,7 +2,7 @@
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
-using static Tests.SubFunctionsLevelsTest;
+using ResumableFunctions.Handler.BaseUse;
 
 namespace Tests;
 
@@ -29,7 +29,7 @@ public class SubFunctionsLevelsTest
         Assert.Equal(4, pushedCalls.Count);
         var instances = await test.GetInstances<SubFunctionsTest.SubFunctions>(true);
         Assert.Equal(2, instances.Count);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         var waits = await test.GetWaits();
         Assert.Equal(7, waits.Count);
         Assert.Equal(7, waits.Count(x => x.Status == WaitStatus.Completed));
@@ -46,7 +46,7 @@ public class SubFunctionsLevelsTest
         Assert.Equal(8, pushedCalls.Count);
         instances = await test.GetInstances<SubFunctionsTest.SubFunctions>(true);
         Assert.Equal(3, instances.Count);
-        Assert.Equal(2, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(2, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         waits = await test.GetWaits();
         Assert.Equal(14, waits.Count);
         Assert.Equal(14, waits.Count(x => x.Status == WaitStatus.Completed));
@@ -66,7 +66,7 @@ public class SubFunctionsLevelsTest
         {
             int x = 10;
             yield return Wait<string, string>(Method1, "M1")
-                .MatchAll()
+                .MatchAny()
                 .AfterMatch((_, _) =>
                 {
                     if (x != 10)
@@ -75,7 +75,7 @@ public class SubFunctionsLevelsTest
 
             x += 10;
             yield return Wait<string, string>(Method4, "M4")
-                .MatchAll()
+                .MatchAny()
                 .AfterMatch((_, _) =>
                 {
                     if (x != 20)
@@ -87,14 +87,14 @@ public class SubFunctionsLevelsTest
         [SubResumableFunction("SubFunction2")]
         public async IAsyncEnumerable<Wait> SubFunction2()
         {
-            yield return Wait<string, string>(Method2, "M2").MatchAll();
+            yield return Wait<string, string>(Method2, "M2").MatchAny();
             yield return Wait("Wait sub function3", SubFunction3);
         }
 
         [SubResumableFunction("SubFunction3")]
         public async IAsyncEnumerable<Wait> SubFunction3()
         {
-            yield return Wait<string, string>(Method3, "M2").MatchAll();
+            yield return Wait<string, string>(Method3, "M2").MatchAny();
         }
 
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";

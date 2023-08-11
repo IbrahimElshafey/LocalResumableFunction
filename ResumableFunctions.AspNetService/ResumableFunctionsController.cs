@@ -1,14 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 using System.Buffers;
-using System.Linq.CompilerServices.TypeSystem;
-using System.Reflection;
 
 namespace ResumableFunctions.AspNetService
 {

@@ -1,10 +1,4 @@
-﻿using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.InOuts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.AspNetService.DisplayObject
 {

@@ -1,7 +1,8 @@
-﻿@using ResumableFunctions.Handler.InOuts;
-@model FunctionWait
+﻿@using ResumableFunctions.Handler.InOuts.Entities;
+@model FunctionWaitEntity
 <li>
-    <div class="w3-card w3-sand w3-padding w3-round" onclick="toggleView('waits-in-function-@Model.Id')">
+    @*onclick="toggleView('waits-in-function-@Model.Id')"*@
+    <div class="w3-card w3-sand w3-padding w3-round" >
         <h5 class="w3-text-indigo"><b>@Model.Name</b></h5>
         <span class="@Model.Status">@Model.Status</span>
         <p></p>

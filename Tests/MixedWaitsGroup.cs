@@ -1,6 +1,6 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests
@@ -44,7 +44,7 @@ namespace Tests
             [SubResumableFunction("SubFunction")]
             public async IAsyncEnumerable<Wait> SubFunction()
             {
-                yield return Wait<string, string>(Method4, "M4 in Sub Function").MatchAll();
+                yield return Wait<string, string>(Method4, "M4 in Sub Function").MatchAny();
             }
 
             [PushCall("Method1")] public string Method1(string input) => "Method1 Call";

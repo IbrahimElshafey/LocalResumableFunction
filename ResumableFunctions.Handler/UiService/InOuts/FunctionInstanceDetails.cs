@@ -1,4 +1,5 @@
 ﻿using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 using System.Collections;
 
 namespace ResumableFunctions.Handler.UiService.InOuts
@@ -8,7 +9,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public string FunctionUrn { get;}
         public string FunctionName { get;}
         public int InstanceId { get; }
-        public FunctionStatus Status { get; }
+        public FunctionInstanceStatus Status { get; }
         public string InstanceData { get; }
         public DateTime Created { get; }
         public DateTime Modified { get; }
@@ -19,7 +20,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public int FunctionId { get; }
 
         public FunctionInstanceDetails(
-            int instanceId,int functionId, string name, string functionName, FunctionStatus status, string instanceData, DateTime created, DateTime modified, int errorsCount, ArrayList waits, List<LogRecord> logs)
+            int instanceId,int functionId, string name, string functionName, FunctionInstanceStatus status, string instanceData, DateTime created, DateTime modified, int errorsCount, ArrayList waits, List<LogRecord> logs)
         {
             InstanceId = instanceId;
             FunctionId = functionId;

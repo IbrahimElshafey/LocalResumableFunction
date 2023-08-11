@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using FastExpressionCompiler;
 using Hangfire.Annotations;
-using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.Core.Abstraction;
 
 namespace ResumableFunctions.Handler.Core;

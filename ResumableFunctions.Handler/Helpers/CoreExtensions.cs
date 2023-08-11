@@ -6,6 +6,7 @@ using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess;
@@ -17,10 +18,10 @@ using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
 
-public static class CoreExtensions
+internal static class CoreExtensions
 {
     //internal static IServiceProvider GetServiceProvider() => _ServiceProvider;
-    public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
+    internal static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
     {
 
 
@@ -63,15 +64,15 @@ public static class CoreExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
         services.AddScoped<IWaitsRepo, WaitsRepo>();
-        services.AddScoped<IServiceRepo, ServiceRepo>();
+        services.AddTransient<IServiceRepo, ServiceRepo>();
         services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
-        services.AddScoped<IScanStateRepo, ScanStateRepo>();
+        services.AddTransient<IScanStateRepo, ScanStateRepo>();
         services.AddScoped<IPushedCallsRepo, PushedCallsRepo>();
         services.AddScoped<IDatabaseCleaning, DatabaseCleaning>();
         services.AddScoped<IWaitProcessingRecordsRepo, WaitProcessingRecordsRepo>();
     }
 
-    public static void UseResumableFunctions(this IHost app)
+    internal static void UseResumableFunctions(this IHost app)
     {
         GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(app.Services));
         CreateScanAndCleanBackgroundTasks(app);
@@ -91,7 +92,7 @@ public static class CoreExtensions
     }
 
 
-    public static (bool IsFunctionData, MemberExpression NewExpression) GetDataParamterAccess(
+    internal static (bool IsFunctionData, MemberExpression NewExpression) GetDataParamterAccess(
         this MemberExpression node,
         ParameterExpression functionInstanceArg)
     {
@@ -127,7 +128,7 @@ public static class CoreExtensions
         }
     }
 
-    public static bool SameMatchSignature(LambdaExpression replayMatch, LambdaExpression methodMatch)
+    internal static bool SameMatchSignature(LambdaExpression replayMatch, LambdaExpression methodMatch)
     {
         var isEqual = replayMatch != null && methodMatch != null;
         if (isEqual is false) return false;
@@ -142,7 +143,7 @@ public static class CoreExtensions
         return true;
     }
 
-    public static bool IsAsyncMethod(this MethodBase method)
+    internal static bool IsAsyncMethod(this MethodBase method)
     {
         var attribute =
             method.GetCustomAttribute(typeof(AsyncStateMachineAttribute)) ??
@@ -150,18 +151,17 @@ public static class CoreExtensions
 
         if (attribute != null) return true;
 
-        var returnTypeIsTask =
+        return
             method is MethodInfo { ReturnType.IsGenericType: true } mi &&
             mi.ReturnType.GetGenericTypeDefinition() == typeof(Task<>);
-        return returnTypeIsTask;
     }
 
 
-    public static string GetFullName(this MethodBase method)
+    internal static string GetFullName(this MethodBase method)
     {
         return $"{method.DeclaringType.FullName}.{method.Name}";
     }
-    public static MethodInfo GetInterfaceMethod(this MethodInfo method)
+    internal static MethodInfo GetInterfaceMethod(this MethodInfo method)
     {
         var type = method.DeclaringType;
         foreach (var interf in type.GetInterfaces())
@@ -179,7 +179,7 @@ public static class CoreExtensions
         return null;
     }
 
-    public static MethodInfo GetMethodInfo(string AssemblyName, string ClassName, string MethodName, string MethodSignature)
+    internal static MethodInfo GetMethodInfo(string AssemblyName, string ClassName, string MethodName, string MethodSignature)
     {
         MethodInfo _methodInfo = null;
         var assemblyPath = $"{AppContext.BaseDirectory}{AssemblyName}.dll";
@@ -196,12 +196,12 @@ public static class CoreExtensions
         return _methodInfo;
     }
 
-    public static IEnumerable<T> Flatten<T>(
+    internal static IEnumerable<T> Flatten<T>(
            this IEnumerable<T> e,
            Func<T, IEnumerable<T>> f) =>
                e.SelectMany(c => f(c).Flatten(f)).Concat(e);
 
-    public static IEnumerable<T> Flatten<T>(this T value, Func<T, IEnumerable<T>> childrens)
+    internal static IEnumerable<T> Flatten<T>(this T value, Func<T, IEnumerable<T>> childrens)
     {
         foreach (var currentItem in childrens(value))
         {
@@ -213,7 +213,7 @@ public static class CoreExtensions
         yield return value;
     }
 
-    public static void CascadeSet<T, Prop>(
+    internal static void CascadeSet<T, Prop>(
         this T objectToSet,
         Expression<Func<IEnumerable<T>>> childs,
         Expression<Func<Prop>> prop,
@@ -225,7 +225,7 @@ public static class CoreExtensions
         //    child.CascadeSetDeleted();
         //}
     }
-    public static IEnumerable<Prop> CascadeGet<T, Prop>(
+    internal static IEnumerable<Prop> CascadeGet<T, Prop>(
        this T objectToSet,
        Expression<Func<IEnumerable<T>>> childs,
        Expression<Func<Prop>> prop,
@@ -243,21 +243,21 @@ public static class CoreExtensions
     //https://www.newtonsoft.com/json/help/html/serializationguide.htm
     //https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/builtin-types/built-in-types
     //https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/constants
-    public static bool IsConstantType(this Type type)
+    internal static bool IsConstantType(this Type type)
     {
         var types = new[] { typeof(bool), typeof(byte), typeof(sbyte), typeof(char), typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(nint), typeof(nuint), typeof(int), typeof(uint), typeof(short), typeof(ushort), typeof(string) };
         return types.Contains(type);
     }
 
-    public static bool CanConvertToSimpleString(this object ob)
+    internal static bool CanConvertToSimpleString(this object ob)
     {
         var type = ob.GetType();
         return ob != null && (type.IsConstantType() || type == typeof(DateTime) || type == typeof(Guid) || type.IsEnum);
     }
 
-    public static MethodInfo GetMethodInfo<T>(Expression<Func<T, object>> methodSelector) =>
+    internal static MethodInfo GetMethodInfo<T>(Expression<Func<T, object>> methodSelector) =>
         GetMethodInfoWithType(methodSelector).MethodInfo;
-    public static (MethodInfo MethodInfo, Type OwnerType) GetMethodInfoWithType<T>(Expression<Func<T, object>> methodSelector)
+    internal static (MethodInfo MethodInfo, Type OwnerType) GetMethodInfoWithType<T>(Expression<Func<T, object>> methodSelector)
     {
         MethodInfo mi = null;
         Type ownerType = null;
@@ -304,7 +304,7 @@ public static class CoreExtensions
 
     }
 
-    public static string GetRealTypeName(this Type t)
+    internal static string GetRealTypeName(this Type t)
     {
         if (!t.IsGenericType)
             return t.Name;
@@ -323,7 +323,7 @@ public static class CoreExtensions
         return sb.ToString();
     }
 
-    public static Expression ToConstantExpression(this object result)
+    internal static Expression ToConstantExpression(this object result)
     {
         if (result.GetType().IsConstantType())
         {
@@ -350,7 +350,7 @@ public static class CoreExtensions
                $"Can't evaluate object [{result}] to constant expression.");
     }
 
-    public static Type GetUnderlyingType(this MemberInfo member)
+    internal static Type GetUnderlyingType(this MemberInfo member)
     {
         switch (member.MemberType)
         {
@@ -367,6 +367,14 @@ public static class CoreExtensions
                 (
                  "Input MemberInfo must be if type EventInfo, FieldInfo, MethodInfo, or PropertyInfo"
                 );
+        }
+    }
+
+    internal static void MergeIntoObject<T>(this JToken value, T target) where T : class
+    {
+        using (var sr = value.CreateReader())
+        {
+            JsonSerializer.Create(ClosureContractResolver.Settings).Populate(sr, target);
         }
     }
 }

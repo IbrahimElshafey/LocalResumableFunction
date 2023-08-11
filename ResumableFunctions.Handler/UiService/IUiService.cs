@@ -1,4 +1,4 @@
-﻿using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts.Entities;
 using ResumableFunctions.Handler.UiService.InOuts;
 
 namespace ResumableFunctions.Handler.UiService
@@ -12,7 +12,7 @@ namespace ResumableFunctions.Handler.UiService
         Task<List<MethodGroupInfo>> GetMethodGroupsSummary(int serviceId = -1, string searchTerm = null);
         Task<List<PushedCallInfo>> GetPushedCalls(int page = 0, int serviceId = -1, string searchTerm = null);
         Task<List<FunctionInstanceInfo>> GetFunctionInstances(int functionId);
-        Task<PushedCallDetails> GetPushedCallDetails(int pushedCallId);
+        Task<PushedCallDetails> GetPushedCallDetails(long pushedCallId);
         Task<FunctionInstanceDetails> GetFunctionInstanceDetails(int instanceId);
         Task<List<MethodInGroupInfo>> GetMethodsInGroup(int groupId);
         Task<List<MethodWaitDetails>> GetWaitsInGroup(int groupId);

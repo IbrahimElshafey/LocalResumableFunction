@@ -1,11 +1,11 @@
 ﻿using System.Linq.Expressions;
-using FastExpressionCompiler;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal partial class WaitsRepo : IWaitsRepo
@@ -16,6 +16,7 @@ internal partial class WaitsRepo : IWaitsRepo
     private readonly IMethodIdsRepo _methodIdsRepo;
     private readonly IResumableFunctionsSettings _settings;
     private readonly IWaitTemplatesRepo _waitTemplatesRepo;
+    private readonly IServiceRepo _serviceRepo;
 
     public WaitsRepo(
         ILogger<WaitsRepo> logger,
@@ -23,7 +24,8 @@ internal partial class WaitsRepo : IWaitsRepo
         WaitsDataContext context,
         IMethodIdsRepo methodIdentifierRepo,
         IResumableFunctionsSettings settings,
-        IWaitTemplatesRepo waitTemplatesRepo)
+        IWaitTemplatesRepo waitTemplatesRepo,
+        IServiceRepo serviceRepo)
     {
         _logger = logger;
         _context = context;
@@ -31,6 +33,7 @@ internal partial class WaitsRepo : IWaitsRepo
         _methodIdsRepo = methodIdentifierRepo;
         _settings = settings;
         _waitTemplatesRepo = waitTemplatesRepo;
+        _serviceRepo = serviceRepo;
     }
 
     public async Task<List<CallServiceImapction>> GetAffectedServicesAndFunctions(string methodUrn)
@@ -103,7 +106,7 @@ internal partial class WaitsRepo : IWaitsRepo
                 foreach (var wait in firstWaitItems)
                 {
                     wait.IsDeleted = true;
-                    if (wait is MethodWait { Name: Constants.TimeWaitName })
+                    if (wait is MethodWaitEntity { Name: Constants.TimeWaitName })
                     {
                         wait.LoadUnmappedProps();
                         _backgroundJobClient.Delete(wait.ExtraData.JobId);
@@ -127,11 +130,11 @@ internal partial class WaitsRepo : IWaitsRepo
     }
 
 
-    public async Task CancelSubWaits(int parentId, int pushedCallId)
+    public async Task CancelSubWaits(long parentId, long pushedCallId)
     {
         await CancelWaits(parentId);
 
-        async Task CancelWaits(int pId)
+        async Task CancelWaits(long pId)
         {
             var waits = await _context
                 .Waits
@@ -147,12 +150,12 @@ internal partial class WaitsRepo : IWaitsRepo
         }
     }
 
-    private void CancelWait(Wait wait, int pushedCallId)
+    private void CancelWait(WaitEntity wait, long pushedCallId)
     {
         wait.LoadUnmappedProps();
         wait.Cancel();
         wait.CallId = pushedCallId;
-        if (wait is MethodWait { Name: Constants.TimeWaitName })
+        if (wait is MethodWaitEntity { Name: Constants.TimeWaitName })
         {
             _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
@@ -161,7 +164,7 @@ internal partial class WaitsRepo : IWaitsRepo
         //wait.FunctionState.AddLog($"Wait [{wait.Name}] canceled.");
     }
 
-    public async Task<Wait> GetWaitParent(Wait wait)
+    public async Task<WaitEntity> GetWaitParent(WaitEntity wait)
     {
         if (wait?.ParentWaitId != null)
         {
@@ -199,7 +202,7 @@ internal partial class WaitsRepo : IWaitsRepo
         }
     }
 
-    public async Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait)
+    public async Task<WaitEntity> GetOldWaitForReplay(ReplayRequest replayWait)
     {
         var waitToReplay =
             await _context.Waits
@@ -225,15 +228,14 @@ internal partial class WaitsRepo : IWaitsRepo
             _logger.LogError(error);
             throw new Exception(error);
         }
-        await _context.SaveChangesAsync();
         return waitToReplay;
     }
 
 
-    public async Task<List<MethodWait>> GetWaitsForTemplate(
+    public async Task<List<MethodWaitEntity>> GetWaitsForTemplate(
         WaitTemplate template,
         string mandatoryPart,
-        params Expression<Func<MethodWait, object>>[] includes)
+        params Expression<Func<MethodWaitEntity, object>>[] includes)
     {
         var query = _context
             .MethodWaits

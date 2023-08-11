@@ -1,14 +1,13 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -24,6 +23,7 @@ internal class Scanner
     private readonly string _currentServiceName;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IServiceRepo _serviceRepo;
+    private readonly IScanStateRepo _scanStateRepo;
     private HashSet<string> _functionsUrns = new HashSet<string>();
 
     public Scanner(
@@ -35,7 +35,8 @@ internal class Scanner
         IBackgroundProcess backgroundJobClient,
         IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor,
-        IServiceRepo serviceRepo)
+        IServiceRepo serviceRepo,
+        IScanStateRepo scanStateRepo)
     {
         _logger = logger;
         _methodIdentifierRepo = methodIdentifierRepo;
@@ -47,13 +48,14 @@ internal class Scanner
         _currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
         _backgroundJobExecutor = backgroundJobExecutor;
         _serviceRepo = serviceRepo;
+        _scanStateRepo = scanStateRepo;
     }
 
     [DisplayName("Start Scanning Current Service")]
     public async Task Start()
     {
         await _backgroundJobExecutor.Execute(
-            $"Scanner_ScanningService_{_currentServiceName}",
+            $"ScanningService_{_currentServiceName}",
             async () =>
             {
                 await RegisterMethods(GetAssembliesToScan());
@@ -63,7 +65,6 @@ internal class Scanner
                 await _context.SaveChangesAsync();
             },
             $"Error when scan [{_currentServiceName}]", true);
-
     }
 
     private List<string> GetAssembliesToScan()
@@ -140,6 +141,8 @@ internal class Scanner
                 var dateBeforeScan = DateTime.Now;
                 if (await _serviceRepo.ShouldScanAssembly(assemblyPath) is false) continue;
 
+                await _scanStateRepo.ResetServiceScanState();
+
 
                 var assembly = Assembly.LoadFile(assemblyPath);
                 var serviceData = await _serviceRepo.GetServiceData(assembly.GetName().Name);
@@ -184,7 +187,7 @@ internal class Scanner
                 {
                     var methodData = new MethodData(method) { MethodType = MethodType.MethodWait };
 
-                    if (UrnDuplication(methodData.MethodUrn, method.GetFullName())) continue;
+                    if (CheckUrnDuplication(methodData.MethodUrn, method.GetFullName())) continue;
 
                     await _methodIdentifierRepo.AddWaitMethodIdentifier(methodData);
                     serviceData?.AddLog($"Adding method identifier {methodData}", LogType.Info, StatusCodes.Scanning);
@@ -194,7 +197,7 @@ internal class Scanner
                         $"Can't add method identifier [{method.GetFullName()}] since it does not match the criteria.", StatusCodes.MethodValidation, null);
             }
 
-            bool UrnDuplication(string methodUrn, string methodName)
+            bool CheckUrnDuplication(string methodUrn, string methodName)
             {
                 if (urns.Contains(methodUrn))
                 {
@@ -319,8 +322,8 @@ internal class Scanner
 
         if (resumableFunction.ReturnType != typeof(IAsyncEnumerable<Wait>) || resumableFunction.GetParameters().Length != 0)
             errors.Add(
-                $"The resumable function [{resumableFunction.GetFullName()}] must match the signature [IAsyncEnumerable<Wait> {resumableFunction.Name}()].\n" +
-                $"Must have no parameter and return type must be [IAsyncEnumerable<Wait>]");
+                $"The resumable function [{resumableFunction.GetFullName()}] must match the signature [IAsyncEnumerable<WaitX> {resumableFunction.Name}()].\n" +
+                $"Must have no parameter and return type must be [IAsyncEnumerable<WaitX>]");
 
         if (resumableFunction.IsStatic)
             errors.Add($"Resumable function [{resumableFunction.GetFullName()}] must be instance method.");

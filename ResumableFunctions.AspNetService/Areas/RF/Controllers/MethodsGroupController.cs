@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.AspNetService.DisplayObject;
 using ResumableFunctions.Handler.UiService;
-using System.Text.RegularExpressions;
 
 namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
 {

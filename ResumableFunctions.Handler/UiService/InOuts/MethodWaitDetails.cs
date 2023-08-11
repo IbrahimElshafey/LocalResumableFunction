@@ -1,13 +1,12 @@
 ﻿using ResumableFunctions.Handler.InOuts;
-using System.Linq.Expressions;
-using System.Text;
 
 namespace ResumableFunctions.Handler.UiService.InOuts
 {
     public class MethodWaitDetails
     {
-        public MethodWaitDetails(string name,
-            int id,
+        public MethodWaitDetails(
+            string name,
+            long id,
             WaitStatus status,
             string functionName,
             int instanceId,
@@ -41,9 +40,9 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public string MatchExpression { get; }
         public MatchStatus MatchStatus { get; }
         public string Name { get; }
-        public int Id { get; }
+        public long Id { get; }
         public WaitStatus Status { get; }
-        public int? CallId { get; set; }
+        public long? CallId { get; set; }
         public string GroupName { get; set; }
     }
 }

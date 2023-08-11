@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,8 @@ namespace ResumableFunctions.Publisher.Helpers
 {
     public static class Extensions
     {
+        private static IServiceProvider _serviceProvider;
+
         public static void AddResumableFunctionsPublisher(this IServiceCollection services, IPublisherSettings settings)
         {
             services.AddSingleton<IFailedRequestHandler, InMemoryFailedRequestHandler>();
@@ -20,21 +23,22 @@ namespace ResumableFunctions.Publisher.Helpers
 
         public static void UseResumableFunctionsPublisher(this IHost app)
         {
-            PublishMethodAspect.ServiceProvider = app.Services;
+            _serviceProvider = app.Services;
             var failedRequestsHandler = app.Services.GetService<IFailedRequestHandler>();
             failedRequestsHandler.HandleFailedRequests();
         }
 
+        public static object GetInstance(Type type)
+        {
+            if (_serviceProvider == null) return null;
+            return _serviceProvider.GetService(type) ??
+                ActivatorUtilities.CreateInstance(_serviceProvider, type);
+        }
+
         public static bool IsAsyncMethod(this MethodBase method)
         {
-            var attType = typeof(AsyncStateMachineAttribute);
-
-            // Obtain the custom attribute for the method. 
-            // The value returned contains the StateMachineType property. 
-            // Null is returned if the attribute isn't present for the method. 
-            var asyncAttr = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
-
-
+            var asyncAttr = method.GetCustomAttribute(typeof(AsyncStateMachineAttribute));
+            
             if (asyncAttr == null)
             {
                 return

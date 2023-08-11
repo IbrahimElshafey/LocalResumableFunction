@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal sealed class WaitsDataContext : DbContext
@@ -40,11 +41,11 @@ internal sealed class WaitsDataContext : DbContext
     public DbSet<WaitMethodIdentifier> WaitMethodIdentifiers { get; set; }
     public DbSet<ResumableFunctionIdentifier> ResumableFunctionIdentifiers { get; set; }
 
-    public DbSet<Wait> Waits { get; set; }
-    public DbSet<MethodWait> MethodWaits { get; set; }
+    public DbSet<WaitEntity> Waits { get; set; }
+    public DbSet<MethodWaitEntity> MethodWaits { get; set; }
     public DbSet<WaitTemplate> WaitTemplates { get; set; }
     public DbSet<MethodsGroup> MethodsGroups { get; set; }
-    public DbSet<FunctionWait> FunctionWaits { get; set; }
+    public DbSet<FunctionWaitEntity> FunctionWaits { get; set; }
 
     public DbSet<PushedCall> PushedCalls { get; set; }
     public DbSet<WaitProcessingRecord> WaitProcessingRecords { get; set; }
@@ -66,13 +67,14 @@ internal sealed class WaitsDataContext : DbContext
         ConfigurConcurrencyToken(modelBuilder);
         ConfigurSoftDeleteFilter(modelBuilder);
         base.OnModelCreating(modelBuilder);
+        //todo:other model creation options may be added by call `_settings.OnModelCreating(modelBuilder)`
     }
 
 
 
     private void ConfigurSoftDeleteFilter(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Wait>().HasQueryFilter(p => !p.IsDeleted);
+        modelBuilder.Entity<WaitEntity>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<ResumableFunctionState>().HasQueryFilter(p => !p.IsDeleted);
     }
 
@@ -103,7 +105,7 @@ internal sealed class WaitsDataContext : DbContext
 
     private void ConfigureWaits(ModelBuilder modelBuilder)
     {
-        var waitBuilder = modelBuilder.Entity<Wait>();
+        var waitBuilder = modelBuilder.Entity<WaitEntity>();
         waitBuilder
             .HasMany(x => x.ChildWaits)
             .WithOne(wait => wait.ParentWait)
@@ -112,30 +114,35 @@ internal sealed class WaitsDataContext : DbContext
 
         waitBuilder
             .HasIndex(x => x.Status)
-            .HasFilter($"{nameof(Wait.Status)} = {(int)WaitStatus.Waiting}")
+            .HasFilter($"{nameof(WaitEntity.Status)} = {(int)WaitStatus.Waiting}")
             .HasDatabaseName("Index_ActiveWaits");
 
         waitBuilder
+            .Property(x => x.Locals)
+            .HasConversion(
+                x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
+                y => JsonConvert.DeserializeObject(y));
+        waitBuilder
             .Property(x => x.Closure)
             .HasConversion(
-            x => JsonConvert.SerializeObject(x,
-                new JsonSerializerSettings { ContractResolver = IgnoreThisField.Instance }),
+            x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
             y => JsonConvert.DeserializeObject(y));
 
-        var methodWaitBuilder = modelBuilder.Entity<MethodWait>();
+        var methodWaitBuilder = modelBuilder.Entity<MethodWaitEntity>();
         methodWaitBuilder
           .Property(x => x.MethodToWaitId)
-          .HasColumnName(nameof(MethodWait.MethodToWaitId));
+          .HasColumnName(nameof(MethodWaitEntity.MethodToWaitId));
         methodWaitBuilder
           .Property(x => x.CallId)
-          .HasColumnName(nameof(MethodWait.CallId));
+          .HasColumnName(nameof(MethodWaitEntity.CallId));
 
-        modelBuilder.Entity<WaitsGroup>()
+
+        modelBuilder.Entity<WaitsGroupEntity>()
            .Property(mw => mw.GroupMatchFuncName)
-           .HasColumnName(nameof(WaitsGroup.GroupMatchFuncName));
+           .HasColumnName(nameof(WaitsGroupEntity.GroupMatchFuncName));
 
         modelBuilder.Ignore<ReplayRequest>();
-        modelBuilder.Ignore<TimeWait>();
+        modelBuilder.Ignore<TimeWaitEntity>();
     }
 
     private void ConfigureMethodWaitTemplate(ModelBuilder modelBuilder)
@@ -272,8 +279,9 @@ internal sealed class WaitsDataContext : DbContext
 
     private void SetServiceId(EntityEntry entry)
     {
-        if (entry.Entity is not IEntity entityInService || entry.State != EntityState.Added) return;
+        if (entry.Entity is not IEntity<int> and not IEntity<long> || entry.State != EntityState.Added) return;
 
+        dynamic entityInService = entry.Entity;
         switch (entityInService.ServiceId)
         {
             case > 0 when entityInService.ServiceId != _settings.CurrentServiceId:
@@ -284,7 +292,7 @@ internal sealed class WaitsDataContext : DbContext
             case > 0:
                 return;
             default:
-                Entry(entityInService).Property(x => x.ServiceId).CurrentValue = _settings.CurrentServiceId;
+                Entry(entityInService).Property(nameof(IEntity<int>.ServiceId)).CurrentValue = _settings.CurrentServiceId;
                 break;
         }
     }
@@ -296,8 +304,8 @@ internal sealed class WaitsDataContext : DbContext
             var waitsWithNoPath =
                 ChangeTracker
                 .Entries()
-                .Where(x => x.Entity is Wait { Path: null })
-                .Select(x => (Wait)x.Entity)
+                .Where(x => x.Entity is WaitEntity { Path: null })
+                .Select(x => (WaitEntity)x.Entity)
                 .ToList();
             foreach (var wait in waitsWithNoPath)
                 wait.Path = GetWaitPath(wait);
@@ -309,7 +317,7 @@ internal sealed class WaitsDataContext : DbContext
             _logger.LogError(ex, "Error when set waits paths.");
         }
 
-        string GetWaitPath(Wait wait)
+        string GetWaitPath(WaitEntity wait)
         {
             var path = $"/{wait.Id}";
             while (wait?.ParentWait != null)
@@ -336,7 +344,10 @@ internal sealed class WaitsDataContext : DbContext
                 entity.Logs.ForEach(logRecord =>
                 {
                     if (logRecord.EntityId is <= 0 or null)
-                        logRecord.EntityId = ((IEntity)entity).Id;
+                        if (entity is IEntity<int> entityInt)
+                            logRecord.EntityId = entityInt.Id;
+                        else if (entity is IEntity<long> entityLong)
+                            logRecord.EntityId = entityLong.Id;
                     logRecord.ServiceId = _settings.CurrentServiceId;
                 });
                 Logs.AddRange(entity.Logs.Where(x => x.Id == 0));
@@ -351,7 +362,7 @@ internal sealed class WaitsDataContext : DbContext
 
     private void NeverUpdateFirstWait(EntityEntry entityEntry)
     {
-        if (entityEntry.Entity is not Wait { IsFirst: true, IsRootNode: true, IsDeleted: false } wait) return;
+        if (entityEntry.Entity is not WaitEntity { IsFirst: true, IsRootNode: true, IsDeleted: false } wait) return;
 
         if (entityEntry.State == EntityState.Modified)
             entityEntry.State = EntityState.Unchanged;
@@ -382,11 +393,12 @@ internal sealed class WaitsDataContext : DbContext
                 entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
                 break;
             case EntityState.Added when entityEntry.Entity is IEntityWithUpdate:
-                entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
+                entityEntry.Property(nameof(IEntity<int>.Created)).CurrentValue = DateTime.Now;
                 entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
                 break;
-            case EntityState.Added when entityEntry.Entity is IEntity:
-                entityEntry.Property(nameof(IEntityWithUpdate.Created)).CurrentValue = DateTime.Now;
+            case EntityState.Added when entityEntry.Entity is IEntity<int>:
+            case EntityState.Added when entityEntry.Entity is IEntity<long>:
+                entityEntry.Property(nameof(IEntity<int>.Created)).CurrentValue = DateTime.Now;
                 break;
         }
     }

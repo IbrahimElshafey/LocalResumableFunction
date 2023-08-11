@@ -1,8 +1,7 @@
 ﻿using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler;
-using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
+using ResumableFunctions.Handler.BaseUse;
 
 namespace Tests
 {
@@ -41,6 +40,7 @@ namespace Tests
             instance.Method1("#");
             instance.Method1("#");
             Assert.Empty(await test.RoundCheck(24, 24, 24));
+            Assert.Equal(1, await test.GetTemplatesCount());
         }
 
         public class Test : ResumableFunctionsContainer

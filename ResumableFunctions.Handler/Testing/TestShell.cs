@@ -1,14 +1,12 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
-using AspectInjector.Broker;
 using FastExpressionCompiler;
 using Hangfire;
 using Medallion.Threading;
+using Medallion.Threading.WaitHandles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Core.Abstraction;
@@ -16,19 +14,20 @@ using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
-using static System.Net.Mime.MediaTypeNames;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.Testing
 {
     public class TestShell : IDisposable
     {
         public IHost CurrentApp { get; private set; }
+
+        private IDistributedSynchronizationHandle _lock;
         private readonly HostApplicationBuilder _builder;
         private readonly Type[] _types;
         private readonly TestSettings _settings;
         private readonly string _testName;
-        private IDistributedSynchronizationHandle _lock;
-        private const string Server = "(localdb)\\MSSQLLocalDB";
+        private IDistributedLockProvider _lockProvider = new WaitHandleDistributedSynchronizationProvider();
         public TestShell(string testName, params Type[] types)
         {
             _testName = testName;
@@ -37,11 +36,11 @@ namespace ResumableFunctions.Handler.Testing
             _types = types;
         }
 
-        public static async Task DeleteDb(string dbName)
+        public async Task DeleteDb(string dbName)
         {
             var dbConfig = new DbContextOptionsBuilder()
                 .UseSqlServer(
-                    $"Server={Server};Database={dbName};Trusted_Connection=True;TrustServerCertificate=True;");
+                    $"Server={_settings.Server};Database={dbName};Trusted_Connection=True;TrustServerCertificate=True;");
             var context = new DbContext(dbConfig.Options);
             try
             {
@@ -55,14 +54,12 @@ namespace ResumableFunctions.Handler.Testing
         }
 
         public IServiceCollection RegisteredServices => _builder.Services;
-
-        public async Task ScanTypes(params string[] functionsToIncludeInTest)
+        public async Task ScanTypes(params string[] functionsUrnsToIncludeInTest)
         {
             await DeleteDb(_testName);
             _builder.Services.AddResumableFunctionsCore(_settings);
             CurrentApp = _builder.Build();
-            var lockProvider = CurrentApp.Services.GetService<IDistributedLockProvider>();
-            _lock = await lockProvider.AcquireLockAsync("Test827556");
+            _lock = await _lockProvider.AcquireLockAsync("Test827556");
             GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(CurrentApp.Services));
 
             using var scope = CurrentApp.Services.CreateScope();
@@ -86,7 +83,7 @@ namespace ResumableFunctions.Handler.Testing
                 {
                     await scanner.RegisterFunctions(typeof(SubResumableFunctionAttribute), type, serviceData);
                     await context.SaveChangesAsync();
-                    await RegisterResumableFunctions(functionsToIncludeInTest, serviceData, scanner, type);
+                    await RegisterResumableFunctions(functionsUrnsToIncludeInTest, serviceData, scanner, type);
                 }
             await context.SaveChangesAsync();
             await context.DisposeAsync();
@@ -119,7 +116,7 @@ namespace ResumableFunctions.Handler.Testing
         {
 
             if (await HasErrors())
-            { 
+            {
                 return Context.Logs.First(x => x.Type == LogType.Error).Message;
             }
 
@@ -137,7 +134,7 @@ namespace ResumableFunctions.Handler.Testing
             return string.Empty;
         }
 
-        public async Task<int> SimulateMethodCall<TClassType>(
+        public async Task<long> SimulateMethodCall<TClassType>(
            Expression<Func<TClassType, object>> methodSelector,
            object output)
         {
@@ -155,7 +152,7 @@ namespace ResumableFunctions.Handler.Testing
             throw new Exception("Can't get input");
         }
 
-        public async Task<int> SimulateMethodCall<TClassType>(Expression<Func<TClassType, object>> methodSelector,
+        public async Task<long> SimulateMethodCall<TClassType>(Expression<Func<TClassType, object>> methodSelector,
             object input,
             object output)
         {
@@ -187,7 +184,7 @@ namespace ResumableFunctions.Handler.Testing
             var query = Context.FunctionStates.AsQueryable().AsNoTracking();
             if (includeNew is false)
             {
-                query = query.Where(x => x.Status != FunctionStatus.New);
+                query = query.Where(x => x.Status != FunctionInstanceStatus.New);
             }
             var instances = await query.ToListAsync();
             foreach (var instance in instances)
@@ -201,7 +198,7 @@ namespace ResumableFunctions.Handler.Testing
 
         public async Task<int> GetCompletedInstancesCount()
         {
-            return await Context.FunctionStates.CountAsync(x => x.Status == FunctionStatus.Completed);
+            return await Context.FunctionStates.CountAsync(x => x.Status == FunctionInstanceStatus.Completed);
         }
 
         public async Task<List<PushedCall>> GetPushedCalls()
@@ -220,7 +217,7 @@ namespace ResumableFunctions.Handler.Testing
         }
 
 
-        public async Task<List<Wait>> GetWaits(int? instanceId = null, bool includeFirst = false)
+        public async Task<List<WaitEntity>> GetWaits(int? instanceId = null, bool includeFirst = false)
         {
             var query = Context.Waits.AsQueryable().AsNoTracking();
             if (instanceId != null)
@@ -252,12 +249,17 @@ namespace ResumableFunctions.Handler.Testing
                     .AsNoTracking()
                     .AnyAsync();
         }
-
+        public async Task<int> GetTemplatesCount()
+        {
+            return await Context.WaitTemplates.CountAsync();
+        }
         public void Dispose()
         {
-            _lock.Dispose();
+            _lock?.Dispose();
             Context?.Dispose();
             CurrentApp?.Dispose();
         }
+
+
     }
 }

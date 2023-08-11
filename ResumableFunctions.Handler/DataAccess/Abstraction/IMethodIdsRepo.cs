@@ -1,4 +1,5 @@
 ﻿using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
@@ -8,7 +9,7 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
         Task AddWaitMethodIdentifier(MethodData methodData);
         Task<ResumableFunctionIdentifier> GetResumableFunction(int id);
         Task<ResumableFunctionIdentifier> GetResumableFunction(MethodData methodData);
-        Task<(int MethodId, int GroupId)> GetId(MethodWait methodWait);
+        Task<(int MethodId, int GroupId)> GetId(MethodWaitEntity methodWait);
         Task<WaitMethodIdentifier> GetMethodIdentifierById(int? methodWaitMethodToWaitId);
         Task<bool> CanPublishFromExternal(string methodUrn);
     }

@@ -1,6 +1,6 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests
@@ -38,7 +38,7 @@ namespace Tests
                         .WhenCancel(() => Counter += x - 1)
                         .AfterMatch(StaticAfterMatch),
                     Wait<string, string>(Method2, "Method 2")
-                        .MatchAll()
+                        .MatchAny()
                         .WhenCancel(() =>
                         {
                             Console.WriteLine("Method Two Cancel");

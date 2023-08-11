@@ -1,15 +1,29 @@
 ﻿@using ResumableFunctions.Handler.InOuts;
-@using ResumableFunctions.Handler.Expressions
-@model WaitsGroup
+@using ResumableFunctions.Handler.Expressions;
+@using ResumableFunctions.Handler.InOuts.Entities;
+@model WaitsGroupEntity
 <li>
-    <div class="w3-card w3-pale-blue w3-padding w3-round" onclick="toggleView('waits-in-group-@Model.Id')">
+    @*onclick="toggleView('waits-in-group-@Model.Id')"*@
+    <div class="w3-card w3-pale-blue w3-padding w3-round" >
         <h5 class="w3-text-indigo"><b>@Model.Name</b></h5>
         <span>@Model.WaitType</span>
         <span class="@Model.Status">@Model.Status</span>
         <br />
-        @if (Model.GroupMatchFuncName != null)
+      @*  @if (Model.GroupMatchFuncName != null)
         {
             <span><b>Match Exprssion: </b><span>@(new ExpressionSerializer().Deserialize(Model.GroupMatchFuncName).ToCSharpString())</span></span>
+        }*@
+        @{
+            var locals = Model.LocalsDisplay();
+        }
+        @if (locals is not null)
+        {
+            <span>
+                <b>Locals: </b>
+                <span class="JsonObject">
+                    @locals
+                </span>
+            </span>
         }
         <p></p>
     </div>

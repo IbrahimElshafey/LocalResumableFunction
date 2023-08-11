@@ -1,8 +1,7 @@
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Testing;
-using static Tests.ComplexApproval;
 
 namespace Tests;
 
@@ -47,7 +46,6 @@ public class ComplexApproval
         public const int CommitteeMembersCount = 3;
         public const int TopicsCount = 3;
         public int RequestId { get; set; }
-        public int CurrentTopicIndex { get; set; }
         public bool FinalDecision { get; set; }
 
         [ResumableFunctionEntryPoint("ComplexApproval")]
@@ -57,28 +55,29 @@ public class ComplexApproval
                 Wait<string, int>(RequestAdded, "Request Added")
                     .AfterMatch((request, requestId) => RequestId = requestId);
 
-            for (; CurrentTopicIndex < TopicsCount; CurrentTopicIndex++)
+            for (var currentTopicIndex = 0; currentTopicIndex < TopicsCount; currentTopicIndex++)
             {
                 yield return
-                    Wait($"Wait all committee approve topic {CurrentTopicIndex} or manager skip",
-                        AllCommitteeApproveTopic(),
-                        ChefSkipTopic())
+                    Wait($"Wait all committee approve topic {currentTopicIndex} or manager skip",
+                        AllCommitteeApproveTopic(currentTopicIndex),
+                        ChefSkipTopic(currentTopicIndex))
                         .MatchAny();
 
-                yield return ChefTopicApproval();
+                //closure is different than locals for this wait
+                yield return ChefTopicApproval(currentTopicIndex);
             }
 
             yield return await FinalApproval();
         }
 
-        private Wait ChefTopicApproval()
+        private Wait ChefTopicApproval(int chefTopicIndex)
         {
-            AskMemberToApproveTopic(RequestId, CurrentTopicIndex, MemberRole.Chef);
+            AskMemberToApproveTopic(RequestId, chefTopicIndex, MemberRole.Chef);
             return
-                Wait<RequestTopicIndex, string>(MemberApproveRequest, $"Chef Topic {CurrentTopicIndex} Approval")
+                Wait<RequestTopicIndex, string>(MemberApproveRequest, $"Chef Topic {chefTopicIndex} Approval")
                     .MatchIf((topicIndex, decision) =>
                         topicIndex.RequestId == RequestId &&
-                        topicIndex.TopicIndex == CurrentTopicIndex &&
+                        topicIndex.TopicIndex == chefTopicIndex &&
                         topicIndex.MemberRole == MemberRole.Chef)
                     .NothingAfterMatch();
         }
@@ -102,16 +101,16 @@ public class ComplexApproval
         }
 
 
-        private MethodWait ChefSkipTopic()
+        private Wait ChefSkipTopic(int chefSkipTopicIndex)
         {
             return Wait<RequestTopicIndex, string>
-                (ChefSkipTopic, $"Chef Skip Topic {CurrentTopicIndex} Approval")
+                (ChefSkipTopic, $"Chef Skip Topic {chefSkipTopicIndex} Approval")
                 .MatchIf((topicIndex, decision) =>
                     topicIndex.RequestId == RequestId &&
-                    topicIndex.TopicIndex == CurrentTopicIndex);
+                    topicIndex.TopicIndex == chefSkipTopicIndex);
         }
 
-        private Wait AllCommitteeApproveTopic()
+        private Wait AllCommitteeApproveTopic(int membersTopicIndex)
         {
             var waits = new Wait[3];
             int x = 10;
@@ -119,13 +118,13 @@ public class ComplexApproval
             for (var memberIndex = 0; memberIndex < CommitteeMembersCount; memberIndex++)
             {
                 currentRole = (MemberRole)memberIndex;
-                AskMemberToApproveTopic(RequestId, CurrentTopicIndex, currentRole);
+                AskMemberToApproveTopic(RequestId, membersTopicIndex, currentRole);
                 waits[memberIndex] =
                     Wait<RequestTopicIndex, string>(
-                        MemberApproveRequest, $"{currentRole} Topic {CurrentTopicIndex} Approval")
+                        MemberApproveRequest, $"{currentRole} Topic {membersTopicIndex} Approval")
                     .MatchIf((topicIndex, decision) =>
                         topicIndex.RequestId == RequestId &&
-                        topicIndex.TopicIndex == CurrentTopicIndex &&
+                        topicIndex.TopicIndex == membersTopicIndex &&
                         topicIndex.MemberRole == currentRole)
                     //.NothingAfterMatch()
                     .AfterMatch((input, output) =>
@@ -138,7 +137,7 @@ public class ComplexApproval
                     ;
             }
             Console.WriteLine(currentRole);
-            return Wait($"Wait All Committee to Approve Topic {CurrentTopicIndex}", waits);
+            return Wait($"Wait All Committee to Approve Topic {membersTopicIndex}", waits);
         }
 
 

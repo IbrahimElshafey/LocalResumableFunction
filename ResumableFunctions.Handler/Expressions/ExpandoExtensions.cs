@@ -4,14 +4,14 @@ using MessagePack.Resolvers;
 
 namespace ResumableFunctions.Handler.Expressions
 {
-    public static class ExpandoExtensions
+    internal static class ExpandoExtensions
     {
-        public static T Get<T>(this ExpandoObject _this, string path)
+        internal static T Get<T>(this ExpandoObject _this, string path)
         {
             var result = Get(_this, path);
             return (T)Convert.ChangeType(result, typeof(T));
         }
-        public static object Get(this ExpandoObject _this, string path)
+        internal static object Get(this ExpandoObject _this, string path)
         {
             var comparer = StringComparer.OrdinalIgnoreCase;
             var root = new Dictionary<string, object>(_this, comparer);
@@ -27,7 +27,7 @@ namespace ResumableFunctions.Handler.Expressions
             return result;
         }
 
-        public static void Set(this ExpandoObject _this, string index, object value)
+        internal static void Set(this ExpandoObject _this, string index, object value)
         {
             var root = (IDictionary<string, object>)_this;
             var parts = index.Split('.');
@@ -46,19 +46,19 @@ namespace ResumableFunctions.Handler.Expressions
             }
         }
 
-        public static T ToObject<T>(this ExpandoObject _this)
+        internal static T ToObject<T>(this ExpandoObject _this)
         {
             var blob = MessagePackSerializer.Serialize(_this, ContractlessStandardResolver.Options);
             return MessagePackSerializer.Deserialize<T>(blob, ContractlessStandardResolver.Options);
         }
 
-        public static object ToObject(this ExpandoObject _this, Type type)
+        internal static object ToObject(this ExpandoObject _this, Type type)
         {
             var blob = MessagePackSerializer.Serialize(_this, ContractlessStandardResolver.Options);
             return MessagePackSerializer.Deserialize(type, blob, ContractlessStandardResolver.Options);
         }
 
-        public static ExpandoObject ToExpando(this object _this)
+        internal static ExpandoObject ToExpando(this object _this)
         {
             var blob = MessagePackSerializer.Serialize(_this, ContractlessStandardResolver.Options);
             return MessagePackSerializer.Deserialize<ExpandoObject>(blob, ContractlessStandardResolver.Options);

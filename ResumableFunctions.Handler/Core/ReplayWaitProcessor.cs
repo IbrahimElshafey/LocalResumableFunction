@@ -5,6 +5,7 @@ using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -14,113 +15,122 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
     private readonly ILogger<ReplayWaitProcessor> _logger;
     private readonly IWaitsRepo _waitsRepo;
     private readonly IWaitTemplatesRepo _waitTemplatesRepo;
+    private readonly IServiceRepo _serviceRepo;
 
     public ReplayWaitProcessor(
         ILogger<ReplayWaitProcessor> logger,
         IWaitsRepo waitsRepo,
-        IWaitTemplatesRepo templatesRepo)
+        IWaitTemplatesRepo templatesRepo,
+        IServiceRepo serviceRepo)
     {
         _logger = logger;
         _waitsRepo = waitsRepo;
         _waitTemplatesRepo = templatesRepo;
+        _serviceRepo = serviceRepo;
     }
 
-    public async Task<(Wait Wait, bool ProceedExecution)> ReplayWait(ReplayRequest replayRequest)
+    public async Task<(WaitEntity Wait, bool ProceedExecution)> ReplayWait(ReplayRequest replayRequest)
     {
-        var oldWaitForReplay = await _waitsRepo.GetOldWaitForReplay(replayRequest);
-        if (oldWaitForReplay == null)
+        try
         {
-            var errorMsg = $"Replay failed because there is no wait to replay, replay request was ({replayRequest})";
-            _logger.LogWarning(errorMsg);
-            throw new Exception(errorMsg);
-        }
-
-        oldWaitForReplay.Status = oldWaitForReplay.Status == WaitStatus.Waiting ? WaitStatus.Canceled : oldWaitForReplay.Status;
-        oldWaitForReplay.CurrentFunction = replayRequest.CurrentFunction;
-        oldWaitForReplay.InCodeLine = replayRequest.InCodeLine;
-        oldWaitForReplay.CallerName = replayRequest.CallerName;
-
-        await _waitsRepo.CancelFunctionWaits(oldWaitForReplay.RequestedByFunctionId, oldWaitForReplay.FunctionStateId);
-
-        switch (replayRequest.ReplayType)
-        {
-            case ReplayType.GoAfter:
-                replayRequest.FunctionState?.AddLog(
-                    $"Try to go back after wait [{oldWaitForReplay.Name}].", LogType.Info, StatusCodes.Replay);
-                return new(oldWaitForReplay, true);
-
-            case ReplayType.GoBefore:
-                replayRequest.FunctionState?.AddLog(
-                    $"Try to go back before wait [{oldWaitForReplay.Name}].", LogType.Info, StatusCodes.Replay);
-                return new(await ReplayGoBefore(oldWaitForReplay), false);
-
-            case ReplayType.GoBeforeWithNewMatch:
-                replayRequest.FunctionState?.AddLog(
-                    $"Try to go back before wait [{oldWaitForReplay.Name}] with new match.", LogType.Info, StatusCodes.Replay);
-                return new(await ReplayGoBeforeWithNewMatch(replayRequest, oldWaitForReplay), false);
-
-            case ReplayType.GoTo:
-                replayRequest.FunctionState?.AddLog(
-                    $"Try go to wait [{oldWaitForReplay.Name}].", LogType.Info, StatusCodes.Replay);
-                return new(await GetWaitDuplication(oldWaitForReplay), false);
-
-            case ReplayType.GoToWithNewMatch:
-                replayRequest.FunctionState?.AddLog(
-                    $"Try go to wait [{oldWaitForReplay.Name}] with new match.", LogType.Info, StatusCodes.Replay);
-                return new(await GetWaitDuplicationWithNewMatch(replayRequest, oldWaitForReplay), false);
-
-            default:
-                var errorMsg = $"ReplayWait type not defined [{replayRequest}].";
-                _logger.LogWarning(errorMsg);
-                oldWaitForReplay.FunctionState?.AddError(errorMsg, StatusCodes.Replay, null);
-                throw new Exception(errorMsg);
-        }
-    }
-
-    private async Task<MethodWait> GetWaitDuplicationWithNewMatch(ReplayRequest replayRequest, Wait waitToReplay)
-    {
-        if (waitToReplay is MethodWait oldMethodWaitToReplay)
-        {
-            if (oldMethodWaitToReplay.Template == null)
+            var waitForReplayDb = await _waitsRepo.GetOldWaitForReplay(replayRequest);
+            if (waitForReplayDb == null)
             {
-                oldMethodWaitToReplay.Template = await _waitTemplatesRepo.GetWaitTemplateWithBasicMatch(oldMethodWaitToReplay.TemplateId);
+                var errorMsg = $"Replay failed because there is no wait to replay, replay request was ({replayRequest})";
+                _logger.LogWarning(errorMsg);
+                throw new Exception(errorMsg);
             }
-            oldMethodWaitToReplay.LoadExpressions();
 
-            if (ReplayMatchIsSameSignature(replayRequest, oldMethodWaitToReplay) is false)
+            waitForReplayDb.Status = waitForReplayDb.Status == WaitStatus.Waiting ? WaitStatus.Canceled : waitForReplayDb.Status;
+            waitForReplayDb.CurrentFunction = replayRequest.CurrentFunction;
+            waitForReplayDb.InCodeLine = replayRequest.InCodeLine;
+            waitForReplayDb.CallerName = replayRequest.CallerName;
+
+            await _waitsRepo.CancelFunctionWaits(waitForReplayDb.RequestedByFunctionId, waitForReplayDb.FunctionStateId);
+
+            switch (replayRequest.ReplayType)
+            {
+                case ReplayType.GoAfter:
+                    replayRequest.FunctionState?.AddLog(
+                        $"Try to go back after wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
+                    return new(waitForReplayDb, true);
+
+                case ReplayType.GoBefore:
+                    replayRequest.FunctionState?.AddLog(
+                        $"Try to go back before wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
+                    return new(await ReplayGoBefore(waitForReplayDb), false);
+
+                case ReplayType.GoBeforeWithNewMatch:
+                    replayRequest.FunctionState?.AddLog(
+                        $"Try to go back before wait [{waitForReplayDb.Name}] with new match.", LogType.Info, StatusCodes.Replay);
+                    return new(await ReplayGoBeforeWithNewMatch(replayRequest, waitForReplayDb), false);
+
+                case ReplayType.GoTo:
+                    replayRequest.FunctionState?.AddLog(
+                        $"Try go to wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
+                    return new(await GetWaitDuplication(waitForReplayDb), false);
+
+                case ReplayType.GoToWithNewMatch:
+                    replayRequest.FunctionState?.AddLog(
+                        $"Try go to wait [{waitForReplayDb.Name}] with new match.", LogType.Info, StatusCodes.Replay);
+                    return new(await ReplayGoToWithNewMatch(replayRequest, waitForReplayDb), false);
+
+                default:
+                    var errorMsg = $"ReplayWait type not defined [{replayRequest}].";
+                    _logger.LogWarning(errorMsg);
+                    waitForReplayDb.FunctionState?.AddError(errorMsg, StatusCodes.Replay, null);
+                    throw new Exception(errorMsg);
+            }
+        }
+        catch (Exception ex)
+        {
+            await _serviceRepo.AddErrorLog(ex, "Error when replay", StatusCodes.Replay);
+            throw;
+        }
+    }
+
+    private async Task<MethodWaitEntity> ReplayGoToWithNewMatch(ReplayRequest replayRequest, WaitEntity waitToReplayDb)
+    {
+        if (waitToReplayDb is MethodWaitEntity oldMethodWaitToReplayDb)
+        {
+            if (oldMethodWaitToReplayDb.Template == null)
+            {
+                oldMethodWaitToReplayDb.Template = await _waitTemplatesRepo.GetWaitTemplateWithBasicMatch(oldMethodWaitToReplayDb.TemplateId);
+            }
+            oldMethodWaitToReplayDb.LoadExpressions();
+
+            if (ReplayMatchIsSameSignature(replayRequest, oldMethodWaitToReplayDb) is false)
                 return null;
 
-            if (waitToReplay.DuplicateWait() is MethodWait duplicateWait)
+            if (waitToReplayDb.DuplicateWait() is MethodWaitEntity duplicateDbWait)
             {
-                duplicateWait.ActionOnChildrenTree(wait =>
-                {
-                    wait.Name += $"-Replay-{DateTime.Now.Ticks}";
-                    wait.IsReplay = true;
-                    wait.IsFirst = false;
-                    wait.CurrentFunction = (ResumableFunctionsContainer)duplicateWait.FunctionState.StateObject;
-                    wait.Status = WaitStatus.Waiting;
-                });
+                duplicateDbWait.Name += $"-Replay-{DateTime.Now.Ticks}";
+                duplicateDbWait.IsReplay = true;
+                duplicateDbWait.IsFirst = false;
+                duplicateDbWait.CurrentFunction = (ResumableFunctionsContainer)duplicateDbWait.FunctionState.StateObject;
+                duplicateDbWait.Status = WaitStatus.Waiting;
+
 
 
                 var template = await AddWaitTemplateIfNotExist(
                     replayRequest.MatchExpression,
-                    oldMethodWaitToReplay.AfterMatchAction,
-                    oldMethodWaitToReplay.CancelMethodAction,
+                    oldMethodWaitToReplayDb.AfterMatchAction,
+                    oldMethodWaitToReplayDb.CancelMethodAction,
                     replayRequest.RequestedByFunctionId,
-                    oldMethodWaitToReplay.MethodGroupToWaitId,
-                    oldMethodWaitToReplay.MethodToWaitId ?? 0,
+                    oldMethodWaitToReplayDb.MethodGroupToWaitId,
+                    oldMethodWaitToReplayDb.MethodToWaitId ?? 0,
                     replayRequest.CurrentFunction,
-                    oldMethodWaitToReplay.InCodeLine,
-                    duplicateWait);
-                duplicateWait.TemplateId = template.Id;
-                await _waitsRepo.SaveWait(duplicateWait);
-                return duplicateWait;
+                    oldMethodWaitToReplayDb.InCodeLine,
+                    duplicateDbWait);
+                duplicateDbWait.TemplateId = template.Id;
+                await _waitsRepo.SaveWait(duplicateDbWait);
+                return duplicateDbWait;
             }
         }
 
         var errorMsg = $"When the replay type is [{ReplayType.GoToWithNewMatch}]" +
-                       $"the wait to replay  must be of type [{nameof(MethodWait)}]";
-        waitToReplay.FunctionState.AddError(errorMsg, StatusCodes.Replay, null);
+                       $"the wait to replay  must be of type [{nameof(MethodWaitEntity)}]";
+        waitToReplayDb.FunctionState.AddError(errorMsg, StatusCodes.Replay, null);
         throw new Exception(errorMsg);
 
     }
@@ -134,18 +144,19 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         int methodId,
         object functionInstance,
         int inCodeLine,
-        MethodWait newReplayWait)
+        MethodWaitEntity newReplayWait)
     {
 
         var matchExpressionParts =
             new MatchExpressionWriter(matchExpression, functionInstance).MatchExpressionParts;
-        newReplayWait.SetClosure(matchExpressionParts.Closure);
+        if (matchExpressionParts.Closure != null)
+            newReplayWait.SetClosure(matchExpressionParts.Closure);
         newReplayWait.MandatoryPart = matchExpressionParts.GetInstanceMandatoryPart(functionInstance);
-        
+
         var expressionsHash =
             new ExpressionsHashCalculator(matchExpressionParts.MatchExpression, afterMatchAction, cancelMethodAction)
             .GetHash();
-        
+
         return
             await _waitTemplatesRepo.CheckTemplateExist(expressionsHash, funcId, groupId) ??
             await _waitTemplatesRepo.AddNewTemplate(
@@ -160,7 +171,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 matchExpressionParts);
     }
 
-    private async Task<Wait> GetWaitDuplication(Wait oldWaitToReplay)
+    private async Task<WaitEntity> GetWaitDuplication(WaitEntity oldWaitToReplay)
     {
         if (oldWaitToReplay.WasFirst)
         {
@@ -186,7 +197,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         return duplicateWait;
     }
 
-    private async Task<Wait> ReplayGoBefore(Wait oldCompletedWait)
+    private async Task<WaitEntity> ReplayGoBefore(WaitEntity oldCompletedWait)
     {
         if (oldCompletedWait.WasFirst)
         {
@@ -199,7 +210,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         var goBefore = await GoBefore(oldCompletedWait);
         if (goBefore.HasWait)
         {
-            var nextWaitAfterReplay = goBefore.Runner.Current;
+            var nextWaitAfterReplay = goBefore.Runner.CurrentWait;
             nextWaitAfterReplay.CopyCommonIds(oldCompletedWait);
             await _waitsRepo.SaveWait(nextWaitAfterReplay);
             return nextWaitAfterReplay;
@@ -211,52 +222,52 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         throw new Exception(errorMsg);
     }
 
-    private async Task<Wait> ReplayGoBeforeWithNewMatch(ReplayRequest replayWait, Wait oldWaitToReplay)
+    private async Task<WaitEntity> ReplayGoBeforeWithNewMatch(ReplayRequest replayWait, WaitEntity waitToReplayDb)
     {
-        if (oldWaitToReplay is MethodWait oldMethodWait)
+        if (waitToReplayDb is MethodWaitEntity oldMethodWait)
         {
-            var goBefore = await GoBefore(oldWaitToReplay);
-            if (goBefore is { HasWait: true, Runner.Current: MethodWait methodWaitToReplay })
+            var goBefore = await GoBefore(waitToReplayDb);
+            if (goBefore is { HasWait: true, Runner.CurrentWait: MethodWaitEntity methodWaitToReplayFresh })
             {
-                if (ReplayMatchIsSameSignature(replayWait, methodWaitToReplay) is false)
+                if (ReplayMatchIsSameSignature(replayWait, methodWaitToReplayFresh) is false)
                     return null;
 
 
                 var template = await AddWaitTemplateIfNotExist(
                      replayWait.MatchExpression,
-                     methodWaitToReplay.AfterMatchAction,
-                     methodWaitToReplay.CancelMethodAction,
+                     methodWaitToReplayFresh.AfterMatchAction,
+                     methodWaitToReplayFresh.CancelMethodAction,
                      oldMethodWait.RequestedByFunctionId,
                      oldMethodWait.MethodGroupToWaitId,
                      oldMethodWait.MethodToWaitId ?? 0,
                      replayWait.CurrentFunction,
                      oldMethodWait.InCodeLine,
-                     methodWaitToReplay);
+                     methodWaitToReplayFresh);
 
-                methodWaitToReplay.FunctionState = replayWait.FunctionState;
-                methodWaitToReplay.FunctionStateId = replayWait.FunctionStateId;
-                methodWaitToReplay.RequestedByFunction = oldWaitToReplay.RequestedByFunction;
-                methodWaitToReplay.RequestedByFunctionId = oldWaitToReplay.RequestedByFunctionId;
-                methodWaitToReplay.ParentWaitId = oldWaitToReplay.ParentWaitId;
-                methodWaitToReplay.TemplateId = template.Id;
-                await _waitsRepo.SaveWait(methodWaitToReplay);
-                return methodWaitToReplay;
+                methodWaitToReplayFresh.FunctionState = replayWait.FunctionState;
+                methodWaitToReplayFresh.FunctionStateId = replayWait.FunctionStateId;
+                methodWaitToReplayFresh.RequestedByFunction = waitToReplayDb.RequestedByFunction;
+                methodWaitToReplayFresh.RequestedByFunctionId = waitToReplayDb.RequestedByFunctionId;
+                methodWaitToReplayFresh.ParentWaitId = waitToReplayDb.ParentWaitId;
+                methodWaitToReplayFresh.TemplateId = template.Id;
+                await _waitsRepo.SaveWait(methodWaitToReplayFresh);
+                return methodWaitToReplayFresh;
             }
 
             const string errorMsg = "Replay Go Before with new match found no waits!!";
             _logger.LogError(errorMsg);
-            oldWaitToReplay.FunctionState.AddError(errorMsg, StatusCodes.Replay, null);
+            waitToReplayDb.FunctionState.AddError(errorMsg, StatusCodes.Replay, null);
             throw new Exception(errorMsg);
         }
 
         var message = $"When the replay type is [{ReplayType.GoBeforeWithNewMatch}]" +
-                      $"the wait to replay  must be of type [{nameof(MethodWait)}]";
+                      $"the wait to replay  must be of type [{nameof(MethodWaitEntity)}]";
         _logger.LogError(message, null, StatusCodes.Replay);
-        oldWaitToReplay.FunctionState.AddError(message, StatusCodes.Replay, null);
+        waitToReplayDb.FunctionState.AddError(message, StatusCodes.Replay, null);
         throw new Exception(message);
     }
 
-    private bool ReplayMatchIsSameSignature(ReplayRequest replayWait, MethodWait mw)
+    private bool ReplayMatchIsSameSignature(ReplayRequest replayWait, MethodWaitEntity mw)
     {
         var isSameSignature =
             CoreExtensions.SameMatchSignature(replayWait.MatchExpression, mw.MatchExpression);
@@ -266,14 +277,14 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         return true;
     }
 
-    private async Task<(FunctionRunner Runner, bool HasWait)> GoBefore(Wait oldCompletedWait)
+    private async Task<(FunctionRunner Runner, bool HasWait)> GoBefore(WaitEntity oldCompletedWait)
     {
         var runner = new FunctionRunner(oldCompletedWait.CurrentFunction,
-            oldCompletedWait.RequestedByFunction.MethodInfo, oldCompletedWait.StateBeforeWait);
+            oldCompletedWait.RequestedByFunction.MethodInfo, oldCompletedWait.StateBeforeWait, oldCompletedWait.Closure);
         var hasWait = await runner.MoveNextAsync();
         if (hasWait)
         {
-            var waitToReplay = runner.Current;
+            var waitToReplay = runner.CurrentWait;
             waitToReplay.ActionOnChildrenTree(wait =>
             {
                 wait.Name += $"-Replay-{DateTime.Now.Ticks}";

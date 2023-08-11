@@ -6,11 +6,3 @@ public enum MatchStatus
     Matched = 1,
     NotMatched = -1,
 }
-
-
-public enum ExecutionStatus
-{
-    NotStartedYet = 0,
-    ExecutionSucceeded = 1,
-    ExecutionFailed = -1,
-}

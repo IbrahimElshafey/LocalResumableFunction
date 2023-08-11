@@ -1,15 +1,6 @@
-﻿using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ResumableFunctions.Handler.Helpers
+﻿namespace ResumableFunctions.Handler.Helpers
 {
-    public static class StatusCodes
+    internal static class StatusCodes
     {
         public const int MethodValidation = 1;
         public const int Scanning = 2;
@@ -21,7 +12,7 @@ namespace ResumableFunctions.Handler.Helpers
         public const int DataCleaning = 9;
         public const int Custom = -1000;
 
-        public static Dictionary<int, string> StatusCodeNames = new Dictionary<int, string>
+        internal static Dictionary<int, string> StatusCodeNames = new Dictionary<int, string>
         {
             {-1, "Any"},
             {MethodValidation, "Method Validation"},
@@ -35,21 +26,6 @@ namespace ResumableFunctions.Handler.Helpers
             {DataCleaning, "Database Cleaning"},
         };
 
-        public static string NameOf(int errorCode) => StatusCodeNames[errorCode];
-    }
-
-    public class IgnoreThisField : DefaultContractResolver
-    {
-        public static IgnoreThisField Instance { get; } = new IgnoreThisField();
-
-        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
-        {
-            JsonProperty property = base.CreateProperty(member, memberSerialization);
-            if (member.Name.EndsWith("__this") || member.Name.Contains("<>"))
-            {
-                property.Ignored = true;
-            }
-            return property;
-        }
+        internal static string NameOf(int errorCode) => StatusCodeNames[errorCode];
     }
 }

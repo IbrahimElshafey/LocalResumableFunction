@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -63,7 +64,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
     public async Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData)
     {
         await using var lockHandle =
-            await _lockProvider.AcquireLockAsync($"ResumableFunction_{methodData.MethodUrn}");
+            await _lockProvider.AcquireLockAsync($"{_settings.CurrentWaitsDbName}_RF_{methodData.MethodUrn}");
         var inDb = await TryGetResumableFunction(methodData);
         if (inDb != null)
         {
@@ -80,7 +81,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
     public async Task AddWaitMethodIdentifier(MethodData methodData)
     {
         await using var waitHandle =
-            await _lockProvider.AcquireLockAsync($"MethodGroup_{methodData.MethodUrn}");
+            await _lockProvider.AcquireLockAsync($"{_settings.CurrentWaitsDbName}_MG_{methodData.MethodUrn}");
         var methodGroup =
             await _context
                 .MethodsGroups
@@ -140,7 +141,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
     }
 
 
-    public async Task<(int MethodId, int GroupId)> GetId(MethodWait methodWait)
+    public async Task<(int MethodId, int GroupId)> GetId(MethodWaitEntity methodWait)
     {
         if (methodWait.MethodGroupToWaitId != default && methodWait.MethodToWaitId != default)
             return (methodWait.MethodToWaitId ?? 0, methodWait.MethodGroupToWaitId);

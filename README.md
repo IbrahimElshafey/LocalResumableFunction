@@ -22,7 +22,7 @@ In the example below each [yield return] is a place for pause/resume function ex
 **Example** (this is not a pseudocode it's debuggable code):
 ``` C#
 [ResumableFunctionEntryPoint("ClientOnboardingWorkflow.StartClientOnboardingWorkflow")]
-internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
+internal async IAsyncEnumerable<WaitX> StartClientOnboardingWorkflow()
 {
     yield return WaitUserRegistration();
     OwnerTaskId = _service.AskOwnerToApproveClient(RegistrationResult.FormId);
@@ -75,30 +75,26 @@ The example below shows how to use resumable functions to implement a client onb
 With resumable function you can write this scenario like below:
 Just a few lines of codes that tells what happen!
 ``` C#
-[ResumableFunctionEntryPoint("ClientOnboardingWorkflow.StartClientOnboardingWorkflow")]
-internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
+[ResumableFunctionEntryPoint("ClientOnboardingWorkflowPublic.Start")]
+internal async IAsyncEnumerable<WaitX> StartClientOnboardingWorkflow()
 {
-    yield return WaitUserRegistration();
-    OwnerTaskId = _service.AskOwnerToApproveClient(RegistrationResult.FormId);
+    yield return WaitClientFillForm();
 
-    yield return WaitOwnerApproveClient();
-    if (OwnerApprovalInput.Decision is false)
-    {
-        _service.InformUserAboutRejection(RegistrationForm.UserId);
-    }
-    else if (OwnerApprovalInput.Decision)
-    {
-        _service.SendWelcomePackage(RegistrationForm.UserId);
-        ClientMeetingId = _service.SetupInitalMeetingAndAgenda(RegistrationForm.UserId);
+    yield return AskOwnerToApprove();
 
+    if (OwnerDecision is false)
+        _service.InformUserAboutRejection(UserId);
+            
+    else if (OwnerDecision is true)
+    {
+        _service.SendWelcomePackage(UserId);
         yield return WaitMeetingResult();
-        Console.WriteLine(MeetingResult);
     }
 
     Console.WriteLine("User Registration Done");
 }
 ```
-* The resumable function must match the signature `IAsyncEnumerable<Wait> FunctionName()`
+* The resumable function must match the signature `IAsyncEnumerable<WaitX> FunctionName()`
 * The class that contains the resumable function must inherit `ResumableFunctionsContainer` class.
 ```C#
 public class ClientOnboardingWorkflow : ResumableFunctionsContainer
@@ -221,9 +217,9 @@ builder.Services
  yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers);
  ....
 //method must have  `SubResumableFunction` attribute
-//Must return `IAsyncEnumerable<Wait>`
+//Must return `IAsyncEnumerable<WaitX>`
 [SubResumableFunction("WaitTwoManagers")]
-public async IAsyncEnumerable<Wait> WaitTwoManagers()
+public async IAsyncEnumerable<WaitX> WaitTwoManagers()
 {
 	//wait some code
 	.
@@ -233,7 +229,7 @@ public async IAsyncEnumerable<Wait> WaitTwoManagers()
 * `SubResumableFunction` Can wait another `SubResumableFunction` 
 ```C#
 [SubResumableFunction("SubFunction1")]
-public async IAsyncEnumerable<Wait> SubFunction1()
+public async IAsyncEnumerable<WaitX> SubFunction1()
 {
     yield return Wait<string, string>(Method1, "M1").MatchAll();
     yield return Wait("Wait sub function2", SubFunction2);

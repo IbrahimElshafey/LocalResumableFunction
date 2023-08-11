@@ -1,6 +1,5 @@
 ﻿using ResumableFunctions.Handler.Expressions;
-using ResumableFunctions.Handler.InOuts;
-using System.Linq.Expressions;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
@@ -16,7 +15,7 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
             string cancelMethodAction,
             string afterMatchAction,
             MatchExpressionParts matchExpressionParts);
-        Task<WaitTemplate> AddNewTemplate(byte[] hashResult, MethodWait methodWait);
+        Task<WaitTemplate> AddNewTemplate(byte[] hashResult, MethodWaitEntity methodWait);
         Task<WaitTemplate> CheckTemplateExist(byte[] hash, int funcId, int groupId);
         Task<List<WaitTemplate>> GetWaitTemplatesForFunction(int methodGroupId, int functionId);
         Task<WaitTemplate> GetById(int templateId);

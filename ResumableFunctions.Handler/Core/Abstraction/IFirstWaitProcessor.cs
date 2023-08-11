@@ -1,10 +1,10 @@
-﻿using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.Core.Abstraction
 {
     public interface IFirstWaitProcessor
     {
-        Task<MethodWait> CloneFirstWait(MethodWait firstMatchedMethodWait);
+        Task<MethodWaitEntity> CloneFirstWait(MethodWaitEntity firstMatchedMethodWait);
         Task RegisterFirstWait(int functionId);
     }
 }

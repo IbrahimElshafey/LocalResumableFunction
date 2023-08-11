@@ -1,7 +1,5 @@
 ﻿using FastExpressionCompiler;
-using ResumableFunctions.Handler.Helpers;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace ResumableFunctions.Handler.Expressions;
 

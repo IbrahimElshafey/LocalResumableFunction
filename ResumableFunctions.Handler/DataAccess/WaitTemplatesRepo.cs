@@ -3,8 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Expressions;
-using ResumableFunctions.Handler.InOuts;
-using System.Linq.Expressions;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -21,7 +20,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
         _context = _scope.ServiceProvider.GetService<WaitsDataContext>();
     }
 
-    public async Task<WaitTemplate> AddNewTemplate(byte[] hashResult, MethodWait methodWait)
+    public async Task<WaitTemplate> AddNewTemplate(byte[] hashResult, MethodWaitEntity methodWait)
     {
         return await AddNewTemplate(
             hashResult,

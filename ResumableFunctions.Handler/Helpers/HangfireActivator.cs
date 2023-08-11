@@ -5,7 +5,7 @@ namespace ResumableFunctions.Handler.Helpers;
 
 public class HangfireActivator : JobActivator
 {
-    private static IServiceProvider serviceProvider;
+    internal static IServiceProvider serviceProvider;
     public HangfireActivator(IServiceProvider serviceProvider)
     {
         HangfireActivator.serviceProvider = serviceProvider;

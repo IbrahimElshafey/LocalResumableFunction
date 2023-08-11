@@ -1,6 +1,6 @@
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
@@ -23,7 +23,7 @@ public class ReplayTests
         Assert.Equal(1, pushedCalls.Count);
         var instances = await test.GetInstances<GoAfterFunction>();
         Assert.Equal(1, instances.Count);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         Assert.Equal(2, (instances[0].StateObject as GoAfterFunction).Counter);
 
         var waits = await test.GetWaits();
@@ -50,7 +50,7 @@ public class ReplayTests
         Assert.Equal(3, pushedCalls.Count);
         var instances = await test.GetInstances<GoBeforeFunction>();
         Assert.Single(instances);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         Assert.Equal(20, (instances[0].StateObject as GoBeforeFunction).Counter);
         var waits = await test.GetWaits();
         Assert.Equal(3, waits.Count);
@@ -64,7 +64,7 @@ public class ReplayTests
         Assert.Equal(6, pushedCalls.Count);
         instances = await test.GetInstances<GoBeforeFunction>();
         Assert.Equal(2, instances.Count);
-        Assert.Equal(2, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(2, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         Assert.Equal(20, (instances[1].StateObject as GoBeforeFunction).Counter);
         waits = await test.GetWaits();
         Assert.Equal(6, waits.Count);
@@ -92,7 +92,7 @@ public class ReplayTests
         Assert.Equal(3, pushedCalls.Count);
         var instances = await test.GetInstances<GoBeforeWithNewMatchFunction>();
         Assert.Single(instances);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         Assert.Equal(20, (instances[0].StateObject as GoBeforeWithNewMatchFunction).Counter);
         var waits = await test.GetWaits();
         Assert.Equal(3, waits.Count);
@@ -107,7 +107,7 @@ public class ReplayTests
         Assert.Equal(6, pushedCalls.Count);
         instances = await test.GetInstances<GoBeforeWithNewMatchFunction>();
         Assert.Equal(2, instances.Count);
-        Assert.Equal(2, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(2, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         Assert.Equal(20, (instances[1].StateObject as GoBeforeWithNewMatchFunction).Counter);
         waits = await test.GetWaits();
         Assert.Equal(6, waits.Count);
@@ -136,7 +136,7 @@ public class ReplayTests
         Assert.Equal(3, pushedCalls.Count);
         var instances = await test.GetInstances<ReplayGoToFunction>();
         Assert.Single(instances);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         Assert.Equal(16, (instances[0].StateObject as ReplayGoToFunction).Counter);
         var waits = await test.GetWaits();
         Assert.Equal(3, waits.Count);
@@ -151,7 +151,7 @@ public class ReplayTests
         Assert.Equal(6, pushedCalls.Count);
         instances = await test.GetInstances<ReplayGoToFunction>();
         Assert.Equal(2, instances.Count);
-        Assert.Equal(2, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(2, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         Assert.Equal(16, (instances[1].StateObject as ReplayGoToFunction).Counter);
         waits = await test.GetWaits();
         Assert.Equal(6, waits.Count);
@@ -179,7 +179,7 @@ public class ReplayTests
         Assert.Equal(3, pushedCalls.Count);
         var instances = await test.GetInstances<GoToWithNewMatchFunction>();
         Assert.Single(instances);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         Assert.Equal(16, (instances[0].StateObject as GoToWithNewMatchFunction).Counter);
         var waits = await test.GetWaits();
         Assert.Equal(3, waits.Count);
@@ -194,7 +194,7 @@ public class ReplayTests
         Assert.Equal(6, pushedCalls.Count);
         instances = await test.GetInstances<GoToWithNewMatchFunction>();
         Assert.Equal(2, instances.Count);
-        Assert.Equal(2, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(2, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         Assert.Equal(16, (instances[1].StateObject as GoToWithNewMatchFunction).Counter);
         waits = await test.GetWaits();
         Assert.Equal(6, waits.Count);
@@ -212,7 +212,7 @@ public class ReplayTests
 
             Counter += 10;
             yield return
-                Wait<string, string>(Method2, "M2").MatchAll();
+                Wait<string, string>(Method2, "M2").MatchAny();
 
             if (Counter < 20)
                 yield return GoBackBefore<string, string>("M2", (input, output) => input == "Back");
@@ -251,7 +251,7 @@ public class ReplayTests
 
             Counter += 10;
             yield return
-                Wait<string, string>(Method2, "M2").MatchAll();
+                Wait<string, string>(Method2, "M2").MatchAny();
 
             if (Counter < 20)
                 yield return GoBackBefore("M2");
@@ -274,7 +274,13 @@ public class ReplayTests
             Counter += 10;
             var x = 5;
             yield return
-                Wait<string, string>(Method2, "M2").MatchAll();
+                Wait<string, string>(Method2, "M2")
+                .MatchAny()
+                .AfterMatch((_, _) =>
+                {
+                    if (x != 5 && x != 10)
+                        throw new Exception("Closure continuation problem.");
+                });
 
             Counter += 3;
             x *= 2;
@@ -299,7 +305,7 @@ public class ReplayTests
 
             Counter += 10;
             yield return
-                Wait<string, string>(Method2, "M2").MatchAll();
+                Wait<string, string>(Method2, "M2").MatchAny();
 
             Counter += 3;
 

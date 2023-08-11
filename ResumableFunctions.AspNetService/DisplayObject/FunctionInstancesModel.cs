@@ -8,8 +8,8 @@ namespace ResumableFunctions.AspNetService.DisplayObject
         public string FunctionName { get; set; }
         public List<FunctionInstanceInfo> Instances { get; set; }
 
-        public int InProgressCount => Instances.Count(x => x.FunctionState.Status == FunctionStatus.InProgress);
-        public int FailedCount => Instances.Count(x => x.FunctionState.Status == FunctionStatus.InError);
-        public int CompletedCount => Instances.Count(x => x.FunctionState.Status == FunctionStatus.Completed);
+        public int InProgressCount => Instances.Count(x => x.FunctionState.Status == FunctionInstanceStatus.InProgress);
+        public int FailedCount => Instances.Count(x => x.FunctionState.Status == FunctionInstanceStatus.InError);
+        public int CompletedCount => Instances.Count(x => x.FunctionState.Status == FunctionInstanceStatus.Completed);
     }
 }

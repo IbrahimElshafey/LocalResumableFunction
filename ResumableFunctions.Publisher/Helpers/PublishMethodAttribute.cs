@@ -11,17 +11,15 @@ namespace ResumableFunctions.Publisher.Helpers
     [Injection(typeof(PublishMethodAspect), Inherited = true)]
     public sealed class PublishMethodAttribute : Attribute
     {
-        public PublishMethodAttribute(string methodIdentifier)
+        public PublishMethodAttribute(string methodUrn)
         {
-            if (string.IsNullOrWhiteSpace(methodIdentifier))
-                throw new ArgumentNullException("MethodIdentifier can't be null or empty.");
-            MethodIdentifier = methodIdentifier;
+            MethodUrn = methodUrn;
         }
 
         /// <summary>
         /// used to enable developer to change method name an parameters and keep point to the old one
         /// </summary>
-        public string MethodIdentifier { get; }
+        public string MethodUrn { get; }
         public string ToService { get; set; }
         public override object TypeId => "c0a6b0c2-c79f-427b-a66a-8df59076e3ff";
     }

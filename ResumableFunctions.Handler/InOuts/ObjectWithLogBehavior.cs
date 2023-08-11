@@ -1,8 +1,10 @@
-﻿namespace ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts.Entities;
 
-public static class ObjectWithLogBehavior
+namespace ResumableFunctions.Handler.InOuts;
+
+internal static class ObjectWithLogBehavior
 {
-    public static bool HasErrors(this IObjectWithLog _this) => _this.Logs.Any(x => x.Type == LogType.Error);
+    internal static bool HasErrors(this IObjectWithLog _this) => _this.Logs.Any(x => x.Type == LogType.Error);
 
     internal static void AddLog(this IObjectWithLog _this, string message, LogType logType, int code)
     {
@@ -28,7 +30,6 @@ public static class ObjectWithLogBehavior
             Created = DateTime.Now,
         };
         _this.Logs.Add(logRecord);
-        _this.ErrorCounter++;
         if (ex != null)
         {
             logRecord.Message += $"\n{ex}";

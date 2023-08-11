@@ -1,5 +1,4 @@
-﻿using Hangfire;
-using ResumableFunctions.Handler.Core.Abstraction;
+﻿using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using System.ComponentModel;

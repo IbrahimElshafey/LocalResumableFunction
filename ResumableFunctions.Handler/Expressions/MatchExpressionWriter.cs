@@ -1,18 +1,12 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection;
-using System.Xml.Linq;
 using FastExpressionCompiler;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.InOuts;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Expressions;
 public partial class MatchExpressionWriter : ExpressionVisitor
 {
     private LambdaExpression _matchExpression;
-
     private readonly object _currentFunctionInstance;
     private readonly List<ExpressionPart> _expressionParts = new();
 
@@ -50,7 +44,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         Expression closure = null;
         changeClosureVarsVisitor.OnVisitConstant(node =>
         {
-            if (node.Type.Name.StartsWith("<>c__DisplayClass"))
+            if (node.Type.Name.StartsWith(Constants.CompilerClosurePrefix))
             {
                 closure = node;
                 return _matchExpression.Parameters[3];
@@ -69,25 +63,28 @@ public partial class MatchExpressionWriter : ExpressionVisitor
     private void ChangeSignature()
     {
         var expression = _matchExpression;
+        var inputArg = Parameter(_matchExpression.Parameters[0].Type, "input");
+        var outputArg = Parameter(_matchExpression.Parameters[1].Type, "output");
         var functionInstanceArg = Parameter(_currentFunctionInstance.GetType(), "functionInstance");
         var closureType = GetClosureType();
-        var localVarsArg = Parameter(closureType, "locals");
+        var localVarsArg = Parameter(closureType, "closure");
         var changeParameterVisitor = new GenericVisitor();
         changeParameterVisitor.OnVisitConstant(OnVisitConstant);
-        var updatedBoy = (LambdaExpression)changeParameterVisitor.Visit(_matchExpression);
+        changeParameterVisitor.OnVisitParameter(OnVisitParameter);
+        var updatedBoy = changeParameterVisitor.Visit(_matchExpression.Body);
         var functionType = typeof(Func<,,,,>)
             .MakeGenericType(
-                updatedBoy.Parameters[0].Type,
-                updatedBoy.Parameters[1].Type,
+                inputArg.Type,
+                outputArg.Type,
                 _currentFunctionInstance.GetType(),
                 closureType,
                 typeof(bool));
 
         _matchExpression = Lambda(
             functionType,
-            updatedBoy.Body,
-            expression.Parameters[0],
-            expression.Parameters[1],
+            updatedBoy,
+            inputArg,
+            outputArg,
             functionInstanceArg,
             localVarsArg
             );
@@ -97,6 +94,14 @@ public partial class MatchExpressionWriter : ExpressionVisitor
             if (node.Value == _currentFunctionInstance)
                 return functionInstanceArg;
             return base.VisitConstant(node);
+        }
+        Expression OnVisitParameter(ParameterExpression parameter)
+        {
+            if (parameter == _matchExpression.Parameters[0])
+                return inputArg;
+            if (parameter == _matchExpression.Parameters[1])
+                return outputArg;
+            return base.VisitParameter(parameter);
         }
     }
 
@@ -109,7 +114,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         getClosureTypeVisitor.Visit(_matchExpression);
         Expression OnVisitConstant(ConstantExpression node)
         {
-            if (node.Type.Name.StartsWith("<>c__DisplayClass"))
+            if (node.Type.Name.StartsWith(Constants.CompilerClosurePrefix))
                 result = node.Type;
             return base.VisitConstant(node);
         }
@@ -134,7 +139,6 @@ public partial class MatchExpressionWriter : ExpressionVisitor
 
             if (node.NodeType == ExpressionType.Equal)
             {
-                //todo:replace IsUseParameters with UseUseParametersOnly
                 if (CanConvertToSimpleString(node.Left) && IsInputOutputExpression(node.Right, out _))
                     _expressionParts.Add(new(node, node.Right, node.Left));
                 else if (CanConvertToSimpleString(node.Right) && IsInputOutputExpression(node.Left, out _))
@@ -319,15 +323,15 @@ public partial class MatchExpressionWriter : ExpressionVisitor
         checkUseParamter.OnVisitParameter(param =>
         {
             if (param == _matchExpression.Parameters[0] || param == _matchExpression.Parameters[1])
-                paramtersUseCount += 1;
+                paramtersUseCount++;
             if (param == _matchExpression.Parameters[2] || param == _matchExpression.Parameters[3])
-                otherVars += 1;
+                otherVars++;
             return param;
         });
         checkUseParamter.OnVisitConstant(constant =>
         {
-            if (constant.Type.Name.StartsWith("<>c__DisplayClass"))
-                otherVars += 1;
+            if (constant.Type.Name.StartsWith(Constants.CompilerClosurePrefix))
+                otherVars++;
             return constant;
         });
         checkUseParamter.Visit(expression);

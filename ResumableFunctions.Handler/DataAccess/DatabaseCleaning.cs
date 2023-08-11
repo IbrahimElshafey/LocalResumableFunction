@@ -1,9 +1,9 @@
-﻿using Hangfire;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess
 {
@@ -30,7 +30,7 @@ namespace ResumableFunctions.Handler.DataAccess
 
             var instanceIds =
                 await _context.FunctionStates
-                .Where(instance => instance.Status == FunctionStatus.Completed && instance.Modified < dateThreshold)
+                .Where(instance => instance.Status == FunctionInstanceStatus.Completed && instance.Modified < dateThreshold)
                 .Select(x => x.Id)
                 .ToListAsync();
             int count = 0;

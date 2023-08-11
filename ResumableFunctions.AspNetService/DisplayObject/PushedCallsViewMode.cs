@@ -1,4 +1,4 @@
-﻿using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts.Entities;
 using ResumableFunctions.Handler.UiService.InOuts;
 
 namespace ResumableFunctions.AspNetService.DisplayObject

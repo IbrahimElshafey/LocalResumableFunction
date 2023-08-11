@@ -2,10 +2,10 @@
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.InOuts;
 using System.Reflection;
-using System.Runtime;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -67,8 +67,6 @@ internal class ServiceRepo : IServiceRepo
             serviceData.AddError(message, StatusCodes.Scanning, null);
             return false;
         }
-
-        serviceData.ErrorCounter = 0;
 
         if (serviceData.ParentId == -1)
         {

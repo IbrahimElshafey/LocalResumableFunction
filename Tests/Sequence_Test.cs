@@ -1,5 +1,6 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
@@ -45,9 +46,22 @@ public class Sequence
         [ResumableFunctionEntryPoint("ThreeMethodsSequence")]
         public async IAsyncEnumerable<Wait> ThreeMethodsSequence()
         {
-            yield return Wait<string, string>(Method1, "M1");
-            yield return Wait<string, string>(Method2, "M2").MatchAll();
-            yield return Wait<string, string>(Method3, "M3").MatchAll();
+            int x = 1;
+            yield return Wait<string, string>(Method1, "M1")
+                .AfterMatch((_, _) => x++);
+            //x++;
+            if (x != 2)
+                throw new Exception("Closure not continue");
+            x++;
+            yield return Wait<string, string>(Method2, "M2").MatchAny();
+            x++;
+            if (x != 4)
+                throw new Exception("Closure not continue");
+            x++;
+            yield return Wait<string, string>(Method3, "M3").MatchAny();
+            x++;
+            if (x != 6)
+                throw new Exception("Closure not continue");
             await Task.Delay(100);
         }
 

@@ -4,7 +4,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
     {
-        switch (12)
+        switch (15)
         {
             case 1:
                 TestTreeCascadeAction(); break;
@@ -41,6 +41,9 @@ internal class Program
                 break;
             case 14:
                 new LambdaExamples().Run();
+                break;
+            case 15:
+                new RecursiveFillStackTest().Run();
                 break;
         }
 

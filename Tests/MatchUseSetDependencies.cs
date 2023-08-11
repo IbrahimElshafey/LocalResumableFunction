@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using ResumableFunctions.Handler;
+﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
@@ -26,7 +26,7 @@ public class MatchUseSetDependencies
         Assert.Equal(1, pushedCalls.Count);
         var instances = await test.GetInstances<TestClass>();
         Assert.Equal(1, instances.Count);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionStatus.Completed));
+        Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
     }
 
     public class TestClass : ResumableFunctionsContainer

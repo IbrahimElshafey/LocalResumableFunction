@@ -1,25 +1,54 @@
 ﻿using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.Expressions;
-using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler;
-using System.Dynamic;
 using System.Reflection.Emit;
 using System.Linq.Expressions;
-using System.IO;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace Tests
 {
     public class MatchRewriteTests
     {
+
+        [Fact]
+        void ClosureTest1()
+        {
+            int x = 10;
+            Action action1 = () => x += 10;
+            Action action2 = () => x += 20;
+
+            action1();
+            action2();
+            Assert.Equal(40, x);
+        }
+
         [Fact]
         public void One()
         {
+
             //(x, y) => x.Id == InstanceId + 20
             var wait = new Test() { InstanceId = 10 }.PublicPropsUseInMatch(MatchExpressionType.One);
             var parts = wait.MatchExpressionParts;
             Assert.NotNull(parts.InstanceMandatoryPartExpression);
             Assert.NotNull(parts.CallMandatoryPartExpression);
             Assert.Null(parts.Closure);
+            Assert.True(parts.IsMandatoryPartFullMatch);
+            Assert.Equal(
+               parts.GetPushedCallMandatoryPart(new MethodInput { Id = 30 }, null),
+               parts.GetInstanceMandatoryPart(wait.CurrentFunction));
+            Assert.NotEqual(
+               parts.GetPushedCallMandatoryPart(new MethodInput { Id = 40 }, null),
+               parts.GetInstanceMandatoryPart(wait.CurrentFunction));
+        }
+
+        [Fact]
+        public void OneClosure()
+        {
+            //(x, y) => x.Id == instanceId + 20
+            var wait = new Test().UseClosureInMatch(MatchExpressionType.One);
+            var parts = wait.MatchExpressionParts;
+            Assert.NotNull(parts.InstanceMandatoryPartExpression);
+            Assert.NotNull(parts.CallMandatoryPartExpression);
+            Assert.NotNull(parts.Closure);
             Assert.True(parts.IsMandatoryPartFullMatch);
             Assert.Equal(
                parts.GetPushedCallMandatoryPart(new MethodInput { Id = 30 }, null),
@@ -38,6 +67,18 @@ namespace Tests
             Assert.Null(parts.InstanceMandatoryPartExpression);
             Assert.Null(parts.CallMandatoryPartExpression);
             Assert.Null(parts.Closure);
+            Assert.False(parts.IsMandatoryPartFullMatch);
+        }
+
+        [Fact]
+        public void TwoClosure()
+        {
+            //(x, y) => !(y.TaskId == instanceId + 10 && x.Id > 12)
+            var wait = new Test().UseClosureInMatch(MatchExpressionType.Two);
+            var parts = wait.MatchExpressionParts;
+            Assert.Null(parts.InstanceMandatoryPartExpression);
+            Assert.Null(parts.CallMandatoryPartExpression);
+            Assert.NotNull(parts.Closure);
             Assert.False(parts.IsMandatoryPartFullMatch);
         }
 
@@ -126,6 +167,7 @@ namespace Tests
               parts.GetInstanceMandatoryPart(wait.CurrentFunction));
         }
 
+
         [Fact]
         public void Nine()
         {
@@ -198,38 +240,105 @@ namespace Tests
             Assert.True(parts.IsMandatoryPartFullMatch);
         }
 
+        [Fact]
+        public void Fourteen()
+        {
+            //(x, y) => !x.IsMan
+            var wait = new Test().PublicPropsUseInMatch(MatchExpressionType.Fourteen);
+            var parts = wait.MatchExpressionParts;
+            Assert.Null(parts.InstanceMandatoryPartExpression);
+            Assert.Null(parts.CallMandatoryPartExpression);
+            Assert.Null(parts.Closure);
+            Assert.False(parts.IsMandatoryPartFullMatch);
+        }
+
+        [Fact]
+        public void Fifteen()
+        {
+            //(x, y) => 11 + 1 == 12
+            var wait = new Test().PublicPropsUseInMatch(MatchExpressionType.Fifteen);
+            var parts = wait.MatchExpressionParts;
+            Assert.Null(parts.InstanceMandatoryPartExpression);
+            Assert.Null(parts.CallMandatoryPartExpression);
+            Assert.Null(parts.Closure);
+            Assert.False(parts.IsMandatoryPartFullMatch);
+        }
+
+        [Fact]
+        public void Sixteen()
+        {
+            /*(x, y) =>
+                (!(y.TaskId == InstanceId + 10 && x.Id > 12) &&
+                x.Id == InstanceId + 20 &&
+                y.DateProp == DateTime.Today &&
+                y.ByteArray == new byte[] { 12, 13, 14, 15, } ||
+                y.IntArray[0] == IntArrayMethod()[2] ||
+                y.IntArray == IntArrayMethod()) &&
+                11 + 1 == 12 &&
+                y.GuidProp == new Guid("ab62534b-2229-4f42-8f4e-c287c82ec760") &&
+                y.EnumProp == (StackBehaviour.Pop1 | StackBehaviour.Pop1_pop1) &&
+                true | false && x.Id == InstanceId &&
+                y.EnumProp == StackBehaviour.Popi_popi_popi && x.IsMan &&
+                x.Name == "Mohamed"
+            */
+            var wait = new Test().PublicPropsUseInMatch(MatchExpressionType.Sixteen);
+            var parts = wait.MatchExpressionParts;
+            Assert.NotNull(parts.InstanceMandatoryPartExpression);
+            Assert.NotNull(parts.CallMandatoryPartExpression);
+            Assert.Null(parts.Closure);
+            Assert.True(parts.IsMandatoryPartFullMatch);
+        }
+
         public class Test : ResumableFunctionsContainer
         {
             public int InstanceId { get; set; } = 5;
             public bool IsChild { get; set; }
 
-            [PushCall("TestMethodOne")]
-            private int TestMethodOne(string input) => input.Length;
+            //[PushCall("TestMethodOne")]
+            //private int TestMethodOne(string input) => input.Length;
 
             [PushCall("TestMethodTwo")]
             private MethodOutput TestMethodTwo(MethodInput input) => new MethodOutput { TaskId = input.Id };
 
-            public MethodWait UseClosureInMatch()
+            public MethodWaitEntity UseClosureInMatch(MatchExpressionType matchExpressionType)
             {
-                var methodWait = new MethodWait<string, int>(TestMethodOne)
-                            .MatchIf((x, y) => y == InstanceId || x == (InstanceId + 10).ToString() && y <= Math.Max(10, 100))
-                            .AfterMatch((input, output) => InstanceId = output);
-                methodWait.CurrentFunction = this;
-                return methodWait;
+                int instanceId = 10;
+                Expression<Func<MethodInput, MethodOutput, bool>> matchExpression = matchExpressionType
+                switch
+                {
+                    MatchExpressionType.One => (x, y) => x.Id == instanceId + 20,
+                    MatchExpressionType.Two => (x, y) => !(y.TaskId == instanceId + 10 && x.Id > 12),
+                    MatchExpressionType.Three => throw new NotImplementedException(),
+                    MatchExpressionType.Four => throw new NotImplementedException(),
+                    MatchExpressionType.Five => throw new NotImplementedException(),
+                    MatchExpressionType.Six => throw new NotImplementedException(),
+                    MatchExpressionType.Eight => throw new NotImplementedException(),
+                    MatchExpressionType.Nine => throw new NotImplementedException(),
+                    MatchExpressionType.Ten => throw new NotImplementedException(),
+                    MatchExpressionType.Eleven => throw new NotImplementedException(),
+                    MatchExpressionType.Twelve => throw new NotImplementedException(),
+                    MatchExpressionType.Thirteen => throw new NotImplementedException(),
+                    MatchExpressionType.Fourteen => throw new NotImplementedException(),
+                    MatchExpressionType.Fifteen => throw new NotImplementedException(),
+                    MatchExpressionType.Sixteen => throw new NotImplementedException()
+                };
+                return new MethodWaitEntity<MethodInput, MethodOutput>(TestMethodTwo)
+                {
+                    CurrentFunction = this
+                }
+                 .MatchIf(matchExpression)
+                 .AfterMatch((input, output) => InstanceId = output.TaskId);
             }
 
             private int[] IntArrayMethod() => new int[] { 12, 13, 14, 15, };
-            public MethodWait PublicPropsUseInMatch(MatchExpressionType matchExpressionType)
+            public MethodWaitEntity PublicPropsUseInMatch(MatchExpressionType matchExpressionType)
             {
-                var localVariable = GetString();
-                var wait = new MethodWait<MethodInput, MethodOutput>(TestMethodTwo);
-                wait.CurrentFunction = this;
-                var methodWait =
-                    wait
-                    .MatchIf(GetMatchExprssion(matchExpressionType))
-                    .AfterMatch((input, output) => InstanceId = output.TaskId);
-                methodWait.CurrentFunction = this;
-                return methodWait;
+                return new MethodWaitEntity<MethodInput, MethodOutput>(TestMethodTwo)
+                {
+                    CurrentFunction = this
+                }
+                .MatchIf(GetMatchExprssion(matchExpressionType))
+                .AfterMatch((input, output) => InstanceId = output.TaskId);
             }
 
             private Expression<Func<MethodInput, MethodOutput, bool>> GetMatchExprssion(MatchExpressionType matchExpressionType)
@@ -260,23 +369,27 @@ namespace Tests
                         return (x, y) => InstanceMethod(x.Id) == InstanceId;
                     case MatchExpressionType.Thirteen:
                         return (x, y) => Math.Min(x.Id, 100) == InstanceId;
-                    default:
-                        break;
-                }
-                return (x, y) =>
-                           //!(y.TaskId == InstanceId + 10 &&
-                           //x.Id > 12) &&
+                    case MatchExpressionType.Fourteen:
+                        return (x, y) => !x.IsMan;
+                    case MatchExpressionType.Fifteen:
+                        return (x, y) => 11 + 1 == 12;
+                    case MatchExpressionType.Sixteen:
+                        return (x, y) =>
+                           (!(y.TaskId == InstanceId + 10 && x.Id > 12) &&
                            x.Id == InstanceId + 20 &&
-                           //y.DateProp == DateTime.Today &&
-                           //y.ByteArray == new byte[] { 12, 13, 14, 15, } ||
-                           //y.IntArray[0] == IntArrayMethod()[2] ||
-                           //y.IntArray == IntArrayMethod() &&
-                           //11 + 1 == 12 &&
-                           //y.GuidProp == new Guid("ab62534b-2229-4f42-8f4e-c287c82ec760") &&
-                           y.EnumProp == (StackBehaviour.Pop1 | StackBehaviour.Pop1_pop1) ||
+                           y.DateProp == DateTime.Today &&
+                           y.ByteArray == new byte[] { 12, 13, 14, 15, } ||
+                           y.IntArray[0] == IntArrayMethod()[2] ||
+                           y.IntArray == IntArrayMethod()) &&
+                           11 + 1 == 12 &&
+                           y.GuidProp == new Guid("ab62534b-2229-4f42-8f4e-c287c82ec760") &&
+                           y.EnumProp == (StackBehaviour.Pop1 | StackBehaviour.Pop1_pop1) &&
                            true | false && x.Id == InstanceId &&
                            y.EnumProp == StackBehaviour.Popi_popi_popi && x.IsMan &&
                            x.Name == "Mohamed";
+                    default:
+                        throw new Exception("No Expression");
+                }
 
 
             }
@@ -306,6 +419,9 @@ namespace Tests
         Eleven,
         Twelve,
         Thirteen,
+        Fourteen,
+        Fifteen,
+        Sixteen,
     }
     public class PointXY
     {

@@ -1,9 +1,9 @@
-﻿@using ResumableFunctions.Handler.InOuts;
-@model Wait
+﻿@using ResumableFunctions.Handler.InOuts.Entities;
+@model WaitEntity
 
-@if (Model is MethodWait mw)
-    Html.DisplayFor(x => mw, nameof(MethodWait));
-else if (Model is WaitsGroup group)
-    Html.DisplayFor(x => group, nameof(WaitsGroup));
-else if (Model is FunctionWait function)
-    Html.DisplayFor(x => function, nameof(FunctionWait));
+@if (Model is MethodWaitEntity mw)
+    Html.DisplayFor(x => mw, nameof(MethodWaitEntity));
+else if (Model is WaitsGroupEntity group)
+    Html.DisplayFor(x => group, nameof(WaitsGroupEntity));
+else if (Model is FunctionWaitEntity function)
+    Html.DisplayFor(x => function, nameof(FunctionWaitEntity));

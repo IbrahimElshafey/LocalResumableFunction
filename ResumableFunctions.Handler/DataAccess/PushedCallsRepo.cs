@@ -1,5 +1,5 @@
 ﻿using ResumableFunctions.Handler.DataAccess.Abstraction;
-using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -11,7 +11,7 @@ internal class PushedCallsRepo : IPushedCallsRepo
     {
         _context = context;
     }
-    public async Task<PushedCall> GetById(int pushedCallId)
+    public async Task<PushedCall> GetById(long pushedCallId)
     {
         return await _context
             .PushedCalls

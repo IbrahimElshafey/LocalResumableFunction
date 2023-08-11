@@ -1,13 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 using System.Reflection;
-using System.Threading;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.Core
 {
@@ -39,7 +36,7 @@ namespace ResumableFunctions.Handler.Core
             _serviceRepo = serviceRepo;
         }
 
-        public async Task<int> PushCall(PushedCall pushedCall)
+        public async Task<long> PushCall(PushedCall pushedCall)
         {
             try
             {
@@ -55,7 +52,7 @@ namespace ResumableFunctions.Handler.Core
                 throw new Exception(error, ex);
             }
         }
-        public async Task<int> PushExternalCall(PushedCall pushedCall, string serviceName)
+        public async Task<long> PushExternalCall(PushedCall pushedCall, string serviceName)
         {
             try
             {

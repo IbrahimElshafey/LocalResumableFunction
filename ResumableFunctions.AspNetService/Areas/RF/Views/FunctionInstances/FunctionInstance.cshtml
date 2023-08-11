@@ -56,21 +56,21 @@
            onclick="location.href='/RF/FunctionInstances/AllInstances?functionId=@Model.FunctionId&functionName=@Model.FunctionUrn'"
            value="All Function Intstances" />
 
+    @*Waits*@
     <header class="w3-text-indigo">
         <h4 class="w3-margin-top"><b>Waits Tree</b></h4>
     </header>
     <ul class="w3-ul">
-        @foreach (var logItem in Model.Waits)
+        @foreach (var wait in Model.Waits)
         {
-            @Html.DisplayFor(x => logItem,logItem.GetType().Name)
+            @Html.DisplayFor(x => wait,wait.GetType().Name.Replace("Entity",""))
         }
     </ul>
 
-
+    @*Logs*@
     <header class="w3-text-indigo">
         <h4 class="w3-margin-top"><b>Log History</b></h4>
     </header>
-    @*GetLogs partial*@
     <div class="w3-container">
         <div class="w3-row w3-margin w3-padding">
 

@@ -1,18 +1,18 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
-using FastExpressionCompiler;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
 internal partial class WaitsRepo
 {
-    public async Task<bool> SaveWait(Wait newWait)
+    public async Task<bool> SaveWait(WaitEntity newWait)
     {
         if (newWait.IsValidWaitRequest() is false)
         {
@@ -21,19 +21,26 @@ internal partial class WaitsRepo
                 $"that requested by function [{newWait.RequestedByFunction}].";
             _logger.LogError(message);
         }
+        //else if (newWait.Errors.Any())
+        //{
+        //    foreach (var error in newWait.Errors)
+        //    {
+        //        await _serviceRepo.AddErrorLog(null, error, StatusCodes.WaitValidation);
+        //    }
+        //}
 
         switch (newWait)
         {
-            case MethodWait methodWait:
+            case MethodWaitEntity methodWait:
                 await SaveMethodWait(methodWait);
                 break;
-            case WaitsGroup manyWaits:
+            case WaitsGroupEntity manyWaits:
                 await SaveWaitsGroup(manyWaits);
                 break;
-            case FunctionWait functionWait:
+            case FunctionWaitEntity functionWait:
                 await SaveFunctionWait(functionWait);
                 break;
-            case TimeWait timeWait:
+            case TimeWaitEntity timeWait:
                 await HandleTimeWaitRequest(timeWait);
                 break;
         }
@@ -41,7 +48,7 @@ internal partial class WaitsRepo
         return false;
     }
 
-    public async Task<MethodWait> GetMethodWait(int waitId, params Expression<Func<MethodWait, object>>[] includes)
+    public async Task<MethodWaitEntity> GetMethodWait(int waitId, params Expression<Func<MethodWaitEntity, object>>[] includes)
     {
         var query = _context.MethodWaits.AsQueryable();
         foreach (var include in includes)
@@ -59,7 +66,7 @@ internal partial class WaitsRepo
             .RequestedByFunction.MethodInfo;
     }
 
-    private async Task SaveMethodWait(MethodWait methodWait)
+    private async Task SaveMethodWait(MethodWaitEntity methodWait)
     {
         var methodId = await _methodIdsRepo.GetId(methodWait);
         var funcId = methodWait.RequestedByFunctionId;
@@ -90,7 +97,7 @@ internal partial class WaitsRepo
 
 
 
-    private async Task SaveWaitsGroup(WaitsGroup manyWaits)
+    private async Task SaveWaitsGroup(WaitsGroupEntity manyWaits)
     {
         for (var index = 0; index < manyWaits.ChildWaits.Count; index++)
         {
@@ -109,39 +116,46 @@ internal partial class WaitsRepo
         await AddWait(manyWaits);
     }
 
-    private async Task SaveFunctionWait(FunctionWait functionWait)
+    private async Task SaveFunctionWait(FunctionWaitEntity functionWait)
     {
-        await AddWait(functionWait);
-
-        var functionRunner = new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
-        var hasNext = await functionRunner.MoveNextAsync();
-        functionWait.FirstWait = functionRunner.Current;
-        if (hasNext is false)
+        try
         {
-            _logger.LogWarning($"No waits exist in sub function ({functionWait.FunctionInfo.GetFullName()})");
-            return;
+            await AddWait(functionWait);
+
+            var functionRunner = new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
+            var hasNext = await functionRunner.MoveNextAsync();
+            functionWait.FirstWait = functionRunner.CurrentWait;
+            if (hasNext is false)
+            {
+                _logger.LogWarning($"No waits exist in sub function ({functionWait.FunctionInfo.GetFullName()})");
+                return;
+            }
+
+            functionWait.FirstWait = functionRunner.CurrentWait;
+            functionWait.FirstWait.FunctionState = functionWait.FunctionState;
+            functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
+            functionWait.FirstWait.ParentWait = functionWait;
+            functionWait.FirstWait.ParentWaitId = functionWait.Id;
+            functionWait.FirstWait.IsFirst = functionWait.IsFirst;
+            var methodId = await _methodIdsRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
+            functionWait.FirstWait.RequestedByFunction = methodId;
+            functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
+
+            if (functionWait.FirstWait is ReplayRequest)
+            {
+                _logger.LogWarning("First wait can't be a replay request");
+                //await ReplayWait(replayWait);//todo:review first wait is replay for what??
+            }
+            else
+                await SaveWait(functionWait.FirstWait);//first wait for sub function
         }
-
-        functionWait.FirstWait = functionRunner.Current;
-        functionWait.FirstWait.FunctionState = functionWait.FunctionState;
-        functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
-        functionWait.FirstWait.ParentWait = functionWait;
-        functionWait.FirstWait.ParentWaitId = functionWait.Id;
-        functionWait.FirstWait.IsFirst = functionWait.IsFirst;
-        var methodId = await _methodIdsRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
-        functionWait.FirstWait.RequestedByFunction = methodId;
-        functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
-
-        if (functionWait.FirstWait is ReplayRequest)
+        catch (Exception ex)
         {
-            _logger.LogWarning("First wait can't be a replay request");
-            //await ReplayWait(replayWait);//todo:review first wait is replay for what??
+            await _serviceRepo.AddErrorLog(ex, "When save function wait", StatusCodes.WaitValidation);
         }
-        else
-            await SaveWait(functionWait.FirstWait);//first wait for sub function
     }
 
-    private async Task HandleTimeWaitRequest(TimeWait timeWait)
+    private async Task HandleTimeWaitRequest(TimeWaitEntity timeWait)
     {
         var timeWaitMethod = timeWait.TimeWaitMethod;
 
@@ -167,7 +181,7 @@ internal partial class WaitsRepo
 
 
 
-    public Task AddWait(Wait wait)
+    public Task AddWait(WaitEntity wait)
     {
         var isExistLocal = _context.Waits.Local.Contains(wait);
         var notAddStatus = _context.Entry(wait).State != EntityState.Added;
@@ -179,10 +193,10 @@ internal partial class WaitsRepo
         _logger.LogInformation($"Add Wait [{wait.Name}] with type [{wait.WaitType}]");
         switch (wait)
         {
-            case WaitsGroup waitGroup:
-                waitGroup.ChildWaits.RemoveAll(x => x is TimeWait);
+            case WaitsGroupEntity waitGroup:
+                waitGroup.ChildWaits.RemoveAll(x => x is TimeWaitEntity);
                 break;
-            case MethodWait { MethodToWaitId: > 0 } methodWait:
+            case MethodWaitEntity { MethodToWaitId: > 0 } methodWait:
                 //Bug:I forgot why I added this??!!
                 methodWait.MethodToWait = null;
                 break;
@@ -192,7 +206,7 @@ internal partial class WaitsRepo
         return Task.CompletedTask;
     }
 
-    private void SetNodeType(Wait wait)
+    private void SetNodeType(WaitEntity wait)
     {
         wait.ActionOnChildrenTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
     }

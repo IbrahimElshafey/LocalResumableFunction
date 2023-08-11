@@ -1,9 +1,9 @@
-﻿using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.Core.Abstraction
 {
     internal interface IReplayWaitProcessor
     {
-        Task<(Wait Wait, bool ProceedExecution)> ReplayWait(ReplayRequest replayRequest);
+        Task<(WaitEntity Wait, bool ProceedExecution)> ReplayWait(ReplayRequest replayRequest);
     }
 }

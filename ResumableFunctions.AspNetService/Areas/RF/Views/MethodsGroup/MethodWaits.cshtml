@@ -15,7 +15,7 @@
 
     <br />
     <table class="w3-table-all w3-padding-32" style="width: 100%;table-layout: fixed;">
-        
+
         @foreach (var item in Model)
         {
             <tr>
@@ -24,13 +24,13 @@
                     <ul>
                         <li>
                             <b>Name: </b>
-                            <span>@item.Name</span>
+                            <span>@item.Name #@item.Id</span>
                         </li>
                         <li>
                             <b>In Instance: </b>
                             <a href="~/RF/FunctionInstances/FunctionInstance?instanceId=@item.InstanceId"
-                               target="_blank"
-                               class="w3-text-blue">
+                           target="_blank"
+                           class="w3-text-blue">
                                 @item.FunctionName
                             </a>
                         </li>
@@ -44,10 +44,13 @@
                                 </a>
                             }
                         </li>
-                        <li>
-                            <b>Mandatory Parts: </b>
-                            <span>@item.MandatoryPart</span>
-                        </li>
+                        @if (item.MandatoryPart != null)
+                        {
+                            <li>
+                                <b>Mandatory Parts: </b>
+                                <span>@item.MandatoryPart</span>
+                            </li>
+                        }
                     </ul>
                 </td>
 
@@ -56,13 +59,16 @@
                         <li>
                             <b>Match If: </b> @item.MatchExpression
                         </li>
-                        <li>
-                            <b>Mandatory Parts: </b> @item.MandatoryPartExpression
-                        </li>
+                        @if (item.MandatoryPartExpression != null)
+                        {
+                            <li>
+                                <b>Mandatory Expression: </b> @item.MandatoryPartExpression
+                            </li>
+                        }
                         <li>
                             <b>Created: </b> @item.Created
                         </li>
-                       
+
                     </ul>
                 </td>
             </tr>

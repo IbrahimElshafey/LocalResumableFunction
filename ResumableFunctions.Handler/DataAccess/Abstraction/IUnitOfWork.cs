@@ -1,6 +1,4 @@
-﻿using ResumableFunctions.Handler.InOuts;
-
-namespace ResumableFunctions.Handler.DataAccess.Abstraction
+﻿namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
     public interface IUnitOfWork : IDisposable
     {

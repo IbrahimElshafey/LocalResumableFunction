@@ -1,14 +1,8 @@
 ﻿# UI V1
 
-* Infinite scroll for:
-	* Logs view
-	* Pushed Calls view
-	* Waits for method group
-	* Function Instances
+
 
 # UI V2
-* Tabels problem on small screens
-* Wait templates for method group
 * Actions on Wait 
 	* Cancel (If Waiting)
 	* Replay Go To (If Completed/Canceled)

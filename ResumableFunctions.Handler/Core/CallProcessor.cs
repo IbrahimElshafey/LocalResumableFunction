@@ -38,7 +38,7 @@ internal partial class CallProcessor : ICallProcessor
     }
 
     [DisplayName("Initial Process Pushed Call [{0}] for MethodUrn [{1}]")]
-    public async Task InitialProcessPushedCall(int pushedCallId, string methodUrn)
+    public async Task InitialProcessPushedCall(long pushedCallId, string methodUrn)
     {
         if (!await _scanStateRepo.IsScanFinished())
         {

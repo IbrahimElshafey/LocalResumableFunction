@@ -1,5 +1,5 @@
 ﻿using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.BaseUse;
 
 namespace TestApi1.Examples;
 
@@ -72,7 +72,11 @@ public class TestWaitManyExample : ProjectApprovalExample
             Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output)
-        ).MatchIf(waitGroup => waitGroup.CompletedCount == 2);
+        ).MatchIf(waitGroup =>
+        {
+            //throw new NotImplementedException();
+            return waitGroup.CompletedCount == 2;
+        });
         WriteMessage("Two waits of three waits matched.");
         WriteMessage("WaitManyAndCountExpressionDefined ended.");
         Success(nameof(WaitManyAndGroupExpressionDefined));

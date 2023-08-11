@@ -1,14 +1,10 @@
-﻿using FastExpressionCompiler;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using ResumableFunctions.Handler;
+﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using System.Dynamic;
-using System.Linq.Expressions;
 using System.Reflection.Emit;
 using ResumableFunctions.Handler.Expressions;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace TestSomething
 {
@@ -22,9 +18,9 @@ namespace TestSomething
         [PushCall("TestMethodTwo")]
         public MethodOutput TestMethodTwo(MethodInput input) => new MethodOutput { TaskId = input.Id };
 
-        public MethodWait WaitMethodOne()
+        public MethodWaitEntity WaitMethodOne()
         {
-            var methodWait = new MethodWait<string, int>(TestMethodOne)
+            var methodWait = new MethodWaitEntity<string, int>(TestMethodOne)
                         .MatchIf((x, y) => y == InstanceId || x == (InstanceId + 10).ToString() && y <= Math.Max(10, 100))
                         .AfterMatch((input, output) => InstanceId = output);
             methodWait.CurrentFunction = this;
@@ -32,10 +28,10 @@ namespace TestSomething
         }
 
         private int[] IntArrayMethod() => new int[] { 12, 13, 14, 15, };
-        public MethodWait WaitMethodTwo()
+        public MethodWaitEntity WaitMethodTwo()
         {
             var localVariable = GetString();
-            var methodWait = new MethodWait<MethodInput, MethodOutput>(TestMethodTwo)
+            var methodWait = new MethodWaitEntity<MethodInput, MethodOutput>(TestMethodTwo)
                        .MatchIf((x, y) =>
                        //!(y.TaskId == InstanceId + 10 &&
                        //x.Id > 12) &&

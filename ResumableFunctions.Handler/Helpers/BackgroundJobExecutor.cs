@@ -37,10 +37,11 @@ namespace ResumableFunctions.Handler.Helpers
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            int scanTaskId = 0;
+            int scanTaskId = -1;
             try
             {
-                await using var handle = await _lockProvider.TryAcquireLockAsync(_settings.CurrentWaitsDbName + lockName);
+                await using var handle =
+                    await _lockProvider.TryAcquireLockAsync(_settings.CurrentWaitsDbName + lockName);
                 if (handle is null) return;//if another process work on same task then ignore
 
                 using var scope = _serviceProvider.CreateScope();
@@ -61,7 +62,6 @@ namespace ResumableFunctions.Handler.Helpers
             }
             finally
             {
-                //if (isScanTask)//todo: why deleted??
                 await _scanStateRepo.RemoveScanState(scanTaskId);
             }
         }

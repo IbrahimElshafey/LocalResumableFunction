@@ -1,8 +1,8 @@
-﻿using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction;
 
 public interface IWaitProcessingRecordsRepo
 {
-    Task<WaitProcessingRecord> Add(WaitProcessingRecord waitProcessingRecord);
+    WaitProcessingRecord Add(WaitProcessingRecord waitProcessingRecord);
 }

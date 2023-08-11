@@ -1,8 +1,8 @@
-﻿@using ResumableFunctions.Handler.InOuts;
-@model MethodWait
+﻿@using ResumableFunctions.Handler.InOuts.Entities;
+@model MethodWaitEntity
 <li>
     <div class="w3-card w3-white w3-padding w3-round">
-        <h6 class="w3-text-indigo"><b>@Model.Name</b></h6>
+        <h6 class="w3-text-indigo"><b>@Model.Name #@Model.Id</b></h6>
         <table class="w3-ul">
             <tr>
                 <td><b class="w3-text-blue-gray">Status: </b></td>
@@ -14,14 +14,17 @@
                     }
                 </td>
             </tr>
-            @if (Model.Closure is not null)
+            @{
+                var locals = Model.LocalsDisplay();
+            }
+            @if (locals is not null)
             {
                 <tr>
                     <td><b class="w3-text-blue-gray">Locals: </b></td>
                     <td>
-                        <pre class="JsonObject">
-                            @Model.Closure
-                            </pre>
+                        <span class="JsonObject">
+                            @locals
+                        </span>
                     </td>
                 </tr>
             }
@@ -37,17 +40,16 @@
                 }
             }
             <tr>
-                <td colspan="2">
-                    <b class="w3-text-blue-gray">Created: </b>
-                    @Model.Created
-                    @if (Model.Modified != DateTime.MinValue)
-                    {
-                        <b class="w3-text-blue-gray">Modified: </b>
-                        @Model.Modified
-                    }
-                </td>
-
+                <td><b class="w3-text-blue-gray">Created: </b></td>
+                <td> @Model.Created</td>
             </tr>
+            @if (Model.Modified != DateTime.MinValue)
+            {
+                <tr>
+                    <td><b class="w3-text-blue-gray">Modified: </b></td>
+                    <td> @Model.Modified</td>
+                </tr>
+            }
         </table>
     </div>
 </li>

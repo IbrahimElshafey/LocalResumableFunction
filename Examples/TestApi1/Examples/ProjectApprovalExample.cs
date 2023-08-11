@@ -1,6 +1,6 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.BaseUse;
 
 namespace TestApi1.Examples;
 
@@ -89,7 +89,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
         Success(nameof(ExternalMethodWaitGoodby));
     }
     //any method with attribute [ResumableFunctionEntryPoint] that takes no argument
-    //and return IAsyncEnumerable<Wait> is a resumbale function
+    //and return IAsyncEnumerable<WaitX> is a resumbale function
     [ResumableFunctionEntryPoint("PAE.InterfaceMethod")]
     public async IAsyncEnumerable<Wait> InterfaceMethod()
     {

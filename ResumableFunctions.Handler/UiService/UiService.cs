@@ -2,8 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 using ResumableFunctions.Handler.UiService.InOuts;
-using System;
 using System.Collections;
 
 namespace ResumableFunctions.Handler.UiService
@@ -120,9 +120,9 @@ namespace ResumableFunctions.Handler.UiService
               .Select(x => new FunctionInfo(
                       x,
                       x.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsRootNode).Name,
-                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InProgress),
-                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.Completed),
-                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionStatus.InError)
+                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionInstanceStatus.InProgress),
+                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionInstanceStatus.Completed),
+                      x.ActiveFunctionsStates.Count(x => x.Status == FunctionInstanceStatus.InError)
                       ))
               .ToListAsync();
         }
@@ -193,7 +193,7 @@ namespace ResumableFunctions.Handler.UiService
                 .GroupBy(x => x.PushedCallId)
                 .Select(x => new
                 {
-                    CallId = (int?)x.Key,
+                    CallId = (long?)x.Key,
                     All = (int?)x.Count(),
                     Matched = (int?)x.Count(waitForCall => waitForCall.MatchStatus == MatchStatus.Matched),
                     NotMatched = (int?)x.Count(waitForCall =>
@@ -243,7 +243,7 @@ namespace ResumableFunctions.Handler.UiService
             return result;
         }
 
-        public async Task<PushedCallDetails> GetPushedCallDetails(int pushedCallId)
+        public async Task<PushedCallDetails> GetPushedCallDetails(long pushedCallId)
         {
             var pushedCall = await _context.PushedCalls.FindAsync(pushedCallId);
             pushedCall.LoadUnmappedProps();
@@ -401,11 +401,11 @@ namespace ResumableFunctions.Handler.UiService
             return result;
         }
 
-        private async Task SetWaitTemplates(List<Wait> waits)
+        private async Task SetWaitTemplates(List<WaitEntity> waits)
         {
             var templatesIds = waits
-                .Where(x => x is MethodWait mw)
-                .Select(x => (MethodWait)x)
+                .Where(x => x is MethodWaitEntity mw)
+                .Select(x => (MethodWaitEntity)x)
                 .Select(x => x.TemplateId)
                 .ToList();
             var templates =
@@ -421,7 +421,7 @@ namespace ResumableFunctions.Handler.UiService
                 .ToDictionaryAsync(x => x.Id);
             foreach (var wait in waits)
             {
-                if (wait is MethodWait mw && templates.ContainsKey(mw.TemplateId))
+                if (wait is MethodWaitEntity mw && templates.ContainsKey(mw.TemplateId))
                 {
                     mw.Template = templates[mw.TemplateId];
                     //mw.Template.LoadUnmappedProps();

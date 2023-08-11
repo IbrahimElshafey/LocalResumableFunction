@@ -9,7 +9,6 @@
 	* Pushed call activate one instance,what if same function and sub fnction wait the same wait
 
 
-* Write test cases for expressions rewrite because it's critical part
 * Attributes test
 * Scan results is correct
 
@@ -17,9 +16,9 @@
 * 1 Million active wait for same function
 	* With mandatory part exist
 	* Without mandatory part exist
-* 1000 resumable function test
-* 1000 pushed call per second test
-* One method activate 1000 function type
+* 500 active resumable function
+* 100 resumable function activated by one pushed call
+* 10000 pushed call per second test
 
 # Problem to solve 
 * We can't mock Resumable function class dependencies and use the mocks because of attributes checks

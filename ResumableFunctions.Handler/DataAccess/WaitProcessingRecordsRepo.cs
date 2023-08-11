@@ -1,7 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ResumableFunctions.Handler.DataAccess.Abstraction;
-using ResumableFunctions.Handler.InOuts;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+﻿using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -14,10 +12,9 @@ internal class WaitProcessingRecordsRepo : IWaitProcessingRecordsRepo
         _context = context;
     }
 
-    public async Task<WaitProcessingRecord> Add(WaitProcessingRecord waitProcessingRecord)
+    public WaitProcessingRecord Add(WaitProcessingRecord waitProcessingRecord)
     {
         _context.WaitProcessingRecords.Add(waitProcessingRecord);
-        await _context.SaveChangesAsync();
         return waitProcessingRecord;
     }
 }

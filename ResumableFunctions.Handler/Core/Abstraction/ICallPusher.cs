@@ -1,10 +1,10 @@
-﻿using ResumableFunctions.Handler.InOuts;
+﻿using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.Core.Abstraction
 {
     public interface ICallPusher
     {
-        Task<int> PushCall(PushedCall pushedCall);
-        Task<int> PushExternalCall(PushedCall pushedCall, string serviceName);
+        Task<long> PushCall(PushedCall pushedCall);
+        Task<long> PushExternalCall(PushedCall pushedCall, string serviceName);
     }
 }

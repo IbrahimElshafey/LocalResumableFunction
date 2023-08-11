@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
-using Hangfire.Common;
-using Newtonsoft.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Helpers;
-using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -10,40 +12,42 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
 {
     private IAsyncEnumerator<Wait> _functionRunner;
 
-    public FunctionRunner(Wait currentWait)
+    public FunctionRunner(WaitEntity oldCompletedWait)
     {
-        var functionRunnerType = currentWait.CurrentFunction.GetType()
+        var functionRunnerType = oldCompletedWait.CurrentFunction.GetType()
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
             .FirstOrDefault(type =>
-            type.Name.StartsWith($"<{currentWait.RequestedByFunction.MethodName}>") &&
+            type.Name.StartsWith($"<{oldCompletedWait.RequestedByFunction.MethodName}>") &&
             typeof(IAsyncEnumerable<Wait>).IsAssignableFrom(type));
 
         if (functionRunnerType == null)
             throw new Exception(
-                $"Can't find resumable function [{currentWait?.RequestedByFunction?.MethodName}] " +
-                $"in class [{currentWait?.CurrentFunction?.GetType().FullName}].");
+                $"Can't find resumable function [{oldCompletedWait?.RequestedByFunction?.MethodName}] " +
+                $"in class [{oldCompletedWait?.CurrentFunction?.GetType().FullName}].");
 
-        CreateRunner(functionRunnerType);
-        SetFunctionCallerInstance(currentWait.CurrentFunction);
-        SetClosure(currentWait.Closure);//for colsure continuation
-        SetState(currentWait.StateAfterWait);
+        CreateRunner(functionRunnerType, oldCompletedWait.Locals);
+        SetFunctionCallerInstance(oldCompletedWait.CurrentFunction);
+        SetState(oldCompletedWait.StateAfterWait);
+        SetActiveClosure(oldCompletedWait.Closure);
     }
 
 
-    public FunctionRunner(ResumableFunctionsContainer classInstance, MethodInfo resumableFunction, int? state = null)
+    public FunctionRunner(ResumableFunctionsContainer classInstance, MethodInfo resumableFunction, int? state = null, object closure = null)
     {
         var functionRunnerType = classInstance.GetType()
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
             .FirstOrDefault(x => x.Name.StartsWith($"<{resumableFunction.Name}>"));
         CreateRunner(functionRunnerType);
         SetFunctionCallerInstance(classInstance);
-        //SetClosure(null);
         SetState(state ?? int.MinValue);
+        if (closure != null)
+            SetActiveClosure(closure);
     }
 
     public bool ResumableFunctionExistInCode => _functionRunner != null;
 
     public Wait Current => _functionRunner.Current;
+    public WaitEntity CurrentWait => _functionRunner.Current.WaitEntity;
 
     public ValueTask DisposeAsync()
     {
@@ -56,21 +60,29 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
         var hasNext = await _functionRunner.MoveNextAsync();
         if (hasNext)
         {
-            _functionRunner.Current.StateBeforeWait = stateBeforeWait;
-            _functionRunner.Current.StateAfterWait = GetState();
-            //set closure after move to next
-            if (_functionRunner.Current?.Closure == null)
-                _functionRunner.Current.SetClosure(GetClosure());
+            CurrentWait.StateBeforeWait = stateBeforeWait;
+            CurrentWait.StateAfterWait = GetState();
+            //set locals for the new incoming wait
+            if (CurrentWait.Locals == null)
+                CurrentWait.SetLocals(_functionRunner);
         }
         return hasNext;
     }
 
 
-    private void CreateRunner(Type functionRunnerType)
+    private void CreateRunner(Type functionRunnerType, object oldLocals = null)
     {
+
         const string error = "Can't create a function runner.";
         if (functionRunnerType == null)
             throw new Exception(error);
+
+        if (oldLocals?.GetType() == functionRunnerType)
+        {
+            _functionRunner = (IAsyncEnumerator<Wait>)oldLocals;
+            return;
+        }
+
 
         var ctor = functionRunnerType.GetConstructor(
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance,
@@ -81,45 +93,49 @@ internal class FunctionRunner : IAsyncEnumerator<Wait>
 
         _functionRunner = (IAsyncEnumerator<Wait>)ctor.Invoke(new object[] { -2 });
 
+
         if (_functionRunner == null)
             throw new Exception(error);
-    }
 
-    private void SetFunctionCallerInstance(ResumableFunctionsContainer resumableFunctionLocal)
-    {
-        //set parent class who call
-        var thisField = _functionRunner.GetType().GetFields().FirstOrDefault(x => x.Name.EndsWith("__this"));
-        thisField?.SetValue(_functionRunner, resumableFunctionLocal);
-    }
-
-    private void SetClosure(object closure)
-    {
-        _functionRunner.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-        .Where(x => x.FieldType.Name.StartsWith("<>c__DisplayClass"))
-        .ToList()
-        .ForEach(closureField =>
+        if (oldLocals != null && oldLocals is JObject jobject)
         {
-            try
-            {
-                closureField.SetValue(_functionRunner, closure);
-            }
-            catch 
-            {}
-        });
-    }
-
-    private object GetClosure()
-    {
-        if (_functionRunner == null) return null;
-
-        var closureField =
-           _functionRunner?.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-           .FirstOrDefault(closureField => closureField.FieldType.Name.StartsWith("<>c__DisplayClass") && closureField.GetValue(_functionRunner) != null);
-        if (closureField != null)
-        {
-            return closureField.GetValue(_functionRunner);
+            jobject.MergeIntoObject(_functionRunner);
+            //JsonConvert.PopulateObject(jobject.CreateReader(), _functionRunner, LocalsContractResolver.Settings);
         }
-        return null;
+    }
+
+    private void SetFunctionCallerInstance(ResumableFunctionsContainer functionClassInstance)
+    {
+        //set caller class for current function runner
+        var thisField = _functionRunner
+            .GetType()
+            .GetFields()
+            .FirstOrDefault(x => x.Name.EndsWith(Constants.CompilerCallerSuffix) && x.FieldType == functionClassInstance.GetType());
+        thisField?.SetValue(_functionRunner, functionClassInstance);
+    }
+
+    private void SetActiveClosure(object closure)
+    {
+        if (closure == null)
+            return;
+        _functionRunner.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
+            .Where(x => x.FieldType.Name.StartsWith(Constants.CompilerClosurePrefix))
+            .ToList()
+            .ForEach(closureField =>
+            {
+                try
+                {
+                    if (closure is JObject jobject)
+                    {
+                        var closureObject = jobject.ToObject(closureField.FieldType);
+                        closureField.SetValue(_functionRunner, closureObject ?? Activator.CreateInstance(closureField.FieldType));
+                    }
+                    else if (closure.GetType() == closureField.FieldType)
+                        closureField.SetValue(_functionRunner, closure);
+                }
+                catch
+                { }
+            });
     }
 
     private int GetState()

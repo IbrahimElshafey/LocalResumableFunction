@@ -1,4 +1,4 @@
-﻿using System.Dynamic;
+﻿using ResumableFunctions.Handler.Helpers;
 using System.Linq.Expressions;
 using static ResumableFunctions.Handler.Expressions.MatchExpressionWriter;
 using static System.Linq.Expressions.Expression;
@@ -49,7 +49,7 @@ namespace ResumableFunctions.Handler.Expressions
                 var changeClosureVarsVisitor = new GenericVisitor();
                 changeClosureVarsVisitor.OnVisitConstant(node =>
                 {
-                    if (node.Type.Name.StartsWith("<>c__DisplayClass"))
+                    if (node.Type.Name.StartsWith(Constants.CompilerClosurePrefix))
                     {
                         return _matchExpression.Parameters[3];
                     }

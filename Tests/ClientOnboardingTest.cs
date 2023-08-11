@@ -4,7 +4,6 @@ using ClientOnboarding.Workflow;
 using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
-using System.Diagnostics;
 
 namespace Tests
 {
@@ -41,7 +40,7 @@ namespace Tests
             var instances = await test.GetInstances<ClientOnboardingWorkflowPublic>();
             Assert.Single(instances);
             if (finished)
-                Assert.Equal(FunctionStatus.Completed, instances[0].Status);
+                Assert.Equal(FunctionInstanceStatus.Completed, instances[0].Status);
             return instances[0].StateObject as ClientOnboardingWorkflowPublic;
         }
     }

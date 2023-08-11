@@ -1,20 +1,24 @@
-﻿# Work on Closures
-* does closure may be diffrent for class in same wait??
-* Clear scan locks for service on scan start
-* Match expression tests
-	* Mandatory parts rewrite and tests
-		* inOut.prop + loclas.Prop == value
-		* instance.Method(inOut.prop) == value
-	* Warning of closure in math that not in a resumable function or embed it
-	* Test complex match expressions
-
-* Can we access closure in wait constructor?
-* Closure in loops not saved immediately after creating the wait
-
-* Test what happen when
-	* yield return ExternalClass.MethodWait();
-
-# Todo
+﻿# Todo
+* Review SaveChanges use
+* Enable change testshell settings
+	* Run unit tests in parallel if not localDB
 * Use same dll in two different services must be allowed
-* How to check that pushed calls processed by all affected services
-* Roslyn Analyzer
+
+# UI Todo
+* Filtering controls at top for:
+	* Function Instances
+	* Waits in method group
+* Infinite scroll for:
+	* Logs view
+	* Pushed Calls view
+	* Waits in method group
+	* Function Instances
+* Tabels problem on small screens
+* Restrict access to UI from servers only
+
+
+
+# New Version 1.0.10
+* Active Todo
+* Update Package description
+* Update documentation and record videos

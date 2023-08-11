@@ -6,4 +6,5 @@ public enum LogType
     Warning,
     Error,
     ImportantInfo,
+    WasError,
 }

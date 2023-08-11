@@ -1,11 +1,9 @@
-using ClientOnboarding.InOuts;
-using ClientOnboarding.Services;
-using ClientOnboarding.Workflow;
-using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests
@@ -38,7 +36,7 @@ namespace Tests
             Assert.Equal(round, instances.Count);
             var errors = await test.GetLogs();
             Assert.Empty(errors);
-            return (waits.First(x => x.IsFirst) as MethodWait)?.MandatoryPart;
+            return (waits.First(x => x.IsFirst) as MethodWaitEntity)?.MandatoryPart;
         }
     }
 

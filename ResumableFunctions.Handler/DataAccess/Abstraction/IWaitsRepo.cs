@@ -1,5 +1,5 @@
 ﻿using ResumableFunctions.Handler.InOuts;
-using System.Linq.CompilerServices.TypeSystem;
+using ResumableFunctions.Handler.InOuts.Entities;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -9,13 +9,13 @@ public interface IWaitsRepo
 {
     Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId);
     Task CancelOpenedWaitsForState(int stateId);
-    Task CancelSubWaits(int parentId, int pushedCallId);
-    Task<Wait> GetOldWaitForReplay(ReplayRequest replayWait);
-    Task<Wait> GetWaitParent(Wait wait);
+    Task CancelSubWaits(long parentId, long pushedCallId);
+    Task<WaitEntity> GetOldWaitForReplay(ReplayRequest replayWait);
+    Task<WaitEntity> GetWaitParent(WaitEntity wait);
     Task<List<CallServiceImapction>> GetAffectedServicesAndFunctions(string methodUrn);
     Task RemoveFirstWaitIfExist(int methodIdentifierId);
-    Task<bool> SaveWait(Wait newWait);
-    Task<MethodWait> GetMethodWait(int waitId, params Expression<Func<MethodWait, object>>[] includes);
+    Task<bool> SaveWait(WaitEntity newWait);
+    Task<MethodWaitEntity> GetMethodWait(int waitId, params Expression<Func<MethodWaitEntity, object>>[] includes);
     Task<MethodInfo> GetRequestedByMethodInfo(int waitId);
-    Task<List<MethodWait>> GetWaitsForTemplate(WaitTemplate template, string mandatoryPart, params Expression<Func<MethodWait, object>>[] includes);
+    Task<List<MethodWaitEntity>> GetWaitsForTemplate(WaitTemplate template, string mandatoryPart, params Expression<Func<MethodWaitEntity, object>>[] includes);
 }

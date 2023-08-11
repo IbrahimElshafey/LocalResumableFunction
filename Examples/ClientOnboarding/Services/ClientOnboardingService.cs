@@ -17,7 +17,7 @@ namespace ClientOnboarding.Services
 
         public virtual TaskId AskOwnerToApproveClient(int registrationFormId)
         {
-            return new TaskId { Id = registrationFormId };
+            return new TaskId { Id = Random.Shared.Next() };
         }
 
         [PushCall("ClientOnboardingService.OwnerApproveClient")]

@@ -1,5 +1,4 @@
-﻿using System.Dynamic;
-using System.Linq.CompilerServices.TypeSystem;
+﻿using System.Linq.CompilerServices.TypeSystem;
 using MessagePack;
 using MessagePack.Resolvers;
 
