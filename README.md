@@ -2,7 +2,7 @@
 [![Intro Video in Arabic](https://img.youtube.com/vi/Oc9NjP0_0ig/0.jpg)](https://www.youtube.com/watch?v=Oc9NjP0_0ig)
 
 
-* [PDF Intro](#resumable-function-example)
+* [PDF Intro](https://pdfhost.io/v/DFgolpDyq_Resumable_Functions)
 * [Resumable Function Example](#resumable-function-example)
 * [Why this project?](#why-this-project)
 * [**Start using the library NuGet package**](#start-using-the-library)
