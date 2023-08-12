@@ -9,9 +9,10 @@
     <Title>$(AssemblyName)</Title>
     <Authors>ibrahim.ragab.net</Authors>
     <RepositoryUrl>https://github.com/IbrahimElshafey/ResumableFunctions</RepositoryUrl>
-    <Description>To be used with WEB API projects.</Description>
+    <Description>To be used with WEB API projects.
+A library that provides a way for waiting the execution of a method in days or months, without blocking the CPU or consuming memory.This can be useful for writing workflows tha has a long running tasks.</Description>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
-    <Version>1.0.9</Version>
+    <Version>1.0.10</Version>
   </PropertyGroup>
 
   <ItemGroup>

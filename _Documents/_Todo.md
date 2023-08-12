@@ -19,6 +19,5 @@
 
 
 # New Version 1.0.10
-* Active Todo
-* Update Package description
-* Update documentation and record videos
+* Update documentation
+* What is new?

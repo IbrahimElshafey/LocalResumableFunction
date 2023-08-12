@@ -2,7 +2,7 @@
 [![Intro Video in Arabic](https://img.youtube.com/vi/Oc9NjP0_0ig/0.jpg)](https://www.youtube.com/watch?v=Oc9NjP0_0ig)
 
 
-* [What are Resumable Functions?](#what-are-resumable-functions)
+* [Resumable Function Example](#resumable-function-example)
 * [Why this project?](#why-this-project)
 * [Example](#example)
 * [**Start using the library NuGet package**](#start-using-the-library)
@@ -14,37 +14,25 @@
 * [Database Cleaning Job](https://github.com/IbrahimElshafey/ResumableFunctions/blob/main/_Documents/GitHubDocs/Cleaning_Job.md)
 * [Samples](https://github.com/IbrahimElshafey/ResumableFunctionsSamples)
 * [How it works internally](#how-it-works-internally)
-# What Are Resumable Functions?
+
+# Resumable Function Example
 A resumable function is a function that can be suspended and resumed at a later point in time. This is in contrast to traditional functions, which must be executed to completion before they can return.
 
-In the example below each [yield return] is a place for pause/resume function execution (explained later).
+**Example**
+![ResumableFunctionExample.png](/_Documents/GitHubDocs/IMG/ResumableFunctionExample.png)
+1. A resumable function must be defined in a class that inherits from `ResumableFunctionsContainer`.
+1. We add the `[ResumableFunctionEntryPoint]` attribute to the resumable function to tell the library to register or save the first wait in the database when it scans the DLL for resumable functions.
+1. The resumable function must return an `IAsyncEnumerable<Wait>` and must have no input parameters.
+1. Each `yield return` statement is a place where the function execution can be paused until the required method is called, the pause may be days or months.
+1. We tell the library that we want to wait for the method `_service.ClientFillsForm` to be executed. This method has an input of type `RegistrationForm` and an output of type `RegistrationResult`.
+1. When the `ClientFillsForm` method is executed, the library will evaluate its input and output against the match expression. If the match expression is satisfied, the function execution will be resumed. Otherwise, the execution will not be resumed.
+1. If we need to capture the input and output of the `ClientFillsForm` method after the match expression is satisfied, we can use the `AfterMatch` method.
+* **The library saves the state of the resumable function in the database. This includes a serialized instance of the class that contains the resumable function, as well as any local variables.**
 
-**Example** (this is not a pseudocode it's debuggable code):
-``` C#
-[ResumableFunctionEntryPoint("ClientOnboardingWorkflow.StartClientOnboardingWorkflow")]
-internal async IAsyncEnumerable<WaitX> StartClientOnboardingWorkflow()
-{
-    yield return WaitUserRegistration();
-    OwnerTaskId = _service.AskOwnerToApproveClient(RegistrationResult.FormId);
-
-    yield return WaitOwnerApproveClient();
-    if (OwnerApprovalInput.Decision is false)
-    {
-        _service.InformUserAboutRejection(RegistrationForm.UserId);
-    }
-    else if (OwnerApprovalInput.Decision)
-    {
-        _service.SendWelcomePackage(RegistrationForm.UserId);
-        ClientMeetingId = _service.SetupInitalMeetingAndAgenda(RegistrationForm.UserId);
-
-        yield return WaitMeetingResult();
-        Console.WriteLine(MeetingResult);
-    }
-
-    Console.WriteLine("User Registration Done");
-}
-```
-
+![PushCallAttribute.png](/_Documents/GitHubDocs/IMG/PushCallAttribute.png)
+* The attribute `[PushCall]` must be added to the method you want to wait.
+* The method must have one input parameter.
+* This attribute will enable the method to push it's input and output to the library when it executed.
 # Why this project?
 Server processing must be fast to be efficient with processor and memory resources. This means that we can't write a method that blocks for a long time, such as days. For example, the following pseudocode cannot be translated into a single block of code:
 ```
