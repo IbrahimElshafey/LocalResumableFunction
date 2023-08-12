@@ -2,9 +2,9 @@
 [![Intro Video in Arabic](https://img.youtube.com/vi/Oc9NjP0_0ig/0.jpg)](https://www.youtube.com/watch?v=Oc9NjP0_0ig)
 
 
+* [PDF Intro](#resumable-function-example)
 * [Resumable Function Example](#resumable-function-example)
 * [Why this project?](#why-this-project)
-* [Example](#example)
 * [**Start using the library NuGet package**](#start-using-the-library)
 * [Supported Wait Types](#supported-wait-types)
 * [Resumable Functions UI](https://github.com/IbrahimElshafey/ResumableFunctions/blob/main/_Documents/GitHubDocs/Resumable_Functions_UI.md)
@@ -20,10 +20,11 @@ A resumable function is a function that can be suspended and resumed at a later 
 
 **Example**
 ![ResumableFunctionExample.png](/_Documents/GitHubDocs/IMG/ResumableFunctionExample.png)
+Lines Description:
 1. A resumable function must be defined in a class that inherits from `ResumableFunctionsContainer`.
 1. We add the `[ResumableFunctionEntryPoint]` attribute to the resumable function to tell the library to register or save the first wait in the database when it scans the DLL for resumable functions.
 1. The resumable function must return an `IAsyncEnumerable<Wait>` and must have no input parameters.
-1. Each `yield return` statement is a place where the function execution can be paused until the required method is called, the pause may be days or months.
+1. Each `yield return` statement is a place where the function execution can be paused until the required wait is matched, the pause may be days or months.
 1. We tell the library that we want to wait for the method `_service.ClientFillsForm` to be executed. This method has an input of type `RegistrationForm` and an output of type `RegistrationResult`.
 1. When the `ClientFillsForm` method is executed, the library will evaluate its input and output against the match expression. If the match expression is satisfied, the function execution will be resumed. Otherwise, the execution will not be resumed.
 1. If we need to capture the input and output of the `ClientFillsForm` method after the match expression is satisfied, we can use the `AfterMatch` method.
@@ -49,80 +50,6 @@ Business functions/methods must not call each other directly. For example, the m
 This project aims to solve the above problems by using resumable functions. Resumable functions are functions that can be paused and resumed later. This allows us to write code that reflects the business requirements without sacrificing readability. It makes it easier to write distributed systems/SOA/Micro Services that are easy to understand when a developer reads the source code.
 
 This project makes resumable functions a reality.
-
-# Example
-The example below shows how to use resumable functions to implement a client onboarding workflow. The workflow consists of the following steps:
-1. The user fills out a registration form.
-1. The system sends the registration for approval by owner.
-1. If the registration is approved, the system sends the welcome package.
-1. If the registration is rejected, the system sends a message to the user about rejection.
-1. The system sets up an initial meeting.
-1. Some business after the meeting is done.
-
-
-With resumable function you can write this scenario like below:
-Just a few lines of codes that tells what happen!
-``` C#
-[ResumableFunctionEntryPoint("ClientOnboardingWorkflowPublic.Start")]
-internal async IAsyncEnumerable<WaitX> StartClientOnboardingWorkflow()
-{
-    yield return WaitClientFillForm();
-
-    yield return AskOwnerToApprove();
-
-    if (OwnerDecision is false)
-        _service.InformUserAboutRejection(UserId);
-            
-    else if (OwnerDecision is true)
-    {
-        _service.SendWelcomePackage(UserId);
-        yield return WaitMeetingResult();
-    }
-
-    Console.WriteLine("User Registration Done");
-}
-```
-* The resumable function must match the signature `IAsyncEnumerable<WaitX> FunctionName()`
-* The class that contains the resumable function must inherit `ResumableFunctionsContainer` class.
-```C#
-public class ClientOnboardingWorkflow : ResumableFunctionsContainer
-```
-* Mark a method with `[ResumableFunctionEntryPoint]` to indicate that the method pauses and resumes based on waits inside.
-* The library will scan your DLL to find first waits for each resumable function to register/save it in the database.
-* `ResumableFunctionEntryPoint` attributes take `string methodUrn` mandatory to track the resumable function by the library so you can change the method name if you want.
-* The method `WaitUserRegistration` return a wait like below:
-```C#
-private MethodWait<RegistrationForm, RegistrationResult> WaitUserRegistration()
-{
-    return Wait<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, "Wait User Registration")
-            .MatchIf((regForm, regResult) => regResult.FormId > 0)
-            .SetData((regForm, regResult) =>
-                RegistrationForm == regForm &&
-                RegistrationResult == regResult);
-}
-```
-* The code translation is, We wait for the `_service.ClientFillForm` method to be called and finished, and if the match condition matches then the resumable function will resume.
-* Library will save a wait record for `_service.ClientFillForm` in database and pause the resumable function execution until `ClientFillsForm` method called.
-* `ClientFillsForm` method must be taged with attribute `[PushCall]`
-```C#
-[PushCall("ClientOnboardingService.ClientFillsForm")]
-public RegistrationResult ClientFillsForm(RegistrationForm registrationForm)
-{
-    //method body
-}
-```
-* The attribute `[PushCall]` enables the method to push its input and output when it successfully called and completed.
-* We define match expression `MatchIf((regForm, regResult) => regResult.FormId > 0)` that will be evaluated when `ClientFillsForm` method called to check if it is a match for the current instance or not.
-* When a call pushed to the library,the library search for active waits that may be a match.
-* The library serializes the class containing the resumable function, saves it to the database, and loads it when a method is called and matched.
-* The match expression evaluated against the method input and output and active instance data.
-* If a match occurred we update the class instance data using `SetData` expression, Note that the assignment operator is not allowed in expression trees so we use equal operator.
-* The execution will continue after setting data until the next wait or finishing.
-* The next wait will be saved to the database in the same way.
-* The loop will continue until resumable function end.0
-* The method marked with `[PushCall]` must have one input paramter that is serializable, you can use value types and strings also.
-* You can mark any instance method with `[PushCall]` if it have one parameter.
-* We use [MessagePack](https://github.com/MessagePack-CSharp/MessagePack-CSharp) to serialize/deserialize ResumableFunctionsContainer instance.
 
 # Start using the library
 * Create new Web API project, Name it `RequestApproval`
@@ -153,52 +80,41 @@ builder.Services
 # Supported Wait Types
 * Wait **single method** to match (similar to `await` in `async\await`)
 ``` C#
- yield return
-         Wait<Project, bool>("Project Submitted", ProjectSubmitted)
-             .MatchIf((input, output) => output == true)
-             .SetData((input, output) => CurrentProject == input);
+yield return
+    Wait<Project, bool>(ProjectSubmitted, "Project Submitted")
+    .MatchIf((input, output) => output == true)
+    .AfterMatch((input, output) => CurrentProject = input);
 ```
 * Wait **first method match in a group** of methods (similar to `Task.WhenAny()`)
 ``` C#
- yield return Wait(
-            "Wait first in two",
-            new MethodWait<Project, bool>(ProjectSubmitted)
-                .MatchIf((input, output) => output == true)
-                .SetData((input, output) => CurrentProject == input),
-            new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == output)
-        ).First();
+yield return Wait("Wait First In Three",
+    Wait<string, string>(Method7, "Method 7"),
+    Wait<string, string>(Method8, "Method 8"),
+    Wait<string, string>(Method9, "Method 9")
+).MatchAny();
 ```
 * Wait **group of methods** to match (similar to `Task.WhenAll()`)
 ``` C#
- yield return Wait(
-            "Wait three methods",
-            new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == output),
-            new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerTwoApproval == output),
-            new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval == output)
-        ).All();
+yield return Wait("Wait three methods",
+    Wait<string, string>(Method1, "Method 1"),
+    Wait<string, string>(Method2, "Method 2"),
+    Wait<string, string>(Method3, "Method 3")
+    );
+//or 
+yield return Wait("Wait three methods",
+    Wait<string, string>(Method1, "Method 1"),
+    Wait<string, string>(Method2, "Method 2"),
+    Wait<string, string>(Method3, "Method 3")
+    ).MatchAll();
 ```
 * **Custom wait for a group** with custom match expression that must be satisfied to mark the group as completed
 ``` C#
- yield return Wait(
-            "Wait many with complex match expression",
-            new MethodWait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerOneApproval == output),
-            new MethodWait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerTwoApproval == output),
-            new MethodWait<ApprovalDecision, bool>(ManagerThreeApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .SetData((input, output) => ManagerThreeApproval == output)
-        ).When(waitGroup => waitGroup.CompletedCount == 2);//wrtite any complex exprssion against waitGroup
+yield return Wait("Wait three methods",
+    Wait<string, string>(Method1, "Method 1"),
+    Wait<string, string>(Method2, "Method 2"),
+    Wait<string, string>(Method3, "Method 3")
+)
+.MatchIf(waitsGroup => waitsGroup.CompletedCount == 2 && Id == 10 && x == 1);
 ```
 * You can wait a **sub resumable function** that is not an entry point
 ``` C#
@@ -219,8 +135,8 @@ public async IAsyncEnumerable<WaitX> WaitTwoManagers()
 [SubResumableFunction("SubFunction1")]
 public async IAsyncEnumerable<WaitX> SubFunction1()
 {
-    yield return Wait<string, string>(Method1, "M1").MatchAll();
-    yield return Wait("Wait sub function2", SubFunction2);
+    yield return Wait<string, string>(Method1, "M1").MatchAny();
+    yield return Wait("Wait sub function2", SubFunction2);//this waits another resumable function
 }
 ```
 * You can wait **mixed group** that contains `SubResumableFunction`s, `MethodWait`s and `WaitsGroup`s
@@ -232,14 +148,14 @@ yield return Wait("Wait Many Types Group",
         Wait<string, string>(Method3, "Method 3")
     ),
     Wait("Wait sub function", SubFunction),
-    Wait<string, string>(Method5, "Wait Method M5"));
+    Wait<string, string>(Method5, "Wait Single Method"));
 ```
 * You can **GoBackTo** a previous wait to wait it again.
 ``` C#
 if (ManagerOneApproval is false)
 {
 	WriteMessage("Manager one rejected project and replay will go to ManagerOneApproveProject.");
-	yield return GoBackTo("ManagerOneApproveProject");
+	yield return GoBackTo("ManagerOneApproveProject");//the name must be a previous wait
 }
 ```
 * You can **GoBackAfter** a previous wait.
@@ -247,17 +163,17 @@ if (ManagerOneApproval is false)
 yield return
 	Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
 		.MatchIf((input, output) => output == true)
-		.SetData((input, output) => CurrentProject == input);
+		.AfterMatch((input, output) => CurrentProject = input);
 
 await AskManagerToApprove("Manager 1",CurrentProject.Id);
 yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
 	.MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-	.SetData((input, output) => ManagerOneApproval == input.Decision);
+	.AfterMatch((input, output) => ManagerOneApproval == input.Decision);
 
 if (ManagerOneApproval is false)
 {
 	WriteMessage("Manager one rejected project and replay will go after ProjectSubmitted.");
-	yield return GoBackAfter(ProjectSumbitted);
+	yield return GoBackAfter(ProjectSumbitted);//here is go back
 }
 ```
 * You can **GoBackBefore** a previous wait
@@ -266,17 +182,18 @@ WriteMessage("Before project submitted.");
 yield return
 	Wait<Project, bool>(ProjectSumbitted, ProjectSubmitted)
 		.MatchIf((input, output) => output == true && input.IsResubmit == false)
-		.SetData((input, output) => CurrentProject == input);
+		.AfterMatch((input, output) => CurrentProject = input);
 
 await AskManagerToApprove("Manager 1", CurrentProject.Id);
 yield return Wait<ApprovalDecision, bool>("ManagerOneApproveProject", ManagerOneApproveProject)
 	.MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-	.SetData((input, output) => ManagerOneApproval == input.Decision);
+	.AfterMatch((input, output) => ManagerOneApproval == input.Decision);
 
 if (ManagerOneApproval is false)
 {
 	WriteMessage(
 		"ReplayExample: Manager one rejected project and replay will wait ProjectSumbitted again.");
+    //here is go back
 	yield return
 		GoBackBefore<Project, bool>(
 			ProjectSumbitted,
@@ -287,7 +204,7 @@ if (ManagerOneApproval is false)
 ``` C#
 yield return
     Wait(TimeSpan.FromDays(2), "Wait Two Days")
-    .SetData(x => TimeWaitId == x.TimeMatchId);
+    .AfterMatch(x => TimeWaitId = x.TimeMatchId);
 ```
 
 # How it works internally
