@@ -8,15 +8,15 @@ namespace ResumableFunctions.Handler.Core.Abstraction
 {
     public interface IResumableFunctionsSettings
     {
-        public IGlobalConfiguration HangfireConfig { get; }
-        public DbContextOptionsBuilder WaitsDbConfig { get; }
-        public string CurrentServiceUrl { get; }
-        public int CurrentServiceId { get; internal set; }
+        IGlobalConfiguration HangfireConfig { get; }
+        DbContextOptionsBuilder WaitsDbConfig { get; }
+        string CurrentServiceUrl { get; }
+        int CurrentServiceId { get; set; }
 
-        public IDistributedLockProvider DistributedLockProvider { get; }
-        public string[] DllsToScan { get; }
+        IDistributedLockProvider DistributedLockProvider { get; }
+        string[] DllsToScan { get; }
 
-        public bool ForceRescan { get; set; }
+        bool ForceRescan { get; set; }
         string CurrentWaitsDbName { get; }
         string CurrentServiceName => Assembly.GetEntryAssembly().GetName().Name;
 

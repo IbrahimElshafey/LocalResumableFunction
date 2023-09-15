@@ -112,6 +112,8 @@ namespace ResumableFunctions.Handler.Core
                                 ExecuteAfterMatchAction,
                                 ResumeExecution);
 
+                            await _context.SaveChangesAsync();
+
                             if (!isSuccess) continue;
 
                             matchExist = true;
@@ -155,7 +157,7 @@ namespace ResumableFunctions.Handler.Core
             {
                 var isMatch = _methodWait.IsMatched();
                 if (!isMatch)
-                    await UpdateWaitRecord(x => x.MatchStatus = MatchStatus.NotMatched);
+                    UpdateWaitRecord(x => x.MatchStatus = MatchStatus.NotMatched);
                 else
                 {
                     var message =
@@ -165,7 +167,7 @@ namespace ResumableFunctions.Handler.Core
                         await _serviceRepo.AddLog(message, LogType.Info, StatusCodes.WaitProcessing);
                     else
                         _methodWait.FunctionState.AddLog(message, LogType.Info, StatusCodes.WaitProcessing);
-                    await UpdateWaitRecord(x => x.MatchStatus = MatchStatus.Matched);
+                    UpdateWaitRecord(x => x.MatchStatus = MatchStatus.Matched);
 
                 }
                 return isMatch;
@@ -209,12 +211,12 @@ namespace ResumableFunctions.Handler.Core
                     {
                         _context.MarkEntityAsModified(_methodWait.FunctionState);
                         await _context.SaveChangesAsync();
-                        await UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionSucceeded);
+                        UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionSucceeded);
                     }
                     else
                     {
                         _methodWait.Status = _settings.WaitStatusIfProcessingError;
-                        await UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionFailed);
+                        UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionFailed);
                         throw new Exception(
                             $"Can't update function state [{_methodWait.FunctionStateId}] after method wait [{_methodWait}] matched.");
                     }
@@ -270,7 +272,7 @@ namespace ResumableFunctions.Handler.Core
                             }
                             else
                             {
-                                await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionSucceeded);
+                                UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionSucceeded);
                                 return true;
                             }
                             break;
@@ -287,11 +289,11 @@ namespace ResumableFunctions.Handler.Core
                 _methodWait.FunctionState.AddError(errorMsg, StatusCodes.WaitProcessing, ex);
                 _methodWait.FunctionState.Status = FunctionInstanceStatus.InError;
                 _methodWait.Status = _settings.WaitStatusIfProcessingError;
-                await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionFailed);
+                UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionFailed);
                 await _methodWait.CurrentFunction?.OnErrorOccurred(errorMsg, ex);
                 return false;
             }
-            await UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionSucceeded);
+            UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionSucceeded);
             return true;
         }
 
@@ -348,7 +350,7 @@ namespace ResumableFunctions.Handler.Core
         {
             if (nextWait is ReplayRequest replayRequest)
             {
-                var replayResult = await _replayWaitProcessor.ReplayWait(replayRequest);
+                var replayResult = await _replayWaitProcessor.GetWaitToReplay(replayRequest);
                 _context.MarkEntityAsModified(replayResult.Wait.FunctionState);
                 if (replayResult is { ProceedExecution: true, Wait: not null })
                     await ProceedToNextWait(replayResult.Wait);
@@ -418,12 +420,12 @@ namespace ResumableFunctions.Handler.Core
                 throw new Exception($"Error when process pushed method [{pushedCallId}] and wait [{_methodWait.Id}].", ex);
             }
         }
-        private async Task UpdateWaitRecord(Action<WaitProcessingRecord> action, [CallerMemberName] string calledBy = "")
+        private void UpdateWaitRecord(Action<WaitProcessingRecord> action, [CallerMemberName] string calledBy = "")
         {
             try
             {
                 action(_waitCall);
-                await _context.SaveChangesAsync();
+                //await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {

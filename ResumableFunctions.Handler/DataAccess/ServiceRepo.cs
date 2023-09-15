@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.InOuts.Entities;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -44,30 +45,26 @@ internal class ServiceRepo : IServiceRepo
             .ExecuteDeleteAsync();
     }
 
-    public async Task<bool> ShouldScanAssembly(string assemblyPath)
+    public async Task<ServiceData> FindServiceDataForScan(string currentAssemblyName)
     {
-        var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
-        var serviceData = await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName) ??
-                          await AddNewServiceData(currentAssemblyName);
+        var serviceData = 
+            await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName) ??
+            await AddNewServiceData(currentAssemblyName);
 
         var notRoot = serviceData.Id != _settings.CurrentServiceId;
         var notInCurrent = serviceData.ParentId != _settings.CurrentServiceId;
         if (notInCurrent && notRoot)
         {
             var rootService = _context.ServicesData.Local.FirstOrDefault(x => x.Id == _settings.CurrentServiceId);
-            rootService?.AddError($"Dll [{currentAssemblyName}] will not be added to service [{Assembly.GetEntryAssembly()?.GetName().Name}] because it's used in another service.", StatusCodes.Scanning, null);
-            return false;
+            rootService?.AddError(
+                $"Dll [{currentAssemblyName}] will not be added to service " +
+                $"[{Assembly.GetEntryAssembly()?.GetName().Name}] because it's used in another service.",
+                StatusCodes.Scanning, null);
+            return null;
         }
 
         _settings.CurrentServiceId = serviceData.ParentId == -1 ? serviceData.Id : serviceData.ParentId;
-        if (File.Exists(assemblyPath) is false)
-        {
-            var message = $"Assembly file ({assemblyPath}) not exist.";
-            _logger.LogError(message);
-            serviceData.AddError(message, StatusCodes.Scanning, null);
-            return false;
-        }
-
+        //delete dll related if parent service 
         if (serviceData.ParentId == -1)
         {
             await _context
@@ -75,32 +72,7 @@ internal class ServiceRepo : IServiceRepo
                .Where(x => x.ParentId == serviceData.Id)
                .ExecuteDeleteAsync();
         }
-
-
-        var assembly = Assembly.LoadFile(assemblyPath);
-        var isReferenceResumableFunction =
-            assembly.GetReferencedAssemblies().Any(x => new[]
-            {
-                "ResumableFunctions.Handler",
-                "ResumableFunctions.AspNetService"
-            }.Contains(x.Name));
-
-        if (isReferenceResumableFunction is false)
-        {
-            serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].", StatusCodes.Scanning, null);
-            return false;
-        }
-
-        var lastBuildDate = File.GetLastWriteTime(assemblyPath);
-        serviceData.Url = _settings.CurrentServiceUrl;
-        serviceData.AddLog($"Check last scan date for assembly [{currentAssemblyName}].", LogType.Info, StatusCodes.Scanning);
-        var shouldScan = lastBuildDate > serviceData.Modified;
-        if (shouldScan is false)
-            serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].", LogType.Info, StatusCodes.Scanning);
-        if (_settings.ForceRescan)
-            serviceData.AddLog(
-                $"Dll [{currentAssemblyName}] Will be scanned because force rescan is enabled.", LogType.Warning, StatusCodes.Scanning);
-        return shouldScan || _settings.ForceRescan;
+        return serviceData;
     }
 
     public async Task<ServiceData> GetServiceData(string assemblyName)

@@ -4,6 +4,6 @@ namespace ResumableFunctions.Handler.Core.Abstraction
 {
     internal interface IReplayWaitProcessor
     {
-        Task<(WaitEntity Wait, bool ProceedExecution)> ReplayWait(ReplayRequest replayRequest);
+        Task<(WaitEntity Wait, bool ProceedExecution)> GetWaitToReplay(ReplayRequest replayRequest);
     }
 }

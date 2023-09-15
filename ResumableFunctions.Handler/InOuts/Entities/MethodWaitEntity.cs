@@ -113,7 +113,7 @@ public class MethodWaitEntity : WaitEntity
     }
 
 
-    internal override bool IsValidWaitRequest()
+    internal override bool ValidateWaitRequest()
     {
         if (IsReplay)
             return true;
@@ -139,7 +139,7 @@ public class MethodWaitEntity : WaitEntity
                 $"You didn't called the method [{nameof(MethodWait<int, int>.AfterMatch)}] for wait [{Name}], " +
                 $"Please use [{nameof(MethodWait<int, int>.NothingAfterMatch)}()] if this is intended.", LogType.Warning, StatusCodes.WaitValidation);
 
-        return base.IsValidWaitRequest();
+        return base.ValidateWaitRequest();
     }
 
     internal void LoadExpressions()

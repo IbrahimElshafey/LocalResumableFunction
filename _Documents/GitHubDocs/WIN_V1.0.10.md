@@ -5,3 +5,6 @@
 * Fix exposing not necessary API to the end user.
 * Enahnce mandatory part extraction of the match expressions.
 * AfterMatch,WaitsGroup.MatchIf, and WhenCancel now accept a methods callback as input, not an expression tree.
+
+https://pdfhost.io/edit?doc=4c5103c7-39b6-4eaf-85ab-914a08183079
+https://pdfhost.io/v/DFgolpDyq_Resumable_Functions

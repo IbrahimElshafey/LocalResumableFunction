@@ -15,7 +15,6 @@ namespace ResumableFunctions.AspNetService
                 .AddControllersAsServices();
             mvcBuilder.Services.AddRazorPages();
             mvcBuilder.Services.AddResumableFunctionsCore(settings);
-            //CreateHangfireDb(mvcBuilder, settings);
         }
 
         
@@ -38,17 +37,6 @@ namespace ResumableFunctions.AspNetService
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-        }
-
-        public static T ToObject<T>(this Stream stream)
-        {
-            var serializer = new JsonSerializer();
-
-            using (var sr = new StreamReader(stream))
-            using (var jsonTextReader = new JsonTextReader(sr))
-            {
-                return serializer.Deserialize<T>(jsonTextReader);
-            }
         }
     }
 }

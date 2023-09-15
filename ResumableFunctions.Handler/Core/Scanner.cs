@@ -139,7 +139,7 @@ internal class Scanner
                 _logger.LogInformation($"Start scan assembly [{assemblyPath}]");
 
                 var dateBeforeScan = DateTime.Now;
-                if (await _serviceRepo.ShouldScanAssembly(assemblyPath) is false) continue;
+                if (await AssemblyNeedScan(assemblyPath) is false) continue;
 
                 await _scanStateRepo.ResetServiceScanState();
 
@@ -169,6 +169,52 @@ internal class Scanner
                 _logger.LogError(ex, $"Error when register a method in assembly [{assemblyPath}]");
                 throw;
             }
+        }
+    }
+
+    private async Task<bool> AssemblyNeedScan(string assemblyPath)
+    {
+        try
+        {
+            var currentAssemblyName = Path.GetFileNameWithoutExtension(assemblyPath);
+            var serviceData = await _serviceRepo.FindServiceDataForScan(currentAssemblyName);
+            if (serviceData == null) return false;
+
+            if (File.Exists(assemblyPath) is false)
+            {
+                var message = $"Assembly file ({assemblyPath}) not exist.";
+                _logger.LogError(message);
+                serviceData.AddError(message, StatusCodes.Scanning, null);
+                return false;
+            }
+            var assembly = Assembly.LoadFile(assemblyPath);
+            var isReferenceResumableFunction =
+                assembly.GetReferencedAssemblies().Any(x => new[]
+                {
+                "ResumableFunctions.Handler",
+                "ResumableFunctions.AspNetService"
+                }.Contains(x.Name));
+
+            if (isReferenceResumableFunction is false)
+            {
+                serviceData.AddError($"No reference for ResumableFunction DLLs found,The scan canceled for [{assemblyPath}].", StatusCodes.Scanning, null);
+                return false;
+            }
+            var lastBuildDate = File.GetLastWriteTime(assemblyPath);
+            serviceData.Url = _settings.CurrentServiceUrl;
+            serviceData.AddLog($"Check last scan date for assembly [{currentAssemblyName}].", LogType.Info, StatusCodes.Scanning);
+            var shouldScan = lastBuildDate > serviceData.Modified;
+            if (shouldScan is false)
+                serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].", LogType.Info, StatusCodes.Scanning);
+            if (_settings.ForceRescan)
+                serviceData.AddLog(
+                    $"Dll [{currentAssemblyName}] Will be scanned because force rescan is enabled.", LogType.Warning, StatusCodes.Scanning);
+            return shouldScan || _settings.ForceRescan;
+        }
+        catch (Exception)
+        {
+            _logger.LogError($"Error when try to check if assembly [{assemblyPath}] should be scanned or not.");
+            return false;
         }
     }
 
@@ -322,8 +368,8 @@ internal class Scanner
 
         if (resumableFunction.ReturnType != typeof(IAsyncEnumerable<Wait>) || resumableFunction.GetParameters().Length != 0)
             errors.Add(
-                $"The resumable function [{resumableFunction.GetFullName()}] must match the signature [IAsyncEnumerable<WaitX> {resumableFunction.Name}()].\n" +
-                $"Must have no parameter and return type must be [IAsyncEnumerable<WaitX>]");
+                $"The resumable function [{resumableFunction.GetFullName()}] must match the signature [IAsyncEnumerable<Wait> {resumableFunction.Name}()].\n" +
+                $"Must have no parameter and return type must be [IAsyncEnumerable<Wait>]");
 
         if (resumableFunction.IsStatic)
             errors.Add($"Resumable function [{resumableFunction.GetFullName()}] must be instance method.");

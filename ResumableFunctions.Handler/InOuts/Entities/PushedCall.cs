@@ -36,7 +36,7 @@ public class PushedCall : IEntity<long>, IOnSaveEntity
 
     public void OnSave()
     {
-        var converter = new BinaryToObjectConverter();
+        var converter = new BinarySerializer();
         DataValue = converter.ConvertToBinary(Data);
         MethodDataValue = converter.ConvertToBinary(MethodData);
         MethodUrn = MethodData?.MethodUrn;
@@ -44,7 +44,7 @@ public class PushedCall : IEntity<long>, IOnSaveEntity
 
     public void LoadUnmappedProps(MethodInfo methodInfo = null)
     {
-        var converter = new BinaryToObjectConverter();
+        var converter = new BinarySerializer();
         if (methodInfo == null)
             Data = converter.ConvertToObject<InputOutput>(DataValue);
         else
@@ -60,7 +60,7 @@ public class PushedCall : IEntity<long>, IOnSaveEntity
 
     private static InputOutput GetMethodData(Type inputType, Type outputType, byte[] dataBytes)
     {
-        var converter = new BinaryToObjectConverter();
+        var converter = new BinarySerializer();
         var genericInputOutPut = typeof(GInputOutput<,>).MakeGenericType(inputType, outputType);
         dynamic data = converter.ConvertToObject(dataBytes, genericInputOutPut);
         return InputOutput.FromGeneric(data);

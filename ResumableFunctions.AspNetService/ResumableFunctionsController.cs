@@ -45,7 +45,7 @@ namespace ResumableFunctions.AspNetService
         {
             var body = await Request.BodyReader.ReadAsync();
             var bytes = body.Buffer.ToArray();
-            var serializer = new BinaryToObjectConverter();
+            var serializer = new BinarySerializer();
             var externalCall = serializer.ConvertToObject<ExternalCallArgs>(bytes);
             return await ExternalCallJson(externalCall);
         }

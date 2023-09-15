@@ -35,7 +35,7 @@ public class ResumableFunctionState : IEntity<int>, IEntityWithUpdate, IEntityWi
 
     public void OnSave()
     {
-        var converter = new BinaryToObjectConverter();
+        var converter = new BinarySerializer();
         StateObjectValue = converter.ConvertToBinary(StateObject);
         //foreach (var wait in Waits)
         //{
@@ -48,7 +48,7 @@ public class ResumableFunctionState : IEntity<int>, IEntityWithUpdate, IEntityWi
 
     public void LoadUnmappedProps(Type stateObjectType)
     {
-        var converter = new BinaryToObjectConverter();
+        var converter = new BinarySerializer();
         StateObject =
             stateObjectType != null ?
                 converter.ConvertToObject(StateObjectValue, stateObjectType) :

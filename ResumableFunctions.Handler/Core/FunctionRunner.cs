@@ -8,7 +8,7 @@ using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.Core;
 
-internal class FunctionRunner : IAsyncEnumerator<Wait>
+public class FunctionRunner : IAsyncEnumerator<Wait>
 {
     private IAsyncEnumerator<Wait> _functionRunner;
 

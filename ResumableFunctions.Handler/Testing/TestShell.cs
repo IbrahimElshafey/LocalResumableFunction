@@ -4,6 +4,7 @@ using FastExpressionCompiler;
 using Hangfire;
 using Medallion.Threading;
 using Medallion.Threading.WaitHandles;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -22,44 +23,46 @@ namespace ResumableFunctions.Handler.Testing
     {
         public IHost CurrentApp { get; private set; }
 
-        private IDistributedSynchronizationHandle _lock;
+        //private IDistributedSynchronizationHandle _lock;
         private readonly HostApplicationBuilder _builder;
         private readonly Type[] _types;
         private readonly TestSettings _settings;
         private readonly string _testName;
-        private IDistributedLockProvider _lockProvider = new WaitHandleDistributedSynchronizationProvider();
+        //private IDistributedLockProvider _lockProvider = new WaitHandleDistributedSynchronizationProvider();
         public TestShell(string testName, params Type[] types)
         {
+            //_connection = new SqliteConnection($"DataSource=file:{_testName}?mode=memory&cache=shared");
+          
             _testName = testName;
             _settings = new TestSettings(testName);
+            _settings.Connection.Open();
             _builder = Host.CreateApplicationBuilder();
             _types = types;
         }
 
-        public async Task DeleteDb(string dbName)
-        {
-            var dbConfig = new DbContextOptionsBuilder()
-                .UseSqlServer(
-                    $"Server={_settings.Server};Database={dbName};Trusted_Connection=True;TrustServerCertificate=True;");
-            var context = new DbContext(dbConfig.Options);
-            try
-            {
-                await context.Database.EnsureDeletedAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-        }
+        //public async Task DeleteDb(string dbName)
+        //{
+        //    var dbConfig = new DbContextOptionsBuilder()
+        //        .UseSqlServer(_settings.ConnectionString);
+        //    var context = new DbContext(dbConfig.Options);
+        //    try
+        //    {
+        //        await context.Database.EnsureDeletedAsync();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine(e);
+        //        throw;
+        //    }
+        //}
 
         public IServiceCollection RegisteredServices => _builder.Services;
         public async Task ScanTypes(params string[] functionsUrnsToIncludeInTest)
         {
-            await DeleteDb(_testName);
+            //await DeleteDb(_testName);
             _builder.Services.AddResumableFunctionsCore(_settings);
             CurrentApp = _builder.Build();
-            _lock = await _lockProvider.AcquireLockAsync("Test827556");
+            //_lock = await _lockProvider.AcquireLockAsync("Test827556");
             GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(CurrentApp.Services));
 
             using var scope = CurrentApp.Services.CreateScope();
@@ -68,7 +71,7 @@ namespace ResumableFunctions.Handler.Testing
                 AssemblyName = _types[0].Assembly.GetName().Name,
                 ParentId = -1,
             };
-            await using var context = scope.ServiceProvider.GetService<WaitsDataContext>();
+            using var context = scope.ServiceProvider.GetService<WaitsDataContext>();
             context.ServicesData.Add(serviceData);
             await context.SaveChangesAsync();
             _settings.CurrentServiceId = serviceData.Id;
@@ -255,9 +258,9 @@ namespace ResumableFunctions.Handler.Testing
         }
         public void Dispose()
         {
-            _lock?.Dispose();
-            Context?.Dispose();
-            CurrentApp?.Dispose();
+            //_lock?.Dispose();
+            //Context?.Dispose();
+            //CurrentApp?.Dispose();
         }
 
 

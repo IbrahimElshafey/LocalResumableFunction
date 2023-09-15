@@ -14,20 +14,13 @@ internal partial class WaitsRepo
 {
     public async Task<bool> SaveWait(WaitEntity newWait)
     {
-        if (newWait.IsValidWaitRequest() is false)
+        if (newWait.ValidateWaitRequest() is false)
         {
             var message =
                 $"Error when validate the requested wait [{newWait.Name}] " +
                 $"that requested by function [{newWait.RequestedByFunction}].";
             _logger.LogError(message);
         }
-        //else if (newWait.Errors.Any())
-        //{
-        //    foreach (var error in newWait.Errors)
-        //    {
-        //        await _serviceRepo.AddErrorLog(null, error, StatusCodes.WaitValidation);
-        //    }
-        //}
 
         switch (newWait)
         {
@@ -142,10 +135,7 @@ internal partial class WaitsRepo
             functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
 
             if (functionWait.FirstWait is ReplayRequest)
-            {
-                _logger.LogWarning("First wait can't be a replay request");
-                //await ReplayWait(replayWait);//todo:review first wait is replay for what??
-            }
+                await _serviceRepo.AddErrorLog(null, "First wait can't be a replay request", StatusCodes.FirstWait);
             else
                 await SaveWait(functionWait.FirstWait);//first wait for sub function
         }

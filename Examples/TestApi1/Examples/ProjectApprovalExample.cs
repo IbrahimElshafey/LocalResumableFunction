@@ -89,7 +89,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
         Success(nameof(ExternalMethodWaitGoodby));
     }
     //any method with attribute [ResumableFunctionEntryPoint] that takes no argument
-    //and return IAsyncEnumerable<WaitX> is a resumbale function
+    //and return IAsyncEnumerable<Wait> is a resumbale function
     [ResumableFunctionEntryPoint("PAE.InterfaceMethod")]
     public async IAsyncEnumerable<Wait> InterfaceMethod()
     {

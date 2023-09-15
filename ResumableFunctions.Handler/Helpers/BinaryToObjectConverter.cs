@@ -3,7 +3,7 @@ using MessagePack;
 using MessagePack.Resolvers;
 
 namespace ResumableFunctions.Handler.Helpers;
-internal class BinaryToObjectConverter
+internal class BinarySerializer
 {
 
     private MessagePackSerializerOptions Options() => ContractlessStandardResolver.Options;

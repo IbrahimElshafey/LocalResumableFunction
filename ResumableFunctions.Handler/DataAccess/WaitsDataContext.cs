@@ -67,7 +67,6 @@ internal sealed class WaitsDataContext : DbContext
         ConfigurConcurrencyToken(modelBuilder);
         ConfigurSoftDeleteFilter(modelBuilder);
         base.OnModelCreating(modelBuilder);
-        //todo:other model creation options may be added by call `_settings.OnModelCreating(modelBuilder)`
     }
 
 

@@ -121,9 +121,9 @@ yield return Wait("Wait three methods",
  yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers);
  ....
 //method must have  `SubResumableFunction` attribute
-//Must return `IAsyncEnumerable<Wait>`
+//Must return `IAsyncEnumerable<WaitX>`
 [SubResumableFunction("WaitTwoManagers")]
-public async IAsyncEnumerable<Wait> WaitTwoManagers()
+public async IAsyncEnumerable<WaitX> WaitTwoManagers()
 {
 	//wait some code
 	.
@@ -133,7 +133,7 @@ public async IAsyncEnumerable<Wait> WaitTwoManagers()
 * `SubResumableFunction` Can wait another `SubResumableFunction` 
 ```C#
 [SubResumableFunction("SubFunction1")]
-public async IAsyncEnumerable<Wait> SubFunction1()
+public async IAsyncEnumerable<WaitX> SubFunction1()
 {
     yield return Wait<string, string>(Method1, "M1").MatchAny();
     yield return Wait("Wait sub function2", SubFunction2);//this waits another resumable function

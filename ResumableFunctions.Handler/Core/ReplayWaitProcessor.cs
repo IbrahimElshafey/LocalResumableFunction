@@ -29,7 +29,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         _serviceRepo = serviceRepo;
     }
 
-    public async Task<(WaitEntity Wait, bool ProceedExecution)> ReplayWait(ReplayRequest replayRequest)
+    public async Task<(WaitEntity Wait, bool ProceedExecution)> GetWaitToReplay(ReplayRequest replayRequest)
     {
         try
         {

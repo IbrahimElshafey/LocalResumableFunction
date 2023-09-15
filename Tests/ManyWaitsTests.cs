@@ -189,7 +189,7 @@ namespace Tests
                 Wait<string, string>(Method1, "Method 1"),
                 Wait<string, string>(Method2, "Method 2"),
                 Wait<string, string>(Method3, "Method 3")
-                );
+                ).MatchAll();
             await Task.Delay(100);
             Console.WriteLine("Three method done");
         }

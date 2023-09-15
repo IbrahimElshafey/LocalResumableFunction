@@ -71,7 +71,6 @@ namespace ResumableFunctions.Handler.Attributes
             {
                 _logger.LogError(ex, $"Error when try to push call for method [{name}]");
             }
-            //Console.WriteLine($"Method [{name}] executed and result is [{result}]");
         }
     }
 }

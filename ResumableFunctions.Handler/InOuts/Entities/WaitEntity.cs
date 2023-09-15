@@ -248,7 +248,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     internal virtual void Cancel() => Status = Status == WaitStatus.Waiting ? Status = WaitStatus.Canceled : Status;
 
-    internal virtual bool IsValidWaitRequest()
+    internal virtual bool ValidateWaitRequest()
     {
         var isNameDuplicated =
             FunctionState
@@ -306,14 +306,14 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     public void OnSave()
     {
-        var converter = new BinaryToObjectConverter();
+        var converter = new BinarySerializer();
         if (ExtraData != null)
             ExtraDataValue = converter.ConvertToBinary(ExtraData);
     }
 
     public void LoadUnmappedProps()
     {
-        var converter = new BinaryToObjectConverter();
+        var converter = new BinarySerializer();
         if (ExtraDataValue != null)
             ExtraData = converter.ConvertToObject<WaitExtraData>(ExtraDataValue);
         if (FunctionState?.StateObject != null && CurrentFunction == null)
