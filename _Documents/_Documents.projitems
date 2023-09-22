@@ -9,7 +9,6 @@
     <Import_RootNamespace>_Documents</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)Compare.WinMerge" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\WIN_V1.0.10.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\What Help.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Internals.md" />

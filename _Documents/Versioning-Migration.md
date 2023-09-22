@@ -1,5 +1,5 @@
 # Publish new version to production
-* Side by side different versions that share the same DB
+* Side by side different versions
 	* Pushed call will have version
 	* RF will have version
 * Inter services waits and versions

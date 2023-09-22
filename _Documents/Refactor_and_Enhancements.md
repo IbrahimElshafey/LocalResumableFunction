@@ -40,6 +40,7 @@
 * Alternates is functions that trigger by the same pushed call but
 	* Only one instance activated
 	* Only one instance completed and other will be canceled
+	* we may have multiple 
 * Services registry is separate service
 * Security and IUserContext
 * Function priority/Matched Waits priority
