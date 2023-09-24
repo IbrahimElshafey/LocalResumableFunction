@@ -1,14 +1,14 @@
-# Publish new version to production
-* Side by side different versions
-	* Pushed call will have version
-	* RF will have version
-* Inter services waits and versions
-* External calls and versions
-* What about function class migration that is serialized
-* What happedn when resumable function database schema changed
-* What about HangfireDb
-* Old active resumable function instances?
-* How to receive calls while upgrading?
+# Side by Side Versions
+* Add new version addd all active waits will be assigned to the old version
+* When call pushed the system passes the matched waits to the corresponding versions
+* Each version has a puplish date and deactivation date
+* Wait that created in range between puplish date and deactivation date will be handled by the version corresponding
+* The current version dectivation date is Date.Max
+* I will use service fabric to host services
 
-* How to migrate to waits db new version when package changed
-* https://www.freecodecamp.org/news/how-to-version-a-rest-api/
+
+# Publish new version to production
+* What about function class migration that is serialized
+* What happedn when resumable function database schema changed with a new version
+* What about HangfireDb schema
+* How to receive calls while upgrading?

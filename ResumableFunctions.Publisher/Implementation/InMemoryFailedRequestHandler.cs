@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
-using ResumableFunctions.Publisher.InOuts;
-using System.Collections.Concurrent;
 using ResumableFunctions.Publisher.Abstraction;
-using System.Net.Http;
+using ResumableFunctions.Publisher.InOuts;
 using System;
+using System.Collections.Concurrent;
+using System.Net.Http;
 using System.Threading.Tasks;
 namespace ResumableFunctions.Publisher.Implementation
 {
@@ -36,11 +36,12 @@ namespace ResumableFunctions.Publisher.Implementation
             }
         }
 
-        public async void HandleFailedRequests()
+        public async Task HandleFailedRequests()
         {
             while (true)
             {
-                await Task.Delay(_settings.CheckFailedRequestEvery);
+                if (_failedRequests.Count == 0)
+                    await Task.Delay(_settings.CheckFailedRequestEvery);
                 if (_failedRequests.Count > 0)
                     CallFailedRequests();
             }

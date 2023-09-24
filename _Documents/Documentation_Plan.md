@@ -1,6 +1,6 @@
 # Write docs for
-* What are resumable functions.
-* Why resumable functions, What problems it solve
+* What are resumable functions?
+* Why resumable functions? What problems it solve?
 * Wait Types
 * Some consideration when using it
 * Compare two implementations

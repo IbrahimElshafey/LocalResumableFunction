@@ -11,38 +11,16 @@
 * Use RequestedByFunctionId prop in TimeWaitInput to refine match for time waits
 
 
-# Data store enhancements
-* Store pushed calls in different store that support:
-	* Fast insertion
-	* Fast query by key (No other queries)
-	* May be a queue service Kafka,RbbittMQ or ActiveMQ
-	* May use pull mode to get pushed calls
-* Store waits in different store that support:
-	* Fast queries 
-	* Fast wait insertion
-	* May be an option https://github.com/VelocityDB/VelocityDB
-* InMemory DBs
-	* May I use https://ignite.apache.org/docs/latest/ which is a distributed database for high-performance computing with in-memory speed.
-	* https://hazelcast.com/clients/dotnet/
-	* https://www.couchbase.com/
-* Fast logging
-	* Separate data store for log
-	* Logs can be queried by
-		* Date
-		* Service Id
-		* EntityName, EntityId
-		* Status
-	* Custom implementation for logging (IResumableFunctionLogging)
-	* https://www.influxdata.com/
 
-# New Features
+
+# Features
+* Security and IUserContext
 * Target multiple runtimes
 * Alternates is functions that trigger by the same pushed call but
 	* Only one instance activated
 	* Only one instance completed and other will be canceled
 	* we may have multiple 
 * Services registry is separate service
-* Security and IUserContext
 * Function priority/Matched Waits priority
 	* How hangfire handle priority
 * Performance Analysis/Monitoring
