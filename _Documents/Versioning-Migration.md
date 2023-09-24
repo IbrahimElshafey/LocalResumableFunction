@@ -5,7 +5,7 @@
 * Wait that created in range between puplish date and deactivation date will be handled by the version corresponding
 * The current version dectivation date is Date.Max
 * I will use service fabric to host services
-
+* When to mark version as dead? when no active waits exist and we don't need this
 
 # Publish new version to production
 * What about function class migration that is serialized
