@@ -26,5 +26,3 @@
 	* Code Project
 	* Medium
 	* c-sharpcorner.com
-
-* You don't need to set PushedCall attribute on interface method
