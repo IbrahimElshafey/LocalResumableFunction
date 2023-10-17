@@ -30,3 +30,4 @@
 * Date range filter for:
 	* Logs view
 	* Pushed Calls view
+* Localization For UI and log messages
