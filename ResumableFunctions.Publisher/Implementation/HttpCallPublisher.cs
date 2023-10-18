@@ -48,23 +48,20 @@ namespace ResumableFunctions.Publisher.Implementation
                 },
                 Input = input,
                 Output = output,
-                ServiceName = serviceName
+                ToServices = serviceName
             });
         }
 
         public async Task Publish(MethodCall methodCall)
         {
-            var failedRequest = new FailedRequest();
+            var serviceUrl = _settings.ServicesRegistry[methodCall.ToServices];
+            string actionUrl =
+                $"{serviceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ExternalCallAction}";
+            byte[] body = null;
             try
             {
-                var serviceUrl = _settings.ServicesRegistry[methodCall.ServiceName];
-                var actionUrl =
-                    $"{serviceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ExternalCallAction}";
-                failedRequest.ActionUrl = actionUrl;
 
-                var body = MessagePackSerializer.Serialize(methodCall, ContractlessStandardResolver.Options);
-                failedRequest.Body = body;
-
+                body = MessagePackSerializer.Serialize(methodCall, ContractlessStandardResolver.Options);
                 var client = _httpClientFactory.CreateClient();
                 var response = await client.PostAsync(actionUrl, new ByteArrayContent(body));
                 response.EnsureSuccessStatusCode();
@@ -74,6 +71,7 @@ namespace ResumableFunctions.Publisher.Implementation
             }
             catch (Exception ex)
             {
+                var failedRequest = new FailedRequest(Guid.NewGuid(), DateTime.Now, actionUrl, body);
                 _logger.LogError(ex, $"Error occurred when publish method call {methodCall}");
                 _ = _failedRequestHandler.EnqueueFailedRequest(failedRequest);
             }

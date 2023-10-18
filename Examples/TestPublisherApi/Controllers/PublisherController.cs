@@ -17,22 +17,22 @@ namespace TestPublisherApi.Controllers
         }
 
         [HttpGet(nameof(Method123))]
-        [PublishMethod("PublisherController.Method123", ToService = "TestApi1")]
+        [PublishMethod("PublisherController.Method123", "TestApi1", "TestApi2")]
         public string Method123(string input)
         {
             return $"{nameof(Method123)} called with input [{input}]";
         }
 
         [HttpGet(nameof(MethodNotExist))]
-        [PublishMethod("PublisherController.MethodNotExist", ToService = "TestApi2")]//not exist in TestApi2
+        [PublishMethod("PublisherController.MethodNotExist", "TestApi2")]//not exist in TestApi2
         public string MethodNotExist(string input)
         {
             return $"{nameof(MethodNotExist)} called with input [{input}]";
         }
 
         [HttpGet(nameof(TwoParamsMethod))]
-        [PublishMethod("PublisherController.TwoParamsMethod", ToService = "TestApi1")]
-        public string TwoParamsMethod(string input,string t2)
+        [PublishMethod("PublisherController.TwoParamsMethod", "TestApi1")]
+        public string TwoParamsMethod(string input, string t2)
         {
             return $"{nameof(TwoParamsMethod)} called with input [{input}]";
         }

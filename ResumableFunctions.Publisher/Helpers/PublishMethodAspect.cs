@@ -49,7 +49,7 @@ namespace ResumableFunctions.Publisher.Helpers
                     ClassName = metadata.DeclaringType.Name,
                     MethodName = metadata.Name,
                 },
-                ServiceName = publishMethodAttribute.ToService
+                ToServices = publishMethodAttribute.ToServices
             };
             if (args.Length > 0)
                 _methodCall.Input = args[0];

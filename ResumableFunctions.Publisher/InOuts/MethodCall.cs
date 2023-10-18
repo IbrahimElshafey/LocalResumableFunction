@@ -4,8 +4,9 @@ namespace ResumableFunctions.Publisher.InOuts
 {
     public class MethodCall
     {
+       
         public MethodData MethodData { get; set; }
-        public string ServiceName { get; set; }
+        public string[] ToServices { get; set; }
         public object Input { get; set; }
         public object Output { get; set; }
         public override string ToString()

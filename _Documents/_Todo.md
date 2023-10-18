@@ -1,4 +1,5 @@
 ﻿# Todo
+* Service Name must be mandatory for `PublishMethodAttribute` and publish to multiple services
 * How I handle call recieving while scan
 * Add IFailedRequestHandler Faster implementation
 	* Save failed requests to disk

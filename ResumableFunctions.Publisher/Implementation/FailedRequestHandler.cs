@@ -30,8 +30,6 @@ namespace ResumableFunctions.Publisher.Implementation
         {
             try
             {
-                failedRequest.Created = DateTime.Now;
-                failedRequest.Key = Guid.NewGuid();
                 await _failedRequestRepo.Add(failedRequest);
             }
             catch (Exception ex)
