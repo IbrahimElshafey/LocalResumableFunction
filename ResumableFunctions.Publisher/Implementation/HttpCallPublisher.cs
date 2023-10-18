@@ -75,7 +75,7 @@ namespace ResumableFunctions.Publisher.Implementation
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error occurred when publish method call {methodCall}");
-                _failedRequestHandler.AddFailedRequest(failedRequest);
+                _ = _failedRequestHandler.EnqueueFailedRequest(failedRequest);
             }
         }
     }

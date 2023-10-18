@@ -1,4 +1,5 @@
 ﻿# Todo
+* How I handle call recieving while scan
 * Add IFailedRequestHandler Faster implementation
 	* Save failed requests to disk
 * Review SaveChanges use

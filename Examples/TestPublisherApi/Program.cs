@@ -20,7 +20,7 @@ internal class Program
                 { "TestApi1", "https://localhost:7140/" },
                 { "TestApi2", "https://localhost:7099/" },
             },
-            checkFailedRequestEvery: TimeSpan.FromSeconds(10)));
+            checkFailedRequestEvery: TimeSpan.FromSeconds(20)));
 
         var app = builder.Build();
         // Configure the HTTP request pipeline.
