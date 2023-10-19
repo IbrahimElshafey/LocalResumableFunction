@@ -48,32 +48,36 @@ namespace ResumableFunctions.Publisher.Implementation
                 },
                 Input = input,
                 Output = output,
-                ToServices = serviceName
+                ServiceName = serviceName
             });
         }
 
         public async Task Publish(MethodCall methodCall)
         {
-            var serviceUrl = _settings.ServicesRegistry[methodCall.ToServices];
-            string actionUrl =
-                $"{serviceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ExternalCallAction}";
-            byte[] body = null;
-            try
+            //D:\GAFT\ResumableFunctions\ResumableFunctions.AspNetService\ResumableFunctionsController.cs
+            foreach (var service in methodCall.ToServices)
             {
-
-                body = MessagePackSerializer.Serialize(methodCall, ContractlessStandardResolver.Options);
-                var client = _httpClientFactory.CreateClient();
-                var response = await client.PostAsync(actionUrl, new ByteArrayContent(body));
-                response.EnsureSuccessStatusCode();
-                var result = await response.Content.ReadAsStringAsync();
-                if (!(result == "1" || result == "-1"))
-                    throw new Exception("Expected result must be 1 or -1");
-            }
-            catch (Exception ex)
-            {
-                var failedRequest = new FailedRequest(Guid.NewGuid(), DateTime.Now, actionUrl, body);
-                _logger.LogError(ex, $"Error occurred when publish method call {methodCall}");
-                _ = _failedRequestHandler.EnqueueFailedRequest(failedRequest);
+                var serviceUrl = _settings.ServicesRegistry[service];
+                string actionUrl =
+                    $"{serviceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ExternalCallAction}";
+                byte[] body = null;
+                try
+                {
+                    methodCall.ServiceName = service;
+                    body = MessagePackSerializer.Serialize(methodCall, ContractlessStandardResolver.Options);
+                    var client = _httpClientFactory.CreateClient();
+                    var response = await client.PostAsync(actionUrl, new ByteArrayContent(body));
+                    response.EnsureSuccessStatusCode();
+                    var result = await response.Content.ReadAsStringAsync();
+                    if (!(result == "1" || result == "-1"))
+                        throw new Exception("Expected result must be 1 or -1");
+                }
+                catch (Exception ex)
+                {
+                    var failedRequest = new FailedRequest(Guid.NewGuid(), DateTime.Now, actionUrl, body);
+                    _logger.LogError(ex, $"Error occurred when publish method call {methodCall}");
+                    _ = _failedRequestHandler.EnqueueFailedRequest(failedRequest);
+                }
             }
         }
     }

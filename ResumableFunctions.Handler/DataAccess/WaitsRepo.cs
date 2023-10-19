@@ -36,7 +36,32 @@ internal partial class WaitsRepo : IWaitsRepo
         _serviceRepo = serviceRepo;
     }
 
-    public async Task<List<CallServiceImapction>> GetAffectedServicesAndFunctions(string methodUrn)
+    public async Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn)
+    {
+        var methodGroup = await GetMethodGroup(methodUrn);
+        var affectedFunctions =
+            await
+            _context.MethodWaits
+            .Where(x =>
+                x.Status == WaitStatus.Waiting &&
+                x.MethodGroupToWaitId == methodGroup.Id &&
+                x.ServiceId == _settings.CurrentServiceId)
+            .Select(x => x.RequestedByFunctionId)
+            .Distinct()
+            .ToListAsync();
+        return affectedFunctions.Any() ?
+            new CallEffection
+            {
+                AffectedServiceId = _settings.CurrentServiceId,
+                AffectedServiceUrl = string.Empty,
+                AffectedServiceName = _settings.CurrentServiceName,
+                MethodGroupId = methodGroup.Id,
+                AffectedFunctionsIds = affectedFunctions,
+            }
+            : null;
+    }
+
+    public async Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn)
     {
         var methodGroup = await GetMethodGroup(methodUrn);
 
@@ -51,7 +76,7 @@ internal partial class WaitsRepo : IWaitsRepo
             methodWaitsQuery = methodWaitsQuery.Where(x => x.ServiceId == _settings.CurrentServiceId);
         }
 
-        var affectedFunctions =
+        var affectedFunctionsGroupedByService =
             await methodWaitsQuery
            .Select(x => new { x.RequestedByFunctionId, x.ServiceId })
            .Distinct()
@@ -60,13 +85,13 @@ internal partial class WaitsRepo : IWaitsRepo
 
         return (
               from service in await _context.ServicesData.Where(x => x.ParentId == -1).ToListAsync()
-              from affectedFunction in affectedFunctions
+              from affectedFunction in affectedFunctionsGroupedByService
               where service.Id == affectedFunction.Key
-              select new CallServiceImapction
+              select new CallEffection
               {
-                  ServiceId = service.Id,
-                  ServiceUrl = service.Url,
-                  ServiceName = service.AssemblyName,
+                  AffectedServiceId = service.Id,
+                  AffectedServiceUrl = service.Url,
+                  AffectedServiceName = service.AssemblyName,
                   MethodGroupId = methodGroup.Id,
                   AffectedFunctionsIds = affectedFunction.Select(x => x.RequestedByFunctionId).ToList(),
               }

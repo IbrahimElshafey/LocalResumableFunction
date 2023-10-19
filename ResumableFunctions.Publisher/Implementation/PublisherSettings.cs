@@ -1,6 +1,8 @@
-﻿using ResumableFunctions.Publisher.Abstraction;
+﻿using EnsureThat;
+using ResumableFunctions.Publisher.Abstraction;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 
 namespace ResumableFunctions.Publisher.Implementation
 {
@@ -9,6 +11,8 @@ namespace ResumableFunctions.Publisher.Implementation
 
         public PublisherSettings(Dictionary<string, string> servicesRegistry, TimeSpan checkFailedRequestEvery = default)
         {
+            Ensure.That(servicesRegistry).IsNotNull();
+            Ensure.That(servicesRegistry).HasItems();
             ServicesRegistry = servicesRegistry;
             if (checkFailedRequestEvery != default)
                 CheckFailedRequestEvery = checkFailedRequestEvery;

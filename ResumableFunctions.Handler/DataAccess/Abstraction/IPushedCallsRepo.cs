@@ -5,5 +5,5 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction;
 public interface IPushedCallsRepo
 {
     Task<PushedCall> GetById(long pushedCallId);
-    void Push(PushedCall pushedCall);
+    Task Push(PushedCall pushedCall);
 }

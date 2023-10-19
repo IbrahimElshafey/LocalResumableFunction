@@ -23,3 +23,10 @@
 		* Status
 	* Custom implementation for logging (IResumableFunctionLogging)
 	* May I use InfluxDB,RocksDB or Faster
+
+# We need In-Memory DB that:
+* Can be used with EF
+* Can be used with Hangfire
+* Support Snapshoting and clustering
+* Mark some tables as on disk only
+* 

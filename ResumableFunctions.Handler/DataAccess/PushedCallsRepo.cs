@@ -18,8 +18,9 @@ internal class PushedCallsRepo : IPushedCallsRepo
             .FindAsync(pushedCallId);
     }
 
-    public void Push(PushedCall pushedCall)
+    public Task Push(PushedCall pushedCall)
     {
         _context.PushedCalls.Add(pushedCall);
+        return Task.CompletedTask;
     }
 }

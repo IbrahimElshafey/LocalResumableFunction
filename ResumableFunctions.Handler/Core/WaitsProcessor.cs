@@ -67,7 +67,7 @@ namespace ResumableFunctions.Handler.Core
         }
 
         [DisplayName("Process Function Expected Matches where [FunctionId:{0}], [PushedCallId:{1}], [MethodGroupId:{2}]")]
-        public async Task ProcessFunctionExpectedMatchedWaits(int functionId, long pushedCallId, int methodGroupId)
+        public async Task ProcessFunctionExpectedWaits(int functionId, long pushedCallId, int methodGroupId)
         {
             await _backgroundJobExecutor.Execute(
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
@@ -231,7 +231,7 @@ namespace ResumableFunctions.Handler.Core
                     StatusCodes.WaitProcessing, ex);
 
                 _backgroundJobClient.Schedule(() =>
-                        ProcessFunctionExpectedMatchedWaits(_methodWait.RequestedByFunctionId, pushedCallId, _methodWait.MethodGroupToWaitId),
+                        ProcessFunctionExpectedWaits(_methodWait.RequestedByFunctionId, pushedCallId, _methodWait.MethodGroupToWaitId),
                     TimeSpan.FromSeconds(10));
                 return false;
             }

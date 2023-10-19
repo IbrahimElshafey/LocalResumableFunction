@@ -59,13 +59,13 @@ namespace ResumableFunctions.Handler.Attributes
         [Advice(Kind.After)]
         public void OnExit(
            [Argument(Source.Name)] string name,
-           [Argument(Source.ReturnValue)] object result//,
+           [Argument(Source.ReturnValue)] object result
            )
         {
             try
             {
                 _pushedCall.Data.Output = result;
-                _callPusher.PushCall(_pushedCall).Wait();
+                _callPusher.PushCall(_pushedCall).Wait();//local push in RF shared group
             }
             catch (Exception ex)
             {

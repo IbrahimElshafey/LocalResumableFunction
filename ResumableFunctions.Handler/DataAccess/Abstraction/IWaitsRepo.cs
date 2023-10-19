@@ -12,7 +12,8 @@ public interface IWaitsRepo
     Task CancelSubWaits(long parentId, long pushedCallId);
     Task<WaitEntity> GetOldWaitForReplay(ReplayRequest replayWait);
     Task<WaitEntity> GetWaitParent(WaitEntity wait);
-    Task<List<CallServiceImapction>> GetAffectedServicesAndFunctions(string methodUrn);
+    Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn);
+    Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn);
     Task RemoveFirstWaitIfExist(int methodIdentifierId);
     Task<bool> SaveWait(WaitEntity newWait);
     Task<MethodWaitEntity> GetMethodWait(int waitId, params Expression<Func<MethodWaitEntity, object>>[] includes);
