@@ -27,6 +27,8 @@ namespace Tests
             Assert.Empty(errors);
             var waits = await test.GetWaits();
             Assert.Equal(4, waits.Count);
+            var instance = await test.GetFirstInstance<WaitManyMethods>();
+            Assert.Equal(3, instance.Counter);
 
             wms.Method1("1");
             wms.Method2("2");
@@ -89,7 +91,7 @@ namespace Tests
             wms.Method7("1");
 
             var pushedCalls = await test.GetPushedCalls();
-            Assert.Equal(1, pushedCalls.Count);
+            Assert.Single(pushedCalls);
             errors = await test.GetLogs();
             Assert.Empty(errors);
             var waits = await test.GetWaits();
@@ -97,6 +99,8 @@ namespace Tests
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
             Assert.Equal(1, waits.Count(x => x.IsRootNode));
+            var instance = await test.GetFirstInstance<WaitManyMethods>();
+            Assert.Equal(1, instance.Counter);
 
             //round two
             wms.Method8("1");
@@ -186,9 +190,9 @@ namespace Tests
         public async IAsyncEnumerable<Wait> WaitThreeAtStart()
         {
             yield return Wait("Wait three methods",
-                Wait<string, string>(Method1, "Method 1"),
-                Wait<string, string>(Method2, "Method 2"),
-                Wait<string, string>(Method3, "Method 3")
+                Wait<string, string>(Method1, "Method 1").AfterMatch((_, _) => Counter++),
+                Wait<string, string>(Method2, "Method 2").AfterMatch((_, _) => Counter++),
+                Wait<string, string>(Method3, "Method 3").AfterMatch((_, _) => Counter++)
                 ).MatchAll();
             await Task.Delay(100);
             Console.WriteLine("Three method done");
@@ -205,13 +209,14 @@ namespace Tests
             await Task.Delay(100);
         }
 
+        public int Counter { get; set; }
         [ResumableFunctionEntryPoint("WaitFirstInThree")]
         public async IAsyncEnumerable<Wait> WaitFirstInThree()
         {
             yield return Wait("Wait First In Three",
-                Wait<string, string>(Method7, "Method 7"),
-                Wait<string, string>(Method8, "Method 8"),
-                Wait<string, string>(Method9, "Method 9")
+                Wait<string, string>(Method7, "Method 7").AfterMatch((_, _) => Counter++),
+                Wait<string, string>(Method8, "Method 8").AfterMatch((_, _) => Counter++),
+                Wait<string, string>(Method9, "Method 9").AfterMatch((_, _) => Counter++)
             ).MatchAny();
             await Task.Delay(100);
             Console.WriteLine("WaitFirstInThree");

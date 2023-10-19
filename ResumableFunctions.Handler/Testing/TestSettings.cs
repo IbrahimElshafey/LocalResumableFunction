@@ -1,12 +1,11 @@
 ﻿using Hangfire;
 using Medallion.Threading;
-using Medallion.Threading.WaitHandles;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.InOuts;
-using System.Data.Common;
-using System.Runtime;
 //using System.Data.SQLite;
 namespace ResumableFunctions.Handler.Testing
 {
@@ -14,10 +13,6 @@ namespace ResumableFunctions.Handler.Testing
     {
 
         private readonly string _testName;
-        //public string Server = "(localdb)\\MSSQLLocalDB";
-        public SqliteConnection Connection => 
-            //new SqliteConnection($"DataSource=file:{_testName}?mode=memory&cache=shared");
-            new SqliteConnection($"DataSource=file::memory:?cache=shared");
 
 
 
@@ -28,19 +23,9 @@ namespace ResumableFunctions.Handler.Testing
         }
         public IGlobalConfiguration HangfireConfig => null;
 
-        //public DbContextOptionsBuilder WaitsDbConfig =>
-        //    new DbContextOptionsBuilder()
-        //    .UseSqlServer($"Server={Server};Database={_testName};Trusted_Connection=True;TrustServerCertificate=True;");
-
-        public DbContextOptionsBuilder WaitsDbConfig
-        {
-            get
-            {
-                return new DbContextOptionsBuilder().UseSqlite(Connection);
-                //.UseSqlite($"file:{_testName}?mode=memory&cache=shared");
-                //.UseSqlite($"DataSource=file:{_testName}?mode=memory&cache=shared");
-            }
-        }
+        public DbContextOptionsBuilder WaitsDbConfig =>
+         new DbContextOptionsBuilder()
+         .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={_testName};Trusted_Connection=True;TrustServerCertificate=True;");
 
 
         public string CurrentServiceUrl => null;
