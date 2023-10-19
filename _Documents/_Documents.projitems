@@ -9,6 +9,7 @@
     <Import_RootNamespace>_Documents</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Articles\Article1.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\WIN_V1.0.10.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\What Help.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Internals.md" />
@@ -18,7 +19,7 @@
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Resumable_Functions_UI.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Cleaning_Job.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Commands.md" />
-    <None Include="$(MSBuildThisFileDirectory)Documentation_Plan.md" />
+    <None Include="$(MSBuildThisFileDirectory)Articles\Documentation_Plan.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\External Reading.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Aggregate Column Idea.md" />
     <None Include="$(MSBuildThisFileDirectory)Publisher.md" />

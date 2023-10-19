@@ -16,6 +16,7 @@
 	* Choreography
 		* Services can comunicate with each other and wait calls from each other
 * How to test your resumable functions?
+
 * Hou to publish new service version with modified resumable functions?
 * Why not use service bus?
 * Background processing and Hangfire
