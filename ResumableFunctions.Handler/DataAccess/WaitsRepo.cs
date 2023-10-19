@@ -177,6 +177,8 @@ internal partial class WaitsRepo : IWaitsRepo
 
     private void CancelWait(WaitEntity wait, long pushedCallId)
     {
+        if (wait.ParentWait != null)
+            wait.CurrentFunction = wait.ParentWait.CurrentFunction;
         wait.LoadUnmappedProps();
         wait.Cancel();
         wait.CallId = pushedCallId;
@@ -184,8 +186,8 @@ internal partial class WaitsRepo : IWaitsRepo
         {
             _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
-        if (wait.ParentWait != null)
-            wait.ParentWait.CurrentFunction = wait.CurrentFunction;
+        //if (wait.ParentWait != null)
+        //    wait.ParentWait.CurrentFunction = wait.CurrentFunction;
         //wait.FunctionState.AddLog($"Wait [{wait.Name}] canceled.");
     }
 

@@ -35,14 +35,14 @@ namespace Tests
                 yield return Wait("Wait three methods",
                     Wait<string, string>(Method1, "Method 1")
                         .MatchIf((_, _) => dateTime < new DateTime(2025, 1, 1))
-                        .WhenCancel(() => Counter += x - 1)
+                        .WhenCancel(() => Counter += x - 1)//counter=1
                         .AfterMatch(StaticAfterMatch),
                     Wait<string, string>(Method2, "Method 2")
                         .MatchAny()
                         .WhenCancel(() =>
                         {
                             Console.WriteLine("Method Two Cancel");
-                            Counter += x;
+                            Counter += x;//counter=2
                         })
                         ,
                     Wait<string, string>(Method3, "Method 3")
