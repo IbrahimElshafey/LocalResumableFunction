@@ -58,7 +58,7 @@ namespace ResumableFunctions.Handler.InOuts
 
             if (pushCallAttribute == null) return;
 
-            CanPublishFromExternal = pushCallAttribute.CanPublishFromExternal;
+            CanPublishFromExternal = pushCallAttribute.FromExternal;
             IsLocalOnly = pushCallAttribute.IsLocalOnly;
         }
 

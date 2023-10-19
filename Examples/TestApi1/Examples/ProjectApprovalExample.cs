@@ -240,7 +240,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
         Console.ForegroundColor = ConsoleColor.White;
     }
 
-    [PushCall("IManagerFiveApproval.ManagerFiveApproveProject", CanPublishFromExternal = true)]
+    [PushCall("IManagerFiveApproval.ManagerFiveApproveProject", FromExternal = true)]
     public bool FiveApproveProject(ApprovalDecision args)
     {
         WriteAction($"Manager Four Approve Project with decision ({args.Decision})");

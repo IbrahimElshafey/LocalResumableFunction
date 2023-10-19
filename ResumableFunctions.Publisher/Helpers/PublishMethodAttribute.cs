@@ -1,4 +1,5 @@
 ﻿using AspectInjector.Broker;
+using EnsureThat;
 using System;
 
 namespace ResumableFunctions.Publisher.Helpers
@@ -14,6 +15,7 @@ namespace ResumableFunctions.Publisher.Helpers
         public PublishMethodAttribute(string methodUrn, params string[] toServices)
         {
             MethodUrn = methodUrn;
+            Ensure.That(toServices).HasItems();
             ToServices = toServices;
         }
 

@@ -12,14 +12,14 @@ namespace ResumableFunctions.Handler.Attributes
         }
 
         public string MethodUrn { get; }
-        public bool CanPublishFromExternal { get; set; }
+        public bool FromExternal { get; set; }
         public bool IsLocalOnly { get; set; }
 
         public override object TypeId => "1f220128-d0f7-4dac-ad81-ff942d68942c";
 
         public override string ToString()
         {
-            return $"{MethodUrn},{CanPublishFromExternal}";
+            return $"{MethodUrn},{FromExternal}";
         }
     }
 }

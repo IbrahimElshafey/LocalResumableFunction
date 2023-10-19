@@ -15,12 +15,7 @@
 	* Function state
 	* Match and SetData Expressions
 
-
-# May be good to use
-* How can I benefit from Azure Service Fabric
-	* https://learn.microsoft.com/en-us/azure/service-fabric/service-fabric-overview
-
-
 # Questions
-* How to check that pushed calls processed by all affected services?
+* How to check that pushed call processed by all affected services?
+* How to check that pushed call can be deleted?
 

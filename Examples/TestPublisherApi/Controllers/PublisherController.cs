@@ -31,10 +31,10 @@ namespace TestPublisherApi.Controllers
         }
 
         [HttpGet(nameof(TwoParamsMethod))]
-        [PublishMethod("PublisherController.TwoParamsMethod", "TestApi1")]
+        [PublishMethod("PublisherController.TwoParamsMethod", "TestApi1")]//will throw exception
         public string TwoParamsMethod(string input, string t2)
         {
-            return $"{nameof(TwoParamsMethod)} called with input [{input}]";
+            return $"{nameof(TwoParamsMethod)} called with input [{input+t2}]";
         }
     }
 }

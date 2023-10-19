@@ -47,7 +47,7 @@ namespace ResumableFunctions.Handler.Attributes
                 MethodData = new MethodData(metadata as MethodInfo)
                 {
                     MethodUrn = pushResultAttribute.MethodUrn,
-                    CanPublishFromExternal = pushResultAttribute.CanPublishFromExternal,
+                    CanPublishFromExternal = pushResultAttribute.FromExternal,
                     IsLocalOnly = pushResultAttribute.IsLocalOnly,
                 },
             };

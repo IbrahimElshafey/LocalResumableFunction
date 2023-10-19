@@ -173,7 +173,7 @@ namespace ResumableFunctions.Handler.Testing
                     MethodData = new MethodData(methodInfo)
                     {
                         MethodUrn = pushResultAttribute.MethodUrn,
-                        CanPublishFromExternal = pushResultAttribute.CanPublishFromExternal,
+                        CanPublishFromExternal = pushResultAttribute.FromExternal,
                         IsLocalOnly = pushResultAttribute.IsLocalOnly,
                     },
                 });

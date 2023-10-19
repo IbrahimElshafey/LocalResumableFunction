@@ -167,7 +167,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
 
             var result = GetExpressionValue(expression);
             if (result != null)
-                return true && result.CanConvertToSimpleString();
+                return result.CanConvertToSimpleString();
 
             throw new NotSupportedException(
                 $"Can't use expression [{expression}] in match because it's evaluated to [NULL].");

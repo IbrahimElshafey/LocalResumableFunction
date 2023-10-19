@@ -23,6 +23,7 @@
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Aggregate Column Idea.md" />
     <None Include="$(MSBuildThisFileDirectory)Publisher.md" />
     <None Include="$(MSBuildThisFileDirectory)Features.md" />
+    <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Service Fabric.md" />
     <None Include="$(MSBuildThisFileDirectory)Testing.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\MVC_Use.md" />
     <None Include="$(MSBuildThisFileDirectory)Background_Cleaning_Job.md" />
