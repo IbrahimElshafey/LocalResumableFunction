@@ -13,6 +13,7 @@ public abstract partial class ResumableFunctionsContainer
         [CallerLineNumber] int inCodeLine = 0,
         [CallerMemberName] string callerName = "")
     {
+        //todo:validate attribute exist
         return new FunctionWaitEntity
         {
             Name = name,
@@ -27,7 +28,7 @@ public abstract partial class ResumableFunctionsContainer
     protected WaitsGroup Wait(string name, params Func<IAsyncEnumerable<Wait>>[] subFunctions)
     {
         var functionGroup = new WaitsGroupEntity
-        {
+        {   
             ChildWaits = new List<WaitEntity>(new WaitEntity[subFunctions.Length]),
             Name = name,
             WaitType = WaitType.GroupWaitAll,

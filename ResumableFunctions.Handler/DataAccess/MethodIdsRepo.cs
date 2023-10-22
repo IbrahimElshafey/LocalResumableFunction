@@ -128,11 +128,14 @@ internal class MethodIdsRepo : IMethodIdsRepo
 
     private static void AddMethodIdToGroup(MethodData methodData, MethodsGroup methodGroup, WaitMethodIdentifier toAdd)
     {
+        //todo: how the user can change IsLocalOnly and CanPublishFromExternal
         if (methodGroup.IsLocalOnly != methodData.IsLocalOnly)
             throw new Exception(ErrorTemplate(nameof(MethodsGroup.IsLocalOnly), methodGroup.IsLocalOnly));
+        
         if (methodGroup.CanPublishFromExternal != methodData.CanPublishFromExternal)
             throw new Exception(ErrorTemplate(nameof(MethodsGroup.CanPublishFromExternal),
                 methodGroup.CanPublishFromExternal));
+
         methodGroup.WaitMethodIdentifiers?.Add(toAdd);
 
         string ErrorTemplate(string propName, bool propValue) =>

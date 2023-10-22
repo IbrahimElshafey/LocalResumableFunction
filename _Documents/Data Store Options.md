@@ -1,11 +1,13 @@
-﻿# Data store enhancements
-* Pushed Calls,Waits, Logging, and States
+﻿# Data Store Enhancements for (Pushed Calls,Waits, Logging, and States)
 * We should not use SQL servers or any commercial DB
 	* With current implementation we can use PostgreSQL, MySQL, MariaDB, Firebird but I didn't test them yet
 * Store pushed calls in different store that support:
 	* Fast insertion
 	* Fast query by key (No other queries)
-	* May I use Faster from Microsoft
+	* May I use:
+		* Faster from Microsoft
+		* A fast store and forward message queue for .NET. (aka not a broker or server)
+			* https://github.com/LightningQueues/LightningQueues
 * Store waits in different store that support:
 	* Fast queries 
 	* Fast wait insertion
@@ -30,3 +32,9 @@
 * Support Snapshoting and clustering
 * Mark some tables as on disk only
 * 
+
+# Services Communication
+* NetMQ is a 100% native C# port of the lightweight messaging library ZeroMQ.
+	* https://github.com/zeromq/netmq
+* MagicOnion is a modern RPC framework for .NET platform that provides bi-directional real-time communications such as SignalR and Socket.io and RPC mechanisms such as WCF and web-based APIs.
+	* https://github.com/Cysharp/MagicOnion

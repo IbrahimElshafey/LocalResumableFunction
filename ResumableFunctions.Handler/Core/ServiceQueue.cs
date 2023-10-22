@@ -96,6 +96,10 @@ internal class ServiceQueue : IServiceQueue
                     callEffection.MethodUrn = methodUrn;
                     await ServiceProcessPushedCall(callEffection);//todo:log if null
                 }
+                else
+                {
+                    _logger.LogWarning($"There are no functions affected in current service by pushed call [{methodUrn}:{pushedCallId}]");
+                }
             },
             $"Error when call [{nameof(ProcessCallLocally)}(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})] in service [{_settings.CurrentServiceId}]");
     }

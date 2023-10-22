@@ -8,11 +8,11 @@
 	* When more than one services share the db
 		* Should external call hits all services
 	* Should we define an external id for pushed call?
-* Review CanPublishFromExternal
-* How I handle call recieving while creating db
+* Review CanPublishFromExternal and IsLocalOnly
+	* Should it defined for method group or method idenetifier
 * Add IFailedRequestHandler Faster implementation
 	* Save failed requests to disk
-* Review SaveChanges use
+* Review SaveChanges call
 * Enable change testshell settings
 	* Run unit tests in parallel if not localDB
 * Use same dll in two different services must be allowed
@@ -22,3 +22,5 @@
 * Use RequestedByFunctionId prop in TimeWaitInput to refine match for time waits
 * Confirm One Transaction per bussiness unit
 * Speed tests => work in memory
+* How I handle call recieving while creating db
+

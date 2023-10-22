@@ -211,10 +211,10 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
 
     internal MethodWaitEntity<TInput, TOutput> MatchAny()
     {
-        MatchExpression = (Expression<Func<TInput, TOutput, bool>>)((x, y) => true);
+        MatchExpression = (Expression<Func<TInput, TOutput, bool>>)((_, _) => true);
         MatchExpressionParts = new MatchExpressionWriter(MatchExpression, CurrentFunction).MatchExpressionParts;
         return this;
-    }
+    }   
 
     internal MethodWaitEntity<TInput, TOutput> NothingAfterMatch()
     {
