@@ -1,9 +1,9 @@
-﻿using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.Helpers;
+using System.Reflection;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ResumableFunctions.Handler.InOuts
 {

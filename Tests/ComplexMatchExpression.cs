@@ -40,7 +40,7 @@ public class ComplexMatchExpression
                 Wait<string, string>(Method6, "M6")
                 .MatchIf((input, output) =>
                     input == "Test" &&
-                    InstanceCall(input, output) && 
+                    InstanceCall(input, output) &&
                     (IntMethod() == 110 || Math.Max(input.Length, output.Length) > 1)
                 );
         }

@@ -1,6 +1,6 @@
-﻿using System.Linq.CompilerServices.TypeSystem;
-using MessagePack;
+﻿using MessagePack;
 using MessagePack.Resolvers;
+using System.Linq.CompilerServices.TypeSystem;
 
 namespace ResumableFunctions.Handler.Helpers;
 internal class BinarySerializer

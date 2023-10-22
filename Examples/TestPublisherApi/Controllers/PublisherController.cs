@@ -34,7 +34,7 @@ namespace TestPublisherApi.Controllers
         [PublishMethod("PublisherController.TwoParamsMethod", "TestApi1")]//will throw exception
         public string TwoParamsMethod(string input, string t2)
         {
-            return $"{nameof(TwoParamsMethod)} called with input [{input+t2}]";
+            return $"{nameof(TwoParamsMethod)} called with input [{input + t2}]";
         }
     }
 }

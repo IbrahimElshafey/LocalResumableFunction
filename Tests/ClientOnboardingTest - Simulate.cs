@@ -41,7 +41,7 @@ namespace Tests
         }
     }
 
-    internal class ClientOnboardingServiceFake: ClientOnboardingService
+    internal class ClientOnboardingServiceFake : ClientOnboardingService
     {
         public override TaskId AskOwnerToApproveClient(int registrationFormId)
         {

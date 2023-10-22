@@ -1,10 +1,10 @@
-﻿using System.Reflection;
-using AspectInjector.Broker;
+﻿using AspectInjector.Broker;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.Attributes
 {
@@ -53,7 +53,7 @@ namespace ResumableFunctions.Handler.Attributes
             };
             if (args.Length > 0)
                 _pushedCall.Data.Input = args[0];
-           
+
         }
 
         [Advice(Kind.After)]

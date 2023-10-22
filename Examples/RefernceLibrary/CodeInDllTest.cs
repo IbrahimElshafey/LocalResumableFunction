@@ -21,7 +21,7 @@ namespace ReferenceLibrary
                 .AfterMatch((input, output) => UserName = output)
                 )
                 .MatchAny();
-          
+
             yield return Wait<string, string>
                (SayGoodby, "Wait say goodby")
                .MatchIf((userName, helloMsg) => userName == UserName)

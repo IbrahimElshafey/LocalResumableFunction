@@ -1,7 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-using ResumableFunctions.Handler.BaseUse;
+﻿using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler;
 
@@ -28,7 +28,7 @@ public abstract partial class ResumableFunctionsContainer
     protected WaitsGroup Wait(string name, params Func<IAsyncEnumerable<Wait>>[] subFunctions)
     {
         var functionGroup = new WaitsGroupEntity
-        {   
+        {
             ChildWaits = new List<WaitEntity>(new WaitEntity[subFunctions.Length]),
             Name = name,
             WaitType = WaitType.GroupWaitAll,

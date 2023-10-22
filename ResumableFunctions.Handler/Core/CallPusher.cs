@@ -62,7 +62,7 @@ namespace ResumableFunctions.Handler.Core
                     await _serviceRepo.AddErrorLog(
                         null,
                         $"Pushed call target service [{serviceName}] but the current service is [{currentServiceName}]" +
-                        $"\nPushed call was [{pushedCall}]", 
+                        $"\nPushed call was [{pushedCall}]",
                         StatusCodes.PushedCall);
                     return -1;
                 }
@@ -76,7 +76,7 @@ namespace ResumableFunctions.Handler.Core
                     await _serviceQueue.ProcessCallLocally(pushedCall.Id, pushedCall.MethodData.MethodUrn);
                     return pushedCall.Id;
                 }
-                    
+
 
                 await _serviceRepo.AddLog(
                     $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}].\nPushed call was [{pushedCall}]",

@@ -1,12 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ResumableFunctions.Handler.DataAccess.Abstraction;
-using ResumableFunctions.Handler.InOuts;
-using System.Reflection;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -47,7 +46,7 @@ internal class ServiceRepo : IServiceRepo
 
     public async Task<ServiceData> FindServiceDataForScan(string currentAssemblyName)
     {
-        var serviceData = 
+        var serviceData =
             await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == currentAssemblyName) ??
             await AddNewServiceData(currentAssemblyName);
 

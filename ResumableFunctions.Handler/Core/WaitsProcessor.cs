@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Medallion.Threading;
+﻿using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
@@ -8,6 +6,8 @@ using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler.Core
 {

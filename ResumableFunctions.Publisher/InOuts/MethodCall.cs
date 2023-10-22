@@ -4,7 +4,7 @@ namespace ResumableFunctions.Publisher.InOuts
 {
     public class MethodCall
     {
-       
+
         public MethodData MethodData { get; set; }
         [MessagePack.IgnoreMember]
         public string[] ToServices { get; set; }

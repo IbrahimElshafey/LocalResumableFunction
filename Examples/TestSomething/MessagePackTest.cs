@@ -1,9 +1,9 @@
 ﻿using MessagePack;
 using MessagePack.Resolvers;
+using ResumableFunctions.Handler.Expressions;
 using System.Drawing;
 using System.Dynamic;
 using System.Linq.Expressions;
-using ResumableFunctions.Handler.Expressions;
 
 namespace TestSomething
 {
@@ -26,7 +26,7 @@ namespace TestSomething
             // Dynamic ("untyped")
             var dynamicModel = MessagePackSerializer.Deserialize<Model2>(blob, StandardResolverAllowPrivate.Options);
 
-           
+
 
             //ContractlessStandardResolver();
         }

@@ -6,8 +6,8 @@ namespace ResumableFunctions.Handler.UiService.InOuts
 {
     public class FunctionInstanceDetails
     {
-        public string FunctionUrn { get;}
-        public string FunctionName { get;}
+        public string FunctionUrn { get; }
+        public string FunctionName { get; }
         public int InstanceId { get; }
         public FunctionInstanceStatus Status { get; }
         public string InstanceData { get; }
@@ -20,7 +20,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         public int FunctionId { get; }
 
         public FunctionInstanceDetails(
-            int instanceId,int functionId, string name, string functionName, FunctionInstanceStatus status, string instanceData, DateTime created, DateTime modified, int errorsCount, ArrayList waits, List<LogRecord> logs)
+            int instanceId, int functionId, string name, string functionName, FunctionInstanceStatus status, string instanceData, DateTime created, DateTime modified, int errorsCount, ArrayList waits, List<LogRecord> logs)
         {
             InstanceId = instanceId;
             FunctionId = functionId;

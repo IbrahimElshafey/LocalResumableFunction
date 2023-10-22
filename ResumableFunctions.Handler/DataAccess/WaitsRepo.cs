@@ -1,11 +1,11 @@
-﻿using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal partial class WaitsRepo : IWaitsRepo

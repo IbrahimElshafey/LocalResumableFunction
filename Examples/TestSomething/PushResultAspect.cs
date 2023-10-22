@@ -1,5 +1,5 @@
-﻿using System.Reflection;
-using AspectInjector.Broker;
+﻿using AspectInjector.Broker;
+using System.Reflection;
 
 namespace TestSomething
 {
@@ -17,8 +17,8 @@ namespace TestSomething
             )
         {
             var pushResultAttribute = triggers.OfType<PushToResumableFunctionEngineAttribute>().First();
-           
-            Console.WriteLine($"Before executing method [{name}] with input [{args.Aggregate((x,y)=>$"{x},{y}")}] and attribute [{pushResultAttribute}]");
+
+            Console.WriteLine($"Before executing method [{name}] with input [{args.Aggregate((x, y) => $"{x},{y}")}] and attribute [{pushResultAttribute}]");
             Console.WriteLine($"Instance is: [{instance}]");
             Console.WriteLine($"Return type is: [{retType.FullName}]");
             Console.WriteLine($"Metadata is: [{metadata.Name}] of type [{metadata.GetType().Name}]");
@@ -33,6 +33,6 @@ namespace TestSomething
             Console.WriteLine($"Method [{name}] executed and result is [{result}]");
         }
 
-        
+
     }
 }

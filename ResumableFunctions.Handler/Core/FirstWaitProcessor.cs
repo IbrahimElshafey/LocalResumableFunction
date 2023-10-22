@@ -1,11 +1,11 @@
-﻿using System.ComponentModel;
-using System.Reflection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -202,7 +202,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 x.WasFirst = true;
                 x.FunctionState = functionState;
             });
-            return firstWait;   
+            return firstWait;
         }
         catch (Exception ex)
         {

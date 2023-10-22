@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-using AspectInjector.Broker;
+﻿using AspectInjector.Broker;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Publisher.Abstraction;
 using ResumableFunctions.Publisher.InOuts;
+using System;
+using System.Linq;
+using System.Reflection;
 
 namespace ResumableFunctions.Publisher.Helpers
 {

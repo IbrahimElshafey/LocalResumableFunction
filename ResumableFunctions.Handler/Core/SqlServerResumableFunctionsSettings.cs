@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Hangfire;
+﻿using Hangfire;
 using Hangfire.SqlServer;
 using Medallion.Threading;
 using Medallion.Threading.SqlServer;
@@ -7,6 +6,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.InOuts;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.Core
 {

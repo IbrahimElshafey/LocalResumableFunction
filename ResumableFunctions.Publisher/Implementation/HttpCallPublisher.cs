@@ -1,13 +1,13 @@
-﻿using MessagePack.Resolvers;
-using MessagePack;
+﻿using MessagePack;
+using MessagePack.Resolvers;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Publisher.Abstraction;
 using ResumableFunctions.Publisher.Helpers;
 using ResumableFunctions.Publisher.InOuts;
-using System.Threading.Tasks;
 using System;
 using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace ResumableFunctions.Publisher.Implementation
 {

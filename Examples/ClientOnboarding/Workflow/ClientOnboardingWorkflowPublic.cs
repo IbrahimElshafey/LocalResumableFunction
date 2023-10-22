@@ -30,7 +30,7 @@ namespace ClientOnboarding.Workflow
 
             if (OwnerDecision is false)
                 _service.InformUserAboutRejection(UserId);
-            
+
             else if (OwnerDecision is true)
             {
                 _service.SendWelcomePackage(UserId);

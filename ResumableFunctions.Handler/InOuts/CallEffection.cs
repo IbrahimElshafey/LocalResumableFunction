@@ -2,7 +2,7 @@
 
 public class CallEffection
 {
-    
+
     public int AffectedServiceId { get; set; }
     public string AffectedServiceName { get; set; }
     public string AffectedServiceUrl { get; set; }

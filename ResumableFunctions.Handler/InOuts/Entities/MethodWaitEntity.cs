@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
-using System.Reflection;
-using FastExpressionCompiler;
+﻿using FastExpressionCompiler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 public class MethodWaitEntity : WaitEntity
@@ -214,7 +214,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
         MatchExpression = (Expression<Func<TInput, TOutput, bool>>)((_, _) => true);
         MatchExpressionParts = new MatchExpressionWriter(MatchExpression, CurrentFunction).MatchExpressionParts;
         return this;
-    }   
+    }
 
     internal MethodWaitEntity<TInput, TOutput> NothingAfterMatch()
     {

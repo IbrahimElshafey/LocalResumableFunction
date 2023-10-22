@@ -1,6 +1,4 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
-using FastExpressionCompiler;
+﻿using FastExpressionCompiler;
 using Hangfire;
 using Medallion.Threading;
 using Medallion.Threading.WaitHandles;
@@ -15,6 +13,8 @@ using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.Testing
 {

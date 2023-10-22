@@ -2,7 +2,6 @@
 using ResumableFunctions.Publisher.Abstraction;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 
 namespace ResumableFunctions.Publisher.Implementation
 {

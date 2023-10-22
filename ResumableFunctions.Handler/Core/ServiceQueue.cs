@@ -5,7 +5,6 @@ using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using System.ComponentModel;
-using System.Net.Http;
 using System.Text;
 
 namespace ResumableFunctions.Handler.Core;
@@ -89,7 +88,7 @@ internal class ServiceQueue : IServiceQueue
             async () =>
             {
                 var callEffection = await _waitsRepository.GetCallEffectionInCurrentService(methodUrn);
-              
+
                 if (callEffection != null)
                 {
                     callEffection.CallId = pushedCallId;

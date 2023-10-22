@@ -2,7 +2,6 @@
 using ResumableFunctions.Publisher.Abstraction;
 using ResumableFunctions.Publisher.InOuts;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;

@@ -150,7 +150,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             IsActive = 1,
             CancelMethodAction = cancelMethodAction,
             AfterMatchAction = afterMatchAction
-    };
+        };
 
         if (matchExpressionParts != null)
         {

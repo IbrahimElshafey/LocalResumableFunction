@@ -1,10 +1,8 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.Core;
 

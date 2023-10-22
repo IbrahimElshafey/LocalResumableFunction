@@ -1,6 +1,6 @@
-﻿using System.Dynamic;
-using MessagePack;
+﻿using MessagePack;
 using MessagePack.Resolvers;
+using System.Dynamic;
 
 namespace ResumableFunctions.Handler.Expressions
 {

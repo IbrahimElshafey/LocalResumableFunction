@@ -7,7 +7,7 @@
         Task CleanInactiveWaitTemplates();
         Task CleanSoftDeletedRows();
         Task CleanOldPushedCalls();
-        
+
         //todo: Task DeleteInactiveMethodidentifiers();
     }
 }

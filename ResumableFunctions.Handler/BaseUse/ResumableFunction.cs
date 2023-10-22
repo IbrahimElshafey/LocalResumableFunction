@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
-using System.Reflection;
-using FastExpressionCompiler;
+﻿using FastExpressionCompiler;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler;
 

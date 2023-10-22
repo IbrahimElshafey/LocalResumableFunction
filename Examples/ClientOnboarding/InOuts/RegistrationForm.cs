@@ -2,7 +2,7 @@
 {
     public class RegistrationForm
     {
-        public int UserId { get;  set; }
-        public string FormData { get;  set; }
+        public int UserId { get; set; }
+        public string FormData { get; set; }
     }
 }
