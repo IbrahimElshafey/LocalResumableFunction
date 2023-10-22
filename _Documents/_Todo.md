@@ -1,17 +1,8 @@
 ﻿# Todo
-* Publish from client to multiple services
-	* Pushed call must have flag fields for:
-		* Is from external
-		* From service
-		* To Service
-		* Processing behavior (Process Locally, or propagate in cluster)
-	* When more than one services share the db
-		* Should external call hits all services
-	* Should we define an external id for pushed call?
+* Analyzer
 * Review CanPublishFromExternal and IsLocalOnly
 	* Should it defined for method group or method idenetifier
-* Add IFailedRequestHandler Faster implementation
-	* Save failed requests to disk
+* Add IFailedRequestHandler to save failed requests to disk
 * Review SaveChanges call
 * Enable change testshell settings
 	* Run unit tests in parallel if not localDB
@@ -23,4 +14,14 @@
 * Confirm One Transaction per bussiness unit
 * Speed tests => work in memory
 * How I handle call recieving while creating db
+
+* Publish from client to multiple services
+	* Pushed call must have flag fields for:
+		* Is from external
+		* From service
+		* To Service
+		* Processing behavior (Process Locally, or propagate in cluster)
+	* When more than one services share the db
+		* Should external call hits all services? No
+	* Should we define an external id for pushed call?
 

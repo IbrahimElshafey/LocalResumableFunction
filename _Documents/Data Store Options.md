@@ -1,6 +1,16 @@
 ﻿# Data Store Enhancements for (Pushed Calls,Waits, Logging, and States)
 * We should not use SQL servers or any commercial DB
 	* With current implementation we can use PostgreSQL, MySQL, MariaDB, Firebird but I didn't test them yet
+* I need database that
+	* Support EF
+	* Keeps hot data in memory
+	* Saves cold data to disk
+	* 
+## Pushed Calls
+* Used 
+	* When method executed and call pushed
+	* When clean database to delete old pushed calls
+	* 
 * Store pushed calls in different store that support:
 	* Fast insertion
 	* Fast query by key (No other queries)

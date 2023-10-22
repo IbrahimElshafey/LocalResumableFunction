@@ -42,7 +42,8 @@ namespace ResumableFunctions.Handler.Core
             {
                 await _pushedCallsRepo.Push(pushedCall);
                 await _context.SaveChangesAsync();
-                _backgroundProcess.Enqueue(() => _serviceQueue.RouteCallToAffectedServices(pushedCall.Id, pushedCall.MethodData.MethodUrn));
+                _backgroundProcess.Enqueue(() => 
+                    _serviceQueue.RouteCallToAffectedServices(pushedCall.Id, pushedCall.MethodData.MethodUrn));
                 return pushedCall.Id;
             }
             catch (Exception ex)
@@ -73,7 +74,9 @@ namespace ResumableFunctions.Handler.Core
                     await _pushedCallsRepo.Push(pushedCall);
                     await _context.SaveChangesAsync();
                     //Route call to current service only
-                    await _serviceQueue.ProcessCallLocally(pushedCall.Id, pushedCall.MethodData.MethodUrn);
+                    _backgroundProcess.Enqueue(() =>
+                        _serviceQueue.ProcessCallLocally(pushedCall.Id, pushedCall.MethodData.MethodUrn));
+
                     return pushedCall.Id;
                 }
 
