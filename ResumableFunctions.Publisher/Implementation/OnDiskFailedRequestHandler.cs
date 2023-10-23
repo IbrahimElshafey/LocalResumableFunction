@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace ResumableFunctions.Publisher.Implementation
 {
-    internal class OnDiskFailedRequestHandler : IFailedRequestRepo
+    public class OnDiskFailedRequestHandler : IFailedRequestRepo
     {
         const string requestsFolder = ".\\FailedRequests";
         private readonly ConcurrentDictionary<Guid, FailedRequest> _failedRequests = new ConcurrentDictionary<Guid, FailedRequest>();
@@ -24,25 +24,19 @@ namespace ResumableFunctions.Publisher.Implementation
         }
         public async Task Add(FailedRequest request)
         {
-            //add file
-            var byteArray = MessagePackSerializer.Serialize(request, ContractlessStandardResolver.Options);
-            using (FileStream fileStream =
-                new FileStream(FilePath(request), FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
-            {
-                // Write the byte array to the file asynchronously
-                await fileStream.WriteAsync(byteArray, 0, byteArray.Length);
-            }
+            await WriteRequest(request);
             _failedRequests.TryAdd(request.Key, request);
         }
 
         public IEnumerable<FailedRequest> GetRequests()
         {
             //if no in memory data , read from disk
-            if (_failedRequests.Count == 0) 
+            if (_failedRequests.Count == 0)
             {
                 foreach (var file in Directory.EnumerateFiles(requestsFolder))
                 {
-                    var request = MessagePackSerializer.Deserialize<FailedRequest>(File.ReadAllBytes(file), ContractlessStandardResolver.Options);
+                    byte[] buffer = File.ReadAllBytes(file);
+                    var request = MessagePackSerializer.Deserialize<FailedRequest>(buffer, ContractlessStandardResolver.Options);
                     _failedRequests.TryAdd(request.Key, request);
                 }
             }
@@ -65,9 +59,24 @@ namespace ResumableFunctions.Publisher.Implementation
             return Task.CompletedTask;
         }
 
-        public async Task Update(FailedRequest request)
+        public async Task Update(FailedRequest request) => await WriteRequest(request);
+
+
+
+        private string FilePath(FailedRequest request) => $"{requestsFolder}\\{request.Key}.file";
+
+        private async Task<byte[]> ReadFileBytesAsync(string filePath)
         {
-            //update file content
+            using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true))
+            {
+                byte[] buffer = new byte[fileStream.Length];
+                await fileStream.ReadAsync(buffer, 0, buffer.Length);
+                return buffer;
+            }
+        }
+
+        private async Task WriteRequest(FailedRequest request)
+        {
             var byteArray = MessagePackSerializer.Serialize(request, ContractlessStandardResolver.Options);
             using (FileStream fileStream =
                 new FileStream(FilePath(request), FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true))
@@ -76,7 +85,5 @@ namespace ResumableFunctions.Publisher.Implementation
                 await fileStream.WriteAsync(byteArray, 0, byteArray.Length);
             }
         }
-
-        private string FilePath(FailedRequest request) => $"{requestsFolder}\\{request.Key}.file";
     }
 }

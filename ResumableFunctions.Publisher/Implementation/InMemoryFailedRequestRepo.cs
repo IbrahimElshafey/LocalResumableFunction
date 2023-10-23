@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ResumableFunctions.Publisher.Implementation
 {
-    internal class InMemoryFailedRequestRepo : IFailedRequestRepo
+    public class InMemoryFailedRequestRepo : IFailedRequestRepo
     {
         private readonly ConcurrentDictionary<Guid, FailedRequest> _failedRequests = new ConcurrentDictionary<Guid, FailedRequest>();
 

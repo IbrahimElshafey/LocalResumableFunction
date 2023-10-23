@@ -217,17 +217,24 @@ namespace Tests
         [ResumableFunctionEntryPoint("WaitFirstInThree")]
         public async IAsyncEnumerable<Wait> WaitFirstInThree()
         {
+            int localInCancel = 10;
+            int localInMatch = 10;
             yield return Wait("Wait First In Three",
                 Wait<string, string>(Method7, "Method 7")
-                .AfterMatch((_, _) => Counter++)
-                .WhenCancel(() => CancelCounter++),
+                .AfterMatch((_, _) => { Counter++; localInMatch++; })
+                .WhenCancel(() => { CancelCounter++; localInCancel++; }),
                 Wait<string, string>(Method8, "Method 8")
-                .AfterMatch((_, _) => Counter++)
-                .WhenCancel(() => CancelCounter++),
+                .AfterMatch((_, _) => { Counter++; localInMatch++; })
+                .WhenCancel(() => { CancelCounter++; localInCancel++; }),
                 Wait<string, string>(Method9, "Method 9")
-                .AfterMatch((_, _) => Counter++)
-                .WhenCancel(() => CancelCounter++)
+                .AfterMatch((_, _) => { Counter++; localInMatch++; })
+                .WhenCancel(() => { CancelCounter++; localInCancel++; })
             ).MatchAny();
+
+            if (localInMatch != 11)
+                throw new Exception("Local variable not saved in match in wait first group.");
+            if (localInCancel != 12)
+                throw new Exception("Local variable not saved in cancel in wait first group.");
             await Task.Delay(100);
             Console.WriteLine("WaitFirstInThree");
         }

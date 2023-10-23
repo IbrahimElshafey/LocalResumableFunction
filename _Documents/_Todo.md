@@ -1,8 +1,8 @@
 ﻿# Todo
+* Review and add more tests
 * Analyzer
 * Review CanPublishFromExternal and IsLocalOnly
 	* Should it defined for method group or method idenetifier
-* Add IFailedRequestHandler to save failed requests to disk
 * Review SaveChanges call
 * Enable change testshell settings
 	* Run unit tests in parallel if not localDB

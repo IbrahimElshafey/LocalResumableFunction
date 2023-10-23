@@ -7,7 +7,11 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>A library that allows you to publish methods to a resumable function service by decorating them with the [PublishMethod] attribute.</Description>
     <!--<Nullable>enable</Nullable>-->
-  </PropertyGroup>
+	 
+	</PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>10.0</LangVersion>
+	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="AspectInjector" Version="2.8.2" />
 		<PackageReference Include="Ensure.That" Version="10.1.0" />

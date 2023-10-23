@@ -7,7 +7,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 namespace ResumableFunctions.Publisher.Implementation
 {
-    internal class FailedRequestHandler : IFailedRequestHandler
+    public class FailedRequestHandler : IFailedRequestHandler
     {
         private readonly IPublisherSettings _settings;
         private readonly IHttpClientFactory _httpClientFactory;

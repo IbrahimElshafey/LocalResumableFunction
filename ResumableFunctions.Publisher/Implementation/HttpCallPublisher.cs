@@ -34,7 +34,7 @@ namespace ResumableFunctions.Publisher.Implementation
             TInput input,
             TOutput output,
             string methodUrn,
-            string serviceName)
+            params string[] toServices)
         {
             var minfo = methodToPush.Method;
             await Publish(new MethodCall
@@ -48,7 +48,7 @@ namespace ResumableFunctions.Publisher.Implementation
                 },
                 Input = input,
                 Output = output,
-                ServiceName = serviceName
+                ToServices = toServices
             });
         }
 

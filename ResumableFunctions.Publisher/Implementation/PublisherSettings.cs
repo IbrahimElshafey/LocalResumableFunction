@@ -17,7 +17,8 @@ namespace ResumableFunctions.Publisher.Implementation
                 CheckFailedRequestEvery = checkFailedRequestEvery;
         }
 
-
+        //todo: convert this to method that is generic
+        //also IFailedRequestHandler, IFailedRequestRepo
         public Type CallPublisherType => typeof(HttpCallPublisher);
 
         public Dictionary<string, string> ServicesRegistry { get; }
