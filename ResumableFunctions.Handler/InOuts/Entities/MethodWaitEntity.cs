@@ -82,7 +82,7 @@ public class MethodWaitEntity : WaitEntity
                 return true;
             var check = MatchExpression.CompileFast();
             var closureType = MatchExpression.Parameters[3].Type;
-            var closure = GetClosureAsType(closureType);
+            var closure = GetClosure(closureType);
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction, closure);
         }
         catch (Exception ex)

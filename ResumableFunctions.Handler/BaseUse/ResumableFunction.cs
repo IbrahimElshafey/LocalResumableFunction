@@ -22,6 +22,7 @@ public abstract partial class ResumableFunctionsContainer
     protected void Error(string message, Exception ex = null) => this.AddError(message, Helpers.StatusCodes.Custom, ex);
 
     [IgnoreMember][NotMapped] public List<LogRecord> Logs { get; set; } = new();
+    [IgnoreMember][NotMapped] internal Dictionary<Type, object> Closures { get; } = new();
 
     private bool _dependenciesAreSet;
     internal void InitializeDependencies(IServiceProvider serviceProvider)

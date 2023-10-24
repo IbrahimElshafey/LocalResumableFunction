@@ -1,5 +1,13 @@
 ﻿# Todo
-* Review and add more tests
+* Add scope UPDATE continuation tests for:
+	- Global Scope
+	- Local Closure scope
+	- In sequance
+	- In group
+	- In function
+	- Within After Match Call [May update local or global state]
+	- Within Cancel Call [May update local or global state]
+	- Within Group match filter [May update local or global state]
 * Analyzer
 * Review CanPublishFromExternal and IsLocalOnly
 	* Should it defined for method group or method idenetifier

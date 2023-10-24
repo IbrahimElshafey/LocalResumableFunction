@@ -52,8 +52,16 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     internal WaitEntity ParentWait { get; set; }
 
     internal List<WaitEntity> ChildWaits { get; set; } = new();
-    public object Locals { get; private set; }
-    public object Closure { get; private set; }
+
+    /// <summary>
+    /// Local variables in method at the wait point where current wait requested
+    /// It's the runner class serialized we can rename this to RunnerState
+    /// </summary>
+    public object Locals { get; protected set; }
+    /// <summary>
+    /// Local variables that is closed and used in match expression or any call
+    /// </summary>
+    public object Closure { get; protected set; }
 
     internal long? ParentWaitId { get; set; }
     public string Path { get; set; }
@@ -66,42 +74,53 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public int InCodeLine { get; set; }
     public string CallerName { get; set; }
 
-    //AfterMatch,CancelAction,GroupCheckFilter
+    //MethodWait.MatchIf(Expression<Func<TInput, TOutput, bool>>)
+    //MethodWait.WhenCancel(Action cancelAction)
+    //WaitsGroup.MatchIf(Func<WaitsGroup, bool>)
+    //The method may update closure  
     protected object CallMethodByName(string methodFullName, params object[] parameters)
     {
+        //todo:keep closure problem
         var parts = methodFullName.Split('#');
         var methodName = parts[1];
-        var className = parts[0];
-        object instance = CurrentFunction;
-        var classType = instance.GetType();
-        var methodInfo = classType.GetMethod(methodName, Flags());
+        var className = parts[0];//may be the RFContainer calss or closure class
 
-        if (methodInfo != null)
-            return methodInfo.Invoke(instance, parameters);
+        //is local method in current function class
+        object rfClassInstance = CurrentFunction;
+        var rfClassType = rfClassInstance.GetType();
+        var localMethodInfo = rfClassType.GetMethod(methodName, Flags());
+        if (localMethodInfo != null)
+            return localMethodInfo.Invoke(rfClassInstance, parameters);
 
-        var lambdasClass = classType.Assembly.GetType(className);
-        if (lambdasClass != null)
+        //is lambda method (closure exist)
+        var closureType = rfClassType.Assembly.GetType(className);
+        if (closureType != null)
         {
-            methodInfo = lambdasClass.GetMethod(methodName, Flags());
-            instance = GetClosureAsType(lambdasClass);
+            var closureMethodInfo = closureType.GetMethod(methodName, Flags());
+            var closureInstance = GetClosure(closureType);
+            SetClosureCaller(closureInstance);
 
-            SetClosureCaller(instance);
-            if (methodInfo != null)
+            if (closureMethodInfo != null)
             {
-                var result = methodInfo.Invoke(instance, parameters);
-                SetClosure(instance, true);
+                var result = closureMethodInfo.Invoke(closureInstance, parameters);
+                SetClosure(closureInstance, true);
+                //todo:Change closure field in runner
+                //since we don't have access to runner we push closure instance and runner will get it from there
+                //the runner will get closure fields by type
                 return result;
             }
         }
 
         throw new NullReferenceException(
-            $"Can't find method [{methodName}] in class [{classType.Name}]");
+            $"Can't find method [{methodName}] in class [{rfClassType.Name}]");
     }
 
     private void SetClosureCaller(object closureInstance)
     {
         var closureType = closureInstance.GetType();
-        if (!closureType.Name.StartsWith(Constants.CompilerClosurePrefix)) return;
+        bool notClosureClass = !closureType.Name.StartsWith(Constants.CompilerClosurePrefix);
+        if (notClosureClass) return;
+
         var thisField = closureType
             .GetFields()
             .FirstOrDefault(x => x.Name.EndsWith(Constants.CompilerCallerSuffix) && x.FieldType == CurrentFunction.GetType());
@@ -109,6 +128,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         {
             thisField.SetValue(closureInstance, CurrentFunction);
         }
+        // may be multiple closures in same IAsyncEnumrable where clsoure C1 is field in closure C2 and so on.
         else
         {
             var parentClosuresFields = closureType
@@ -369,14 +389,24 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     protected static BindingFlags Flags() =>
         BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-    protected object GetClosureAsType(Type closureClass)
+    protected object GetClosure(Type closureClass)
     {
+        ////todo:try to get from cached closures in current function closures
+        //if (CurrentFunction.Closures.ContainsKey(closureClass))
+        //    return CurrentFunction.Closures[closureClass];
         Closure = Closure is JObject jobject ? jobject.ToObject(closureClass) : Closure;
         return Closure ?? Activator.CreateInstance(closureClass);
     }
 
     internal void SetClosure(object closure, bool deepCopy = false)
     {
+        ////todo:set closure in current function closures
+        //var closureType = closure.GetType();
+        //if (CurrentFunction.Closures.ContainsKey(closureType))
+        //    CurrentFunction.Closures[closureType] = closure;
+        //else
+        //    CurrentFunction.Closures.Add(closureType, closure);
+
         if (deepCopy && closure != null)
         {
             var closureString =

@@ -26,7 +26,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         CreateRunner(functionRunnerType, oldCompletedWait.Locals);
         SetFunctionCallerInstance(oldCompletedWait.CurrentFunction);
         SetState(oldCompletedWait.StateAfterWait);
-        SetActiveClosure(oldCompletedWait.Closure);
+        SetClosure(oldCompletedWait.Closure);
     }
 
 
@@ -39,7 +39,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         SetFunctionCallerInstance(classInstance);
         SetState(state ?? int.MinValue);
         if (closure != null)
-            SetActiveClosure(closure);
+            SetClosure(closure);
     }
 
     public bool ResumableFunctionExistInCode => _functionRunner != null;
@@ -112,7 +112,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         thisField?.SetValue(_functionRunner, functionClassInstance);
     }
 
-    private void SetActiveClosure(object closure)
+    private void SetClosure(object closure)
     {
         if (closure == null)
             return;
