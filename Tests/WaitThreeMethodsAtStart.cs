@@ -49,11 +49,23 @@ namespace Tests
             [ResumableFunctionEntryPoint("WaitThreeAtStart")]
             public async IAsyncEnumerable<Wait> WaitThreeAtStart()
             {
+                int cancelCounter = 10;
+                int afterMatchCounter = 10;
                 yield return Wait("Wait three methods",
-                    Wait<string, string>(Method1, "Method 1").AfterMatch((_, _) => Counter++).WhenCancel(() => CancelCounter++),
-                    Wait<string, string>(Method2, "Method 2").AfterMatch((_, _) => Counter++).WhenCancel(() => CancelCounter++),
-                    Wait<string, string>(Method3, "Method 3").AfterMatch((_, _) => Counter++).WhenCancel(() => CancelCounter++)
+                    Wait<string, string>(Method1, "Method 1")
+                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
+                    .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
+                    Wait<string, string>(Method2, "Method 2")
+                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
+                    .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
+                    Wait<string, string>(Method3, "Method 3")
+                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
+                    .WhenCancel(() => { CancelCounter++; cancelCounter++; })
                     ).MatchAll();
+                if (afterMatchCounter != 13)
+                    throw new Exception("Local variable not saved in after match in wait many group.");
+                if (cancelCounter != 10)
+                    throw new Exception("Local variable not saved in cancel in wait many group.");
                 await Task.Delay(100);
                 Console.WriteLine("Three method done");
             }

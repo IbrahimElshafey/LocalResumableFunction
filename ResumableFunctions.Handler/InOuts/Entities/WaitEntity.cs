@@ -57,11 +57,11 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// Local variables in method at the wait point where current wait requested
     /// It's the runner class serialized we can rename this to RunnerState
     /// </summary>
-    public object Locals { get; protected set; }
+    public object Locals { get; private set; }
     /// <summary>
     /// Local variables that is closed and used in match expression or any call
     /// </summary>
-    public object Closure { get; protected set; }
+    public object Closure { get; private set; }
 
     internal long? ParentWaitId { get; set; }
     public string Path { get; set; }
@@ -74,7 +74,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public int InCodeLine { get; set; }
     public string CallerName { get; set; }
 
-    //MethodWait.MatchIf(Expression<Func<TInput, TOutput, bool>>)
+    //MethodWait.AfterMatch(Action<TInput, TOutput>)
     //MethodWait.WhenCancel(Action cancelAction)
     //WaitsGroup.MatchIf(Func<WaitsGroup, bool>)
     //The method may update closure  
@@ -385,29 +385,30 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         //}
         return $"{method.DeclaringType.FullName}#{method.Name}";
     }
-
+    internal string ClosureKey => $"{RequestedByFunctionId}-{StateBeforeWait}";
 
     protected static BindingFlags Flags() =>
         BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
     protected object GetClosure(Type closureClass)
     {
-        ////todo:try to get from cached closures in current function closures
-        //if (CurrentFunction.Closures.ContainsKey(closureClass))
-        //    return CurrentFunction.Closures[closureClass];
+        //todo:try to get from cached closures in current function closures
+        //if (CurrentFunction.Closures.ContainsKey(ClosureKey))
+        //    return CurrentFunction.Closures[ClosureKey];
         Closure = Closure is JObject jobject ? jobject.ToObject(closureClass) : Closure;
         return Closure ?? Activator.CreateInstance(closureClass);
     }
 
     internal void SetClosure(object closure, bool deepCopy = false)
     {
-        ////todo:set closure in current function closures
-        //var closureType = closure.GetType();
-        //if (CurrentFunction.Closures.ContainsKey(closureType))
-        //    CurrentFunction.Closures[closureType] = closure;
-        //else
-        //    CurrentFunction.Closures.Add(closureType, closure);
+        //todo:set closure in current function closures
+        if (closure == null) return;
 
-        if (deepCopy && closure != null)
+        //if (CurrentFunction.Closures.ContainsKey(ClosureKey))
+        //    CurrentFunction.Closures[ClosureKey] = closure;
+        //else
+        //    CurrentFunction.Closures.Add(ClosureKey, closure);
+
+        if (deepCopy)
         {
             var closureString =
                 JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
@@ -415,6 +416,9 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         }
         else
             Closure = closure;
+        //ActionOnChildrenTree(wait => wait.Closure = closure);
+        if (ParentWait != null)
+            ParentWait.Closure = closure;
     }
 
     internal void SetLocals(object locals)
