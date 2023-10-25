@@ -34,6 +34,7 @@ internal sealed class WaitsDataContext : DbContext
         }
     }
 
+    public DbSet<ClosureData> Closures { get; set; }
     public DbSet<ScanState> ScanStates { get; set; }
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
 
@@ -63,13 +64,28 @@ internal sealed class WaitsDataContext : DbContext
         ConfigureWaitProcessingRecords(modelBuilder);
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
         ConfigureWaits(modelBuilder);
+        ConfigureClosuresData(modelBuilder.Entity<ClosureData>());
         ConfigureMethodWaitTemplate(modelBuilder);
         ConfigurConcurrencyToken(modelBuilder);
         ConfigurSoftDeleteFilter(modelBuilder);
         base.OnModelCreating(modelBuilder);
     }
 
-
+    private void ConfigureClosuresData(EntityTypeBuilder<ClosureData> closureTable)
+    {
+        closureTable.HasKey(x => x.Id);
+        closureTable.Property(x => x.Id).ValueGeneratedNever();
+        closureTable
+            .Property(x => x.Locals)
+            .HasConversion(
+                x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
+                y => JsonConvert.DeserializeObject(y));
+        closureTable
+            .Property(x => x.Closure)
+            .HasConversion(
+            x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
+            y => JsonConvert.DeserializeObject(y));
+    }
 
     private void ConfigurSoftDeleteFilter(ModelBuilder modelBuilder)
     {
