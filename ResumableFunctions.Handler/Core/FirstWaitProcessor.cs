@@ -48,7 +48,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         var rootId = int.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
         var resumableFunction =
             rootId != firstMatchedMethodWait.Id ?
-            await _waitsRepository.GetRequestedByMethodInfo(rootId) :
+            await _waitsRepository.GetMethodInfoForRf(rootId) :
             firstMatchedMethodWait.RequestedByFunction.MethodInfo;
 
         try
@@ -151,6 +151,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     {
         try
         {
+            //todo: ResumableFunctionsContainer must be constructor less if you want to pass dependancies create a method `SetDependencies`
             var classInstance = (ResumableFunctionsContainer)Activator.CreateInstance(resumableFunction.DeclaringType);
 
             if (classInstance == null)

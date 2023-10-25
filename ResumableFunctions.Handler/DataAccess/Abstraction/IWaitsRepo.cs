@@ -17,6 +17,6 @@ public interface IWaitsRepo
     Task RemoveFirstWaitIfExist(int methodIdentifierId);
     Task<bool> SaveWait(WaitEntity newWait);
     Task<MethodWaitEntity> GetMethodWait(int waitId, params Expression<Func<MethodWaitEntity, object>>[] includes);
-    Task<MethodInfo> GetRequestedByMethodInfo(int waitId);
+    Task<MethodInfo> GetMethodInfoForRf(int waitId);
     Task<List<MethodWaitEntity>> GetWaitsForTemplate(WaitTemplate template, string mandatoryPart, params Expression<Func<MethodWaitEntity, object>>[] includes);
 }

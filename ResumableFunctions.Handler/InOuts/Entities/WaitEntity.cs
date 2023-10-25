@@ -10,6 +10,7 @@ namespace ResumableFunctions.Handler.InOuts.Entities;
 
 public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 {
+
     public long Id { get; set; }
     public DateTime Created { get; set; }
     public string Name { get; set; }
@@ -57,11 +58,11 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// Local variables in method at the wait point where current wait requested
     /// It's the runner class serialized we can rename this to RunnerState
     /// </summary>
-    public object Locals { get; private set; }
+    private object _locals;
     /// <summary>
     /// Local variables that is closed and used in match expression or any call
     /// </summary>
-    public object Closure { get; private set; }
+    private object _closure;
 
     internal long? ParentWaitId { get; set; }
     public string Path { get; set; }
@@ -73,6 +74,10 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     internal long? CallId { get; set; }
     public int InCodeLine { get; set; }
     public string CallerName { get; set; }
+    internal void SetNodeType()
+    {
+        ActionOnChildrenTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
+    }
 
     //MethodWait.AfterMatch(Action<TInput, TOutput>)
     //MethodWait.WhenCancel(Action cancelAction)
@@ -80,7 +85,6 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     //The method may update closure  
     protected object CallMethodByName(string methodFullName, params object[] parameters)
     {
-        //todo:keep closure problem
         var parts = methodFullName.Split('#');
         var methodName = parts[1];
         var className = parts[0];//may be the RFContainer calss or closure class
@@ -104,9 +108,6 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             {
                 var result = closureMethodInfo.Invoke(closureInstance, parameters);
                 SetClosure(closureInstance, true);
-                //todo:Change closure field in runner
-                //since we don't have access to runner we push closure instance and runner will get it from there
-                //the runner will get closure fields by type
                 return result;
             }
         }
@@ -215,7 +216,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                     TemplateId = methodWait.TemplateId,
                     MethodGroupToWaitId = methodWait.MethodGroupToWaitId,
                     MethodToWaitId = methodWait.MethodToWaitId,
-                    Closure = methodWait.Closure,
+                    _closure = methodWait.GetClosure(null),
                 };
                 break;
             case FunctionWaitEntity:
@@ -253,7 +254,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         IsFirst = fromWait.IsFirst;
         StateBeforeWait = fromWait.StateBeforeWait;
         StateAfterWait = fromWait.StateAfterWait;
-        Locals = fromWait.Locals;
+        _locals = fromWait.GetLocals();
         IsRootNode = fromWait.IsRootNode;
         IsReplay = fromWait.IsReplay;
         ExtraData = fromWait.ExtraData;
@@ -365,76 +366,68 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         if (declaringType.Name.StartsWith(Constants.CompilerClosurePrefix))
             SetClosure(del.Target, true);
 
-        //var runnerType = functionClassType
-        //    .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
-        //    .FirstOrDefault(type =>
-        //    type.Name.StartsWith($"<{CallerName}>") &&
-        //    typeof(IAsyncEnumerable<Wait>).IsAssignableFrom(type));
-        //if (declaringType.Name.StartsWith(Constants.CompilerClosurePrefix) && runnerType != null)
-        //{
-        //    var localsField =
-        //            runnerType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-        //            .FirstOrDefault(x => x.FieldType == method.DeclaringType);
-        //    if (localsField is null)
-        //        throw new Exception(
-        //            $"You use local variables in method [{CallerName}] for callback [{methodName}] " +
-        //            $"while you wait [{Name}], " +
-        //            $"The compiler didn't create the loclas as a field, " +
-        //            $"to force it to create a one use/list your local varaibles at the end of the resuamble function. somthing like:\n" +
-        //            $"Console.WriteLine(<your_local_var>);");
-        //}
         return $"{method.DeclaringType.FullName}#{method.Name}";
     }
     internal string ClosureKey => $"{RequestedByFunctionId}-{StateBeforeWait}";
 
     protected static BindingFlags Flags() =>
         BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-    protected object GetClosure(Type closureClass)
+    public object GetClosure(Type closureClass)
     {
-        //todo:try to get from cached closures in current function closures
-        //if (CurrentFunction.Closures.ContainsKey(ClosureKey))
-        //    return CurrentFunction.Closures[ClosureKey];
-        Closure = Closure is JObject jobject ? jobject.ToObject(closureClass) : Closure;
-        return Closure ?? Activator.CreateInstance(closureClass);
-    }
+        //todo:get closure from root wait
+        //if (RootWait == null)
+        //    throw new NullReferenceException("ROOT WAIT IS NULL.");
+        if (closureClass == null)
+            return RootWait?._closure;
 
+        RootWait._closure = RootWait._closure is JObject jobject ? jobject.ToObject(closureClass) : RootWait._closure;
+        return RootWait._closure ?? Activator.CreateInstance(closureClass);
+    }
     internal void SetClosure(object closure, bool deepCopy = false)
     {
-        //todo:set closure in current function closures
+        //if (RootWait == null)
+        //    throw new NullReferenceException("ROOT WAIT IS NULL.");
+        //todo:set closure for the root wait
         if (closure == null) return;
-
-        //if (CurrentFunction.Closures.ContainsKey(ClosureKey))
-        //    CurrentFunction.Closures[ClosureKey] = closure;
-        //else
-        //    CurrentFunction.Closures.Add(ClosureKey, closure);
 
         if (deepCopy)
         {
             var closureString =
                 JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
-            Closure = JsonConvert.DeserializeObject(closureString, closure.GetType());
+            RootWait._closure = JsonConvert.DeserializeObject(closureString, closure.GetType());
         }
         else
-            Closure = closure;
-        //ActionOnChildrenTree(wait => wait.Closure = closure);
-        if (ParentWait != null)
-            ParentWait.Closure = closure;
+            RootWait._closure = closure;
     }
 
+    internal WaitEntity RootWait
+    {
+        get
+        {
+            SetNodeType();
+            if (IsRootNode) return this;
+            var root = ParentWait;
+            while (root != null && !root.IsRootNode)
+                root = root.ParentWait;
+            return root;
+        }
+    }
     internal void SetLocals(object locals)
     {
-        Locals = locals;
+        //todo:set locals for the root wait
+        RootWait._locals = locals;
     }
+    internal object GetLocals() => RootWait._locals;
 
     internal string LocalsDisplay()
     {
-        if (Locals == null && Closure == null)
+        if (_locals == null && _closure == null)
             return null;
         var result = new JObject();
-        if (Locals != null && Locals.ToString() != "{}")
-            result["Locals"] = Locals as JToken;
-        if (Closure != null && Closure.ToString() != "{}")
-            result["Closure"] = Closure as JToken;
+        if (_locals != null && _locals.ToString() != "{}")
+            result["Locals"] = _locals as JToken;
+        if (_closure != null && _closure.ToString() != "{}")
+            result["Closure"] = _closure as JToken;
         if (result?.ToString() != "{}")
             return result.ToString()?.Replace("<", "").Replace(">", "");
         return null;
