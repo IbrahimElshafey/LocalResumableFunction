@@ -58,11 +58,11 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// Local variables in method at the wait point where current wait requested
     /// It's the runner class serialized we can rename this to RunnerState
     /// </summary>
-    private object _locals;
+    public object Locals { get; private set; }
     /// <summary>
     /// Local variables that is closed and used in match expression or any call
     /// </summary>
-    private object _closure;
+    public object Closure { get; private set; }
 
     internal long? ParentWaitId { get; set; }
     public string Path { get; set; }
@@ -74,10 +74,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     internal long? CallId { get; set; }
     public int InCodeLine { get; set; }
     public string CallerName { get; set; }
-    internal void SetNodeType()
-    {
-        ActionOnChildrenTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
-    }
+
 
     //MethodWait.AfterMatch(Action<TInput, TOutput>)
     //MethodWait.WhenCancel(Action cancelAction)
@@ -216,7 +213,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                     TemplateId = methodWait.TemplateId,
                     MethodGroupToWaitId = methodWait.MethodGroupToWaitId,
                     MethodToWaitId = methodWait.MethodToWaitId,
-                    _closure = methodWait.GetClosure(null),
+                    Closure = methodWait.Closure,
                 };
                 break;
             case FunctionWaitEntity:
@@ -254,7 +251,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         IsFirst = fromWait.IsFirst;
         StateBeforeWait = fromWait.StateBeforeWait;
         StateAfterWait = fromWait.StateAfterWait;
-        _locals = fromWait.GetLocals();
+        Locals = fromWait.Locals;
         IsRootNode = fromWait.IsRootNode;
         IsReplay = fromWait.IsReplay;
         ExtraData = fromWait.ExtraData;
@@ -292,6 +289,9 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     }
 
 
+    /// <summary>
+    /// Including the current one
+    /// </summary>
     internal void ActionOnParentTree(Action<WaitEntity> action)
     {
         action(this);
@@ -299,12 +299,57 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             ParentWait.ActionOnParentTree(action);
     }
 
+    /// <summary>
+    /// Including the current one
+    /// </summary>
     internal void ActionOnChildrenTree(Action<WaitEntity> action)
     {
         action(this);
         if (ChildWaits != null)
             foreach (var item in ChildWaits)
                 item.ActionOnChildrenTree(action);
+    }
+
+    internal IEnumerable<WaitEntity> GetTreeItems()
+    {
+        yield return this;
+        if (ChildWaits != null)
+            foreach (var item in ChildWaits)
+            {
+                foreach (var item2 in item.GetTreeItems())
+                {
+                    yield return item2;
+                }
+            }
+    }
+
+    internal IEnumerable<WaitEntity> GetAllParent()
+    {
+        yield return this;
+        if (ParentWait != null)
+            ParentWait.GetAllParent();
+    }
+
+    internal void SetNodeType()
+    {
+        ActionOnChildrenTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
+    }
+
+    internal void SetClosureIfRoot()
+    {
+        var waitsWithoutClosure = new List<WaitEntity>();
+        object closure = null;
+        foreach (var wait in GetTreeItems())
+        {
+            if (wait.Closure == null)
+                waitsWithoutClosure.Add(wait);
+            else
+                closure = wait.Closure;
+        }
+        foreach (var wait in waitsWithoutClosure)
+        {
+            wait.Closure = closure;
+        }
     }
 
     internal MethodWaitEntity GetChildMethodWait(string name)
@@ -372,62 +417,40 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     protected static BindingFlags Flags() =>
         BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-    public object GetClosure(Type closureClass)
+    protected object GetClosure(Type closureClass)
     {
-        //todo:get closure from root wait
-        //if (RootWait == null)
-        //    throw new NullReferenceException("ROOT WAIT IS NULL.");
-        if (closureClass == null)
-            return RootWait?._closure;
-
-        RootWait._closure = RootWait._closure is JObject jobject ? jobject.ToObject(closureClass) : RootWait._closure;
-        return RootWait._closure ?? Activator.CreateInstance(closureClass);
+        Closure = Closure is JObject jobject ? jobject.ToObject(closureClass) : Closure;
+        return Closure ?? Activator.CreateInstance(closureClass);
     }
+
     internal void SetClosure(object closure, bool deepCopy = false)
     {
-        //if (RootWait == null)
-        //    throw new NullReferenceException("ROOT WAIT IS NULL.");
-        //todo:set closure for the root wait
         if (closure == null) return;
 
         if (deepCopy)
         {
             var closureString =
                 JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
-            RootWait._closure = JsonConvert.DeserializeObject(closureString, closure.GetType());
+            Closure = JsonConvert.DeserializeObject(closureString, closure.GetType());
         }
         else
-            RootWait._closure = closure;
+            Closure = closure;
     }
 
-    internal WaitEntity RootWait
-    {
-        get
-        {
-            SetNodeType();
-            if (IsRootNode) return this;
-            var root = ParentWait;
-            while (root != null && !root.IsRootNode)
-                root = root.ParentWait;
-            return root;
-        }
-    }
     internal void SetLocals(object locals)
     {
-        //todo:set locals for the root wait
-        RootWait._locals = locals;
+        Locals = locals;
     }
-    internal object GetLocals() => RootWait._locals;
 
     internal string LocalsDisplay()
     {
-        if (_locals == null && _closure == null)
+        if (Locals == null && Closure == null)
             return null;
         var result = new JObject();
-        if (_locals != null && _locals.ToString() != "{}")
-            result["Locals"] = _locals as JToken;
-        if (_closure != null && _closure.ToString() != "{}")
-            result["Closure"] = _closure as JToken;
+        if (Locals != null && Locals.ToString() != "{}")
+            result["Locals"] = Locals as JToken;
+        if (Closure != null && Closure.ToString() != "{}")
+            result["Closure"] = Closure as JToken;
         if (result?.ToString() != "{}")
             return result.ToString()?.Replace("<", "").Replace(">", "");
         return null;

@@ -1,11 +1,14 @@
 ﻿# Todo
-* Locals and Closures in Specefic Stop Point/yield return/State
-	* Must be shared for all waits in same StopPoint 
+* Review the need for path property 
+	* Used in CloneFirstWait
+* Locals and Closures should be saved for root wait only
+	* Must be shared for all waits under same root
 * We SetClosure in places
-	* MatchIf Expression set
-	* Replay Wait New Template
-	* CallMethodByName after  => AfterMatch,WhenCancel,Group.MatchIf
-	* Validate Method when requested for => AfterMatch,WhenCancel,Group.MatchIf
+	* Keep that there may be a looping
+	* MatchIf Expression set [No Update WaitState NewInMemory]
+	* Validate Method when requested for => AfterMatch,WhenCancel,Group.MatchIf [No Update WaitState NewInMemory]
+	* Replay Wait New Template [No Update WaitState NewInMemory]
+	* CallMethodByName after  => AfterMatch,WhenCancel,Group.MatchIf [UPDATE]
 * Add scope UPDATE continuation tests for:
 	- Global Scope
 	- Local Closure scope
@@ -39,3 +42,9 @@
 	* When more than one services share the db
 		* Should external call hits all services? No
 	* Should we define an external id for pushed call?
+
+
+AddWait closure
+	If root set closure from it's child
+UpdateWait closure
+	If not root find root and update all child closures

@@ -26,6 +26,7 @@ public class WaitsGroupEntity : WaitEntity
                 break;
 
             case WaitType.GroupWaitWithExpression when GroupMatchFuncName != null:
+                //todo:[closure update] GroupWaitWithExpression
                 var isCompleted = (bool)CallMethodByName(GroupMatchFuncName, ToWaitsGroup());
                 Status = isCompleted ? WaitStatus.Completed : Status;
                 return isCompleted;

@@ -1,4 +1,5 @@
 ﻿# Validate attributes usage
+* ResumableFunctionsContainer must be constructor less if you want to pass dependancies create a method `SetDependencies`
 * [PushCallAttribute] must applied to a method you want to wait
 * [PushCallAttribute] 
 	* method must have one input that is serializable

@@ -1,9 +1,19 @@
 ﻿namespace ResumableFunctions.Handler.InOuts.Entities;
 
-public class Data
+public class ClosureData : IEntity<long>,IEntityWithUpdate
 {
-    public int StopPoint { get; set; }
-    public int Type { get; set; }
-    public int FunctionId { get; set; }
-    public string ObjectValue { get; set; }
+    public int RootWaitId { get; set; }
+
+    public string LocalValue { get; set; }
+    public string ClosureValue { get; set; }
+
+    public long Id { get; set; }//PK
+
+    public DateTime Created { get; set; }
+
+    public int? ServiceId { get; set; }
+
+    public DateTime Modified { get; set; }
+
+    public string ConcurrencyToken { get; set; }
 }

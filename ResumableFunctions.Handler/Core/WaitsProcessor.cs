@@ -201,6 +201,7 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> ExecuteAfterMatchAction()
         {
+            //todo:[closure update] AfterMatchAction
             var pushedCallId = _pushedCall.Id;
             _methodWait.CallId = pushedCallId;
             try
@@ -268,6 +269,7 @@ namespace ResumableFunctions.Handler.Core
                                 currentWait.FunctionState.AddLog($"Wait [{currentWait.Name}] is completed.", LogType.Info, StatusCodes.WaitProcessing);
                                 currentWait.Status = WaitStatus.Completed;
                                 await _waitsRepo.CancelSubWaits(currentWait.Id, _pushedCall.Id);
+                                //todo:[closure update] CancelSubWaits
                                 await GoNext(parent, currentWait);
                             }
                             else
