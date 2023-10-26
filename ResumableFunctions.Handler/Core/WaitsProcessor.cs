@@ -268,7 +268,6 @@ namespace ResumableFunctions.Handler.Core
                         case FunctionWaitEntity:
                             if (currentWait.IsCompleted())
                             {
-                                //todo:[closure update] after call WaitsGroupEntity.IsCompleted [if GroupWaitWithExpression]
                                 currentWait.FunctionState.AddLog($"Wait [{currentWait.Name}] is completed.", LogType.Info, StatusCodes.WaitProcessing);
                                 currentWait.Status = WaitStatus.Completed;
                                 await _waitsRepo.CancelSubWaits(currentWait.Id, _pushedCall.Id);

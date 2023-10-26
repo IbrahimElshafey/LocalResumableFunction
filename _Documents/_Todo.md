@@ -1,12 +1,14 @@
 ﻿# Todo
-* Locals and Closures should be saved for root wait only
-	* Must be shared for all waits under same root
+* IF closure changed it must propgate:
+	* In method `WaitsRepo.CancelWait` > solve all cancel problems
+	* In method `WaitProcessor.ExecuteAfterMatchAction`
 * We SetClosure in places
 	* Keep that there may be a looping
 	* MatchIf Expression set [No Update WaitState NewInMemory]
 	* Validate Method when requested for => AfterMatch,WhenCancel,Group.MatchIf [No Update WaitState NewInMemory]
 	* Replay Wait New Template [No Update WaitState NewInMemory]
 	* CallMethodByName after  => AfterMatch,WhenCancel,Group.MatchIf [UPDATE]
+* You should not update/mutate state in this method in Group.MatchIf
 * Add scope continuation tests for:
 	- Global Scope
 	- Local Closure scope
