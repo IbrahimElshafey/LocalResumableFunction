@@ -29,7 +29,7 @@ namespace Tests
             Assert.Equal(4, waits.Count);
             Assert.Equal(3, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(1, waits.Count(x => x.Status == WaitStatus.Canceled));
-            Assert.Equal(1, waits.Count(x => x.IsRootNode));
+            Assert.Equal(1, waits.Count(x => x.IsRoot));
 
 
             wms.Method3("1");
@@ -43,7 +43,7 @@ namespace Tests
             Assert.Equal(8, waits.Count);
             Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
-            Assert.Equal(2, waits.Count(x => x.IsRootNode));
+            Assert.Equal(2, waits.Count(x => x.IsRoot));
         }
         public class Test : ResumableFunctionsContainer
         {

@@ -120,7 +120,7 @@ namespace ResumableFunctions.Handler.UiService
               .Where(x => x.Type == MethodType.ResumableFunctionEntryPoint)
               .Select(x => new FunctionInfo(
                       x,
-                      x.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsRootNode).Name,
+                      x.WaitsCreatedByFunction.First(x => x.IsFirst && x.IsRoot).Name,
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionInstanceStatus.InProgress),
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionInstanceStatus.Completed),
                       x.ActiveFunctionsStates.Count(x => x.Status == FunctionInstanceStatus.InError)
@@ -235,7 +235,7 @@ namespace ResumableFunctions.Handler.UiService
                  .Include(x => x.Waits)
                  .Select(functionState => new FunctionInstanceInfo(
                      functionState,
-                     functionState.Waits.First(wait => wait.IsRootNode && wait.Status == WaitStatus.Waiting),
+                     functionState.Waits.First(wait => wait.IsRoot && wait.Status == WaitStatus.Waiting),
                      functionState.Waits.Count,
                      functionState.Id
                      ));

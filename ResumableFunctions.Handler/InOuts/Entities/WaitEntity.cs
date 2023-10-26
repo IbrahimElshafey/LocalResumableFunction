@@ -20,7 +20,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public bool WasFirst { get; set; }
     public int StateBeforeWait { get; set; }
     public int StateAfterWait { get; set; }
-    public bool IsRootNode { get; set; }
+    public bool IsRoot { get; set; }
     public bool IsReplay { get; set; }
 
     [NotMapped]
@@ -252,7 +252,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         StateBeforeWait = fromWait.StateBeforeWait;
         StateAfterWait = fromWait.StateAfterWait;
         Locals = fromWait.Locals;
-        IsRootNode = fromWait.IsRootNode;
+        IsRoot = fromWait.IsRoot;
         IsReplay = fromWait.IsReplay;
         ExtraData = fromWait.ExtraData;
         WaitType = fromWait.WaitType;
@@ -332,7 +332,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     internal void SetNodeType()
     {
-        ActionOnChildrenTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
+        ActionOnChildrenTree(w => w.IsRoot = w.ParentWait == null && w.ParentWaitId == null);
     }
 
     internal void SetClosureIfRoot()

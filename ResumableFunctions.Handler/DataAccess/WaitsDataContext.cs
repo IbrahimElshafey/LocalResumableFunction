@@ -377,7 +377,7 @@ internal sealed class WaitsDataContext : DbContext
 
     private void NeverUpdateFirstWait(EntityEntry entityEntry)
     {
-        if (entityEntry.Entity is not WaitEntity { IsFirst: true, IsRootNode: true, IsDeleted: false } wait) return;
+        if (entityEntry.Entity is not WaitEntity { IsFirst: true, IsRoot: true, IsDeleted: false } wait) return;
 
         if (entityEntry.State == EntityState.Modified)
             entityEntry.State = EntityState.Unchanged;

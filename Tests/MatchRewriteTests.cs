@@ -325,7 +325,7 @@ namespace Tests
                 return new MethodWaitEntity<MethodInput, MethodOutput>(TestMethodTwo)
                 {
                     CurrentFunction = this,
-                    IsRootNode = true,
+                    IsRoot = true,
                 }
                  .MatchIf(matchExpression)
                  .AfterMatch((input, output) => InstanceId = output.TaskId);
@@ -337,7 +337,7 @@ namespace Tests
                 return new MethodWaitEntity<MethodInput, MethodOutput>(TestMethodTwo)
                 {
                     CurrentFunction = this,
-                    IsRootNode = true,
+                    IsRoot = true,
                 }
                 .MatchIf(GetMatchExprssion(matchExpressionType))
                 .AfterMatch((input, output) => InstanceId = output.TaskId);

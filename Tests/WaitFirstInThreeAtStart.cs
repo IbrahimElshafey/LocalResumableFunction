@@ -28,7 +28,7 @@ namespace Tests
             Assert.Equal(4, waits.Count);
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
-            Assert.Equal(1, waits.Count(x => x.IsRootNode));
+            Assert.Equal(1, waits.Count(x => x.IsRoot));
             var instance = await testShell.GetFirstInstance<Test>();
             Assert.Equal(1, instance.Counter);
             Assert.Equal(2, instance.CancelCounter);
@@ -43,7 +43,7 @@ namespace Tests
             Assert.Equal(8, waits.Count);
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Completed).Count());
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Canceled).Count());
-            Assert.Equal(2, waits.Where(x => x.IsRootNode).Count());
+            Assert.Equal(2, waits.Where(x => x.IsRoot).Count());
         }
         public class Test : ResumableFunctionsContainer
         {

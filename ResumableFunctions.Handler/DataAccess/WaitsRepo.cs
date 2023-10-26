@@ -182,7 +182,7 @@ internal partial class WaitsRepo : IWaitsRepo
         wait.LoadUnmappedProps();
         //todo:if method wait and closure changed then update root tree and all child
         wait.Cancel();
-        _waitsRepo.PropageteClosureChange();
+        //_waitsRepo.PropageteClosureChange();
         wait.CallId = pushedCallId;
         if (wait is MethodWaitEntity { Name: Constants.TimeWaitName })
         {
@@ -227,7 +227,7 @@ internal partial class WaitsRepo : IWaitsRepo
                 x.RequestedByFunctionId == requestedByFunctionId &&
                 x.FunctionStateId == functionStateId &&
                 x.Status == WaitStatus.Waiting &&
-                x.IsRootNode)
+                x.IsRoot)
             .ToListAsync();
 
         foreach (var wait in pendingRootWaits)
@@ -256,7 +256,7 @@ internal partial class WaitsRepo : IWaitsRepo
             _logger.LogError(error);
             throw new Exception(error);
         }
-        var isNode = waitToReplay.IsRootNode || waitToReplay.ParentWait?.WaitType == WaitType.FunctionWait;
+        var isNode = waitToReplay.IsRoot || waitToReplay.ParentWait?.WaitType == WaitType.FunctionWait;
         if (isNode is false)
         {
             var error = $"Wait to replay [{replayWait.Name}] must be a node.";

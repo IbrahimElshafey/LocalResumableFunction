@@ -30,7 +30,7 @@ public class TimeWaitEntity : WaitEntity
             _timeMethodWait.CurrentFunction = CurrentFunction;
             _timeMethodWait.IsFirst = IsFirst;
             _timeMethodWait.WasFirst = WasFirst;
-            _timeMethodWait.IsRootNode = IsRootNode;
+            _timeMethodWait.IsRoot = IsRoot;
             _timeMethodWait.ParentWait = ParentWait;
             _timeMethodWait.FunctionState = FunctionState;
             _timeMethodWait.RequestedByFunctionId = RequestedByFunctionId;

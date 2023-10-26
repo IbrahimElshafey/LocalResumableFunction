@@ -30,7 +30,7 @@ namespace Tests
             var waits = await test.GetWaits();
             Assert.Equal(4, waits.Count);
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Completed).Count());
-            Assert.Equal(2, waits.Where(x => x.IsRootNode).Count());
+            Assert.Equal(2, waits.Where(x => x.IsRoot).Count());
 
             wms = new Test();
             wms.Method4("1");
@@ -44,7 +44,7 @@ namespace Tests
             waits = await test.GetWaits();
             Assert.Equal(8, waits.Count);
             Assert.Equal(8, waits.Where(x => x.Status == WaitStatus.Completed).Count());
-            Assert.Equal(4, waits.Where(x => x.IsRootNode).Count());
+            Assert.Equal(4, waits.Where(x => x.IsRoot).Count());
         }
 
         public class Test : ResumableFunctionsContainer
