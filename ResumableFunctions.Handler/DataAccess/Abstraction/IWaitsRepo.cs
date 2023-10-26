@@ -7,7 +7,7 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction;
 
 public interface IWaitsRepo
 {
-    Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId);
+    Task CancelFunctionPendingWaits(int requestedByFunctionId, int functionStateId);
     Task CancelOpenedWaitsForState(int stateId);
     Task CancelSubWaits(long parentId, long pushedCallId);
     Task<WaitEntity> GetOldWaitForReplay(ReplayRequest replayWait);

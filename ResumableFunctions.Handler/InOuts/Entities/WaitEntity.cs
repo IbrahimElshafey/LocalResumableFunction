@@ -51,6 +51,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     ///     not
     /// </summary>
     internal WaitEntity ParentWait { get; set; }
+    internal long? ParentWaitId { get; set; }
 
     internal List<WaitEntity> ChildWaits { get; set; } = new();
 
@@ -64,7 +65,6 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// </summary>
     public object Closure { get; private set; }
 
-    internal long? ParentWaitId { get; set; }
     public string Path { get; set; }
 
     [NotMapped]

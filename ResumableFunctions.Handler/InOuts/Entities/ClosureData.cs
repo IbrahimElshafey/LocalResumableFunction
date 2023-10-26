@@ -4,7 +4,7 @@ public class ClosureData : IEntity<long>,IEntityWithUpdate
 {
     /// <summary>
     /// RootWaitId
-    /// </summary>  
+    /// </summary>
     public long Id { get; set; }
     public object Locals { get; set; }
     public object Closure { get; set; }

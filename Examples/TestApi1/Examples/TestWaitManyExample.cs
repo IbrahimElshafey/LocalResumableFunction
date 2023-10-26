@@ -56,6 +56,7 @@ public class TestWaitManyExample : ProjectApprovalExample
     [ResumableFunctionEntryPoint("TestWaitManyExample.WaitManyAndGroupExpressionDefined")]
     public async IAsyncEnumerable<Wait> WaitManyAndGroupExpressionDefined()
     {
+        var localVarIngroupMatch = 10;
         yield return
             Wait<Project, bool>(ProjectSubmitted, "Project Submitted in WaitManyAndGroupExpressionDefined")
                 .MatchIf((input, output) => output == true)
@@ -75,6 +76,7 @@ public class TestWaitManyExample : ProjectApprovalExample
         ).MatchIf(waitGroup =>
         {
             //throw new NotImplementedException();
+            localVarIngroupMatch++;
             return waitGroup.CompletedCount == 2;
         });
         WriteMessage("Two waits of three waits matched.");

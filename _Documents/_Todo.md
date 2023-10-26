@@ -1,6 +1,4 @@
 ﻿# Todo
-* Review the need for path property 
-	* Used in CloneFirstWait
 * Locals and Closures should be saved for root wait only
 	* Must be shared for all waits under same root
 * We SetClosure in places
@@ -9,7 +7,7 @@
 	* Validate Method when requested for => AfterMatch,WhenCancel,Group.MatchIf [No Update WaitState NewInMemory]
 	* Replay Wait New Template [No Update WaitState NewInMemory]
 	* CallMethodByName after  => AfterMatch,WhenCancel,Group.MatchIf [UPDATE]
-* Add scope UPDATE continuation tests for:
+* Add scope continuation tests for:
 	- Global Scope
 	- Local Closure scope
 	- In sequance
@@ -18,6 +16,10 @@
 	- Within After Match Call [May update local or global state]
 	- Within Cancel Call [May update local or global state]
 	- Within Group match filter [May update local or global state]
+
+* Review the need for path property 
+	* Used in CloneFirstWait
+
 * Analyzer
 * Review CanPublishFromExternal and IsLocalOnly
 	* Should it defined for method group or method idenetifier

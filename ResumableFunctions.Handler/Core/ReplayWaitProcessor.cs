@@ -46,7 +46,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             waitForReplayDb.InCodeLine = replayRequest.InCodeLine;
             waitForReplayDb.CallerName = replayRequest.CallerName;
 
-            await _waitsRepo.CancelFunctionWaits(waitForReplayDb.RequestedByFunctionId, waitForReplayDb.FunctionStateId);
+            await _waitsRepo.CancelFunctionPendingWaits(waitForReplayDb.RequestedByFunctionId, waitForReplayDb.FunctionStateId);
 
             switch (replayRequest.ReplayType)
             {

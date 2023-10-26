@@ -157,9 +157,9 @@ internal partial class WaitsRepo : IWaitsRepo
 
     public async Task CancelSubWaits(long parentId, long pushedCallId)
     {
-        await CancelWaits(parentId);
+        await CancelChildWaits(parentId);
 
-        async Task CancelWaits(long pId)
+        async Task CancelChildWaits(long pId)
         {
             var waits = await _context
                 .Waits
@@ -170,16 +170,17 @@ internal partial class WaitsRepo : IWaitsRepo
             {
                 CancelWait(wait, pushedCallId);
                 if (wait.CanBeParent)
-                    await CancelWaits(wait.Id);
+                    await CancelChildWaits(wait.Id);
             }
         }
     }
 
     private void CancelWait(WaitEntity wait, long pushedCallId)
     {
-        if (wait.ParentWait != null)
+        if (wait.ParentWait != null)//todo:traverse up to get current function
             wait.CurrentFunction = wait.ParentWait.CurrentFunction;
         wait.LoadUnmappedProps();
+        //todo:if method wait and closure changed then update root tree and all child
         wait.Cancel();
         wait.CallId = pushedCallId;
         if (wait is MethodWaitEntity { Name: Constants.TimeWaitName })
@@ -212,19 +213,25 @@ internal partial class WaitsRepo : IWaitsRepo
               .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, status => WaitStatus.Canceled));
     }
 
-    public async Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId)
+    /// <summary>
+    /// Used by ReplayWaitProcessor.GetWaitToReplay
+    /// </summary>
+    /// <returns></returns>
+    public async Task CancelFunctionPendingWaits(int requestedByFunctionId, int functionStateId)
     {
-        var functionInstanceWaits =
+        var pendingRootWaits =
             await _context.Waits
             .OrderByDescending(x => x.Id)
             .Where(x =>
                 x.RequestedByFunctionId == requestedByFunctionId &&
-                x.FunctionStateId == functionStateId)
+                x.FunctionStateId == functionStateId &&
+                x.Status == WaitStatus.Waiting &&
+                x.IsRootNode)
             .ToListAsync();
 
-        foreach (var wait in functionInstanceWaits)
+        foreach (var wait in pendingRootWaits)
         {
-            wait.Cancel();
+            CancelWait(wait, -1);
             await CancelSubWaits(wait.Id, -1);
         }
     }
