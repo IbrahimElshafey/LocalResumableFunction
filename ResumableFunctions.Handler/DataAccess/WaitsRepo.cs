@@ -182,6 +182,7 @@ internal partial class WaitsRepo : IWaitsRepo
         wait.LoadUnmappedProps();
         //todo:if method wait and closure changed then update root tree and all child
         wait.Cancel();
+        _waitsRepo.PropageteClosureChange();
         wait.CallId = pushedCallId;
         if (wait is MethodWaitEntity { Name: Constants.TimeWaitName })
         {
