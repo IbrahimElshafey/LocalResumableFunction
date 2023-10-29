@@ -211,7 +211,7 @@ namespace ResumableFunctions.Handler.Core
                     if (_methodWait.ExecuteAfterMatchAction())
                     {
                         _context.MarkEntityAsModified(_methodWait.FunctionState);
-                        await _waitsRepo.PropagateClosureChange(_methodWait);
+                        await _waitsRepo.PropagateClosureIfChanged(_methodWait);
                         await _context.SaveChangesAsync();//Review: why?
                         UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionSucceeded);
                         

@@ -34,13 +34,17 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public string ConcurrencyToken { get; set; }
     public bool IsDeleted { get; set; }
 
+    /// <summary>
+    /// The state object of current resumable function container.
+    /// </summary>
     internal ResumableFunctionState FunctionState { get; set; }
 
     internal int FunctionStateId { get; set; }
 
 
     /// <summary>
-    ///     The resumable function that initiated/created/requested the wait.
+    ///  The resumable function that initiated/created/requested the wait.
+    ///  May be resumable function or sub resumable function.
     /// </summary>
     internal ResumableFunctionIdentifier RequestedByFunction { get; set; }
 
@@ -64,6 +68,9 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// Local variables that is closed and used in match expression or any call
     /// </summary>
     public object Closure { get; private set; }
+
+    [NotMapped]
+    internal int ClosureHash { get; private set; }
 
     public string Path { get; set; }
 
@@ -431,6 +438,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         {
             var closureString =
                 JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
+            ClosureHash = closureString.GetHashCode();
             Closure = JsonConvert.DeserializeObject(closureString, closure.GetType());
         }
         else

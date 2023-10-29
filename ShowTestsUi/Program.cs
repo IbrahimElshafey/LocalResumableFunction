@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 var settings =
-    new SqlServerResumableFunctionsSettings(null, "WaitFirstInThreeAtStart_Test")
+    new SqlServerResumableFunctionsSettings(null, "ComplexApproval_Test")
     .SetCurrentServiceUrl("https://localhost:7219/");
 //settings.CleanDbSettings.CompletedInstanceRetention = TimeSpan.FromSeconds(3);
 //settings.CleanDbSettings.DeactivatedWaitTemplateRetention = TimeSpan.FromSeconds(3);

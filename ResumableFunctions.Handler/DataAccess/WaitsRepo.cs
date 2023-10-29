@@ -1,5 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FastExpressionCompiler;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
@@ -185,7 +187,7 @@ internal partial class WaitsRepo : IWaitsRepo
         wait.CallId = pushedCallId;
         if (wait is MethodWaitEntity mw)
         {
-            await PropagateClosureChange(mw);
+            await PropagateClosureIfChanged(mw);
 
             if (mw.Name == Constants.TimeWaitName)
                 _backgroundJobClient.Delete(wait.ExtraData.JobId);
@@ -298,16 +300,33 @@ internal partial class WaitsRepo : IWaitsRepo
             .ToListAsync();
     }
 
-    public async Task PropagateClosureChange(WaitEntity wait)
+    public async Task PropagateClosureIfChanged(WaitEntity wait)
     {
         //is root
         if (wait.ParentWait == null && wait.ParentWaitId == null) return;
-        //has parent node loaded
-        var parentWait = wait.ParentWait ?? await _context.Waits.FindAsync(wait.ParentWaitId);
-        if (parentWait != null && parentWait.StateAfterWait == wait.StateAfterWait)
+
+        //get old JObject closure from db
+        var oldClosure = await _context.Waits
+            .Where(x => x.Id == wait.Id)
+            .Select(x => x.Closure)
+            .FirstAsync() as JObject;
+        var current = wait.Closure is JObject c ? c : JObject.FromObject(wait.Closure);
+        var sameAsOld = JToken.DeepEquals(oldClosure, current);
+        if (sameAsOld) return;
+
+        //all waits that have same StopPoint, RequestedBySameFunction and FunctionStateId
+        //Todo: LOOPS AND JSON IN COMPARE
+        Expression<Func<WaitEntity, bool>> predicate = w =>
+                w.FunctionStateId == wait.FunctionStateId &&
+                w.StateAfterWait == wait.StateAfterWait &&
+                w.RequestedByFunctionId == wait.RequestedByFunctionId;
+        var count = await _context.Waits.Where(predicate).CountAsync();
+        var waits = await _context.Waits
+            .Where(predicate)
+            .ToListAsync();
+        foreach (var w in waits)
         {
-            parentWait.SetClosure(wait.Closure);
-            parentWait.ChildWaits.ForEach(w => w.SetClosure(wait.Closure));
+            w.SetClosure(wait.Closure);
         }
     }
 }
