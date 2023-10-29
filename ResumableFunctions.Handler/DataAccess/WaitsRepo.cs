@@ -168,25 +168,27 @@ internal partial class WaitsRepo : IWaitsRepo
 
             foreach (var wait in waits)
             {
-                CancelWait(wait, pushedCallId);
+                await CancelWait(wait, pushedCallId);
                 if (wait.CanBeParent)
                     await CancelChildWaits(wait.Id);
             }
         }
     }
 
-    private void CancelWait(WaitEntity wait, long pushedCallId)
+    private async Task CancelWait(WaitEntity wait, long pushedCallId)
     {
         if (wait.ParentWait != null)//todo:traverse up to get current function
             wait.CurrentFunction = wait.ParentWait.CurrentFunction;
         wait.LoadUnmappedProps();
         //todo:if method wait and closure changed then update root tree and all child
         wait.Cancel();
-        //_waitsRepo.PropageteClosureChange();
         wait.CallId = pushedCallId;
-        if (wait is MethodWaitEntity { Name: Constants.TimeWaitName })
+        if (wait is MethodWaitEntity mw)
         {
-            _backgroundJobClient.Delete(wait.ExtraData.JobId);
+            await PropagateClosureChange(mw);
+
+            if (mw.Name == Constants.TimeWaitName)
+                _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
         //if (wait.ParentWait != null)
         //    wait.ParentWait.CurrentFunction = wait.CurrentFunction;
@@ -232,7 +234,7 @@ internal partial class WaitsRepo : IWaitsRepo
 
         foreach (var wait in pendingRootWaits)
         {
-            CancelWait(wait, -1);
+            await CancelWait(wait, -1);
             await CancelSubWaits(wait.Id, -1);
         }
     }
@@ -294,5 +296,18 @@ internal partial class WaitsRepo : IWaitsRepo
             await query
             .OrderBy(x => x.IsFirst)
             .ToListAsync();
+    }
+
+    public async Task PropagateClosureChange(WaitEntity wait)
+    {
+        //is root
+        if (wait.ParentWait == null && wait.ParentWaitId == null) return;
+        //has parent node loaded
+        var parentWait = wait.ParentWait ?? await _context.Waits.FindAsync(wait.ParentWaitId);
+        if (parentWait != null && parentWait.StateAfterWait == wait.StateAfterWait)
+        {
+            parentWait.SetClosure(wait.Closure);
+            parentWait.ChildWaits.ForEach(w => w.SetClosure(wait.Closure));
+        }
     }
 }

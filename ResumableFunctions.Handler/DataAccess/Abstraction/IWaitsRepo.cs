@@ -19,4 +19,6 @@ public interface IWaitsRepo
     Task<MethodWaitEntity> GetMethodWait(int waitId, params Expression<Func<MethodWaitEntity, object>>[] includes);
     Task<MethodInfo> GetMethodInfoForRf(int waitId);
     Task<List<MethodWaitEntity>> GetWaitsForTemplate(WaitTemplate template, string mandatoryPart, params Expression<Func<MethodWaitEntity, object>>[] includes);
+
+    Task PropagateClosureChange(WaitEntity wait);
 }
