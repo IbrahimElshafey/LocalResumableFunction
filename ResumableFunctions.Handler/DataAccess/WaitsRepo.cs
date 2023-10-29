@@ -312,7 +312,7 @@ internal partial class WaitsRepo : IWaitsRepo
             .Select(x => x.Closure)
             .FirstAsync() as JObject;
         var currentClosure = wait.Closure is JObject jobjectClosure ?
-            jobjectClosure : 
+            jobjectClosure :
             JObject.FromObject(wait.Closure, JsonSerializer.Create(ClosureContractResolver.Settings));
         var sameAsOld = JToken.DeepEquals(oldClosure, currentClosure);
         if (sameAsOld) return;
@@ -322,7 +322,8 @@ internal partial class WaitsRepo : IWaitsRepo
         Expression<Func<WaitEntity, bool>> predicate = w =>
                 w.FunctionStateId == wait.FunctionStateId &&
                 w.StateAfterWait == wait.StateAfterWait &&
-                w.RequestedByFunctionId == wait.RequestedByFunctionId;
+                w.RequestedByFunctionId == wait.RequestedByFunctionId &&
+                w.CallerName == wait.CallerName;
         var count = await _context.Waits.Where(predicate).CountAsync();
         //var waits = await _context.Waits
         //    .Where(predicate)
