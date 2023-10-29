@@ -1,6 +1,7 @@
 ﻿using FastExpressionCompiler;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
@@ -310,8 +311,10 @@ internal partial class WaitsRepo : IWaitsRepo
             .Where(x => x.Id == wait.Id)
             .Select(x => x.Closure)
             .FirstAsync() as JObject;
-        var current = wait.Closure is JObject c ? c : JObject.FromObject(wait.Closure);
-        var sameAsOld = JToken.DeepEquals(oldClosure, current);
+        var currentClosure = wait.Closure is JObject jobjectClosure ?
+            jobjectClosure : 
+            JObject.FromObject(wait.Closure, JsonSerializer.Create(ClosureContractResolver.Settings));
+        var sameAsOld = JToken.DeepEquals(oldClosure, currentClosure);
         if (sameAsOld) return;
 
         //all waits that have same StopPoint, RequestedBySameFunction and FunctionStateId
@@ -321,12 +324,12 @@ internal partial class WaitsRepo : IWaitsRepo
                 w.StateAfterWait == wait.StateAfterWait &&
                 w.RequestedByFunctionId == wait.RequestedByFunctionId;
         var count = await _context.Waits.Where(predicate).CountAsync();
-        var waits = await _context.Waits
-            .Where(predicate)
-            .ToListAsync();
-        foreach (var w in waits)
-        {
-            w.SetClosure(wait.Closure);
-        }
+        //var waits = await _context.Waits
+        //    .Where(predicate)
+        //    .ToListAsync();
+        //foreach (var w in waits)
+        //{
+        //    w.SetClosure(wait.Closure);
+        //}
     }
 }
