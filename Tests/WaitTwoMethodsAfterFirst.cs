@@ -56,8 +56,9 @@ namespace Tests
             {
                 yield return Wait<string, string>(Method4, "Method 4");
                 yield return Wait("Two Methods After First",
-                    Wait<string, string>(Method5, "Method 5").MatchAny(),
-                    Wait<string, string>(Method6, "Method 6").MatchAny()
+                    new[] {
+                        Wait<string, string>(Method5, "Method 5").MatchAny(),
+                        Wait<string, string>(Method6, "Method 6").MatchAny()}
                 );
                 await Task.Delay(100);
             }

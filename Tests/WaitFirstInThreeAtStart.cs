@@ -56,6 +56,8 @@ namespace Tests
                 int cancelCounter = 10;
                 int afterMatchCounter = 10;
                 yield return Wait("Wait First In Three",
+                    new[]
+                    {
                     Wait<string, string>(Method7, "Method 7")
                     .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
                     .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
@@ -65,6 +67,7 @@ namespace Tests
                     Wait<string, string>(Method9, "Method 9")
                     .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
                     .WhenCancel(() => { CancelCounter++; cancelCounter++; })
+                    }
                 ).MatchAny();
 
                 if (afterMatchCounter != 11)

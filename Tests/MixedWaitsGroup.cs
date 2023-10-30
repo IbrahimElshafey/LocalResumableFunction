@@ -29,14 +29,15 @@ namespace Tests
             [ResumableFunctionEntryPoint("MixedWaitsGroup")]
             public async IAsyncEnumerable<Wait> WaitThreeAtStart()
             {
-                yield return Wait("Wait Many Types Group",
+                yield return Wait("Wait Many Types Group", new[] {
                     Wait("Wait three methods in Group",
+                    new Wait[] {
                         Wait<string, string>(Method1, "Method 1"),
                         Wait<string, string>(Method2, "Method 2"),
-                        Wait<string, string>(Method3, "Method 3")
+                        Wait<string, string>(Method3, "Method 3")}
                     ),
                     Wait("Wait sub function", SubFunction),
-                    Wait<string, string>(Method5, "Wait Method M5"));
+                    Wait<string, string>(Method5, "Wait Method M5")});
                 await Task.Delay(100);
                 Console.WriteLine("Three method done");
             }

@@ -318,19 +318,20 @@ internal partial class WaitsRepo : IWaitsRepo
         if (sameAsOld) return;
 
         //all waits that have same StopPoint, RequestedBySameFunction and FunctionStateId
-        //Todo: LOOPS AND JSON IN COMPARE
+        //Todo: LOOPS
         Expression<Func<WaitEntity, bool>> predicate = w =>
                 w.FunctionStateId == wait.FunctionStateId &&
                 w.StateAfterWait == wait.StateAfterWait &&
                 w.RequestedByFunctionId == wait.RequestedByFunctionId &&
                 w.CallerName == wait.CallerName;
         var count = await _context.Waits.Where(predicate).CountAsync();
-        //var waits = await _context.Waits
-        //    .Where(predicate)
-        //    .ToListAsync();
-        //foreach (var w in waits)
-        //{
-        //    w.SetClosure(wait.Closure);
-        //}
+        var waits =
+            await _context.Waits
+            .Where(predicate)
+            .ToListAsync();
+        foreach (var w in waits)
+        {
+            w.SetClosure(wait.Closure);
+        }
     }
 }

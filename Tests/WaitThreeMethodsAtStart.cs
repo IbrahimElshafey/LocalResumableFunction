@@ -52,15 +52,18 @@ namespace Tests
                 int cancelCounter = 10;
                 int afterMatchCounter = 10;
                 yield return Wait("Wait three methods",
+                    new[]
+                    {
                     Wait<string, string>(Method1, "Method 1")
-                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
-                    .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
+                        .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
+                        .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
                     Wait<string, string>(Method2, "Method 2")
-                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
-                    .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
+                        .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
+                        .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
                     Wait<string, string>(Method3, "Method 3")
-                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
-                    .WhenCancel(() => { CancelCounter++; cancelCounter++; })
+                        .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
+                        .WhenCancel(() => { CancelCounter++; cancelCounter++; })
+                    }
                     ).MatchAll();
                 if (afterMatchCounter != 13)
                     throw new Exception("Local variable not saved in after match in wait many group.");
@@ -72,7 +75,7 @@ namespace Tests
 
             public int Counter { get; set; }
             public int CancelCounter { get; set; }
-            
+
             [PushCall("RequestAdded")]
             public string Method1(string input) => "RequestAdded Call";
             [PushCall("Method2")]

@@ -15,13 +15,17 @@ public class TestTimeExample : ProjectApprovalExample
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         const string waitManagerOneApprovalInSeconds = "Wait manager one approval in 2 days";
-        yield return Wait(
-                waitManagerOneApprovalInSeconds,
+        yield return 
+        Wait(
+            waitManagerOneApprovalInSeconds,
+            new[]
+            {
                 Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((input, output) => ManagerOneApproval = output),
                 Wait(TimeSpan.FromDays(2), "Two Days")
-                .AfterMatch((_, _) => TimerMatched = true)
+                    .AfterMatch((_, _) => TimerMatched = true)
+            }
         ).MatchAny();
 
         if (TimerMatched)

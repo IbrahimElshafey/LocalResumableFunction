@@ -15,6 +15,8 @@ public class TestWaitManyExample : ProjectApprovalExample
         };
         yield return Wait(
             "Wait three methods at start",
+            new Wait[]
+            {
             Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerOneApproval = output),
@@ -24,6 +26,7 @@ public class TestWaitManyExample : ProjectApprovalExample
             Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output)
+            }
         ).MatchAll();
         WriteMessage("Three waits matched.");
         Success(nameof(WaitThreeMethodAtStart));
@@ -39,6 +42,8 @@ public class TestWaitManyExample : ProjectApprovalExample
         WriteMessage("Wait three managers to approve");
         yield return Wait(
             "Wait three methods",
+            new Wait[]
+            {
             Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerOneApproval = output),
@@ -48,6 +53,7 @@ public class TestWaitManyExample : ProjectApprovalExample
             Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output)
+            }
         ).MatchAll();
         WriteMessage("Three waits matched.");
         Success(nameof(WaitThreeMethod));
@@ -64,15 +70,18 @@ public class TestWaitManyExample : ProjectApprovalExample
         WriteMessage("Wait two of three managers to approve");
         yield return Wait(
             "Wait many with complex match expression",
-            Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .AfterMatch((input, output) => ManagerOneApproval = output),
-            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .AfterMatch((input, output) => ManagerTwoApproval = output),
-            Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .AfterMatch((input, output) => ManagerThreeApproval = output)
+             new Wait[]
+             {
+                Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                    .AfterMatch((input, output) => ManagerOneApproval = output),
+                Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                    .AfterMatch((input, output) => ManagerTwoApproval = output),
+                Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                    .AfterMatch((input, output) => ManagerThreeApproval = output)
+             }
         ).MatchIf(waitGroup =>
         {
             //throw new NotImplementedException();

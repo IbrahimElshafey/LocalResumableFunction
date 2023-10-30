@@ -53,9 +53,12 @@ namespace Tests
             {
                 int x = 1;
                 yield return Wait("Wait three methods",
+                    new[]
+                    {
                     Wait<string, string>(Method1, "Method 1"),
                     Wait<string, string>(Method2, "Method 2"),
                     Wait<string, string>(Method3, "Method 3")
+                    }
                 )
                 //.MatchIf(group => group.CompletedCount == 2 && Id == 10 && x == 1);
                 .MatchIf(group =>

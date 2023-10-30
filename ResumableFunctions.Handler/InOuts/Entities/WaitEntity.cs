@@ -342,6 +342,12 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         ActionOnChildrenTree(w => w.IsRoot = w.ParentWait == null && w.ParentWaitId == null);
     }
 
+    //todo:review , 
+    /*
+     *  w.StateAfterWait == wait.StateAfterWait &&
+        w.RequestedByFunctionId == wait.RequestedByFunctionId &&
+        w.CallerName == wait.CallerName;
+     */
     internal void SetClosureIfRoot()
     {
         var waitsWithoutClosure = new List<WaitEntity>();

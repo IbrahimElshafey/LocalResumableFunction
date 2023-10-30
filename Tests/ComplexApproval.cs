@@ -59,8 +59,11 @@ public class ComplexApproval
             {
                 yield return
                     Wait($"Wait all committee approve topic {currentTopicIndex} or manager skip",
-                        AllCommitteeApproveTopic(currentTopicIndex),
-                        ChefSkipTopic(currentTopicIndex))
+                        new[] 
+                        {
+                            AllCommitteeApproveTopic(currentTopicIndex),
+                            ChefSkipTopic(currentTopicIndex)
+                        })
                         .MatchAny();
 
                 //closure is different than locals for this wait

@@ -47,7 +47,7 @@ public class ReplayInSubFunction
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return Wait<string, string>(Method6, "M6");
-            yield return Wait("Wait Two Paths", PathOneFunction, PathTwoFunction);//wait two sub functions
+            yield return Wait("Wait Two Paths", new[] { PathOneFunction, PathTwoFunction });//wait two sub functions
             yield return Wait<string, string>(Method5, "M5").MatchAny();
         }
         public int Counter1 { get; set; }
