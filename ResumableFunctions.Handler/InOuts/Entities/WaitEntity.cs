@@ -64,13 +64,12 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// It's the runner class serialized we can rename this to RunnerState
     /// </summary>
     public object Locals { get; private set; }
+
     /// <summary>
-    /// Local variables that is closed and used in match expression or any call
+    /// Local variables that is closed (make a closure) in match expression or callbacks.
     /// </summary>
     public object Closure { get; private set; }
-
-    [NotMapped]
-    internal int ClosureHash { get; private set; }
+    public Guid ClosureId { get; set; }
 
     public string Path { get; set; }
 
@@ -340,6 +339,15 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     internal void SetNodeType()
     {
         ActionOnChildrenTree(w => w.IsRoot = w.ParentWait == null && w.ParentWaitId == null);
+        if (this is WaitsGroupEntity waitGroup)
+        {
+            waitGroup.ClosureId = Guid.NewGuid();
+            waitGroup.ChildWaits.ForEach(childWait =>
+            {
+                if (childWait.CallerName == waitGroup.CallerName)
+                    childWait.ClosureId = waitGroup.ClosureId;
+            });
+        }
     }
 
     //todo:review , 
@@ -408,7 +416,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
         var validConatinerCalss =
           (declaringType == functionClassType ||
-          declaringType.Name == "<>c" ||
+          declaringType.Name == Constants.CompilerStaticLambdas ||
           declaringType.Name.StartsWith(Constants.CompilerClosurePrefix)) &&
           declaringType.FullName.StartsWith(functionClassType.FullName);
 
@@ -426,7 +434,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
         return $"{method.DeclaringType.FullName}#{method.Name}";
     }
-    internal string ClosureKey => $"{RequestedByFunctionId}-{StateBeforeWait}";
+    //internal string ClosureKey => $"{RequestedByFunctionId}-{StateBeforeWait}";
 
     protected static BindingFlags Flags() =>
         BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
@@ -444,7 +452,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         {
             var closureString =
                 JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
-            ClosureHash = closureString.GetHashCode();
+            //ClosureHash = closureString.GetHashCode();
             Closure = JsonConvert.DeserializeObject(closureString, closure.GetType());
         }
         else

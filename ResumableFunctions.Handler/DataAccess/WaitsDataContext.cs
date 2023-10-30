@@ -75,11 +75,7 @@ internal sealed class WaitsDataContext : DbContext
     {
         closureTable.HasKey(x => x.Id);
         closureTable.Property(x => x.Id).ValueGeneratedNever();
-        closureTable
-            .Property(x => x.Locals)
-            .HasConversion(
-                x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
-                y => JsonConvert.DeserializeObject(y));
+        
         closureTable
             .Property(x => x.Closure)
             .HasConversion(
@@ -142,6 +138,7 @@ internal sealed class WaitsDataContext : DbContext
             .HasConversion(
             x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
             y => JsonConvert.DeserializeObject(y));
+       
 
         var methodWaitBuilder = modelBuilder.Entity<MethodWaitEntity>();
         methodWaitBuilder
@@ -334,6 +331,7 @@ internal sealed class WaitsDataContext : DbContext
 
         string GetWaitPath(WaitEntity wait)
         {
+            //:{wait.WaitType.ToString()[0]}
             var path = $"/{wait.Id}";
             while (wait?.ParentWait != null)
             {

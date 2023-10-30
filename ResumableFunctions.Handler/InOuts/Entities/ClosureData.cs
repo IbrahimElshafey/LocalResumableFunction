@@ -2,15 +2,11 @@
 
 public class ClosureData : IEntity<long>,IEntityWithUpdate
 {
-    /// <summary>
-    /// RootWaitId
-    /// </summary>
     public long Id { get; set; }
-    public object Locals { get; set; }
+    public long RootId { get; set; }
+    public string CallerName { get; set; }
     public object Closure { get; set; }
-
-    internal void SetLocalsAsType(Type type) { }
-    internal void SetClosureAsType(Type type) { }
+    public List<WaitEntity> LinkedWaits { get; set; }
 
     public DateTime Created { get; set; }
 

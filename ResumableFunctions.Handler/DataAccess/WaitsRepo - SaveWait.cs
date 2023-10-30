@@ -178,8 +178,8 @@ internal partial class WaitsRepo
         var isExistLocal = _context.Waits.Local.Contains(wait);
         var notAddStatus = _context.Entry(wait).State != EntityState.Added;
         wait.SetNodeType();
-        if (wait.IsRoot)
-            wait.SetClosureIfRoot();
+        //if (wait.IsRoot)
+        //    wait.SetClosureIfRoot();
 
         if (isExistLocal || !notAddStatus) return Task.CompletedTask;
 

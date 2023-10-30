@@ -9,6 +9,7 @@ using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal partial class WaitsRepo : IWaitsRepo
@@ -316,14 +317,16 @@ internal partial class WaitsRepo : IWaitsRepo
             JObject.FromObject(wait.Closure, JsonSerializer.Create(ClosureContractResolver.Settings));
         var sameAsOld = JToken.DeepEquals(oldClosure, currentClosure);
         if (sameAsOld) return;
-
+        return;
         //all waits that have same StopPoint, RequestedBySameFunction and FunctionStateId
-        //Todo: LOOPS
+        //Todo: root id prefix is not accurate since we can call same method twice
+        var rootId = Regex.Match(wait.Path, "^(/\\d+)/").Groups[1].Value;
         Expression<Func<WaitEntity, bool>> predicate = w =>
                 w.FunctionStateId == wait.FunctionStateId &&
                 w.StateAfterWait == wait.StateAfterWait &&
                 w.RequestedByFunctionId == wait.RequestedByFunctionId &&
-                w.CallerName == wait.CallerName;
+                w.CallerName == wait.CallerName &&
+                w.Path.StartsWith(rootId);
         var count = await _context.Waits.Where(predicate).CountAsync();
         var waits =
             await _context.Waits
