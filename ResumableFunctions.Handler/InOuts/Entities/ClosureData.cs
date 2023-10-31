@@ -1,12 +1,12 @@
 ﻿namespace ResumableFunctions.Handler.InOuts.Entities;
 
-public class ClosureData : IEntity<long>,IEntityWithUpdate
+public class ClosureData : IEntity<Guid>, IEntityWithUpdate
 {
-    public long Id { get; set; }
+    public Guid Id { get; set; }
     public long RootId { get; set; }
     public string CallerName { get; set; }
     public object Closure { get; set; }
-    public List<WaitEntity> LinkedWaits { get; set; }
+    //public List<WaitEntity> LinkedWaits { get; set; }
 
     public DateTime Created { get; set; }
 

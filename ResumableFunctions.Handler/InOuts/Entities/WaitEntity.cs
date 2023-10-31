@@ -20,7 +20,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public bool WasFirst { get; set; }
     public int StateBeforeWait { get; set; }
     public int StateAfterWait { get; set; }
-    public bool IsRoot { get; set; }
+    public bool IsRoot { get;  set; }
     public bool IsReplay { get; set; }
 
     [NotMapped]
@@ -69,7 +69,9 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// Local variables that is closed (make a closure) in match expression or callbacks.
     /// </summary>
     public object Closure { get; private set; }
-    public Guid ClosureId { get; set; }
+
+    //public ClosureData MutableClosure { get; set; }
+    public Guid? MutableClosureId { get; set; }
 
     public string Path { get; set; }
 
@@ -336,41 +338,48 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             ParentWait.GetAllParent();
     }
 
-    internal void SetNodeType()
+    internal virtual void OnAddWait()
     {
         ActionOnChildrenTree(w => w.IsRoot = w.ParentWait == null && w.ParentWaitId == null);
-        if (this is WaitsGroupEntity waitGroup)
-        {
-            waitGroup.ClosureId = Guid.NewGuid();
-            waitGroup.ChildWaits.ForEach(childWait =>
-            {
-                if (childWait.CallerName == waitGroup.CallerName)
-                    childWait.ClosureId = waitGroup.ClosureId;
-            });
-        }
+        if (IsRoot)
+            SetClosuresForTree();
     }
 
-    //todo:review , 
+
+    //todo:delete this after use mutable closure , 
     /*
      *  w.StateAfterWait == wait.StateAfterWait &&
         w.RequestedByFunctionId == wait.RequestedByFunctionId &&
         w.CallerName == wait.CallerName;
      */
-    internal void SetClosureIfRoot()
+    private void SetClosuresForTree()
     {
         var waitsWithoutClosure = new List<WaitEntity>();
-        object closure = null;
-        foreach (var wait in GetTreeItems())
+        //object closure = null;
+        var waitGroups =
+            GetTreeItems().
+            GroupBy(x => x.MutableClosureId);
+        foreach (var group in waitGroups)
         {
-            if (wait.Closure == null)
-                waitsWithoutClosure.Add(wait);
-            else
-                closure = wait.Closure;
+            var firstNotNullClosure = group.FirstOrDefault(x => x.Closure != default);
+            if (firstNotNullClosure == default) break;
+            foreach (var wait in group)
+            {
+                if (wait.Closure == null)
+                    wait.Closure = firstNotNullClosure;
+            }
         }
-        foreach (var wait in waitsWithoutClosure)
-        {
-            wait.Closure = closure;
-        }
+        //foreach (var wait in GetTreeItems())
+        //{
+        //    if (wait.Closure == null)
+        //        waitsWithoutClosure.Add(wait);
+        //    else
+        //        closure = wait.Closure;
+        //}
+        //foreach (var wait in waitsWithoutClosure)
+        //{
+        //    wait.Closure = closure;
+        //}
     }
 
     internal MethodWaitEntity GetChildMethodWait(string name)

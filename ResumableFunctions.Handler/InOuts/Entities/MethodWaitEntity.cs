@@ -69,6 +69,16 @@ public class MethodWaitEntity : WaitEntity
             throw new Exception(error, ex);
         }
     }
+    internal override void OnAddWait()
+    {
+        base.OnAddWait();
+        var closureNotChange = AfterMatchAction == null && CancelMethodAction == null;
+        if (closureNotChange) return;
+
+        if (Closure == default) return;
+
+        MutableClosureId = Guid.NewGuid();
+    }
 
     internal bool IsMatched()
     {

@@ -12,6 +12,9 @@ namespace ResumableFunctions.Handler.DataAccess;
 
 internal partial class WaitsRepo
 {
+    /// <summary>
+    /// Add fresh from memory wait
+    /// </summary>
     public async Task<bool> SaveWait(WaitEntity newWait)
     {
         if (newWait.ValidateWaitRequest() is false)
@@ -92,23 +95,21 @@ internal partial class WaitsRepo
 
 
 
-    private async Task SaveWaitsGroup(WaitsGroupEntity manyWaits)
+    private async Task SaveWaitsGroup(WaitsGroupEntity waitsGroup)
     {
-        for (var index = 0; index < manyWaits.ChildWaits.Count; index++)
+        for (var index = 0; index < waitsGroup.ChildWaits.Count; index++)
         {
-            var childWait = manyWaits.ChildWaits[index];
-            childWait.FunctionState = manyWaits.FunctionState;
-            childWait.RequestedByFunctionId = manyWaits.RequestedByFunctionId;
-            childWait.RequestedByFunction = manyWaits.RequestedByFunction;
-            childWait.StateAfterWait = manyWaits.StateAfterWait;
-            childWait.ParentWait = manyWaits;
-            childWait.CurrentFunction = manyWaits.CurrentFunction;
-            //if (childWait.Closure == null)
-            //    childWait.SetClosure(manyWaits.Closure);
+            var childWait = waitsGroup.ChildWaits[index];
+            childWait.FunctionState = waitsGroup.FunctionState;
+            childWait.RequestedByFunctionId = waitsGroup.RequestedByFunctionId;
+            childWait.RequestedByFunction = waitsGroup.RequestedByFunction;
+            childWait.StateAfterWait = waitsGroup.StateAfterWait;
+            childWait.ParentWait = waitsGroup;
+            childWait.CurrentFunction = waitsGroup.CurrentFunction;
             await SaveWait(childWait);
         }
 
-        await AddWait(manyWaits);
+        await AddWait(waitsGroup);
     }
 
     private async Task SaveFunctionWait(FunctionWaitEntity functionWait)
@@ -172,16 +173,16 @@ internal partial class WaitsRepo
     }
 
 
-
+    /// <summary>
+    /// Add waits from leefs to roots
+    /// </summary>
     public Task AddWait(WaitEntity wait)
     {
-        var isExistLocal = _context.Waits.Local.Contains(wait);
-        var notAddStatus = _context.Entry(wait).State != EntityState.Added;
-        wait.SetNodeType();
-        //if (wait.IsRoot)
-        //    wait.SetClosureIfRoot();
+        var isTracked = _context.Waits.Local.Contains(wait);
+        var isAddStatus = _context.Entry(wait).State == EntityState.Added;
+        wait.OnAddWait();
 
-        if (isExistLocal || !notAddStatus) return Task.CompletedTask;
+        if (isTracked || isAddStatus) return Task.CompletedTask;
 
         _logger.LogInformation($"Add Wait [{wait.Name}] with type [{wait.WaitType}]");
         switch (wait)

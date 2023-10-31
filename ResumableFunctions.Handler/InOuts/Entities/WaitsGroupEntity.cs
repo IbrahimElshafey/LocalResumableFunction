@@ -43,5 +43,17 @@ public class WaitsGroupEntity : WaitEntity
         return completed;
     }
 
+    internal override void OnAddWait()
+    {
+        //Set Mutable Closure Id For Group
+        MutableClosureId = Guid.NewGuid();
+        ChildWaits.ForEach(childWait =>
+        {
+            if (childWait.CallerName == CallerName)
+                childWait.MutableClosureId = MutableClosureId;
+        });
+        base.OnAddWait();
+    }
+
     internal WaitsGroup ToWaitsGroup() => new WaitsGroup(this);
 }
