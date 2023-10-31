@@ -76,8 +76,8 @@ public class MethodWaitEntity : WaitEntity
         if (closureNotChange) return;
 
         if (Closure == default) return;
-
-        MutableClosureId = Guid.NewGuid();
+        if (MutableClosureId == null)
+            MutableClosureId = Guid.NewGuid();
     }
 
     internal bool IsMatched()

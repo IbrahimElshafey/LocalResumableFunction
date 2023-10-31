@@ -1,4 +1,8 @@
 ﻿# Closure Bug
+* One closure or multiple closure per function??
+* All waits requested by
+	* Same CallerName
+	* Under same RequestedByFunctionId parent
 * When evaluate match we use immutable version of closure
 * When we resume the execution we use the mutable version of closure
 
@@ -33,3 +37,6 @@ Requested by function, Stop point = state after wait
 Is closure or function state chnaged after
 - MatchAction
 - Cancel Action
+
+
+- Multiple replay and local variables

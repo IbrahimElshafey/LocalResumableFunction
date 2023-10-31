@@ -75,7 +75,7 @@ internal sealed class WaitsDataContext : DbContext
     {
         closureTable.HasKey(x => x.Id);
         closureTable.Property(x => x.Id).ValueGeneratedNever();
-        
+
         closureTable
             .Property(x => x.Closure)
             .HasConversion(
@@ -138,7 +138,7 @@ internal sealed class WaitsDataContext : DbContext
             .HasConversion(
             x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
             y => JsonConvert.DeserializeObject(y));
-       
+
 
         var methodWaitBuilder = modelBuilder.Entity<MethodWaitEntity>();
         methodWaitBuilder
@@ -260,6 +260,7 @@ internal sealed class WaitsDataContext : DbContext
             NeverUpdateFirstWait(entry);
             HandleSoftDelete(entry);
             ExcludeFalseAddEntries(entry);
+            //SetMutableClosureLink(entry);
             OnSaveEntity(entry);
             //if (entry.Entity is Wait wait)
             //    if (wait.FunctionState == null && wait?.ParentWait?.FunctionState != null)
@@ -269,6 +270,14 @@ internal sealed class WaitsDataContext : DbContext
             //    }
         }
     }
+
+    //private void SetMutableClosureLink(EntityEntry entry)
+    //{
+    //    if (entry.Entity is MethodWaitEntity wait && wait.Closure == null)
+    //    {
+
+    //    }
+    //}
 
     private void SetConcurrencyToken(EntityEntry entityEntry)
     {

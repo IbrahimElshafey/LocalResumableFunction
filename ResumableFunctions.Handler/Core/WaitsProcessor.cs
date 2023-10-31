@@ -258,7 +258,7 @@ namespace ResumableFunctions.Handler.Core
                     {
                         case MethodWaitEntity methodWait:
                             currentWait.Status = WaitStatus.Completed;
-                            await GoNext(parent, methodWait);
+                            await TryProceedExecution(parent, methodWait);
                             await _context.SaveChangesAsync();
                             if (parent != null)
                                 parent.CurrentFunction = methodWait.CurrentFunction;
@@ -271,7 +271,7 @@ namespace ResumableFunctions.Handler.Core
                                 currentWait.FunctionState.AddLog($"Wait [{currentWait.Name}] is completed.", LogType.Info, StatusCodes.WaitProcessing);
                                 currentWait.Status = WaitStatus.Completed;
                                 await _waitsRepo.CancelSubWaits(currentWait.Id, _pushedCall.Id);
-                                await GoNext(parent, currentWait);
+                                await TryProceedExecution(parent, currentWait);
                             }
                             else
                             {
@@ -300,7 +300,7 @@ namespace ResumableFunctions.Handler.Core
             return true;
         }
 
-        private async Task GoNext(WaitEntity parent, WaitEntity currentWait)
+        private async Task TryProceedExecution(WaitEntity parent, WaitEntity currentWait)
         {
             switch (parent)
             {

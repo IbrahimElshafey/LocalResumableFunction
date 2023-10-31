@@ -9,6 +9,7 @@ namespace ResumableFunctions.Handler.Core;
 public class FunctionRunner : IAsyncEnumerator<Wait>
 {
     private IAsyncEnumerator<Wait> _functionRunner;
+    private readonly WaitEntity _oldCompletedWait;
 
     public FunctionRunner(WaitEntity oldCompletedWait)
     {
@@ -26,7 +27,8 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         CreateRunner(functionRunnerType, oldCompletedWait.Locals);
         SetFunctionCallerInstance(oldCompletedWait.CurrentFunction);
         SetState(oldCompletedWait.StateAfterWait);
-        SetClosure(oldCompletedWait.Closure);
+        SetRunnerClosureField(oldCompletedWait.Closure);
+        _oldCompletedWait = oldCompletedWait;
     }
 
 
@@ -39,7 +41,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         SetFunctionCallerInstance(classInstance);
         SetState(state ?? int.MinValue);
         if (closure != null)
-            SetClosure(closure);
+            SetRunnerClosureField(closure);
     }
 
     public bool ResumableFunctionExistInCode => _functionRunner != null;
@@ -63,6 +65,8 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             //set locals for the new incoming wait
             if (CurrentWait.Locals == null)
                 CurrentWait.SetLocals(_functionRunner);
+            if (_oldCompletedWait != null && _oldCompletedWait.CallerName == CurrentWait.CallerName)
+                CurrentWait.MutableClosureId = _oldCompletedWait.MutableClosureId;
         }
         return hasNext;
     }
@@ -112,7 +116,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         thisField?.SetValue(_functionRunner, functionClassInstance);
     }
 
-    private void SetClosure(object closure)
+    private void SetRunnerClosureField(object closure)
     {
         if (closure == null)
             return;

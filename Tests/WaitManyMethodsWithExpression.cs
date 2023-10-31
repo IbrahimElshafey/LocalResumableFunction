@@ -55,7 +55,7 @@ namespace Tests
                 yield return Wait("Wait three methods",
                     new[]
                     {
-                    Wait<string, string>(Method1, "Method 1"),
+                    Wait<string, string>(Method1, "Method 1").MatchIf((_,_)=>x==1),
                     Wait<string, string>(Method2, "Method 2"),
                     Wait<string, string>(Method3, "Method 3")
                     }

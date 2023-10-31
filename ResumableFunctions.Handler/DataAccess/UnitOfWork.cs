@@ -12,11 +12,11 @@ internal class UnitOfWork : IUnitOfWork
 
     public async Task<bool> SaveChangesAsync()
     {
-        var success = await _context.SaveChangesAsync() > 0;
+        
 
         // Possibility to dispatch domain events, etc
 
-        return success;
+        return await _context.SaveChangesAsync() > 0;
     }
 
     public void Dispose() => _context.Dispose();
