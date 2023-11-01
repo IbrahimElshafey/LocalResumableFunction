@@ -34,7 +34,7 @@ internal sealed class WaitsDataContext : DbContext
         }
     }
 
-    public DbSet<ClosureData> Closures { get; set; }
+    public DbSet<RuntimeClosure> RuntimeClosures { get; set; }
     public DbSet<ScanState> ScanStates { get; set; }
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
 
@@ -64,24 +64,13 @@ internal sealed class WaitsDataContext : DbContext
         ConfigureWaitProcessingRecords(modelBuilder);
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
         ConfigureWaits(modelBuilder);
-        ConfigureClosuresData(modelBuilder.Entity<ClosureData>());
+        ConfigureRuntimeClosures(modelBuilder.Entity<RuntimeClosure>());
         ConfigureMethodWaitTemplate(modelBuilder);
         ConfigurConcurrencyToken(modelBuilder);
         ConfigurSoftDeleteFilter(modelBuilder);
         base.OnModelCreating(modelBuilder);
     }
 
-    private void ConfigureClosuresData(EntityTypeBuilder<ClosureData> closureTable)
-    {
-        closureTable.HasKey(x => x.Id);
-        closureTable.Property(x => x.Id).ValueGeneratedNever();
-
-        closureTable
-            .Property(x => x.Closure)
-            .HasConversion(
-            x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
-            y => JsonConvert.DeserializeObject(y));
-    }
 
     private void ConfigurSoftDeleteFilter(ModelBuilder modelBuilder)
     {
@@ -114,6 +103,23 @@ internal sealed class WaitsDataContext : DbContext
         waitProcessingRecordBuilder.HasIndex(x => x.PushedCallId, "WaitForPushedCall_Idx");
     }
 
+    private void ConfigureRuntimeClosures(EntityTypeBuilder<RuntimeClosure> closureTable)
+    {
+        closureTable.HasKey(x => x.Id);
+        closureTable.Property(x => x.Id).ValueGeneratedNever();
+
+        closureTable
+            .Property(x => x.Value)
+            .HasConversion(
+            x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
+            y => JsonConvert.DeserializeObject(y));
+
+        closureTable
+           .HasMany(x => x.LinkedWaits)
+           .WithOne(wait => wait.RuntimeClosure)
+           .HasForeignKey(x => x.RuntimeClosureId)
+           .HasConstraintName("FK_RuntimeClosure_Waits");
+    }
     private void ConfigureWaits(ModelBuilder modelBuilder)
     {
         var waitBuilder = modelBuilder.Entity<WaitEntity>();
@@ -133,8 +139,9 @@ internal sealed class WaitsDataContext : DbContext
             .HasConversion(
                 x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
                 y => JsonConvert.DeserializeObject(y));
+        
         waitBuilder
-            .Property(x => x.Closure)
+            .Property(x => x.ImmutableClosure)
             .HasConversion(
             x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
             y => JsonConvert.DeserializeObject(y));
@@ -147,6 +154,7 @@ internal sealed class WaitsDataContext : DbContext
         methodWaitBuilder
           .Property(x => x.CallId)
           .HasColumnName(nameof(MethodWaitEntity.CallId));
+        
 
 
         modelBuilder.Entity<WaitsGroupEntity>()
@@ -260,24 +268,10 @@ internal sealed class WaitsDataContext : DbContext
             NeverUpdateFirstWait(entry);
             HandleSoftDelete(entry);
             ExcludeFalseAddEntries(entry);
-            //SetMutableClosureLink(entry);
             OnSaveEntity(entry);
-            //if (entry.Entity is Wait wait)
-            //    if (wait.FunctionState == null && wait?.ParentWait?.FunctionState != null)
-            //    {
-            //        wait.FunctionState = wait.ParentWait.FunctionState;
-            //        wait.FunctionStateId = wait.ParentWait.FunctionStateId;
-            //    }
         }
     }
 
-    //private void SetMutableClosureLink(EntityEntry entry)
-    //{
-    //    if (entry.Entity is MethodWaitEntity wait && wait.Closure == null)
-    //    {
-
-    //    }
-    //}
 
     private void SetConcurrencyToken(EntityEntry entityEntry)
     {
@@ -427,7 +421,8 @@ internal sealed class WaitsDataContext : DbContext
 
     private void ExcludeFalseAddEntries(EntityEntry entry)
     {
-        if (entry.State == EntityState.Added && entry.IsKeySet)
+        var isGuidKey = entry.Entity is IEntity<Guid>;
+        if (entry.State == EntityState.Added && entry.IsKeySet && !isGuidKey)
             entry.State = EntityState.Unchanged;
     }
 }

@@ -45,17 +45,19 @@ public class WaitsGroupEntity : WaitEntity
 
     internal override void OnAddWait()
     {
-        //Set Mutable Closure Id For Group
-        if (ChildWaits.Any(x => x.MutableClosureId != null && CallerName == x.CallerName))
+        //Set mutable closure Id for group
+        var childHasClosure = ChildWaits.Any(x => x.RuntimeClosureId != null && CallerName == x.CallerName);
+        if (childHasClosure)
         {
-            if (MutableClosureId == null)
-                MutableClosureId = Guid.NewGuid();
+            if (RuntimeClosureId == null)
+                RuntimeClosureId = Guid.NewGuid();
             ChildWaits.ForEach(childWait =>
             {
                 if (childWait.CallerName == CallerName)
-                    childWait.MutableClosureId = MutableClosureId;
+                    childWait.RuntimeClosureId = RuntimeClosureId;
             });
         }
+        ActionOnChildrenTree(w => w.IsRoot = w.ParentWait == null && w.ParentWaitId == null);
         base.OnAddWait();
     }
 

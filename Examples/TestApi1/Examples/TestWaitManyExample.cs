@@ -73,14 +73,14 @@ public class TestWaitManyExample : ProjectApprovalExample
              new Wait[]
              {
                 Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                    .AfterMatch((input, output) => ManagerOneApproval = output),
+                    .MatchIf((input, _) => input.ProjectId == CurrentProject.Id)
+                    .AfterMatch((_, output) => ManagerOneApproval = output),
                 Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                    .AfterMatch((input, output) => ManagerTwoApproval = output),
+                    .MatchIf((input, _) => input.ProjectId == CurrentProject.Id)
+                    .AfterMatch((_, output) => ManagerTwoApproval = output),
                 Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
-                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                    .AfterMatch((input, output) => ManagerThreeApproval = output)
+                    .MatchIf((input, _) => input.ProjectId == CurrentProject.Id)
+                    .AfterMatch((_, output) => ManagerThreeApproval = output)
              }
         ).MatchIf(waitGroup =>
         {

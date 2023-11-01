@@ -1,4 +1,6 @@
 ﻿using FastExpressionCompiler;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Expressions;
@@ -25,8 +27,6 @@ public class MethodWaitEntity : WaitEntity
     public string CancelMethodAction { get; protected set; }
 
     public string MandatoryPart { get; set; }
-
-
 
     [NotMapped]
     internal WaitTemplate Template { get; set; }
@@ -71,13 +71,19 @@ public class MethodWaitEntity : WaitEntity
     }
     internal override void OnAddWait()
     {
-        base.OnAddWait();
-        var closureNotChange = AfterMatchAction == null && CancelMethodAction == null;
-        if (closureNotChange) return;
+        IsRoot = ParentWait == null && ParentWaitId == null;
+        //var closureNotChange = AfterMatchAction == null && CancelMethodAction == null;
+        //if (closureNotChange) return;
 
-        if (Closure == default) return;
-        if (MutableClosureId == null)
-            MutableClosureId = Guid.NewGuid();
+        if (ImmutableClosure == default) return;
+        if (RuntimeClosureId == null)
+            RuntimeClosureId = Guid.NewGuid();
+        base.OnAddWait();
+    }
+    protected object GetMatchClosure(Type closureClass)
+    {
+        ImmutableClosure = ImmutableClosure is JObject jobject ? jobject.ToObject(closureClass) : ImmutableClosure;
+        return ImmutableClosure ?? Activator.CreateInstance(closureClass);
     }
 
     internal bool IsMatched()
@@ -92,7 +98,7 @@ public class MethodWaitEntity : WaitEntity
                 return true;
             var check = MatchExpression.CompileFast();
             var closureType = MatchExpression.Parameters[3].Type;
-            var closure = GetClosure(closureType);
+            var closure = GetMatchClosure(closureType);
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction, closure);
         }
         catch (Exception ex)
@@ -206,7 +212,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
     {
         MatchExpression = matchExpression;
         MatchExpressionParts = new MatchExpressionWriter(MatchExpression, CurrentFunction).MatchExpressionParts;
-        SetClosure(MatchExpressionParts.Closure, true);
+        SetImmutableClosure(MatchExpressionParts.Closure);
         MandatoryPart = MatchExpressionParts.GetInstanceMandatoryPart(CurrentFunction);
         return this;
     }

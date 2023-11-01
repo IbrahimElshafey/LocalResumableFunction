@@ -167,19 +167,20 @@ internal partial class WaitsRepo : IWaitsRepo
         {
             var waits = await _context
                 .Waits
+                .Include(x => x.RuntimeClosure)
                 .Where(x => x.ParentWaitId == pId && x.Status == WaitStatus.Waiting)
                 .ToListAsync();
 
             foreach (var wait in waits)
             {
-                await CancelWait(wait, pushedCallId);
+                CancelWait(wait, pushedCallId);//CancelSubWaits
                 if (wait.CanBeParent)
                     await CancelChildWaits(wait.Id);
             }
         }
     }
 
-    private async Task CancelWait(WaitEntity wait, long pushedCallId)
+    private void CancelWait(WaitEntity wait, long pushedCallId)
     {
         if (wait.ParentWait != null)//todo:traverse up to get current function
             wait.CurrentFunction = wait.ParentWait.CurrentFunction;
@@ -189,7 +190,7 @@ internal partial class WaitsRepo : IWaitsRepo
         wait.CallId = pushedCallId;
         if (wait is MethodWaitEntity mw)
         {
-            await PropagateClosureIfChanged(mw);
+            //await PropagateClosureIfChanged(mw);
 
             if (mw.Name == Constants.TimeWaitName)
                 _backgroundJobClient.Delete(wait.ExtraData.JobId);
@@ -238,7 +239,7 @@ internal partial class WaitsRepo : IWaitsRepo
 
         foreach (var wait in pendingRootWaits)
         {
-            await CancelWait(wait, -1);
+            CancelWait(wait, -1);//CancelFunctionPendingWaits
             await CancelSubWaits(wait.Id, -1);
         }
     }
@@ -273,7 +274,7 @@ internal partial class WaitsRepo : IWaitsRepo
     }
 
 
-    public async Task<List<MethodWaitEntity>> GetWaitsForTemplate(
+    public async Task<List<MethodWaitEntity>> GetPendingWaitsForTemplate(
         WaitTemplate template,
         string mandatoryPart,
         params Expression<Func<MethodWaitEntity, object>>[] includes)
@@ -302,39 +303,39 @@ internal partial class WaitsRepo : IWaitsRepo
             .ToListAsync();
     }
 
-    public async Task PropagateClosureIfChanged(WaitEntity wait)
-    {
-        //is root
-        if (wait.ParentWait == null && wait.ParentWaitId == null) return;
+    //public async Task PropagateClosureIfChanged(WaitEntity wait)
+    //{
+    //    //is root
+    //    if (wait.ParentWait == null && wait.ParentWaitId == null) return;
 
-        //get old JObject closure from db
-        var oldClosure = await _context.Waits
-            .Where(x => x.Id == wait.Id)
-            .Select(x => x.Closure)
-            .FirstAsync() as JObject;
-        var currentClosure = wait.Closure is JObject jobjectClosure ?
-            jobjectClosure :
-            JObject.FromObject(wait.Closure, JsonSerializer.Create(ClosureContractResolver.Settings));
-        var sameAsOld = JToken.DeepEquals(oldClosure, currentClosure);
-        if (sameAsOld) return;
-        return;
-        //all waits that have same StopPoint, RequestedBySameFunction and FunctionStateId
-        //Todo: root id prefix is not accurate since we can call same method twice
-        var rootId = Regex.Match(wait.Path, "^(/\\d+)/").Groups[1].Value;
-        Expression<Func<WaitEntity, bool>> predicate = w =>
-                w.FunctionStateId == wait.FunctionStateId &&
-                w.StateAfterWait == wait.StateAfterWait &&
-                w.RequestedByFunctionId == wait.RequestedByFunctionId &&
-                w.CallerName == wait.CallerName &&
-                w.Path.StartsWith(rootId);
-        var count = await _context.Waits.Where(predicate).CountAsync();
-        var waits =
-            await _context.Waits
-            .Where(predicate)
-            .ToListAsync();
-        foreach (var w in waits)
-        {
-            w.SetClosure(wait.Closure);
-        }
-    }
+    //    //get old JObject closure from db
+    //    var oldClosure = await _context.Waits
+    //        .Where(x => x.Id == wait.Id)
+    //        .Select(x => x.Closure)
+    //        .FirstAsync() as JObject;
+    //    var currentClosure = wait.Closure is JObject jobjectClosure ?
+    //        jobjectClosure :
+    //        JObject.FromObject(wait.Closure, JsonSerializer.Create(ClosureContractResolver.Settings));
+    //    var sameAsOld = JToken.DeepEquals(oldClosure, currentClosure);
+    //    if (sameAsOld) return;
+    //    return;
+    //    //all waits that have same StopPoint, RequestedBySameFunction and FunctionStateId
+    //    //Todo: root id prefix is not accurate since we can call same method twice
+    //    var rootId = Regex.Match(wait.Path, "^(/\\d+)/").Groups[1].Value;
+    //    Expression<Func<WaitEntity, bool>> predicate = w =>
+    //            w.FunctionStateId == wait.FunctionStateId &&
+    //            w.StateAfterWait == wait.StateAfterWait &&
+    //            w.RequestedByFunctionId == wait.RequestedByFunctionId &&
+    //            w.CallerName == wait.CallerName &&
+    //            w.Path.StartsWith(rootId);
+    //    var count = await _context.Waits.Where(predicate).CountAsync();
+    //    var waits =
+    //        await _context.Waits
+    //        .Where(predicate)
+    //        .ToListAsync();
+    //    foreach (var w in waits)
+    //    {
+    //        w.SetClosure(wait.Closure);
+    //    }
+    //}
 }

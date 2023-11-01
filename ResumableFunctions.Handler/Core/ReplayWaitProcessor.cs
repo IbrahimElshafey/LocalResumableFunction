@@ -150,7 +150,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         var matchExpressionParts =
             new MatchExpressionWriter(matchExpression, functionInstance).MatchExpressionParts;
         if (matchExpressionParts.Closure != null)
-            newReplayWait.SetClosure(matchExpressionParts.Closure);
+            newReplayWait.SetImmutableClosure(matchExpressionParts.Closure);//todo:check get from runtime closure not old match closure
         newReplayWait.MandatoryPart = matchExpressionParts.GetInstanceMandatoryPart(functionInstance);
 
         var expressionsHash =
@@ -279,8 +279,11 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     private async Task<(FunctionRunner Runner, bool HasWait)> GoBefore(WaitEntity oldCompletedWait)
     {
-        var runner = new FunctionRunner(oldCompletedWait.CurrentFunction,
-            oldCompletedWait.RequestedByFunction.MethodInfo, oldCompletedWait.StateBeforeWait, oldCompletedWait.Closure);
+        var runner = new FunctionRunner(
+            oldCompletedWait.CurrentFunction,
+            oldCompletedWait.RequestedByFunction.MethodInfo,
+            oldCompletedWait.StateBeforeWait, 
+            oldCompletedWait.RuntimeClosure?.Value);
         var hasWait = await runner.MoveNextAsync();
         if (hasWait)
         {

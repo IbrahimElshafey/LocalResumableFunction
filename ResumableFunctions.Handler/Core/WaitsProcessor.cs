@@ -24,6 +24,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IWaitProcessingRecordsRepo _waitProcessingRecordsRepo;
         private readonly IMethodIdsRepo _methodIdsRepo;
+        private readonly IRuntimeClosureRepo _runtimeClosureRepo;
         private readonly IWaitTemplatesRepo _templatesRepo;
         private readonly IPushedCallsRepo _pushedCallsRepo;
         private readonly IServiceRepo _serviceRepo;
@@ -47,7 +48,8 @@ namespace ResumableFunctions.Handler.Core
             IWaitTemplatesRepo templatesRepo,
             IPushedCallsRepo pushedCallsRepo,
             IServiceRepo serviceRepo,
-            IResumableFunctionsSettings settings)
+            IResumableFunctionsSettings settings,
+            IRuntimeClosureRepo runtimeClosureRepo)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -64,6 +66,7 @@ namespace ResumableFunctions.Handler.Core
             _pushedCallsRepo = pushedCallsRepo;
             _serviceRepo = serviceRepo;
             _settings = settings;
+            _runtimeClosureRepo = runtimeClosureRepo;
         }
 
         [DisplayName("Process Function Expected Matches where [FunctionId:{0}], [PushedCallId:{1}], [MethodGroupId:{2}]")]
@@ -80,11 +83,16 @@ namespace ResumableFunctions.Handler.Core
                         return;
                     foreach (var template in waitTemplates)
                     {
-                        var waits = await _waitsRepo.GetWaitsForTemplate(
+                        var waits = await _waitsRepo.GetPendingWaitsForTemplate(
                             template,
                             _pushedCall.GetMandatoryPart(template.CallMandatoryPartExpression),
                             x => x.RequestedByFunction,
                             x => x.FunctionState);
+                        /*,
+                         * todo: load both in previous include
+                            x => x.RuntimeClosure,
+                            x => x.MethodToWait
+                        */
                         if (waits == null)
                             continue;
                         foreach (var wait in waits)
@@ -130,7 +138,8 @@ namespace ResumableFunctions.Handler.Core
         {
 
             methodWait.MethodToWait = await _methodIdsRepo.GetMethodIdentifierById(methodWait.MethodToWaitId);
-
+            if (methodWait.RuntimeClosureId != null)
+                methodWait.RuntimeClosure = await _runtimeClosureRepo.GetRuntimeClosure(methodWait.RuntimeClosureId.Value);
             if (methodWait.MethodToWait == null)
             {
                 var error = $"No method exist that linked to wait [{methodWait.MethodToWaitId}].";
@@ -201,7 +210,7 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> ExecuteAfterMatchAction()
         {
-            
+
             var pushedCallId = _pushedCall.Id;
             _methodWait.CallId = pushedCallId;
             try
@@ -211,10 +220,11 @@ namespace ResumableFunctions.Handler.Core
                     if (_methodWait.ExecuteAfterMatchAction())
                     {
                         _context.MarkEntityAsModified(_methodWait.FunctionState);
-                        await _waitsRepo.PropagateClosureIfChanged(_methodWait);
+                        _context.MarkEntityAsModified(_methodWait.RuntimeClosure);
+                        //await _waitsRepo.PropagateClosureIfChanged(_methodWait);
                         await _context.SaveChangesAsync();//Review: why?
                         UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionSucceeded);
-                        
+
                     }
                     else
                     {
@@ -271,6 +281,8 @@ namespace ResumableFunctions.Handler.Core
                                 currentWait.FunctionState.AddLog($"Wait [{currentWait.Name}] is completed.", LogType.Info, StatusCodes.WaitProcessing);
                                 currentWait.Status = WaitStatus.Completed;
                                 await _waitsRepo.CancelSubWaits(currentWait.Id, _pushedCall.Id);
+                                if (currentWait.RuntimeClosure != null)
+                                    _context.MarkEntityAsModified(currentWait.RuntimeClosure);
                                 await TryProceedExecution(parent, currentWait);
                             }
                             else

@@ -1,10 +1,10 @@
 ﻿# Closure Bug
-* One closure or multiple closure per function??
 * All waits requested by
 	* Same CallerName
 	* Under same RequestedByFunctionId parent
-* When evaluate match we use immutable version of closure
-* When we resume the execution we use the mutable version of closure
+* When evaluate match we use immutable version of closure [So it will be moved to MethodWait class]
+* When we resume the execution we use the mutable version of closure 
+	* [Mutable version is shared for waits under same method call]
 
 * We should create two version of closure
 	* immutable: that is a one to one with wait

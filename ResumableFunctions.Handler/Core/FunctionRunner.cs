@@ -27,7 +27,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         CreateRunner(functionRunnerType, oldCompletedWait.Locals);
         SetFunctionCallerInstance(oldCompletedWait.CurrentFunction);
         SetState(oldCompletedWait.StateAfterWait);
-        SetRunnerClosureField(oldCompletedWait.Closure);
+        SetRunnerClosureField(oldCompletedWait.RuntimeClosure?.Value);
         _oldCompletedWait = oldCompletedWait;
     }
 
@@ -65,8 +65,14 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             //set locals for the new incoming wait
             if (CurrentWait.Locals == null)
                 CurrentWait.SetLocals(_functionRunner);
-            if (_oldCompletedWait != null && _oldCompletedWait.CallerName == CurrentWait.CallerName)
-                CurrentWait.MutableClosureId = _oldCompletedWait.MutableClosureId;
+
+            bool closureContinuation =
+                _oldCompletedWait != null && _oldCompletedWait.CallerName == CurrentWait.CallerName && _oldCompletedWait.RuntimeClosureId != null;
+            if (closureContinuation)
+            {
+                CurrentWait.RuntimeClosureId = _oldCompletedWait.RuntimeClosureId;
+                CurrentWait.OldCompletedSibling = _oldCompletedWait;
+            }
         }
         return hasNext;
     }

@@ -65,10 +65,10 @@ namespace Tests
                         .WhenCancel(() => { CancelCounter++; cancelCounter++; })
                     }
                     ).MatchAll();
-                //if (afterMatchCounter != 13)
-                //    throw new Exception("Local variable not saved in after match in wait many group.");
-                //if (cancelCounter != 10)
-                //    throw new Exception("Local variable not saved in cancel in wait many group.");
+                if (afterMatchCounter != 13)
+                    throw new Exception("Local variable not saved in after match in wait many group.");
+                if (cancelCounter != 10)
+                    throw new Exception("Local variable not saved in cancel in wait many group.");
                 await Task.Delay(100);
                 Console.WriteLine("Three method done");
             }

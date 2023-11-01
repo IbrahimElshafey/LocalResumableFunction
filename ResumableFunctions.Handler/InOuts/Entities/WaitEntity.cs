@@ -14,13 +14,12 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public long Id { get; set; }
     public DateTime Created { get; set; }
     public string Name { get; set; }
-
     public WaitStatus Status { get; set; } = WaitStatus.Waiting;
     public bool IsFirst { get; set; }
     public bool WasFirst { get; set; }
     public int StateBeforeWait { get; set; }
     public int StateAfterWait { get; set; }
-    public bool IsRoot { get;  set; }
+    public bool IsRoot { get; set; }
     public bool IsReplay { get; set; }
 
     [NotMapped]
@@ -65,13 +64,19 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// </summary>
     public object Locals { get; private set; }
 
+
+
+    public RuntimeClosure RuntimeClosure { get; set; }
+
+    [NotMapped]
+    public WaitEntity OldCompletedSibling { get; set; }
+
+    public Guid? RuntimeClosureId { get; set; }
+
     /// <summary>
     /// Local variables that is closed (make a closure) in match expression or callbacks.
     /// </summary>
-    public object Closure { get; private set; }
-
-    //public ClosureData MutableClosure { get; set; }
-    public Guid? MutableClosureId { get; set; }
+    public object ImmutableClosure { get; internal set; }
 
     public string Path { get; set; }
 
@@ -82,6 +87,8 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     internal long? CallId { get; set; }
     public int InCodeLine { get; set; }
     public string CallerName { get; set; }
+
+    
 
 
     //MethodWait.AfterMatch(Action<TInput, TOutput>)
@@ -106,13 +113,13 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         if (closureType != null)
         {
             var closureMethodInfo = closureType.GetMethod(methodName, Flags());
-            var closureInstance = GetClosure(closureType);
+            var closureInstance = RuntimeClosure?.AsType(closureType);
             SetClosureCaller(closureInstance);
 
             if (closureMethodInfo != null)
             {
                 var result = closureMethodInfo.Invoke(closureInstance, parameters);
-                SetClosure(closureInstance, true);
+                RuntimeClosure.Value = closureInstance;
                 return result;
             }
         }
@@ -221,7 +228,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                     TemplateId = methodWait.TemplateId,
                     MethodGroupToWaitId = methodWait.MethodGroupToWaitId,
                     MethodToWaitId = methodWait.MethodToWaitId,
-                    Closure = methodWait.Closure,
+                    ImmutableClosure = methodWait.ImmutableClosure,
                 };
                 break;
             case FunctionWaitEntity:
@@ -340,46 +347,39 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     internal virtual void OnAddWait()
     {
-        ActionOnChildrenTree(w => w.IsRoot = w.ParentWait == null && w.ParentWaitId == null);
-        if (IsRoot)
-            SetClosuresForTree();
-    }
+        if (!IsRoot) return;
 
-
-    //todo:delete this after use mutable closure , 
-    /*
-     *  w.StateAfterWait == wait.StateAfterWait &&
-        w.RequestedByFunctionId == wait.RequestedByFunctionId &&
-        w.CallerName == wait.CallerName;
-     */
-    private void SetClosuresForTree()
-    {
-        var waitsWithoutClosure = new List<WaitEntity>();
-        //object closure = null;
         var waitGroups =
             GetTreeItems().
-            GroupBy(x => x.MutableClosureId);
+            Where(x => x.RuntimeClosureId != null).
+            GroupBy(x => x.RuntimeClosureId);
         foreach (var group in waitGroups)
         {
-            var firstNotNullClosure = group.FirstOrDefault(x => x.Closure != default);
-            if (firstNotNullClosure == default) break;
+            var mw = (MethodWaitEntity)
+                group.FirstOrDefault(x => x is MethodWaitEntity mw && mw.ImmutableClosure != default);
+            if (mw == default)
+            {
+                foreach (var wait in group)
+                {
+                    wait.RuntimeClosureId = null;
+                }
+                break;
+            }
+            var runtimeClosure =
+                OldCompletedSibling?.RuntimeClosure == null ?
+                new RuntimeClosure
+                {
+                    Id = mw.RuntimeClosureId.Value,
+                    Value = mw.ImmutableClosure,
+                    CallerName = mw.CallerName,
+                } :
+                OldCompletedSibling?.RuntimeClosure;
             foreach (var wait in group)
             {
-                if (wait.Closure == null)
-                    wait.Closure = firstNotNullClosure;
+                wait.RuntimeClosureId = null;
+                wait.RuntimeClosure = runtimeClosure;
             }
         }
-        //foreach (var wait in GetTreeItems())
-        //{
-        //    if (wait.Closure == null)
-        //        waitsWithoutClosure.Add(wait);
-        //    else
-        //        closure = wait.Closure;
-        //}
-        //foreach (var wait in waitsWithoutClosure)
-        //{
-        //    wait.Closure = closure;
-        //}
     }
 
     internal MethodWaitEntity GetChildMethodWait(string name)
@@ -416,12 +416,16 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             CurrentFunction = (ResumableFunctionsContainer)FunctionState.StateObject;
     }
 
-    internal string ValidateMethod(Delegate del, string methodName)
+    /// <summary>
+    /// Validate delegate that used for groupMatchFilter,AfterMatchAction,CancelAction and return:
+    /// $"{method.DeclaringType.FullName}#{method.Name}"
+    /// </summary>
+    internal string ValidateMethod(Delegate callback, string methodName)
     {
-        var method = del.Method;
+        var method = callback.Method;
         var functionClassType = CurrentFunction.GetType();
         var declaringType = method.DeclaringType;
-        var containerType = del.Target?.GetType();
+        var containerType = callback.Target?.GetType();
 
         var validConatinerCalss =
           (declaringType == functionClassType ||
@@ -439,34 +443,23 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             throw new Exception(
                 $"For wait [{Name}] the [{methodName}:{method.Name}] must not be over-loaded.");
         if (declaringType.Name.StartsWith(Constants.CompilerClosurePrefix))
-            SetClosure(del.Target, true);
-
+            SetImmutableClosure(callback.Target);
         return $"{method.DeclaringType.FullName}#{method.Name}";
     }
-    //internal string ClosureKey => $"{RequestedByFunctionId}-{StateBeforeWait}";
+
+    internal void SetImmutableClosure(object closure)
+    {
+        if (closure == default) return;
+
+        var closureString =
+               JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
+        //ClosureHash = closureString.GetHashCode();
+        ImmutableClosure = JsonConvert.DeserializeObject(closureString, closure.GetType());
+    }
 
     protected static BindingFlags Flags() =>
         BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-    protected object GetClosure(Type closureClass)
-    {
-        Closure = Closure is JObject jobject ? jobject.ToObject(closureClass) : Closure;
-        return Closure ?? Activator.CreateInstance(closureClass);
-    }
 
-    internal void SetClosure(object closure, bool deepCopy = false)
-    {
-        if (closure == null) return;
-
-        if (deepCopy)
-        {
-            var closureString =
-                JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
-            //ClosureHash = closureString.GetHashCode();
-            Closure = JsonConvert.DeserializeObject(closureString, closure.GetType());
-        }
-        else
-            Closure = closure;
-    }
 
     internal void SetLocals(object locals)
     {
@@ -475,13 +468,14 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     internal string LocalsDisplay()
     {
-        if (Locals == null && Closure == null)
+        var closure = RuntimeClosure?.Value;
+        if (Locals == null && closure == null)
             return null;
         var result = new JObject();
         if (Locals != null && Locals.ToString() != "{}")
             result["Locals"] = Locals as JToken;
-        if (Closure != null && Closure.ToString() != "{}")
-            result["Closure"] = Closure as JToken;
+        if (closure != null && closure.ToString() != "{}")
+            result["Closure"] = closure as JToken;
         if (result?.ToString() != "{}")
             return result.ToString()?.Replace("<", "").Replace(">", "");
         return null;

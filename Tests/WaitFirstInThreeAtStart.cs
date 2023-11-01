@@ -55,25 +55,28 @@ namespace Tests
             {
                 int cancelCounter = 10;
                 int afterMatchCounter = 10;
+                int sharedCounter = 10;
                 yield return Wait("Wait First In Three",
                     new[]
                     {
                     Wait<string, string>(Method7, "Method 7")
-                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
-                    .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
+                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
+                    .WhenCancel(() => { CancelCounter++; cancelCounter++;sharedCounter++; }),
                     Wait<string, string>(Method8, "Method 8")
-                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
-                    .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
+                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
+                    .WhenCancel(() => { CancelCounter++; cancelCounter++;sharedCounter++; }),
                     Wait<string, string>(Method9, "Method 9")
-                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
-                    .WhenCancel(() => { CancelCounter++; cancelCounter++; })
+                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
+                    .WhenCancel(() => { CancelCounter++; cancelCounter++;sharedCounter++; })
                     }
                 ).MatchAny();
 
-                //if (afterMatchCounter != 11)
-                //    throw new Exception("Local variable not saved in match in wait first group.");
-                //if (cancelCounter != 12)
-                //    throw new Exception("Local variable not saved in cancel in wait first group.");
+                if (afterMatchCounter != 11)
+                    throw new Exception("Local variable not saved in match in wait first group.");
+                if (cancelCounter != 12)
+                    throw new Exception("Local variable not saved in cancel in wait first group.");
+                if (sharedCounter != 13)
+                    throw new Exception("Local variable `sharedCounter` not as expected in wait first group.");
                 await Task.Delay(100);
                 Console.WriteLine("WaitFirstInThree");
             }
