@@ -109,6 +109,8 @@ namespace ResumableFunctions.Handler.Testing
             }
         }
 
+        //todo:add root waits count, completed waits count, completed root waits count,
+
         public async Task<string> RoundCheck(
             int expectedPushedCallsCount,
             int waitsCount,

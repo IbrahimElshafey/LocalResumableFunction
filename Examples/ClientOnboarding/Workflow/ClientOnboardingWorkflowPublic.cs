@@ -55,10 +55,7 @@ namespace ClientOnboarding.Workflow
             return
                 Wait<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, "Wait Owner Approve Client")
                 .MatchIf((approveClientInput, approveResult) => approveClientInput.TaskId == OwnerTaskId)
-                .AfterMatch((approveClientInput, approveResult) =>
-                {
-                    OwnerDecision = approveClientInput.Decision;
-                });
+                .AfterMatch((approveClientInput, approveResult) => OwnerDecision = approveClientInput.Decision);
         }
 
         private Wait WaitClientFillForm()
