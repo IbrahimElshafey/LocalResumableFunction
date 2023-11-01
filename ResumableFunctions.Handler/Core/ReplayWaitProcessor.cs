@@ -124,6 +124,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                     duplicateDbWait);
                 duplicateDbWait.TemplateId = template.Id;
                 await _waitsRepo.SaveWait(duplicateDbWait);
+                duplicateDbWait.RuntimeClosureId = null;
+                duplicateDbWait.RuntimeClosure = oldMethodWaitToReplayDb.RuntimeClosure;
                 return duplicateDbWait;
             }
         }
@@ -194,6 +196,9 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             wait.Status = WaitStatus.Waiting;
         });
         await _waitsRepo.SaveWait(duplicateWait);
+        duplicateWait.RuntimeClosureId = null;
+        //todo:closure vars may be changed as flow (wait to replay - change vars - replay wait)
+        duplicateWait.RuntimeClosure = oldWaitToReplay.RuntimeClosure;
         return duplicateWait;
     }
 
@@ -213,6 +218,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             var nextWaitAfterReplay = goBefore.Runner.CurrentWait;
             nextWaitAfterReplay.CopyCommonIds(oldCompletedWait);
             await _waitsRepo.SaveWait(nextWaitAfterReplay);
+            nextWaitAfterReplay.RuntimeClosureId = null;
+            nextWaitAfterReplay.RuntimeClosure = oldCompletedWait.RuntimeClosure;
             return nextWaitAfterReplay;
         }
 
@@ -251,6 +258,8 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 methodWaitToReplayFresh.ParentWaitId = waitToReplayDb.ParentWaitId;
                 methodWaitToReplayFresh.TemplateId = template.Id;
                 await _waitsRepo.SaveWait(methodWaitToReplayFresh);
+                methodWaitToReplayFresh.RuntimeClosureId = null;
+                methodWaitToReplayFresh.RuntimeClosure = waitToReplayDb.RuntimeClosure;
                 return methodWaitToReplayFresh;
             }
 
@@ -279,6 +288,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     private async Task<(FunctionRunner Runner, bool HasWait)> GoBefore(WaitEntity oldCompletedWait)
     {
+        //todo:oldCompletedWait.RuntimeClosure?.Value or closure in memory
         var runner = new FunctionRunner(
             oldCompletedWait.CurrentFunction,
             oldCompletedWait.RequestedByFunction.MethodInfo,

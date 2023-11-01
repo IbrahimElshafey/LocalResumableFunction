@@ -116,8 +116,6 @@ internal partial class WaitsRepo
     {
         try
         {
-            await AddWait(functionWait);
-
             var functionRunner = new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
             var hasNext = await functionRunner.MoveNextAsync();
             functionWait.FirstWait = functionRunner.CurrentWait;
@@ -140,7 +138,10 @@ internal partial class WaitsRepo
             if (functionWait.FirstWait is ReplayRequest)
                 await _serviceRepo.AddErrorLog(null, "First wait can't be a replay request", StatusCodes.FirstWait);
             else
+            {
                 await SaveWait(functionWait.FirstWait);//first wait for sub function
+                await AddWait(functionWait);
+            }
         }
         catch (Exception ex)
         {
