@@ -80,10 +80,10 @@ public class MethodWaitEntity : WaitEntity
             RuntimeClosureId = Guid.NewGuid();
         base.OnAddWait();
     }
-    protected object GetMatchClosure(Type closureClass)
+    protected object GetMatchClosure(Type closureType)
     {
-        ImmutableClosure = ImmutableClosure is JObject jobject ? jobject.ToObject(closureClass) : ImmutableClosure;
-        return ImmutableClosure ?? Activator.CreateInstance(closureClass);
+        ImmutableClosure = ImmutableClosure is JObject jobject ? jobject.ToObject(closureType) : ImmutableClosure;
+        return ImmutableClosure ?? Activator.CreateInstance(closureType);
     }
 
     internal bool IsMatched()

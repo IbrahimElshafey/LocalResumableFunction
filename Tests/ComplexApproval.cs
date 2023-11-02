@@ -48,6 +48,8 @@ public class ComplexApproval
         public int RequestId { get; set; }
         public bool FinalDecision { get; set; }
 
+        public int PublicCounter { get; set; } = 10;
+
         [ResumableFunctionEntryPoint("ComplexApproval")]
         public async IAsyncEnumerable<Wait> ComplexApproval()
         {
@@ -137,6 +139,7 @@ public class ComplexApproval
                         sharedCounter += 10;
                         if (sharedCounter < 10)
                             throw new Exception("Local var `sharedCounter` must be >= 10.");
+                        PublicCounter = 1000;
                     })
                     ;
             }
@@ -147,6 +150,7 @@ public class ComplexApproval
                 {
                     bool result = sharedCounter == 40;
                     if (result) sharedCounter += 5;
+                    PublicCounter = 2000;
                     return result;
                 });
         }

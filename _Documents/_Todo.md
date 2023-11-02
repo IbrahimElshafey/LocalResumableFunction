@@ -1,15 +1,8 @@
 ﻿# Todo
 
-* Add scope continuation tests for:
-	- Global Scope
-	- Local Closure scope
-	- In sequance
-	- In group
-	- In function
-	- Within After Match Call [May update local or global state]
-	- Within Cancel Call [May update local or global state]
-	- Within Group match filter [May update local or global state]
 
+* Review Wait name duplication expected scenario 
+	- Same wait name in two sub resumable function
 * Review the need for path property 
 	* Used in CloneFirstWait
 
