@@ -350,7 +350,7 @@ namespace ResumableFunctions.Handler.Core
                 }
                 nextWait.FunctionState.Status = FunctionInstanceStatus.InProgress;
                 _context.MarkEntityAsModified(nextWait.FunctionState);
-                await SaveTheNewWait(nextWait);
+                await SaveNewWait(nextWait);
 
             }
             catch (Exception ex)
@@ -362,7 +362,7 @@ namespace ResumableFunctions.Handler.Core
             }
         }
 
-        private async Task SaveTheNewWait(WaitEntity nextWait)
+        private async Task SaveNewWait(WaitEntity nextWait)
         {
             if (nextWait is ReplayRequest replayRequest)
             {

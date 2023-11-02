@@ -88,7 +88,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public int InCodeLine { get; set; }
     public string CallerName { get; set; }
 
-    
+
 
 
     //MethodWait.AfterMatch(Action<TInput, TOutput>)
@@ -130,6 +130,8 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     private void SetClosureCaller(object closureInstance)
     {
+        if (closureInstance == null) return;
+
         var closureType = closureInstance.GetType();
         bool notClosureClass = !closureType.Name.StartsWith(Constants.CompilerClosurePrefix);
         if (notClosureClass) return;
@@ -365,18 +367,25 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 }
                 break;
             }
-            var runtimeClosure =
-                OldCompletedSibling?.RuntimeClosure == null ?
+
+            var useOldWaitClosure =
+                OldCompletedSibling != null &&
+                OldCompletedSibling.RuntimeClosure != null &&
+                OldCompletedSibling.CallerName == group.First().CallerName;
+
+            var runtimeClosure = 
+                useOldWaitClosure ?
+                OldCompletedSibling.RuntimeClosure :
                 new RuntimeClosure
                 {
                     Id = mw.RuntimeClosureId.Value,
                     Value = mw.ImmutableClosure,
                     CallerName = mw.CallerName,
-                } :
-                OldCompletedSibling?.RuntimeClosure;
+                };
+
             foreach (var wait in group)
             {
-                wait.RuntimeClosureId = null;
+                //wait.RuntimeClosureId = null;
                 wait.RuntimeClosure = runtimeClosure;
             }
         }

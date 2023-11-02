@@ -67,7 +67,9 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
                 CurrentWait.SetLocals(_functionRunner);
 
             bool closureContinuation =
-                _oldCompletedWait != null && _oldCompletedWait.CallerName == CurrentWait.CallerName && _oldCompletedWait.RuntimeClosureId != null;
+                _oldCompletedWait != null && 
+                _oldCompletedWait.CallerName == CurrentWait.CallerName &&
+                _oldCompletedWait.RuntimeClosureId != null;
             if (closureContinuation)
             {
                 CurrentWait.RuntimeClosureId = _oldCompletedWait.RuntimeClosureId;

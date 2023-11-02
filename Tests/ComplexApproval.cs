@@ -59,7 +59,7 @@ public class ComplexApproval
             {
                 yield return
                     Wait($"Wait all committee approve topic {currentTopicIndex} or manager skip",
-                        new[] 
+                        new[]
                         {
                             AllCommitteeApproveTopic(currentTopicIndex),
                             ChefSkipTopic(currentTopicIndex)
@@ -108,7 +108,7 @@ public class ComplexApproval
         {
             return Wait<RequestTopicIndex, string>
                 (ChefSkipTopic, $"Chef Skip Topic {chefSkipTopicIndex} Approval")
-                .MatchIf((topicIndex, decision) =>
+                .MatchIf((topicIndex, _) =>
                     topicIndex.RequestId == RequestId &&
                     topicIndex.TopicIndex == chefSkipTopicIndex);
         }
@@ -125,7 +125,7 @@ public class ComplexApproval
                 waits[memberIndex] =
                     Wait<RequestTopicIndex, string>(
                         MemberApproveRequest, $"{currentRole} Topic {membersTopicIndex} Approval")
-                    .MatchIf((topicIndex, decision) =>
+                    .MatchIf((topicIndex, _) =>
                         topicIndex.RequestId == RequestId &&
                         topicIndex.TopicIndex == membersTopicIndex &&
                         topicIndex.MemberRole == currentRole)
