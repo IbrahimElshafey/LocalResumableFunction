@@ -8,13 +8,20 @@ using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Linq.CompilerServices.TypeSystem;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal sealed class WaitsDataContext : DbContext
 {
     private readonly ILogger<WaitsDataContext> _logger;
     private readonly IResumableFunctionsSettings _settings;
-
+    private readonly ValueComparer<object> _closureComparer = new ValueComparer<object>(
+           (o1, o2) =>
+               JsonConvert.SerializeObject(o1, ClosureContractResolver.Settings) == JsonConvert.SerializeObject(o2, ClosureContractResolver.Settings),
+           oToHash =>
+               oToHash == null ? 0 : JsonConvert.SerializeObject(oToHash, ClosureContractResolver.Settings).GetHashCode(),
+           oToSnapShot =>
+               JsonConvert.DeserializeObject<object>(JsonConvert.SerializeObject(oToSnapShot, ClosureContractResolver.Settings)));
     public WaitsDataContext(
         ILogger<WaitsDataContext> logger,
         IResumableFunctionsSettings settings,
@@ -113,6 +120,8 @@ internal sealed class WaitsDataContext : DbContext
             .HasConversion(
             x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
             y => JsonConvert.DeserializeObject(y));
+        closureTable
+            .Property(x => x.Value).Metadata.SetValueComparer(_closureComparer);
 
         closureTable
            .HasMany(x => x.LinkedWaits)
@@ -139,12 +148,16 @@ internal sealed class WaitsDataContext : DbContext
             .HasConversion(
                 x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
                 y => JsonConvert.DeserializeObject(y));
-        
+        waitBuilder
+            .Property(x => x.Locals).Metadata.SetValueComparer(_closureComparer);
+
         waitBuilder
             .Property(x => x.ImmutableClosure)
             .HasConversion(
             x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
             y => JsonConvert.DeserializeObject(y));
+        waitBuilder
+           .Property(x => x.ImmutableClosure).Metadata.SetValueComparer(_closureComparer);
 
 
         var methodWaitBuilder = modelBuilder.Entity<MethodWaitEntity>();
@@ -232,11 +245,6 @@ internal sealed class WaitsDataContext : DbContext
             .WithOne(wait => wait.FunctionState)
             .HasForeignKey(x => x.FunctionStateId)
             .HasConstraintName("FK_WaitsForFunctionState");
-        //stateTypeBuilder
-        //    .Property(x => x.Closures)
-        //    .HasConversion(
-        //    x => JsonConvert.SerializeObject(x),
-        //    y => JsonConvert.DeserializeObject<Closures>(y));
     }
 
 

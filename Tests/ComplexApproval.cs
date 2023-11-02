@@ -106,11 +106,13 @@ public class ComplexApproval
 
         private Wait ChefSkipTopic(int chefSkipTopicIndex)
         {
+            var skipCounter = 10;
             return Wait<RequestTopicIndex, string>
                 (ChefSkipTopic, $"Chef Skip Topic {chefSkipTopicIndex} Approval")
                 .MatchIf((topicIndex, _) =>
                     topicIndex.RequestId == RequestId &&
-                    topicIndex.TopicIndex == chefSkipTopicIndex);
+                    topicIndex.TopicIndex == chefSkipTopicIndex)
+                .AfterMatch((_, _) => skipCounter += 5);
         }
 
         private Wait AllCommitteeApproveTopic(int membersTopicIndex)

@@ -230,7 +230,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                     TemplateId = methodWait.TemplateId,
                     MethodGroupToWaitId = methodWait.MethodGroupToWaitId,
                     MethodToWaitId = methodWait.MethodToWaitId,
-                    ImmutableClosure = methodWait.ImmutableClosure,
+                    ImmutableClosure = methodWait.ImmutableClosure,//todo:should I use runtime closure
                 };
                 break;
             case FunctionWaitEntity:
@@ -373,15 +373,21 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 OldCompletedSibling.RuntimeClosure != null &&
                 OldCompletedSibling.CallerName == group.First().CallerName;
 
-            var runtimeClosure = 
-                useOldWaitClosure ?
-                OldCompletedSibling.RuntimeClosure :
-                new RuntimeClosure
+            RuntimeClosure runtimeClosure = null;
+            if (useOldWaitClosure)
+            {
+                OldCompletedSibling.RuntimeClosure.Value = mw.ImmutableClosure;
+                runtimeClosure = OldCompletedSibling.RuntimeClosure;
+            }
+            else
+            {
+                runtimeClosure = new RuntimeClosure
                 {
                     Id = mw.RuntimeClosureId.Value,
                     Value = mw.ImmutableClosure,
                     CallerName = mw.CallerName,
                 };
+            }
 
             foreach (var wait in group)
             {
@@ -477,7 +483,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     internal string LocalsDisplay()
     {
-        var closure = RuntimeClosure?.Value;
+        var closure = ImmutableClosure;
         if (Locals == null && closure == null)
             return null;
         var result = new JObject();

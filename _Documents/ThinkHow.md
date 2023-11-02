@@ -40,3 +40,5 @@ Is closure or function state chnaged after
 
 
 - Multiple replay and local variables
+
+* What if closure is not serializable
