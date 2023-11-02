@@ -1,7 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-using ResumableFunctions.Handler.BaseUse;
+﻿using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler;
 
@@ -13,6 +13,7 @@ public abstract partial class ResumableFunctionsContainer
         [CallerLineNumber] int inCodeLine = 0,
         [CallerMemberName] string callerName = "")
     {
+        //todo:validate attribute exist
         return new FunctionWaitEntity
         {
             Name = name,

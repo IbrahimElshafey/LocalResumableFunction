@@ -1,6 +1,6 @@
-﻿using System.Dynamic;
+﻿using ResumableFunctions.Handler.Helpers;
+using System.Dynamic;
 using System.Linq.Expressions;
-using ResumableFunctions.Handler.Helpers;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Expressions
@@ -17,7 +17,7 @@ namespace ResumableFunctions.Handler.Expressions
             _inputOutput = Parameter(typeof(ExpandoObject), "inputOutput");
             _instance = Parameter(typeof(ExpandoObject), "instance");
             var result = Visit(matchExpression.Body);
-            if (!_stop && result != null) 
+            if (!_stop && result != null)
                 Result = Lambda<Func<ExpandoObject, ExpandoObject, bool>>(result, _inputOutput, _instance);
         }
 

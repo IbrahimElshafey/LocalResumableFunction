@@ -40,10 +40,10 @@ namespace ResumableFunctions.Handler.Core
             await _jobExecutor.Execute(CleanJobName,
                 async () =>
                 {
-                   await _databaseCleaning.CleanSoftDeletedRows();
-                   await _databaseCleaning.CleanInactiveWaitTemplates();
-                   await _databaseCleaning.CleanCompletedFunctionInstances();
-                   await _databaseCleaning.CleanOldPushedCalls();
+                    await _databaseCleaning.CleanSoftDeletedRows();
+                    await _databaseCleaning.CleanInactiveWaitTemplates();
+                    await _databaseCleaning.CleanCompletedFunctionInstances();
+                    await _databaseCleaning.CleanOldPushedCalls();
                 },
                 $"Error when {CleanJobName}");
         }

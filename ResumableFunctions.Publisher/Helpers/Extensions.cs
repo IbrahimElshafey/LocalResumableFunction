@@ -1,11 +1,11 @@
-﻿using System;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ResumableFunctions.Publisher.Abstraction;
 using ResumableFunctions.Publisher.Implementation;
+using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace ResumableFunctions.Publisher.Helpers
 {
@@ -15,7 +15,9 @@ namespace ResumableFunctions.Publisher.Helpers
 
         public static void AddResumableFunctionsPublisher(this IServiceCollection services, IPublisherSettings settings)
         {
-            services.AddSingleton<IFailedRequestHandler, InMemoryFailedRequestHandler>();
+            services.AddSingleton<IFailedRequestHandler, FailedRequestHandler>();
+            //services.AddSingleton<IFailedRequestRepo, InMemoryFailedRequestRepo>();
+            services.AddSingleton<IFailedRequestRepo, OnDiskFailedRequestHandler>();
             services.AddSingleton(typeof(IPublisherSettings), settings);
             services.AddHttpClient();
             services.AddSingleton(typeof(ICallPublisher), settings.CallPublisherType);
@@ -38,7 +40,7 @@ namespace ResumableFunctions.Publisher.Helpers
         public static bool IsAsyncMethod(this MethodBase method)
         {
             var asyncAttr = method.GetCustomAttribute(typeof(AsyncStateMachineAttribute));
-            
+
             if (asyncAttr == null)
             {
                 return

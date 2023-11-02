@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
-using System.Reflection;
-using FastExpressionCompiler;
+﻿using FastExpressionCompiler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 public class MethodWaitEntity : WaitEntity
@@ -82,7 +82,7 @@ public class MethodWaitEntity : WaitEntity
                 return true;
             var check = MatchExpression.CompileFast();
             var closureType = MatchExpression.Parameters[3].Type;
-            var closure = GetClosureAsType(closureType);
+            var closure = GetClosure(closureType);
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction, closure);
         }
         catch (Exception ex)
@@ -211,7 +211,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
 
     internal MethodWaitEntity<TInput, TOutput> MatchAny()
     {
-        MatchExpression = (Expression<Func<TInput, TOutput, bool>>)((x, y) => true);
+        MatchExpression = (Expression<Func<TInput, TOutput, bool>>)((_, _) => true);
         MatchExpressionParts = new MatchExpressionWriter(MatchExpression, CurrentFunction).MatchExpressionParts;
         return this;
     }

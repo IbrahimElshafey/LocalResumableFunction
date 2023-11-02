@@ -1,7 +1,7 @@
-﻿using System.Linq.Expressions;
-using Hangfire;
+﻿using Hangfire;
 using Hangfire.Annotations;
 using ResumableFunctions.Handler.Core.Abstraction;
+using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.Core;
 internal class HangfireBackgroundProcess : IBackgroundProcess
@@ -14,7 +14,7 @@ internal class HangfireBackgroundProcess : IBackgroundProcess
     }
 
     public void AddOrUpdateRecurringJob<TClass>(
-        [NotNull] string recurringJobId, 
+        [NotNull] string recurringJobId,
         [InstantHandle][NotNull] Expression<Func<TClass, Task>> methodCall,
         [NotNull] string cronExpression)
     {

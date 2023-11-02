@@ -1,6 +1,6 @@
-﻿using System.Linq.Expressions;
-using FastExpressionCompiler;
+﻿using FastExpressionCompiler;
 using ResumableFunctions.Handler.Helpers;
+using System.Linq.Expressions;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Expressions;
@@ -167,7 +167,7 @@ public partial class MatchExpressionWriter : ExpressionVisitor
 
             var result = GetExpressionValue(expression);
             if (result != null)
-                return true && result.CanConvertToSimpleString();
+                return result.CanConvertToSimpleString();
 
             throw new NotSupportedException(
                 $"Can't use expression [{expression}] in match because it's evaluated to [NULL].");

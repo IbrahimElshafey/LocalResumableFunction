@@ -11,12 +11,17 @@ namespace ReferenceLibrary
         [ResumableFunctionEntryPoint("TestFunctionInDll")]
         public async IAsyncEnumerable<Wait> TestFunctionInDll()
         {
-            yield return Wait<string, string>
-                (SayHello, "Wait say hello")
-                //.MatchIf((userName, helloMsg) => userName.StartsWith("M"))
-                .AfterMatch((userName, helloMsg) => UserName = userName)
-                //.NoSetData()
-                ;
+            yield return Wait(
+                "Wait first",
+
+                Wait<string, string>(SayHello, "Wait say hello")
+                .AfterMatch((userName, helloMsg) => UserName = userName),
+
+                 Wait<string, string>(Method123, "Wait Method123")
+                .AfterMatch((input, output) => UserName = output)
+                )
+                .MatchAny();
+
             yield return Wait<string, string>
                (SayGoodby, "Wait say goodby")
                .MatchIf((userName, helloMsg) => userName == UserName)
@@ -43,5 +48,8 @@ namespace ReferenceLibrary
         {
             return $"Goodby, {userName}.";
         }
+
+        [PushCall("PublisherController.Method123", FromExternal = true)]
+        public string Method123(string input) => default;
     }
 }

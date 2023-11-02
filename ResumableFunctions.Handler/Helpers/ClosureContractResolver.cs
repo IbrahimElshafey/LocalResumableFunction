@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json.Serialization;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.Helpers
@@ -7,7 +7,7 @@ namespace ResumableFunctions.Handler.Helpers
     public class ClosureContractResolver : DefaultContractResolver
     {
         static ClosureContractResolver contractResolver = new ClosureContractResolver();
-        internal static JsonSerializerSettings Settings { get; } = 
+        internal static JsonSerializerSettings Settings { get; } =
             new JsonSerializerSettings { ContractResolver = contractResolver };
 
         protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)

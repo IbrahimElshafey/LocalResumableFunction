@@ -4,7 +4,7 @@ namespace TestApi1.Examples
 {
     internal interface IManagerFiveApproval
     {
-        [PushCall("IManagerFiveApproval.ManagerFiveApproveProject", CanPublishFromExternal = true)]
+        [PushCall("IManagerFiveApproval.ManagerFiveApproveProject", FromExternal = true)]
         bool FiveApproveProject(ApprovalDecision args);
     }
 }

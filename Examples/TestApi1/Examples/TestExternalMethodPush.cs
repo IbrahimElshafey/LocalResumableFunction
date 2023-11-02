@@ -20,7 +20,7 @@ namespace TestApi1.Examples
             Console.WriteLine("^^^Success for ResumableFunctionThatWaitExternal^^^");
         }
 
-        [PushCall("PublisherController.Method123", CanPublishFromExternal = true)]
+        [PushCall("PublisherController.Method123", FromExternal = true)]
         public string Method123(string input) => default;
     }
 }

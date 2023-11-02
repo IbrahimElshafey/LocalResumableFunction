@@ -1,10 +1,10 @@
-﻿using System.Reflection;
-using AspectInjector.Broker;
+﻿using AspectInjector.Broker;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.Attributes
 {
@@ -47,25 +47,25 @@ namespace ResumableFunctions.Handler.Attributes
                 MethodData = new MethodData(metadata as MethodInfo)
                 {
                     MethodUrn = pushResultAttribute.MethodUrn,
-                    CanPublishFromExternal = pushResultAttribute.CanPublishFromExternal,
+                    CanPublishFromExternal = pushResultAttribute.FromExternal,
                     IsLocalOnly = pushResultAttribute.IsLocalOnly,
                 },
             };
             if (args.Length > 0)
                 _pushedCall.Data.Input = args[0];
-           
+
         }
 
         [Advice(Kind.After)]
         public void OnExit(
            [Argument(Source.Name)] string name,
-           [Argument(Source.ReturnValue)] object result//,
+           [Argument(Source.ReturnValue)] object result
            )
         {
             try
             {
                 _pushedCall.Data.Output = result;
-                _callPusher.PushCall(_pushedCall).Wait();
+                _callPusher.PushCall(_pushedCall).Wait();//local push in RF shared group
             }
             catch (Exception ex)
             {

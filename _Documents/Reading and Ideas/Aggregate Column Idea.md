@@ -3,12 +3,13 @@
 	* EntityName (sush as Orders)
 	* AggregateName (such as FailedOrdersCount,TotalPayments)
 	* AggregateFunction (such as SUM, COUNT, AVG, LAST,...) or user defined
-	* ResetValue (such as -100 default null)
+	* ResetValue (such as -100 default null)//when you want to recalculate aggregation  
 	* KeepValuesAfterAggregation (true or false)
-* Create table [AggregateValues] with columns 'No update just insersion and delete'
+* Create table [AggregateValues] with 'No update just insersion and delete'
 	* AggregateDefinitionId
+	* Entity ID
 	* Number Value
-	* CreationDate
+	* CreationDate (May delete this)
 	* IsAggregation (boolean)
 
 ## Example
@@ -19,7 +20,7 @@
 * When you wanty to display like counts [post.GetAggregate("LikesCount")]
 
 # Table File Log
-* This will be a separate test project to know more about reading/writing to files
+* This will be a separate test project to know more about reading/writing to files,database, concurrency, disk buffers,
 * How database ACID work
 * Use GroBuf to serialize object
 	* GroBuf https://github.com/skbkontur/GroBuf

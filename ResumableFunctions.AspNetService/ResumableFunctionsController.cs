@@ -14,19 +14,19 @@ namespace ResumableFunctions.AspNetService
     public class ResumableFunctionsController : ControllerBase
     {
         public readonly ICallPusher _callPusher;
-        public readonly ICallProcessor _callProcessor;
+        public readonly IServiceQueue _serviceQueue;
         private readonly IBackgroundProcess _backgroundProcess;
         private readonly ILogger<ResumableFunctionsController> _logger;
 
         public ResumableFunctionsController(
             ILogger<ResumableFunctionsController> logger,
             ICallPusher callPusher,
-            ICallProcessor callProcessor,
+            IServiceQueue serviceQueue,
             IBackgroundProcess backgroundProcess)
         {
             _logger = logger;
             _callPusher = callPusher;
-            _callProcessor = callProcessor;
+            _serviceQueue = serviceQueue;
             _backgroundProcess = backgroundProcess;
         }
 
@@ -34,9 +34,10 @@ namespace ResumableFunctions.AspNetService
 
 
         [HttpPost(Constants.ServiceProcessPushedCallAction)]
-        public int ServiceProcessPushedCall(CallServiceImapction service)
+        public int ServiceProcessPushedCall(CallEffection callEffection)
         {
-            _backgroundProcess.Enqueue(() => _callProcessor.ServiceProcessPushedCall(service));
+            //_backgroundProcess.Enqueue(() => _callProcessor.ServiceProcessPushedCall(callEffection));//no need for enque since each function Id is enqued
+            _serviceQueue.ServiceProcessPushedCall(callEffection);
             return 1;
         }
 

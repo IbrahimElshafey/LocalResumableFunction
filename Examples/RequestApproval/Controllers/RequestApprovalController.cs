@@ -56,7 +56,7 @@ namespace RequestApproval.Controllers
 
             //save satate in the class contains the resumable function
             ManagerApprovalTaskId = _service.AskManagerApproval(UserRequest.Id);
-            
+
             //wait another new method
             yield return Wait<ApproveRequestArgs, int>(_service.ManagerApproval, "Wait Manager Approval")
                     .MatchIf((approveRequestArgs, approvalId) => approvalId > 0 && approveRequestArgs.TaskId == ManagerApprovalTaskId)

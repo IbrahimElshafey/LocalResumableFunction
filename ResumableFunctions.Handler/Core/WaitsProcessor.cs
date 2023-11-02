@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using Medallion.Threading;
+﻿using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
@@ -8,6 +6,8 @@ using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler.Core
 {
@@ -67,7 +67,7 @@ namespace ResumableFunctions.Handler.Core
         }
 
         [DisplayName("Process Function Expected Matches where [FunctionId:{0}], [PushedCallId:{1}], [MethodGroupId:{2}]")]
-        public async Task ProcessFunctionExpectedMatchedWaits(int functionId, long pushedCallId, int methodGroupId)
+        public async Task ProcessFunctionExpectedWaits(int functionId, long pushedCallId, int methodGroupId)
         {
             await _backgroundJobExecutor.Execute(
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
@@ -201,6 +201,7 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> ExecuteAfterMatchAction()
         {
+            
             var pushedCallId = _pushedCall.Id;
             _methodWait.CallId = pushedCallId;
             try
@@ -210,8 +211,10 @@ namespace ResumableFunctions.Handler.Core
                     if (_methodWait.ExecuteAfterMatchAction())
                     {
                         _context.MarkEntityAsModified(_methodWait.FunctionState);
-                        await _context.SaveChangesAsync();
+                        //todo:[closure update] AfterMatchAction
+                        await _context.SaveChangesAsync();//Review: why?
                         UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionSucceeded);
+                        
                     }
                     else
                     {
@@ -231,7 +234,7 @@ namespace ResumableFunctions.Handler.Core
                     StatusCodes.WaitProcessing, ex);
 
                 _backgroundJobClient.Schedule(() =>
-                        ProcessFunctionExpectedMatchedWaits(_methodWait.RequestedByFunctionId, pushedCallId, _methodWait.MethodGroupToWaitId),
+                        ProcessFunctionExpectedWaits(_methodWait.RequestedByFunctionId, pushedCallId, _methodWait.MethodGroupToWaitId),
                     TimeSpan.FromSeconds(10));
                 return false;
             }
@@ -265,6 +268,7 @@ namespace ResumableFunctions.Handler.Core
                         case FunctionWaitEntity:
                             if (currentWait.IsCompleted())
                             {
+                                //todo:[closure update] after call WaitsGroupEntity.IsCompleted [if GroupWaitWithExpression]
                                 currentWait.FunctionState.AddLog($"Wait [{currentWait.Name}] is completed.", LogType.Info, StatusCodes.WaitProcessing);
                                 currentWait.Status = WaitStatus.Completed;
                                 await _waitsRepo.CancelSubWaits(currentWait.Id, _pushedCall.Id);

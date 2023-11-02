@@ -1,10 +1,10 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-using AspectInjector.Broker;
+﻿using AspectInjector.Broker;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Publisher.Abstraction;
 using ResumableFunctions.Publisher.InOuts;
+using System;
+using System.Linq;
+using System.Reflection;
 
 namespace ResumableFunctions.Publisher.Helpers
 {
@@ -49,7 +49,7 @@ namespace ResumableFunctions.Publisher.Helpers
                     ClassName = metadata.DeclaringType.Name,
                     MethodName = metadata.Name,
                 },
-                ServiceName = publishMethodAttribute.ToService
+                ToServices = publishMethodAttribute.ToServices
             };
             if (args.Length > 0)
                 _methodCall.Input = args[0];

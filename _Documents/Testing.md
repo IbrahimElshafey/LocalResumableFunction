@@ -10,7 +10,7 @@
 
 
 * Attributes test
-* Scan results is correct
+* Scan results are correct
 
 # Performance Test
 * 1 Million active wait for same function

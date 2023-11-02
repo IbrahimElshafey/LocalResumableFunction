@@ -52,7 +52,7 @@ namespace Tests
     }
     public class ExceptionAtStartTest : ResumableFunctionsContainer
     {
-        
+
 
         [ResumableFunctionEntryPoint("ExceptionAtStartTest")]
         public async IAsyncEnumerable<Wait> ExceptionAtStart()

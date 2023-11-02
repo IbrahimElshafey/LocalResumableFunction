@@ -1,11 +1,11 @@
-﻿using System.Linq.Expressions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -46,7 +46,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             waitForReplayDb.InCodeLine = replayRequest.InCodeLine;
             waitForReplayDb.CallerName = replayRequest.CallerName;
 
-            await _waitsRepo.CancelFunctionWaits(waitForReplayDb.RequestedByFunctionId, waitForReplayDb.FunctionStateId);
+            await _waitsRepo.CancelFunctionPendingWaits(waitForReplayDb.RequestedByFunctionId, waitForReplayDb.FunctionStateId);
 
             switch (replayRequest.ReplayType)
             {

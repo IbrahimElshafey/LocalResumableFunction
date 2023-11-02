@@ -65,7 +65,7 @@ internal class Program
         {
             Console.ReadLine();
         }
-       
+
     }
 
     private static void TestTreeCascadeAction()

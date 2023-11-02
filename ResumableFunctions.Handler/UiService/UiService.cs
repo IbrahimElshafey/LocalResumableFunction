@@ -12,6 +12,7 @@ namespace ResumableFunctions.Handler.UiService
     {
         private readonly WaitsDataContext _context;
 
+        //todo: UI service must not use EF context directly
         public UiService(WaitsDataContext context)
         {
             _context = context;

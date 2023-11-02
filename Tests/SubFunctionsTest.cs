@@ -21,7 +21,7 @@ public class SubFunctionsTest
         instance.Method2("m2");
         instance.Method3("m3");
 
-        Assert.Empty(await test.RoundCheck(2,3,1));
+        Assert.Empty(await test.RoundCheck(2, 3, 1));
     }
 
     [Fact]

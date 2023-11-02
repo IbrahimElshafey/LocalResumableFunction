@@ -1,12 +1,12 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
@@ -53,9 +53,11 @@ internal partial class WaitsRepo
             .FirstOrDefaultAsync(x => x.Id == waitId);
     }
 
-    public async Task<MethodInfo> GetRequestedByMethodInfo(int waitId)
+    public async Task<MethodInfo> GetMethodInfoForRf(int waitId)
     {
-        return (await _context.Waits.Include(x => x.RequestedByFunction).FirstAsync(x => x.Id == waitId))
+        return (await _context.Waits
+            .Include(x => x.RequestedByFunction)
+            .FirstAsync(x => x.Id == waitId))
             .RequestedByFunction.MethodInfo;
     }
 
@@ -175,8 +177,9 @@ internal partial class WaitsRepo
     {
         var isExistLocal = _context.Waits.Local.Contains(wait);
         var notAddStatus = _context.Entry(wait).State != EntityState.Added;
-        SetNodeType(wait);
-
+        wait.SetNodeType();
+        if (wait.IsRootNode)
+            wait.SetClosureIfRoot();
 
         if (isExistLocal || !notAddStatus) return Task.CompletedTask;
 
@@ -196,8 +199,5 @@ internal partial class WaitsRepo
         return Task.CompletedTask;
     }
 
-    private void SetNodeType(WaitEntity wait)
-    {
-        wait.ActionOnChildrenTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
-    }
+
 }

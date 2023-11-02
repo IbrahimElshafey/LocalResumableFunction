@@ -1,8 +1,4 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using Hangfire;
+﻿using Hangfire;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
@@ -14,6 +10,10 @@ using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
 using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
@@ -31,7 +31,7 @@ internal static class CoreExtensions
         services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
         services.AddScoped<IReplayWaitProcessor, ReplayWaitProcessor>();
         services.AddScoped<IWaitsProcessor, WaitsProcessor>();
-        services.AddScoped<ICallProcessor, CallProcessor>();
+        services.AddScoped<IServiceQueue, ServiceQueue>();
         services.AddScoped<ICallPusher, CallPusher>();
         services.AddScoped<ICleaningJob, CleaningJob>();
         services.AddScoped<Scanner>();
@@ -41,7 +41,6 @@ internal static class CoreExtensions
 
 
         services.AddHttpClient();
-        services.AddSingleton<IServiceQueue, HangfireServiceQueue>();
         services.AddSingleton(settings);
         services.AddSingleton(settings.DistributedLockProvider);
 

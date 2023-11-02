@@ -54,7 +54,7 @@
 
 //    private static async Task TestSameEventAgain()
 //    {
-        
+
 //        await RegisterResumableFunction(typeof(WaitSameEventAgain), nameof(WaitSameEventAgain.Test_WaitSameEventAgain));
 //        var example = new WaitSameEventAgain();
 //        var currentProject = ProjectApprovalExample.GetCurrentProject();

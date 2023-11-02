@@ -24,7 +24,7 @@ internal class BinaryPackTest
         var generic = method.MakeGenericMethod(typeof(MyObject3));
         //var loaded2 = generic.Invoke(null, new[] { data });
 
-      
+
         var loaded3 = generic.Invoke(null, new[] { data });
     }
     public class MyObject<T>

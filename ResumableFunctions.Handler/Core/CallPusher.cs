@@ -11,8 +11,8 @@ namespace ResumableFunctions.Handler.Core
     internal class CallPusher : ICallPusher
     {
         private readonly IUnitOfWork _context;
-        private readonly IBackgroundProcess _backgroundJobClient;
-        private readonly ICallProcessor _processor;
+        private readonly IBackgroundProcess _backgroundProcess;
+        private readonly IServiceQueue _serviceQueue;
         private readonly ILogger<CallPusher> _logger;
         private readonly IPushedCallsRepo _pushedCallsRepo;
         private readonly IMethodIdsRepo _methodIdsRepo;
@@ -20,16 +20,16 @@ namespace ResumableFunctions.Handler.Core
 
         public CallPusher(
             IUnitOfWork context,
-            IBackgroundProcess backgroundJobClient,
-            ICallProcessor processor,
+            IBackgroundProcess backgroundProcess,
+            IServiceQueue serviceQueue,
             ILogger<CallPusher> logger,
             IPushedCallsRepo pushedCallsRepo,
             IMethodIdsRepo methodIdsRepo,
             IServiceRepo serviceRepo)
         {
             _context = context;
-            _backgroundJobClient = backgroundJobClient;
-            _processor = processor;
+            _backgroundProcess = backgroundProcess;
+            _serviceQueue = serviceQueue;
             _logger = logger;
             _pushedCallsRepo = pushedCallsRepo;
             _methodIdsRepo = methodIdsRepo;
@@ -40,9 +40,10 @@ namespace ResumableFunctions.Handler.Core
         {
             try
             {
-                _pushedCallsRepo.Push(pushedCall);
+                await _pushedCallsRepo.Push(pushedCall);
                 await _context.SaveChangesAsync();
-                _backgroundJobClient.Enqueue(() => _processor.InitialProcessPushedCall(pushedCall.Id, pushedCall.MethodData.MethodUrn));
+                _backgroundProcess.Enqueue(() => 
+                    _serviceQueue.RouteCallToAffectedServices(pushedCall.Id, pushedCall.MethodData.MethodUrn));
                 return pushedCall.Id;
             }
             catch (Exception ex)
@@ -62,14 +63,23 @@ namespace ResumableFunctions.Handler.Core
                     await _serviceRepo.AddErrorLog(
                         null,
                         $"Pushed call target service [{serviceName}] but the current service is [{currentServiceName}]" +
-                        $"\nPushed call was [{pushedCall}]", 
+                        $"\nPushed call was [{pushedCall}]",
                         StatusCodes.PushedCall);
                     return -1;
                 }
 
                 var methodUrn = pushedCall.MethodData.MethodUrn;
                 if (await _methodIdsRepo.CanPublishFromExternal(methodUrn))
-                    return await PushCall(pushedCall);
+                {
+                    await _pushedCallsRepo.Push(pushedCall);
+                    await _context.SaveChangesAsync();
+                    //Route call to current service only
+                    _backgroundProcess.Enqueue(() =>
+                        _serviceQueue.ProcessCallLocally(pushedCall.Id, pushedCall.MethodData.MethodUrn));
+
+                    return pushedCall.Id;
+                }
+
 
                 await _serviceRepo.AddLog(
                     $"There is no method with URN [{methodUrn}] that can be called from external in service [{serviceName}].\nPushed call was [{pushedCall}]",

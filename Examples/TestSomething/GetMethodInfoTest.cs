@@ -1,7 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using ResumableFunctions.Handler.Expressions;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using ResumableFunctions.Handler.Expressions;
 
 namespace TestSomething;
 internal class GetMethodInfoTest

@@ -12,7 +12,7 @@ namespace TestApi2.Controllers
         [PushCall("TestController.ExternalMethodTest")]
         public int ExternalMethodTest(object o)
         {
-           return Random.Shared.Next();
+            return Random.Shared.Next();
         }
 
         [HttpPost(nameof(ExternalMethodTest2))]

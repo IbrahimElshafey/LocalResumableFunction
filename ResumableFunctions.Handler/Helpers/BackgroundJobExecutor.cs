@@ -1,9 +1,9 @@
-﻿using System.Runtime.CompilerServices;
-using Medallion.Threading;
+﻿using Medallion.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
+using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler.Helpers
 {

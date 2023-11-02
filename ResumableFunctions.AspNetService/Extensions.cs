@@ -1,7 +1,6 @@
 ﻿using Hangfire;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 namespace ResumableFunctions.AspNetService
@@ -17,7 +16,7 @@ namespace ResumableFunctions.AspNetService
             mvcBuilder.Services.AddResumableFunctionsCore(settings);
         }
 
-        
+
         public static void UseResumableFunctions(this WebApplication app)
         {
 
@@ -25,7 +24,7 @@ namespace ResumableFunctions.AspNetService
             app.UseHangfireDashboard();
             app.MapRazorPages();
             app.UseStaticFiles();
-           
+
 
             app.UseRouting();
 

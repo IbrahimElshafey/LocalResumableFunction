@@ -1,5 +1,4 @@
 ﻿namespace ResumableFunctions.Handler.InOuts.Entities;
-
 public class ScanState : IEntity<int>
 {
     public int Id { get; set; }

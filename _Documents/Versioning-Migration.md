@@ -1,14 +1,21 @@
-# Publish new version to production
-* Side by side different versions that share the same DB
-	* Pushed call will have version
-	* RF will have version
-* Inter services waits and versions
-* External calls and versions
-* What about function class migration that is serialized
-* What happedn when resumable function database schema changed
-* What about HangfireDb
-* Old active resumable function instances?
-* How to receive calls while upgrading?
+# Side by Side Versions
+* When release a new version all active waits will be assigned to the old/current version
+* Now we have waits that may be handled by version that is old
+* When a call pushed to the system it found the matched waits and redirect them to the corresponding versions
+* Each version has a puplish date and deactivation date
+* Wait that created in range between puplish date and deactivation date will be handled by the version corresponding
+* The current version dectivation date is Date.Max
 
-* How to migrate to waits db new version when package changed
-* https://www.freecodecamp.org/news/how-to-version-a-rest-api/
+* We may use service fabric to host services
+* When to mark version as dead? 
+	* When no active waits exist.
+	* We mark service as dead for the purpose of clenaing it's resources from the hosted server
+
+# Publish new version to production
+* What about function class migration that is serialized?
+	* Because old version is kept and it handle it's old waits, there is no problem.
+* What happedn when resumable function database schema changed with a new version?
+	* We must provide migration script
+* What about HangfireDb schema
+	* We will search how the solve this
+* How to receive calls while upgrading? What about updating distributed system?

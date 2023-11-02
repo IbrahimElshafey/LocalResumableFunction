@@ -1,15 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Helpers;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 
 public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
 {
+
     public long Id { get; set; }
     public DateTime Created { get; set; }
     public string Name { get; set; }
@@ -50,12 +51,20 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     ///     not
     /// </summary>
     internal WaitEntity ParentWait { get; set; }
+    internal long? ParentWaitId { get; set; }
 
     internal List<WaitEntity> ChildWaits { get; set; } = new();
+
+    /// <summary>
+    /// Local variables in method at the wait point where current wait requested
+    /// It's the runner class serialized we can rename this to RunnerState
+    /// </summary>
     public object Locals { get; private set; }
+    /// <summary>
+    /// Local variables that is closed and used in match expression or any call
+    /// </summary>
     public object Closure { get; private set; }
 
-    internal long? ParentWaitId { get; set; }
     public string Path { get; set; }
 
     [NotMapped]
@@ -66,42 +75,50 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public int InCodeLine { get; set; }
     public string CallerName { get; set; }
 
-    //AfterMatch,CancelAction,GroupCheckFilter
+
+    //MethodWait.AfterMatch(Action<TInput, TOutput>)
+    //MethodWait.WhenCancel(Action cancelAction)
+    //WaitsGroup.MatchIf(Func<WaitsGroup, bool>)
+    //The method may update closure  
     protected object CallMethodByName(string methodFullName, params object[] parameters)
     {
         var parts = methodFullName.Split('#');
         var methodName = parts[1];
-        var className = parts[0];
-        object instance = CurrentFunction;
-        var classType = instance.GetType();
-        var methodInfo = classType.GetMethod(methodName, Flags());
+        var className = parts[0];//may be the RFContainer calss or closure class
 
-        if (methodInfo != null)
-            return methodInfo.Invoke(instance, parameters);
+        //is local method in current function class
+        object rfClassInstance = CurrentFunction;
+        var rfClassType = rfClassInstance.GetType();
+        var localMethodInfo = rfClassType.GetMethod(methodName, Flags());
+        if (localMethodInfo != null)
+            return localMethodInfo.Invoke(rfClassInstance, parameters);
 
-        var lambdasClass = classType.Assembly.GetType(className);
-        if (lambdasClass != null)
+        //is lambda method (closure exist)
+        var closureType = rfClassType.Assembly.GetType(className);
+        if (closureType != null)
         {
-            methodInfo = lambdasClass.GetMethod(methodName, Flags());
-            instance = GetClosureAsType(lambdasClass);
+            var closureMethodInfo = closureType.GetMethod(methodName, Flags());
+            var closureInstance = GetClosure(closureType);
+            SetClosureCaller(closureInstance);
 
-            SetClosureCaller(instance);
-            if (methodInfo != null)
+            if (closureMethodInfo != null)
             {
-                var result = methodInfo.Invoke(instance, parameters);
-                SetClosure(instance, true);
+                var result = closureMethodInfo.Invoke(closureInstance, parameters);
+                SetClosure(closureInstance, true);
                 return result;
             }
         }
 
         throw new NullReferenceException(
-            $"Can't find method [{methodName}] in class [{classType.Name}]");
+            $"Can't find method [{methodName}] in class [{rfClassType.Name}]");
     }
 
     private void SetClosureCaller(object closureInstance)
     {
         var closureType = closureInstance.GetType();
-        if (!closureType.Name.StartsWith(Constants.CompilerClosurePrefix)) return;
+        bool notClosureClass = !closureType.Name.StartsWith(Constants.CompilerClosurePrefix);
+        if (notClosureClass) return;
+
         var thisField = closureType
             .GetFields()
             .FirstOrDefault(x => x.Name.EndsWith(Constants.CompilerCallerSuffix) && x.FieldType == CurrentFunction.GetType());
@@ -109,6 +126,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         {
             thisField.SetValue(closureInstance, CurrentFunction);
         }
+        // may be multiple closures in same IAsyncEnumrable where clsoure C1 is field in closure C2 and so on.
         else
         {
             var parentClosuresFields = closureType
@@ -271,6 +289,9 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     }
 
 
+    /// <summary>
+    /// Including the current one
+    /// </summary>
     internal void ActionOnParentTree(Action<WaitEntity> action)
     {
         action(this);
@@ -278,12 +299,57 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             ParentWait.ActionOnParentTree(action);
     }
 
+    /// <summary>
+    /// Including the current one
+    /// </summary>
     internal void ActionOnChildrenTree(Action<WaitEntity> action)
     {
         action(this);
         if (ChildWaits != null)
             foreach (var item in ChildWaits)
                 item.ActionOnChildrenTree(action);
+    }
+
+    internal IEnumerable<WaitEntity> GetTreeItems()
+    {
+        yield return this;
+        if (ChildWaits != null)
+            foreach (var item in ChildWaits)
+            {
+                foreach (var item2 in item.GetTreeItems())
+                {
+                    yield return item2;
+                }
+            }
+    }
+
+    internal IEnumerable<WaitEntity> GetAllParent()
+    {
+        yield return this;
+        if (ParentWait != null)
+            ParentWait.GetAllParent();
+    }
+
+    internal void SetNodeType()
+    {
+        ActionOnChildrenTree(w => w.IsRootNode = w.ParentWait == null && w.ParentWaitId == null);
+    }
+
+    internal void SetClosureIfRoot()
+    {
+        var waitsWithoutClosure = new List<WaitEntity>();
+        object closure = null;
+        foreach (var wait in GetTreeItems())
+        {
+            if (wait.Closure == null)
+                waitsWithoutClosure.Add(wait);
+            else
+                closure = wait.Closure;
+        }
+        foreach (var wait in waitsWithoutClosure)
+        {
+            wait.Closure = closure;
+        }
     }
 
     internal MethodWaitEntity GetChildMethodWait(string name)
@@ -345,31 +411,13 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         if (declaringType.Name.StartsWith(Constants.CompilerClosurePrefix))
             SetClosure(del.Target, true);
 
-        //var runnerType = functionClassType
-        //    .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
-        //    .FirstOrDefault(type =>
-        //    type.Name.StartsWith($"<{CallerName}>") &&
-        //    typeof(IAsyncEnumerable<Wait>).IsAssignableFrom(type));
-        //if (declaringType.Name.StartsWith(Constants.CompilerClosurePrefix) && runnerType != null)
-        //{
-        //    var localsField =
-        //            runnerType.GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-        //            .FirstOrDefault(x => x.FieldType == method.DeclaringType);
-        //    if (localsField is null)
-        //        throw new Exception(
-        //            $"You use local variables in method [{CallerName}] for callback [{methodName}] " +
-        //            $"while you wait [{Name}], " +
-        //            $"The compiler didn't create the loclas as a field, " +
-        //            $"to force it to create a one use/list your local varaibles at the end of the resuamble function. somthing like:\n" +
-        //            $"Console.WriteLine(<your_local_var>);");
-        //}
         return $"{method.DeclaringType.FullName}#{method.Name}";
     }
-
+    internal string ClosureKey => $"{RequestedByFunctionId}-{StateBeforeWait}";
 
     protected static BindingFlags Flags() =>
         BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
-    protected object GetClosureAsType(Type closureClass)
+    protected object GetClosure(Type closureClass)
     {
         Closure = Closure is JObject jobject ? jobject.ToObject(closureClass) : Closure;
         return Closure ?? Activator.CreateInstance(closureClass);
@@ -377,7 +425,9 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     internal void SetClosure(object closure, bool deepCopy = false)
     {
-        if (deepCopy && closure != null)
+        if (closure == null) return;
+
+        if (deepCopy)
         {
             var closureString =
                 JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);

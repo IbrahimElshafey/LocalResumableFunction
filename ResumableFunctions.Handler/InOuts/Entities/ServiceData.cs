@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using MessagePack;
+﻿using MessagePack;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 public class ServiceData : IEntity<int>, IObjectWithLog, IEntityWithUpdate

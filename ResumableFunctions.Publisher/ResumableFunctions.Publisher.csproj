@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -7,10 +7,15 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>A library that allows you to publish methods to a resumable function service by decorating them with the [PublishMethod] attribute.</Description>
     <!--<Nullable>enable</Nullable>-->
-  </PropertyGroup>
+	 
+	</PropertyGroup>
+	<PropertyGroup>
+		<LangVersion>10.0</LangVersion>
+	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="AspectInjector" Version="2.8.2" />
-		<PackageReference Include="MessagePack" Version="2.5.124" />
+		<PackageReference Include="Ensure.That" Version="10.1.0" />
+		<PackageReference Include="MessagePack" Version="2.5.129" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />

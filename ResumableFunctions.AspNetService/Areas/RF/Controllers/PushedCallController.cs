@@ -10,7 +10,7 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
         private readonly ILogger<PushedCallController> _logger;
         private readonly IUiService _service;
 
-        public PushedCallController(ILogger<PushedCallController> logger,IUiService service)
+        public PushedCallController(ILogger<PushedCallController> logger, IUiService service)
         {
             _logger = logger;
             _service = service;

@@ -1,11 +1,11 @@
-﻿using System.ComponentModel;
-using System.Reflection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler.Core;
 
@@ -48,7 +48,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         var rootId = int.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
         var resumableFunction =
             rootId != firstMatchedMethodWait.Id ?
-            await _waitsRepository.GetRequestedByMethodInfo(rootId) :
+            await _waitsRepository.GetMethodInfoForRf(rootId) :
             firstMatchedMethodWait.RequestedByFunction.MethodInfo;
 
         try
@@ -151,6 +151,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     {
         try
         {
+            //todo: ResumableFunctionsContainer must be constructor less if you want to pass dependancies create a method `SetDependencies`
             var classInstance = (ResumableFunctionsContainer)Activator.CreateInstance(resumableFunction.DeclaringType);
 
             if (classInstance == null)
@@ -202,7 +203,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 x.WasFirst = true;
                 x.FunctionState = functionState;
             });
-            return firstWait;   
+            return firstWait;
         }
         catch (Exception ex)
         {

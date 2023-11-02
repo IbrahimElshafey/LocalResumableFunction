@@ -1,10 +1,10 @@
 ﻿using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.InOuts;
+using ResumableFunctions.Handler.InOuts.Entities;
 using System.Dynamic;
 using System.Reflection.Emit;
-using ResumableFunctions.Handler.Expressions;
-using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace TestSomething
 {
@@ -100,7 +100,7 @@ namespace TestSomething
             //var matchDynComp = matchDynamic.CompileFast();
             //var resu = matchDynComp.Invoke(dynamicPushedCall, instanceDynamic);
 
-          
+
             //MandatoryPartExpression(matchRewriter, dynamicPushedCall, pushedCall);
         }
 

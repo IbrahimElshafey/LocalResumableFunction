@@ -1,11 +1,13 @@
 ﻿# Validate attributes usage
-* [PushCallAttribute] must applied to method you want to wait
+* ResumableFunctionsContainer must be constructor less if you want to pass dependancies create a method `SetDependencies`
+* [PushCallAttribute] must applied to a method you want to wait
 * [PushCallAttribute] 
 	* method must have one input that is serializable
 	* MethodUrn must not be empty if attribute applied
 * Validate input output type serialization
-* Function URN name must not duplicate
+* Resumable Function URN name must not duplicate
 * Method URN name must not duplicate in same class
+* You don't need to set PushedCall attribute on interface method
 
 # Validate Wait Requests
 * You didn't set the `MatchExpression` for wait

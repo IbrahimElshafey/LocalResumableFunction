@@ -1,7 +1,7 @@
-﻿using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler;
-using ResumableFunctions.Handler.Testing;
+﻿using ResumableFunctions.Handler;
+using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.BaseUse;
+using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
@@ -55,7 +55,7 @@ namespace Tests
                     .MatchIf((input, output) => _dynamicProp > 1 && x == 10);
                 //.MatchIf((input, output) => _dynamicProp > 1);
                 await Task.Delay(100);
-                
+
                 Console.WriteLine(x);
             }
 

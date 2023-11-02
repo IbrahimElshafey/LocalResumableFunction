@@ -14,27 +14,33 @@ public class WaitsGroupEntity : WaitEntity
 
     internal override bool IsCompleted()
     {
-        var isFinished = false;
+        var completed = false;
         switch (WaitType)
         {
             case WaitType.GroupWaitAll:
-                isFinished = ChildWaits?.All(x => x.Status == WaitStatus.Completed) is true;
+                completed = ChildWaits?.All(x => x.Status == WaitStatus.Completed) is true;
                 break;
 
             case WaitType.GroupWaitFirst:
-                isFinished = ChildWaits?.Any(x => x.Status == WaitStatus.Completed) is true;
+                completed = ChildWaits?.Any(x => x.Status == WaitStatus.Completed) is true;
                 break;
 
             case WaitType.GroupWaitWithExpression when GroupMatchFuncName != null:
+                //todo:[closure update] GroupWaitWithExpression
                 var isCompleted = (bool)CallMethodByName(GroupMatchFuncName, ToWaitsGroup());
                 Status = isCompleted ? WaitStatus.Completed : Status;
                 return isCompleted;
 
             case WaitType.GroupWaitWithExpression:
-                isFinished = ChildWaits?.Any(x => x.Status == WaitStatus.Waiting) is false;
+                completed = ChildWaits?.Any(x => x.Status == WaitStatus.Waiting) is false;
                 break;
         }
-        return isFinished;
+        //if (completed)
+        //{
+        //    Closure = ChildWaits.Last().Closure;
+        //    Locals = ChildWaits.Last().Locals;
+        //}
+        return completed;
     }
 
     internal WaitsGroup ToWaitsGroup() => new WaitsGroup(this);

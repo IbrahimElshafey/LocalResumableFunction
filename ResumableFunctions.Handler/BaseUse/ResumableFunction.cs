@@ -1,11 +1,11 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
-using System.Reflection;
-using FastExpressionCompiler;
+﻿using FastExpressionCompiler;
 using MessagePack;
 using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ResumableFunctions.Handler;
 
@@ -22,6 +22,7 @@ public abstract partial class ResumableFunctionsContainer
     protected void Error(string message, Exception ex = null) => this.AddError(message, Helpers.StatusCodes.Custom, ex);
 
     [IgnoreMember][NotMapped] public List<LogRecord> Logs { get; set; } = new();
+    //[IgnoreMember][NotMapped] internal Dictionary<string, object> Closures { get; } = new();
 
     private bool _dependenciesAreSet;
     internal void InitializeDependencies(IServiceProvider serviceProvider)

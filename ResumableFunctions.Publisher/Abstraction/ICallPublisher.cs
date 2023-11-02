@@ -11,7 +11,7 @@ namespace ResumableFunctions.Publisher.Abstraction
             TInput input,
             TOutput output,
             string methodUrn,
-            string serviceName);
+            params string[] toServices);
         Task Publish(MethodCall MethodCall);
     }
 }

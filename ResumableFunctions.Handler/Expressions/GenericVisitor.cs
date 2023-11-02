@@ -74,7 +74,7 @@ public class GenericVisitor : ExpressionVisitor
               ex => visitCall((MethodCallExpression)ex)));
     }
 
-    internal void StopWhen(Func<Expression,bool> stopCondition)
+    internal void StopWhen(Func<Expression, bool> stopCondition)
     {
         _stopCondition = stopCondition;
     }

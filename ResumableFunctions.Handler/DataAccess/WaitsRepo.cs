@@ -1,11 +1,11 @@
-﻿using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Linq.Expressions;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal partial class WaitsRepo : IWaitsRepo
@@ -36,7 +36,32 @@ internal partial class WaitsRepo : IWaitsRepo
         _serviceRepo = serviceRepo;
     }
 
-    public async Task<List<CallServiceImapction>> GetAffectedServicesAndFunctions(string methodUrn)
+    public async Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn)
+    {
+        var methodGroup = await GetMethodGroup(methodUrn);
+        var affectedFunctions =
+            await
+            _context.MethodWaits
+            .Where(x =>
+                x.Status == WaitStatus.Waiting &&
+                x.MethodGroupToWaitId == methodGroup.Id &&
+                x.ServiceId == _settings.CurrentServiceId)
+            .Select(x => x.RequestedByFunctionId)
+            .Distinct()
+            .ToListAsync();
+        return affectedFunctions.Any() ?
+            new CallEffection
+            {
+                AffectedServiceId = _settings.CurrentServiceId,
+                AffectedServiceUrl = string.Empty,
+                AffectedServiceName = _settings.CurrentServiceName,
+                MethodGroupId = methodGroup.Id,
+                AffectedFunctionsIds = affectedFunctions,
+            }
+            : null;
+    }
+
+    public async Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn)
     {
         var methodGroup = await GetMethodGroup(methodUrn);
 
@@ -51,7 +76,7 @@ internal partial class WaitsRepo : IWaitsRepo
             methodWaitsQuery = methodWaitsQuery.Where(x => x.ServiceId == _settings.CurrentServiceId);
         }
 
-        var affectedFunctions =
+        var affectedFunctionsGroupedByService =
             await methodWaitsQuery
            .Select(x => new { x.RequestedByFunctionId, x.ServiceId })
            .Distinct()
@@ -60,13 +85,13 @@ internal partial class WaitsRepo : IWaitsRepo
 
         return (
               from service in await _context.ServicesData.Where(x => x.ParentId == -1).ToListAsync()
-              from affectedFunction in affectedFunctions
+              from affectedFunction in affectedFunctionsGroupedByService
               where service.Id == affectedFunction.Key
-              select new CallServiceImapction
+              select new CallEffection
               {
-                  ServiceId = service.Id,
-                  ServiceUrl = service.Url,
-                  ServiceName = service.AssemblyName,
+                  AffectedServiceId = service.Id,
+                  AffectedServiceUrl = service.Url,
+                  AffectedServiceName = service.AssemblyName,
                   MethodGroupId = methodGroup.Id,
                   AffectedFunctionsIds = affectedFunction.Select(x => x.RequestedByFunctionId).ToList(),
               }
@@ -132,9 +157,9 @@ internal partial class WaitsRepo : IWaitsRepo
 
     public async Task CancelSubWaits(long parentId, long pushedCallId)
     {
-        await CancelWaits(parentId);
+        await CancelChildWaits(parentId);
 
-        async Task CancelWaits(long pId)
+        async Task CancelChildWaits(long pId)
         {
             var waits = await _context
                 .Waits
@@ -145,22 +170,25 @@ internal partial class WaitsRepo : IWaitsRepo
             {
                 CancelWait(wait, pushedCallId);
                 if (wait.CanBeParent)
-                    await CancelWaits(wait.Id);
+                    await CancelChildWaits(wait.Id);
             }
         }
     }
 
     private void CancelWait(WaitEntity wait, long pushedCallId)
     {
+        if (wait.ParentWait != null)//todo:traverse up to get current function
+            wait.CurrentFunction = wait.ParentWait.CurrentFunction;
         wait.LoadUnmappedProps();
+        //todo:if method wait and closure changed then update root tree and all child
         wait.Cancel();
         wait.CallId = pushedCallId;
         if (wait is MethodWaitEntity { Name: Constants.TimeWaitName })
         {
             _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
-        if (wait.ParentWait != null)
-            wait.ParentWait.CurrentFunction = wait.CurrentFunction;
+        //if (wait.ParentWait != null)
+        //    wait.ParentWait.CurrentFunction = wait.CurrentFunction;
         //wait.FunctionState.AddLog($"Wait [{wait.Name}] canceled.");
     }
 
@@ -185,19 +213,25 @@ internal partial class WaitsRepo : IWaitsRepo
               .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, status => WaitStatus.Canceled));
     }
 
-    public async Task CancelFunctionWaits(int requestedByFunctionId, int functionStateId)
+    /// <summary>
+    /// Used by ReplayWaitProcessor.GetWaitToReplay
+    /// </summary>
+    /// <returns></returns>
+    public async Task CancelFunctionPendingWaits(int requestedByFunctionId, int functionStateId)
     {
-        var functionInstanceWaits =
+        var pendingRootWaits =
             await _context.Waits
             .OrderByDescending(x => x.Id)
             .Where(x =>
                 x.RequestedByFunctionId == requestedByFunctionId &&
-                x.FunctionStateId == functionStateId)
+                x.FunctionStateId == functionStateId &&
+                x.Status == WaitStatus.Waiting &&
+                x.IsRootNode)
             .ToListAsync();
 
-        foreach (var wait in functionInstanceWaits)
+        foreach (var wait in pendingRootWaits)
         {
-            wait.Cancel();
+            CancelWait(wait, -1);
             await CancelSubWaits(wait.Id, -1);
         }
     }

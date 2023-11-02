@@ -1,8 +1,8 @@
-﻿using ResumableFunctions.Handler.Attributes;
-using ResumableFunctions.Handler;
-using System.Reflection.Emit;
-using System.Linq.Expressions;
+﻿using ResumableFunctions.Handler;
+using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Linq.Expressions;
+using System.Reflection.Emit;
 
 namespace Tests
 {
@@ -324,7 +324,8 @@ namespace Tests
                 };
                 return new MethodWaitEntity<MethodInput, MethodOutput>(TestMethodTwo)
                 {
-                    CurrentFunction = this
+                    CurrentFunction = this,
+                    IsRootNode = true,
                 }
                  .MatchIf(matchExpression)
                  .AfterMatch((input, output) => InstanceId = output.TaskId);
@@ -335,7 +336,8 @@ namespace Tests
             {
                 return new MethodWaitEntity<MethodInput, MethodOutput>(TestMethodTwo)
                 {
-                    CurrentFunction = this
+                    CurrentFunction = this,
+                    IsRootNode = true,
                 }
                 .MatchIf(GetMatchExprssion(matchExpressionType))
                 .AfterMatch((input, output) => InstanceId = output.TaskId);

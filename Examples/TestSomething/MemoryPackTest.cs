@@ -16,6 +16,6 @@ public class MemoryPackTest
         var bin = MemoryPackSerializer.Serialize(myObject);
         var val = MemoryPackSerializer.Deserialize<MyObject<int>>(bin);
         var newObj = new MyObject<int>();
-        var val2= MemoryPackSerializer.Deserialize(bin,ref newObj);
+        var val2 = MemoryPackSerializer.Deserialize(bin, ref newObj);
     }
 }
