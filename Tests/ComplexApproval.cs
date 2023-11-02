@@ -118,7 +118,7 @@ public class ComplexApproval
         private Wait AllCommitteeApproveTopic(int membersTopicIndex)
         {
             var waits = new Wait[3];
-            int x = 10;
+            int sharedCounter = 10;
             MemberRole currentRole = MemberRole.None;
             for (var memberIndex = 0; memberIndex < CommitteeMembersCount; memberIndex++)
             {
@@ -134,15 +134,21 @@ public class ComplexApproval
                     //.NothingAfterMatch()
                     .AfterMatch((input, output) =>
                     {
-                        x += 10;
-                        Console.WriteLine(x);
-                        Console.WriteLine(input);
-                        Console.WriteLine(output);
+                        sharedCounter += 10;
+                        if (sharedCounter < 10)
+                            throw new Exception("Local var `sharedCounter` must be >= 10.");
                     })
                     ;
             }
             Console.WriteLine(currentRole);
-            return Wait($"Wait All Committee to Approve Topic {membersTopicIndex}", waits);
+            return
+                Wait($"Wait All Committee to Approve Topic {membersTopicIndex}", waits)
+                .MatchIf((_) =>
+                {
+                    bool result = sharedCounter == 40;
+                    if (result) sharedCounter += 5;
+                    return result;
+                });
         }
 
 
