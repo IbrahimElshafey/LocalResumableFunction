@@ -1,6 +1,7 @@
 ﻿using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler;
@@ -25,7 +26,10 @@ public abstract partial class ResumableFunctionsContainer
         }.ToWait();
     }
 
-    protected WaitsGroup Wait(string name, params Func<IAsyncEnumerable<Wait>>[] subFunctions)
+    protected WaitsGroup Wait(string name,
+        Func<IAsyncEnumerable<Wait>>[] subFunctions,
+        [CallerLineNumber] int inCodeLine = 0,
+        [CallerMemberName] string callerName = "")
     {
         var functionGroup = new WaitsGroupEntity
         {
@@ -33,6 +37,8 @@ public abstract partial class ResumableFunctionsContainer
             Name = name,
             WaitType = WaitType.GroupWaitAll,
             CurrentFunction = this,
+            CallerName = callerName,
+            InCodeLine = inCodeLine,
         };
         for (var index = 0; index < subFunctions.Length; index++)
         {

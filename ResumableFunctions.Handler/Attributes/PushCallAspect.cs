@@ -8,8 +8,6 @@ using System.Reflection;
 
 namespace ResumableFunctions.Handler.Attributes
 {
-
-
     [Aspect(Scope.PerInstance, Factory = typeof(HangfireActivator))]
     public class PushCallAspect
     {

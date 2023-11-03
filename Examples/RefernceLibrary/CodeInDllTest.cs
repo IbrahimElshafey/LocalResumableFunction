@@ -13,12 +13,14 @@ namespace ReferenceLibrary
         {
             yield return Wait(
                 "Wait first",
+                new[]
+                {
+                    Wait<string, string>(SayHello, "Wait say hello")
+                    .AfterMatch((userName, helloMsg) => UserName = userName),
 
-                Wait<string, string>(SayHello, "Wait say hello")
-                .AfterMatch((userName, helloMsg) => UserName = userName),
-
-                 Wait<string, string>(Method123, "Wait Method123")
-                .AfterMatch((input, output) => UserName = output)
+                    Wait<string, string>(Method123, "Wait Method123")
+                    .AfterMatch((input, output) => UserName = output)
+                }
                 )
                 .MatchAny();
 

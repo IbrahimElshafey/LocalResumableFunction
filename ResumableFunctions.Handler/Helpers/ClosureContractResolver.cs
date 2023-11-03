@@ -14,7 +14,11 @@ namespace ResumableFunctions.Handler.Helpers
         {
             var props = type
                .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-               .Where(member => member is FieldInfo && !member.Name.StartsWith("<>"))
+               .Where(member =>
+                        member is FieldInfo &&
+                        !member.Name.StartsWith("<>") &&
+                        !member.Name.StartsWith("<GroupMatchFuncName>")
+                        )
                .Select(parameter => base.CreateProperty(parameter, memberSerialization))
                .ToList();
             props.ForEach(p => { p.Writable = true; p.Readable = true; });

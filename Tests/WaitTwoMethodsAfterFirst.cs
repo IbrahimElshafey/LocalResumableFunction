@@ -6,10 +6,10 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
-    //todo: update this test
+
     public class WaitTwoMethodsAfterFirst
     {
-       
+
         [Fact]
         public async Task WaitTwoMethodsAfterFirst_Test()
         {
@@ -30,7 +30,7 @@ namespace Tests
             var waits = await test.GetWaits();
             Assert.Equal(4, waits.Count);
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Completed).Count());
-            Assert.Equal(2, waits.Where(x => x.IsRootNode).Count());
+            Assert.Equal(2, waits.Where(x => x.IsRoot).Count());
 
             wms = new Test();
             wms.Method4("1");
@@ -44,7 +44,7 @@ namespace Tests
             waits = await test.GetWaits();
             Assert.Equal(8, waits.Count);
             Assert.Equal(8, waits.Where(x => x.Status == WaitStatus.Completed).Count());
-            Assert.Equal(4, waits.Where(x => x.IsRootNode).Count());
+            Assert.Equal(4, waits.Where(x => x.IsRoot).Count());
         }
 
         public class Test : ResumableFunctionsContainer
@@ -56,8 +56,9 @@ namespace Tests
             {
                 yield return Wait<string, string>(Method4, "Method 4");
                 yield return Wait("Two Methods After First",
-                    Wait<string, string>(Method5, "Method 5").MatchAny(),
-                    Wait<string, string>(Method6, "Method 6").MatchAny()
+                    new[] {
+                        Wait<string, string>(Method5, "Method 5").MatchAny(),
+                        Wait<string, string>(Method6, "Method 6").MatchAny()}
                 );
                 await Task.Delay(100);
             }

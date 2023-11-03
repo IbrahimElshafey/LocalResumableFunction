@@ -28,12 +28,12 @@ namespace ResumableFunctions.Handler.Testing
         private readonly TestSettings _settings;
         private readonly string _testName;
         private IDistributedLockProvider _lockProvider = new WaitHandleDistributedSynchronizationProvider();
-        public TestShell(string testName, params Type[] types)
+        public TestShell(string testName, params Type[] scanTypes)
         {
             _testName = testName;
             _settings = new TestSettings(testName);
             _builder = Host.CreateApplicationBuilder();
-            _types = types;
+            _types = scanTypes;
         }
 
         public async Task DeleteDb(string dbName)
@@ -108,6 +108,8 @@ namespace ResumableFunctions.Handler.Testing
                     serviceData.AddError($"Can't register resumable function [{resumableFunctionInfo.GetFullName()}].", StatusCodes.MethodValidation, null);
             }
         }
+
+        //todo:add root waits count, completed waits count, completed root waits count,
 
         public async Task<string> RoundCheck(
             int expectedPushedCallsCount,
@@ -273,6 +275,19 @@ namespace ResumableFunctions.Handler.Testing
             CurrentApp?.Dispose();
         }
 
-
+        internal async Task<List<WaitEntity>> GetWaitsCreateAfterCall(long callId)
+        {
+            var callIdCreated = await Context
+                .PushedCalls
+                .Where(x => x.Id == callId)
+                .AsNoTracking()
+                .Select(x => x.Created)
+                .FirstAsync();
+            return await Context
+                .Waits
+                .Where(x => x.Created > callIdCreated && x.Status == WaitStatus.Waiting)
+                .AsNoTracking()
+                .ToListAsync();
+        }
     }
 }

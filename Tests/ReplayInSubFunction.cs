@@ -47,7 +47,7 @@ public class ReplayInSubFunction
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return Wait<string, string>(Method6, "M6");
-            yield return Wait("Wait Two Paths", PathOneFunction, PathTwoFunction);//wait two sub functions
+            yield return Wait("Wait Two Paths", new[] { PathOneFunction, PathTwoFunction });//wait two sub functions
             yield return Wait<string, string>(Method5, "M5").MatchAny();
         }
         public int Counter1 { get; set; }
@@ -56,7 +56,7 @@ public class ReplayInSubFunction
         [SubResumableFunction("PathOneFunction")]
         public async IAsyncEnumerable<Wait> PathOneFunction()
         {
-            int x = 0;
+            var x = 0;
             yield return
                    Wait<string, string>(Method1, "M1")
                    .MatchAny()
@@ -89,7 +89,7 @@ public class ReplayInSubFunction
         [SubResumableFunction("PathTwoFunction")]
         public async IAsyncEnumerable<Wait> PathTwoFunction()
         {
-            int x = 100;
+            var x = 100;
             yield return
                   Wait<string, string>(Method3, "M3")
                   .MatchAny()
@@ -109,12 +109,13 @@ public class ReplayInSubFunction
             Counter2 += 3;
             x += 20;
             if (Counter2 < 16)
-                yield return GoBackTo<string, string>("M4", (input, output) => input == "Back");
+                yield return GoBackTo<string, string>("M4", (input, _) => input == "Back");
 
             await Task.Delay(100);
         }
 
-        [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
+        [PushCall("Method1")]
+        public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
         [PushCall("Method3")] public string Method3(string input) => input + "M3";
         [PushCall("Method4")] public string Method4(string input) => input + "M4";

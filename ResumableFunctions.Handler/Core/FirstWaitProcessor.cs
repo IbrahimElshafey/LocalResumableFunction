@@ -156,7 +156,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
             if (classInstance == null)
             {
-
                 var errorMsg = $"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]";
                 await _serviceRepo.AddErrorLog(null, errorMsg, StatusCodes.FirstWait);
 
@@ -180,7 +179,10 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
             if (firstWait == null)
             {
-                await _serviceRepo.AddErrorLog(null, $"Can't get first wait in function [{resumableFunction.GetFullName()}].", StatusCodes.FirstWait);
+                await _serviceRepo.AddErrorLog(
+                    null, 
+                    $"Can't get first wait in function [{resumableFunction.GetFullName()}].",
+                    StatusCodes.FirstWait);
                 return null;
             }
 

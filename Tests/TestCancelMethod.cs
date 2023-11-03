@@ -20,35 +20,45 @@ namespace Tests
             instance.Method4("44");
             Assert.Empty(await test.RoundCheck(2, 5, 1));
 
-            instance = (await test.GetInstances<Test>()).FirstOrDefault()?.StateObject as Test;
-            Assert.Equal(2, instance?.Counter);
         }
 
         public class Test : ResumableFunctionsContainer
         {
-            public int Counter { get; set; }
+            public int Counter { get; set; } = 10;
             [ResumableFunctionEntryPoint("TestCancelMethod")]
             public async IAsyncEnumerable<Wait> TestCancelMethod()
             {
                 var dateTime = DateTime.Now;
-                int x = 2;
+                int localCounter = 2;
                 yield return Wait("Wait three methods",
+                    new[]
+                    {
                     Wait<string, string>(Method1, "Method 1")
                         .MatchIf((_, _) => dateTime < new DateTime(2025, 1, 1))
-                        .WhenCancel(() => Counter += x - 1)//counter=1
+                        .WhenCancel(() =>
+                            {
+                            ++Counter;
+                            localCounter++;
+                            })
                         .AfterMatch(StaticAfterMatch),
                     Wait<string, string>(Method2, "Method 2")
                         .MatchAny()
                         .WhenCancel(() =>
                         {
                             Console.WriteLine("Method Two Cancel");
-                            Counter += x;//counter=2
+                            ++Counter;
+                            ++localCounter;
                         })
                         ,
                     Wait<string, string>(Method3, "Method 3")
-                        .WhenCancel(StaticIncrementCounter)
+                        .WhenCancel(IncrementCounter)}
                     )
                 .MatchAny();
+
+                if (Counter != 12)
+                    throw new Exception("Updating state in cancel callback failed.");
+                if (localCounter != 3)
+                    throw new Exception("Updating local counter in cancel callback failed.");
 
                 var ran = new Random(10).Next(10, 50);
                 yield return
@@ -57,9 +67,12 @@ namespace Tests
                     .AfterMatch((_, _) =>
                     {
                         Console.WriteLine("After match");
-                        if (x != 2)
+                        if (localCounter != 3)
                             throw new Exception("Closure continuation not restored.");
+                        localCounter++;
                     });
+                if (localCounter != 4)
+                    throw new Exception("Closure update in cancel not work.");
                 await Task.Delay(100);
                 Console.WriteLine("Three method done");
             }

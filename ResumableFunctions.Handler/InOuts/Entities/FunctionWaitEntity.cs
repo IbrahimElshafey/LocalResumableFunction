@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using ResumableFunctions.Handler.Attributes;
+using ResumableFunctions.Handler.BaseUse;
+using ResumableFunctions.Handler.Helpers;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
@@ -16,4 +19,20 @@ public sealed class FunctionWaitEntity : WaitEntity
 
     internal override bool IsCompleted() => ChildWaits.Any(x => x.Status == WaitStatus.Waiting) is false;
 
+    internal override void OnAddWait()
+    {
+        IsRoot = ParentWait == null && ParentWaitId == null;
+        base.OnAddWait();
+    }
+    internal override bool ValidateWaitRequest()
+    {
+        var hasSubFunctionAttribute = FunctionInfo.GetCustomAttributes<SubResumableFunctionAttribute>().Any();
+        if (!hasSubFunctionAttribute)
+            FunctionState.AddLog(
+                  $"You didn't set attribute [{nameof(SubResumableFunctionAttribute)}] for method [{FunctionInfo.GetFullName()}]," +
+                  $"when you try to wait [{Name}].",
+                  LogType.Error,
+                  StatusCodes.WaitValidation);
+        return base.ValidateWaitRequest();
+    }
 }

@@ -8,13 +8,20 @@ using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using System.Linq.CompilerServices.TypeSystem;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal sealed class WaitsDataContext : DbContext
 {
     private readonly ILogger<WaitsDataContext> _logger;
     private readonly IResumableFunctionsSettings _settings;
-
+    private readonly ValueComparer<object> _closureComparer = new ValueComparer<object>(
+           (o1, o2) =>
+               JsonConvert.SerializeObject(o1, ClosureContractResolver.Settings) == JsonConvert.SerializeObject(o2, ClosureContractResolver.Settings),
+           oToHash =>
+               oToHash == null ? 0 : JsonConvert.SerializeObject(oToHash, ClosureContractResolver.Settings).GetHashCode(),
+           oToSnapShot =>
+               JsonConvert.DeserializeObject<object>(JsonConvert.SerializeObject(oToSnapShot, ClosureContractResolver.Settings)));
     public WaitsDataContext(
         ILogger<WaitsDataContext> logger,
         IResumableFunctionsSettings settings,
@@ -34,7 +41,7 @@ internal sealed class WaitsDataContext : DbContext
         }
     }
 
-    public DbSet<ClosureData> Closures { get; set; }
+    public DbSet<PrivateData> PrivateData { get; set; }
     public DbSet<ScanState> ScanStates { get; set; }
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
 
@@ -64,28 +71,13 @@ internal sealed class WaitsDataContext : DbContext
         ConfigureWaitProcessingRecords(modelBuilder);
         ConfigureServiceData(modelBuilder.Entity<ServiceData>());
         ConfigureWaits(modelBuilder);
-        ConfigureClosuresData(modelBuilder.Entity<ClosureData>());
+        ConfigureRuntimeClosures(modelBuilder.Entity<PrivateData>());
         ConfigureMethodWaitTemplate(modelBuilder);
         ConfigurConcurrencyToken(modelBuilder);
         ConfigurSoftDeleteFilter(modelBuilder);
         base.OnModelCreating(modelBuilder);
     }
 
-    private void ConfigureClosuresData(EntityTypeBuilder<ClosureData> closureTable)
-    {
-        closureTable.HasKey(x => x.Id);
-        closureTable.Property(x => x.Id).ValueGeneratedNever();
-        closureTable
-            .Property(x => x.Locals)
-            .HasConversion(
-                x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
-                y => JsonConvert.DeserializeObject(y));
-        closureTable
-            .Property(x => x.Closure)
-            .HasConversion(
-            x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
-            y => JsonConvert.DeserializeObject(y));
-    }
 
     private void ConfigurSoftDeleteFilter(ModelBuilder modelBuilder)
     {
@@ -118,6 +110,31 @@ internal sealed class WaitsDataContext : DbContext
         waitProcessingRecordBuilder.HasIndex(x => x.PushedCallId, "WaitForPushedCall_Idx");
     }
 
+    private void ConfigureRuntimeClosures(EntityTypeBuilder<PrivateData> closureTable)
+    {
+        closureTable.HasKey(x => x.Id);
+        closureTable.Property(x => x.Id).ValueGeneratedNever();
+
+        closureTable
+            .Property(x => x.Value)
+            .HasConversion(
+            x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
+            y => JsonConvert.DeserializeObject(y));
+        closureTable
+            .Property(x => x.Value).Metadata.SetValueComparer(_closureComparer);
+
+        closureTable
+           .HasMany(x => x.ClosureLinkedWaits)
+           .WithOne(wait => wait.RuntimeClosure)
+           .HasForeignKey(x => x.RuntimeClosureId)
+           .HasConstraintName("FK_RuntimeClosure_Waits");
+
+        closureTable
+         .HasMany(x => x.LocalsLinkedWaits)
+         .WithOne(wait => wait.Locals)
+         .HasForeignKey(x => x.LocalsId)
+         .HasConstraintName("FK_LocalVars_Waits");
+    }
     private void ConfigureWaits(ModelBuilder modelBuilder)
     {
         var waitBuilder = modelBuilder.Entity<WaitEntity>();
@@ -132,16 +149,22 @@ internal sealed class WaitsDataContext : DbContext
             .HasFilter($"{nameof(WaitEntity.Status)} = {(int)WaitStatus.Waiting}")
             .HasDatabaseName("Index_ActiveWaits");
 
+        //waitBuilder
+        //    .Property(x => x.Locals)
+        //    .HasConversion(
+        //        x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
+        //        y => JsonConvert.DeserializeObject(y));
+        //waitBuilder
+        //    .Property(x => x.Locals).Metadata.SetValueComparer(_closureComparer);
+
         waitBuilder
-            .Property(x => x.Locals)
-            .HasConversion(
-                x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
-                y => JsonConvert.DeserializeObject(y));
-        waitBuilder
-            .Property(x => x.Closure)
+            .Property(x => x.ImmutableClosure)
             .HasConversion(
             x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
             y => JsonConvert.DeserializeObject(y));
+        waitBuilder
+           .Property(x => x.ImmutableClosure).Metadata.SetValueComparer(_closureComparer);
+
 
         var methodWaitBuilder = modelBuilder.Entity<MethodWaitEntity>();
         methodWaitBuilder
@@ -150,6 +173,7 @@ internal sealed class WaitsDataContext : DbContext
         methodWaitBuilder
           .Property(x => x.CallId)
           .HasColumnName(nameof(MethodWaitEntity.CallId));
+        
 
 
         modelBuilder.Entity<WaitsGroupEntity>()
@@ -227,11 +251,6 @@ internal sealed class WaitsDataContext : DbContext
             .WithOne(wait => wait.FunctionState)
             .HasForeignKey(x => x.FunctionStateId)
             .HasConstraintName("FK_WaitsForFunctionState");
-        //stateTypeBuilder
-        //    .Property(x => x.Closures)
-        //    .HasConversion(
-        //    x => JsonConvert.SerializeObject(x),
-        //    y => JsonConvert.DeserializeObject<Closures>(y));
     }
 
 
@@ -264,14 +283,9 @@ internal sealed class WaitsDataContext : DbContext
             HandleSoftDelete(entry);
             ExcludeFalseAddEntries(entry);
             OnSaveEntity(entry);
-            //if (entry.Entity is Wait wait)
-            //    if (wait.FunctionState == null && wait?.ParentWait?.FunctionState != null)
-            //    {
-            //        wait.FunctionState = wait.ParentWait.FunctionState;
-            //        wait.FunctionStateId = wait.ParentWait.FunctionStateId;
-            //    }
         }
     }
+
 
     private void SetConcurrencyToken(EntityEntry entityEntry)
     {
@@ -334,6 +348,7 @@ internal sealed class WaitsDataContext : DbContext
 
         string GetWaitPath(WaitEntity wait)
         {
+            //:{wait.WaitType.ToString()[0]}
             var path = $"/{wait.Id}";
             while (wait?.ParentWait != null)
             {
@@ -377,7 +392,7 @@ internal sealed class WaitsDataContext : DbContext
 
     private void NeverUpdateFirstWait(EntityEntry entityEntry)
     {
-        if (entityEntry.Entity is not WaitEntity { IsFirst: true, IsRootNode: true, IsDeleted: false } wait) return;
+        if (entityEntry.Entity is not WaitEntity { IsFirst: true, IsRoot: true, IsDeleted: false } wait) return;
 
         if (entityEntry.State == EntityState.Modified)
             entityEntry.State = EntityState.Unchanged;
@@ -420,7 +435,8 @@ internal sealed class WaitsDataContext : DbContext
 
     private void ExcludeFalseAddEntries(EntityEntry entry)
     {
-        if (entry.State == EntityState.Added && entry.IsKeySet)
+        var isGuidKey = entry.Entity is IEntity<Guid>;
+        if (entry.State == EntityState.Added && entry.IsKeySet && !isGuidKey)
             entry.State = EntityState.Unchanged;
     }
 }

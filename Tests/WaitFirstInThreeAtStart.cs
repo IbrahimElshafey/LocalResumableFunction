@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
-    //todo: update this test
+
     public class WaitFirstInThreeAtStart
     {
         [Fact]
@@ -28,7 +28,7 @@ namespace Tests
             Assert.Equal(4, waits.Count);
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
-            Assert.Equal(1, waits.Count(x => x.IsRootNode));
+            Assert.Equal(1, waits.Count(x => x.IsRoot));
             var instance = await testShell.GetFirstInstance<Test>();
             Assert.Equal(1, instance.Counter);
             Assert.Equal(2, instance.CancelCounter);
@@ -43,7 +43,7 @@ namespace Tests
             Assert.Equal(8, waits.Count);
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Completed).Count());
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Canceled).Count());
-            Assert.Equal(2, waits.Where(x => x.IsRootNode).Count());
+            Assert.Equal(2, waits.Where(x => x.IsRoot).Count());
         }
         public class Test : ResumableFunctionsContainer
         {
@@ -55,22 +55,28 @@ namespace Tests
             {
                 int cancelCounter = 10;
                 int afterMatchCounter = 10;
+                int sharedCounter = 10;
                 yield return Wait("Wait First In Three",
-                    Wait<string, string>(Method7, "Method 7")
-                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
-                    .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
-                    Wait<string, string>(Method8, "Method 8")
-                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
-                    .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
-                    Wait<string, string>(Method9, "Method 9")
-                    .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
-                    .WhenCancel(() => { CancelCounter++; cancelCounter++; })
+                    new Wait[]
+                    {
+                        Wait<string, string>(Method7, "Method 7")
+                            .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
+                            .WhenCancel(() => { CancelCounter++; cancelCounter++;sharedCounter++; }),
+                        Wait<string, string>(Method8, "Method 8")
+                            .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
+                            .WhenCancel(() => { CancelCounter++; cancelCounter++;sharedCounter++; }),
+                        Wait<string, string>(Method9, "Method 9")
+                            .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
+                            .WhenCancel(() => { CancelCounter++; cancelCounter++;sharedCounter++; }),
+                    }
                 ).MatchAny();
 
                 if (afterMatchCounter != 11)
                     throw new Exception("Local variable not saved in match in wait first group.");
                 if (cancelCounter != 12)
                     throw new Exception("Local variable not saved in cancel in wait first group.");
+                if (sharedCounter != 13)
+                    throw new Exception("Local variable `sharedCounter` not as expected in wait first group.");
                 await Task.Delay(100);
                 Console.WriteLine("WaitFirstInThree");
             }

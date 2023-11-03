@@ -4,7 +4,7 @@
 ///     Start point for a resumable function
 /// </summary>
 /// 
-[AttributeUsage(AttributeTargets.Method)]
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
 
 public sealed class ResumableFunctionEntryPointAttribute : Attribute, ITrackingIdentifier
 {

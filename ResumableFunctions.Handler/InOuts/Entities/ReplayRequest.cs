@@ -15,5 +15,4 @@ public class ReplayRequest : WaitEntity
     {
         return $"[{nameof(ReplayType)}:{ReplayType}],[{nameof(Name)}:{Name}]";
     }
-
 }

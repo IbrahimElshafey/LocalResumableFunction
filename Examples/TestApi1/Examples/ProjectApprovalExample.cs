@@ -138,12 +138,15 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
         WriteMessage("WaitTwoManagers started");
         yield return Wait(
             "Wait two methods",
+            new[]
+            {
             Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerOneApproval = output),
             Wait<ApprovalDecision, bool>(ManagerTwoApproveProject, "Manager Two Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerTwoApproval = output)
+            }
         ).MatchAll();
         WriteMessage("Two waits matched");
     }
@@ -155,12 +158,15 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
         WriteMessage("First started");
         yield return Wait(
             "Wait first in two",
-            Wait<Project, bool>(ProjectSubmitted, "Project Submitted")
-                .MatchIf((input, output) => output == true)
-                .AfterMatch((input, output) => CurrentProject = input),
-            Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .AfterMatch((input, output) => ManagerOneApproval = output)
+            new Wait[]
+            {
+                Wait<Project, bool>(ProjectSubmitted, "Project Submitted")
+                    .MatchIf((input, output) => output == true)
+                    .AfterMatch((input, output) => CurrentProject = input),
+                Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                    .AfterMatch((input, output) => ManagerOneApproval = output)
+            }
         ).MatchAny();
         WriteMessage("One of two waits matched");
     }

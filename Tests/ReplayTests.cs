@@ -225,15 +225,21 @@ public class ReplayTests
     public class GoAfterFunction : ResumableFunctionsContainer
     {
         public int Counter { get; set; }
+
         [ResumableFunctionEntryPoint("GoAfterFunction")]
         public async IAsyncEnumerable<Wait> Test()
         {
+            int localCounter = 10;
             yield return
-                Wait<string, string>(Method1, "M1");
+                Wait<string, string>(Method1, "M1")
+                .AfterMatch((_, _) => localCounter += 10);
 
             Counter++;
             if (Counter < 2)
                 yield return GoBackAfter("M1");
+
+            if (localCounter != 20)
+                throw new Exception("Closure restore in replay problem.");
             await Task.Delay(100);
         }
 
@@ -300,18 +306,25 @@ public class ReplayTests
         [ResumableFunctionEntryPoint("ReplayGoToFunction")]
         public async IAsyncEnumerable<Wait> Test()
         {
+            var localCounter = 10;
             yield return
-                Wait<string, string>(Method1, "M1");
+                Wait<string, string>(Method1, "M1")
+                .AfterMatch((_, _) => localCounter += 10);
 
             Counter += 10;
             yield return
-                Wait<string, string>(Method2, "M2").MatchAny();
+                Wait<string, string>(Method2, "M2")
+                .AfterMatch((_, _) => localCounter += 10)
+                .MatchAny();
 
             Counter += 3;
+            localCounter += 10;
 
             if (Counter < 16)
                 yield return GoBackTo("M2");
 
+            if (localCounter != 60)
+                throw new Exception("Locals continuation problem.");
             await Task.Delay(100);
         }
 

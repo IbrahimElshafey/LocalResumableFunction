@@ -57,8 +57,11 @@ public class SubFunctionsLevelsTest
         [ResumableFunctionEntryPoint("FunctionTwoLevels")]
         public async IAsyncEnumerable<Wait> Test()
         {
+            int x = 100;
             yield return Wait("Wait sub function1", SubFunction1);
             await Task.Delay(100);
+            if (x != 100)
+                throw new Exception("Locals continuation problem.");
         }
 
         [SubResumableFunction("SubFunction1")]
@@ -71,6 +74,7 @@ public class SubFunctionsLevelsTest
                 {
                     if (x != 10)
                         throw new Exception("Closure in sub function problem.");
+                    x += 10;
                 });
 
             x += 10;
@@ -78,7 +82,7 @@ public class SubFunctionsLevelsTest
                 .MatchAny()
                 .AfterMatch((_, _) =>
                 {
-                    if (x != 20)
+                    if (x != 30)
                         throw new Exception("Closure restore in sub function problem.");
                 });
             yield return Wait("Wait sub function2", SubFunction2);
@@ -87,14 +91,23 @@ public class SubFunctionsLevelsTest
         [SubResumableFunction("SubFunction2")]
         public async IAsyncEnumerable<Wait> SubFunction2()
         {
+            int x = 100;
             yield return Wait<string, string>(Method2, "M2").MatchAny();
+            if (x != 100)
+                throw new Exception("Locals continuation problem.");
+            x += 100;
             yield return Wait("Wait sub function3", SubFunction3);
+            if (x != 200)
+                throw new Exception("Locals continuation problem.");
         }
 
         [SubResumableFunction("SubFunction3")]
         public async IAsyncEnumerable<Wait> SubFunction3()
         {
+            int x = 1000;
             yield return Wait<string, string>(Method3, "M2").MatchAny();
+            if (x != 1000)
+                throw new Exception("Locals continuation problem.");
         }
 
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";

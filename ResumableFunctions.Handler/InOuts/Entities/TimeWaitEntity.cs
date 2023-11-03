@@ -6,10 +6,7 @@ namespace ResumableFunctions.Handler.InOuts.Entities;
 public class TimeWaitEntity : WaitEntity
 {
     internal readonly MethodWaitEntity<TimeWaitInput, bool> _timeMethodWait;
-    internal TimeWaitEntity()
-    {
 
-    }
     internal TimeWaitEntity(ResumableFunctionsContainer currentFunction)
     {
         var timeWaitMethod = typeof(LocalRegisteredMethods)
@@ -30,13 +27,13 @@ public class TimeWaitEntity : WaitEntity
             _timeMethodWait.CurrentFunction = CurrentFunction;
             _timeMethodWait.IsFirst = IsFirst;
             _timeMethodWait.WasFirst = WasFirst;
-            _timeMethodWait.IsRootNode = IsRootNode;
+            _timeMethodWait.IsRoot = IsRoot;
             _timeMethodWait.ParentWait = ParentWait;
             _timeMethodWait.FunctionState = FunctionState;
             _timeMethodWait.RequestedByFunctionId = RequestedByFunctionId;
             _timeMethodWait.StateBeforeWait = StateBeforeWait;
             _timeMethodWait.StateAfterWait = StateAfterWait;
-            _timeMethodWait.SetLocals(Locals);
+            _timeMethodWait.Locals = Locals;
             _timeMethodWait.CallerName = CallerName;
             _timeMethodWait.InCodeLine = InCodeLine;
             _timeMethodWait.ExtraData =
@@ -45,7 +42,7 @@ public class TimeWaitEntity : WaitEntity
                     TimeToWait = TimeToWait,
                     UniqueMatchId = UniqueMatchId,
                 };
-            _timeMethodWait.MatchIf((timeWaitInput, result) => timeWaitInput.TimeMatchId == "");
+            _timeMethodWait.MatchIf((timeWaitInput, result) => timeWaitInput.TimeMatchId == string.Empty);
             return _timeMethodWait;
         }
     }

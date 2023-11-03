@@ -1,24 +1,8 @@
 ﻿# Todo
-* Locals and Closures should be saved for root wait only
-	* Must be shared for all waits under same root
-* We SetClosure in places
-	* Keep that there may be a looping
-	* MatchIf Expression set [No Update WaitState NewInMemory]
-	* Validate Method when requested for => AfterMatch,WhenCancel,Group.MatchIf [No Update WaitState NewInMemory]
-	* Replay Wait New Template [No Update WaitState NewInMemory]
-	* CallMethodByName after  => AfterMatch,WhenCancel,Group.MatchIf [UPDATE]
-* Add scope continuation tests for:
-	- Global Scope
-	- Local Closure scope
-	- In sequance
-	- In group
-	- In function
-	- Within After Match Call [May update local or global state]
-	- Within Cancel Call [May update local or global state]
-	- Within Group match filter [May update local or global state]
 
-* Review the need for path property 
-	* Used in CloneFirstWait
+
+* Review Wait name duplication expected scenario 
+	- Same wait name in two sub resumable function
 
 * Analyzer
 * Review CanPublishFromExternal and IsLocalOnly

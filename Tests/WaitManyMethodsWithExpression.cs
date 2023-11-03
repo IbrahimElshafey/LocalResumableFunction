@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
-    //todo: update this test
+
     public class WaitManyMethodsWithExpression
     {
         [Fact]
@@ -29,7 +29,7 @@ namespace Tests
             Assert.Equal(4, waits.Count);
             Assert.Equal(3, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(1, waits.Count(x => x.Status == WaitStatus.Canceled));
-            Assert.Equal(1, waits.Count(x => x.IsRootNode));
+            Assert.Equal(1, waits.Count(x => x.IsRoot));
 
 
             wms.Method3("1");
@@ -43,7 +43,7 @@ namespace Tests
             Assert.Equal(8, waits.Count);
             Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
-            Assert.Equal(2, waits.Count(x => x.IsRootNode));
+            Assert.Equal(2, waits.Count(x => x.IsRoot));
         }
         public class Test : ResumableFunctionsContainer
         {
@@ -53,9 +53,12 @@ namespace Tests
             {
                 int x = 1;
                 yield return Wait("Wait three methods",
-                    Wait<string, string>(Method1, "Method 1"),
+                    new[]
+                    {
+                    Wait<string, string>(Method1, "Method 1").MatchIf((_,_)=>x==1),
                     Wait<string, string>(Method2, "Method 2"),
                     Wait<string, string>(Method3, "Method 3")
+                    }
                 )
                 //.MatchIf(group => group.CompletedCount == 2 && Id == 10 && x == 1);
                 .MatchIf(group =>

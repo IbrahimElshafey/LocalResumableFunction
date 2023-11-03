@@ -62,6 +62,7 @@ internal static class CoreExtensions
         services.AddDbContext<WaitsDataContext>(optionsBuilder => optionsBuilder = settings.WaitsDbConfig);
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
+        services.AddScoped<IPrivateDataRepo, PrivateDataRepo>();
         services.AddScoped<IWaitsRepo, WaitsRepo>();
         services.AddTransient<IServiceRepo, ServiceRepo>();
         services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();

@@ -1,4 +1,6 @@
 ﻿using FastExpressionCompiler;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Expressions;
@@ -25,8 +27,6 @@ public class MethodWaitEntity : WaitEntity
     public string CancelMethodAction { get; protected set; }
 
     public string MandatoryPart { get; set; }
-
-
 
     [NotMapped]
     internal WaitTemplate Template { get; set; }
@@ -69,6 +69,22 @@ public class MethodWaitEntity : WaitEntity
             throw new Exception(error, ex);
         }
     }
+    internal override void OnAddWait()
+    {
+        IsRoot = ParentWait == null && ParentWaitId == null;
+        //var closureNotChange = AfterMatchAction == null && CancelMethodAction == null;
+        //if (closureNotChange) return;
+
+        if (ImmutableClosure == default) return;
+        if (RuntimeClosureId == null)
+            RuntimeClosureId = Guid.NewGuid();
+        base.OnAddWait();
+    }
+    protected object GetMatchClosure(Type closureType)
+    {
+        ImmutableClosure = ImmutableClosure is JObject jobject ? jobject.ToObject(closureType) : ImmutableClosure;
+        return ImmutableClosure ?? Activator.CreateInstance(closureType);
+    }
 
     internal bool IsMatched()
     {
@@ -82,7 +98,7 @@ public class MethodWaitEntity : WaitEntity
                 return true;
             var check = MatchExpression.CompileFast();
             var closureType = MatchExpression.Parameters[3].Type;
-            var closure = GetClosure(closureType);
+            var closure = GetMatchClosure(closureType);
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction, closure);
         }
         catch (Exception ex)
@@ -188,7 +204,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
 
     internal MethodWaitEntity<TInput, TOutput> AfterMatch(Action<TInput, TOutput> afterMatchAction)
     {
-        AfterMatchAction = ValidateMethod(afterMatchAction, nameof(AfterMatchAction));
+        AfterMatchAction = ValidateCallback(afterMatchAction, nameof(AfterMatchAction));
         return this;
     }
 
@@ -196,7 +212,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
     {
         MatchExpression = matchExpression;
         MatchExpressionParts = new MatchExpressionWriter(MatchExpression, CurrentFunction).MatchExpressionParts;
-        SetClosure(MatchExpressionParts.Closure, true);
+        SetImmutableClosure(MatchExpressionParts.Closure);
         MandatoryPart = MatchExpressionParts.GetInstanceMandatoryPart(CurrentFunction);
         return this;
     }
@@ -205,7 +221,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
 
     internal MethodWaitEntity<TInput, TOutput> WhenCancel(Action cancelAction)
     {
-        CancelMethodAction = ValidateMethod(cancelAction, nameof(CancelMethodAction));
+        CancelMethodAction = ValidateCallback(cancelAction, nameof(CancelMethodAction));
         return this;
     }
 

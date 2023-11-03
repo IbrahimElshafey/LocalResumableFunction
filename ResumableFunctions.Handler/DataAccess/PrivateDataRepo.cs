@@ -1,0 +1,19 @@
+﻿using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.InOuts.Entities;
+
+namespace ResumableFunctions.Handler.DataAccess;
+
+internal class PrivateDataRepo : IPrivateDataRepo
+{
+    private readonly WaitsDataContext _context;
+
+    public PrivateDataRepo(WaitsDataContext context)
+    {
+        _context = context;
+    }
+
+    public async Task<PrivateData> GetPrivateData(Guid guid)
+    {
+        return await _context.PrivateData.FindAsync(guid);
+    }
+}

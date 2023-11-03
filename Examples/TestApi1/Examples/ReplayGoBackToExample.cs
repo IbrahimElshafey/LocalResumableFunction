@@ -16,15 +16,18 @@ public class ReplayGoBackToExample : ProjectApprovalExample
         WriteMessage("Wait first manager of three to approve");
         yield return Wait(
             "Wait first approval in three managers",
-            Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .AfterMatch((input, output) => ManagerOneApproval = input.Decision),
-            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .AfterMatch((input, output) => ManagerTwoApproval = input.Decision),
-            Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
-                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                .AfterMatch((input, output) => ManagerThreeApproval = input.Decision)
+            new[]
+            {
+                Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                    .AfterMatch((input, output) => ManagerOneApproval = input.Decision),
+                Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                    .AfterMatch((input, output) => ManagerTwoApproval = input.Decision),
+                Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                    .AfterMatch((input, output) => ManagerThreeApproval = input.Decision)
+            }
         ).MatchAny();
 
         var approvals = ManagerOneApproval || ManagerTwoApproval || ManagerThreeApproval;

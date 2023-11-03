@@ -7,7 +7,6 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
-
 internal class MethodIdsRepo : IMethodIdsRepo
 {
     private readonly ILogger<MethodIdsRepo> _logger;

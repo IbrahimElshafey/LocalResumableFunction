@@ -48,6 +48,8 @@ public class ComplexApproval
         public int RequestId { get; set; }
         public bool FinalDecision { get; set; }
 
+        public int PublicCounter { get; set; } = 10;
+
         [ResumableFunctionEntryPoint("ComplexApproval")]
         public async IAsyncEnumerable<Wait> ComplexApproval()
         {
@@ -59,8 +61,11 @@ public class ComplexApproval
             {
                 yield return
                     Wait($"Wait all committee approve topic {currentTopicIndex} or manager skip",
-                        AllCommitteeApproveTopic(currentTopicIndex),
-                        ChefSkipTopic(currentTopicIndex))
+                        new[]
+                        {
+                            AllCommitteeApproveTopic(currentTopicIndex),
+                            ChefSkipTopic(currentTopicIndex)
+                        })
                         .MatchAny();
 
                 //closure is different than locals for this wait
@@ -103,17 +108,19 @@ public class ComplexApproval
 
         private Wait ChefSkipTopic(int chefSkipTopicIndex)
         {
+            var skipCounter = 10;
             return Wait<RequestTopicIndex, string>
                 (ChefSkipTopic, $"Chef Skip Topic {chefSkipTopicIndex} Approval")
-                .MatchIf((topicIndex, decision) =>
+                .MatchIf((topicIndex, _) =>
                     topicIndex.RequestId == RequestId &&
-                    topicIndex.TopicIndex == chefSkipTopicIndex);
+                    topicIndex.TopicIndex == chefSkipTopicIndex)
+                .AfterMatch((_, _) => skipCounter += 5);
         }
 
         private Wait AllCommitteeApproveTopic(int membersTopicIndex)
         {
             var waits = new Wait[3];
-            int x = 10;
+            int sharedCounter = 10;
             MemberRole currentRole = MemberRole.None;
             for (var memberIndex = 0; memberIndex < CommitteeMembersCount; memberIndex++)
             {
@@ -122,22 +129,30 @@ public class ComplexApproval
                 waits[memberIndex] =
                     Wait<RequestTopicIndex, string>(
                         MemberApproveRequest, $"{currentRole} Topic {membersTopicIndex} Approval")
-                    .MatchIf((topicIndex, decision) =>
+                    .MatchIf((topicIndex, _) =>
                         topicIndex.RequestId == RequestId &&
                         topicIndex.TopicIndex == membersTopicIndex &&
                         topicIndex.MemberRole == currentRole)
                     //.NothingAfterMatch()
                     .AfterMatch((input, output) =>
                     {
-                        x += 10;
-                        Console.WriteLine(x);
-                        Console.WriteLine(input);
-                        Console.WriteLine(output);
+                        sharedCounter += 10;
+                        if (sharedCounter < 10)
+                            throw new Exception("Local var `sharedCounter` must be >= 10.");
+                        PublicCounter = 1000;
                     })
                     ;
             }
             Console.WriteLine(currentRole);
-            return Wait($"Wait All Committee to Approve Topic {membersTopicIndex}", waits);
+            return
+                Wait($"Wait All Committee to Approve Topic {membersTopicIndex}", waits)
+                .MatchIf((_) =>
+                {
+                    bool result = sharedCounter == 40;
+                    if (result) sharedCounter += 5;
+                    PublicCounter = 2000;
+                    return result;
+                });
         }
 
 

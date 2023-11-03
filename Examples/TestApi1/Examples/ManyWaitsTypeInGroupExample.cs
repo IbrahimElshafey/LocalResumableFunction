@@ -14,19 +14,25 @@ public class ManyWaitsTypeInGroupExample : ProjectApprovalExample
         WriteMessage("Wait many types in same group");
         yield return
             Wait("Many waits types",
-                Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
-                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                    .AfterMatch((input, output) => ManagerOneApproval = output),
-                Wait(
-                    "Wait Manager Two and Four",
-                    Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+                new[]
+                {
+                    Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                         .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                        .AfterMatch((input, output) => ManagerTwoApproval = output),
-                    Wait<ApprovalDecision, bool>(ManagerFourApproveProject)
-                        .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
-                        .AfterMatch((input, output) => ManagerFourApproval = output)
-                ).MatchAll(),
-                Wait("Sub function Wait", ManagerThreeSubFunction));
+                        .AfterMatch((input, output) => ManagerOneApproval = output),
+                    Wait(
+                        "Wait Manager Two and Four",
+                        new []
+                        {
+                            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+                                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                                .AfterMatch((input, output) => ManagerTwoApproval = output),
+                            Wait<ApprovalDecision, bool>(ManagerFourApproveProject)
+                                .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
+                                .AfterMatch((input, output) => ManagerFourApproval = output)
+                        }),
+                     Wait("Sub function Wait", ManagerThreeSubFunction)
+                }
+                ).MatchAll();
         Success(nameof(ManyWaitsTypeInGroup));
     }
 

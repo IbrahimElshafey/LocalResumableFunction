@@ -10,22 +10,36 @@ public class ClientOnboardingWorkflowPrivate : ResumableFunctionsContainer
     [ResumableFunctionEntryPoint("ClientOnboardingWorkflowPrivate.Start")]
     internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
     {
+        int localCounter = 10;
         var userId = -1;
         yield return
             Wait<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, "Wait User Registration")
-            .MatchIf((regForm, regResult) => regResult.FormId > 0)
+            .MatchIf((_, regResult) => regResult.FormId > 0)
             .AfterMatch((regForm, regResult) =>
             {
                 FormId = regResult.FormId;
                 userId = regForm.UserId;
+                localCounter += 10;
             });
+
+        if (localCounter != 20)
+            throw new Exception("Local var `localCounter` must be 20.");
 
         var ownerTaskId = _service.AskOwnerToApproveClient(FormId).Id;
         var ownerDecision = false;
+        localCounter += 10;
         yield return
             Wait<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, "Wait Owner Approve Client")
             .MatchIf((approveClientInput, _) => approveClientInput.TaskId == ownerTaskId)
-            .AfterMatch((approveClientInput, _) => ownerDecision = approveClientInput.Decision);
+            .AfterMatch((approveClientInput, _) =>
+            {
+                ownerDecision = approveClientInput.Decision;
+                if (localCounter != 30)
+                    throw new Exception("Local var `localCounter` must be 30.");
+                localCounter += 10;
+            });
+        if (localCounter != 40)
+            throw new Exception("Local var `localCounter` must be 40.");
         /*some code*/
         if (ownerDecision is false)
         {
@@ -58,7 +72,4 @@ public class ClientOnboardingWorkflowPrivate : ResumableFunctionsContainer
     {
         _service = service;
     }
-
-
-
 }

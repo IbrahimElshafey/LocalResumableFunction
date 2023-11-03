@@ -14,7 +14,7 @@ public class WaitManyFunctionsExample : ProjectApprovalExample
                 .MatchIf((input, output) => output == true)
                 .AfterMatch((input, output) => CurrentProject = input);
         WriteMessage("After project submitted.");
-        yield return Wait("Wait multiple resumable functions", WaitManagerOneAndTwoSubFunction, ManagerThreeSubFunction);
+        yield return Wait("Wait multiple resumable functions", new[] { WaitManagerOneAndTwoSubFunction, ManagerThreeSubFunction });
         Success(nameof(WaitManyFunctions));
     }
 
@@ -27,7 +27,7 @@ public class WaitManyFunctionsExample : ProjectApprovalExample
                 .MatchIf((input, output) => output == true)
                 .AfterMatch((input, output) => CurrentProject = input);
         WriteMessage("After project submitted.");
-        yield return Wait("Wait multiple resumable functions", ManagerThreeSubFunction, ManagerOneCallSubManagerTwo);
+        yield return Wait("Wait multiple resumable functions", new[] { ManagerThreeSubFunction, ManagerOneCallSubManagerTwo });
         WriteMessage("{3}After wait multiple resumable functions");
         Success(nameof(WaitSubFunctionTwoLevels));
     }
@@ -43,7 +43,7 @@ public class WaitManyFunctionsExample : ProjectApprovalExample
                 .AfterMatch((input, output) => CurrentProject = input);
         WriteMessage("After project submitted.");
         yield return
-            Wait("Wait multiple resumable functions", WaitManagerOneAndTwoSubFunction, ManagerThreeSubFunction)
+            Wait("Wait multiple resumable functions", new[] { WaitManagerOneAndTwoSubFunction, ManagerThreeSubFunction })
                 .MatchAny();
         WriteMessage("After wait two functions.");
         Success(nameof(WaitFirstFunction));
@@ -56,12 +56,15 @@ public class WaitManyFunctionsExample : ProjectApprovalExample
         WriteMessage("WaitTwoManagers started");
         yield return Wait(
             "Wait two methods",
+            new Wait[]
+            {
             Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerOneApproval = output),
             Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerTwoApproval = output)
+            }
         ).MatchAll();
         WriteMessage("Two waits matched");
     }
