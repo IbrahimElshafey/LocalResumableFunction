@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
-    
+
     public class WaitManyMethodsWithExpression
     {
         [Fact]

@@ -204,7 +204,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
 
     internal MethodWaitEntity<TInput, TOutput> AfterMatch(Action<TInput, TOutput> afterMatchAction)
     {
-        AfterMatchAction = ValidateMethod(afterMatchAction, nameof(AfterMatchAction));
+        AfterMatchAction = ValidateCallback(afterMatchAction, nameof(AfterMatchAction));
         return this;
     }
 
@@ -221,7 +221,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
 
     internal MethodWaitEntity<TInput, TOutput> WhenCancel(Action cancelAction)
     {
-        CancelMethodAction = ValidateMethod(cancelAction, nameof(CancelMethodAction));
+        CancelMethodAction = ValidateCallback(cancelAction, nameof(CancelMethodAction));
         return this;
     }
 

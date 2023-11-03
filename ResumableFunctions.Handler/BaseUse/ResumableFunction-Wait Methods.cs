@@ -42,11 +42,16 @@ public abstract partial class ResumableFunctionsContainer
         }.ToMethodWait();
     }
 
-    protected WaitsGroup Wait(string name, 
+    protected WaitsGroup Wait(
+        string name, 
         Wait[] waits,
         [CallerLineNumber] int inCodeLine = 0,
         [CallerMemberName] string callerName = "")
     {
+        if (waits.Any(x => x == null))
+        {
+            throw new ArgumentNullException($"The group wait named [{name}] contains wait that is null.");
+        }
         var group = new WaitsGroupEntity
         {
             Name = name,

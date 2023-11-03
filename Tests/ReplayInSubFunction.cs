@@ -114,7 +114,8 @@ public class ReplayInSubFunction
             await Task.Delay(100);
         }
 
-        [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
+        [PushCall("Method1")]
+        public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
         [PushCall("Method3")] public string Method3(string input) => input + "M3";
         [PushCall("Method4")] public string Method4(string input) => input + "M4";

@@ -3,7 +3,6 @@ using ClientOnboarding.Services;
 using ClientOnboarding.Workflow;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
-using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests;

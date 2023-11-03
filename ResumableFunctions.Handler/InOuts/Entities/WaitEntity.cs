@@ -63,12 +63,12 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// It's the runner class serialized we can rename this to RunnerState
     /// </summary>
     public PrivateData Locals { get; internal set; }
-    public Guid? LocalsId { get;  internal set; }
+    public Guid? LocalsId { get; internal set; }
 
 
     public PrivateData RuntimeClosure { get; set; }
     public Guid? RuntimeClosureId { get; set; }
-    
+
     [NotMapped]
     public WaitEntity OldCompletedSibling { get; set; }
 
@@ -284,10 +284,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     internal virtual bool ValidateWaitRequest()
     {
-        var isNameDuplicated =
-            FunctionState
-            .Waits
-            .Count(x => x.Name == Name) > 1;
+        var isNameDuplicated = FunctionState.Waits.Count(x => x.Name == Name) > 1;
         if (isNameDuplicated)
         {
             FunctionState.AddLog(
@@ -434,7 +431,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// Validate delegate that used for groupMatchFilter,AfterMatchAction,CancelAction and return:
     /// $"{method.DeclaringType.FullName}#{method.Name}"
     /// </summary>
-    internal string ValidateMethod(Delegate callback, string methodName)
+    internal string ValidateCallback(Delegate callback, string methodName)
     {
         var method = callback.Method;
         var functionClassType = CurrentFunction.GetType();

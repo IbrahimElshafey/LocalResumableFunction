@@ -10,6 +10,7 @@
 
 
 * Attributes test
+* Validation, errors, and exceptions is work fine
 * Scan results are correct
 
 # Performance Test

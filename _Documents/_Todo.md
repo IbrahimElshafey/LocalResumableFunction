@@ -3,8 +3,6 @@
 
 * Review Wait name duplication expected scenario 
 	- Same wait name in two sub resumable function
-* Review the need for path property 
-	* Used in CloneFirstWait
 
 * Analyzer
 * Review CanPublishFromExternal and IsLocalOnly

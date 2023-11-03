@@ -16,12 +16,6 @@
 
 
 
-* We SetClosure in places
-	* Keep in mind that may be a looping exist [deep clone closure]
-	* Replay Wait New Template [No Update WaitState NewInMemory]
-
-
-
 - Multiple replay and local variables
 
 * What if closure is not serializable

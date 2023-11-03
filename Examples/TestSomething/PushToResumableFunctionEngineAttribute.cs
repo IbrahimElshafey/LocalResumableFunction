@@ -2,7 +2,7 @@
 
 namespace TestSomething
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     [Injection(typeof(PushResultAspect), Inherited = true)]
     public class PushToResumableFunctionEngineAttribute : Attribute
     {

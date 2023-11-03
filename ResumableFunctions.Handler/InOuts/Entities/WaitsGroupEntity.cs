@@ -1,4 +1,5 @@
 ﻿using ResumableFunctions.Handler.BaseUse;
+using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 
@@ -60,6 +61,23 @@ public class WaitsGroupEntity : WaitEntity
         ActionOnChildrenTree(w => w.IsRoot = w.ParentWait == null && w.ParentWaitId == null);
         base.OnAddWait();
     }
-
+    internal override bool ValidateWaitRequest()
+    {
+        if (ChildWaits == null || !ChildWaits.Any())
+        {
+            FunctionState.AddLog(
+                $"The group wait named [{Name}] does not have childern, You must add one wait at least.",
+                LogType.Error,
+                StatusCodes.WaitValidation);
+        }
+        if (ChildWaits.Any(x => x == null))
+        {
+            FunctionState.AddLog(
+                $"The group wait named [{Name}] contains wait that has null value.",
+                LogType.Error,
+                StatusCodes.WaitValidation);
+        }
+        return base.ValidateWaitRequest();
+    }
     internal WaitsGroup ToWaitsGroup() => new WaitsGroup(this);
 }

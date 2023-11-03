@@ -6,10 +6,10 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
-    
+
     public class WaitTwoMethodsAfterFirst
     {
-       
+
         [Fact]
         public async Task WaitTwoMethodsAfterFirst_Test()
         {

@@ -31,7 +31,7 @@ namespace ResumableFunctions.Handler.BaseUse
             WaitsGroupEntity.WaitType = WaitType.GroupWaitWithExpression;
             WaitsGroupEntity.InCodeLine = inCodeLine;
             WaitsGroupEntity.CallerName = callerName;
-            WaitsGroupEntity.GroupMatchFuncName = WaitsGroupEntity.ValidateMethod(groupMatchFilter, nameof(WaitsGroupEntity.GroupMatchFuncName));
+            WaitsGroupEntity.GroupMatchFuncName = WaitsGroupEntity.ValidateCallback(groupMatchFilter, nameof(WaitsGroupEntity.GroupMatchFuncName));
             return this;
         }
 

@@ -6,10 +6,7 @@ namespace ResumableFunctions.Handler.InOuts.Entities;
 public class TimeWaitEntity : WaitEntity
 {
     internal readonly MethodWaitEntity<TimeWaitInput, bool> _timeMethodWait;
-    internal TimeWaitEntity()
-    {
 
-    }
     internal TimeWaitEntity(ResumableFunctionsContainer currentFunction)
     {
         var timeWaitMethod = typeof(LocalRegisteredMethods)

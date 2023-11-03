@@ -23,6 +23,12 @@ internal partial class WaitsRepo
                 $"Error when validate the requested wait [{newWait.Name}] " +
                 $"that requested by function [{newWait.RequestedByFunction}].";
             _logger.LogError(message);
+            //todo: why continue and not stop here??
+            //if (!newWait.IsFirst)
+            //{
+            //    await _context.SaveChangesAsync();
+            //    return false;
+            //}
         }
 
         switch (newWait)
