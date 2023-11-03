@@ -36,7 +36,7 @@ public class TimeWaitEntity : WaitEntity
             _timeMethodWait.RequestedByFunctionId = RequestedByFunctionId;
             _timeMethodWait.StateBeforeWait = StateBeforeWait;
             _timeMethodWait.StateAfterWait = StateAfterWait;
-            _timeMethodWait.SetLocals(Locals);
+            _timeMethodWait.Locals = Locals;
             _timeMethodWait.CallerName = CallerName;
             _timeMethodWait.InCodeLine = InCodeLine;
             _timeMethodWait.ExtraData =
@@ -45,7 +45,7 @@ public class TimeWaitEntity : WaitEntity
                     TimeToWait = TimeToWait,
                     UniqueMatchId = UniqueMatchId,
                 };
-            _timeMethodWait.MatchIf((timeWaitInput, result) => timeWaitInput.TimeMatchId == "");
+            _timeMethodWait.MatchIf((timeWaitInput, result) => timeWaitInput.TimeMatchId == string.Empty);
             return _timeMethodWait;
         }
     }

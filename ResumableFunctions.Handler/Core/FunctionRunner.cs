@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts.Entities;
@@ -9,30 +10,34 @@ namespace ResumableFunctions.Handler.Core;
 public class FunctionRunner : IAsyncEnumerator<Wait>
 {
     private IAsyncEnumerator<Wait> _functionRunner;
-    private readonly WaitEntity _oldCompletedWait;
+    private readonly WaitEntity _oldMatchedWait;
 
-    public FunctionRunner(WaitEntity oldCompletedWait)
+    public FunctionRunner(WaitEntity oldMatchedWait)
     {
-        var functionRunnerType = oldCompletedWait.CurrentFunction.GetType()
+        var functionRunnerType = oldMatchedWait.CurrentFunction.GetType()
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
             .FirstOrDefault(type =>
-            type.Name.StartsWith($"<{oldCompletedWait.RequestedByFunction.MethodName}>") &&
+            type.Name.StartsWith($"<{oldMatchedWait.RequestedByFunction.MethodName}>") &&
             typeof(IAsyncEnumerable<Wait>).IsAssignableFrom(type));
 
         if (functionRunnerType == null)
             throw new Exception(
-                $"Can't find resumable function [{oldCompletedWait?.RequestedByFunction?.MethodName}] " +
-                $"in class [{oldCompletedWait?.CurrentFunction?.GetType().FullName}].");
+                $"Can't find resumable function [{oldMatchedWait?.RequestedByFunction?.MethodName}] " +
+                $"in class [{oldMatchedWait?.CurrentFunction?.GetType().FullName}].");
 
-        CreateRunner(functionRunnerType, oldCompletedWait.Locals);
-        SetFunctionCallerInstance(oldCompletedWait.CurrentFunction);
-        SetState(oldCompletedWait.StateAfterWait);
-        SetRunnerClosureField(oldCompletedWait.RuntimeClosure?.Value);
-        _oldCompletedWait = oldCompletedWait;
+        CreateRunner(functionRunnerType, oldMatchedWait.Locals);
+        SetFunctionCallerInstance(oldMatchedWait.CurrentFunction);
+        SetState(oldMatchedWait.StateAfterWait);
+        SetRunnerClosureField(oldMatchedWait.RuntimeClosure?.Value);
+        _oldMatchedWait = oldMatchedWait;
     }
 
 
-    public FunctionRunner(ResumableFunctionsContainer classInstance, MethodInfo resumableFunction, int? state = null, object closure = null)
+    public FunctionRunner(
+        ResumableFunctionsContainer classInstance,
+        MethodInfo resumableFunction,
+        int? state = null,
+        object closure = null)
     {
         var functionRunnerType = classInstance.GetType()
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
@@ -63,33 +68,50 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             CurrentWait.StateBeforeWait = stateBeforeWait;
             CurrentWait.StateAfterWait = GetState();
             //set locals for the new incoming wait
-            if (CurrentWait.Locals == null)
-                CurrentWait.SetLocals(_functionRunner);
+            var localContinuation =
+                _oldMatchedWait != null &&
+                _oldMatchedWait.Locals != null;
+            if (localContinuation)
+            {
+                _oldMatchedWait.Locals.Value = _functionRunner;
+                CurrentWait.LocalsId = _oldMatchedWait.LocalsId;
+                CurrentWait.Locals = _oldMatchedWait.Locals;
+            }
+            else
+            {
+                CurrentWait.Locals = new PrivateData
+                {
+                    Id = Guid.NewGuid(),
+                    Value = _functionRunner
+                };
+            }
 
-            bool closureContinuation =
-                _oldCompletedWait != null && 
-                _oldCompletedWait.CallerName == CurrentWait.CallerName &&
-                _oldCompletedWait.RuntimeClosureId != null;
+            //set closure
+            var closureContinuation =
+                _oldMatchedWait != null &&
+                _oldMatchedWait.CallerName == CurrentWait.CallerName &&
+                _oldMatchedWait.RuntimeClosureId != null;
             if (closureContinuation)
             {
-                CurrentWait.RuntimeClosureId = _oldCompletedWait.RuntimeClosureId;
-                CurrentWait.OldCompletedSibling = _oldCompletedWait;
+                CurrentWait.RuntimeClosureId = _oldMatchedWait.RuntimeClosureId;
+                CurrentWait.OldCompletedSibling = _oldMatchedWait;
             }
         }
         return hasNext;
     }
 
 
-    private void CreateRunner(Type functionRunnerType, object oldLocals = null)
+    private void CreateRunner(Type functionRunnerType, PrivateData oldLocals = null)
     {
 
         const string error = "Can't create a function runner.";
         if (functionRunnerType == null)
             throw new Exception(error);
 
-        if (oldLocals?.GetType() == functionRunnerType)
+        //use the old wait runner
+        if (oldLocals?.Value.GetType() == functionRunnerType)
         {
-            _functionRunner = (IAsyncEnumerator<Wait>)oldLocals;
+            _functionRunner = (IAsyncEnumerator<Wait>)oldLocals.Value;
             return;
         }
 
@@ -107,10 +129,10 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         if (_functionRunner == null)
             throw new Exception(error);
 
-        if (oldLocals != null && oldLocals is JObject jobject)
+        if (oldLocals != null && oldLocals.Value is JObject jobject)
         {
+            //Is same RF
             jobject.MergeIntoObject(_functionRunner);
-            //JsonConvert.PopulateObject(jobject.CreateReader(), _functionRunner, LocalsContractResolver.Settings);
         }
     }
 

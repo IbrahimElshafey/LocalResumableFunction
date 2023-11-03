@@ -24,7 +24,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IDistributedLockProvider _lockProvider;
         private readonly IWaitProcessingRecordsRepo _waitProcessingRecordsRepo;
         private readonly IMethodIdsRepo _methodIdsRepo;
-        private readonly IRuntimeClosureRepo _runtimeClosureRepo;
+        private readonly IPrivateDataRepo _privateDataRepo;
         private readonly IWaitTemplatesRepo _templatesRepo;
         private readonly IPushedCallsRepo _pushedCallsRepo;
         private readonly IServiceRepo _serviceRepo;
@@ -49,7 +49,7 @@ namespace ResumableFunctions.Handler.Core
             IPushedCallsRepo pushedCallsRepo,
             IServiceRepo serviceRepo,
             IResumableFunctionsSettings settings,
-            IRuntimeClosureRepo runtimeClosureRepo)
+            IPrivateDataRepo privateDataRepo)
         {
             _serviceProvider = serviceProvider;
             _logger = logger;
@@ -66,7 +66,7 @@ namespace ResumableFunctions.Handler.Core
             _pushedCallsRepo = pushedCallsRepo;
             _serviceRepo = serviceRepo;
             _settings = settings;
-            _runtimeClosureRepo = runtimeClosureRepo;
+            _privateDataRepo = privateDataRepo;
         }
 
         [DisplayName("Process Function Expected Matches where [FunctionId:{0}], [PushedCallId:{1}], [MethodGroupId:{2}]")]
@@ -139,7 +139,9 @@ namespace ResumableFunctions.Handler.Core
 
             methodWait.MethodToWait = await _methodIdsRepo.GetMethodIdentifierById(methodWait.MethodToWaitId);
             if (methodWait.RuntimeClosureId != null)
-                methodWait.RuntimeClosure = await _runtimeClosureRepo.GetRuntimeClosure(methodWait.RuntimeClosureId.Value);
+                methodWait.RuntimeClosure = await _privateDataRepo.GetPrivateData(methodWait.RuntimeClosureId.Value);
+            if (methodWait.LocalsId != null)
+                methodWait.Locals = await _privateDataRepo.GetPrivateData(methodWait.LocalsId.Value);
             if (methodWait.MethodToWait == null)
             {
                 var error = $"No method exist that linked to wait [{methodWait.MethodToWaitId}].";

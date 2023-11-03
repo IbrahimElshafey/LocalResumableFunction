@@ -3,17 +3,17 @@ using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal class RuntimeClosureRepo : IRuntimeClosureRepo
+internal class PrivateDataRepo : IPrivateDataRepo
 {
     private readonly WaitsDataContext _context;
 
-    public RuntimeClosureRepo(WaitsDataContext context)
+    public PrivateDataRepo(WaitsDataContext context)
     {
         _context = context;
     }
 
-    public async Task<RuntimeClosure> GetRuntimeClosure(Guid guid)
+    public async Task<PrivateData> GetPrivateData(Guid guid)
     {
-        return await _context.RuntimeClosures.FindAsync(guid);
+        return await _context.PrivateData.FindAsync(guid);
     }
 }

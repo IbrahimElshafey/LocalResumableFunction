@@ -2,12 +2,12 @@
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 
-public class RuntimeClosure : IEntity<Guid>, IEntityWithUpdate
+public class PrivateData : IEntity<Guid>, IEntityWithUpdate
 {
     public Guid Id { get; set; }
-    public string CallerName { get; set; }
     public object Value { get; set; }
-    public List<WaitEntity> LinkedWaits { get; set; }
+    public List<WaitEntity> ClosureLinkedWaits { get; set; }
+    public List<WaitEntity> LocalsLinkedWaits { get; set; }
 
     public DateTime Created { get; set; }
 

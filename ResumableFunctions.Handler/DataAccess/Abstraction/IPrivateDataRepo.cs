@@ -2,8 +2,8 @@
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
-    public interface IRuntimeClosureRepo
+    public interface IPrivateDataRepo
     {
-        Task<RuntimeClosure> GetRuntimeClosure(Guid guid);
+        Task<PrivateData> GetPrivateData(Guid guid);
     }
 }

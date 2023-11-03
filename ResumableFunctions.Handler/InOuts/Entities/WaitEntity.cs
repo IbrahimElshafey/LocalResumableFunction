@@ -62,16 +62,15 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// Local variables in method at the wait point where current wait requested
     /// It's the runner class serialized we can rename this to RunnerState
     /// </summary>
-    public object Locals { get; private set; }
+    public PrivateData Locals { get; internal set; }
+    public Guid? LocalsId { get;  internal set; }
 
 
-
-    public RuntimeClosure RuntimeClosure { get; set; }
-
+    public PrivateData RuntimeClosure { get; set; }
+    public Guid? RuntimeClosureId { get; set; }
+    
     [NotMapped]
     public WaitEntity OldCompletedSibling { get; set; }
-
-    public Guid? RuntimeClosureId { get; set; }
 
     /// <summary>
     /// Local variables that is closed (make a closure) in match expression or callbacks.
@@ -373,19 +372,19 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 OldCompletedSibling.RuntimeClosure != null &&
                 OldCompletedSibling.CallerName == group.First().CallerName;
 
-            RuntimeClosure runtimeClosure = null;
+            PrivateData runtimeClosure = null;
             if (useOldWaitClosure)
             {
+                //closure vars may be changed so update it
                 OldCompletedSibling.RuntimeClosure.Value = mw.ImmutableClosure;
                 runtimeClosure = OldCompletedSibling.RuntimeClosure;
             }
             else
             {
-                runtimeClosure = new RuntimeClosure
+                runtimeClosure = new PrivateData
                 {
                     Id = mw.RuntimeClosureId.Value,
                     Value = mw.ImmutableClosure,
-                    CallerName = mw.CallerName,
                 };
             }
 
@@ -476,23 +475,18 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
 
 
-    internal void SetLocals(object locals)
-    {
-        Locals = locals;
-    }
-
     internal string LocalsDisplay()
     {
-        var closure = ImmutableClosure;
-        if (Locals == null && closure == null)
-            return null;
-        var result = new JObject();
-        if (Locals != null && Locals.ToString() != "{}")
-            result["Locals"] = Locals as JToken;
-        if (closure != null && closure.ToString() != "{}")
-            result["Closure"] = closure as JToken;
-        if (result?.ToString() != "{}")
-            return result.ToString()?.Replace("<", "").Replace(">", "");
+        //var closure = ImmutableClosure;
+        //if (Locals == null && closure == null)
+        //    return null;
+        //var result = new JObject();
+        //if (Locals != null && Locals.ToString() != "{}")
+        //    result["Locals"] = Locals as JToken;
+        //if (closure != null && closure.ToString() != "{}")
+        //    result["Closure"] = closure as JToken;
+        //if (result?.ToString() != "{}")
+        //    return result.ToString()?.Replace("<", "").Replace(">", "");
         return null;
     }
 
