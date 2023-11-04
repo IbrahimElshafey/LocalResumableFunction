@@ -1,5 +1,6 @@
 ﻿# Todo
-
+* UI when click errors link show log errors not all
+* Cleaning closures when delete old state `CleanCompletedFunctionInstances`
 
 * Review Wait name duplication expected scenario 
 	- Same wait name in two sub resumable function
@@ -9,7 +10,8 @@
 	* Should it defined for method group or method idenetifier
 * Review SaveChanges call
 * Enable change testshell settings
-	* Run unit tests in parallel if not localDB
+	* Run unit tests in parallel
+
 * Use same dll in two different services must be allowed
 
 * Message Pack private setter props serialization
@@ -30,7 +32,8 @@
 	* Should we define an external id for pushed call?
 
 
-AddWait closure
-	If root set closure from it's child
-UpdateWait closure
-	If not root find root and update all child closures
+# Later
+* How to check that pushed call processed by all affected services?
+	* How to check that pushed call can be deleted?
+* Publisher Project Todos
+* Roslyn_Analyzer

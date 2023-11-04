@@ -9,12 +9,6 @@
 	- Within Cancel Call [May update local or global state]
 	- Within Group match filter [May update local or global state]
 
-* When we resume the execution we use the mutable version of closure 
-	* Mutable version may be shared for many waits under same method call
-
-
-
-
 
 - Multiple replay and local variables
 

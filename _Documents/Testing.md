@@ -21,10 +21,7 @@
 * 100 resumable function activated by one pushed call
 * 10000 pushed call per second test
 
-# Problem to solve 
-* We can't mock Resumable function class dependencies and use the mocks because of attributes checks
-* Could we fake dll and then mock faked instances?
-* No Fakes or Mokes libraries you should write your fake implementation for your interfaces
+
 
 # Generate test code for resumable function
 * I plan to auto-generate code for test
