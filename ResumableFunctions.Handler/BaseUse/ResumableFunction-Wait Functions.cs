@@ -1,8 +1,9 @@
 ﻿using ResumableFunctions.Handler.BaseUse;
+using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace ResumableFunctions.Handler;
 
@@ -22,6 +23,28 @@ public abstract partial class ResumableFunctionsContainer
             CurrentFunction = this,
             CallerName = callerName,
             InCodeLine = inCodeLine,
+        }.ToWait();
+    }
+
+    protected Wait Wait(
+        string name,
+        IAsyncEnumerable<Wait> function,
+        [CallerLineNumber] int inCodeLine = 0,
+        [CallerMemberName] string callerName = "")
+    {
+        var runner = function.GetAsyncEnumerator();
+        var runnerName = function.GetAsyncEnumerator().GetType().Name;
+        var methodName = Regex.Match(runnerName, @"<(.+)>").Groups[1].Value;
+        var functionInfo = GetType().GetMethod(methodName, CoreExtensions.DeclaredWithinTypeFlags());
+        return new FunctionWaitEntity
+        {
+            Name = name,
+            WaitType = WaitType.FunctionWait,
+            FunctionInfo = functionInfo,
+            CurrentFunction = this,
+            CallerName = callerName,
+            InCodeLine = inCodeLine,
+            Runner = runner,
         }.ToWait();
     }
 

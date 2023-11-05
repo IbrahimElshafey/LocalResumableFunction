@@ -377,4 +377,11 @@ internal static class CoreExtensions
             JsonSerializer.Create(ClosureContractResolver.Settings).Populate(sr, target);
         }
     }
+
+    internal static BindingFlags DeclaredWithinTypeFlags() =>
+    BindingFlags.DeclaredOnly |
+    BindingFlags.Public |
+    BindingFlags.NonPublic |
+    BindingFlags.Static |
+    BindingFlags.Instance;
 }

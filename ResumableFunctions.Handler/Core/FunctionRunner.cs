@@ -49,6 +49,11 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             SetRunnerClosureField(closure);
     }
 
+    public FunctionRunner(IAsyncEnumerator<Wait> runner)
+    {
+        _functionRunner = runner;
+    }
+
     public bool ResumableFunctionExistInCode => _functionRunner != null;
 
     public Wait Current => _functionRunner.Current;

@@ -100,7 +100,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         //is local method in current function class
         object rfClassInstance = CurrentFunction;
         var rfClassType = rfClassInstance.GetType();
-        var localMethodInfo = rfClassType.GetMethod(methodName, Flags());
+        var localMethodInfo = rfClassType.GetMethod(methodName, CoreExtensions.DeclaredWithinTypeFlags());
         if (localMethodInfo != null)
             return localMethodInfo.Invoke(rfClassInstance, parameters);
 
@@ -108,7 +108,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         var closureType = rfClassType.Assembly.GetType(className);
         if (closureType != null)
         {
-            var closureMethodInfo = closureType.GetMethod(methodName, Flags());
+            var closureMethodInfo = closureType.GetMethod(methodName, CoreExtensions.DeclaredWithinTypeFlags());
             var closureInstance = RuntimeClosure?.AsType(closureType);
             SetClosureFunctionClassField(closureInstance);
 
@@ -446,7 +446,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 $"For wait [{Name}] the [{methodName}:{method.Name}] must be a method in class " +
                 $"[{functionClassType.Name}] or inline lambda method.");
 
-        var hasOverload = functionClassType.GetMethods(Flags()).Count(x => x.Name == method.Name) > 1;
+        var hasOverload = functionClassType.GetMethods(CoreExtensions.DeclaredWithinTypeFlags()).Count(x => x.Name == method.Name) > 1;
         if (hasOverload)
             throw new Exception(
                 $"For wait [{Name}] the [{methodName}:{method.Name}] must not be over-loaded.");
@@ -465,8 +465,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         ImmutableClosure = JsonConvert.DeserializeObject(closureString, closure.GetType());
     }
 
-    protected static BindingFlags Flags() =>
-        BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+
 
 
     internal string LocalsDisplay()

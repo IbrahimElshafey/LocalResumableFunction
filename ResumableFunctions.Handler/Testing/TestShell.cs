@@ -94,7 +94,7 @@ namespace ResumableFunctions.Handler.Testing
         private static async Task RegisterResumableFunctions(string[] functionsToIncludeInTest, ServiceData serviceData, Scanner scanner, Type type)
         {
             var functions =
-                type.GetMethods(scanner.GetBindingFlags())
+                type.GetMethods(CoreExtensions.DeclaredWithinTypeFlags())
                 .Where(method => method
                     .GetCustomAttributes()
                     .Any(attribute =>

@@ -115,25 +115,29 @@ public class SubFunctionsTest
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return Wait<string, string>(Method2, "M2");
-            yield return Wait("Wait sub function2", SubFunction2);
+            yield return Wait("Wait sub function2", SubFunction2(155));
             await Task.Delay(100);
         }
+            
         [SubResumableFunction("SubFunction2")]
-        public async IAsyncEnumerable<Wait> SubFunction2()
+        public async IAsyncEnumerable<Wait> SubFunction2(int funcInput)
         {
             int x = 100;
             yield return Wait<string, string>(Method3, "M3")
                 .MatchAny()
-                .AfterMatch(InstanceCall)
+                //.AfterMatch(InstanceCall)
                 //.AfterMatch(TestMethodClass.AfterMatchExternal)
-                //.AfterMatch((input, output) =>
-                //{
-                //    Message = $"Input: {input}, Output: {output}";
-                //    if (x != 100)
-                //        throw new Exception("Closure not saved for sub resumable function.")
-                //})
+                .AfterMatch((input, output) =>
+                {
+                    Message = $"Input: {input}, Output: {output}";
+                    if (x != 100)
+                        throw new Exception("Closure not saved for sub resumable function.");
+                    funcInput += 5;
+                })
                 ;
             Console.WriteLine(x);
+            if (funcInput != 160)
+                throw new Exception("SubResumableFunction input must be 160.");
         }
 
         private void InstanceCall(string arg1, string arg2)

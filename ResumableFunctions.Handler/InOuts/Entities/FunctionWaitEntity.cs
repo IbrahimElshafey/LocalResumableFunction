@@ -12,8 +12,11 @@ public sealed class FunctionWaitEntity : WaitEntity
     {
 
     }
+
+    //todo:delete this property
     [NotMapped]
     public WaitEntity FirstWait { get; set; }
+    internal IAsyncEnumerator<Wait> Runner { get; set; }
 
     [NotMapped] public MethodInfo FunctionInfo { get; set; }
 
