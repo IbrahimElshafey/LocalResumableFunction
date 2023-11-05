@@ -21,7 +21,7 @@ internal class ScanStateRepo : IScanStateRepo
         _context = context;
         _lockProvider = lockProvider;
         _settings = settings;
-        _scanStateLockName = $"{_settings.CurrentServiceName}_ScanStateLock";
+        _scanStateLockName = $"{_settings.CurrentWaitsDbName}_{_settings.CurrentServiceName}_ScanStateLock";
     }
     public async Task<bool> IsScanFinished()
     {

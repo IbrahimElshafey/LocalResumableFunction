@@ -6,12 +6,12 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
 
-public class MatchUseSetDependencies
+public class MatchExpressionUseCases
 {
     [Fact]
-    public async Task MatchUseSetDependencies_Test()
+    public async Task MatchExpressionUseCases_Test()
     {
-        using var test = new TestShell(nameof(MatchUseSetDependencies_Test), typeof(TestClass));
+        using var test = new TestShell(nameof(MatchExpressionUseCases_Test), typeof(TestClass));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();
@@ -23,9 +23,9 @@ public class MatchUseSetDependencies
         logs = await test.GetLogs();
         Assert.Empty(logs);
         var pushedCalls = await test.GetPushedCalls();
-        Assert.Equal(1, pushedCalls.Count);
+        Assert.Single(pushedCalls);
         var instances = await test.GetInstances<TestClass>();
-        Assert.Equal(1, instances.Count);
+        Assert.Single(instances);
         Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
     }
 

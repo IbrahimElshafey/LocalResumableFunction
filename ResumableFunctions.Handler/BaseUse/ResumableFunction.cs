@@ -15,6 +15,10 @@ public abstract partial class ResumableFunctionsContainer
     {
         return Task.CompletedTask;
     }
+    public virtual Task OnInstanceCompleted()
+    {
+        return Task.CompletedTask;
+    }
     [IgnoreMember] internal MethodInfo CurrentResumableFunction { get; set; }
 
     protected void Log(string message) => this.AddLog(message, LogType.Info, Helpers.StatusCodes.Custom);

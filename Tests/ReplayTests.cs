@@ -252,15 +252,21 @@ public class ReplayTests
         [ResumableFunctionEntryPoint("GoBeforeFunction")]
         public async IAsyncEnumerable<Wait> Test()
         {
+            int localCounter = 10;
             yield return
                 Wait<string, string>(Method1, "M1");
 
+            localCounter += 10;
             Counter += 10;
             yield return
-                Wait<string, string>(Method2, "M2").MatchAny();
+                Wait<string, string>(Method2, "M2")
+                .MatchAny()
+                .AfterMatch((_, _) => localCounter+=10);
 
             if (Counter < 20)
                 yield return GoBackBefore("M2");
+            if (localCounter != 50)
+                throw new Exception("Local variable should be 50");
             await Task.Delay(100);
         }
 

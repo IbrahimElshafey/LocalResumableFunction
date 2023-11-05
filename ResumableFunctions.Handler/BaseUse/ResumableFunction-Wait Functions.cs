@@ -14,7 +14,6 @@ public abstract partial class ResumableFunctionsContainer
         [CallerLineNumber] int inCodeLine = 0,
         [CallerMemberName] string callerName = "")
     {
-        //todo:validate attribute exist
         return new FunctionWaitEntity
         {
             Name = name,

@@ -7,17 +7,17 @@ using ResumableFunctions.Handler.Testing;
 namespace Tests
 {
 
-    public class WaitFirstInThreeAtStart
+    public class ManyWaits3
     {
         [Fact]
         public async Task WaitFirstInThreeAtStart_Test()
         {
-            using var testShell = new TestShell(nameof(WaitFirstInThreeAtStart_Test), typeof(Test));
+            using var testShell = new TestShell(nameof(WaitFirstInThreeAtStart_Test), typeof(WaitFirstInThreeAtStart));
             await testShell.ScanTypes();
             var errors = await testShell.GetLogs();
             Assert.Empty(errors);
 
-            var testInstance = new Test();
+            var testInstance = new WaitFirstInThreeAtStart();
             testInstance.Method7("1");
 
             var pushedCalls = await testShell.GetPushedCalls();
@@ -29,7 +29,7 @@ namespace Tests
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
             Assert.Equal(1, waits.Count(x => x.IsRoot));
-            var instance = await testShell.GetFirstInstance<Test>();
+            var instance = await testShell.GetFirstInstance<WaitFirstInThreeAtStart>();
             Assert.Equal(1, instance.Counter);
             Assert.Equal(2, instance.CancelCounter);
 
@@ -45,7 +45,7 @@ namespace Tests
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Canceled).Count());
             Assert.Equal(2, waits.Where(x => x.IsRoot).Count());
         }
-        public class Test : ResumableFunctionsContainer
+        public class WaitFirstInThreeAtStart : ResumableFunctionsContainer
         {
 
             public int Counter { get; set; }

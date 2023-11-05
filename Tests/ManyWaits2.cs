@@ -7,17 +7,17 @@ using ResumableFunctions.Handler.Testing;
 namespace Tests
 {
 
-    public class WaitManyMethodsWithExpression
+    public class ManyWaits2
     {
         [Fact]
         public async Task WaitManyMethodsWithExpression_Test()
         {
-            using var test = new TestShell(nameof(WaitManyMethodsWithExpression_Test), typeof(Test));
+            using var test = new TestShell(nameof(WaitManyMethodsWithExpression_Test), typeof(WaitManyMethodsWithExpression));
             await test.ScanTypes();
             var errors = await test.GetLogs();
             Assert.Empty(errors);
 
-            var wms = new Test();
+            var wms = new WaitManyMethodsWithExpression();
             wms.Method2("1");
             wms.Method3("1");
 
@@ -45,7 +45,7 @@ namespace Tests
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));
             Assert.Equal(2, waits.Count(x => x.IsRoot));
         }
-        public class Test : ResumableFunctionsContainer
+        public class WaitManyMethodsWithExpression : ResumableFunctionsContainer
         {
             public int Id { get; set; } = 10;
             [ResumableFunctionEntryPoint("WaitManyWithExpression")]

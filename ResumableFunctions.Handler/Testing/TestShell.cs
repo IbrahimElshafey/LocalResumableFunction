@@ -45,6 +45,7 @@ namespace ResumableFunctions.Handler.Testing
             try
             {
                 await context.Database.EnsureDeletedAsync();
+                await context.Database.EnsureCreatedAsync();
             }
             catch (Exception e)
             {
@@ -60,6 +61,7 @@ namespace ResumableFunctions.Handler.Testing
             _builder.Services.AddResumableFunctionsCore(_settings);
             CurrentApp = _builder.Build();
             _lock = await _lockProvider.AcquireLockAsync("Test827556");
+            //_lock = await _lockProvider.AcquireLockAsync(Guid.NewGuid().ToString());
             GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(CurrentApp.Services));
 
             using var scope = CurrentApp.Services.CreateScope();
@@ -109,12 +111,10 @@ namespace ResumableFunctions.Handler.Testing
             }
         }
 
-        //todo:add root waits count, completed waits count, completed root waits count,
-
         public async Task<string> RoundCheck(
             int expectedPushedCallsCount,
-            int waitsCount,
-            int completedInstancesCount)
+            int waitsCount = -1,
+            int completedInstancesCount = -1)
         {
 
             if (await HasErrors())
@@ -129,9 +129,13 @@ namespace ResumableFunctions.Handler.Testing
             if (waitsCount != -1 && await GetWaitsCount() is int existWaitsCount && existWaitsCount != waitsCount)
                 return $"Waits count [{existWaitsCount}] not equal [{waitsCount}]";
 
-            int instnacesCount = await GetCompletedInstancesCount();
-            if (instnacesCount != completedInstancesCount)
-                return $"Completed instances [{instnacesCount}] count not equal [{completedInstancesCount}]";
+
+            if (completedInstancesCount != -1)
+            {
+                int instnacesCount = await GetCompletedInstancesCount();
+                if (instnacesCount != completedInstancesCount)
+                    return $"Completed instances [{instnacesCount}] count not equal [{completedInstancesCount}]";
+            }
 
             return string.Empty;
         }
@@ -242,9 +246,10 @@ namespace ResumableFunctions.Handler.Testing
             return await query.OrderBy(x => x.Id).ToListAsync();
         }
 
-        public async Task<int> GetWaitsCount()
+        public async Task<int> GetWaitsCount(Expression<Func<WaitEntity, bool>> expression = null)
         {
-            return await Context.Waits.CountAsync(x => !x.IsFirst);
+            expression ??= x => !x.IsFirst;
+            return await Context.Waits.CountAsync(expression);
         }
 
         public async Task<List<LogRecord>> GetLogs(LogType logType = LogType.Error)

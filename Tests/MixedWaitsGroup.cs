@@ -23,6 +23,7 @@ namespace Tests
             instance.Method5("M5");
 
             Assert.Empty(await test.RoundCheck(5, 8, 1));
+            Assert.Equal(1, await test.GetWaitsCount(x => x.IsRoot && x.Status == ResumableFunctions.Handler.InOuts.WaitStatus.Completed));
         }
         public class Test : ResumableFunctionsContainer
         {

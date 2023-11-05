@@ -1,4 +1,10 @@
-﻿# Closure Bug
+﻿* Call same sub resumable function many times
+	* Replay Cancel?
+	* Replay Name Duplication?
+
+* Sub resumable function parameters??
+
+# Closure Bug
 * Add scope continuation tests for:
 	- Global Scope
 	- Local Closure scope

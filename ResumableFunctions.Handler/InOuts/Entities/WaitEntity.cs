@@ -87,9 +87,6 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public int InCodeLine { get; set; }
     public string CallerName { get; set; }
 
-
-
-
     //MethodWait.AfterMatch(Action<TInput, TOutput>)
     //MethodWait.WhenCancel(Action cancelAction)
     //WaitsGroup.MatchIf(Func<WaitsGroup, bool>)
@@ -113,7 +110,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         {
             var closureMethodInfo = closureType.GetMethod(methodName, Flags());
             var closureInstance = RuntimeClosure?.AsType(closureType);
-            SetClosureCaller(closureInstance);
+            SetClosureFunctionClassField(closureInstance);
 
             if (closureMethodInfo != null)
             {
@@ -127,7 +124,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             $"Can't find method [{methodName}] in class [{rfClassType.Name}]");
     }
 
-    private void SetClosureCaller(object closureInstance)
+    private void SetClosureFunctionClassField(object closureInstance)
     {
         if (closureInstance == null) return;
 
@@ -150,7 +147,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 .Where(x => x.FieldType.Name.StartsWith(Constants.CompilerClosurePrefix));
             foreach (var closureField in parentClosuresFields)
             {
-                SetClosureCaller(closureField.GetValue(closureInstance));
+                SetClosureFunctionClassField(closureField.GetValue(closureInstance));
             }
         }
     }

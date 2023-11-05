@@ -47,25 +47,25 @@ namespace ResumableFunctions.Handler.Testing
 
                 public IDistributedSynchronizationHandle Acquire(TimeSpan? timeout = null, CancellationToken cancellationToken = default)
                 {
-                    return new DistributedSynchronizationHandle();
+                    return new NoLockDistributedSynchronizationHandle();
                 }
 
                 public async ValueTask<IDistributedSynchronizationHandle> AcquireAsync(TimeSpan? timeout = null, CancellationToken cancellationToken = default)
                 {
-                    return new DistributedSynchronizationHandle();
+                    return new NoLockDistributedSynchronizationHandle();
                 }
 
                 public IDistributedSynchronizationHandle TryAcquire(TimeSpan timeout = default, CancellationToken cancellationToken = default)
                 {
-                    return new DistributedSynchronizationHandle();
+                    return new NoLockDistributedSynchronizationHandle();
                 }
 
                 public async ValueTask<IDistributedSynchronizationHandle> TryAcquireAsync(TimeSpan timeout = default, CancellationToken cancellationToken = default)
                 {
-                    return new DistributedSynchronizationHandle();
+                    return new NoLockDistributedSynchronizationHandle();
                 }
 
-                private class DistributedSynchronizationHandle : IDistributedSynchronizationHandle
+                private class NoLockDistributedSynchronizationHandle : IDistributedSynchronizationHandle
                 {
                     public CancellationToken HandleLostToken => CancellationToken.None;
 
