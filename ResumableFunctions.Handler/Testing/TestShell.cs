@@ -112,7 +112,7 @@ namespace ResumableFunctions.Handler.Testing
         }
 
         public async Task<string> RoundCheck(
-            int expectedPushedCallsCount,
+            int pushedCallsCount,
             int waitsCount = -1,
             int completedInstancesCount = -1)
         {
@@ -123,8 +123,8 @@ namespace ResumableFunctions.Handler.Testing
             }
 
             int callsCount = await GetPushedCallsCount();
-            if (callsCount != expectedPushedCallsCount)
-                return $"Pushed calls count [{callsCount}] not equal [{expectedPushedCallsCount}]";
+            if (callsCount != pushedCallsCount)
+                return $"Pushed calls count [{callsCount}] not equal [{pushedCallsCount}]";
 
             if (waitsCount != -1 && await GetWaitsCount() is int existWaitsCount && existWaitsCount != waitsCount)
                 return $"Waits count [{existWaitsCount}] not equal [{waitsCount}]";
