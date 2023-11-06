@@ -54,6 +54,8 @@ namespace ResumableFunctions.Handler.DataAccess
                 count = await _context.WaitProcessingRecords
                     .Where(waitProcessingRecord => instanceIds.Contains(waitProcessingRecord.StateId))
                     .ExecuteDeleteAsync();
+
+                //todo:delete linked private data
                 await AddLog($"Delete [{count}] wait processing record related to completed functions instances done.");
             }
             await AddLog("Delete compeleted functions instances completed.");

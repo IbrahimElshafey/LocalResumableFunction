@@ -2,8 +2,7 @@
 * UI when click errors link show log errors not all
 * Cleaning closures when delete old state `CleanCompletedFunctionInstances`
 
-* Review Wait name duplication expected scenario 
-	- Same wait name in two sub resumable function
+
 
 * Analyzer
 * Review CanPublishFromExternal and IsLocalOnly
@@ -37,3 +36,4 @@
 	* How to check that pushed call can be deleted?
 * Publisher Project Todos
 * Roslyn_Analyzer
+* What if type is not serializable??
