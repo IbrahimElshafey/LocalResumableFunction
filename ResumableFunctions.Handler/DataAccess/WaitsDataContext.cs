@@ -308,7 +308,7 @@ internal sealed class WaitsDataContext : DbContext
 
     private void SetServiceId(EntityEntry entry)
     {
-        if (entry.Entity is not IEntity<int> and not IEntity<long> || entry.State != EntityState.Added) return;
+        if (entry.Entity is not IEntity || entry.State != EntityState.Added) return;
 
         dynamic entityInService = entry.Entity;
         switch (entityInService.ServiceId)

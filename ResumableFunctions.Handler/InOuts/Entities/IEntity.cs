@@ -1,8 +1,11 @@
 ﻿namespace ResumableFunctions.Handler.InOuts.Entities;
-public interface IEntity<IdType>
+public interface IEntity
 {
-    IdType Id { get; }
     DateTime Created { get; }
     int? ServiceId { get; }
+}
+public interface IEntity<IdType> : IEntity
+{
+    IdType Id { get; }
 }
 
