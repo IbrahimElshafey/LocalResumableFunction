@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
 
-public class SubFunctionsTest
+public partial class SubFunctionsTests
 {
     [Fact]
     public async Task FunctionAfterFirst_Test()

@@ -7,7 +7,7 @@ using ResumableFunctions.Handler.Testing;
 namespace Tests
 {
 
-    public class ManyWaits2
+    public partial class ManyWaits
     {
         [Fact]
         public async Task WaitManyMethodsWithExpression_Test()

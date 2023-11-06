@@ -5,17 +5,17 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
-    public class MixedWaitsGroup
+    public partial class ManyWaits
     {
         [Fact]
         public async Task MixedWaitsGroup_Test()
         {
-            using var test = new TestShell(nameof(MixedWaitsGroup_Test), typeof(Test));
+            using var test = new TestShell(nameof(MixedWaitsGroup_Test), typeof(MixedWaitsGroup));
             await test.ScanTypes("MixedWaitsGroup");
             var errors = await test.GetLogs();
             Assert.Empty(errors);
 
-            var instance = new Test();
+            var instance = new MixedWaitsGroup();
             instance.Method1("M1");
             instance.Method2("M2");
             instance.Method3("M3");
@@ -25,7 +25,7 @@ namespace Tests
             Assert.Empty(await test.RoundCheck(5, 8, 1));
             Assert.Equal(1, await test.GetWaitsCount(x => x.IsRoot && x.Status == ResumableFunctions.Handler.InOuts.WaitStatus.Completed));
         }
-        public class Test : ResumableFunctionsContainer
+        public class MixedWaitsGroup : ResumableFunctionsContainer
         {
             [ResumableFunctionEntryPoint("MixedWaitsGroup")]
             public async IAsyncEnumerable<Wait> WaitThreeAtStart()

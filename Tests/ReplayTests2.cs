@@ -5,18 +5,18 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
-public class ReplayInSubFunction
+public partial class ReplayTests
 {
     [Fact]
     public async Task ReplayInSubFunction_Test()
     {
-        using var test = new TestShell(nameof(ReplayInSubFunction_Test), typeof(TestClass));
+        using var test = new TestShell(nameof(ReplayInSubFunction_Test), typeof(ReplayInSubFunction));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();
         Assert.Empty(logs);
 
-        var instance = new TestClass();
+        var instance = new ReplayInSubFunction();
         instance.Method6("Test");
         instance.Method1("Test");
         instance.Method2("Test");
@@ -30,7 +30,7 @@ public class ReplayInSubFunction
         Assert.Empty(logs);
         var pushedCalls = await test.GetPushedCalls();
         Assert.Equal(8, pushedCalls.Count);
-        var instances = await test.GetInstances<TestClass>();
+        var instances = await test.GetInstances<ReplayInSubFunction>();
         Assert.Equal(1, instances.Count);
         Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         //Assert.Equal(1, (instances[0].StateObject as ReplayInSubFunction).Counter1);
@@ -40,7 +40,7 @@ public class ReplayInSubFunction
         //Assert.Equal(1, waits.Count(x => x.Status == WaitStatus.Completed));
     }
 
-    public class TestClass : ResumableFunctionsContainer
+    public class ReplayInSubFunction : ResumableFunctionsContainer
     {
         public int SharedCounter { get; set; }
         [ResumableFunctionEntryPoint("ReplayInSubFunctions")]

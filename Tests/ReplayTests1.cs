@@ -5,7 +5,7 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
-public class ReplayTests
+public partial class ReplayTests
 {
     [Fact]
     public async Task GoAfter_Test()

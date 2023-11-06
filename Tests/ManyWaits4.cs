@@ -7,7 +7,7 @@ using ResumableFunctions.Handler.Testing;
 namespace Tests
 {
 
-    public class ManyWaits4
+    public partial class ManyWaits
     {
 
         [Fact]

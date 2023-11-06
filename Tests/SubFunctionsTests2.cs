@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
 
-public class SubFunctionsLevelsTest
+public partial class SubFunctionsTests
 {
     [Fact]
     public async Task FunctionLevels_Test()
@@ -27,7 +27,7 @@ public class SubFunctionsLevelsTest
         Assert.Empty(logs);
         var pushedCalls = await test.GetPushedCalls();
         Assert.Equal(4, pushedCalls.Count);
-        var instances = await test.GetInstances<SubFunctionsTest.SubFunctions>(true);
+        var instances = await test.GetInstances<FunctionLevels>(true);
         Assert.Equal(2, instances.Count);
         Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         var waits = await test.GetWaits();
@@ -44,7 +44,7 @@ public class SubFunctionsLevelsTest
         Assert.Empty(logs);
         pushedCalls = await test.GetPushedCalls();
         Assert.Equal(8, pushedCalls.Count);
-        instances = await test.GetInstances<SubFunctionsTest.SubFunctions>(true);
+        instances = await test.GetInstances<FunctionLevels>(true);
         Assert.Equal(3, instances.Count);
         Assert.Equal(2, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         waits = await test.GetWaits();

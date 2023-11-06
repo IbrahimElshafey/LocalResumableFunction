@@ -7,7 +7,7 @@ using ResumableFunctions.Handler.Testing;
 namespace Tests
 {
 
-    public class ManyWaits3
+    public partial class ManyWaits
     {
         [Fact]
         public async Task WaitFirstInThreeAtStart_Test()
