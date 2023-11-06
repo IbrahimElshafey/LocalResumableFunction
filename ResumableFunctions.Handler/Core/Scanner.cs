@@ -365,7 +365,7 @@ internal class Scanner
                 $"The resumable function [{resumableFunction.GetFullName()}] return type must be [IAsyncEnumerable<Wait>]");
 
         if (
-            resumableFunction.GetCustomAttribute<ResumableFunctionEntryPointAttribute>() == null ||
+            resumableFunction.GetCustomAttribute<ResumableFunctionEntryPointAttribute>() != null &&
             resumableFunction.GetParameters().Length != 0)
             errors.Add(
                 $"The resumable function [{resumableFunction.GetFullName()}] must match the signature [IAsyncEnumerable<Wait> {resumableFunction.Name}()].\n" +

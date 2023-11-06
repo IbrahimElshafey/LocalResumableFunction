@@ -37,7 +37,7 @@ namespace Tests
                         Wait<string, string>(Method2, "Method 2"),
                         Wait<string, string>(Method3, "Method 3")}
                     ),
-                    Wait("Wait sub function", SubFunction),
+                    Wait("Wait sub function", SubFunction()),
                     Wait<string, string>(Method5, "Wait Method M5")});
                 await Task.Delay(100);
                 Console.WriteLine("Three method done");

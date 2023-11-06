@@ -47,14 +47,14 @@ public class ReplayInSubFunction
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return Wait<string, string>(Method6, "M6");
-            yield return Wait("Wait Two Paths", new[] { PathOneFunction, PathTwoFunction });//wait two sub functions
+            yield return Wait("Wait Two Paths", new[] { PathOneFunction("123"), PathTwoFunction() });//wait two sub functions
             yield return Wait<string, string>(Method5, "M5").MatchAny();
         }
         public int Counter1 { get; set; }
         public int Counter2 { get; set; }
 
         [SubResumableFunction("PathOneFunction")]
-        public async IAsyncEnumerable<Wait> PathOneFunction()
+        public async IAsyncEnumerable<Wait> PathOneFunction(string functionInput)
         {
             var x = 0;
             yield return
@@ -64,6 +64,9 @@ public class ReplayInSubFunction
                    {
                        SharedCounter += 10;
                        x += 15;
+                       if (functionInput != "123")
+                           throw new Exception("Function input must be 123");
+                       functionInput = "789";
                    });
 
             Counter1 += 10;
@@ -82,7 +85,8 @@ public class ReplayInSubFunction
             //    yield return GoBackTo<string, string>("M2", (input, output) => input == "Back");
             if (Counter1 < 16)
                 yield return GoBackTo("M2");
-
+            if (functionInput != "789")
+                throw new Exception("Function input must be 789");
             await Task.Delay(100);
         }
 

@@ -87,7 +87,7 @@ public class SubFunctionsTest
         [ResumableFunctionEntryPoint("TwoFunctionsAtFirst")]
         public async IAsyncEnumerable<Wait> Test()
         {
-            yield return Wait("Wait two sub functions", new[] { SubFunction1, SubFunction2 });
+            yield return Wait("Wait two sub functions", new[] { SubFunction1(), SubFunction2() });
             await Task.Delay(100);
         }
 
@@ -157,7 +157,7 @@ public class SubFunctionsTest
         [ResumableFunctionEntryPoint("FunctionAtStart")]
         public async IAsyncEnumerable<Wait> FunctionAtStart()
         {
-            yield return Wait("Wait sub function", SubFunction);
+            yield return Wait("Wait sub function", SubFunction());
             await Task.Delay(100);
         }
 

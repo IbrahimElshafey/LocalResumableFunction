@@ -30,7 +30,7 @@ public class ManyWaitsTypeInGroupExample : ProjectApprovalExample
                                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                                 .AfterMatch((input, output) => ManagerFourApproval = output)
                         }),
-                     Wait("Sub function Wait", ManagerThreeSubFunction)
+                     Wait("Sub function Wait", ManagerThreeSubFunction())
                 }
                 ).MatchAll();
         Success(nameof(ManyWaitsTypeInGroup));

@@ -58,7 +58,7 @@ public class SubFunctionsLevelsTest
         public async IAsyncEnumerable<Wait> Test()
         {
             int x = 100;
-            yield return Wait("Wait sub function1", SubFunction1);
+            yield return Wait("Wait sub function1", SubFunction1());
             await Task.Delay(100);
             if (x != 100)
                 throw new Exception("Locals continuation problem.");
@@ -85,7 +85,7 @@ public class SubFunctionsLevelsTest
                     if (x != 30)
                         throw new Exception("Closure restore in sub function problem.");
                 });
-            yield return Wait("Wait sub function2", SubFunction2);
+            yield return Wait("Wait sub function2", SubFunction2());
         }
 
         [SubResumableFunction("SubFunction2")]
@@ -96,7 +96,7 @@ public class SubFunctionsLevelsTest
             if (x != 100)
                 throw new Exception("Locals continuation problem.");
             x += 100;
-            yield return Wait("Wait sub function3", SubFunction3);
+            yield return Wait("Wait sub function3", SubFunction3());
             if (x != 200)
                 throw new Exception("Locals continuation problem.");
         }
