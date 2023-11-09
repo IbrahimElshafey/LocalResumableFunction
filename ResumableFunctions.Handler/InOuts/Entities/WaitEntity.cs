@@ -226,7 +226,8 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                     TemplateId = methodWait.TemplateId,
                     MethodGroupToWaitId = methodWait.MethodGroupToWaitId,
                     MethodToWaitId = methodWait.MethodToWaitId,
-                    ImmutableClosure = methodWait.ImmutableClosure,//todo:should I use runtime closure
+                    //todo:should I use runtime closure
+                    ImmutableClosure = methodWait.ImmutableClosure,
                 };
                 break;
             case FunctionWaitEntity:

@@ -65,7 +65,10 @@ public partial class SubFunctionsTests
                 {
                     if (x != 30)
                         throw new Exception("Closure restore in sub function problem.");
+                    x += 10;
                 });
+            if (x != 40)
+                throw new Exception("Closure restore in sub function problem.");
         }
 
 

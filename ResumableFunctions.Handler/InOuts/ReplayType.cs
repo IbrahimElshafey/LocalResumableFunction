@@ -11,6 +11,7 @@ public enum ReplayType
     /// Execute code before wait `x` and then re-wait `x` again.
     /// </summary>
     GoBefore,
+
     /// <summary>
     /// Execute code before wait `x` and then re-wait `x` again but with new match expression.
     /// </summary>

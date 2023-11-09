@@ -200,7 +200,6 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         });
         await _waitsRepo.SaveWait(duplicateWait);
         duplicateWait.RuntimeClosureId = null;
-        //todo:closure vars may be changed as flow (wait to replay - change vars - replay wait)
         //todo:closure may be from normall method and continuation may reuse same old private method data??
         duplicateWait.RuntimeClosure = oldWaitToReplay.RuntimeClosure;
         return duplicateWait;

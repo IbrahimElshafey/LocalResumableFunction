@@ -1,4 +1,4 @@
-﻿* Validate wait name duplication 
+﻿
 * Call same sub resumable function many times
 	* Replay Cancel?
 	* Replay Name Duplication?
@@ -8,7 +8,6 @@
 
 # Closure Bug
 * Add scope continuation tests for:
-	- Global Scope
 	- Local Closure scope
 	- In sequance
 	- In group

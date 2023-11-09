@@ -1,4 +1,11 @@
 ﻿# Todo
+* Validate wait name duplication
+* Validate go back to closure update
+	* Re-evaluate match expression
+	* Use same old match expression
+* Closure may be from normall method and continuation in replay go back may reuse same old private method data?? 
+* UI service must not use EF context directly
+* Replay time wait not same description as old wait
 * UI when click errors link show log errors not all
 * Cleaning closures when delete old state `CleanCompletedFunctionInstances`
 
