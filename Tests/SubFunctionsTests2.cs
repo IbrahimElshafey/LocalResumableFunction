@@ -46,7 +46,7 @@ public partial class SubFunctionsTests
         public async IAsyncEnumerable<Wait> SubFunction1(string functionInput)
         {
             int x = 10;
-            yield return Wait<string, string>(Method1, "M1")
+            yield return Wait<string, string>(Method1, $"M1-{functionInput}")
                 .MatchIf((input, _) => input == functionInput)
                 .AfterMatch((_, _) =>
                 {

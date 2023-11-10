@@ -1,5 +1,4 @@
 ﻿# Todo
-* Remove replay request and use goto keyword
 * AfterMatch,MatchExpression,WhenCancel must use same closure type,AfterMatch
 	yield return
             MethodThatGetWait()//use match expression inside method
@@ -7,20 +6,15 @@
             .MatchAny();
 
 * Complex local var in closure
-* Reset Errors after function complete
-* Closure may be from normall method and continuation in replay go back TO may reuse same old private method data?? 
-* Validate wait name duplication
-* Validate go back TO closure update
-	* Re-evaluate match expression
-	* Use same old match expression
+* Review pushed call activate one instance
 
 
 * wait group(privateMwthod1(),privateMwthod2,...)
+* Reset Errors after function complete
 * Add is caller RF for wait entity
 
 
 * UI service must not use EF context directly
-* Replay time wait not same description as old wait
 * UI when click errors link show log errors not all
 * Cleaning closures when delete old state `CleanCompletedFunctionInstances`
 
@@ -37,7 +31,6 @@
 
 * Message Pack private setter props serialization
 * Parameter check lib use
-* Use RequestedByFunctionId prop in TimeWaitInput to refine match for time waits
 * Confirm One Transaction per bussiness unit
 * Speed tests => work in memory
 * How I handle call recieving while creating db

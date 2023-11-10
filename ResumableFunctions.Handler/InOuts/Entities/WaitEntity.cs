@@ -216,16 +216,6 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     internal virtual bool ValidateWaitRequest()
     {
-        //todo: validate wait name duplication for in memory waits
-        var isNameDuplicated = FunctionState.Waits.Count(x => x.Name == Name) > 1;
-        if (isNameDuplicated)
-        {
-            FunctionState.AddLog(
-                $"The wait named [{Name}] is duplicated in function [{RequestedByFunction?.MethodName}] body," +
-                $"fix it to not cause a problem. If it's a loop join the  index to the name",
-                LogType.Warning, StatusCodes.WaitValidation);
-        }
-
         var hasErrors = FunctionState.HasErrors();
         if (hasErrors)
         {

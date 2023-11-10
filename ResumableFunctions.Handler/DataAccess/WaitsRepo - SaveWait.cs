@@ -155,9 +155,9 @@ internal partial class WaitsRepo
 
     private async Task HandleTimeWaitRequest(TimeWaitEntity timeWait)
     {
-        var timeWaitMethod = timeWait.TimeWaitMethod;
+        var timeWaitCallbackMethod = timeWait.TimeWaitMethod;
 
-        var methodId = await _methodIdsRepo.GetId(timeWaitMethod);
+        var methodId = await _methodIdsRepo.GetId(timeWaitCallbackMethod);
 
         var timeWaitInput = new TimeWaitInput
         {
@@ -166,14 +166,14 @@ internal partial class WaitsRepo
             Description = $"[{timeWait.Name}] in function [{timeWait.RequestedByFunction.RF_MethodUrn}:{timeWait.FunctionState.Id}]"
         };
         if (!timeWait.IgnoreJobCreation)
-            timeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
+            timeWaitCallbackMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
                 () => new LocalRegisteredMethods().TimeWait(timeWaitInput), timeWait.TimeToWait);
 
-        timeWaitMethod.MethodToWaitId = methodId.MethodId;
-        timeWaitMethod.MethodGroupToWaitId = methodId.GroupId;
+        timeWaitCallbackMethod.MethodToWaitId = methodId.MethodId;
+        timeWaitCallbackMethod.MethodGroupToWaitId = methodId.GroupId;
 
-        await SaveMethodWait(timeWaitMethod);
-        timeWaitMethod.MandatoryPart = timeWait.UniqueMatchId;
+        await SaveMethodWait(timeWaitCallbackMethod);
+        timeWaitCallbackMethod.MandatoryPart = timeWait.UniqueMatchId;
         _context.Entry(timeWait).State = EntityState.Detached;
     }
 
