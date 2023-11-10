@@ -32,8 +32,7 @@ public sealed class FunctionWaitEntity : WaitEntity
         var hasSubFunctionAttribute = FunctionInfo.GetCustomAttributes<SubResumableFunctionAttribute>().Any();
         if (!hasSubFunctionAttribute)
             FunctionState.AddLog(
-                  $"You didn't set attribute [{nameof(SubResumableFunctionAttribute)}] for method [{FunctionInfo.GetFullName()}]," +
-                  $"when you try to wait [{Name}].",
+                  $"You didn't set attribute [{nameof(SubResumableFunctionAttribute)}] for method [{FunctionInfo.GetFullName()}].",
                   LogType.Error,
                   StatusCodes.WaitValidation);
         return base.ValidateWaitRequest();

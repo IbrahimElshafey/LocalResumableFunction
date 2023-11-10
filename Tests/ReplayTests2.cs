@@ -31,7 +31,7 @@ public partial class ReplayTests
         var pushedCalls = await test.GetPushedCalls();
         Assert.Equal(8, pushedCalls.Count);
         var instances = await test.GetInstances<ReplayInSubFunction>();
-        Assert.Equal(1, instances.Count);
+        Assert.Single(instances);
         Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         //Assert.Equal(1, (instances[0].StateObject as ReplayInSubFunction).Counter1);
 
@@ -70,9 +70,11 @@ public partial class ReplayTests
                    });
 
             Counter1 += 10;
+        M2_Wait:
             yield return
                 Wait<string, string>(Method2, "M2")
-                .MatchAny()
+                .MatchAny(Counter1 == 10)
+                .MatchIf(Counter1 == 13, (input, output) => input == "Back")
                 .AfterMatch((_, _) =>
                 {
                     if (Counter1 == 13 && x != 30)
@@ -84,7 +86,7 @@ public partial class ReplayTests
             //if (Counter1 < 16)
             //    yield return GoBackTo<string, string>("M2", (input, output) => input == "Back");
             if (Counter1 < 16)
-                yield return GoBackTo("M2");
+                goto M2_Wait;
             if (functionInput != "789")
                 throw new Exception("Function input must be 789");
             await Task.Delay(100);
@@ -100,9 +102,11 @@ public partial class ReplayTests
                   .AfterMatch((_, _) => SharedCounter += 10);
 
             Counter2 += 10;
+        M4:
             yield return
                 Wait<string, string>(Method4, "M4")
-                .MatchAny()
+                .MatchAny(Counter2 == 10)
+                .MatchIf(Counter2 == 13, (input, _) => input == "Back")
                 .AfterMatch((_, _) =>
                 {
                     if (!(x == 100 || x == 120))
@@ -113,7 +117,7 @@ public partial class ReplayTests
             Counter2 += 3;
             x += 20;
             if (Counter2 < 16)
-                yield return GoBackTo<string, string>("M4", (input, _) => input == "Back");
+                goto M4;
 
             await Task.Delay(100);
         }

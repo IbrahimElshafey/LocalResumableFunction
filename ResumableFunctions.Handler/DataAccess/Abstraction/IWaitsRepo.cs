@@ -10,7 +10,6 @@ public interface IWaitsRepo
     Task CancelFunctionPendingWaits(WaitEntity waitForReplayDb);
     Task CancelOpenedWaitsForState(int stateId);
     Task CancelSubWaits(long parentId, long pushedCallId);
-    Task<WaitEntity> GetOldWaitForReplay(ReplayRequest replayWait);
     Task<WaitEntity> GetWaitParent(WaitEntity wait);
     Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn);
     Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn);

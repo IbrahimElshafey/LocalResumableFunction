@@ -48,10 +48,10 @@ namespace RequestApproval.Controllers
         [ResumableFunctionEntryPoint("RequestApprovalWorkflow.RequestApprovalFlow")]
         internal async IAsyncEnumerable<Wait> RequestApprovalFlow()
         {
-            //wait a method to be executed, If match expression satisified it will continue
-            //method may be called in any time
-            yield return Wait<Request, bool>(_service.UserSubmitRequest, WaitSubmitRequest)
-                    .MatchIf((request, result) => request.Id > 0)
+            Wait_Submit_Request:
+             yield return Wait<Request, bool>(_service.UserSubmitRequest, WaitSubmitRequest)
+                    .MatchIf(UserRequest == null, (request, result) => request.Id > 0)
+                    .MatchIf(UserRequest != null, (request, result) => request.Id == UserRequest.Id)
                     .AfterMatch((request, result) => UserRequest = request);
 
             //save satate in the class contains the resumable function
@@ -72,8 +72,7 @@ namespace RequestApproval.Controllers
                     break;
                 case "MoreInfo":
                     _service.AskUserForMoreInfo(UserRequest.Id, ManagerApprovalResult.Message);
-                    yield return GoBackTo<Request, bool>(WaitSubmitRequest, (request, result) => request.Id == UserRequest.Id);
-                    break;
+                    goto Wait_Submit_Request;
                 default: throw new ArgumentException("Allowed values for decision are one of(Accept,Reject,MoreInfo)");
             }
 

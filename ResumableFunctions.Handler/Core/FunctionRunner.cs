@@ -35,18 +35,16 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
 
     public FunctionRunner(
         ResumableFunctionsContainer classInstance,
-        MethodInfo resumableFunction,
-        int? state = null,
-        object closure = null)
+        MethodInfo resumableFunction)
     {
         var functionRunnerType = classInstance.GetType()
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
             .FirstOrDefault(x => x.Name.StartsWith($"<{resumableFunction.Name}>"));
         CreateRunner(functionRunnerType);
         SetRunnerFunctionClass(classInstance);
-        SetState(state ?? int.MinValue);
-        if (closure != null)
-            SetRunnerClosureField(closure);
+        SetState(int.MinValue);
+        //if (closure != null)
+        //    SetRunnerClosureField(closure);
     }
 
     public FunctionRunner(IAsyncEnumerator<Wait> runner)
@@ -70,7 +68,6 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         var hasNext = await _functionRunner.MoveNextAsync();
         if (hasNext)
         {
-            CurrentWait.StateBeforeWait = stateBeforeWait;
             CurrentWait.StateAfterWait = GetState();
             //set locals for the new incoming wait
             var localContinuation =

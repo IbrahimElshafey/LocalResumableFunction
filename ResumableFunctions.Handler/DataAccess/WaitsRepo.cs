@@ -240,36 +240,6 @@ internal partial class WaitsRepo : IWaitsRepo
         }
     }
 
-    public async Task<WaitEntity> GetOldWaitForReplay(ReplayRequest replayRequest)
-    {
-        var waitToReplay =
-            await _context.Waits
-            .OrderByDescending(x => x.Id)
-            .Include(x => x.ParentWait)
-            .Include(x => x.RequestedByFunction)
-            .FirstOrDefaultAsync(x =>
-                x.RequestedByFunctionId == replayRequest.RequestedByFunctionId &&
-                x.FunctionStateId == replayRequest.FunctionState.Id &&
-                x.Name == replayRequest.Name &&
-                x.LocalsId == replayRequest.LocalsId);
-
-        if (waitToReplay == null)
-        {
-            var error =
-                  $"Can't replay not exiting wait [{replayRequest.Name}] in function [{replayRequest?.RequestedByFunction}].";
-            _logger.LogError(error);
-            throw new Exception(error);
-        }
-        var isNode = waitToReplay.IsRoot || waitToReplay.ParentWait?.WaitType == WaitType.FunctionWait;
-        if (isNode is false)
-        {
-            var error = $"Wait to replay [{replayRequest.Name}] must be a node.";
-            _logger.LogError(error);
-            throw new Exception(error);
-        }
-        return waitToReplay;
-    }
-
 
     public async Task<List<MethodWaitEntity>> GetPendingWaitsForTemplate(
         WaitTemplate template,
@@ -281,10 +251,6 @@ internal partial class WaitsRepo : IWaitsRepo
             .Where(
                 wait =>
                 wait.Status == WaitStatus.Waiting &&
-                //wait.MethodGroupToWaitId == template.MethodGroupId &&
-                //wait.ServiceId == _settings.CurrentServiceId &&
-                //wait.MethodToWaitId == template.MethodId &&
-                //wait.RequestedByFunctionId == template.FunctionId &&
                 wait.TemplateId == template.Id);
         foreach (var include in includes)
         {

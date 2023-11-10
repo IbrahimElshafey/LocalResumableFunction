@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace ResumableFunctions.Handler;
 
-public abstract partial class ResumableFunctionsContainer
+public abstract partial class ResumableFunctionsContainer : IObjectWithLog
 {
     public virtual Task OnErrorOccurred(string message, Exception ex = null)
     {

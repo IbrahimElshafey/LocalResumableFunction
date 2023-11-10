@@ -209,13 +209,15 @@ public partial class ReplayTests
         {
             yield return
                 Wait<string, string>(Method1, "M1");
-
+        Before_M2:
             Counter += 10;
             yield return
-                Wait<string, string>(Method2, "M2").MatchAny();
+                Wait<string, string>(Method2, "M2").
+                MatchAny(Counter == 10).
+                MatchIf(Counter == 20, (input, output) => input == "Back");
 
             if (Counter < 20)
-                yield return GoBackBefore<string, string>("M2", (input, output) => input == "Back");
+                goto Before_M2;
             await Task.Delay(100);
         }
 
@@ -237,7 +239,6 @@ public partial class ReplayTests
             Counter++;
             if (Counter < 2)
                 goto after_m1;
-                //yield return GoBackAfter("M1");
 
             if (localCounter != 20)
                 throw new Exception("Closure restore in replay problem.");
@@ -256,16 +257,17 @@ public partial class ReplayTests
             int localCounter = 10;
             yield return
                 Wait<string, string>(Method1, "M1");
-
+        before_m2:
             localCounter += 10;
             Counter += 10;
             yield return
                 Wait<string, string>(Method2, "M2")
                 .MatchAny()
-                .AfterMatch((_, _) => localCounter+=10);
+                .AfterMatch((_, _) => localCounter += 10);
 
             if (Counter < 20)
-                yield return GoBackBefore("M2");
+                goto before_m2;
+            //yield return GoBackBefore("M2");
             if (localCounter != 50)
                 throw new Exception("Local variable should be 50");
             await Task.Delay(100);
@@ -286,9 +288,11 @@ public partial class ReplayTests
 
             Counter += 10;
             var x = 5;
+        M2:
             yield return
                 Wait<string, string>(Method2, "M2")
-                .MatchAny()
+                .MatchAny(x == 5)
+                .MatchIf(x == 10, (input, output) => input == "Back" && x == 10)
                 .AfterMatch((_, _) =>
                 {
                     if (x != 5 && x != 10)
@@ -299,7 +303,7 @@ public partial class ReplayTests
             x *= 2;
 
             if (Counter < 16)
-                yield return GoBackTo<string, string>("M2", (input, output) => input == "Back" && x == 10);
+                goto M2;
 
             await Task.Delay(100);
         }
@@ -319,6 +323,7 @@ public partial class ReplayTests
                 .AfterMatch((_, _) => localCounter += 10);
 
             Counter += 10;
+        M2_Wait:
             yield return
                 Wait<string, string>(Method2, "M2")
                 .AfterMatch((_, _) => localCounter += 10)
@@ -328,7 +333,7 @@ public partial class ReplayTests
             localCounter += 10;
 
             if (Counter < 16)
-                yield return GoBackTo("M2");
+                goto M2_Wait;
 
             if (localCounter != 60)
                 throw new Exception("Locals continuation problem.");

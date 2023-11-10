@@ -31,7 +31,6 @@ public class TimeWaitEntity : WaitEntity
             _timeMethodWait.ParentWait = ParentWait;
             _timeMethodWait.FunctionState = FunctionState;
             _timeMethodWait.RequestedByFunctionId = RequestedByFunctionId;
-            _timeMethodWait.StateBeforeWait = StateBeforeWait;
             _timeMethodWait.StateAfterWait = StateAfterWait;
             _timeMethodWait.Locals = Locals;
             _timeMethodWait.CallerName = CallerName;

@@ -1,4 +1,7 @@
 ﻿# UI Todo
+* UI service must not use EF context directly
+* UI when click errors link show log errors not all
+
 * Filtering controls at top for:
 	* Function Instances
 	* Waits in method group

@@ -83,18 +83,19 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 FunctionInstanceStatus.InProgress;
             await _waitsRepository.SaveWait(firstWaitClone);//first wait clone
 
-            var currentMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
-            currentMw.Status = WaitStatus.Waiting;
-            currentMw.Input = firstMatchedMethodWait.Input;
-            currentMw.Output = firstMatchedMethodWait.Output;
+            //return method wait that 
+            var currentMatchedMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
+            currentMatchedMw.Status = WaitStatus.Waiting;
+            currentMatchedMw.Input = firstMatchedMethodWait.Input;
+            currentMatchedMw.Output = firstMatchedMethodWait.Output;
             var waitTemplate = await _templatesRepo.GetWaitTemplateWithBasicMatch(firstMatchedMethodWait.TemplateId);
-            currentMw.TemplateId = waitTemplate.Id;
-            currentMw.Template = waitTemplate;
-            currentMw.IsFirst = false;
-            currentMw.LoadExpressions();
+            currentMatchedMw.TemplateId = waitTemplate.Id;
+            currentMatchedMw.Template = waitTemplate;
+            currentMatchedMw.IsFirst = false;
+            currentMatchedMw.LoadExpressions();
             await _context.SaveChangesAsync();
             firstWaitClone.Status = WaitStatus.Waiting;
-            return currentMw;
+            return currentMatchedMw;
         }
         catch (Exception ex)
         {

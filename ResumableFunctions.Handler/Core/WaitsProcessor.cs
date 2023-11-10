@@ -14,7 +14,6 @@ namespace ResumableFunctions.Handler.Core
     internal class WaitsProcessor : IWaitsProcessor
     {
         private readonly IFirstWaitProcessor _firstWaitProcessor;
-        private readonly IReplayWaitProcessor _replayWaitProcessor;
         private readonly IWaitsRepo _waitsRepo;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<WaitsProcessor> _logger;
@@ -40,7 +39,6 @@ namespace ResumableFunctions.Handler.Core
             IWaitsRepo waitsRepo,
             IBackgroundProcess backgroundJobClient,
             IUnitOfWork context,
-            IReplayWaitProcessor replayWaitProcessor,
             BackgroundJobExecutor backgroundJobExecutor,
             IDistributedLockProvider lockProvider,
             IWaitProcessingRecordsRepo waitsForCallsRepo,
@@ -57,7 +55,6 @@ namespace ResumableFunctions.Handler.Core
             _waitsRepo = waitsRepo;
             _backgroundJobClient = backgroundJobClient;
             _context = context;
-            _replayWaitProcessor = replayWaitProcessor;
             _backgroundJobExecutor = backgroundJobExecutor;
             _lockProvider = lockProvider;
             _waitProcessingRecordsRepo = waitsForCallsRepo;
@@ -362,15 +359,6 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task SaveNewWait(WaitEntity nextWait)
         {
-            if (nextWait is ReplayRequest replayRequest)
-            {
-                var dbWaitToReplay = await _replayWaitProcessor.ProcessReplayRequest(replayRequest);
-                //todo: move this to `_replayWaitProcessor`
-                _context.MarkEntityAsModified(dbWaitToReplay.FunctionState);
-                if (replayRequest.ReplayType is ReplayType.GoAfter && dbWaitToReplay != null)
-                    await ProceedToNextWait(dbWaitToReplay);
-            }
-            else
                 await _waitsRepo.SaveWait(nextWait);
             await _context.SaveChangesAsync();
         }

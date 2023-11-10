@@ -144,13 +144,8 @@ internal partial class WaitsRepo
             functionWait.FirstWait.RequestedByFunction = methodId;
             functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
 
-            if (functionWait.FirstWait is ReplayRequest)
-                await _serviceRepo.AddErrorLog(null, "First wait can't be a replay request", StatusCodes.FirstWait);
-            else
-            {
-                await SaveWait(functionWait.FirstWait);//first wait for sub function
-                await AddWait(functionWait);
-            }
+            await SaveWait(functionWait.FirstWait);//first wait for sub function
+            await AddWait(functionWait);
         }
         catch (Exception ex)
         {
@@ -160,9 +155,9 @@ internal partial class WaitsRepo
 
     private async Task HandleTimeWaitRequest(TimeWaitEntity timeWait)
     {
-        var timeWaitMethod = timeWait.TimeWaitMethod;
+        var timeWaitCallbackMethod = timeWait.TimeWaitMethod;
 
-        var methodId = await _methodIdsRepo.GetId(timeWaitMethod);
+        var methodId = await _methodIdsRepo.GetId(timeWaitCallbackMethod);
 
         var timeWaitInput = new TimeWaitInput
         {
@@ -171,14 +166,14 @@ internal partial class WaitsRepo
             Description = $"[{timeWait.Name}] in function [{timeWait.RequestedByFunction.RF_MethodUrn}:{timeWait.FunctionState.Id}]"
         };
         if (!timeWait.IgnoreJobCreation)
-            timeWaitMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
+            timeWaitCallbackMethod.ExtraData.JobId = _backgroundJobClient.Schedule(
                 () => new LocalRegisteredMethods().TimeWait(timeWaitInput), timeWait.TimeToWait);
 
-        timeWaitMethod.MethodToWaitId = methodId.MethodId;
-        timeWaitMethod.MethodGroupToWaitId = methodId.GroupId;
+        timeWaitCallbackMethod.MethodToWaitId = methodId.MethodId;
+        timeWaitCallbackMethod.MethodGroupToWaitId = methodId.GroupId;
 
-        await SaveMethodWait(timeWaitMethod);
-        timeWaitMethod.MandatoryPart = timeWait.UniqueMatchId;
+        await SaveMethodWait(timeWaitCallbackMethod);
+        timeWaitCallbackMethod.MandatoryPart = timeWait.UniqueMatchId;
         _context.Entry(timeWait).State = EntityState.Detached;
     }
 
