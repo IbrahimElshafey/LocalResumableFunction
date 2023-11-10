@@ -365,10 +365,9 @@ namespace ResumableFunctions.Handler.Core
             if (nextWait is ReplayRequest replayRequest)
             {
                 var dbWaitToReplay = await _replayWaitProcessor.ProcessReplayRequest(replayRequest);
-                //todo: move this to `_replayWaitProcessor`
                 _context.MarkEntityAsModified(dbWaitToReplay.FunctionState);
-                if (replayRequest.ReplayType is ReplayType.GoAfter && dbWaitToReplay != null)
-                    await ProceedToNextWait(dbWaitToReplay);
+                //if (replayRequest.ReplayType is ReplayType.GoAfter && dbWaitToReplay != null)
+                //    await ProceedToNextWait(dbWaitToReplay);
             }
             else
                 await _waitsRepo.SaveWait(nextWait);

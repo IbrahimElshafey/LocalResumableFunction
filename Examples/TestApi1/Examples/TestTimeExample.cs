@@ -13,11 +13,11 @@ public class TestTimeExample : ProjectApprovalExample
                 .MatchIf((input, output) => output == true)
                 .AfterMatch((project, outputResult) => CurrentProject = project);
 
+        ask_manager_to_approve:
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
-        const string waitManagerOneApprovalInSeconds = "Wait manager one approval in 2 days";
-        yield return 
+        yield return
         Wait(
-            waitManagerOneApprovalInSeconds,
+            "Wait manager one approval in 2 days",
             new[]
             {
                 Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
@@ -32,7 +32,7 @@ public class TestTimeExample : ProjectApprovalExample
         {
             WriteMessage("Timer matched");
             TimerMatched = false;
-            yield return GoBackBefore(waitManagerOneApprovalInSeconds);
+            goto ask_manager_to_approve;
         }
         else
         {

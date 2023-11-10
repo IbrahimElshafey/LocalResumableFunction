@@ -70,6 +70,7 @@ public partial class ReplayTests
                    });
 
             Counter1 += 10;
+            M2_Wait:
             yield return
                 Wait<string, string>(Method2, "M2")
                 .MatchAny()
@@ -84,7 +85,7 @@ public partial class ReplayTests
             //if (Counter1 < 16)
             //    yield return GoBackTo<string, string>("M2", (input, output) => input == "Back");
             if (Counter1 < 16)
-                yield return GoBackTo("M2");
+                goto M2_Wait;
             if (functionInput != "789")
                 throw new Exception("Function input must be 789");
             await Task.Delay(100);

@@ -9,42 +9,6 @@ namespace ResumableFunctions.Handler;
 public abstract partial class ResumableFunctionsContainer : IObjectWithLog
 {
     /// <summary>
-    ///     Go back to code after the wait.
-    /// </summary>
-    protected Wait GoBackAfter(
-        string name,
-        [CallerLineNumber] int inCodeLine = 0,
-        [CallerMemberName] string callerName = "")
-    {
-        return new ReplayRequest
-        {
-            Name = name,
-            ReplayType = ReplayType.GoAfter,
-            CurrentFunction = this,
-            InCodeLine = inCodeLine,
-            CallerName = callerName
-        }.ToWait(); ;
-    }
-
-    /// <summary>
-    ///     Go back to code before the wait and re-wait it again.
-    /// </summary>
-    protected Wait GoBackBefore(
-        string name,
-        [CallerLineNumber] int inCodeLine = 0,
-        [CallerMemberName] string callerName = "")
-    {
-        return new ReplayRequest
-        {
-            Name = name,
-            ReplayType = ReplayType.GoBefore,
-            CurrentFunction = this,
-            InCodeLine = inCodeLine,
-            CallerName = callerName
-        }.ToWait(); ;
-    }
-
-    /// <summary>
     ///     Go back to code before method wait and re-wait it again with new match condition.
     /// </summary>
     protected Wait GoBackBefore<TInput, TOutput>(
@@ -64,24 +28,6 @@ public abstract partial class ResumableFunctionsContainer : IObjectWithLog
         }.ToWait(); ;
     }
 
-    /// <summary>
-    ///  Go back to wait and re-wait it again.
-    ///  If the wait is a return of a method call the method will not be called again.
-    /// </summary>
-    protected Wait GoBackTo(
-        string name,
-        [CallerLineNumber] int inCodeLine = 0,
-        [CallerMemberName] string callerName = "")
-    {
-        return new ReplayRequest
-        {
-            Name = name,
-            ReplayType = ReplayType.GoTo,
-            CurrentFunction = this,
-            InCodeLine = inCodeLine,
-            CallerName = callerName
-        }.ToWait(); ;
-    }
 
     /// <summary>
     ///     Go back to wait and re-wait it again with new match condition.

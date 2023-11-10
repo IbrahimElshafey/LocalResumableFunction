@@ -14,6 +14,7 @@ public class ReplayGoBackAfterExample : ProjectApprovalExample
                 .MatchIf((input, output) => output == true)
                 .AfterMatch((input, output) => CurrentProject = input);
 
+    AskManagerApprovalLabel:
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         yield return Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
@@ -22,7 +23,7 @@ public class ReplayGoBackAfterExample : ProjectApprovalExample
         if (ManagerOneApproval is false)
         {
             WriteMessage("Manager one rejected project and replay will go after ProjectSubmitted.");
-            yield return GoBackAfter(ProjectSumbitted);
+            goto AskManagerApprovalLabel;
         }
         else
         {

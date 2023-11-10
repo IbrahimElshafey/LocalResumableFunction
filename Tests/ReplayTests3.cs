@@ -45,7 +45,6 @@ public partial class ReplayTests
 
             if (Counter < 16)
                 goto wait_method_two;
-                //yield return GoBackTo("M2");
 
             if (localCounter != 40)
                 throw new Exception("Locals continuation problem.");
@@ -66,7 +65,7 @@ public partial class ReplayTests
                  .AfterMatch((_, _) =>
                  {
                      methodTwoCounter += 10;
-                     if (!(methodTwoCounter == 20 || methodTwoCounter == 30))
+                     if (methodTwoCounter != 20)
                          throw new Exception("Method closure reused for local method.");
                  })
                  .MatchAny();

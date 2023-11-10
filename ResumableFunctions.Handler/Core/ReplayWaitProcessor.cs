@@ -54,25 +54,25 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
             switch (replayRequest.ReplayType)
             {
-                case ReplayType.GoAfter:
-                    replayRequest.FunctionState?.AddLog(
-                        $"Try to go back after wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
-                    return waitForReplayDb;
+                //case ReplayType.GoAfter:
+                //    replayRequest.FunctionState?.AddLog(
+                //        $"Try to go back after wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
+                //    return waitForReplayDb;
 
-                case ReplayType.GoBefore:
-                    replayRequest.FunctionState?.AddLog(
-                        $"Try to go back before wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
-                    return await ReplayGoBefore(waitForReplayDb);
+                //case ReplayType.GoBefore:
+                //    replayRequest.FunctionState?.AddLog(
+                //        $"Try to go back before wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
+                //    return await ReplayGoBefore(waitForReplayDb);
 
                 case ReplayType.GoBeforeWithNewMatch:
                     replayRequest.FunctionState?.AddLog(
                         $"Try to go back before wait [{waitForReplayDb.Name}] with new match.", LogType.Info, StatusCodes.Replay);
                     return await ReplayGoBeforeWithNewMatch(replayRequest, waitForReplayDb);
 
-                case ReplayType.GoTo:
-                    replayRequest.FunctionState?.AddLog(
-                        $"Try go to wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
-                    return await GetWaitDuplication(waitForReplayDb);
+                //case ReplayType.GoTo:
+                //    replayRequest.FunctionState?.AddLog(
+                //        $"Try go to wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
+                //    return await GetWaitDuplication(waitForReplayDb);
 
                 case ReplayType.GoToWithNewMatch:
                     replayRequest.FunctionState?.AddLog(
