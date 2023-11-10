@@ -185,19 +185,14 @@ internal partial class WaitsRepo : IWaitsRepo
         if (wait.ParentWait != null)//todo:traverse up to get current function
             wait.CurrentFunction = wait.ParentWait.CurrentFunction;
         wait.LoadUnmappedProps();
-        //todo:if method wait and closure changed then update root tree and all child
         wait.Cancel();
         wait.CallId = pushedCallId;
-        if (wait is MethodWaitEntity mw)
-        {
-            //await PropagateClosureIfChanged(mw);
 
-            if (mw.Name == Constants.TimeWaitName)
-                _backgroundJobClient.Delete(wait.ExtraData.JobId);
+        bool isTimeWait = wait is MethodWaitEntity mw && mw.Name == Constants.TimeWaitName;
+        if (isTimeWait)
+        {
+            _backgroundJobClient.Delete(wait.ExtraData.JobId);
         }
-        //if (wait.ParentWait != null)
-        //    wait.ParentWait.CurrentFunction = wait.CurrentFunction;
-        //wait.FunctionState.AddLog($"Wait [{wait.Name}] canceled.");
     }
 
     public async Task<WaitEntity> GetWaitParent(WaitEntity wait)
@@ -225,26 +220,27 @@ internal partial class WaitsRepo : IWaitsRepo
     /// Used by ReplayWaitProcessor.GetWaitToReplay
     /// </summary>
     /// <returns></returns>
-    public async Task CancelFunctionPendingWaits(int requestedByFunctionId, int functionStateId)
+    public async Task CancelFunctionPendingWaits(WaitEntity waitForReplayDb)
     {
         var pendingRootWaits =
             await _context.Waits
             .OrderByDescending(x => x.Id)
             .Where(x =>
-                x.RequestedByFunctionId == requestedByFunctionId &&
-                x.FunctionStateId == functionStateId &&
+                x.RequestedByFunctionId == waitForReplayDb.RequestedByFunctionId &&
+                x.FunctionStateId == waitForReplayDb.FunctionStateId &&
                 x.Status == WaitStatus.Waiting &&
+                x.LocalsId == waitForReplayDb.LocalsId &&
                 x.IsRoot)
             .ToListAsync();
 
         foreach (var wait in pendingRootWaits)
         {
-            CancelWait(wait, -1);//CancelFunctionPendingWaits
+            CancelWait(wait, -1);
             await CancelSubWaits(wait.Id, -1);
         }
     }
 
-    public async Task<WaitEntity> GetOldWaitForReplay(ReplayRequest replayWait)
+    public async Task<WaitEntity> GetOldWaitForReplay(ReplayRequest replayRequest)
     {
         var waitToReplay =
             await _context.Waits
@@ -252,21 +248,22 @@ internal partial class WaitsRepo : IWaitsRepo
             .Include(x => x.ParentWait)
             .Include(x => x.RequestedByFunction)
             .FirstOrDefaultAsync(x =>
-                x.RequestedByFunctionId == replayWait.RequestedByFunctionId &&
-                x.FunctionStateId == replayWait.FunctionState.Id &&
-                x.Name == replayWait.Name);
+                x.RequestedByFunctionId == replayRequest.RequestedByFunctionId &&
+                x.FunctionStateId == replayRequest.FunctionState.Id &&
+                x.Name == replayRequest.Name &&
+                x.LocalsId == replayRequest.LocalsId);
 
         if (waitToReplay == null)
         {
             var error =
-                  $"Can't replay not exiting wait [{replayWait.Name}] in function [{replayWait?.RequestedByFunction}].";
+                  $"Can't replay not exiting wait [{replayRequest.Name}] in function [{replayRequest?.RequestedByFunction}].";
             _logger.LogError(error);
             throw new Exception(error);
         }
         var isNode = waitToReplay.IsRoot || waitToReplay.ParentWait?.WaitType == WaitType.FunctionWait;
         if (isNode is false)
         {
-            var error = $"Wait to replay [{replayWait.Name}] must be a node.";
+            var error = $"Wait to replay [{replayRequest.Name}] must be a node.";
             _logger.LogError(error);
             throw new Exception(error);
         }
@@ -302,40 +299,4 @@ internal partial class WaitsRepo : IWaitsRepo
             .OrderBy(x => x.IsFirst)
             .ToListAsync();
     }
-
-    //public async Task PropagateClosureIfChanged(WaitEntity wait)
-    //{
-    //    //is root
-    //    if (wait.ParentWait == null && wait.ParentWaitId == null) return;
-
-    //    //get old JObject closure from db
-    //    var oldClosure = await _context.Waits
-    //        .Where(x => x.Id == wait.Id)
-    //        .Select(x => x.Closure)
-    //        .FirstAsync() as JObject;
-    //    var currentClosure = wait.Closure is JObject jobjectClosure ?
-    //        jobjectClosure :
-    //        JObject.FromObject(wait.Closure, JsonSerializer.Create(ClosureContractResolver.Settings));
-    //    var sameAsOld = JToken.DeepEquals(oldClosure, currentClosure);
-    //    if (sameAsOld) return;
-    //    return;
-    //    //all waits that have same StopPoint, RequestedBySameFunction and FunctionStateId
-    //    //Todo: root id prefix is not accurate since we can call same method twice
-    //    var rootId = Regex.Match(wait.Path, "^(/\\d+)/").Groups[1].Value;
-    //    Expression<Func<WaitEntity, bool>> predicate = w =>
-    //            w.FunctionStateId == wait.FunctionStateId &&
-    //            w.StateAfterWait == wait.StateAfterWait &&
-    //            w.RequestedByFunctionId == wait.RequestedByFunctionId &&
-    //            w.CallerName == wait.CallerName &&
-    //            w.Path.StartsWith(rootId);
-    //    var count = await _context.Waits.Where(predicate).CountAsync();
-    //    var waits =
-    //        await _context.Waits
-    //        .Where(predicate)
-    //        .ToListAsync();
-    //    foreach (var w in waits)
-    //    {
-    //        w.SetClosure(wait.Closure);
-    //    }
-    //}
 }

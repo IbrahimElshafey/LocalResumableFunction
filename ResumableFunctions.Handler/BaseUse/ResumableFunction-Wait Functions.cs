@@ -1,8 +1,9 @@
 ﻿using ResumableFunctions.Handler.BaseUse;
+using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 
 namespace ResumableFunctions.Handler;
 
@@ -10,24 +11,28 @@ public abstract partial class ResumableFunctionsContainer
 {
     protected Wait Wait(
         string name,
-        Func<IAsyncEnumerable<Wait>> function,
+        IAsyncEnumerable<Wait> function,
         [CallerLineNumber] int inCodeLine = 0,
         [CallerMemberName] string callerName = "")
     {
-        //todo:validate attribute exist
+        var runner = function.GetAsyncEnumerator();
+        var runnerName = function.GetAsyncEnumerator().GetType().Name;
+        var methodName = Regex.Match(runnerName, "<(.+)>").Groups[1].Value;
+        var functionInfo = GetType().GetMethod(methodName, CoreExtensions.DeclaredWithinTypeFlags());
         return new FunctionWaitEntity
         {
-            Name = name,
+            Name = name ?? $"#{methodName}#",
             WaitType = WaitType.FunctionWait,
-            FunctionInfo = function.Method,
+            FunctionInfo = functionInfo,
             CurrentFunction = this,
             CallerName = callerName,
             InCodeLine = inCodeLine,
+            Runner = runner,
         }.ToWait();
     }
 
     protected WaitsGroup Wait(string name,
-        Func<IAsyncEnumerable<Wait>>[] subFunctions,
+        IAsyncEnumerable<Wait>[] subFunctions,
         [CallerLineNumber] int inCodeLine = 0,
         [CallerMemberName] string callerName = "")
     {
@@ -43,11 +48,10 @@ public abstract partial class ResumableFunctionsContainer
         for (var index = 0; index < subFunctions.Length; index++)
         {
             var currentFunction = subFunctions[index];
-            var currentFuncResult = Wait($"#{currentFunction.Method.Name}#", currentFunction);
+            var currentFuncResult = Wait(null, currentFunction);
             currentFuncResult.WaitEntity.ParentWait = functionGroup;
             functionGroup.ChildWaits[index] = currentFuncResult.WaitEntity;
         }
-
         return functionGroup.ToWaitsGroup();
     }
 }

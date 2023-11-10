@@ -6,7 +6,7 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
 
-public class SubFunctionsLevelsTest
+public partial class SubFunctionsTests
 {
     [Fact]
     public async Task FunctionLevels_Test()
@@ -27,7 +27,7 @@ public class SubFunctionsLevelsTest
         Assert.Empty(logs);
         var pushedCalls = await test.GetPushedCalls();
         Assert.Equal(4, pushedCalls.Count);
-        var instances = await test.GetInstances<SubFunctionsTest.SubFunctions>(true);
+        var instances = await test.GetInstances<FunctionLevels>(true);
         Assert.Equal(2, instances.Count);
         Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         var waits = await test.GetWaits();
@@ -44,7 +44,7 @@ public class SubFunctionsLevelsTest
         Assert.Empty(logs);
         pushedCalls = await test.GetPushedCalls();
         Assert.Equal(8, pushedCalls.Count);
-        instances = await test.GetInstances<SubFunctionsTest.SubFunctions>(true);
+        instances = await test.GetInstances<FunctionLevels>(true);
         Assert.Equal(3, instances.Count);
         Assert.Equal(2, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         waits = await test.GetWaits();
@@ -58,7 +58,7 @@ public class SubFunctionsLevelsTest
         public async IAsyncEnumerable<Wait> Test()
         {
             int x = 100;
-            yield return Wait("Wait sub function1", SubFunction1);
+            yield return Wait("Wait sub function1", SubFunction1());
             await Task.Delay(100);
             if (x != 100)
                 throw new Exception("Locals continuation problem.");
@@ -85,7 +85,7 @@ public class SubFunctionsLevelsTest
                     if (x != 30)
                         throw new Exception("Closure restore in sub function problem.");
                 });
-            yield return Wait("Wait sub function2", SubFunction2);
+            yield return Wait("Wait sub function2", SubFunction2());
         }
 
         [SubResumableFunction("SubFunction2")]
@@ -96,7 +96,7 @@ public class SubFunctionsLevelsTest
             if (x != 100)
                 throw new Exception("Locals continuation problem.");
             x += 100;
-            yield return Wait("Wait sub function3", SubFunction3);
+            yield return Wait("Wait sub function3", SubFunction3());
             if (x != 200)
                 throw new Exception("Locals continuation problem.");
         }

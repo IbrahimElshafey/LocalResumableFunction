@@ -27,7 +27,6 @@ public class WaitsGroupEntity : WaitEntity
                 break;
 
             case WaitType.GroupWaitWithExpression when GroupMatchFuncName != null:
-                //todo:[closure update] GroupWaitWithExpression
                 var isCompleted = (bool)CallMethodByName(GroupMatchFuncName, ToWaitsGroup());
                 Status = isCompleted ? WaitStatus.Completed : Status;
                 return isCompleted;
@@ -36,17 +35,13 @@ public class WaitsGroupEntity : WaitEntity
                 completed = ChildWaits?.Any(x => x.Status == WaitStatus.Waiting) is false;
                 break;
         }
-        //if (completed)
-        //{
-        //    Closure = ChildWaits.Last().Closure;
-        //    Locals = ChildWaits.Last().Locals;
-        //}
         return completed;
     }
 
     internal override void OnAddWait()
     {
-        //Set mutable closure Id for group
+        //todo: different closures for children 
+        //wait group(privateMwthod1(),privateMwthod2,...)
         var childHasClosure = ChildWaits.Any(x => x.RuntimeClosureId != null && CallerName == x.CallerName);
         if (childHasClosure)
         {

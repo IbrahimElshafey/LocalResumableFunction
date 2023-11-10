@@ -82,12 +82,6 @@ internal class Scanner
         return assemblyPaths;
     }
 
-    internal BindingFlags GetBindingFlags() =>
-        BindingFlags.DeclaredOnly |
-        BindingFlags.Public |
-        BindingFlags.NonPublic |
-        BindingFlags.Static |
-        BindingFlags.Instance;
 
     internal async Task RegisterResumableFunction(MethodInfo resumableFunctionMInfo, ServiceData serviceData)
     {
@@ -224,7 +218,7 @@ internal class Scanner
         {
             var urns = new List<string>();
             var methodWaits = type
-                .GetMethods(GetBindingFlags())
+                .GetMethods(CoreExtensions.DeclaredWithinTypeFlags())
                 .Where(method =>
                         method.GetCustomAttributes().Any(x => x is PushCallAttribute));
             foreach (var method in methodWaits)
@@ -324,7 +318,7 @@ internal class Scanner
     {
         var urns = new List<string>();
         var functions = type
-            .GetMethods(GetBindingFlags())
+            .GetMethods(CoreExtensions.DeclaredWithinTypeFlags())
             .Where(method => method
                 .GetCustomAttributes()
                 .Any(attribute => attribute.GetType() == attributeType));
@@ -366,7 +360,13 @@ internal class Scanner
         if (!resumableFunction.IsAsyncMethod())
             errors.Add($"The resumable function [{resumableFunction.GetFullName()}] must be async.");
 
-        if (resumableFunction.ReturnType != typeof(IAsyncEnumerable<Wait>) || resumableFunction.GetParameters().Length != 0)
+        if (resumableFunction.ReturnType != typeof(IAsyncEnumerable<Wait>))
+            errors.Add(
+                $"The resumable function [{resumableFunction.GetFullName()}] return type must be [IAsyncEnumerable<Wait>]");
+
+        if (
+            resumableFunction.GetCustomAttribute<ResumableFunctionEntryPointAttribute>() != null &&
+            resumableFunction.GetParameters().Length != 0)
             errors.Add(
                 $"The resumable function [{resumableFunction.GetFullName()}] must match the signature [IAsyncEnumerable<Wait> {resumableFunction.Name}()].\n" +
                 $"Must have no parameter and return type must be [IAsyncEnumerable<Wait>]");
@@ -374,7 +374,10 @@ internal class Scanner
         if (resumableFunction.IsStatic)
             errors.Add($"Resumable function [{resumableFunction.GetFullName()}] must be instance method.");
 
-        var hasOverloads = resumableFunction.DeclaringType.GetMethods(GetBindingFlags()).Count(x => x.Name == resumableFunction.Name) > 1;
+        var hasOverloads = resumableFunction
+            .DeclaringType
+            .GetMethods(CoreExtensions.DeclaredWithinTypeFlags())
+            .Count(x => x.Name == resumableFunction.Name) > 1;
         if (hasOverloads)
             errors.Add($"The resumable function [{resumableFunction.Name}] must not overloaded, just declare one method with the name [{resumableFunction.Name}].");
 

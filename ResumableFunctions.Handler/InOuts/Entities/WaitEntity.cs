@@ -87,9 +87,6 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public int InCodeLine { get; set; }
     public string CallerName { get; set; }
 
-
-
-
     //MethodWait.AfterMatch(Action<TInput, TOutput>)
     //MethodWait.WhenCancel(Action cancelAction)
     //WaitsGroup.MatchIf(Func<WaitsGroup, bool>)
@@ -103,7 +100,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         //is local method in current function class
         object rfClassInstance = CurrentFunction;
         var rfClassType = rfClassInstance.GetType();
-        var localMethodInfo = rfClassType.GetMethod(methodName, Flags());
+        var localMethodInfo = rfClassType.GetMethod(methodName, CoreExtensions.DeclaredWithinTypeFlags());
         if (localMethodInfo != null)
             return localMethodInfo.Invoke(rfClassInstance, parameters);
 
@@ -111,9 +108,9 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         var closureType = rfClassType.Assembly.GetType(className);
         if (closureType != null)
         {
-            var closureMethodInfo = closureType.GetMethod(methodName, Flags());
+            var closureMethodInfo = closureType.GetMethod(methodName, CoreExtensions.DeclaredWithinTypeFlags());
             var closureInstance = RuntimeClosure?.AsType(closureType);
-            SetClosureCaller(closureInstance);
+            SetClosureFunctionClassField(closureInstance);
 
             if (closureMethodInfo != null)
             {
@@ -127,7 +124,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             $"Can't find method [{methodName}] in class [{rfClassType.Name}]");
     }
 
-    private void SetClosureCaller(object closureInstance)
+    private void SetClosureFunctionClassField(object closureInstance)
     {
         if (closureInstance == null) return;
 
@@ -150,7 +147,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 .Where(x => x.FieldType.Name.StartsWith(Constants.CompilerClosurePrefix));
             foreach (var closureField in parentClosuresFields)
             {
-                SetClosureCaller(closureField.GetValue(closureInstance));
+                SetClosureFunctionClassField(closureField.GetValue(closureInstance));
             }
         }
     }
@@ -229,7 +226,8 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                     TemplateId = methodWait.TemplateId,
                     MethodGroupToWaitId = methodWait.MethodGroupToWaitId,
                     MethodToWaitId = methodWait.MethodToWaitId,
-                    ImmutableClosure = methodWait.ImmutableClosure,//todo:should I use runtime closure
+                    //todo:should I use runtime closure
+                    ImmutableClosure = methodWait.ImmutableClosure,
                 };
                 break;
             case FunctionWaitEntity:
@@ -284,11 +282,13 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     internal virtual bool ValidateWaitRequest()
     {
+        //todo: validate wait name duplication for in memory waits
         var isNameDuplicated = FunctionState.Waits.Count(x => x.Name == Name) > 1;
         if (isNameDuplicated)
         {
             FunctionState.AddLog(
-                $"The wait named [{Name}] is duplicated in function [{RequestedByFunction?.MethodName}] body,fix it to not cause a problem. If it's a loop concat the  index to the name",
+                $"The wait named [{Name}] is duplicated in function [{RequestedByFunction?.MethodName}] body," +
+                $"fix it to not cause a problem. If it's a loop join the  index to the name",
                 LogType.Warning, StatusCodes.WaitValidation);
         }
 
@@ -449,7 +449,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 $"For wait [{Name}] the [{methodName}:{method.Name}] must be a method in class " +
                 $"[{functionClassType.Name}] or inline lambda method.");
 
-        var hasOverload = functionClassType.GetMethods(Flags()).Count(x => x.Name == method.Name) > 1;
+        var hasOverload = functionClassType.GetMethods(CoreExtensions.DeclaredWithinTypeFlags()).Count(x => x.Name == method.Name) > 1;
         if (hasOverload)
             throw new Exception(
                 $"For wait [{Name}] the [{methodName}:{method.Name}] must not be over-loaded.");
@@ -464,12 +464,13 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
         var closureString =
                JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
-        //ClosureHash = closureString.GetHashCode();
+        if (ImmutableClosure != null && ImmutableClosure.GetType() != closure.GetType())
+            throw new Exception(
+                $"For wait [{Name}] the closure must be same for AfterMatchAction,CancelAction and MatchExpression.");
         ImmutableClosure = JsonConvert.DeserializeObject(closureString, closure.GetType());
     }
 
-    protected static BindingFlags Flags() =>
-        BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+
 
 
     internal string LocalsDisplay()

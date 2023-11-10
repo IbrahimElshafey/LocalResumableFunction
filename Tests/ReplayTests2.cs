@@ -5,18 +5,18 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
-public class ReplayInSubFunction
+public partial class ReplayTests
 {
     [Fact]
     public async Task ReplayInSubFunction_Test()
     {
-        using var test = new TestShell(nameof(ReplayInSubFunction_Test), typeof(TestClass));
+        using var test = new TestShell(nameof(ReplayInSubFunction_Test), typeof(ReplayInSubFunction));
         await test.ScanTypes();
 
         var logs = await test.GetLogs();
         Assert.Empty(logs);
 
-        var instance = new TestClass();
+        var instance = new ReplayInSubFunction();
         instance.Method6("Test");
         instance.Method1("Test");
         instance.Method2("Test");
@@ -30,7 +30,7 @@ public class ReplayInSubFunction
         Assert.Empty(logs);
         var pushedCalls = await test.GetPushedCalls();
         Assert.Equal(8, pushedCalls.Count);
-        var instances = await test.GetInstances<TestClass>();
+        var instances = await test.GetInstances<ReplayInSubFunction>();
         Assert.Equal(1, instances.Count);
         Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
         //Assert.Equal(1, (instances[0].StateObject as ReplayInSubFunction).Counter1);
@@ -40,21 +40,21 @@ public class ReplayInSubFunction
         //Assert.Equal(1, waits.Count(x => x.Status == WaitStatus.Completed));
     }
 
-    public class TestClass : ResumableFunctionsContainer
+    public class ReplayInSubFunction : ResumableFunctionsContainer
     {
         public int SharedCounter { get; set; }
         [ResumableFunctionEntryPoint("ReplayInSubFunctions")]
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return Wait<string, string>(Method6, "M6");
-            yield return Wait("Wait Two Paths", new[] { PathOneFunction, PathTwoFunction });//wait two sub functions
+            yield return Wait("Wait Two Paths", new[] { PathOneFunction("123"), PathTwoFunction() });//wait two sub functions
             yield return Wait<string, string>(Method5, "M5").MatchAny();
         }
         public int Counter1 { get; set; }
         public int Counter2 { get; set; }
 
         [SubResumableFunction("PathOneFunction")]
-        public async IAsyncEnumerable<Wait> PathOneFunction()
+        public async IAsyncEnumerable<Wait> PathOneFunction(string functionInput)
         {
             var x = 0;
             yield return
@@ -64,6 +64,9 @@ public class ReplayInSubFunction
                    {
                        SharedCounter += 10;
                        x += 15;
+                       if (functionInput != "123")
+                           throw new Exception("Function input must be 123");
+                       functionInput = "789";
                    });
 
             Counter1 += 10;
@@ -82,7 +85,8 @@ public class ReplayInSubFunction
             //    yield return GoBackTo<string, string>("M2", (input, output) => input == "Back");
             if (Counter1 < 16)
                 yield return GoBackTo("M2");
-
+            if (functionInput != "789")
+                throw new Exception("Function input must be 789");
             await Task.Delay(100);
         }
 

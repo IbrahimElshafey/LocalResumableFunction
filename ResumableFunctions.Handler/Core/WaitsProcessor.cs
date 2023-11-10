@@ -88,11 +88,7 @@ namespace ResumableFunctions.Handler.Core
                             _pushedCall.GetMandatoryPart(template.CallMandatoryPartExpression),
                             x => x.RequestedByFunction,
                             x => x.FunctionState);
-                        /*,
-                         * todo: load both in previous include
-                            x => x.RuntimeClosure,
-                            x => x.MethodToWait
-                        */
+                        
                         if (waits == null)
                             continue;
                         foreach (var wait in waits)
@@ -368,10 +364,11 @@ namespace ResumableFunctions.Handler.Core
         {
             if (nextWait is ReplayRequest replayRequest)
             {
-                var replayResult = await _replayWaitProcessor.GetWaitToReplay(replayRequest);
-                _context.MarkEntityAsModified(replayResult.Wait.FunctionState);
-                if (replayResult is { ProceedExecution: true, Wait: not null })
-                    await ProceedToNextWait(replayResult.Wait);
+                var dbWaitToReplay = await _replayWaitProcessor.ProcessReplayRequest(replayRequest);
+                //todo: move this to `_replayWaitProcessor`
+                _context.MarkEntityAsModified(dbWaitToReplay.FunctionState);
+                if (replayRequest.ReplayType is ReplayType.GoAfter && dbWaitToReplay != null)
+                    await ProceedToNextWait(dbWaitToReplay);
             }
             else
                 await _waitsRepo.SaveWait(nextWait);
@@ -386,6 +383,7 @@ namespace ResumableFunctions.Handler.Core
             currentWait.FunctionState.AddLog("Function instance completed.", LogType.Info, StatusCodes.WaitProcessing);
             currentWait.FunctionState.Status = FunctionInstanceStatus.Completed;
             await _waitsRepo.CancelOpenedWaitsForState(currentWait.FunctionStateId);
+            await currentWait.CurrentFunction?.OnInstanceCompleted();
         }
 
         private async Task<MethodWaitEntity> LoadWait(int waitId)

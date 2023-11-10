@@ -1,6 +1,13 @@
-﻿# Closure Bug
+﻿
+* Call same sub resumable function many times
+	* Replay Cancel?
+	* Replay Name Duplication?
+	* Review Wait name duplication expected scenario 
+- Same wait name in two sub resumable function
+- Same wait name in same sub resumable function called twice
+
+# Closure Bug
 * Add scope continuation tests for:
-	- Global Scope
 	- Local Closure scope
 	- In sequance
 	- In group
@@ -12,4 +19,3 @@
 
 - Multiple replay and local variables
 
-* What if closure is not serializable

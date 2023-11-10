@@ -5,7 +5,7 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
-public class ReplayTests
+public partial class ReplayTests
 {
     [Fact]
     public async Task GoAfter_Test()
@@ -233,10 +233,11 @@ public class ReplayTests
             yield return
                 Wait<string, string>(Method1, "M1")
                 .AfterMatch((_, _) => localCounter += 10);
-
+        after_m1:
             Counter++;
             if (Counter < 2)
-                yield return GoBackAfter("M1");
+                goto after_m1;
+                //yield return GoBackAfter("M1");
 
             if (localCounter != 20)
                 throw new Exception("Closure restore in replay problem.");
@@ -252,15 +253,21 @@ public class ReplayTests
         [ResumableFunctionEntryPoint("GoBeforeFunction")]
         public async IAsyncEnumerable<Wait> Test()
         {
+            int localCounter = 10;
             yield return
                 Wait<string, string>(Method1, "M1");
 
+            localCounter += 10;
             Counter += 10;
             yield return
-                Wait<string, string>(Method2, "M2").MatchAny();
+                Wait<string, string>(Method2, "M2")
+                .MatchAny()
+                .AfterMatch((_, _) => localCounter+=10);
 
             if (Counter < 20)
                 yield return GoBackBefore("M2");
+            if (localCounter != 50)
+                throw new Exception("Local variable should be 50");
             await Task.Delay(100);
         }
 

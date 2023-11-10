@@ -5,12 +5,12 @@ using ResumableFunctions.Handler.Testing;
 
 namespace Tests
 {
-    public class TestCancelMethod
+    public class CancelCallback
     {
         [Fact]
-        public async Task TestCancelMethod_Test()
+        public async Task CancelCallback_Test()
         {
-            using var test = new TestShell(nameof(TestCancelMethod_Test), typeof(Test));
+            using var test = new TestShell(nameof(CancelCallback_Test), typeof(Test));
             await test.ScanTypes();
 
             Assert.Empty(await test.RoundCheck(0, 0, 0));

@@ -7,18 +7,18 @@ using ResumableFunctions.Handler.Testing;
 namespace Tests
 {
 
-    public class WaitTwoMethodsAfterFirst
+    public partial class ManyWaits
     {
 
         [Fact]
         public async Task WaitTwoMethodsAfterFirst_Test()
         {
-            using var test = new TestShell(nameof(WaitTwoMethodsAfterFirst_Test), typeof(Test));
+            using var test = new TestShell(nameof(WaitTwoMethodsAfterFirst_Test), typeof(WaitTwoMethodsAfterFirst));
             await test.ScanTypes();
             var errors = await test.GetLogs();
             Assert.Empty(errors);
 
-            var wms = new Test();
+            var wms = new WaitTwoMethodsAfterFirst();
             wms.Method4("1");
             wms.Method5("2");
             wms.Method6("3");
@@ -32,7 +32,7 @@ namespace Tests
             Assert.Equal(4, waits.Where(x => x.Status == WaitStatus.Completed).Count());
             Assert.Equal(2, waits.Where(x => x.IsRoot).Count());
 
-            wms = new Test();
+            wms = new WaitTwoMethodsAfterFirst();
             wms.Method4("1");
             wms.Method5("2");
             wms.Method6("3");
@@ -47,7 +47,7 @@ namespace Tests
             Assert.Equal(4, waits.Where(x => x.IsRoot).Count());
         }
 
-        public class Test : ResumableFunctionsContainer
+        public class WaitTwoMethodsAfterFirst : ResumableFunctionsContainer
         {
 
 

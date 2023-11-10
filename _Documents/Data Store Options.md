@@ -18,14 +18,16 @@
 		* Faster from Microsoft
 		* A fast store and forward message queue for .NET. (aka not a broker or server)
 			* https://github.com/LightningQueues/LightningQueues
+## Waits
 * Store waits in different store that support:
-	* Fast queries 
+	* Fast queries
 	* Fast wait insertion
 	* InMemory DBs May be an option
 		* May I use https://ignite.apache.org/docs/latest/ which is a distributed database for high-performance computing with in-memory speed.
 		* https://hazelcast.com/clients/dotnet/
 		* https://www.couchbase.com/
 		* https://github.com/DevrexLabs/memstate
+## Logs
 * Fast logging
 	* Separate data store for log
 	* Logs can be queried by
@@ -35,16 +37,15 @@
 		* Status
 	* Custom implementation for logging (IResumableFunctionLogging)
 	* May I use InfluxDB,RocksDB or Faster
+## States and private data
+	* 
+
 
 # We need In-Memory DB that:
 * Can be used with EF
 * Can be used with Hangfire
 * Support Snapshoting and clustering
 * Mark some tables as on disk only
-* 
-
-# Services Communication
-* NetMQ is a 100% native C# port of the lightweight messaging library ZeroMQ.
-	* https://github.com/zeromq/netmq
-* MagicOnion is a modern RPC framework for .NET platform that provides bi-directional real-time communications such as SignalR and Socket.io and RPC mechanisms such as WCF and web-based APIs.
-	* https://github.com/Cysharp/MagicOnion
+* Keep rows in memory based on condition
+* Keep rows in memory based on root node is live
+* Execute quries againist memory nad don't hit db

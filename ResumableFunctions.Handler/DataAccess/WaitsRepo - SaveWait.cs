@@ -122,7 +122,10 @@ internal partial class WaitsRepo
     {
         try
         {
-            var functionRunner = new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
+            var functionRunner =
+                functionWait.Runner != null ?
+                new FunctionRunner(functionWait.Runner) :
+                new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
             var hasNext = await functionRunner.MoveNextAsync();
             functionWait.FirstWait = functionRunner.CurrentWait;
             if (hasNext is false)

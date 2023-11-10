@@ -26,7 +26,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
                 $"in class [{oldMatchedWait?.CurrentFunction?.GetType().FullName}].");
 
         CreateRunner(functionRunnerType, oldMatchedWait.Locals);
-        SetFunctionCallerInstance(oldMatchedWait.CurrentFunction);
+        SetRunnerFunctionClass(oldMatchedWait.CurrentFunction);
         SetState(oldMatchedWait.StateAfterWait);
         SetRunnerClosureField(oldMatchedWait.RuntimeClosure?.Value);
         _oldMatchedWait = oldMatchedWait;
@@ -43,10 +43,15 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
             .FirstOrDefault(x => x.Name.StartsWith($"<{resumableFunction.Name}>"));
         CreateRunner(functionRunnerType);
-        SetFunctionCallerInstance(classInstance);
+        SetRunnerFunctionClass(classInstance);
         SetState(state ?? int.MinValue);
         if (closure != null)
             SetRunnerClosureField(closure);
+    }
+
+    public FunctionRunner(IAsyncEnumerator<Wait> runner)
+    {
+        _functionRunner = runner;
     }
 
     public bool ResumableFunctionExistInCode => _functionRunner != null;
@@ -136,7 +141,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         }
     }
 
-    private void SetFunctionCallerInstance(ResumableFunctionsContainer functionClassInstance)
+    private void SetRunnerFunctionClass(ResumableFunctionsContainer functionClassInstance)
     {
         //set caller class for current function runner
         var thisField = _functionRunner

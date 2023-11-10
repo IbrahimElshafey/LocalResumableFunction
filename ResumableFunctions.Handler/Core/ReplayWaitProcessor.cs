@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Expressions;
@@ -29,7 +30,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         _serviceRepo = serviceRepo;
     }
 
-    public async Task<(WaitEntity Wait, bool ProceedExecution)> GetWaitToReplay(ReplayRequest replayRequest)
+    public async Task<WaitEntity> ProcessReplayRequest(ReplayRequest replayRequest)
     {
         try
         {
@@ -41,39 +42,42 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
                 throw new Exception(errorMsg);
             }
 
-            waitForReplayDb.Status = waitForReplayDb.Status == WaitStatus.Waiting ? WaitStatus.Canceled : waitForReplayDb.Status;
+            waitForReplayDb.Status = 
+                waitForReplayDb.Status == WaitStatus.Waiting ?
+                WaitStatus.Canceled :
+                waitForReplayDb.Status;
             waitForReplayDb.CurrentFunction = replayRequest.CurrentFunction;
             waitForReplayDb.InCodeLine = replayRequest.InCodeLine;
             waitForReplayDb.CallerName = replayRequest.CallerName;
 
-            await _waitsRepo.CancelFunctionPendingWaits(waitForReplayDb.RequestedByFunctionId, waitForReplayDb.FunctionStateId);
+            await _waitsRepo.CancelFunctionPendingWaits(waitForReplayDb);
 
             switch (replayRequest.ReplayType)
             {
                 case ReplayType.GoAfter:
                     replayRequest.FunctionState?.AddLog(
                         $"Try to go back after wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
-                    return new(waitForReplayDb, true);
+                    return waitForReplayDb;
 
                 case ReplayType.GoBefore:
                     replayRequest.FunctionState?.AddLog(
                         $"Try to go back before wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
-                    return new(await ReplayGoBefore(waitForReplayDb), false);
+                    return await ReplayGoBefore(waitForReplayDb);
 
                 case ReplayType.GoBeforeWithNewMatch:
                     replayRequest.FunctionState?.AddLog(
                         $"Try to go back before wait [{waitForReplayDb.Name}] with new match.", LogType.Info, StatusCodes.Replay);
-                    return new(await ReplayGoBeforeWithNewMatch(replayRequest, waitForReplayDb), false);
+                    return await ReplayGoBeforeWithNewMatch(replayRequest, waitForReplayDb);
 
                 case ReplayType.GoTo:
                     replayRequest.FunctionState?.AddLog(
                         $"Try go to wait [{waitForReplayDb.Name}].", LogType.Info, StatusCodes.Replay);
-                    return new(await GetWaitDuplication(waitForReplayDb), false);
+                    return await GetWaitDuplication(waitForReplayDb);
 
                 case ReplayType.GoToWithNewMatch:
                     replayRequest.FunctionState?.AddLog(
                         $"Try go to wait [{waitForReplayDb.Name}] with new match.", LogType.Info, StatusCodes.Replay);
-                    return new(await ReplayGoToWithNewMatch(replayRequest, waitForReplayDb), false);
+                    return await GetWaitDuplicationWithNewMatch(replayRequest, waitForReplayDb);
 
                 default:
                     var errorMsg = $"ReplayWait type not defined [{replayRequest}].";
@@ -88,8 +92,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
             throw;
         }
     }
-
-    private async Task<MethodWaitEntity> ReplayGoToWithNewMatch(ReplayRequest replayRequest, WaitEntity waitToReplayDb)
+    private async Task<MethodWaitEntity> GetWaitDuplicationWithNewMatch(ReplayRequest replayRequest, WaitEntity waitToReplayDb)
     {
         if (waitToReplayDb is MethodWaitEntity oldMethodWaitToReplayDb)
         {
@@ -152,7 +155,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         var matchExpressionParts =
             new MatchExpressionWriter(matchExpression, functionInstance).MatchExpressionParts;
         if (matchExpressionParts.Closure != null)
-            newReplayWait.SetImmutableClosure(matchExpressionParts.Closure);//todo:check get from runtime closure not old match closure
+            newReplayWait.SetImmutableClosure(matchExpressionParts.Closure);
         newReplayWait.MandatoryPart = matchExpressionParts.GetInstanceMandatoryPart(functionInstance);
 
         var expressionsHash =
@@ -197,7 +200,7 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
         });
         await _waitsRepo.SaveWait(duplicateWait);
         duplicateWait.RuntimeClosureId = null;
-        //todo:closure vars may be changed as flow (wait to replay - change vars - replay wait)
+        //todo:closure may be from normall method and continuation may reuse same old private method data??
         duplicateWait.RuntimeClosure = oldWaitToReplay.RuntimeClosure;
         return duplicateWait;
     }
@@ -288,7 +291,6 @@ internal class ReplayWaitProcessor : IReplayWaitProcessor
 
     private async Task<(FunctionRunner Runner, bool HasWait)> GoBefore(WaitEntity oldCompletedWait)
     {
-        //todo:oldCompletedWait.RuntimeClosure?.Value or closure in memory
         var runner = new FunctionRunner(
             oldCompletedWait.CurrentFunction,
             oldCompletedWait.RequestedByFunction.MethodInfo,

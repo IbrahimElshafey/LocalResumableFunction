@@ -113,7 +113,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         WriteMessage("Wait sub function");
-        yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers);
+        yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers());
         WriteMessage("After sub function ended");
         if (ManagerOneApproval && ManagerTwoApproval)
         {

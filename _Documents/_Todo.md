@@ -1,9 +1,26 @@
 ﻿# Todo
+* Remove replay request and use goto keyword
+* Closure may be from normall method and continuation in replay go back TO may reuse same old private method data?? 
+* Validate wait name duplication
+* Validate go back TO closure update
+	* Re-evaluate match expression
+	* Use same old match expression
+
+* AfterMatch,MatchExpression,WhenCancel must use same closure type,AfterMatch
+	yield return
+            MethodThatGetWait()//use match expression inside method
+            .AfterMatch((_, _) => localCounter += 10)
+            .MatchAny();
+* wait group(privateMwthod1(),privateMwthod2,...)
+* Add is caller RF for wait entity
+
+
+* UI service must not use EF context directly
+* Replay time wait not same description as old wait
 * UI when click errors link show log errors not all
 * Cleaning closures when delete old state `CleanCompletedFunctionInstances`
 
-* Review Wait name duplication expected scenario 
-	- Same wait name in two sub resumable function
+
 
 * Analyzer
 * Review CanPublishFromExternal and IsLocalOnly
@@ -37,3 +54,4 @@
 	* How to check that pushed call can be deleted?
 * Publisher Project Todos
 * Roslyn_Analyzer
+* What if type is not serializable??
