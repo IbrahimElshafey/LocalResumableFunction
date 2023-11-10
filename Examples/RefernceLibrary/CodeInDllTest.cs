@@ -12,7 +12,6 @@ namespace ReferenceLibrary
         public async IAsyncEnumerable<Wait> TestFunctionInDll()
         {
             yield return Wait(
-                "Wait first",
                 new[]
                 {
                     Wait<string, string>(SayHello, "Wait say hello")
@@ -21,7 +20,8 @@ namespace ReferenceLibrary
                     Wait<string, string>(Method123, "Wait Method123")
                     .AfterMatch((input, output) => UserName = output)
                 }
-                )
+,
+                "Wait first")
                 .MatchAny();
 
             yield return Wait<string, string>

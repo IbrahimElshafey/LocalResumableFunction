@@ -10,8 +10,8 @@ namespace ResumableFunctions.Handler;
 public abstract partial class ResumableFunctionsContainer
 {
     protected Wait Wait(
-        string name,
         IAsyncEnumerable<Wait> function,
+        string name = null,
         [CallerLineNumber] int inCodeLine = 0,
         [CallerMemberName] string callerName = "")
     {
@@ -48,7 +48,7 @@ public abstract partial class ResumableFunctionsContainer
         for (var index = 0; index < subFunctions.Length; index++)
         {
             var currentFunction = subFunctions[index];
-            var currentFuncResult = Wait(null, currentFunction);
+            var currentFuncResult = Wait(currentFunction, null);
             currentFuncResult.WaitEntity.ParentWait = functionGroup;
             functionGroup.ChildWaits[index] = currentFuncResult.WaitEntity;
         }

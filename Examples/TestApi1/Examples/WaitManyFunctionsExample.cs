@@ -55,7 +55,6 @@ public class WaitManyFunctionsExample : ProjectApprovalExample
         await Task.Delay(10);
         WriteMessage("WaitTwoManagers started");
         yield return Wait(
-            "Wait two methods",
             new Wait[]
             {
                 Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
@@ -65,7 +64,8 @@ public class WaitManyFunctionsExample : ProjectApprovalExample
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((input, output) => ManagerTwoApproval = output)
             }
-        ).MatchAll();
+,
+            "Wait two methods").MatchAll();
         WriteMessage("Two waits matched");
     }
 
@@ -90,7 +90,7 @@ public class WaitManyFunctionsExample : ProjectApprovalExample
             Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerOneApproval = output);
-        yield return Wait("Wait Sub Function ManagerTwoSub", ManagerTwoSub("123456"));
+        yield return Wait(ManagerTwoSub("123456"), "Wait Sub Function ManagerTwoSub");
         WriteMessage("{1}End ManagerOneCallSubManagerTwo");
     }
 

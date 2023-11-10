@@ -13,14 +13,12 @@ public class ManyWaitsTypeInGroupExample : ProjectApprovalExample
                 .AfterMatch((input, output) => CurrentProject = input);
         WriteMessage("Wait many types in same group");
         yield return
-            Wait("Many waits types",
-                new[]
+            Wait(new[]
                 {
                     Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                         .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                         .AfterMatch((input, output) => ManagerOneApproval = output),
                     Wait(
-                        "Wait Manager Two and Four",
                         new []
                         {
                             Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
@@ -29,10 +27,12 @@ public class ManyWaitsTypeInGroupExample : ProjectApprovalExample
                             Wait<ApprovalDecision, bool>(ManagerFourApproveProject)
                                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                                 .AfterMatch((input, output) => ManagerFourApproval = output)
-                        }),
-                     Wait("Sub function Wait", ManagerThreeSubFunction())
+                        },
+                        "Wait Manager Two and Four"),
+                     Wait(ManagerThreeSubFunction(), "Sub function Wait")
                 }
-                ).MatchAll();
+,
+                "Many waits types").MatchAll();
         Success(nameof(ManyWaitsTypeInGroup));
     }
 

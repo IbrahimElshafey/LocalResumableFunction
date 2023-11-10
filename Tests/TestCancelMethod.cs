@@ -30,8 +30,7 @@ namespace Tests
             {
                 var dateTime = DateTime.Now;
                 int localCounter = 2;
-                yield return Wait("Wait three methods",
-                    new[]
+                yield return Wait(new[]
                     {
                     Wait<string, string>(Method1, "Method 1")
                         .MatchIf((_, _) => dateTime < new DateTime(2025, 1, 1))
@@ -52,7 +51,8 @@ namespace Tests
                         ,
                     Wait<string, string>(Method3, "Method 3")
                         .WhenCancel(IncrementCounter)}
-                    )
+,
+                    "Wait three methods")
                 .MatchAny();
 
                 if (Counter != 12)

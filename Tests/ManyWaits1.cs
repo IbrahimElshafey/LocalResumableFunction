@@ -50,8 +50,7 @@ namespace Tests
             {
                 int cancelCounter = 10;
                 int afterMatchCounter = 10;
-                yield return Wait("Wait three methods",
-                    new[]
+                yield return Wait(new[]
                     {
                     Wait<string, string>(Method1, "Method 1")
                         .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
@@ -63,7 +62,8 @@ namespace Tests
                         .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
                         .WhenCancel(() => { CancelCounter++; cancelCounter++; })
                     }
-                    ).MatchAll();
+,
+                    "Wait three methods").MatchAll();
                 if (afterMatchCounter != 13)
                     throw new Exception("Local variable not saved in after match in wait many group.");
                 if (cancelCounter != 10)

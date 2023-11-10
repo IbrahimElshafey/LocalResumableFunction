@@ -60,12 +60,12 @@ public class ComplexApproval
             for (var currentTopicIndex = 0; currentTopicIndex < TopicsCount; currentTopicIndex++)
             {
                 yield return
-                    Wait($"Wait all committee approve topic {currentTopicIndex} or manager skip",
-                        new[]
+                    Wait(new[]
                         {
                             AllCommitteeApproveTopic(currentTopicIndex),
                             ChefSkipTopic(currentTopicIndex)
-                        })
+                        },
+                        $"Wait all committee approve topic {currentTopicIndex} or manager skip")
                         .MatchAny();
 
                 //closure is different than locals for this wait
@@ -145,7 +145,7 @@ public class ComplexApproval
             }
             Console.WriteLine(currentRole);
             return
-                Wait($"Wait All Committee to Approve Topic {membersTopicIndex}", waits)
+                Wait(waits, $"Wait All Committee to Approve Topic {membersTopicIndex}")
                 .MatchIf((_) =>
                 {
                     bool result = sharedCounter == 40;

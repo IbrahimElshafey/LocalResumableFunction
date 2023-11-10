@@ -114,7 +114,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         WriteMessage("Wait sub function");
-        yield return Wait("Wait sub function that waits two manager approval.", WaitTwoManagers());
+        yield return Wait(WaitTwoManagers(), "Wait sub function that waits two manager approval.");
         WriteMessage("After sub function ended");
         if (ManagerOneApproval && ManagerTwoApproval)
         {
@@ -138,7 +138,6 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     {
         WriteMessage("WaitTwoManagers started");
         yield return Wait(
-            "Wait two methods",
             new[]
             {
             Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
@@ -148,7 +147,8 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerTwoApproval = output)
             }
-        ).MatchAll();
+,
+            "Wait two methods").MatchAll();
         WriteMessage("Two waits matched");
     }
 
@@ -158,7 +158,6 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     {
         WriteMessage("First started");
         yield return Wait(
-            "Wait first in two",
             new Wait[]
             {
                 Wait<Project, bool>(ProjectSubmitted, "Project Submitted")
@@ -168,7 +167,8 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((input, output) => ManagerOneApproval = output)
             }
-        ).MatchAny();
+,
+            "Wait first in two").MatchAny();
         WriteMessage("One of two waits matched");
     }
 

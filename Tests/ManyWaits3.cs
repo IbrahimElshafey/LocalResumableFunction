@@ -56,8 +56,7 @@ namespace Tests
                 int cancelCounter = 10;
                 int afterMatchCounter = 10;
                 int sharedCounter = 10;
-                yield return Wait("Wait First In Three",
-                    new Wait[]
+                yield return Wait(new Wait[]
                     {
                         Wait<string, string>(Method7, "Method 7")
                             .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
@@ -69,7 +68,8 @@ namespace Tests
                             .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
                             .WhenCancel(() => { CancelCounter++; cancelCounter++;sharedCounter++; }),
                     }
-                ).MatchAny();
+,
+                    "Wait First In Three").MatchAny();
 
                 if (afterMatchCounter != 11)
                     throw new Exception("Local variable not saved in match in wait first group.");

@@ -43,8 +43,8 @@ public abstract partial class ResumableFunctionsContainer
     }
 
     protected WaitsGroup Wait(
-        string name, 
         Wait[] waits,
+        string name = null,
         [CallerLineNumber] int inCodeLine = 0,
         [CallerMemberName] string callerName = "")
     {
@@ -54,7 +54,7 @@ public abstract partial class ResumableFunctionsContainer
         }
         var group = new WaitsGroupEntity
         {
-            Name = name,
+            Name = name ?? "Group Wait",
             ChildWaits = waits.Select(x => x.WaitEntity).ToList(),
             WaitType = WaitType.GroupWaitAll,
             CurrentFunction = this,

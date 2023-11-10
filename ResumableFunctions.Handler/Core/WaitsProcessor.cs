@@ -1,6 +1,7 @@
 ﻿using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
@@ -85,7 +86,7 @@ namespace ResumableFunctions.Handler.Core
                             _pushedCall.GetMandatoryPart(template.CallMandatoryPartExpression),
                             x => x.RequestedByFunction,
                             x => x.FunctionState);
-                        
+
                         if (waits == null)
                             continue;
                         foreach (var wait in waits)
@@ -159,11 +160,22 @@ namespace ResumableFunctions.Handler.Core
             var pushedCallId = _pushedCall.Id;
             try
             {
-                var isMatch = _methodWait.IsMatched();
-                if (!isMatch)
-                    UpdateWaitRecord(x => x.MatchStatus = MatchStatus.NotMatched);
-                else
+                var matched = _methodWait.IsMatched();
+                if (matched is true)
                 {
+                    //var hasMatchBefore =
+                    //  await _pushedCallsRepo.HasMatchBeforeForInstance(pushedCallId, _methodWait.FunctionStateId);
+                    //if (hasMatchBefore)
+                    //{
+                    //    await _serviceRepo.AddLog(
+                    //        $"Pushed call [{pushedCallId}] can't activate wait [{_methodWait.Name}]" +
+                    //        $"because another wait for this instance activated before with same call ID.",
+                    //        LogType.Warning,
+                    //        StatusCodes.WaitProcessing);
+                    //    UpdateWaitRecord(x => x.MatchStatus = MatchStatus.NotMatched);
+                    //    return false;
+                    //}
+
                     var message =
                         $"Wait [{_methodWait.Name}] matched in [{_methodWait.RequestedByFunction.RF_MethodUrn}].";
 
@@ -172,9 +184,14 @@ namespace ResumableFunctions.Handler.Core
                     else
                         _methodWait.FunctionState.AddLog(message, LogType.Info, StatusCodes.WaitProcessing);
                     UpdateWaitRecord(x => x.MatchStatus = MatchStatus.Matched);
-
                 }
-                return isMatch;
+
+                if (matched is false)
+                {
+                    UpdateWaitRecord(x => x.MatchStatus = MatchStatus.NotMatched);
+                }
+
+                return matched;
             }
             catch (Exception ex)
             {
@@ -359,7 +376,7 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task SaveNewWait(WaitEntity nextWait)
         {
-                await _waitsRepo.SaveWait(nextWait);
+            await _waitsRepo.SaveWait(nextWait);
             await _context.SaveChangesAsync();
         }
 

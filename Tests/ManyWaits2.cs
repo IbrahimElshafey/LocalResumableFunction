@@ -52,14 +52,14 @@ namespace Tests
             public async IAsyncEnumerable<Wait> WaitManyWithExpression()
             {
                 int x = 1;
-                yield return Wait("Wait three methods",
-                    new[]
+                yield return Wait(new[]
                     {
                     Wait<string, string>(Method1, "Method 1").MatchIf((_,_)=>x==1),
                     Wait<string, string>(Method2, "Method 2"),
                     Wait<string, string>(Method3, "Method 3")
                     }
-                )
+,
+                    "Wait three methods")
                 //.MatchIf(group => group.CompletedCount == 2 && Id == 10 && x == 1);
                 .MatchIf(group =>
                 {

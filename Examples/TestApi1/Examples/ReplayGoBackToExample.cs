@@ -16,7 +16,6 @@ public class ReplayGoBackToExample : ProjectApprovalExample
         WriteMessage("Wait first manager of three to approve");
     WaitFirstApprovalInThree:
         yield return Wait(
-            "Wait first approval in three managers",
             new[]
             {
                 Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
@@ -29,7 +28,8 @@ public class ReplayGoBackToExample : ProjectApprovalExample
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((input, output) => ManagerThreeApproval = input.Decision)
             }
-        ).MatchAny();
+,
+            "Wait first approval in three managers").MatchAny();
 
         var approvals = ManagerOneApproval || ManagerTwoApproval || ManagerThreeApproval;
         if (!approvals)

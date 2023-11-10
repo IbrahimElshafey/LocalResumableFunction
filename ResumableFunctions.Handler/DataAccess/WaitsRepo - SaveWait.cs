@@ -140,6 +140,7 @@ internal partial class WaitsRepo
             functionWait.FirstWait.ParentWait = functionWait;
             functionWait.FirstWait.ParentWaitId = functionWait.Id;
             functionWait.FirstWait.IsFirst = functionWait.IsFirst;
+            functionWait.FirstWait.WasFirst = functionWait.WasFirst;
             var methodId = await _methodIdsRepo.GetResumableFunction(new MethodData(functionWait.FunctionInfo));
             functionWait.FirstWait.RequestedByFunction = methodId;
             functionWait.FirstWait.RequestedByFunctionId = methodId.Id;

@@ -115,7 +115,7 @@ public partial class SubFunctionsTests
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return Wait<string, string>(Method2, "M2");
-            yield return Wait("Wait sub function2", SubFunction2(155));
+            yield return Wait(SubFunction2(155), "Wait sub function2");
             await Task.Delay(100);
         }
             
@@ -157,7 +157,7 @@ public partial class SubFunctionsTests
         [ResumableFunctionEntryPoint("FunctionAtStart")]
         public async IAsyncEnumerable<Wait> FunctionAtStart()
         {
-            yield return Wait("Wait sub function", SubFunction());
+            yield return Wait(SubFunction(), "Wait sub function");
             await Task.Delay(100);
         }
 

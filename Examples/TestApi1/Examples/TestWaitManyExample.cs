@@ -14,7 +14,6 @@ public class TestWaitManyExample : ProjectApprovalExample
             Name = "WaitThreeMethodAtStart",
         };
         yield return Wait(
-            "Wait three methods at start",
             new Wait[]
             {
             Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
@@ -27,7 +26,8 @@ public class TestWaitManyExample : ProjectApprovalExample
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output)
             }
-        ).MatchAll();
+,
+            "Wait three methods at start").MatchAll();
         WriteMessage("Three waits matched.");
         Success(nameof(WaitThreeMethodAtStart));
     }
@@ -41,7 +41,6 @@ public class TestWaitManyExample : ProjectApprovalExample
                 .AfterMatch((input, output) => CurrentProject = input);
         WriteMessage("Wait three managers to approve");
         yield return Wait(
-            "Wait three methods",
             new Wait[]
             {
             Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
@@ -54,7 +53,8 @@ public class TestWaitManyExample : ProjectApprovalExample
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output)
             }
-        ).MatchAll();
+,
+            "Wait three methods").MatchAll();
         WriteMessage("Three waits matched.");
         Success(nameof(WaitThreeMethod));
     }
@@ -69,8 +69,7 @@ public class TestWaitManyExample : ProjectApprovalExample
                 .AfterMatch((input, output) => CurrentProject = input);
         WriteMessage("Wait two of three managers to approve");
         yield return Wait(
-            "Wait many with complex match expression",
-             new Wait[]
+            new Wait[]
              {
                 Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .MatchIf((input, _) => input.ProjectId == CurrentProject.Id)
@@ -82,7 +81,8 @@ public class TestWaitManyExample : ProjectApprovalExample
                     .MatchIf((input, _) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((_, output) => ManagerThreeApproval = output)
              }
-        ).MatchIf(waitGroup =>
+,
+             "Wait many with complex match expression").MatchIf(waitGroup =>
         {
             //throw new NotImplementedException();
             localVarIngroupMatch++;

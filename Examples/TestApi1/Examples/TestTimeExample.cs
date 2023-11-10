@@ -17,7 +17,6 @@ public class TestTimeExample : ProjectApprovalExample
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         yield return
         Wait(
-            "Wait manager one approval in 2 days",
             new[]
             {
                 Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
@@ -26,7 +25,8 @@ public class TestTimeExample : ProjectApprovalExample
                 Wait(TimeSpan.FromDays(2), "Two Days")
                     .AfterMatch((_, _) => TimerMatched = true)
             }
-        ).MatchAny();
+,
+            "Wait manager one approval in 2 days").MatchAny();
 
         if (TimerMatched)
         {
