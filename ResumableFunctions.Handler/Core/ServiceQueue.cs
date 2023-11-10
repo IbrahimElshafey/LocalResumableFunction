@@ -11,7 +11,7 @@ namespace ResumableFunctions.Handler.Core;
 internal class ServiceQueue : IServiceQueue
 {
     private readonly IBackgroundProcess _backgroundJobClient;
-    private readonly ILogger<ReplayWaitProcessor> _logger;
+    private readonly ILogger<ServiceQueue> _logger;
     private readonly IWaitsProcessor _waitsProcessor;
     private readonly IWaitsRepo _waitsRepository;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
@@ -20,7 +20,7 @@ internal class ServiceQueue : IServiceQueue
     private readonly IHttpClientFactory _httpClientFactory;
 
     public ServiceQueue(
-        ILogger<ReplayWaitProcessor> logger,
+        ILogger<ServiceQueue> logger,
         IWaitsProcessor waitsProcessor,
         IWaitsRepo waitsRepository,
         IBackgroundProcess backgroundJobClient,

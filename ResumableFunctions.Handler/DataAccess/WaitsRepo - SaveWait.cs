@@ -144,13 +144,8 @@ internal partial class WaitsRepo
             functionWait.FirstWait.RequestedByFunction = methodId;
             functionWait.FirstWait.RequestedByFunctionId = methodId.Id;
 
-            if (functionWait.FirstWait is ReplayRequest)
-                await _serviceRepo.AddErrorLog(null, "First wait can't be a replay request", StatusCodes.FirstWait);
-            else
-            {
-                await SaveWait(functionWait.FirstWait);//first wait for sub function
-                await AddWait(functionWait);
-            }
+            await SaveWait(functionWait.FirstWait);//first wait for sub function
+            await AddWait(functionWait);
         }
         catch (Exception ex)
         {

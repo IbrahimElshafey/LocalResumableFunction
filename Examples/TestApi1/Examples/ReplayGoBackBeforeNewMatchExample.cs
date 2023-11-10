@@ -9,10 +9,12 @@ public class ReplayGoBackBeforeNewMatchExample : ProjectApprovalExample
     //[ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> TestReplay_GoBackBefore()
     {
+    Project_Submitted:
         WriteMessage("Before project submitted.");
         yield return
             Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
-                .MatchIf((input, output) => output == true && input.IsResubmit == false)
+                .MatchIf(CurrentProject == null, (input, output) => output == true && input.IsResubmit == false)
+                .MatchIf(CurrentProject != null, (input, output) => input.Id == CurrentProject.Id && input.IsResubmit == true)
                 .AfterMatch((input, output) => CurrentProject = input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
@@ -24,10 +26,7 @@ public class ReplayGoBackBeforeNewMatchExample : ProjectApprovalExample
         {
             WriteMessage(
                 "ReplayExample: Manager one rejected project and replay will wait ProjectSumbitted again.");
-            yield return
-                GoBackBefore<Project, bool>(
-                    ProjectSumbitted,
-                    (input, output) => input.Id == CurrentProject.Id && input.IsResubmit == true);
+            goto Project_Submitted;
         }
         else
         {

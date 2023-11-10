@@ -209,13 +209,15 @@ public partial class ReplayTests
         {
             yield return
                 Wait<string, string>(Method1, "M1");
-
+        Before_M2:
             Counter += 10;
             yield return
-                Wait<string, string>(Method2, "M2").MatchAny();
+                Wait<string, string>(Method2, "M2").
+                MatchAny(Counter == 10).
+                MatchIf(Counter == 20, (input, output) => input == "Back");
 
             if (Counter < 20)
-                yield return GoBackBefore<string, string>("M2", (input, output) => input == "Back");
+                goto Before_M2;
             await Task.Delay(100);
         }
 
@@ -286,9 +288,11 @@ public partial class ReplayTests
 
             Counter += 10;
             var x = 5;
+        M2:
             yield return
                 Wait<string, string>(Method2, "M2")
-                .MatchAny()
+                .MatchAny(x == 5)
+                .MatchIf(x == 10, (input, output) => input == "Back" && x == 10)
                 .AfterMatch((_, _) =>
                 {
                     if (x != 5 && x != 10)
@@ -299,7 +303,7 @@ public partial class ReplayTests
             x *= 2;
 
             if (Counter < 16)
-                yield return GoBackTo<string, string>("M2", (input, output) => input == "Back" && x == 10);
+                goto M2;
 
             await Task.Delay(100);
         }
@@ -319,7 +323,7 @@ public partial class ReplayTests
                 .AfterMatch((_, _) => localCounter += 10);
 
             Counter += 10;
-            M2_Wait:
+        M2_Wait:
             yield return
                 Wait<string, string>(Method2, "M2")
                 .AfterMatch((_, _) => localCounter += 10)

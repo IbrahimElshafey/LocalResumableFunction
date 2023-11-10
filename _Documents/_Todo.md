@@ -1,16 +1,20 @@
 ﻿# Todo
 * Remove replay request and use goto keyword
+* AfterMatch,MatchExpression,WhenCancel must use same closure type,AfterMatch
+	yield return
+            MethodThatGetWait()//use match expression inside method
+            .AfterMatch((_, _) => localCounter += 10)
+            .MatchAny();
+
+* Complex local var in closure
+* Reset Errors after function complete
 * Closure may be from normall method and continuation in replay go back TO may reuse same old private method data?? 
 * Validate wait name duplication
 * Validate go back TO closure update
 	* Re-evaluate match expression
 	* Use same old match expression
 
-* AfterMatch,MatchExpression,WhenCancel must use same closure type,AfterMatch
-	yield return
-            MethodThatGetWait()//use match expression inside method
-            .AfterMatch((_, _) => localCounter += 10)
-            .MatchAny();
+
 * wait group(privateMwthod1(),privateMwthod2,...)
 * Add is caller RF for wait entity
 

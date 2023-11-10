@@ -131,8 +131,6 @@ public class MethodWaitEntity : WaitEntity
 
     internal override bool ValidateWaitRequest()
     {
-        if (IsReplay)
-            return true;
         switch (WasFirst)
         {
             case false when MatchExpression == null:

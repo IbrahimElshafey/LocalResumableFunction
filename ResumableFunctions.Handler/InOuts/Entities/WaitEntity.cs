@@ -16,11 +16,10 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public string Name { get; set; }
     public WaitStatus Status { get; set; } = WaitStatus.Waiting;
     public bool IsFirst { get; set; }
-    public bool WasFirst { get; set; }
-    public int StateBeforeWait { get; set; }
+    public bool WasFirst { get; set; }//todo:delete was first if related to replay only
+    public int StateBeforeWait { get; set; }//todo:delete was first if related to replay only
     public int StateAfterWait { get; set; }
     public bool IsRoot { get; set; }
-    public bool IsReplay { get; set; }
 
     [NotMapped]
     public WaitExtraData ExtraData { get; set; }
@@ -170,10 +169,9 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             if (waitExist)
             {
                 var nextWait = functionRunner.CurrentWait;
-                var replaySuffix = nextWait is ReplayRequest ? " - Replay" : "";
 
                 FunctionState.AddLog(
-                    $"Get next wait [{functionRunner.CurrentWait.Name}{replaySuffix}] " +
+                    $"Get next wait [{functionRunner.CurrentWait.Name}] " +
                     $"after [{Name}]", LogType.Info, StatusCodes.WaitProcessing);
 
                 nextWait.ParentWaitId = ParentWaitId;
@@ -267,7 +265,6 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         StateAfterWait = fromWait.StateAfterWait;
         Locals = fromWait.Locals;
         IsRoot = fromWait.IsRoot;
-        IsReplay = fromWait.IsReplay;
         ExtraData = fromWait.ExtraData;
         WaitType = fromWait.WaitType;
         FunctionStateId = fromWait.FunctionStateId;

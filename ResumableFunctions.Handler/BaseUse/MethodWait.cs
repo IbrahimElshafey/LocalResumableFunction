@@ -18,6 +18,13 @@ namespace ResumableFunctions.Handler.BaseUse
             return this;
         }
 
+        public MethodWait<TInput, TOutput> MatchIf(bool condition, Expression<Func<TInput, TOutput, bool>> matchExpression)
+        {
+            if (condition)
+                MethodWaitEnitity.MatchIf(matchExpression);
+            return this;
+        }
+
         public MethodWait<TInput, TOutput> MatchIf(Expression<Func<TInput, TOutput, bool>> matchExpression)
         {
             MethodWaitEnitity.MatchIf(matchExpression);
@@ -30,9 +37,10 @@ namespace ResumableFunctions.Handler.BaseUse
             return this;
         }
 
-        public MethodWait<TInput, TOutput> MatchAny()
+        public MethodWait<TInput, TOutput> MatchAny(bool condition = true)
         {
-            MethodWaitEnitity.MatchAny();
+            if (condition)
+                MethodWaitEnitity.MatchAny();
             return this;
         }
 

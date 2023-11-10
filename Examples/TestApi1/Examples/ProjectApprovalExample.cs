@@ -17,10 +17,11 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow", isActive: true)]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
     {
-        //throw new NotImplementedException("Exception on get first wait.");
+    Project_Submitted:
         yield return
-         Wait<Project, bool>(ProjectSubmitted, "Project Submitted")//Point 2
-             .MatchIf((project, output) => output && !project.IsResubmit)//Point 3
+          Wait<Project, bool>(ProjectSubmitted, "Project Submitted")//Point 2
+             .MatchIf(CurrentProject == null, (project, output) => output && !project.IsResubmit)//Point 3
+             .MatchIf(CurrentProject != null, (project, output) => output && !project.IsResubmit)
              .AfterMatch((project, output) => CurrentProject = project);//Point 4
         Log("###After Project Submitted");
         //throw new NotImplementedException("Exception after first wait match.");
@@ -35,7 +36,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
         {
             Log("Go back and ask applicant to resubmitt project.");
             await AskApplicantToResubmittProject(CurrentProject.Id);
-            yield return GoBackTo<Project, bool>("Project Submitted", (project, output) => output && project.IsResubmit && project.Id == CurrentProject.Id);
+            goto Project_Submitted;
         }
         else
         {

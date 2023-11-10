@@ -180,7 +180,6 @@ internal sealed class WaitsDataContext : DbContext
            .Property(mw => mw.GroupMatchFuncName)
            .HasColumnName(nameof(WaitsGroupEntity.GroupMatchFuncName));
 
-        modelBuilder.Ignore<ReplayRequest>();
         modelBuilder.Ignore<TimeWaitEntity>();
     }
 

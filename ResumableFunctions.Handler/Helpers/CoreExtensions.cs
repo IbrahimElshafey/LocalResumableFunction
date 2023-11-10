@@ -29,7 +29,6 @@ internal static class CoreExtensions
         ResolveDbInterfaces(services, settings);
 
         services.AddScoped<IFirstWaitProcessor, FirstWaitProcessor>();
-        services.AddScoped<IReplayWaitProcessor, ReplayWaitProcessor>();
         services.AddScoped<IWaitsProcessor, WaitsProcessor>();
         services.AddScoped<IServiceQueue, ServiceQueue>();
         services.AddScoped<ICallPusher, CallPusher>();

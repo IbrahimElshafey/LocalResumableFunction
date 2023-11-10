@@ -71,9 +71,11 @@ public class ReplayGoBackToExample : ProjectApprovalExample
 
     public async IAsyncEnumerable<Wait> TestReplay_GoBackToNewMatch()
     {
+    Project_Submitted:
         yield return
             Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
-                .MatchIf((input, output) => output == true)
+                .MatchIf(CurrentProject == null, (input, output) => output == true)
+                .MatchIf(CurrentProject != null, (input, output) => input.IsResubmit && input.Id == CurrentProject.Id)
                 .AfterMatch((input, output) => CurrentProject = input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
@@ -84,7 +86,7 @@ public class ReplayGoBackToExample : ProjectApprovalExample
         if (ManagerOneApproval is false)
         {
             WriteMessage("Manager one rejected project and replay will go to ProjectSubmitted with new match.");
-            yield return GoBackTo<Project, bool>(ProjectSumbitted, (input, output) => input.IsResubmit && input.Id == CurrentProject.Id);
+            goto Project_Submitted;
         }
         else
         {
