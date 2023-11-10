@@ -2,7 +2,6 @@
 
 public enum WaitStatus
 {
-    //todo:add matched status
     Waiting = 0,
     Canceled = 1,
     Completed = 2,

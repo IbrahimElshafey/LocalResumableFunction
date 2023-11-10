@@ -251,10 +251,6 @@ internal partial class WaitsRepo : IWaitsRepo
             .Where(
                 wait =>
                 wait.Status == WaitStatus.Waiting &&
-                //wait.MethodGroupToWaitId == template.MethodGroupId &&
-                //wait.ServiceId == _settings.CurrentServiceId &&
-                //wait.MethodToWaitId == template.MethodId &&
-                //wait.RequestedByFunctionId == template.FunctionId &&
                 wait.TemplateId == template.Id);
         foreach (var include in includes)
         {

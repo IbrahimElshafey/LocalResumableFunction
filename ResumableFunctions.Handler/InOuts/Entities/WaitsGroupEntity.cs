@@ -40,8 +40,6 @@ public class WaitsGroupEntity : WaitEntity
 
     internal override void OnAddWait()
     {
-        //todo: different closures for children 
-        //wait group(privateMwthod1(),privateMwthod2,...)
         var childHasClosure = ChildWaits.Any(x => x.RuntimeClosureId != null && CallerName == x.CallerName);
         if (childHasClosure)
         {
@@ -49,7 +47,7 @@ public class WaitsGroupEntity : WaitEntity
                 RuntimeClosureId = Guid.NewGuid();
             ChildWaits.ForEach(childWait =>
             {
-                if (childWait.CallerName == CallerName)
+                if (childWait.CallerName == CallerName)//todo:what if recursive calls??
                     childWait.RuntimeClosureId = RuntimeClosureId;
             });
         }

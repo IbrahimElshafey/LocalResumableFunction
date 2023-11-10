@@ -1,12 +1,14 @@
-﻿# Test Shell Todo
+﻿* Enable change testshell settings
+	* Run unit tests in parallel
+* Speed tests => work in memory
+* Register(RfClass) //will get dependent types and register all related
+# Test Shell Todo
 * Get instances for pushed call
 * Get matched waits for pushed call
 
 
 
 # Write Unit Tests for basic scenarios:
-* Sub functions tests
-	* Pushed call activate one instance,what if same function and sub fnction wait the same wait
 
 
 * Attributes test
