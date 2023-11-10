@@ -390,7 +390,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
         if (ImmutableClosure != null && ImmutableClosure.GetType() != closure.GetType())
             throw new Exception(
-                $"For wait [{Name}] the closure must be same for AfterMatchAction,CancelAction and MatchExpression.");
+                $"For method wait [{Name}] the closure must be the same for AfterMatchAction, CancelAction, and MatchExpression.");
         ImmutableClosure = JsonConvert.DeserializeObject(closureString, closure.GetType());
     }
 

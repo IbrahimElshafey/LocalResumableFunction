@@ -1,9 +1,4 @@
 ﻿# Todo
-* AfterMatch,MatchExpression,WhenCancel must use same closure type,AfterMatch
-	yield return
-            MethodThatGetWait()//use match expression inside method
-            .AfterMatch((_, _) => localCounter += 10)
-            .MatchAny();
 
 * Complex local var in closure
 * Review pushed call activate one instance

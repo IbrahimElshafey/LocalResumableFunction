@@ -31,12 +31,10 @@ public partial class ReplayTests
         public async IAsyncEnumerable<Wait> Test()
         {
             var localCounter = 10;
-            yield return
-                WaitMethodOne()
-                .AfterMatch((_, _) => localCounter += 10);
+            yield return WaitMethodOne();
 
             Counter += 10;
-        
+
         wait_method_two:
             yield return WaitMethodTwo();
 
@@ -46,22 +44,25 @@ public partial class ReplayTests
             if (Counter < 16)
                 goto wait_method_two;
 
-            if (localCounter != 40)
+            if (localCounter != 30)
                 throw new Exception("Locals continuation problem.");
             await Task.Delay(100);
         }
+
         private MethodWait<string, string> WaitMethodOne()
         {
+            int counter = 20;
             return
                 Wait<string, string>(Method1, "M1").
-                MatchIf((input, _) => input.StartsWith("M"));
+                MatchIf((input, _) => input.StartsWith("M")).
+                WhenCancel(() => counter += 10);
         }
 
         private Wait WaitMethodTwo()
         {
             var methodTwoCounter = 10;
             return
-                Wait<string, string>(Method2, $"M2_{Random.Shared.Next(1,100)}")
+                Wait<string, string>(Method2, $"M2_{Random.Shared.Next(1, 100)}")
                  .AfterMatch((_, _) =>
                  {
                      methodTwoCounter += 10;
