@@ -1,9 +1,20 @@
 ﻿# Todo
+* Remove replay request and use goto keyword
+* Closure may be from normall method and continuation in replay go back TO may reuse same old private method data?? 
 * Validate wait name duplication
-* Validate go back to closure update
+* Validate go back TO closure update
 	* Re-evaluate match expression
 	* Use same old match expression
-* Closure may be from normall method and continuation in replay go back may reuse same old private method data?? 
+
+* AfterMatch,MatchExpression,WhenCancel must use same closure type,AfterMatch
+	yield return
+            MethodThatGetWait()//use match expression inside method
+            .AfterMatch((_, _) => localCounter += 10)
+            .MatchAny();
+* wait group(privateMwthod1(),privateMwthod2,...)
+* Add is caller RF for wait entity
+
+
 * UI service must not use EF context directly
 * Replay time wait not same description as old wait
 * UI when click errors link show log errors not all

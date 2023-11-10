@@ -233,10 +233,11 @@ public partial class ReplayTests
             yield return
                 Wait<string, string>(Method1, "M1")
                 .AfterMatch((_, _) => localCounter += 10);
-
+        after_m1:
             Counter++;
             if (Counter < 2)
-                yield return GoBackAfter("M1");
+                goto after_m1;
+                //yield return GoBackAfter("M1");
 
             if (localCounter != 20)
                 throw new Exception("Closure restore in replay problem.");

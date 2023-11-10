@@ -212,6 +212,11 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
     {
         MatchExpression = matchExpression;
         MatchExpressionParts = new MatchExpressionWriter(MatchExpression, CurrentFunction).MatchExpressionParts;
+        if (ImmutableClosure != null &&
+            MatchExpressionParts.Closure != null &&
+            ImmutableClosure.GetType() != MatchExpressionParts.Closure.GetType())
+            throw new Exception(
+                $"For wait [{Name}] the closure must be same for AfterMatchAction,CancelAction and MatchExpression.");
         SetImmutableClosure(MatchExpressionParts.Closure);
         MandatoryPart = MatchExpressionParts.GetInstanceMandatoryPart(CurrentFunction);
         return this;

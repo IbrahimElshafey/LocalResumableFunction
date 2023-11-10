@@ -65,7 +65,8 @@ public abstract partial class ResumableFunctionsContainer : IObjectWithLog
     }
 
     /// <summary>
-    ///     Go back to wait and re-wait it again.
+    ///  Go back to wait and re-wait it again.
+    ///  If the wait is a return of a method call the method will not be called again.
     /// </summary>
     protected Wait GoBackTo(
         string name,

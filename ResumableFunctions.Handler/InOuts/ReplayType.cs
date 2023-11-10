@@ -5,12 +5,12 @@ public enum ReplayType
     /// <summary>
     /// Execute code after wait `x` and get next wait [ResumeExecution] `y` or exit if no wait
     /// </summary>
-    GoAfter,
+    GoAfter,//todo:can be replaced with goto statement
 
     /// <summary>
     /// Execute code before wait `x` and then re-wait `x` again.
     /// </summary>
-    GoBefore,
+    GoBefore,//todo:can be replaced with goto statement
 
     /// <summary>
     /// Execute code before wait `x` and then re-wait `x` again but with new match expression.
@@ -20,6 +20,6 @@ public enum ReplayType
     /// <summary>
     /// Re-wait `x` again and cancel other sibling waits in current function.
     /// </summary>
-    GoTo,
+    GoTo,//todo:can be replaced with goto statement
     GoToWithNewMatch,
 }

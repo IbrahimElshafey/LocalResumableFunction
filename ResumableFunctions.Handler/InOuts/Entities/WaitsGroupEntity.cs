@@ -40,7 +40,8 @@ public class WaitsGroupEntity : WaitEntity
 
     internal override void OnAddWait()
     {
-        //Set mutable closure Id for group
+        //todo: different closures for children 
+        //wait group(privateMwthod1(),privateMwthod2,...)
         var childHasClosure = ChildWaits.Any(x => x.RuntimeClosureId != null && CallerName == x.CallerName);
         if (childHasClosure)
         {
