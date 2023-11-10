@@ -16,8 +16,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public string Name { get; set; }
     public WaitStatus Status { get; set; } = WaitStatus.Waiting;
     public bool IsFirst { get; set; }
-    public bool WasFirst { get; set; }//todo:delete was first if related to replay only
-    public int StateBeforeWait { get; set; }//todo:delete was first if related to replay only
+    public bool WasFirst { get; set; }
     public int StateAfterWait { get; set; }
     public bool IsRoot { get; set; }
 
@@ -211,68 +210,6 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         FunctionStateId = oldWait.FunctionStateId;
         RequestedByFunction = oldWait.RequestedByFunction;
         RequestedByFunctionId = oldWait.RequestedByFunctionId;
-    }
-
-    public WaitEntity DuplicateWait()
-    {
-        WaitEntity result;
-        switch (this)
-        {
-            case MethodWaitEntity methodWait:
-                result = new MethodWaitEntity
-                {
-                    TemplateId = methodWait.TemplateId,
-                    MethodGroupToWaitId = methodWait.MethodGroupToWaitId,
-                    MethodToWaitId = methodWait.MethodToWaitId,
-                    //todo:should I use runtime closure
-                    ImmutableClosure = methodWait.ImmutableClosure,
-                };
-                break;
-            case FunctionWaitEntity:
-                result = new FunctionWaitEntity();
-                break;
-            case WaitsGroupEntity waitsGroup:
-                result = new WaitsGroupEntity
-                {
-                    GroupMatchFuncName = waitsGroup.GroupMatchFuncName
-                };
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-        result.CopyCommon(this);
-        CopyChildTree(this, result);
-        return result;
-    }
-    private void CopyChildTree(WaitEntity fromWait, WaitEntity toWait)
-    {
-        for (var index = 0; index < fromWait.ChildWaits.Count; index++)
-        {
-            var childWait = fromWait.ChildWaits[index];
-            var duplicateWait = childWait.DuplicateWait();
-            toWait.ChildWaits.Add(duplicateWait);
-            if (childWait.CanBeParent)
-                CopyChildTree(childWait, duplicateWait);
-        }
-    }
-
-    private void CopyCommon(WaitEntity fromWait)
-    {
-        Name = fromWait.Name;
-        Status = fromWait.Status;
-        IsFirst = fromWait.IsFirst;
-        StateBeforeWait = fromWait.StateBeforeWait;
-        StateAfterWait = fromWait.StateAfterWait;
-        Locals = fromWait.Locals;
-        IsRoot = fromWait.IsRoot;
-        ExtraData = fromWait.ExtraData;
-        WaitType = fromWait.WaitType;
-        FunctionStateId = fromWait.FunctionStateId;
-        FunctionState = fromWait.FunctionState;
-        ParentWaitId = fromWait.ParentWaitId;
-        RequestedByFunctionId = fromWait.RequestedByFunctionId;
-        RequestedByFunction = fromWait.RequestedByFunction;
-        CallerName = fromWait.CallerName;
     }
 
     internal virtual void Cancel() => Status = Status == WaitStatus.Waiting ? Status = WaitStatus.Canceled : Status;
