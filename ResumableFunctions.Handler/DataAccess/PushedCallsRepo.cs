@@ -27,13 +27,21 @@ internal class PushedCallsRepo : IPushedCallsRepo
 
     public async Task<bool> HasMatchBeforeForInstance(long pushedCallId, int functionStateId)
     {
+        //return await _context.
+        //    MethodWaits.
+        //    AsNoTracking().
+        //    Where(x =>
+        //        x.Status == InOuts.WaitStatus.Completed &&
+        //        x.CallId == pushedCallId &&
+        //        x.FunctionStateId == functionStateId)
+        //    .AnyAsync();
         return await _context.
-            MethodWaits.
+            WaitProcessingRecords.
             AsNoTracking().
             Where(x =>
-                x.Status == InOuts.WaitStatus.Completed &&
-                x.CallId == pushedCallId &&
-                x.FunctionStateId == functionStateId)
+                x.MatchStatus == InOuts.MatchStatus.Matched &&
+                x.PushedCallId == pushedCallId &&
+                x.StateId == functionStateId)
             .AnyAsync();
     }
 }
