@@ -19,6 +19,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public bool WasFirst { get; set; }
     public int StateAfterWait { get; set; }
     public bool IsRoot { get; set; }
+    public int RootFunctionId { get; set; }
 
     [NotMapped]
     public WaitExtraData ExtraData { get; set; }
@@ -177,6 +178,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 FunctionState.StateObject = CurrentFunction;
                 nextWait.FunctionState = FunctionState;
                 nextWait.RequestedByFunctionId = RequestedByFunctionId;
+                nextWait.RootFunctionId = RootFunctionId;
 
                 return nextWait = functionRunner.CurrentWait;
             }
@@ -270,12 +272,22 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     internal virtual void OnAddWait()
     {
         if (!IsRoot) return;
+        SetRuntimeClosureIds();
+        SetRootFunctionId();
+    }
 
-        var waitGroups =
-            GetTreeItems().
-            Where(x => x.RuntimeClosureId != null).
-            GroupBy(x => x.RuntimeClosureId);
-        foreach (var group in waitGroups)
+    private void SetRootFunctionId()
+    {
+        ActionOnChildrenTree(x => x.RootFunctionId = RequestedByFunctionId);
+    }
+
+    private void SetRuntimeClosureIds()
+    {
+        var waitsGroupedByClosure =
+                    GetTreeItems().
+                    Where(x => x.RuntimeClosureId != null).
+                    GroupBy(x => x.RuntimeClosureId);
+        foreach (var group in waitsGroupedByClosure)
         {
             var mw = (MethodWaitEntity)
                 group.FirstOrDefault(x => x is MethodWaitEntity mw && mw.ImmutableClosure != default);
@@ -296,7 +308,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             PrivateData runtimeClosure = null;
             if (useOldWaitClosure)
             {
-                //closure vars may be changed so update it
+                //closure vars may be changed so update it before assign old closure
                 OldCompletedSibling.RuntimeClosure.Value = mw.ImmutableClosure;
                 runtimeClosure = OldCompletedSibling.RuntimeClosure;
             }

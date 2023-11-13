@@ -25,24 +25,16 @@ internal class PushedCallsRepo : IPushedCallsRepo
         return Task.CompletedTask;
     }
 
-    public async Task<bool> HasMatchBeforeForInstance(long pushedCallId, int functionStateId)
+    public async Task<bool> PushedCallMatchedForFunctionBefore(long pushedCallId, int rootFunctionId)
     {
-        //return await _context.
-        //    MethodWaits.
-        //    AsNoTracking().
-        //    Where(x =>
-        //        x.Status == InOuts.WaitStatus.Completed &&
-        //        x.CallId == pushedCallId &&
-        //        x.FunctionStateId == functionStateId)
-        //    .AnyAsync();
-        //return await _context.
-        //    WaitProcessingRecords.
-        //    AsNoTracking().
-        //    Where(x =>
-        //        x.MatchStatus == InOuts.MatchStatus.Matched &&
-        //        x.PushedCallId == pushedCallId &&
-        //        x.StateId == functionStateId)
-        //    .AnyAsync();
-        return true;
+        //this is heavy query for scenario that may not occure common
+        return await _context.
+            MethodWaits.
+            AsNoTracking().
+            Where(x =>
+                x.Status == Handler.InOuts.WaitStatus.Completed &&
+                x.CallId == pushedCallId &&
+                x.RootFunctionId == rootFunctionId)
+            .AnyAsync();
     }
 }
