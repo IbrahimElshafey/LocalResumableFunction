@@ -13,31 +13,32 @@ namespace ResumableFunctions.Handler.Helpers
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<BackgroundJobExecutor> _logger;
         private readonly IResumableFunctionsSettings _settings;
-        private readonly IScanStateRepo _scanStateRepo;
 
         public BackgroundJobExecutor(
             IServiceProvider serviceProvider,
             IDistributedLockProvider lockProvider,
             ILogger<BackgroundJobExecutor> logger,
-            IResumableFunctionsSettings settings,
-            IScanStateRepo scanStateRepo)
+            IResumableFunctionsSettings settings)
         {
             _serviceProvider = serviceProvider;
             _lockProvider = lockProvider;
             _logger = logger;
             _settings = settings;
-            _scanStateRepo = scanStateRepo;
         }
-        public async Task Execute(
+
+        /// <summary>
+        /// Create new scope and execute the `backgroundTask` while lock is created and no instance of `backgroundTask`
+        /// can be executed.
+        /// </summary>
+        /// <returns></returns>
+        public async Task ExecuteWithLock(
             string lockName,
             Func<Task> backgroundTask,
             string errorMessage,
-            bool isScanTask = false,
             [CallerMemberName] string methodName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            int scanTaskId = -1;
             try
             {
                 await using var handle =
@@ -45,8 +46,6 @@ namespace ResumableFunctions.Handler.Helpers
                 if (handle is null) return;//if another process work on same task then ignore
 
                 using var scope = _serviceProvider.CreateScope();
-                if (isScanTask)
-                    scanTaskId = await _scanStateRepo.AddScanState(lockName);
                 await backgroundTask();
             }
             catch (Exception ex)
@@ -60,10 +59,33 @@ namespace ResumableFunctions.Handler.Helpers
                 _logger.LogError(ex, errorMessage);
                 throw;
             }
-            finally
+        }
+
+
+        public async Task ExecuteWithoutLock(
+            Func<Task> backgroundTask,
+            string errorMessage,
+            [CallerMemberName] string methodName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
+        {
+            try
             {
-                await _scanStateRepo.RemoveScanState(scanTaskId);
+                using var scope = _serviceProvider.CreateScope();
+                await backgroundTask();
+            }
+            catch (Exception ex)
+            {
+                var codeInfo =
+                    $"\nSource File Path: {sourceFilePath}\n" +
+                    $"Line Number: {sourceLineNumber}";
+                errorMessage = errorMessage == null ?
+                    $"Error when execute [{methodName}]\n{codeInfo}" :
+                    $"{errorMessage}\n{codeInfo}";
+                _logger.LogError(ex, errorMessage);
+                throw;
             }
         }
+
     }
 }

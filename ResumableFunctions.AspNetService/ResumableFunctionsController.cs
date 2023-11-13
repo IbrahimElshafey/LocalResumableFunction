@@ -36,7 +36,6 @@ namespace ResumableFunctions.AspNetService
         [HttpPost(Constants.ServiceProcessPushedCallAction)]
         public int ServiceProcessPushedCall(CallEffection callEffection)
         {
-            //_backgroundProcess.Enqueue(() => _callProcessor.ServiceProcessPushedCall(callEffection));//no need for enque since each function Id is enqued
             _serviceQueue.ServiceProcessPushedCall(callEffection);
             return 1;
         }

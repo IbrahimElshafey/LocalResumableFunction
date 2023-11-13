@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
+using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
@@ -20,6 +21,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly IServiceRepo _serviceRepo;
+    private readonly IScanStateRepo _scanStateRepo;
 
     public FirstWaitProcessor(
         ILogger<FirstWaitProcessor> logger,
@@ -30,7 +32,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         BackgroundJobExecutor backgroundJobExecutor,
         IBackgroundProcess backgroundJobClient,
         IServiceRepo serviceRepo,
-        IWaitTemplatesRepo templatesRepo)
+        IWaitTemplatesRepo templatesRepo,
+        IScanStateRepo scanStateRepo)
     {
         _logger = logger;
         _context = context;
@@ -41,6 +44,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _backgroundJobClient = backgroundJobClient;
         _serviceRepo = serviceRepo;
         _templatesRepo = templatesRepo;
+        _scanStateRepo = scanStateRepo;
     }
 
     public async Task<MethodWaitEntity> CloneFirstWait(MethodWaitEntity firstMatchedMethodWait)
@@ -93,7 +97,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             currentMatchedMw.Template = waitTemplate;
             currentMatchedMw.IsFirst = false;
             currentMatchedMw.LoadExpressions();
-            await _context.SaveChangesAsync();
+            await _context.CommitAsync();
             firstWaitClone.Status = WaitStatus.Waiting;
             return currentMatchedMw;
         }
@@ -110,8 +114,12 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     {
         MethodInfo resumableFunction = null;
         var functionName = "";
-        await _backgroundJobExecutor.Execute(
-            $"FirstWaitProcessor_RegisterFirstWait_{functionId}",
+        string lockName = $"FirstWaitProcessor_RegisterFirstWait_{functionId}";
+        int scanStateId = -1;
+        scanStateId = await _scanStateRepo.AddScanState(lockName);
+        try
+        {
+            await _backgroundJobExecutor.ExecuteWithoutLock(
             async () =>
             {
                 try
@@ -130,7 +138,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                         await _waitsRepository.SaveWait(firstWait);
                         _logger.LogInformation(
                             $"Save first wait [{firstWait.Name}] for function [{resumableFunction.GetFullName()}].");
-                        await _context.SaveChangesAsync();
+                        await _context.CommitAsync();
                     }
                 }
                 catch (Exception ex)
@@ -143,7 +151,13 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 }
 
             },
-            ErrorMsg(), true);
+            ErrorMsg());
+        }
+        finally
+        {
+            if (scanStateId > -1)
+                await _scanStateRepo.RemoveScanState(scanStateId);
+        }
         string ErrorMsg() => $"Error when try to register first wait for function [{functionName}:{functionId}]";
     }
 

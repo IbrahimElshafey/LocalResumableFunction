@@ -2,7 +2,7 @@
 {
     public interface IUnitOfWork : IDisposable
     {
-        Task<bool> SaveChangesAsync();
+        Task<bool> CommitAsync();
         Task Rollback();
         void MarkEntityAsModified(object entity);
     }

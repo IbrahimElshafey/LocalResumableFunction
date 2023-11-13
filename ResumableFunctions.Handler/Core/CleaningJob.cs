@@ -11,7 +11,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IResumableFunctionsSettings _settings;
         private readonly BackgroundJobExecutor _jobExecutor;
         private readonly IBackgroundProcess _backgroundProcess;
-        private const string CleanJobName = "Clean Waits Database";
+        private const string CleanJob = "Clean Waits Database";
         private const string MarkInactiveTemplatesJobName = "Mark inactive wait templates";
         public CleaningJob(
             IDatabaseCleaning databaseCleaning,
@@ -28,16 +28,16 @@ namespace ResumableFunctions.Handler.Core
         public void ScheduleCleaningJob()
         {
             _backgroundProcess.AddOrUpdateRecurringJob<CleaningJob>(
-                CleanJobName, t => t.CleanDatabase(), _settings.CleanDbSettings.RunCleaningCron);
+                CleanJob, t => t.CleanDatabase(), _settings.CleanDbSettings.RunCleaningCron);
 
             _backgroundProcess.AddOrUpdateRecurringJob<CleaningJob>(
                  MarkInactiveTemplatesJobName, t => t.MarkInactiveTemplates(), _settings.CleanDbSettings.MarkInactiveWaitTemplatesCron);
         }
 
-        [DisplayName(CleanJobName)]
+        [DisplayName(CleanJob)]
         public async Task CleanDatabase()
         {
-            await _jobExecutor.Execute(CleanJobName,
+            await _jobExecutor.ExecuteWithLock(CleanJob,
                 async () =>
                 {
                     await _databaseCleaning.CleanSoftDeletedRows();
@@ -45,13 +45,13 @@ namespace ResumableFunctions.Handler.Core
                     await _databaseCleaning.CleanCompletedFunctionInstances();
                     await _databaseCleaning.CleanOldPushedCalls();
                 },
-                $"Error when {CleanJobName}");
+                $"Error when {CleanJob}");
         }
 
         [DisplayName(MarkInactiveTemplatesJobName)]
         public async Task MarkInactiveTemplates()
         {
-            await _jobExecutor.Execute(MarkInactiveTemplatesJobName,
+            await _jobExecutor.ExecuteWithLock(MarkInactiveTemplatesJobName,
                 _databaseCleaning.MarkInactiveWaitTemplates,
                 $"Error when {MarkInactiveTemplatesJobName}");
         }

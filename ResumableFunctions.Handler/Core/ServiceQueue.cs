@@ -49,8 +49,8 @@ internal class ServiceQueue : IServiceQueue
             return;
         }
 
-        await _backgroundJobExecutor.Execute(
-            $"{nameof(RouteCallToAffectedServices)}_{pushedCallId}_{_settings.CurrentServiceId}",
+        //$"{nameof(RouteCallToAffectedServices)}_{pushedCallId}_{_settings.CurrentServiceId}",//todo:may no nedd for lock
+        await _backgroundJobExecutor.ExecuteWithoutLock(
             async () =>
             {
                 var callEffections = await _waitsRepository.GetAffectedServicesAndFunctions(methodUrn);
@@ -83,8 +83,8 @@ internal class ServiceQueue : IServiceQueue
             return;
         }
 
-        await _backgroundJobExecutor.Execute(
-            $"{nameof(ProcessCallLocally)}_{pushedCallId}_{_settings.CurrentServiceId}",
+        //$"{nameof(ProcessCallLocally)}_{pushedCallId}_{_settings.CurrentServiceId}",
+        await _backgroundJobExecutor.ExecuteWithoutLock(
             async () =>
             {
                 var callEffection = await _waitsRepository.GetCallEffectionInCurrentService(methodUrn);
@@ -107,8 +107,8 @@ internal class ServiceQueue : IServiceQueue
     public async Task ServiceProcessPushedCall(CallEffection callEffection)
     {
         var pushedCallId = callEffection.CallId;
-        await _backgroundJobExecutor.Execute(
-            $"ServiceProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
+        //$"ServiceProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",//todo:lock if there are many service instances
+        await _backgroundJobExecutor.ExecuteWithoutLock(
             () =>
             {
                 foreach (var functionId in callEffection.AffectedFunctionsIds)

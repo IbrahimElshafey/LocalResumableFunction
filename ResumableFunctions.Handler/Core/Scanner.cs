@@ -54,17 +54,28 @@ internal class Scanner
     [DisplayName("Start Scanning Current Service")]
     public async Task Start()
     {
-        await _backgroundJobExecutor.Execute(
-            $"ScanningService_{_currentServiceName}",
-            async () =>
-            {
-                await RegisterMethods(GetAssembliesToScan());
+        string lockName = $"ScanningService_{_currentServiceName}";
+        int scanStateId = -1;
+        try
+        {
+            scanStateId = await _scanStateRepo.AddScanState(lockName);
+            await _backgroundJobExecutor.ExecuteWithLock(
+                lockName,
+                async () =>
+                {
+                    await RegisterMethods(GetAssembliesToScan());
 
-                await RegisterMethodsInType(typeof(LocalRegisteredMethods), null);
+                    await RegisterMethodsInType(typeof(LocalRegisteredMethods), null);
 
-                await _context.SaveChangesAsync();
-            },
-            $"Error when scan [{_currentServiceName}]", true);
+                    await _context.CommitAsync();
+                },
+                $"Error when scan [{_currentServiceName}]");
+        }
+        finally
+        {
+            if (scanStateId > -1)
+                await _scanStateRepo.RemoveScanState(scanStateId);
+        }
     }
 
     private List<string> GetAssembliesToScan()
@@ -90,7 +101,8 @@ internal class Scanner
         {
             _functionsUrns.Add(info.FunctionData.MethodUrn);
             var resumableFunctionIdentifier = await _methodIdentifierRepo.AddResumableFunctionIdentifier(info.FunctionData);
-            await _context.SaveChangesAsync();
+            await _context.CommitAsync();
+
             if (info.RegisterFirstWait)
                 _backgroundJobClient.Enqueue(
                        () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
@@ -150,7 +162,7 @@ internal class Scanner
                 }
 
                 _logger.LogInformation($"Save discovered method waits for assembly [{assemblyPath}].");
-                await _context.SaveChangesAsync();
+                await _context.CommitAsync();
 
                 foreach (var resumableFunctionClass in resumableFunctionClasses)
                     await RegisterResumableFunctionsInClass(resumableFunctionClass);
@@ -229,7 +241,7 @@ internal class Scanner
 
                     if (CheckUrnDuplication(methodData.MethodUrn, method.GetFullName())) continue;
 
-                    await _methodIdentifierRepo.AddWaitMethodIdentifier(methodData);
+                    await _methodIdentifierRepo.AddMethodIdentifier(methodData);
                     serviceData?.AddLog($"Adding method identifier {methodData}", LogType.Info, StatusCodes.Scanning);
                 }
                 else
@@ -309,7 +321,7 @@ internal class Scanner
         }
 
         await RegisterFunctions(typeof(SubResumableFunctionAttribute), type, serviceData);
-        await _context.SaveChangesAsync();
+        await _context.CommitAsync();
         await RegisterFunctions(typeof(ResumableFunctionEntryPointAttribute), type, serviceData);
     }
 

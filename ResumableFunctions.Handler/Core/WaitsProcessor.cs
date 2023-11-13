@@ -70,7 +70,7 @@ namespace ResumableFunctions.Handler.Core
         [DisplayName("Process Function Expected Matches where [FunctionId:{0}], [PushedCallId:{1}], [MethodGroupId:{2}]")]
         public async Task ProcessFunctionExpectedWaits(int functionId, long pushedCallId, int methodGroupId)
         {
-            await _backgroundJobExecutor.Execute(
+            await _backgroundJobExecutor.ExecuteWithLock(
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
                 async () =>
                 {
@@ -114,7 +114,7 @@ namespace ResumableFunctions.Handler.Core
                                 ExecuteAfterMatchAction,
                                 ResumeExecution);
 
-                            await _context.SaveChangesAsync();
+                            await _context.CommitAsync();
 
                             if (!isSuccess) continue;
 
@@ -216,7 +216,7 @@ namespace ResumableFunctions.Handler.Core
                 _waitCall.StateId = _methodWait.FunctionStateId;
                 _waitCall.WaitId = _methodWait.Id;
                 _methodWait.FunctionState.Status = FunctionInstanceStatus.InProgress;
-                await _context.SaveChangesAsync();
+                await _context.CommitAsync();
             }
             return true;
         }
@@ -236,7 +236,7 @@ namespace ResumableFunctions.Handler.Core
                         _context.MarkEntityAsModified(_methodWait.FunctionState);
                         if (_methodWait.RuntimeClosure != null)
                             _context.MarkEntityAsModified(_methodWait.RuntimeClosure);
-                        await _context.SaveChangesAsync();//Review: why?
+                        await _context.CommitAsync();//Review: why?
                         UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionSucceeded);
 
                     }
@@ -283,7 +283,7 @@ namespace ResumableFunctions.Handler.Core
                         case MethodWaitEntity methodWait:
                             currentWait.Status = WaitStatus.Completed;
                             await TryProceedExecution(parent, methodWait);
-                            await _context.SaveChangesAsync();
+                            await _context.CommitAsync();
                             if (parent != null)
                                 parent.CurrentFunction = methodWait.CurrentFunction;
                             break;
@@ -378,7 +378,7 @@ namespace ResumableFunctions.Handler.Core
         private async Task SaveNewWait(WaitEntity nextWait)
         {
             await _waitsRepo.SaveWait(nextWait);
-            await _context.SaveChangesAsync();
+            await _context.CommitAsync();
         }
 
         private async Task FinalExit(WaitEntity currentWait)
@@ -458,13 +458,10 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task<bool> Pipeline(params Func<Task<bool>>[] actions)
         {
-            await using (await _lockProvider.AcquireLockAsync($"{_settings.CurrentWaitsDbName}_WC_{_waitCall.Id}"))
-            {
-                foreach (var action in actions)
-                    if (!await action())
-                        return false;
-                return true;
-            }
+            foreach (var action in actions)
+                if (!await action())
+                    return false;
+            return true;
         }
     }
 

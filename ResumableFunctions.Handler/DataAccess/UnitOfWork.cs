@@ -10,7 +10,7 @@ internal class UnitOfWork : IUnitOfWork
     public UnitOfWork(WaitsDataContext context) =>
         _context = context;
 
-    public async Task<bool> SaveChangesAsync()
+    public async Task<bool> CommitAsync()
     {
         
 

@@ -63,7 +63,7 @@ internal class MethodIdsRepo : IMethodIdsRepo
     public async Task<ResumableFunctionIdentifier> AddResumableFunctionIdentifier(MethodData methodData)
     {
         await using var lockHandle =
-            await _lockProvider.AcquireLockAsync($"{_settings.CurrentWaitsDbName}_RF_{methodData.MethodUrn}");
+            await _lockProvider.AcquireLockAsync($"{_settings.CurrentWaitsDbName}_AddResumableFunctionIdentifier_{methodData.MethodUrn}");
         var inDb = await TryGetResumableFunction(methodData);
         if (inDb != null)
         {
@@ -77,10 +77,10 @@ internal class MethodIdsRepo : IMethodIdsRepo
         return add;
     }
 
-    public async Task AddWaitMethodIdentifier(MethodData methodData)
+    public async Task AddMethodIdentifier(MethodData methodData)
     {
         await using var waitHandle =
-            await _lockProvider.AcquireLockAsync($"{_settings.CurrentWaitsDbName}_MG_{methodData.MethodUrn}");
+            await _lockProvider.AcquireLockAsync($"{_settings.CurrentWaitsDbName}_AddMethodIdentifier_{methodData.MethodUrn}");
         var methodGroup =
             await _context
                 .MethodsGroups

@@ -41,7 +41,7 @@ namespace ResumableFunctions.Handler.Core
             try
             {
                 await _pushedCallsRepo.Push(pushedCall);
-                await _context.SaveChangesAsync();
+                await _context.CommitAsync();
                 _backgroundProcess.Enqueue(() => 
                     _serviceQueue.RouteCallToAffectedServices(pushedCall.Id, pushedCall.MethodData.MethodUrn));
                 return pushedCall.Id;
@@ -72,7 +72,7 @@ namespace ResumableFunctions.Handler.Core
                 if (await _methodIdsRepo.CanPublishFromExternal(methodUrn))
                 {
                     await _pushedCallsRepo.Push(pushedCall);
-                    await _context.SaveChangesAsync();
+                    await _context.CommitAsync();
                     //Route call to current service only
                     _backgroundProcess.Enqueue(() =>
                         _serviceQueue.ProcessCallLocally(pushedCall.Id, pushedCall.MethodData.MethodUrn));

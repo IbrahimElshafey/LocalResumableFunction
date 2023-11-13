@@ -63,9 +63,9 @@ internal static class CoreExtensions
         services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
         services.AddScoped<IPrivateDataRepo, PrivateDataRepo>();
         services.AddScoped<IWaitsRepo, WaitsRepo>();
-        services.AddTransient<IServiceRepo, ServiceRepo>();
+        services.AddTransient<IServiceRepo, ServiceRepo>();//todo: why AddTransient?
         services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
-        services.AddTransient<IScanStateRepo, ScanStateRepo>();
+        services.AddTransient<IScanStateRepo, ScanStateRepo>();//todo: why AddTransient?
         services.AddScoped<IPushedCallsRepo, PushedCallsRepo>();
         services.AddScoped<IDatabaseCleaning, DatabaseCleaning>();
         services.AddScoped<IWaitProcessingRecordsRepo, WaitProcessingRecordsRepo>();

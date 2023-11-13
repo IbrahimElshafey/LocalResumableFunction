@@ -1,4 +1,5 @@
 ﻿# Todo
+* Wait creation time and pushed call time must be taken in consideration and not override by save changes
 * Add class for lock names
 * Wait processing review
 * Review function state update lock `ExecuteAfterMatchAction`
