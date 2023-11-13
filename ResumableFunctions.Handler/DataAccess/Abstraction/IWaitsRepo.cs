@@ -13,7 +13,7 @@ public interface IWaitsRepo
     Task CancelOpenedWaitsForState(int stateId);
     Task CancelSubWaits(long parentId, long pushedCallId);
     Task<WaitEntity> GetWaitParent(WaitEntity wait);
-    Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn);
+    Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn, DateTime puhsedCallDate);
     Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn);
     Task RemoveFirstWaitIfExist(int methodIdentifierId);
     Task<bool> SaveWait(WaitEntity newWait);

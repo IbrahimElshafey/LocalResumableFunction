@@ -22,7 +22,8 @@ public abstract partial class ResumableFunctionsContainer
             WaitType = WaitType.MethodWait,
             CurrentFunction = this,
             InCodeLine = inCodeLine,
-            CallerName = callerName
+            CallerName = callerName,
+            Created = DateTime.Now,
         }.ToMethodWait();
     }
 
@@ -38,7 +39,8 @@ public abstract partial class ResumableFunctionsContainer
             WaitType = WaitType.MethodWait,
             CurrentFunction = this,
             InCodeLine = inCodeLine,
-            CallerName = callerName
+            CallerName = callerName,
+            Created = DateTime.Now
         }.ToMethodWait();
     }
 
@@ -59,7 +61,8 @@ public abstract partial class ResumableFunctionsContainer
             WaitType = WaitType.GroupWaitAll,
             CurrentFunction = this,
             InCodeLine = inCodeLine,
-            CallerName = callerName
+            CallerName = callerName,
+            Created = DateTime.Now
         };
         return group.ToWaitsGroup();
     }

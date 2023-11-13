@@ -167,7 +167,7 @@ internal sealed class WaitsDataContext : DbContext
         methodWaitBuilder
           .Property(x => x.CallId)
           .HasColumnName(nameof(MethodWaitEntity.CallId));
-        
+
         //methodWaitBuilder.HasOne(x => x.Template).WithMany(x => x.Waits);
         //methodWaitBuilder.HasOne(x => x.MethodToWait).WithMany(x => x.Waits);
 
@@ -418,13 +418,12 @@ internal sealed class WaitsDataContext : DbContext
                 entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.Now;
                 entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
                 break;
-            case EntityState.Added when entityEntry.Entity is IEntityWithUpdate:
-                entityEntry.Property(nameof(IEntity<int>.Created)).CurrentValue = DateTime.Now;
-                entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
-                break;
-            case EntityState.Added when entityEntry.Entity is IEntity<int>:
-            case EntityState.Added when entityEntry.Entity is IEntity<long>:
-                entityEntry.Property(nameof(IEntity<int>.Created)).CurrentValue = DateTime.Now;
+            case EntityState.Added:
+                var creationDateProp = entityEntry.Property(nameof(IEntity.Created));
+                if (creationDateProp.CurrentValue == default)
+                    creationDateProp.CurrentValue = DateTime.Now;
+                if (entityEntry.Entity is IEntityWithUpdate)
+                    entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
                 break;
         }
     }

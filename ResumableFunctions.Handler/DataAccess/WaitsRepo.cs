@@ -67,7 +67,7 @@ internal partial class WaitsRepo : IWaitsRepo
             : null;
     }
 
-    public async Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn)
+    public async Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn, DateTime puhsedCallDate)
     {
         var methodGroup = await GetMethodGroup(methodUrn);
 
@@ -75,7 +75,8 @@ internal partial class WaitsRepo : IWaitsRepo
                    .MethodWaits
                    .Where(x =>
                        x.Status == WaitStatus.Waiting &&
-                       x.MethodGroupToWaitId == methodGroup.Id);
+                       x.MethodGroupToWaitId == methodGroup.Id &&
+                       x.Created < puhsedCallDate);
 
         if (methodGroup.IsLocalOnly)
         {

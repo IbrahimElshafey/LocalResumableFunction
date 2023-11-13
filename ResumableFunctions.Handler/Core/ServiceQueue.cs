@@ -40,12 +40,12 @@ internal class ServiceQueue : IServiceQueue
     }
 
     [DisplayName("Route call [Id: {0},MethodUrn: {1}] to services that may be affected.")]
-    public async Task RouteCallToAffectedServices(long pushedCallId, string methodUrn)
+    public async Task RouteCallToAffectedServices(long pushedCallId, DateTime puhsedCallDate, string methodUrn)
     {
         //if scan is running schedule it for later processing
         if (!await _scanStateRepo.IsScanFinished())
         {
-            _backgroundJobClient.Schedule(() => RouteCallToAffectedServices(pushedCallId, methodUrn), TimeSpan.FromSeconds(3));
+            _backgroundJobClient.Schedule(() => RouteCallToAffectedServices(pushedCallId, puhsedCallDate, methodUrn), TimeSpan.FromSeconds(3));
             return;
         }
 
@@ -53,7 +53,7 @@ internal class ServiceQueue : IServiceQueue
         await _backgroundJobExecutor.ExecuteWithoutLock(
             async () =>
             {
-                var callEffections = await _waitsRepository.GetAffectedServicesAndFunctions(methodUrn);
+                var callEffections = await _waitsRepository.GetAffectedServicesAndFunctions(methodUrn, puhsedCallDate);
                 if (callEffections == null || callEffections.Any() is false)
                 {
                     _logger.LogWarning($"There are no services affected by pushed call [{methodUrn}:{pushedCallId}]");

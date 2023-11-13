@@ -21,9 +21,9 @@ public abstract partial class ResumableFunctionsContainer : IObjectWithLog
     }
     [IgnoreMember] internal MethodInfo CurrentResumableFunction { get; set; }
 
-    protected void Log(string message) => this.AddLog(message, LogType.Info, Helpers.StatusCodes.Custom);
-    protected void Warning(string message) => this.AddLog(message, LogType.Warning, Helpers.StatusCodes.Custom);
-    protected void Error(string message, Exception ex = null) => this.AddError(message, Helpers.StatusCodes.Custom, ex);
+    protected void AddInfoLog(string message) => this.AddLog(message, LogType.Info, Helpers.StatusCodes.Custom);
+    protected void AddWarningLog(string message) => this.AddLog(message, LogType.Warning, Helpers.StatusCodes.Custom);
+    protected void AddErrorLog(string message, Exception ex = null) => this.AddError(message, Helpers.StatusCodes.Custom, ex);
 
     [IgnoreMember][NotMapped] public List<LogRecord> Logs { get; set; } = new();
     //[IgnoreMember][NotMapped] internal Dictionary<string, object> Closures { get; } = new();
