@@ -6,5 +6,5 @@ public interface IPushedCallsRepo
 {
     Task<PushedCall> GetById(long pushedCallId);
     Task Push(PushedCall pushedCall);
-    Task<bool> HasMatchBeforeForInstance(long pushedCallId, int functionStateId);
+    Task<bool> PushedCallMatchedForFunctionBefore(long pushedCallId, int rootFunctionId);
 }

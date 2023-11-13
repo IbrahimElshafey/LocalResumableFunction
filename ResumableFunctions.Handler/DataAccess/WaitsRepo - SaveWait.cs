@@ -50,7 +50,7 @@ internal partial class WaitsRepo
         return false;
     }
 
-    public async Task<MethodWaitEntity> GetMethodWait(int waitId, params Expression<Func<MethodWaitEntity, object>>[] includes)
+    public async Task<MethodWaitEntity> GetMethodWait(long waitId, params Expression<Func<MethodWaitEntity, object>>[] includes)
     {
         var query = _context.MethodWaits.AsQueryable();
         foreach (var include in includes)
@@ -62,7 +62,7 @@ internal partial class WaitsRepo
             .FirstOrDefaultAsync(x => x.Id == waitId);
     }
 
-    public async Task<MethodInfo> GetMethodInfoForRf(int waitId)
+    public async Task<MethodInfo> GetMethodInfoForRf(long waitId)
     {
         return (await _context.Waits
             .Include(x => x.RequestedByFunction)

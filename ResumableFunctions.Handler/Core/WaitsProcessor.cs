@@ -82,7 +82,7 @@ namespace ResumableFunctions.Handler.Core
                     foreach (var template in waitTemplates)
                     {
                         var waits = await _waitsRepo.GetPendingWaitsForTemplate(
-                            template,
+                            template.Id,
                             _pushedCall.GetMandatoryPart(template.CallMandatoryPartExpression),
                             x => x.RequestedByFunction,
                             x => x.FunctionState);
@@ -163,18 +163,19 @@ namespace ResumableFunctions.Handler.Core
                 var matched = _methodWait.IsMatched();
                 if (matched is true)
                 {
-                    //var hasMatchBefore =
-                    //  await _pushedCallsRepo.HasMatchBeforeForInstance(pushedCallId, _methodWait.FunctionStateId);
-                    //if (hasMatchBefore)
-                    //{
-                    //    await _serviceRepo.AddLog(
-                    //        $"Pushed call [{pushedCallId}] can't activate wait [{_methodWait.Name}]" +
-                    //        $"because another wait for this instance activated before with same call ID.",
-                    //        LogType.Warning,
-                    //        StatusCodes.WaitProcessing);
-                    //    UpdateWaitRecord(x => x.MatchStatus = MatchStatus.NotMatched);
-                    //    return false;
-                    //}
+                    //todo:delete this and group waits by root function from the begining
+                    var hasMatchBefore =
+                      await _pushedCallsRepo.PushedCallMatchedForFunctionBefore(pushedCallId, _methodWait.RootFunctionId);
+                    if (hasMatchBefore)
+                    {
+                        await _serviceRepo.AddLog(
+                            $"Pushed call [{pushedCallId}] can't activate wait [{_methodWait.Name}]" +
+                            $"because another wait for this instance activated before with same call ID.",
+                            LogType.Warning,
+                            StatusCodes.WaitProcessing);
+                        UpdateWaitRecord(x => x.MatchStatus = MatchStatus.NotMatched);
+                        return false;
+                    }
 
                     var message =
                         $"Wait [{_methodWait.Name}] matched in [{_methodWait.RequestedByFunction.RF_MethodUrn}].";
@@ -228,14 +229,13 @@ namespace ResumableFunctions.Handler.Core
             _methodWait.CallId = pushedCallId;
             try
             {
-                await using (await _lockProvider.AcquireLockAsync($"{_settings.CurrentWaitsDbName}_UFS_{_methodWait.FunctionStateId}"))
+                await using (await _lockProvider.AcquireLockAsync($"{_settings.CurrentWaitsDbName}_UpdateFunctionState_{_methodWait.FunctionStateId}"))
                 {
                     if (_methodWait.ExecuteAfterMatchAction())
                     {
                         _context.MarkEntityAsModified(_methodWait.FunctionState);
                         if (_methodWait.RuntimeClosure != null)
                             _context.MarkEntityAsModified(_methodWait.RuntimeClosure);
-                        //await _waitsRepo.PropagateClosureIfChanged(_methodWait);
                         await _context.SaveChangesAsync();//Review: why?
                         UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionSucceeded);
 
