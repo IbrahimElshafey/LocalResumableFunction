@@ -82,7 +82,7 @@ namespace ResumableFunctions.Handler.Core
                     foreach (var template in waitTemplates)
                     {
                         var waits = await _waitsRepo.GetPendingWaitsForTemplate(
-                            template,
+                            template.Id,
                             _pushedCall.GetMandatoryPart(template.CallMandatoryPartExpression),
                             x => x.RequestedByFunction,
                             x => x.FunctionState);

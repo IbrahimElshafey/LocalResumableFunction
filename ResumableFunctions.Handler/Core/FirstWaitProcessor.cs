@@ -45,7 +45,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
     public async Task<MethodWaitEntity> CloneFirstWait(MethodWaitEntity firstMatchedMethodWait)
     {
-        var rootId = int.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
+        var rootId = long.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
         var resumableFunction =
             rootId != firstMatchedMethodWait.Id ?
             await _waitsRepository.GetMethodInfoForRf(rootId) :

@@ -35,13 +35,14 @@ internal class PushedCallsRepo : IPushedCallsRepo
         //        x.CallId == pushedCallId &&
         //        x.FunctionStateId == functionStateId)
         //    .AnyAsync();
-        return await _context.
-            WaitProcessingRecords.
-            AsNoTracking().
-            Where(x =>
-                x.MatchStatus == InOuts.MatchStatus.Matched &&
-                x.PushedCallId == pushedCallId &&
-                x.StateId == functionStateId)
-            .AnyAsync();
+        //return await _context.
+        //    WaitProcessingRecords.
+        //    AsNoTracking().
+        //    Where(x =>
+        //        x.MatchStatus == InOuts.MatchStatus.Matched &&
+        //        x.PushedCallId == pushedCallId &&
+        //        x.StateId == functionStateId)
+        //    .AnyAsync();
+        return true;
     }
 }

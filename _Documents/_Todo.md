@@ -1,8 +1,9 @@
 ﻿# Todo
+* Review function state update lock
+* Pushed call activate one instance,what if same function and sub fnction wait the same wait
 * Wait template duplication review
 * Wait processing review
 * Time and waits review
-* Pushed call activate one instance,what if same function and sub fnction wait the same wait
 * Complex local var in closure
 	* What if type is not serializable??
 

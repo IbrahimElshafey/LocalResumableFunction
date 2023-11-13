@@ -5,11 +5,13 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
+using ResumableFunctions.Handler.DataAccess.InOuts;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal partial class WaitsRepo : IWaitsRepo
@@ -241,8 +243,27 @@ internal partial class WaitsRepo : IWaitsRepo
     }
 
 
+    public async Task<List<PendingWaitData>> GetPendingWaitsData(int methodGroupId, int functionId)
+    {
+        return await _context
+           .MethodWaits
+           .Include(x => x.Template)
+           .Where(
+               wait =>
+               wait.Status == WaitStatus.Waiting &&
+               wait.RequestedByFunctionId == functionId &&
+               wait.MethodGroupToWaitId == methodGroupId &&
+               wait.ServiceId == _settings.CurrentServiceId)
+           .OrderBy(x => x.TemplateId)
+           .Select(wait => new PendingWaitData(wait.Id, wait.Template, wait.MandatoryPart, wait.IsFirst))
+           .ToListAsync();
+
+        //OrderBy(x => x.IsFirst).
+        //pendingWaits.ForEach(wait => wait.Template.LoadUnmappedProps());
+    }
+
     public async Task<List<MethodWaitEntity>> GetPendingWaitsForTemplate(
-        WaitTemplate template,
+        int templateId,
         string mandatoryPart,
         params Expression<Func<MethodWaitEntity, object>>[] includes)
     {
@@ -251,7 +272,7 @@ internal partial class WaitsRepo : IWaitsRepo
             .Where(
                 wait =>
                 wait.Status == WaitStatus.Waiting &&
-                wait.TemplateId == template.Id);
+                wait.TemplateId == templateId);
         foreach (var include in includes)
         {
             query = query.Include(include);

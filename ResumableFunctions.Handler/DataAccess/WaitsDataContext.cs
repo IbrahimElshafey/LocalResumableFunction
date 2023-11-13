@@ -149,13 +149,6 @@ internal sealed class WaitsDataContext : DbContext
             .HasFilter($"{nameof(WaitEntity.Status)} = {(int)WaitStatus.Waiting}")
             .HasDatabaseName("Index_ActiveWaits");
 
-        //waitBuilder
-        //    .Property(x => x.Locals)
-        //    .HasConversion(
-        //        x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
-        //        y => JsonConvert.DeserializeObject(y));
-        //waitBuilder
-        //    .Property(x => x.Locals).Metadata.SetValueComparer(_closureComparer);
 
         waitBuilder
             .Property(x => x.ImmutableClosure)
@@ -167,6 +160,7 @@ internal sealed class WaitsDataContext : DbContext
 
 
         var methodWaitBuilder = modelBuilder.Entity<MethodWaitEntity>();
+        //methodWaitBuilder.ToTable("MethodWaits");
         methodWaitBuilder
           .Property(x => x.MethodToWaitId)
           .HasColumnName(nameof(MethodWaitEntity.MethodToWaitId));
@@ -174,6 +168,9 @@ internal sealed class WaitsDataContext : DbContext
           .Property(x => x.CallId)
           .HasColumnName(nameof(MethodWaitEntity.CallId));
         
+        //methodWaitBuilder.HasOne(x => x.Template).WithMany(x => x.Waits);
+        //methodWaitBuilder.HasOne(x => x.MethodToWait).WithMany(x => x.Waits);
+
 
 
         modelBuilder.Entity<WaitsGroupEntity>()

@@ -43,6 +43,7 @@ public class WaitTemplate : IEntity<int>, IOnSaveEntity
     public int? ServiceId { get; set; }
     public int InCodeLine { get; set; }
     public int IsActive { get; set; } = 1;
+    //public List<MethodWaitEntity> Waits { get; internal set; }
 
     bool expressionsLoaded;
     internal void LoadUnmappedProps(bool forceReload = false)
