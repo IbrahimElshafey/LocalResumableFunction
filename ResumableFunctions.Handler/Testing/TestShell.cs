@@ -291,6 +291,7 @@ namespace ResumableFunctions.Handler.Testing
                 .FirstAsync();
             return await Context
                 .Waits
+                .Include(x => x.RuntimeClosure)
                 .Where(x => x.Created > callIdCreated && x.Status == WaitStatus.Waiting)
                 .AsNoTracking()
                 .ToListAsync();

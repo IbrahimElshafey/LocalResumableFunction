@@ -149,17 +149,16 @@ internal sealed class WaitsDataContext : DbContext
             .HasDatabaseName("Index_ActiveWaits");
 
 
-        waitBuilder
-            .Property(x => x.MatchClosure)
-            .HasConversion(
-            x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
-            y => JsonConvert.DeserializeObject(y));
-        waitBuilder
-           .Property(x => x.MatchClosure).Metadata.SetValueComparer(_closureComparer);
+        //waitBuilder
+        //    .Property(x => x.MatchClosure)
+        //    .HasConversion(
+        //    x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
+        //    y => JsonConvert.DeserializeObject(y));
+        //waitBuilder
+        //   .Property(x => x.MatchClosure).Metadata.SetValueComparer(_closureComparer);
 
 
         var methodWaitBuilder = modelBuilder.Entity<MethodWaitEntity>();
-        //methodWaitBuilder.ToTable("MethodWaits");
         methodWaitBuilder
           .Property(x => x.MethodToWaitId)
           .HasColumnName(nameof(MethodWaitEntity.MethodToWaitId));

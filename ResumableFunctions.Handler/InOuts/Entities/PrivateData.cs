@@ -17,6 +17,18 @@ public class PrivateData : IEntity<Guid>, IEntityWithUpdate
 
     public string ConcurrencyToken { get; set; }
 
+    public T GetProp<T>(string propName)
+    {
+        switch (Value)
+        {
+            case JObject jobject:
+                return jobject[propName].ToObject<T>();
+            case object closureObject:
+                return (T)closureObject.GetType().GetField(propName).GetValue(closureObject);
+            default: return default;
+        }
+    }
+
     internal object AsType(Type closureClass)
     {
         Value = Value is JObject jobject ? jobject.ToObject(closureClass) : Value;

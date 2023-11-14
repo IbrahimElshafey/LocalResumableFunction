@@ -74,16 +74,13 @@ public class MethodWaitEntity : WaitEntity
         //var closureNotChange = AfterMatchAction == null && CancelMethodAction == null;
         //if (closureNotChange) return;
 
-        if (MatchClosure == default) return;
+        if (Closure == default) return;
         if (RuntimeClosureId == null)
             RuntimeClosureId = Guid.NewGuid();
         base.OnAddWait();
     }
-    protected object GetMatchClosure(Type closureType)
-    {
-        MatchClosure = MatchClosure is JObject jobject ? jobject.ToObject(closureType) : MatchClosure;
-        return MatchClosure ?? Activator.CreateInstance(closureType);
-    }
+
+
 
     internal bool IsMatched()
     {
@@ -97,7 +94,7 @@ public class MethodWaitEntity : WaitEntity
                 return true;
             var check = MatchExpression.CompileFast();
             var closureType = MatchExpression.Parameters[3].Type;
-            var closure = GetMatchClosure(closureType);
+            var closure = GetClosure(closureType);
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction, closure);
         }
         catch (Exception ex)
@@ -209,12 +206,12 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
     {
         MatchExpression = matchExpression;
         MatchExpressionParts = new MatchExpressionWriter(MatchExpression, CurrentFunction).MatchExpressionParts;
-        if (MatchClosure != null &&
+        if (Closure != null &&
             MatchExpressionParts.Closure != null &&
-            MatchClosure.GetType() != MatchExpressionParts.Closure.GetType())
+            Closure.GetType() != MatchExpressionParts.Closure.GetType())
             throw new Exception(
                 $"For wait [{Name}] the closure must be same for AfterMatchAction,CancelAction and MatchExpression.");
-        SetImmutableClosure(MatchExpressionParts.Closure);
+        SetClosure(MatchExpressionParts.Closure);
         MandatoryPart = MatchExpressionParts.GetInstanceMandatoryPart(CurrentFunction);
         return this;
     }

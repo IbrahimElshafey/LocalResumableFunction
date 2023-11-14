@@ -70,10 +70,8 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     [NotMapped]
     public WaitEntity OldCompletedSibling { get; set; }
 
-    /// <summary>
-    /// Local variables that is closed (make a closure) in match expression or callbacks.
-    /// </summary>
-    public object MatchClosure { get; internal set; }
+    [NotMapped]
+    public object Closure { get; internal set; }
 
     public string Path { get; set; }
 
@@ -293,7 +291,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         foreach (var group in waitsGroupedByClosure)
         {
             var mw = (MethodWaitEntity)
-                group.FirstOrDefault(x => x is MethodWaitEntity mw && mw.MatchClosure != default);
+                group.FirstOrDefault(x => x is MethodWaitEntity mw && mw.Closure != default);
             if (mw == default)
             {
                 foreach (var wait in group)
@@ -312,7 +310,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             if (useOldWaitClosure)
             {
                 //closure vars may be changed so update it before assign old closure
-                OldCompletedSibling.RuntimeClosure.Value = mw.MatchClosure;
+                OldCompletedSibling.RuntimeClosure.Value = mw.Closure;
                 runtimeClosure = OldCompletedSibling.RuntimeClosure;
             }
             else
@@ -320,7 +318,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 runtimeClosure = new PrivateData
                 {
                     Id = mw.RuntimeClosureId.Value,
-                    Value = mw.MatchClosure,
+                    Value = mw.Closure,
                 };
             }
 
@@ -393,39 +391,38 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             throw new Exception(
                 $"For wait [{Name}] the [{methodName}:{method.Name}] must not be over-loaded.");
         if (declaringType.Name.StartsWith(Constants.CompilerClosurePrefix))
-            SetImmutableClosure(callback.Target);
+            SetClosure(callback.Target);
         return $"{method.DeclaringType.FullName}#{method.Name}";
     }
 
-    internal void SetImmutableClosure(object closure)
+    internal void SetClosure(object closure)
     {
         if (closure == default) return;
-
-        var closureString =
-               JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
-        if (MatchClosure != null && MatchClosure.GetType() != closure.GetType())
+        if (Closure != null && Closure.GetType() != closure.GetType())
             throw new Exception(
                 $"For method wait [{Name}] the closure must be the same for AfterMatchAction, CancelAction, and MatchExpression.");
-        MatchClosure = JsonConvert.DeserializeObject(closureString, closure.GetType());
+        Closure = closure;
     }
-
-
+    public object GetClosure(Type closureType)
+    {
+        if (RuntimeClosure?.Value == null) Activator.CreateInstance(closureType);
+        var matchClosure = RuntimeClosure?.Value;
+        matchClosure = matchClosure is JObject jobject ? jobject.ToObject(closureType) : matchClosure;
+        return matchClosure ?? Activator.CreateInstance(closureType);
+    }
 
 
     internal string LocalsDisplay()
     {
-        var matchClosure = MatchClosure;
         var locals = Locals?.Value;
-        var runtimeClosure = RuntimeClosure?.Value;
-        if (locals == null && matchClosure == null && runtimeClosure == null)
+        var closure = RuntimeClosure?.Value;
+        if (locals == null && closure == null)
             return null;
         var result = new JObject();
         if (locals != null && locals.ToString() != "{}")
             result["Locals"] = locals as JToken;
-        if (matchClosure != null && matchClosure.ToString() != "{}")
-            result["MatchClosure"] = matchClosure as JToken;
-        if (runtimeClosure != null && runtimeClosure.ToString() != "{}")
-            result["RuntimeClosure"] = runtimeClosure as JToken;
+        if (closure != null && closure.ToString() != "{}")
+            result["RuntimeClosure"] = closure as JToken;
         if (result?.ToString() != "{}")
             return result.ToString(Formatting.Indented)?.Replace("<", "").Replace(">", "");
         return null;
