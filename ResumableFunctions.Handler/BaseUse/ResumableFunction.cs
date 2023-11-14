@@ -11,11 +11,11 @@ namespace ResumableFunctions.Handler;
 
 public abstract partial class ResumableFunctionsContainer : IObjectWithLog
 {
-    public virtual Task OnErrorOccurred(string message, Exception ex = null)
+    public virtual Task OnError(string message, Exception ex = null)
     {
         return Task.CompletedTask;
     }
-    public virtual Task OnInstanceCompleted()
+    public virtual Task OnCompleted()
     {
         return Task.CompletedTask;
     }

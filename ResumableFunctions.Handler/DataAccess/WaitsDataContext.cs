@@ -409,7 +409,7 @@ internal sealed class WaitsDataContext : DbContext
                 break;
         }
     }
-
+    private DateTime defaultDate = new DateTime(1, 1, 1);
     private void SetDates(EntityEntry entityEntry)
     {
         switch (entityEntry.State)
@@ -420,7 +420,8 @@ internal sealed class WaitsDataContext : DbContext
                 break;
             case EntityState.Added:
                 var creationDateProp = entityEntry.Property(nameof(IEntity.Created));
-                if (creationDateProp.CurrentValue == default)
+                if (DateTime.Compare((DateTime)creationDateProp.CurrentValue, defaultDate) is 0 ||
+                    creationDateProp.CurrentValue == (object)default(DateTime))
                     creationDateProp.CurrentValue = DateTime.Now;
                 if (entityEntry.Entity is IEntityWithUpdate)
                     entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();

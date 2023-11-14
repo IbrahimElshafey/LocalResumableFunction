@@ -203,7 +203,7 @@ namespace ResumableFunctions.Handler.Core
                     await _serviceRepo.AddErrorLog(ex, error, StatusCodes.WaitProcessing);
                 else
                     _methodWait.FunctionState.AddError(error, StatusCodes.WaitProcessing, ex);
-                await _methodWait.CurrentFunction?.OnErrorOccurred(error, ex);
+                await _methodWait.CurrentFunction?.OnError(error, ex);
                 throw new Exception(error, ex);
             }
         }
@@ -264,7 +264,7 @@ namespace ResumableFunctions.Handler.Core
             }
             catch (Exception ex)
             {
-                await _methodWait.CurrentFunction?.OnErrorOccurred("Error when execute after match action.", ex);
+                await _methodWait.CurrentFunction?.OnError("Error when execute after match action.", ex);
             }
 
             return true;
@@ -319,7 +319,7 @@ namespace ResumableFunctions.Handler.Core
                 _methodWait.FunctionState.Status = FunctionInstanceStatus.InError;
                 _methodWait.Status = _settings.WaitStatusIfProcessingError;
                 UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionFailed);
-                await _methodWait.CurrentFunction?.OnErrorOccurred(errorMsg, ex);
+                await _methodWait.CurrentFunction?.OnError(errorMsg, ex);
                 return false;
             }
             UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionSucceeded);
@@ -388,8 +388,8 @@ namespace ResumableFunctions.Handler.Core
             currentWait.FunctionState.StateObject = currentWait.CurrentFunction;
             currentWait.FunctionState.AddLog("Function instance completed.", LogType.Info, StatusCodes.WaitProcessing);
             currentWait.FunctionState.Status = FunctionInstanceStatus.Completed;
-            await _waitsRepo.CancelOpenedWaitsForState(currentWait.FunctionStateId);
-            await currentWait.CurrentFunction?.OnInstanceCompleted();
+            await _waitsRepo.CancelOpenedWaitsForState(currentWait.FunctionStateId);//for confirmation calls
+            await currentWait.CurrentFunction?.OnCompleted();
         }
 
         private async Task<MethodWaitEntity> LoadWait(int waitId)
