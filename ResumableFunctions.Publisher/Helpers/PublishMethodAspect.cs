@@ -45,7 +45,7 @@ namespace ResumableFunctions.Publisher.Helpers
                 MethodData = new MethodData
                 {
                     MethodUrn = publishMethodAttribute.MethodUrn,
-                    AssemblyName = "[External] " + Assembly.GetEntryAssembly()?.GetName().Name,
+                    AssemblyName = "[From Client] " + Assembly.GetEntryAssembly()?.GetName().Name,
                     ClassName = metadata.DeclaringType.Name,
                     MethodName = metadata.Name,
                 },

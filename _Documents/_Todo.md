@@ -1,8 +1,10 @@
 ﻿# Todo
 * Wait processing review
 	* Wait creation time and pushed call time must be taken in consideration when get pending waits
-* Add class for lock names
-* Review function state update lock `ExecuteAfterMatchAction`
+* Suspend Hangfire jobs when new version created
+
+* Review concurrency with [computer and paper]
+	* Review function state update lock `ExecuteAfterMatchAction`
 
 * Wait template duplication review
 	* Must be linked to method id and group id

@@ -32,8 +32,8 @@ namespace Tests
             Assert.Equal(1, waits.Count(x => x.IsRoot));
 
 
-            wms.Method3("1");
             wms.Method1("1");
+            wms.Method3("1");
 
             pushedCalls = await test.GetPushedCalls();
             Assert.Equal(4, pushedCalls.Count);
@@ -51,25 +51,28 @@ namespace Tests
             [ResumableFunctionEntryPoint("WaitManyWithExpression")]
             public async IAsyncEnumerable<Wait> WaitManyWithExpression()
             {
-                int x = 1;
+                int localCounter = 10;
                 yield return Wait(new[]
                     {
-                    Wait<string, string>(Method1, "Method 1").MatchIf((_,_)=>x==1),
-                    Wait<string, string>(Method2, "Method 2"),
-                    Wait<string, string>(Method3, "Method 3")
+                        Wait<string, string>(Method1, "Method 1")
+                            .MatchIf((_,_) => localCounter == 10),
+                        Wait<string, string>(Method2, "Method 2"),
+                        Wait<string, string>(Method3, "Method 3")
                     }
 ,
                     "Wait three methods")
                 //.MatchIf(group => group.CompletedCount == 2 && Id == 10 && x == 1);
                 .MatchIf(group =>
                 {
-                    if (x != 1)
+                    if (localCounter % 10 != 0)
                         throw new Exception("Closure in group match filter not work");
+                    localCounter += 10;
                     return group.CompletedCount == 2 && Id == 10;
                 });
                 //.MatchIf(group => group.CompletedCount == 2);
                 await Task.Delay(100);
-                Console.WriteLine(x);
+                if (localCounter != 30)
+                    throw new Exception("Closure in group match filter not UPDATED.");
                 Console.WriteLine("Three method done");
             }
 

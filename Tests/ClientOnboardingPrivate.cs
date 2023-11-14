@@ -32,7 +32,7 @@ public class ClientOnboardingPrivate
 
         var newWait = (await testShell.GetWaitsCreateAfterCall(callId)).FirstOrDefault();
         Assert.NotNull(newWait);
-        var taskId = (newWait.ImmutableClosure as JObject)["ownerTaskId"].ToObject<int>();
+        var taskId = (newWait.MatchClosure as JObject)["ownerTaskId"].ToObject<int>();
         await testShell.SimulateMethodCall<ClientOnboardingService>(
             x => x.OwnerApproveClient(default),
             new OwnerApproveClientInput { TaskId = taskId, Decision = true },
@@ -41,7 +41,7 @@ public class ClientOnboardingPrivate
 
         newWait = (await testShell.GetWaitsCreateAfterCall(callId)).FirstOrDefault();
         Assert.NotNull(newWait);
-        var clientMeetingId = (newWait.ImmutableClosure as JObject)["clientMeetingId"].ToObject<int>();
+        var clientMeetingId = (newWait.MatchClosure as JObject)["clientMeetingId"].ToObject<int>();
         await testShell.SimulateMethodCall<ClientOnboardingService>(
            x => x.SendMeetingResult(default),
            clientMeetingId,

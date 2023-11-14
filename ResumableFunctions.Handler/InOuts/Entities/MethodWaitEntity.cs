@@ -75,15 +75,15 @@ public class MethodWaitEntity : WaitEntity
         //var closureNotChange = AfterMatchAction == null && CancelMethodAction == null;
         //if (closureNotChange) return;
 
-        if (ImmutableClosure == default) return;
+        if (MatchClosure == default) return;
         if (RuntimeClosureId == null)
             RuntimeClosureId = Guid.NewGuid();
         base.OnAddWait();
     }
     protected object GetMatchClosure(Type closureType)
     {
-        ImmutableClosure = ImmutableClosure is JObject jobject ? jobject.ToObject(closureType) : ImmutableClosure;
-        return ImmutableClosure ?? Activator.CreateInstance(closureType);
+        MatchClosure = MatchClosure is JObject jobject ? jobject.ToObject(closureType) : MatchClosure;
+        return MatchClosure ?? Activator.CreateInstance(closureType);
     }
 
     internal bool IsMatched()
@@ -210,9 +210,9 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
     {
         MatchExpression = matchExpression;
         MatchExpressionParts = new MatchExpressionWriter(MatchExpression, CurrentFunction).MatchExpressionParts;
-        if (ImmutableClosure != null &&
+        if (MatchClosure != null &&
             MatchExpressionParts.Closure != null &&
-            ImmutableClosure.GetType() != MatchExpressionParts.Closure.GetType())
+            MatchClosure.GetType() != MatchExpressionParts.Closure.GetType())
             throw new Exception(
                 $"For wait [{Name}] the closure must be same for AfterMatchAction,CancelAction and MatchExpression.");
         SetImmutableClosure(MatchExpressionParts.Closure);

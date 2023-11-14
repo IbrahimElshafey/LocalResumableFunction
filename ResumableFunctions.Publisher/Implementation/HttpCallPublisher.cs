@@ -42,7 +42,7 @@ namespace ResumableFunctions.Publisher.Implementation
                 MethodData = new MethodData
                 {
                     MethodUrn = methodUrn,
-                    AssemblyName = "[External] " + Assembly.GetEntryAssembly()?.GetName().Name,
+                    AssemblyName = "[From Client] " + Assembly.GetEntryAssembly()?.GetName().Name,
                     ClassName = minfo.DeclaringType.Name,
                     MethodName = minfo.Name,
                 },

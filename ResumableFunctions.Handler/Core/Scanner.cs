@@ -210,7 +210,7 @@ internal class Scanner
             serviceData.Url = _settings.CurrentServiceUrl;
             serviceData.AddLog($"Check last scan date for assembly [{currentAssemblyName}].", LogType.Info, StatusCodes.Scanning);
             var shouldScan = lastBuildDate > serviceData.Modified;
-            if (shouldScan is false)
+            if (shouldScan is false && !_settings.ForceRescan)
                 serviceData.AddLog($"No need to rescan assembly [{currentAssemblyName}].", LogType.Info, StatusCodes.Scanning);
             if (_settings.ForceRescan)
                 serviceData.AddLog(

@@ -55,7 +55,7 @@ public class ComplexApproval
         {
             yield return
                 Wait<string, int>(RequestAdded, "Request Added")
-                    .AfterMatch((request, requestId) => RequestId = requestId);
+                    .AfterMatch((_, requestId) => RequestId = requestId);
 
             for (var currentTopicIndex = 0; currentTopicIndex < TopicsCount; currentTopicIndex++)
             {

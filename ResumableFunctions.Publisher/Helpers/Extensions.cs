@@ -17,7 +17,7 @@ namespace ResumableFunctions.Publisher.Helpers
         {
             services.AddSingleton<IFailedRequestHandler, FailedRequestHandler>();
             //services.AddSingleton<IFailedRequestRepo, InMemoryFailedRequestRepo>();
-            services.AddSingleton<IFailedRequestRepo, OnDiskFailedRequestHandler>();
+            services.AddSingleton<IFailedRequestRepo, OnDiskFailedRequestRepo>();
             services.AddSingleton(typeof(IPublisherSettings), settings);
             services.AddHttpClient();
             services.AddSingleton(typeof(ICallPublisher), settings.CallPublisherType);

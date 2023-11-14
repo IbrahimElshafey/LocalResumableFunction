@@ -74,7 +74,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// <summary>
     /// Local variables that is closed (make a closure) in match expression or callbacks.
     /// </summary>
-    public object ImmutableClosure { get; internal set; }
+    public object MatchClosure { get; internal set; }
 
     public string Path { get; set; }
 
@@ -290,7 +290,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         foreach (var group in waitsGroupedByClosure)
         {
             var mw = (MethodWaitEntity)
-                group.FirstOrDefault(x => x is MethodWaitEntity mw && mw.ImmutableClosure != default);
+                group.FirstOrDefault(x => x is MethodWaitEntity mw && mw.MatchClosure != default);
             if (mw == default)
             {
                 foreach (var wait in group)
@@ -309,7 +309,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             if (useOldWaitClosure)
             {
                 //closure vars may be changed so update it before assign old closure
-                OldCompletedSibling.RuntimeClosure.Value = mw.ImmutableClosure;
+                OldCompletedSibling.RuntimeClosure.Value = mw.MatchClosure;
                 runtimeClosure = OldCompletedSibling.RuntimeClosure;
             }
             else
@@ -317,7 +317,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 runtimeClosure = new PrivateData
                 {
                     Id = mw.RuntimeClosureId.Value,
-                    Value = mw.ImmutableClosure,
+                    Value = mw.MatchClosure,
                 };
             }
 
@@ -400,10 +400,10 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
         var closureString =
                JsonConvert.SerializeObject(closure, ClosureContractResolver.Settings);
-        if (ImmutableClosure != null && ImmutableClosure.GetType() != closure.GetType())
+        if (MatchClosure != null && MatchClosure.GetType() != closure.GetType())
             throw new Exception(
                 $"For method wait [{Name}] the closure must be the same for AfterMatchAction, CancelAction, and MatchExpression.");
-        ImmutableClosure = JsonConvert.DeserializeObject(closureString, closure.GetType());
+        MatchClosure = JsonConvert.DeserializeObject(closureString, closure.GetType());
     }
 
 
