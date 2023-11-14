@@ -1,7 +1,10 @@
 ﻿# Todo
+* Don't save default null closure or local
+* Private data Id must be long incermental
+
 * Wait processing review
 	* Wait creation time and pushed call time must be taken in consideration when get pending waits
-* Suspend Hangfire jobs when new version created
+* Suspend Hangfire old jobs
 
 * Review concurrency with [computer and paper]
 	* Review function state update lock `ExecuteAfterMatchAction`
@@ -9,7 +12,7 @@
 * Wait template duplication review
 	* Must be linked to method id and group id
 * Time waits review
-
+* When instance completed update sub tree status
 * Complex local var in closure
 	* What if type is not serializable??
 

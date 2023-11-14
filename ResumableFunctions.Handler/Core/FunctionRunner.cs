@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts.Entities;
@@ -63,7 +64,6 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
 
     public async ValueTask<bool> MoveNextAsync()
     {
-        var stateBeforeWait = GetState();
         var hasNext = await _functionRunner.MoveNextAsync();
         if (hasNext)
         {
@@ -72,6 +72,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             var localContinuation =
                 _oldMatchedWait != null &&
                 _oldMatchedWait.Locals != null;
+            //if (RunnerHasValue())
             if (localContinuation)
             {
                 _oldMatchedWait.Locals.Value = _functionRunner;
@@ -101,6 +102,11 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         return hasNext;
     }
 
+    private bool RunnerHasValue()
+    {
+        var json = JsonConvert.SerializeObject(_functionRunner, ClosureContractResolver.Settings);
+        return json != "{}";
+    }
 
     private void CreateRunner(Type functionRunnerType, PrivateData oldLocals = null)
     {

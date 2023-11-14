@@ -211,51 +211,7 @@ internal partial class WaitsRepo : IWaitsRepo
     {
         await _context.Waits
               .Where(x => x.FunctionStateId == stateId && x.Status == WaitStatus.Waiting)
-              .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, status => WaitStatus.Canceled));
-    }
-
-    /// <summary>
-    /// Used by ReplayWaitProcessor.GetWaitToReplay
-    /// </summary>
-    /// <returns></returns>
-    public async Task CancelFunctionPendingWaits(WaitEntity waitForReplayDb)
-    {
-        var pendingRootWaits =
-            await _context.Waits
-            .OrderByDescending(x => x.Id)
-            .Where(x =>
-                x.RequestedByFunctionId == waitForReplayDb.RequestedByFunctionId &&
-                x.FunctionStateId == waitForReplayDb.FunctionStateId &&
-                x.Status == WaitStatus.Waiting &&
-                x.LocalsId == waitForReplayDb.LocalsId &&
-                x.IsRoot)
-            .ToListAsync();
-
-        foreach (var wait in pendingRootWaits)
-        {
-            CancelWait(wait, -1);
-            await CancelSubWaits(wait.Id, -1);
-        }
-    }
-
-
-    public async Task<List<PendingWaitData>> GetPendingWaitsData(int methodGroupId, int functionId)
-    {
-        return await _context
-           .MethodWaits
-           .Include(x => x.Template)
-           .Where(
-               wait =>
-               wait.Status == WaitStatus.Waiting &&
-               wait.RequestedByFunctionId == functionId &&
-               wait.MethodGroupToWaitId == methodGroupId &&
-               wait.ServiceId == _settings.CurrentServiceId)
-           .OrderBy(x => x.TemplateId)
-           .Select(wait => new PendingWaitData(wait.Id, wait.Template, wait.MandatoryPart, wait.IsFirst))
-           .ToListAsync();
-
-        //OrderBy(x => x.IsFirst).
-        //pendingWaits.ForEach(wait => wait.Template.LoadUnmappedProps());
+              .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, _ => WaitStatus.Canceled));
     }
 
     public async Task<List<MethodWaitEntity>> GetPendingWaitsForTemplate(

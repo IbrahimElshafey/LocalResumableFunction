@@ -420,9 +420,15 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             return null;
         var result = new JObject();
         if (locals != null && locals.ToString() != "{}")
+        {
             result["Locals"] = locals as JToken;
+            //result["LocalsId"] = LocalsId;
+        }
         if (closure != null && closure.ToString() != "{}")
-            result["RuntimeClosure"] = closure as JToken;
+        {
+            result["Closure"] = closure as JToken;
+            //result["ClosureId"] = RuntimeClosureId;
+        }
         if (result?.ToString() != "{}")
             return result.ToString(Formatting.Indented)?.Replace("<", "").Replace(">", "");
         return null;
