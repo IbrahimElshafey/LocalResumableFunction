@@ -61,35 +61,38 @@ public class ComplexApproval
             {
                 yield return
                     Wait(new[]
-                        {
-                            AllCommitteeApproveTopic(currentTopicIndex),
-                            ChefSkipTopic(currentTopicIndex)
-                        },
-                        $"Wait all committee approve topic {currentTopicIndex} or manager skip")
-                        .MatchAny();
+                    {
+                        AllCommitteeApproveTopic(currentTopicIndex),
+                        ChefSkipTopic(currentTopicIndex)
+                    },
+                    $"Wait all committee approve topic {currentTopicIndex} or manager skip")
+                    .MatchAny();
 
-                //closure is different than locals for this wait
-                yield return ChefTopicApproval(currentTopicIndex);
+                yield return AskMemberToApproveTopic(RequestId, currentTopicIndex, MemberRole.Chef);
             }
 
             yield return await FinalApproval();
         }
 
-        private Wait ChefTopicApproval(int chefTopicIndex)
+        private Wait AskMemberToApproveTopic(int requestId, int topicIndex, MemberRole currentRole)
         {
-            AskMemberToApproveTopic(RequestId, chefTopicIndex, MemberRole.Chef);
+            Console.WriteLine($"For rquest {requestId} and topic {topicIndex} we asked {currentRole} to approve.");
             return
-                Wait<RequestTopicIndex, string>(MemberApproveRequest, $"Chef Topic {chefTopicIndex} Approval")
-                    .MatchIf((topicIndex, decision) =>
-                        topicIndex.RequestId == RequestId &&
-                        topicIndex.TopicIndex == chefTopicIndex &&
-                        topicIndex.MemberRole == MemberRole.Chef)
-                    .NothingAfterMatch();
-        }
-
-        private void AskMemberToApproveTopic(int requestId, int currentTopicIndex, MemberRole memberRole)
-        {
-            return;
+                Wait<RequestTopicIndex, string>(
+                    MemberApproveRequest, $"{currentRole} Topic {topicIndex} Approval")
+                    .MatchIf((topicIndexObject, _) =>
+                        topicIndexObject.RequestId == RequestId &&
+                        topicIndexObject.TopicIndex == topicIndex &&
+                        topicIndexObject.MemberRole == currentRole)
+                    //.NothingAfterMatch()
+                    //.AfterMatch((input, output) =>
+                    //{
+                    //    sharedCounter += 10;
+                    //    if (sharedCounter < 10)
+                    //        throw new Exception("Local var `sharedCounter` must be >= 10.");
+                    //    PublicCounter = 1000;
+                    //})
+                    ;
         }
 
         private async Task<Wait> FinalApproval()
@@ -119,39 +122,23 @@ public class ComplexApproval
 
         private Wait AllCommitteeApproveTopic(int membersTopicIndex)
         {
-            var waits = new Wait[3];
+            var committeeApproveTopicWaits = new Wait[3];
             int sharedCounter = 10;
             MemberRole currentRole = MemberRole.None;
             for (var memberIndex = 0; memberIndex < CommitteeMembersCount; memberIndex++)
             {
                 currentRole = (MemberRole)memberIndex;
-                AskMemberToApproveTopic(RequestId, membersTopicIndex, currentRole);
-                waits[memberIndex] =
-                    Wait<RequestTopicIndex, string>(
-                        MemberApproveRequest, $"{currentRole} Topic {membersTopicIndex} Approval")
-                    .MatchIf((topicIndex, _) =>
-                        topicIndex.RequestId == RequestId &&
-                        topicIndex.TopicIndex == membersTopicIndex &&
-                        topicIndex.MemberRole == currentRole)
-                    //.NothingAfterMatch()
-                    .AfterMatch((input, output) =>
-                    {
-                        sharedCounter += 10;
-                        if (sharedCounter < 10)
-                            throw new Exception("Local var `sharedCounter` must be >= 10.");
-                        PublicCounter = 1000;
-                    })
-                    ;
+                committeeApproveTopicWaits[memberIndex] = AskMemberToApproveTopic(RequestId, membersTopicIndex, currentRole);
             }
             Console.WriteLine(currentRole);
             return
-                Wait(waits, $"Wait All Committee to Approve Topic {membersTopicIndex}")
-                .MatchIf((_) =>
+                Wait(committeeApproveTopicWaits, $"Wait All Committee to Approve Topic {membersTopicIndex}")
+                .MatchIf((group) =>
                 {
                     bool result = sharedCounter == 40;
                     if (result) sharedCounter += 5;
                     PublicCounter = 2000;
-                    return result;
+                    return group.CompletedCount == 3;
                 });
         }
 

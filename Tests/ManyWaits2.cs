@@ -12,34 +12,35 @@ namespace Tests
         [Fact]
         public async Task WaitManyMethodsWithExpression_Test()
         {
-            using var test = new TestShell(nameof(WaitManyMethodsWithExpression_Test), typeof(WaitManyMethodsWithExpression));
-            await test.ScanTypes();
-            var errors = await test.GetLogs();
+            using var testShell = new TestShell(nameof(WaitManyMethodsWithExpression_Test), typeof(WaitManyMethodsWithExpression));
+            await testShell.ScanTypes();
+            var errors = await testShell.GetLogs();
             Assert.Empty(errors);
 
-            var wms = new WaitManyMethodsWithExpression();
-            wms.Method2("1");
-            wms.Method3("1");
+            var instance = new WaitManyMethodsWithExpression();
+            instance.Method2("1");
+            instance.Method3("1");
 
-            var pushedCalls = await test.GetPushedCalls();
+            var pushedCalls = await testShell.GetPushedCalls();
             Assert.Equal(2, pushedCalls.Count);
-            errors = await test.GetLogs();
+            errors = await testShell.GetLogs();
             Assert.Empty(errors);
-            var waits = await test.GetWaits();
+            var waits = await testShell.GetWaits();
             Assert.Equal(4, waits.Count);
             Assert.Equal(3, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(1, waits.Count(x => x.Status == WaitStatus.Canceled));
             Assert.Equal(1, waits.Count(x => x.IsRoot));
 
+            //If we swap the below lines the match expression for Method1 will not be matched
+            //since it evaluate aginist immutable MatchClosure which calculated when wait requested and never updated
+            instance.Method1("1");
+            instance.Method3("1");
 
-            wms.Method1("1");
-            wms.Method3("1");
-
-            pushedCalls = await test.GetPushedCalls();
+            pushedCalls = await testShell.GetPushedCalls();
             Assert.Equal(4, pushedCalls.Count);
-            errors = await test.GetLogs();
+            errors = await testShell.GetLogs();
             Assert.Empty(errors);
-            waits = await test.GetWaits();
+            waits = await testShell.GetWaits();
             Assert.Equal(8, waits.Count);
             Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
             Assert.Equal(2, waits.Count(x => x.Status == WaitStatus.Canceled));

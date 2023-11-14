@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Helpers;
@@ -106,13 +107,17 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         if (closureType != null)
         {
             var closureMethodInfo = closureType.GetMethod(methodName, CoreExtensions.DeclaredWithinTypeFlags());
-            var closureInstance = RuntimeClosure?.AsType(closureType);
-            SetClosureFunctionClassField(closureInstance);
+            var closureInstance = RuntimeClosure?.AsType(closureType) ?? Activator.CreateInstance(closureType);
+
+            SetClosureCallerFunctionClass(closureInstance);
 
             if (closureMethodInfo != null)
             {
                 var result = closureMethodInfo.Invoke(closureInstance, parameters);
-                RuntimeClosure.Value = closureInstance;
+
+                //todo:Review create closure
+                if (RuntimeClosure != null)
+                    RuntimeClosure.Value = closureInstance;
                 return result;
             }
         }
@@ -121,7 +126,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             $"Can't find method [{methodName}] in class [{rfClassType.Name}]");
     }
 
-    private void SetClosureFunctionClassField(object closureInstance)
+    private void SetClosureCallerFunctionClass(object closureInstance)
     {
         if (closureInstance == null) return;
 
@@ -144,7 +149,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 .Where(x => x.FieldType.Name.StartsWith(Constants.CompilerClosurePrefix));
             foreach (var closureField in parentClosuresFields)
             {
-                SetClosureFunctionClassField(closureField.GetValue(closureInstance));
+                SetClosureCallerFunctionClass(closureField.GetValue(closureInstance));
             }
         }
     }
@@ -409,16 +414,20 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     internal string LocalsDisplay()
     {
-        //var closure = ImmutableClosure;
-        //if (Locals == null && closure == null)
-        //    return null;
-        //var result = new JObject();
-        //if (Locals != null && Locals.ToString() != "{}")
-        //    result["Locals"] = Locals as JToken;
-        //if (closure != null && closure.ToString() != "{}")
-        //    result["Closure"] = closure as JToken;
-        //if (result?.ToString() != "{}")
-        //    return result.ToString()?.Replace("<", "").Replace(">", "");
+        var matchClosure = MatchClosure;
+        var locals = Locals?.Value;
+        var runtimeClosure = RuntimeClosure?.Value;
+        if (locals == null && matchClosure == null && runtimeClosure == null)
+            return null;
+        var result = new JObject();
+        if (locals != null && locals.ToString() != "{}")
+            result["Locals"] = locals as JToken;
+        if (matchClosure != null && matchClosure.ToString() != "{}")
+            result["MatchClosure"] = matchClosure as JToken;
+        if (runtimeClosure != null && runtimeClosure.ToString() != "{}")
+            result["RuntimeClosure"] = runtimeClosure as JToken;
+        if (result?.ToString() != "{}")
+            return result.ToString(Formatting.Indented)?.Replace("<", "").Replace(">", "");
         return null;
     }
 
