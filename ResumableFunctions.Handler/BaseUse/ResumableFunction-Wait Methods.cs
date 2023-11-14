@@ -1,7 +1,6 @@
 ﻿using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler;

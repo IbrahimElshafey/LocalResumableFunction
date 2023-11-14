@@ -47,7 +47,7 @@ namespace Tests
         }
         public class WaitManyMethodsWithExpression : ResumableFunctionsContainer
         {
-            public int Id { get; set; } = 10;
+            public int PublicCounter { get; set; } = 10;
             [ResumableFunctionEntryPoint("WaitManyWithExpression")]
             public async IAsyncEnumerable<Wait> WaitManyWithExpression()
             {
@@ -67,12 +67,15 @@ namespace Tests
                     if (localCounter % 10 != 0)
                         throw new Exception("Closure in group match filter not work");
                     localCounter += 10;
-                    return group.CompletedCount == 2 && Id == 10;
+                    PublicCounter += 10;
+                    return group.CompletedCount == 2;
                 });
                 //.MatchIf(group => group.CompletedCount == 2);
                 await Task.Delay(100);
                 if (localCounter != 30)
                     throw new Exception("Closure in group match filter not UPDATED.");
+                if (PublicCounter != 20)
+                    throw new Exception("Updating Counter in group match filter faileds.");
                 Console.WriteLine("Three method done");
             }
 

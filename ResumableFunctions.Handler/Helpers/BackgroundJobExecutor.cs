@@ -2,11 +2,11 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.DataAccess.Abstraction;
 using System.Runtime.CompilerServices;
 
 namespace ResumableFunctions.Handler.Helpers
 {
+    //todo: make this as aspect [BackgroundJob(errorMsg)] [BackgroundJobWithDistributedLock(lockName,errorMsg)]
     public class BackgroundJobExecutor
     {
         private readonly IDistributedLockProvider _lockProvider;

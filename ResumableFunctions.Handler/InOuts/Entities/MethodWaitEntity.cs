@@ -1,6 +1,5 @@
 ﻿using FastExpressionCompiler;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Expressions;

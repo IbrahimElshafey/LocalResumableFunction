@@ -7,7 +7,6 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System;
-using System.Collections;
 using System.Linq;
 
 namespace ResumableFunctions.Publisher.Implementation

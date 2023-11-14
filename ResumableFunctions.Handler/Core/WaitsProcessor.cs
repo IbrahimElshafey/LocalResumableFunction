@@ -1,7 +1,6 @@
 ﻿using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;

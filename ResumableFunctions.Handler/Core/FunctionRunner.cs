@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts.Entities;
