@@ -1,6 +1,5 @@
 ﻿# Todo
 * Don't save default null closure or local
-* Private data Id must be long incermental
 
 * Wait processing review
 	* Wait creation time and pushed call time must be taken in consideration when get pending waits

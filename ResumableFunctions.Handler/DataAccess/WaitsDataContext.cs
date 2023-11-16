@@ -112,7 +112,7 @@ internal sealed class WaitsDataContext : DbContext
     private void ConfigureRuntimeClosures(EntityTypeBuilder<PrivateData> closureTable)
     {
         closureTable.HasKey(x => x.Id);
-        closureTable.Property(x => x.Id).ValueGeneratedNever();
+        //closureTable.Property(x => x.Id).ValueGeneratedNever();
 
         closureTable
             .Property(x => x.Value)
@@ -124,15 +124,15 @@ internal sealed class WaitsDataContext : DbContext
 
         closureTable
            .HasMany(x => x.ClosureLinkedWaits)
-           .WithOne(wait => wait.RuntimeClosure)
-           .HasForeignKey(x => x.RuntimeClosureId)
-           .HasConstraintName("FK_RuntimeClosure_Waits");
+           .WithOne(wait => wait.ClosureData)
+           .HasForeignKey(x => x.ClosureDataId)
+           .HasConstraintName("FK_Closure_Waits");
 
         closureTable
          .HasMany(x => x.LocalsLinkedWaits)
          .WithOne(wait => wait.Locals)
          .HasForeignKey(x => x.LocalsId)
-         .HasConstraintName("FK_LocalVars_Waits");
+         .HasConstraintName("FK_Locals_Waits");
     }
     private void ConfigureWaits(ModelBuilder modelBuilder)
     {
@@ -268,7 +268,7 @@ internal sealed class WaitsDataContext : DbContext
 
     private void BeforeSaveData()
     {
-        foreach (var entry in ChangeTracker.Entries())
+        foreach (var entry in ChangeTracker.Entries().ToList())
         {
             SetDates(entry);
             SetConcurrencyToken(entry);
@@ -427,8 +427,9 @@ internal sealed class WaitsDataContext : DbContext
 
     private void ExcludeFalseAddEntries(EntityEntry entry)
     {
-        var isGuidKey = entry.Entity is IEntity<Guid>;
-        if (entry.State == EntityState.Added && entry.IsKeySet && !isGuidKey)
+        if (entry.State == EntityState.Added && entry.IsKeySet)
             entry.State = EntityState.Unchanged;
+        //if (entry.Entity is PrivateData pd && entry.State == EntityState.Unchanged && pd.Id == 0)
+        //    entry.State = EntityState.Added;
     }
 }

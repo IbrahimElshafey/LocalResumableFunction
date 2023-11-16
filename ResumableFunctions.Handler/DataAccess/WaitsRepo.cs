@@ -165,7 +165,7 @@ internal partial class WaitsRepo : IWaitsRepo
         {
             var waits = await _context
                 .Waits
-                .Include(x => x.RuntimeClosure)
+                .Include(x => x.ClosureData)
                 .Where(x => x.ParentWaitId == pId && x.Status == WaitStatus.Waiting)
                 .ToListAsync();
 

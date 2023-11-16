@@ -12,8 +12,8 @@ internal class PrivateDataRepo : IPrivateDataRepo
         _context = context;
     }
 
-    public async Task<PrivateData> GetPrivateData(Guid guid)
+    public async Task<PrivateData> GetPrivateData(long id)
     {
-        return await _context.PrivateData.FindAsync(guid);
+        return await _context.PrivateData.FindAsync(id);
     }
 }

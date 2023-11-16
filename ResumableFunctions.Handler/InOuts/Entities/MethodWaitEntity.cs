@@ -74,9 +74,9 @@ public class MethodWaitEntity : WaitEntity
         //var closureNotChange = AfterMatchAction == null && CancelMethodAction == null;
         //if (closureNotChange) return;
 
-        if (Closure == default) return;
-        if (RuntimeClosureId == null)
-            RuntimeClosureId = Guid.NewGuid();
+        if (ClosureObject == default) return;
+        if (ClosureKey == null)
+            ClosureKey = Guid.NewGuid();
         base.OnAddWait();
     }
 
@@ -206,9 +206,9 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
     {
         MatchExpression = matchExpression;
         MatchExpressionParts = new MatchExpressionWriter(MatchExpression, CurrentFunction).MatchExpressionParts;
-        if (Closure != null &&
+        if (ClosureObject != null &&
             MatchExpressionParts.Closure != null &&
-            Closure.GetType() != MatchExpressionParts.Closure.GetType())
+            ClosureObject.GetType() != MatchExpressionParts.Closure.GetType())
             throw new Exception(
                 $"For wait [{Name}] the closure must be same for AfterMatchAction,CancelAction and MatchExpression.");
         SetClosure(MatchExpressionParts.Closure);

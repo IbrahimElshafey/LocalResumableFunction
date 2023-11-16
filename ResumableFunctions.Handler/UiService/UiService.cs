@@ -409,7 +409,7 @@ namespace ResumableFunctions.Handler.UiService
                 if (wait is MethodWaitEntity mw)
                 {
                     mw = await _context.MethodWaits.
-                        Include(x => x.RuntimeClosure).
+                        Include(x => x.ClosureData).
                         Include(x => x.Locals).
                         FirstAsync(x => x.Id == mw.Id);
                     mw.Template = await _context.WaitTemplates

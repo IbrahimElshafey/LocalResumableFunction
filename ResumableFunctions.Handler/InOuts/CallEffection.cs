@@ -1,5 +1,4 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
-
 public class CallEffection
 {
 

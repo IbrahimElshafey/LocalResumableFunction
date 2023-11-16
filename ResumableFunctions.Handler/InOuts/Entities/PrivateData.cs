@@ -1,11 +1,11 @@
 ﻿using Newtonsoft.Json.Linq;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
-
-public class PrivateData : IEntity<Guid>, IEntityWithUpdate
+public class PrivateData : IEntity<long>, IEntityWithUpdate
 {
-    public Guid Id { get; set; }
+    public long Id { get; set; }
     public object Value { get; set; }
+    public PrivateDataType Type { get; set; }
     public List<WaitEntity> ClosureLinkedWaits { get; set; }
     public List<WaitEntity> LocalsLinkedWaits { get; set; }
 

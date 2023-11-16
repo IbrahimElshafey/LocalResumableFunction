@@ -131,8 +131,8 @@ namespace ResumableFunctions.Handler.Core
         {
 
             methodWait.MethodToWait = await _methodIdsRepo.GetMethodIdentifierById(methodWait.MethodToWaitId);
-            if (methodWait.RuntimeClosureId != null)
-                methodWait.RuntimeClosure = await _privateDataRepo.GetPrivateData(methodWait.RuntimeClosureId.Value);
+            if (methodWait.ClosureDataId != null)
+                methodWait.ClosureData = await _privateDataRepo.GetPrivateData(methodWait.ClosureDataId.Value);
             if (methodWait.LocalsId != null)
                 methodWait.Locals = await _privateDataRepo.GetPrivateData(methodWait.LocalsId.Value);
             if (methodWait.MethodToWait == null)
@@ -233,8 +233,8 @@ namespace ResumableFunctions.Handler.Core
                     if (_methodWait.ExecuteAfterMatchAction())
                     {
                         _context.MarkEntityAsModified(_methodWait.FunctionState);
-                        if (_methodWait.RuntimeClosure != null)
-                            _context.MarkEntityAsModified(_methodWait.RuntimeClosure);
+                        if (_methodWait.ClosureData != null)
+                            _context.MarkEntityAsModified(_methodWait.ClosureData);
                         await _context.CommitAsync();//Review: why?
                         UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionSucceeded);
 
@@ -294,8 +294,8 @@ namespace ResumableFunctions.Handler.Core
                                 currentWait.FunctionState.AddLog($"Wait [{currentWait.Name}] is completed.", LogType.Info, StatusCodes.WaitProcessing);
                                 currentWait.Status = WaitStatus.Completed;
                                 await _waitsRepo.CancelSubWaits(currentWait.Id, _pushedCall.Id);
-                                if (currentWait.RuntimeClosure != null)
-                                    _context.MarkEntityAsModified(currentWait.RuntimeClosure);
+                                if (currentWait.ClosureData != null)
+                                    _context.MarkEntityAsModified(currentWait.ClosureData);
                                 await TryProceedExecution(parent, currentWait);
                             }
                             else

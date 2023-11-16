@@ -61,17 +61,20 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     /// It's the runner class serialized we can rename this to RunnerState
     /// </summary>
     public PrivateData Locals { get; internal set; }
-    public Guid? LocalsId { get; internal set; }
+    public long? LocalsId { get; internal set; }
 
 
-    public PrivateData RuntimeClosure { get; set; }
-    public Guid? RuntimeClosureId { get; set; }
+    public PrivateData ClosureData { get; set; }
+    public long? ClosureDataId { get; set; }
+
+    [NotMapped]
+    internal Guid? ClosureKey { get; set; }
 
     [NotMapped]
     public WaitEntity OldCompletedSibling { get; set; }
 
     [NotMapped]
-    public object Closure { get; internal set; }
+    public object ClosureObject { get; internal set; }
 
     public string Path { get; set; }
 
@@ -105,7 +108,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         if (closureType != null)
         {
             var closureMethodInfo = closureType.GetMethod(methodName, CoreExtensions.DeclaredWithinTypeFlags());
-            var closureInstance = RuntimeClosure?.AsType(closureType) ?? Activator.CreateInstance(closureType);
+            var closureInstance = ClosureData?.AsType(closureType) ?? Activator.CreateInstance(closureType);
 
             SetClosureCallerFunctionClass(closureInstance);
 
@@ -114,8 +117,8 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 var result = closureMethodInfo.Invoke(closureInstance, parameters);
 
                 //todo:Review create closure
-                if (RuntimeClosure != null)
-                    RuntimeClosure.Value = closureInstance;
+                if (ClosureData != null)
+                    ClosureData.Value = closureInstance;
                 return result;
             }
         }
@@ -286,46 +289,45 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     {
         var waitsGroupedByClosure =
                     GetTreeItems().
-                    Where(x => x.RuntimeClosureId != null).
-                    GroupBy(x => x.RuntimeClosureId);
+                    Where(x => x.ClosureKey != null).
+                    GroupBy(x => x.ClosureKey);
         foreach (var group in waitsGroupedByClosure)
         {
             var mw = (MethodWaitEntity)
-                group.FirstOrDefault(x => x is MethodWaitEntity mw && mw.Closure != default);
+                group.FirstOrDefault(x => x is MethodWaitEntity mw && mw.ClosureObject != default);
             if (mw == default)
             {
-                foreach (var wait in group)
-                {
-                    wait.RuntimeClosureId = null;
-                }
+                //foreach (var wait in group)
+                //{
+                //    wait.ClosureDataId = null;
+                //}
                 break;
             }
 
             var useOldWaitClosure =
                 OldCompletedSibling != null &&
-                OldCompletedSibling.RuntimeClosure != null &&
+                OldCompletedSibling.ClosureData != null &&
                 OldCompletedSibling.CallerName == group.First().CallerName;
 
             PrivateData runtimeClosure = null;
             if (useOldWaitClosure)
             {
                 //closure vars may be changed so update it before assign old closure
-                OldCompletedSibling.RuntimeClosure.Value = mw.Closure;
-                runtimeClosure = OldCompletedSibling.RuntimeClosure;
+                OldCompletedSibling.ClosureData.Value = mw.ClosureObject;
+                runtimeClosure = OldCompletedSibling.ClosureData;
             }
             else
             {
                 runtimeClosure = new PrivateData
                 {
-                    Id = mw.RuntimeClosureId.Value,
-                    Value = mw.Closure,
+                    Value = mw.ClosureObject,
+                    Type = PrivateDataType.Closure
                 };
             }
 
-            foreach (var wait in group)
+            foreach (var waitInGroup in group)
             {
-                //wait.RuntimeClosureId = null;
-                wait.RuntimeClosure = runtimeClosure;
+                waitInGroup.ClosureData = runtimeClosure;
             }
         }
     }
@@ -398,37 +400,31 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     internal void SetClosure(object closure)
     {
         if (closure == default) return;
-        if (Closure != null && Closure.GetType() != closure.GetType())
+        if (ClosureObject != null && ClosureObject.GetType() != closure.GetType())
             throw new Exception(
                 $"For method wait [{Name}] the closure must be the same for AfterMatchAction, CancelAction, and MatchExpression.");
-        Closure = closure;
+        ClosureObject = closure;
     }
     public object GetClosure(Type closureType)
     {
-        if (RuntimeClosure?.Value == null) Activator.CreateInstance(closureType);
-        var matchClosure = RuntimeClosure?.Value;
+        if (ClosureData?.Value == null) Activator.CreateInstance(closureType);
+        var matchClosure = ClosureData?.Value;
         matchClosure = matchClosure is JObject jobject ? jobject.ToObject(closureType) : matchClosure;
         return matchClosure ?? Activator.CreateInstance(closureType);
     }
 
 
-    internal string LocalsDisplay()
+    internal string PrivateDataDisplay()
     {
         var locals = Locals?.Value;
-        var closure = RuntimeClosure?.Value;
+        var closure = ClosureData?.Value;
         if (locals == null && closure == null)
             return null;
         var result = new JObject();
         if (locals != null && locals.ToString() != "{}")
-        {
             result["Locals"] = locals as JToken;
-            //result["LocalsId"] = LocalsId;
-        }
         if (closure != null && closure.ToString() != "{}")
-        {
             result["Closure"] = closure as JToken;
-            //result["ClosureId"] = RuntimeClosureId;
-        }
         if (result?.ToString() != "{}")
             return result.ToString(Formatting.Indented)?.Replace("<", "").Replace(">", "");
         return null;

@@ -28,7 +28,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         CreateRunner(functionRunnerType, oldMatchedWait.Locals);
         SetRunnerFunctionClass(oldMatchedWait.CurrentFunction);
         SetState(oldMatchedWait.StateAfterWait);
-        SetRunnerClosureField(oldMatchedWait.RuntimeClosure?.Value);
+        SetRunnerClosureField(oldMatchedWait.ClosureData?.Value);
         _oldMatchedWait = oldMatchedWait;
     }
 
@@ -76,15 +76,15 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             if (localContinuation)
             {
                 _oldMatchedWait.Locals.Value = _functionRunner;
-                CurrentWait.LocalsId = _oldMatchedWait.LocalsId;
+                //CurrentWait.LocalsId = _oldMatchedWait.LocalsId;
                 CurrentWait.Locals = _oldMatchedWait.Locals;
             }
             else
             {
                 CurrentWait.Locals = new PrivateData
                 {
-                    Id = Guid.NewGuid(),
-                    Value = _functionRunner
+                    Value = _functionRunner,
+                    Type = PrivateDataType.Locals
                 };
             }
 
@@ -92,10 +92,11 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             var closureContinuation =
                 _oldMatchedWait != null &&
                 _oldMatchedWait.CallerName == CurrentWait.CallerName &&
-                _oldMatchedWait.RuntimeClosureId != null;
+                _oldMatchedWait.ClosureDataId != null;
             if (closureContinuation)
             {
-                CurrentWait.RuntimeClosureId = _oldMatchedWait.RuntimeClosureId;
+                //CurrentWait.ClosureDataId = _oldMatchedWait.ClosureDataId;
+                CurrentWait.ClosureData = _oldMatchedWait.ClosureData;
                 CurrentWait.OldCompletedSibling = _oldMatchedWait;
             }
         }
