@@ -112,7 +112,6 @@ internal sealed class WaitsDataContext : DbContext
     private void ConfigureRuntimeClosures(EntityTypeBuilder<PrivateData> closureTable)
     {
         closureTable.HasKey(x => x.Id);
-        //closureTable.Property(x => x.Id).ValueGeneratedNever();
 
         closureTable
             .Property(x => x.Value)
@@ -147,15 +146,6 @@ internal sealed class WaitsDataContext : DbContext
             .HasIndex(x => x.Status)
             .HasFilter($"{nameof(WaitEntity.Status)} = {(int)WaitStatus.Waiting}")
             .HasDatabaseName("Index_ActiveWaits");
-
-
-        //waitBuilder
-        //    .Property(x => x.MatchClosure)
-        //    .HasConversion(
-        //    x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
-        //    y => JsonConvert.DeserializeObject(y));
-        //waitBuilder
-        //   .Property(x => x.MatchClosure).Metadata.SetValueComparer(_closureComparer);
 
 
         var methodWaitBuilder = modelBuilder.Entity<MethodWaitEntity>();
@@ -223,14 +213,6 @@ internal sealed class WaitsDataContext : DbContext
           .OnDelete(DeleteBehavior.Restrict)
           .HasForeignKey(x => x.MethodGroupId)
           .HasConstraintName("FK_Group_WaitMethodIdentifiers");
-
-
-        //modelBuilder.Entity<WaitMethodIdentifier>()
-        //.HasMany(x => x.WaitsRequestsForMethod)
-        //.WithOne(mw => mw.MethodToWait)
-        //.OnDelete(DeleteBehavior.Restrict)
-        //.HasForeignKey(x => x.MethodToWaitId)
-        //.HasConstraintName("FK_WaitsRequestsForMethod");
 
         modelBuilder.Entity<MethodsGroup>()
            .HasIndex(x => x.MethodGroupUrn)
@@ -342,7 +324,6 @@ internal sealed class WaitsDataContext : DbContext
 
         string GetWaitPath(WaitEntity wait)
         {
-            //:{wait.WaitType.ToString()[0]}
             var path = $"/{wait.Id}";
             while (wait?.ParentWait != null)
             {
@@ -425,11 +406,10 @@ internal sealed class WaitsDataContext : DbContext
         }
     }
 
+    //todo:delete
     private void ExcludeFalseAddEntries(EntityEntry entry)
     {
         if (entry.State == EntityState.Added && entry.IsKeySet)
             entry.State = EntityState.Unchanged;
-        //if (entry.Entity is PrivateData pd && entry.State == EntityState.Unchanged && pd.Id == 0)
-        //    entry.State = EntityState.Added;
     }
 }

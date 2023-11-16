@@ -8,7 +8,12 @@ namespace ResumableFunctions.Handler.Helpers
     {
         static ClosureContractResolver contractResolver = new ClosureContractResolver();
         internal static JsonSerializerSettings Settings { get; } =
-            new JsonSerializerSettings { ContractResolver = contractResolver };
+            new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.Ignore,
+                ContractResolver = contractResolver
+            };
 
         protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
         {

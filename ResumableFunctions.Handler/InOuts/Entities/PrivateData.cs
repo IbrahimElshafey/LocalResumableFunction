@@ -1,8 +1,14 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 public class PrivateData : IEntity<long>, IEntityWithUpdate
 {
+    public PrivateData()
+    {
+
+    }
     public long Id { get; set; }
     public object Value { get; set; }
     public PrivateDataType Type { get; set; }
@@ -17,6 +23,7 @@ public class PrivateData : IEntity<long>, IEntityWithUpdate
 
     public string ConcurrencyToken { get; set; }
 
+   
     public T GetProp<T>(string propName)
     {
         switch (Value)

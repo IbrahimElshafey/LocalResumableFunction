@@ -79,7 +79,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
                 //CurrentWait.LocalsId = _oldMatchedWait.LocalsId;
                 CurrentWait.Locals = _oldMatchedWait.Locals;
             }
-            else
+            else if (JsonConvert.SerializeObject(_functionRunner, ClosureContractResolver.Settings) != "{}")
             {
                 CurrentWait.Locals = new PrivateData
                 {
