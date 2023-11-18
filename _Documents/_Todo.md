@@ -1,8 +1,9 @@
 ﻿# Todo
-* Don't save default null closure or local
-
 * Wait processing review
 	* Wait creation time and pushed call time must be taken in consideration when get pending waits
+
+* Provide an advanced API for tests that enable complex queries for DB
+
 * Suspend Hangfire old jobs
 
 * Review concurrency with [computer and paper]

@@ -46,29 +46,12 @@ public partial class ReplayTests
         instance.Method2("Test1");
         instance.Method2("Test1");
 
-        var pushedCalls = await test.GetPushedCalls();
-        Assert.Equal(3, pushedCalls.Count);
-        var instances = await test.GetInstances<GoBeforeFunction>();
-        Assert.Single(instances);
-        Assert.Equal(1, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
-        Assert.Equal(20, (instances[0].StateObject as GoBeforeFunction).Counter);
-        var waits = await test.GetWaits();
-        Assert.Equal(3, waits.Count);
-        Assert.Equal(3, waits.Count(x => x.Status == WaitStatus.Completed));
+        Assert.Empty(await test.RoundCheck(3, 3, 1));
 
         instance.Method1("Test2");
         instance.Method2("Test2");
         instance.Method2("Test2");
-
-        pushedCalls = await test.GetPushedCalls();
-        Assert.Equal(6, pushedCalls.Count);
-        instances = await test.GetInstances<GoBeforeFunction>();
-        Assert.Equal(2, instances.Count);
-        Assert.Equal(2, instances.Count(x => x.Status == FunctionInstanceStatus.Completed));
-        Assert.Equal(20, (instances[1].StateObject as GoBeforeFunction).Counter);
-        waits = await test.GetWaits();
-        Assert.Equal(6, waits.Count);
-        Assert.Equal(6, waits.Count(x => x.Status == WaitStatus.Completed));
+        Assert.Empty(await test.RoundCheck(6, 6, 2));
 
     }
 
@@ -257,6 +240,7 @@ public partial class ReplayTests
             int localCounter = 10;
             yield return
                 Wait<string, string>(Method1, "M1");
+        
         before_m2:
             localCounter += 10;
             Counter += 10;
@@ -270,6 +254,8 @@ public partial class ReplayTests
             //yield return GoBackBefore("M2");
             if (localCounter != 50)
                 throw new Exception("Local variable should be 50");
+            if (Counter != 20)
+                throw new Exception("Counter should be 20");
             await Task.Delay(100);
         }
 
