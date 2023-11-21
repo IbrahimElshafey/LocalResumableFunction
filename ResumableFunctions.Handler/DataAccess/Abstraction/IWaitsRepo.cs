@@ -19,4 +19,8 @@ public interface IWaitsRepo
     Task<MethodWaitEntity> GetMethodWait(long waitId, params Expression<Func<MethodWaitEntity, object>>[] includes);
     Task<MethodInfo> GetMethodInfoForRf(long waitId);
     Task<List<MethodWaitEntity>> GetPendingWaitsForTemplate(int templateId, string mandatoryPart, params Expression<Func<MethodWaitEntity, object>>[] includes);
+
+    //todo: use this and delete `GetPendingWaitsForTemplate` and `_templatesRepo.GetWaitTemplatesForFunction`
+    // load wait and `template.CallMandatoryPartExpression`
+    Task<List<MethodWaitEntity>> GetPendingWaitsForFunction(int rootFunctionId,int methodGroupId);
 }
