@@ -67,7 +67,7 @@ namespace ResumableFunctions.Handler.Core
         }
 
         [DisplayName("Process Function Expected Matches where [FunctionId:{0}], [PushedCallId:{1}], [MethodGroupId:{2}]")]
-        public async Task ProcessFunctionExpectedWaits(int functionId, long pushedCallId, int methodGroupId)
+        public async Task ProcessFunctionExpectedWaits(int functionId, long pushedCallId, int methodGroupId, DateTime pushedCallDate)
         {
             await _backgroundJobExecutor.ExecuteWithLock(
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
@@ -83,6 +83,7 @@ namespace ResumableFunctions.Handler.Core
                         var waits = await _waitsRepo.GetPendingWaitsForTemplate(
                             template.Id,
                             _pushedCall.GetMandatoryPart(template.CallMandatoryPartExpression),
+                            pushedCallDate,
                             x => x.RequestedByFunction,
                             x => x.FunctionState);
 
@@ -129,7 +130,6 @@ namespace ResumableFunctions.Handler.Core
 
         private async Task LoadWaitProps(MethodWaitEntity methodWait)
         {
-
             methodWait.MethodToWait = await _methodIdsRepo.GetMethodIdentifierById(methodWait.MethodToWaitId);
             if (methodWait.ClosureDataId != null)
                 methodWait.ClosureData = await _privateDataRepo.GetPrivateData(methodWait.ClosureDataId.Value);
@@ -257,7 +257,7 @@ namespace ResumableFunctions.Handler.Core
                     StatusCodes.WaitProcessing, ex);
 
                 _backgroundJobClient.Schedule(() =>
-                        ProcessFunctionExpectedWaits(_methodWait.RequestedByFunctionId, pushedCallId, _methodWait.MethodGroupToWaitId),
+                        ProcessFunctionExpectedWaits(_methodWait.RequestedByFunctionId, pushedCallId, _methodWait.MethodGroupToWaitId, _pushedCall.Created),
                     TimeSpan.FromSeconds(10));
                 return false;
             }

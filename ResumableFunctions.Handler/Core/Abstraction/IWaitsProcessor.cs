@@ -2,6 +2,6 @@
 {
     public interface IWaitsProcessor
     {
-        Task ProcessFunctionExpectedWaits(int functionId, long pushedCallId, int methodGroupId);
+        Task ProcessFunctionExpectedWaits(int functionId, long pushedCallId, int methodGroupId, DateTime pushedCallDate);
     }
 }

@@ -295,14 +295,8 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         {
             var mw = (MethodWaitEntity)
                 group.FirstOrDefault(x => x is MethodWaitEntity mw && mw.ClosureObject != default);
-            if (mw == default)
-            {
-                //foreach (var wait in group)
-                //{
-                //    wait.ClosureDataId = null;
-                //}
+            if (mw == null)
                 break;
-            }
 
             var useOldWaitClosure =
                 OldCompletedSibling != null &&

@@ -13,14 +13,15 @@ public interface IWaitsRepo
     Task CancelSubWaits(long parentId, long pushedCallId);
     Task<WaitEntity> GetWaitParent(WaitEntity wait);
     Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn, DateTime puhsedCallDate);
-    Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn);
+    Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn, DateTime puhsedCallDate);
     Task RemoveFirstWaitIfExist(int methodIdentifierId);
     Task<bool> SaveWait(WaitEntity newWait);
     Task<MethodWaitEntity> GetMethodWait(long waitId, params Expression<Func<MethodWaitEntity, object>>[] includes);
     Task<MethodInfo> GetMethodInfoForRf(long waitId);
-    Task<List<MethodWaitEntity>> GetPendingWaitsForTemplate(int templateId, string mandatoryPart, params Expression<Func<MethodWaitEntity, object>>[] includes);
-
-    //todo: use this and delete `GetPendingWaitsForTemplate` and `_templatesRepo.GetWaitTemplatesForFunction`
-    // load wait and `template.CallMandatoryPartExpression`
-    Task<List<MethodWaitEntity>> GetPendingWaitsForFunction(int rootFunctionId,int methodGroupId);
+    Task<List<MethodWaitEntity>> GetPendingWaitsForTemplate(
+        int templateId,
+        string mandatoryPart,
+        DateTime pushedCallDate,
+        params Expression<Func<MethodWaitEntity, object>>[] includes);
+    Task<List<MethodWaitEntity>> GetPendingWaitsForFunction(int rootFunctionId, int methodGroupId,DateTime pushedCallDate);
 }

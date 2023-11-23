@@ -75,7 +75,7 @@ namespace ResumableFunctions.Handler.Core
                     await _context.CommitAsync();
                     //Route call to current service only
                     _backgroundProcess.Enqueue(() =>
-                        _serviceQueue.ProcessCallLocally(pushedCall.Id, pushedCall.MethodData.MethodUrn));
+                        _serviceQueue.ProcessCallLocally(pushedCall.Id, pushedCall.MethodData.MethodUrn, pushedCall.Created));
 
                     return pushedCall.Id;
                 }

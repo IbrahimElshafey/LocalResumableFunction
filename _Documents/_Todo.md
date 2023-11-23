@@ -3,6 +3,7 @@
 	* Wait creation time and pushed call time must be taken in consideration when get pending waits
 * Review Transinet services
 * Dynamic loaded dll 
+* Use UTC time in all system
 
 * Provide an advanced API for tests that enable complex queries for DB
 
