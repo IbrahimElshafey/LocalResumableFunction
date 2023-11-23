@@ -2,6 +2,7 @@
 * Wait processing review
 	* Wait creation time and pushed call time must be taken in consideration when get pending waits
 * Review Transinet services
+* Review first wait clone
 * Dynamic loaded dll 
 * Use UTC time in all system
 

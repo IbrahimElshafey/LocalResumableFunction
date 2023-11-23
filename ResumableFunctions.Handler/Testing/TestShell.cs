@@ -179,7 +179,7 @@ namespace ResumableFunctions.Handler.Testing
                         CanPublishFromExternal = pushResultAttribute.FromExternal,
                         IsLocalOnly = pushResultAttribute.IsLocalOnly,
                     },
-                    Created = DateTime.Now,
+                    Created = DateTime.UtcNow,
                 });
             await Context.SaveChangesAsync();
             return pushedCallId;

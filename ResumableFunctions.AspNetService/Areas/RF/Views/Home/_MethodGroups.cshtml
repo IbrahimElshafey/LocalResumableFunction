@@ -83,7 +83,7 @@
                         <td>
                             @item.CanceledWaits
                         </td>
-                        <td>@item.Created</td>
+                        <td>@item.Created.ToLocalTime()</td>
                     </tr>
                 }
             </table>

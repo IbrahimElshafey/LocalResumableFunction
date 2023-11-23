@@ -106,7 +106,7 @@
                     <td>
                         @(function.Completed == 0 ? "No" : function.Completed.ToString())
                     </td>
-                    <td>@function.FunctionIdentifier.Created</td>
+                        <td>@function.FunctionIdentifier.Created.ToLocalTime()</td>
                     <td>
                         @if (function.FunctionIdentifier.Modified == DateTime.MinValue)
                         {
@@ -114,7 +114,7 @@
                         }
                         else
                         {
-                            <span>@function.FunctionIdentifier.Modified</span>
+                                <span>@function.FunctionIdentifier.Modified.ToLocalTime()</span>
                         }
 
                     </td>

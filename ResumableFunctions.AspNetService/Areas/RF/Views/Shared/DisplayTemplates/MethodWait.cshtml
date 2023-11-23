@@ -41,13 +41,13 @@
             }
             <tr>
                 <td><b class="w3-text-blue-gray">Created: </b></td>
-                <td> @Model.Created</td>
+                <td> @Model.Created.ToLocalTime()</td>
             </tr>
             @if (Model.Modified != DateTime.MinValue)
             {
                 <tr>
                     <td><b class="w3-text-blue-gray">Modified: </b></td>
-                    <td> @Model.Modified</td>
+                    <td> @Model.Modified.ToLocalTime()</td>
                 </tr>
             }
         </table>

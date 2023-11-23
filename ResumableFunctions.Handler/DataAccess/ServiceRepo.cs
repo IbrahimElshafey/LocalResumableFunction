@@ -28,8 +28,8 @@ internal class ServiceRepo : IServiceRepo
     public async Task UpdateDllScanDate(ServiceData dll)
     {
         await _context.Entry(dll).ReloadAsync();
-        dll.AddLog($"Update last scan date for service [{dll.AssemblyName}] to [{DateTime.Now}].", LogType.Info, StatusCodes.Scanning);
-        dll.Modified = DateTime.Now;
+        dll.AddLog($"Update last scan date for service [{dll.AssemblyName}] to [{DateTime.UtcNow}].", LogType.Info, StatusCodes.Scanning);
+        dll.Modified = DateTime.UtcNow;
         await _context.SaveChangesAsync();
     }
 

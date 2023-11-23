@@ -40,11 +40,11 @@
         </tr>
         <tr>
             <td><b>Creation Date:</b></td>
-            <td>@Model.Created</td>
+            <td>@Model.Created.ToLocalTime()</td>
         </tr>
         <tr>
             <td><b>Last Modified:</b></td>
-            <td>@Model.Modified</td>
+            <td>@Model.Modified.ToLocalTime()</td>
         </tr>
         <tr>
             <td><b>Errors Count:</b></td>

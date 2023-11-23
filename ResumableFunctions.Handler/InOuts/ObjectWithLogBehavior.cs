@@ -14,7 +14,7 @@ internal static class ObjectWithLogBehavior
             Type = logType,
             Message = message,
             StatusCode = code,
-            Created = DateTime.Now,
+            Created = DateTime.UtcNow,
         };
         _this.Logs.Add(logRecord);
         //_logger.LogInformation(message, logRecord);
@@ -27,7 +27,7 @@ internal static class ObjectWithLogBehavior
             Type = LogType.Error,
             Message = message,
             StatusCode = code,
-            Created = DateTime.Now,
+            Created = DateTime.UtcNow,
         };
         _this.Logs.Add(logRecord);
         if (ex != null)

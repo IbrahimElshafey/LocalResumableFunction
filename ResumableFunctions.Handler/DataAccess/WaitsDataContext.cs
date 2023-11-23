@@ -393,13 +393,13 @@ internal sealed class WaitsDataContext : DbContext
         switch (entityEntry.State)
         {
             case EntityState.Modified when entityEntry.Entity is IEntityWithUpdate:
-                entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.Now;
+                entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.UtcNow;
                 entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
                 break;
             case EntityState.Added:
                 var creationDateProp = entityEntry.Property(nameof(IEntity.Created));
                 if (DateTime.Compare((DateTime)creationDateProp.CurrentValue, default) == 0)
-                    creationDateProp.CurrentValue = DateTime.Now;
+                    creationDateProp.CurrentValue = DateTime.UtcNow;
                 if (entityEntry.Entity is IEntityWithUpdate)
                     entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
                 break;

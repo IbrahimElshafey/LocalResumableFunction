@@ -22,7 +22,7 @@ public abstract partial class ResumableFunctionsContainer
             CurrentFunction = this,
             InCodeLine = inCodeLine,
             CallerName = callerName,
-            Created = DateTime.Now,
+            Created = DateTime.UtcNow,
         }.ToMethodWait();
     }
 
@@ -39,7 +39,7 @@ public abstract partial class ResumableFunctionsContainer
             CurrentFunction = this,
             InCodeLine = inCodeLine,
             CallerName = callerName,
-            Created = DateTime.Now
+            Created = DateTime.UtcNow
         }.ToMethodWait();
     }
 
@@ -61,7 +61,7 @@ public abstract partial class ResumableFunctionsContainer
             CurrentFunction = this,
             InCodeLine = inCodeLine,
             CallerName = callerName,
-            Created = DateTime.Now
+            Created = DateTime.UtcNow
         };
         return group.ToWaitsGroup();
     }

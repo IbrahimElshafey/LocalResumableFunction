@@ -144,7 +144,7 @@ internal class Scanner
                 //check if file exist
                 _logger.LogInformation($"Start scan assembly [{assemblyPath}]");
 
-                var dateBeforeScan = DateTime.Now;
+                var dateBeforeScan = DateTime.UtcNow;
                 if (await AssemblyNeedScan(assemblyPath) is false) continue;
 
                 await _scanStateRepo.ResetServiceScanState();

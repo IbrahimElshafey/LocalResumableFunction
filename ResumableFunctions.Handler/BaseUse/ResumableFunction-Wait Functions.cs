@@ -28,7 +28,7 @@ public abstract partial class ResumableFunctionsContainer
             CallerName = callerName,
             InCodeLine = inCodeLine,
             Runner = runner,
-            Created = DateTime.Now,
+            Created = DateTime.UtcNow,
         }.ToWait();
     }
 
@@ -45,7 +45,7 @@ public abstract partial class ResumableFunctionsContainer
             CurrentFunction = this,
             CallerName = callerName,
             InCodeLine = inCodeLine,
-            Created = DateTime.Now,
+            Created = DateTime.UtcNow,
         };
         for (var index = 0; index < subFunctions.Length; index++)
         {

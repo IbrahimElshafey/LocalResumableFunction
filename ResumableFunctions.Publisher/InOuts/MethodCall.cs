@@ -7,7 +7,8 @@ namespace ResumableFunctions.Publisher.InOuts
     {
         public MethodCall()
         {
-            Created = DateTime.Now;
+            Created = DateTime.UtcNow;
+            Created = DateTime.UtcNow;
         }
         public MethodData MethodData { get; set; }
         [MessagePack.IgnoreMember]
