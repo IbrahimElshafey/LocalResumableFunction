@@ -1,11 +1,17 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
-
-public class PrivateData : IEntity<Guid>, IEntityWithUpdate
+public class PrivateData : IEntity<long>, IEntityWithUpdate
 {
-    public Guid Id { get; set; }
+    public PrivateData()
+    {
+
+    }
+    public long Id { get; set; }
     public object Value { get; set; }
+    public PrivateDataType Type { get; set; }
     public List<WaitEntity> ClosureLinkedWaits { get; set; }
     public List<WaitEntity> LocalsLinkedWaits { get; set; }
 
@@ -16,6 +22,19 @@ public class PrivateData : IEntity<Guid>, IEntityWithUpdate
     public DateTime Modified { get; set; }
 
     public string ConcurrencyToken { get; set; }
+
+   
+    public T GetProp<T>(string propName)
+    {
+        switch (Value)
+        {
+            case JObject jobject:
+                return jobject[propName].ToObject<T>();
+            case object closureObject:
+                return (T)closureObject.GetType().GetField(propName).GetValue(closureObject);
+            default: return default;
+        }
+    }
 
     internal object AsType(Type closureClass)
     {

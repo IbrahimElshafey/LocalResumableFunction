@@ -1,6 +1,5 @@
 ﻿using FastExpressionCompiler;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Expressions;
@@ -75,16 +74,13 @@ public class MethodWaitEntity : WaitEntity
         //var closureNotChange = AfterMatchAction == null && CancelMethodAction == null;
         //if (closureNotChange) return;
 
-        if (ImmutableClosure == default) return;
-        if (RuntimeClosureId == null)
-            RuntimeClosureId = Guid.NewGuid();
+        if (ClosureObject == default) return;
+        if (ClosureKey == null)
+            ClosureKey = Guid.NewGuid();
         base.OnAddWait();
     }
-    protected object GetMatchClosure(Type closureType)
-    {
-        ImmutableClosure = ImmutableClosure is JObject jobject ? jobject.ToObject(closureType) : ImmutableClosure;
-        return ImmutableClosure ?? Activator.CreateInstance(closureType);
-    }
+
+
 
     internal bool IsMatched()
     {
@@ -98,7 +94,7 @@ public class MethodWaitEntity : WaitEntity
                 return true;
             var check = MatchExpression.CompileFast();
             var closureType = MatchExpression.Parameters[3].Type;
-            var closure = GetMatchClosure(closureType);
+            var closure = GetClosure(closureType);
             return (bool)check.DynamicInvoke(Input, Output, CurrentFunction, closure);
         }
         catch (Exception ex)
@@ -210,12 +206,12 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
     {
         MatchExpression = matchExpression;
         MatchExpressionParts = new MatchExpressionWriter(MatchExpression, CurrentFunction).MatchExpressionParts;
-        if (ImmutableClosure != null &&
+        if (ClosureObject != null &&
             MatchExpressionParts.Closure != null &&
-            ImmutableClosure.GetType() != MatchExpressionParts.Closure.GetType())
+            ClosureObject.GetType() != MatchExpressionParts.Closure.GetType())
             throw new Exception(
                 $"For wait [{Name}] the closure must be same for AfterMatchAction,CancelAction and MatchExpression.");
-        SetImmutableClosure(MatchExpressionParts.Closure);
+        SetClosure(MatchExpressionParts.Closure);
         MandatoryPart = MatchExpressionParts.GetInstanceMandatoryPart(CurrentFunction);
         return this;
     }

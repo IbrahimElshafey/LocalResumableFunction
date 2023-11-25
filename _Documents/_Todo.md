@@ -1,12 +1,20 @@
 ﻿# Todo
-* Wait creation time and pushed call time must be taken in consideration and not override by save changes
-* Add class for lock names
 * Wait processing review
-* Review function state update lock `ExecuteAfterMatchAction`
+* Review Transinet services
+* Review first wait clone
+* Dynamic loaded dll
 
-* Wait template duplication review
+
+* Provide an advanced API for tests that enable complex queries for DB
+
+* Suspend Hangfire old jobs
+
+* Review concurrency with [pen and paper]
+	* Review function state update lock `ExecuteAfterMatchAction`
+
+
 * Time waits review
-
+* When instance completed update sub tree status
 * Complex local var in closure
 	* What if type is not serializable??
 

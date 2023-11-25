@@ -34,6 +34,7 @@ public class TimeWaitEntity : WaitEntity
             _timeMethodWait.StateAfterWait = StateAfterWait;
             _timeMethodWait.Locals = Locals;
             _timeMethodWait.CallerName = CallerName;
+            _timeMethodWait.Created = Created;
             _timeMethodWait.InCodeLine = InCodeLine;
             _timeMethodWait.ExtraData =
                 new WaitExtraData

@@ -34,14 +34,14 @@
                     <span class="w3-text-brown"> input )</span>
                 </td>
                 @*<td>@method.CanPublishFromExternal</td>*@
-                <td>@method.Created</td>
+                <td>@method.Created.ToLocalTime()</td>
                 @if (method.Modified == DateTime.MinValue)
                 {
                     <td>Not Updated</td>
                 }
                 else
                 {
-                    <td>@method.Modified</td>
+                    <td>@method.Modified.ToLocalTime()</td>
                 }
             </tr>
         }

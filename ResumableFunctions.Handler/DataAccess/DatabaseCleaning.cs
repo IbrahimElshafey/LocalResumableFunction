@@ -26,7 +26,7 @@ namespace ResumableFunctions.Handler.DataAccess
         public async Task CleanCompletedFunctionInstances()
         {
             await AddLog("Start to delete compeleted functions instances.");
-            var dateThreshold = DateTime.Now.Subtract(_setting.CleanDbSettings.CompletedInstanceRetention);
+            var dateThreshold = DateTime.UtcNow.Subtract(_setting.CleanDbSettings.CompletedInstanceRetention);
 
             var instanceIds =
                 await _context.FunctionStates
@@ -64,7 +64,7 @@ namespace ResumableFunctions.Handler.DataAccess
         public async Task CleanOldPushedCalls()
         {
             await AddLog("Start to delete old pushed calls.");
-            var dateThreshold = DateTime.Now.Subtract(_setting.CleanDbSettings.PushedCallRetention);
+            var dateThreshold = DateTime.UtcNow.Subtract(_setting.CleanDbSettings.PushedCallRetention);
             var count =
                 await _context.PushedCalls
                 .Where(instance => instance.Created < dateThreshold)
@@ -101,14 +101,14 @@ namespace ResumableFunctions.Handler.DataAccess
                 .Where(waitTemplate => waitTemplate.IsActive == 1 && !activeWaitTemplate.Contains(waitTemplate.Id))
                 .ExecuteUpdateAsync(template => template
                     .SetProperty(x => x.IsActive, -1)
-                    .SetProperty(x => x.DeactivationDate, DateTime.Now));
+                    .SetProperty(x => x.DeactivationDate, DateTime.UtcNow));
             await AddLog($"Deactivate [{count}] unused wait templates done.");
         }
 
         public async Task CleanInactiveWaitTemplates()
         {
             await AddLog("Start to delete deactivated wait templates.");
-            var dateThreshold = DateTime.Now.Subtract(_setting.CleanDbSettings.DeactivatedWaitTemplateRetention);
+            var dateThreshold = DateTime.UtcNow.Subtract(_setting.CleanDbSettings.DeactivatedWaitTemplateRetention);
             var count = await _context.WaitTemplates
                 .Where(template => template.IsActive == -1 && template.DeactivationDate < dateThreshold)
                 .ExecuteDeleteAsync();

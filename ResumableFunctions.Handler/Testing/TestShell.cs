@@ -119,22 +119,22 @@ namespace ResumableFunctions.Handler.Testing
 
             if (await HasErrors())
             {
-                return Context.Logs.First(x => x.Type == LogType.Error).Message;
+                throw new Exception(Context.Logs.First(x => x.Type == LogType.Error).Message);
             }
 
             int callsCount = await GetPushedCallsCount();
             if (callsCount != pushedCallsCount)
-                return $"Pushed calls count [{callsCount}] not equal [{pushedCallsCount}]";
+                throw new Exception($"Pushed calls count [{callsCount}] not equal [{pushedCallsCount}]");
 
             if (waitsCount != -1 && await GetWaitsCount() is int existWaitsCount && existWaitsCount != waitsCount)
-                return $"Waits count [{existWaitsCount}] not equal [{waitsCount}]";
+                throw new Exception($"Waits count [{existWaitsCount}] not equal [{waitsCount}]");
 
 
             if (completedInstancesCount != -1)
             {
                 int instnacesCount = await GetCompletedInstancesCount();
                 if (instnacesCount != completedInstancesCount)
-                    return $"Completed instances [{instnacesCount}] count not equal [{completedInstancesCount}]";
+                    throw new Exception($"Completed instances [{instnacesCount}] count not equal [{completedInstancesCount}]");
             }
 
             return string.Empty;
@@ -179,6 +179,7 @@ namespace ResumableFunctions.Handler.Testing
                         CanPublishFromExternal = pushResultAttribute.FromExternal,
                         IsLocalOnly = pushResultAttribute.IsLocalOnly,
                     },
+                    Created = DateTime.UtcNow,
                 });
             await Context.SaveChangesAsync();
             return pushedCallId;
@@ -290,6 +291,7 @@ namespace ResumableFunctions.Handler.Testing
                 .FirstAsync();
             return await Context
                 .Waits
+                .Include(x => x.ClosureData)
                 .Where(x => x.Created > callIdCreated && x.Status == WaitStatus.Waiting)
                 .AsNoTracking()
                 .ToListAsync();

@@ -42,7 +42,7 @@ namespace ResumableFunctions.Publisher.Implementation
                 MethodData = new MethodData
                 {
                     MethodUrn = methodUrn,
-                    AssemblyName = "[External] " + Assembly.GetEntryAssembly()?.GetName().Name,
+                    AssemblyName = "[From Client] " + Assembly.GetEntryAssembly()?.GetName().Name,
                     ClassName = minfo.DeclaringType.Name,
                     MethodName = minfo.Name,
                 },
@@ -74,7 +74,7 @@ namespace ResumableFunctions.Publisher.Implementation
                 }
                 catch (Exception ex)
                 {
-                    var failedRequest = new FailedRequest(Guid.NewGuid(), DateTime.Now, actionUrl, body);
+                    var failedRequest = new FailedRequest(Guid.NewGuid(), DateTime.UtcNow, actionUrl, body);
                     _logger.LogError(ex, $"Error occurred when publish method call {methodCall}");
                     _ = _failedRequestHandler.EnqueueFailedRequest(failedRequest);
                 }

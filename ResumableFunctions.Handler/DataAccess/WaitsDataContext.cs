@@ -8,7 +8,6 @@ using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
-using System.Linq.CompilerServices.TypeSystem;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal sealed class WaitsDataContext : DbContext
@@ -113,7 +112,6 @@ internal sealed class WaitsDataContext : DbContext
     private void ConfigureRuntimeClosures(EntityTypeBuilder<PrivateData> closureTable)
     {
         closureTable.HasKey(x => x.Id);
-        closureTable.Property(x => x.Id).ValueGeneratedNever();
 
         closureTable
             .Property(x => x.Value)
@@ -125,15 +123,15 @@ internal sealed class WaitsDataContext : DbContext
 
         closureTable
            .HasMany(x => x.ClosureLinkedWaits)
-           .WithOne(wait => wait.RuntimeClosure)
-           .HasForeignKey(x => x.RuntimeClosureId)
-           .HasConstraintName("FK_RuntimeClosure_Waits");
+           .WithOne(wait => wait.ClosureData)
+           .HasForeignKey(x => x.ClosureDataId)
+           .HasConstraintName("FK_Closure_Waits");
 
         closureTable
          .HasMany(x => x.LocalsLinkedWaits)
          .WithOne(wait => wait.Locals)
          .HasForeignKey(x => x.LocalsId)
-         .HasConstraintName("FK_LocalVars_Waits");
+         .HasConstraintName("FK_Locals_Waits");
     }
     private void ConfigureWaits(ModelBuilder modelBuilder)
     {
@@ -150,24 +148,14 @@ internal sealed class WaitsDataContext : DbContext
             .HasDatabaseName("Index_ActiveWaits");
 
 
-        waitBuilder
-            .Property(x => x.ImmutableClosure)
-            .HasConversion(
-            x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
-            y => JsonConvert.DeserializeObject(y));
-        waitBuilder
-           .Property(x => x.ImmutableClosure).Metadata.SetValueComparer(_closureComparer);
-
-
         var methodWaitBuilder = modelBuilder.Entity<MethodWaitEntity>();
-        //methodWaitBuilder.ToTable("MethodWaits");
         methodWaitBuilder
           .Property(x => x.MethodToWaitId)
           .HasColumnName(nameof(MethodWaitEntity.MethodToWaitId));
         methodWaitBuilder
           .Property(x => x.CallId)
           .HasColumnName(nameof(MethodWaitEntity.CallId));
-        
+
         //methodWaitBuilder.HasOne(x => x.Template).WithMany(x => x.Waits);
         //methodWaitBuilder.HasOne(x => x.MethodToWait).WithMany(x => x.Waits);
 
@@ -226,14 +214,6 @@ internal sealed class WaitsDataContext : DbContext
           .HasForeignKey(x => x.MethodGroupId)
           .HasConstraintName("FK_Group_WaitMethodIdentifiers");
 
-
-        //modelBuilder.Entity<WaitMethodIdentifier>()
-        //.HasMany(x => x.WaitsRequestsForMethod)
-        //.WithOne(mw => mw.MethodToWait)
-        //.OnDelete(DeleteBehavior.Restrict)
-        //.HasForeignKey(x => x.MethodToWaitId)
-        //.HasConstraintName("FK_WaitsRequestsForMethod");
-
         modelBuilder.Entity<MethodsGroup>()
            .HasIndex(x => x.MethodGroupUrn)
             .HasDatabaseName("Index_MethodGroupUniqueUrn")
@@ -270,7 +250,7 @@ internal sealed class WaitsDataContext : DbContext
 
     private void BeforeSaveData()
     {
-        foreach (var entry in ChangeTracker.Entries())
+        foreach (var entry in ChangeTracker.Entries().ToList())
         {
             SetDates(entry);
             SetConcurrencyToken(entry);
@@ -344,7 +324,6 @@ internal sealed class WaitsDataContext : DbContext
 
         string GetWaitPath(WaitEntity wait)
         {
-            //:{wait.WaitType.ToString()[0]}
             var path = $"/{wait.Id}";
             while (wait?.ParentWait != null)
             {
@@ -409,30 +388,28 @@ internal sealed class WaitsDataContext : DbContext
                 break;
         }
     }
-
     private void SetDates(EntityEntry entityEntry)
     {
         switch (entityEntry.State)
         {
             case EntityState.Modified when entityEntry.Entity is IEntityWithUpdate:
-                entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.Now;
+                entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.UtcNow;
                 entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
                 break;
-            case EntityState.Added when entityEntry.Entity is IEntityWithUpdate:
-                entityEntry.Property(nameof(IEntity<int>.Created)).CurrentValue = DateTime.Now;
-                entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
-                break;
-            case EntityState.Added when entityEntry.Entity is IEntity<int>:
-            case EntityState.Added when entityEntry.Entity is IEntity<long>:
-                entityEntry.Property(nameof(IEntity<int>.Created)).CurrentValue = DateTime.Now;
+            case EntityState.Added:
+                var creationDateProp = entityEntry.Property(nameof(IEntity.Created));
+                if (DateTime.Compare((DateTime)creationDateProp.CurrentValue, default) == 0)
+                    creationDateProp.CurrentValue = DateTime.UtcNow;
+                if (entityEntry.Entity is IEntityWithUpdate)
+                    entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
                 break;
         }
     }
 
+    //todo:delete
     private void ExcludeFalseAddEntries(EntityEntry entry)
     {
-        var isGuidKey = entry.Entity is IEntity<Guid>;
-        if (entry.State == EntityState.Added && entry.IsKeySet && !isGuidKey)
+        if (entry.State == EntityState.Added && entry.IsKeySet)
             entry.State = EntityState.Unchanged;
     }
 }

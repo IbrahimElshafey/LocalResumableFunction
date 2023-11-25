@@ -21,7 +21,9 @@ internal class ScanStateRepo : IScanStateRepo
         _context = context;
         _lockProvider = lockProvider;
         _settings = settings;
-        _scanStateLockName = $"{_settings.CurrentWaitsDbName}_{_settings.CurrentServiceName}_ScanStateLock";
+        //should not contain ServiceName
+        //_scanStateLockName = $"{_settings.CurrentWaitsDbName}_{_settings.CurrentServiceName}_ScanStateLock";
+        _scanStateLockName = $"{_settings.CurrentWaitsDbName}_ScanStateLock";
     }
     public async Task<bool> IsScanFinished()
     {
@@ -31,7 +33,7 @@ internal class ScanStateRepo : IScanStateRepo
 
     public async Task<int> AddScanState(string name)
     {
-        var toAdd = new ScanState { Name = name };
+        var toAdd = new ScanState { Name = name, ServiceName = _settings.CurrentServiceName };
         _context.ScanStates.Add(toAdd);
         await _context.SaveChangesAsync();
         return toAdd.Id;
@@ -48,6 +50,6 @@ internal class ScanStateRepo : IScanStateRepo
     public async Task ResetServiceScanState()
     {
         await using var lockScanStat = await _lockProvider.AcquireLockAsync(_scanStateLockName);
-        await _context.ScanStates.Where(x => x.ServiceId == _settings.CurrentServiceId).ExecuteDeleteAsync();
+        await _context.ScanStates.Where(x => x.ServiceName == _settings.CurrentServiceName).ExecuteDeleteAsync();
     }
 }

@@ -11,19 +11,19 @@ namespace ResumableFunctions.Handler;
 
 public abstract partial class ResumableFunctionsContainer : IObjectWithLog
 {
-    public virtual Task OnErrorOccurred(string message, Exception ex = null)
+    public virtual Task OnError(string message, Exception ex = null)
     {
         return Task.CompletedTask;
     }
-    public virtual Task OnInstanceCompleted()
+    public virtual Task OnCompleted()
     {
         return Task.CompletedTask;
     }
     [IgnoreMember] internal MethodInfo CurrentResumableFunction { get; set; }
 
-    protected void Log(string message) => this.AddLog(message, LogType.Info, Helpers.StatusCodes.Custom);
-    protected void Warning(string message) => this.AddLog(message, LogType.Warning, Helpers.StatusCodes.Custom);
-    protected void Error(string message, Exception ex = null) => this.AddError(message, Helpers.StatusCodes.Custom, ex);
+    protected void AddInfoLog(string message) => this.AddLog(message, LogType.Info, Helpers.StatusCodes.Custom);
+    protected void AddWarningLog(string message) => this.AddLog(message, LogType.Warning, Helpers.StatusCodes.Custom);
+    protected void AddErrorLog(string message, Exception ex = null) => this.AddError(message, Helpers.StatusCodes.Custom, ex);
 
     [IgnoreMember][NotMapped] public List<LogRecord> Logs { get; set; } = new();
     //[IgnoreMember][NotMapped] internal Dictionary<string, object> Closures { get; } = new();

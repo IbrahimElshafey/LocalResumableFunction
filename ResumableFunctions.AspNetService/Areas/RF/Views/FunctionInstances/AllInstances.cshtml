@@ -48,8 +48,8 @@
                         @instance.WaitsCount Waits
                     </a>
                 </td>
-                <td>@instance.FunctionState.Created</td>
-                <td>@instance.FunctionState.Modified</td>
+                <td>@instance.FunctionState.Created.ToLocalTime()</td>
+                <td>@instance.FunctionState.Modified.ToLocalTime()</td>
             </tr>
         }
         

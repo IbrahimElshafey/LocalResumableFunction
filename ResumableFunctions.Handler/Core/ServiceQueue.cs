@@ -40,12 +40,12 @@ internal class ServiceQueue : IServiceQueue
     }
 
     [DisplayName("Route call [Id: {0},MethodUrn: {1}] to services that may be affected.")]
-    public async Task RouteCallToAffectedServices(long pushedCallId, string methodUrn)
+    public async Task RouteCallToAffectedServices(long pushedCallId, DateTime puhsedCallDate, string methodUrn)
     {
         //if scan is running schedule it for later processing
         if (!await _scanStateRepo.IsScanFinished())
         {
-            _backgroundJobClient.Schedule(() => RouteCallToAffectedServices(pushedCallId, methodUrn), TimeSpan.FromSeconds(3));
+            _backgroundJobClient.Schedule(() => RouteCallToAffectedServices(pushedCallId, puhsedCallDate, methodUrn), TimeSpan.FromSeconds(3));
             return;
         }
 
@@ -53,7 +53,7 @@ internal class ServiceQueue : IServiceQueue
         await _backgroundJobExecutor.ExecuteWithoutLock(
             async () =>
             {
-                var callEffections = await _waitsRepository.GetAffectedServicesAndFunctions(methodUrn);
+                var callEffections = await _waitsRepository.GetAffectedServicesAndFunctions(methodUrn, puhsedCallDate);
                 if (callEffections == null || callEffections.Any() is false)
                 {
                     _logger.LogWarning($"There are no services affected by pushed call [{methodUrn}:{pushedCallId}]");
@@ -64,6 +64,7 @@ internal class ServiceQueue : IServiceQueue
                 {
                     callEffection.CallId = pushedCallId;
                     callEffection.MethodUrn = methodUrn;
+                    callEffection.CallDate = puhsedCallDate;
                     var isLocal = callEffection.AffectedServiceId == _settings.CurrentServiceId;
                     if (isLocal)
                         await ServiceProcessPushedCall(callEffection);
@@ -75,11 +76,12 @@ internal class ServiceQueue : IServiceQueue
     }
 
     [DisplayName("Process call [Id: {0},MethodUrn: {1}] Locally.")]
-    public async Task ProcessCallLocally(long pushedCallId, string methodUrn)
+    public async Task ProcessCallLocally(long pushedCallId, string methodUrn, DateTime puhsedCallDate)
     {
         if (!await _scanStateRepo.IsScanFinished())
         {
-            _backgroundJobClient.Schedule(() => ProcessCallLocally(pushedCallId, methodUrn), TimeSpan.FromSeconds(3));
+            _backgroundJobClient.Schedule(() =>
+            ProcessCallLocally(pushedCallId, methodUrn, puhsedCallDate), TimeSpan.FromSeconds(3));
             return;
         }
 
@@ -87,12 +89,13 @@ internal class ServiceQueue : IServiceQueue
         await _backgroundJobExecutor.ExecuteWithoutLock(
             async () =>
             {
-                var callEffection = await _waitsRepository.GetCallEffectionInCurrentService(methodUrn);
+                var callEffection = await _waitsRepository.GetCallEffectionInCurrentService(methodUrn, puhsedCallDate);
 
                 if (callEffection != null)
                 {
                     callEffection.CallId = pushedCallId;
                     callEffection.MethodUrn = methodUrn;
+                    callEffection.CallDate = puhsedCallDate;
                     await ServiceProcessPushedCall(callEffection);//todo:log if null
                 }
                 else
@@ -114,7 +117,8 @@ internal class ServiceQueue : IServiceQueue
                 foreach (var functionId in callEffection.AffectedFunctionsIds)
                 {
                     _backgroundJobClient.Enqueue(
-                        () => _waitsProcessor.ProcessFunctionExpectedWaits(functionId, pushedCallId, callEffection.MethodGroupId));
+                        () => _waitsProcessor.ProcessFunctionExpectedWaits(
+                            functionId, pushedCallId, callEffection.MethodGroupId, callEffection.CallDate));
                 }
                 return Task.CompletedTask;
             },

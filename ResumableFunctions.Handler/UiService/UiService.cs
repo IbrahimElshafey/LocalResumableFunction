@@ -317,7 +317,7 @@ namespace ResumableFunctions.Handler.UiService
                 await _context.Waits
                 .Where(x => x.FunctionStateId == instanceId)
                 .ToListAsync();
-            await SetWaitTemplates(waits);
+            await LoadMethodWaitDetails(waits);
             var waitsNodes = new ArrayList(waits.Where(x => x.ParentWait == null).ToList());
             return new FunctionInstanceDetails(
                 instanceId,
@@ -402,30 +402,24 @@ namespace ResumableFunctions.Handler.UiService
             return result;
         }
 
-        private async Task SetWaitTemplates(List<WaitEntity> waits)
+        private async Task LoadMethodWaitDetails(List<WaitEntity> waits)
         {
-            var templatesIds = waits
-                .Where(x => x is MethodWaitEntity mw)
-                .Select(x => (MethodWaitEntity)x)
-                .Select(x => x.TemplateId)
-                .ToList();
-            var templates =
-                  await _context.WaitTemplates
-                .Where(x => templatesIds.Contains(x.Id))
-                .Select(template => new WaitTemplate
-                {
-                    MatchExpressionValue = template.MatchExpressionValue,
-                    AfterMatchAction = template.AfterMatchAction,
-                    InstanceMandatoryPartExpressionValue = template.CallMandatoryPartExpressionValue,
-                    Id = template.Id
-                })
-                .ToDictionaryAsync(x => x.Id);
             foreach (var wait in waits)
             {
-                if (wait is MethodWaitEntity mw && templates.ContainsKey(mw.TemplateId))
+                if (wait is MethodWaitEntity mw)
                 {
-                    mw.Template = templates[mw.TemplateId];
-                    //mw.Template.LoadUnmappedProps();
+                    mw = await _context.MethodWaits.
+                        Include(x => x.ClosureData).
+                        Include(x => x.Locals).
+                        FirstAsync(x => x.Id == mw.Id);
+                    mw.Template = await _context.WaitTemplates
+                        .Select(template => new WaitTemplate
+                        {
+                            MatchExpressionValue = template.MatchExpressionValue,
+                            AfterMatchAction = template.AfterMatchAction,
+                            InstanceMandatoryPartExpressionValue = template.CallMandatoryPartExpressionValue,
+                            Id = template.Id
+                        }).FirstAsync(x => x.Id == mw.TemplateId);
                 }
             }
         }

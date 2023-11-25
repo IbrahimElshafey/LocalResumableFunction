@@ -82,7 +82,7 @@ namespace RequestApproval.Controllers
 
 
 
-        public override Task OnErrorOccurred(string message, Exception ex = null)
+        public override Task OnError(string message, Exception ex = null)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(message);

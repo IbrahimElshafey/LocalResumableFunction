@@ -28,7 +28,7 @@ namespace Tests
             [ResumableFunctionEntryPoint("TestCancelMethod")]
             public async IAsyncEnumerable<Wait> TestCancelMethod()
             {
-                var dateTime = DateTime.Now;
+                var dateTime = DateTime.UtcNow;
                 int localCounter = 2;
                 yield return Wait(new[]
                     {

@@ -7,16 +7,15 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System;
-using System.Collections;
 using System.Linq;
 
 namespace ResumableFunctions.Publisher.Implementation
 {
-    public class OnDiskFailedRequestHandler : IFailedRequestRepo
+    public class OnDiskFailedRequestRepo : IFailedRequestRepo
     {
         const string requestsFolder = ".\\FailedRequests";
         private readonly ConcurrentDictionary<Guid, FailedRequest> _failedRequests = new ConcurrentDictionary<Guid, FailedRequest>();
-        public OnDiskFailedRequestHandler()
+        public OnDiskFailedRequestRepo()
         {
             //todo: add logger and settings
             //settings will be (Failed Requests folder path,Wait for save on disk or fire and forget)
@@ -53,27 +52,15 @@ namespace ResumableFunctions.Publisher.Implementation
 
         public Task Remove(FailedRequest request)
         {
-            //remove file
-            File.Delete(FilePath(request));
+            if (File.Exists(FilePath(request)))
+                File.Delete(FilePath(request));
             _failedRequests.TryRemove(request.Key, out _);
             return Task.CompletedTask;
         }
 
         public async Task Update(FailedRequest request) => await WriteRequest(request);
 
-
-
         private string FilePath(FailedRequest request) => $"{requestsFolder}\\{request.Key}.file";
-
-        private async Task<byte[]> ReadFileBytesAsync(string filePath)
-        {
-            using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096, useAsync: true))
-            {
-                byte[] buffer = new byte[fileStream.Length];
-                await fileStream.ReadAsync(buffer, 0, buffer.Length);
-                return buffer;
-            }
-        }
 
         private async Task WriteRequest(FailedRequest request)
         {

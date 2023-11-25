@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
-using ResumableFunctions.Handler.DataAccess;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
@@ -201,23 +200,24 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 return null;
             }
 
-            var methodId = await _methodIdentifierRepo.GetResumableFunction(new MethodData(resumableFunction));
+            var functionId = await _methodIdentifierRepo.GetResumableFunction(new MethodData(resumableFunction));
             if (removeIfExist)
             {
                 _logger.LogInformation("First wait already exist it will be deleted and recreated since it may be changed.");
-                await _waitsRepository.RemoveFirstWaitIfExist(methodId.Id);
+                await _waitsRepository.RemoveFirstWaitIfExist(functionId.Id);
             }
             var functionState = new ResumableFunctionState
             {
-                ResumableFunctionIdentifier = methodId,
+                ResumableFunctionIdentifier = functionId,
                 StateObject = classInstance,
             };
             firstWait.ActionOnChildrenTree(x =>
             {
-                x.RequestedByFunction = methodId;
-                x.RequestedByFunctionId = methodId.Id;
+                x.RequestedByFunction = functionId;
+                x.RequestedByFunctionId = functionId.Id;
                 x.IsFirst = true;
                 x.WasFirst = true;
+                x.RootFunctionId = functionId.Id;
                 x.FunctionState = functionState;
             });
             return firstWait;

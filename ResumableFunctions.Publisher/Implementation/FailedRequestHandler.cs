@@ -87,7 +87,7 @@ namespace ResumableFunctions.Publisher.Implementation
                     request.AttemptsCount++;
                     _logger.LogError(ex,
                         $"A request [{request.Key}] failed again for [{request.AttemptsCount}] times");
-                    request.LastAttemptDate = DateTime.Now;
+                    request.LastAttemptDate = DateTime.UtcNow;
                     await _failedRequestRepo.Update(request);
                 }
             }

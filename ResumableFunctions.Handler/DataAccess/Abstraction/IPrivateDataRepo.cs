@@ -4,6 +4,6 @@ namespace ResumableFunctions.Handler.DataAccess.Abstraction
 {
     public interface IPrivateDataRepo
     {
-        Task<PrivateData> GetPrivateData(Guid guid);
+        Task<PrivateData> GetPrivateData(long id);
     }
 }

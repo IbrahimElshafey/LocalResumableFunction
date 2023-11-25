@@ -1,8 +1,5 @@
-﻿using FastExpressionCompiler;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.DataAccess.InOuts;
@@ -10,8 +7,6 @@ using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
 using System.Linq.Expressions;
-using System.Text.RegularExpressions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal partial class WaitsRepo : IWaitsRepo
@@ -42,7 +37,7 @@ internal partial class WaitsRepo : IWaitsRepo
         _serviceRepo = serviceRepo;
     }
 
-    public async Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn)
+    public async Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn, DateTime puhsedCallDate)
     {
         var methodGroup = await GetMethodGroup(methodUrn);
         var affectedFunctions =
@@ -51,7 +46,8 @@ internal partial class WaitsRepo : IWaitsRepo
             .Where(x =>
                 x.Status == WaitStatus.Waiting &&
                 x.MethodGroupToWaitId == methodGroup.Id &&
-                x.ServiceId == _settings.CurrentServiceId)
+                x.ServiceId == _settings.CurrentServiceId &&
+                x.Created < puhsedCallDate)
             .Select(x => x.RequestedByFunctionId)
             .Distinct()
             .ToListAsync();
@@ -67,7 +63,7 @@ internal partial class WaitsRepo : IWaitsRepo
             : null;
     }
 
-    public async Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn)
+    public async Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn, DateTime puhsedCallDate)
     {
         var methodGroup = await GetMethodGroup(methodUrn);
 
@@ -75,7 +71,8 @@ internal partial class WaitsRepo : IWaitsRepo
                    .MethodWaits
                    .Where(x =>
                        x.Status == WaitStatus.Waiting &&
-                       x.MethodGroupToWaitId == methodGroup.Id);
+                       x.MethodGroupToWaitId == methodGroup.Id &&
+                       x.Created < puhsedCallDate);
 
         if (methodGroup.IsLocalOnly)
         {
@@ -169,7 +166,7 @@ internal partial class WaitsRepo : IWaitsRepo
         {
             var waits = await _context
                 .Waits
-                .Include(x => x.RuntimeClosure)
+                .Include(x => x.ClosureData)
                 .Where(x => x.ParentWaitId == pId && x.Status == WaitStatus.Waiting)
                 .ToListAsync();
 
@@ -215,56 +212,13 @@ internal partial class WaitsRepo : IWaitsRepo
     {
         await _context.Waits
               .Where(x => x.FunctionStateId == stateId && x.Status == WaitStatus.Waiting)
-              .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, status => WaitStatus.Canceled));
-    }
-
-    /// <summary>
-    /// Used by ReplayWaitProcessor.GetWaitToReplay
-    /// </summary>
-    /// <returns></returns>
-    public async Task CancelFunctionPendingWaits(WaitEntity waitForReplayDb)
-    {
-        var pendingRootWaits =
-            await _context.Waits
-            .OrderByDescending(x => x.Id)
-            .Where(x =>
-                x.RequestedByFunctionId == waitForReplayDb.RequestedByFunctionId &&
-                x.FunctionStateId == waitForReplayDb.FunctionStateId &&
-                x.Status == WaitStatus.Waiting &&
-                x.LocalsId == waitForReplayDb.LocalsId &&
-                x.IsRoot)
-            .ToListAsync();
-
-        foreach (var wait in pendingRootWaits)
-        {
-            CancelWait(wait, -1);
-            await CancelSubWaits(wait.Id, -1);
-        }
-    }
-
-
-    public async Task<List<PendingWaitData>> GetPendingWaitsData(int methodGroupId, int functionId)
-    {
-        return await _context
-           .MethodWaits
-           .Include(x => x.Template)
-           .Where(
-               wait =>
-               wait.Status == WaitStatus.Waiting &&
-               wait.RequestedByFunctionId == functionId &&
-               wait.MethodGroupToWaitId == methodGroupId &&
-               wait.ServiceId == _settings.CurrentServiceId)
-           .OrderBy(x => x.TemplateId)
-           .Select(wait => new PendingWaitData(wait.Id, wait.Template, wait.MandatoryPart, wait.IsFirst))
-           .ToListAsync();
-
-        //OrderBy(x => x.IsFirst).
-        //pendingWaits.ForEach(wait => wait.Template.LoadUnmappedProps());
+              .ExecuteUpdateAsync(x => x.SetProperty(wait => wait.Status, _ => WaitStatus.Canceled));
     }
 
     public async Task<List<MethodWaitEntity>> GetPendingWaitsForTemplate(
         int templateId,
         string mandatoryPart,
+        DateTime pushedCallDate,
         params Expression<Func<MethodWaitEntity, object>>[] includes)
     {
         var query = _context
@@ -272,7 +226,8 @@ internal partial class WaitsRepo : IWaitsRepo
             .Where(
                 wait =>
                 wait.Status == WaitStatus.Waiting &&
-                wait.TemplateId == templateId);
+                wait.TemplateId == templateId &&
+                wait.Created < pushedCallDate);
         foreach (var include in includes)
         {
             query = query.Include(include);
@@ -285,5 +240,28 @@ internal partial class WaitsRepo : IWaitsRepo
             await query
             .OrderBy(x => x.IsFirst)
             .ToListAsync();
+    }
+
+    public async Task<List<MethodWaitEntity>> GetPendingWaitsForFunction(
+        int rootFunctionId,
+        int methodGroupId,
+        DateTime pushedCallDate)
+    {
+        //todo: use this and delete `GetPendingWaitsForTemplate` and `_templatesRepo.GetWaitTemplatesForFunction`
+        // load wait and `template.CallMandatoryPartExpression`
+        var waits = await _context
+          .MethodWaits
+          .Where(
+              wait =>
+              wait.Status == WaitStatus.Waiting &&
+              wait.TemplateId == rootFunctionId &&
+              wait.Created < pushedCallDate)
+          .ToListAsync();
+        var templateIds = waits.Select(x => x.TemplateId);
+        var templates = await _context.WaitTemplates.
+            Where(x => templateIds.Contains(x.Id)).
+            ToDictionaryAsync(x => x.Id, x => x);
+        waits.ForEach(x => x.Template = templates[x.TemplateId]);
+        return waits;
     }
 }

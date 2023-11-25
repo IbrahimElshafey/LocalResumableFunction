@@ -6,4 +6,5 @@ public class ExternalCallArgs
     public MethodData MethodData { get; set; }
     public object Input { get; set; }
     public object Output { get; set; }
+    public DateTime Created { get; set; }
 }

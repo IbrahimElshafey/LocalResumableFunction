@@ -65,7 +65,8 @@ namespace ResumableFunctions.AspNetService
                     {
                         Input = externalCall.Input,
                         Output = externalCall.Output
-                    }
+                    },
+                    Created = externalCall.Created,
                 };
                 pushedCall.MethodData.CanPublishFromExternal = true;
                 await _callPusher.PushExternalCall(pushedCall, externalCall.ServiceName);

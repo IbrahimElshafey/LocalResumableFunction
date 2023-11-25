@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts.Entities;
@@ -28,7 +28,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         CreateRunner(functionRunnerType, oldMatchedWait.Locals);
         SetRunnerFunctionClass(oldMatchedWait.CurrentFunction);
         SetState(oldMatchedWait.StateAfterWait);
-        SetRunnerClosureField(oldMatchedWait.RuntimeClosure?.Value);
+        SetRunnerClosureField(oldMatchedWait.ClosureData?.Value);
         _oldMatchedWait = oldMatchedWait;
     }
 
@@ -43,8 +43,6 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         CreateRunner(functionRunnerType);
         SetRunnerFunctionClass(classInstance);
         SetState(int.MinValue);
-        //if (closure != null)
-        //    SetRunnerClosureField(closure);
     }
 
     public FunctionRunner(IAsyncEnumerator<Wait> runner)
@@ -64,44 +62,72 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
 
     public async ValueTask<bool> MoveNextAsync()
     {
-        var stateBeforeWait = GetState();
         var hasNext = await _functionRunner.MoveNextAsync();
         if (hasNext)
         {
             CurrentWait.StateAfterWait = GetState();
             //set locals for the new incoming wait
-            var localContinuation =
-                _oldMatchedWait != null &&
-                _oldMatchedWait.Locals != null;
-            if (localContinuation)
-            {
-                _oldMatchedWait.Locals.Value = _functionRunner;
-                CurrentWait.LocalsId = _oldMatchedWait.LocalsId;
-                CurrentWait.Locals = _oldMatchedWait.Locals;
-            }
-            else
-            {
-                CurrentWait.Locals = new PrivateData
-                {
-                    Id = Guid.NewGuid(),
-                    Value = _functionRunner
-                };
-            }
+            SetLocalsForNewWait();
 
             //set closure
-            var closureContinuation =
-                _oldMatchedWait != null &&
-                _oldMatchedWait.CallerName == CurrentWait.CallerName &&
-                _oldMatchedWait.RuntimeClosureId != null;
-            if (closureContinuation)
-            {
-                CurrentWait.RuntimeClosureId = _oldMatchedWait.RuntimeClosureId;
-                CurrentWait.OldCompletedSibling = _oldMatchedWait;
-            }
+            SetClosureForNewWait();
         }
         return hasNext;
     }
 
+    private void SetClosureForNewWait()
+    {
+        var closureContinuation =
+                        _oldMatchedWait != null &&
+                        _oldMatchedWait.CallerName == CurrentWait.CallerName &&
+                        _oldMatchedWait.ClosureDataId != null;
+        var closureFields = GetClosureFields();
+        if (closureContinuation)
+        {
+            //CurrentWait.ClosureDataId = _oldMatchedWait.ClosureDataId;
+            CurrentWait.ClosureData = _oldMatchedWait.ClosureData;
+            CurrentWait.OldCompletedSibling = _oldMatchedWait;
+        }
+        else if (closureFields.Any())
+        {
+            var activeClosure = closureFields.
+                Select(x => x.GetValue(_functionRunner)).
+                FirstOrDefault(x => x != null);
+            if (activeClosure != null)
+                CurrentWait.ClosureData = new PrivateData
+                {
+                    Value = activeClosure,
+                    Type = PrivateDataType.Locals
+                };
+        }
+    }
+
+    private void SetLocalsForNewWait()
+    {
+        var localContinuation =
+            _oldMatchedWait != null &&
+            _oldMatchedWait.Locals != null;
+        if (localContinuation)
+        {
+            _oldMatchedWait.Locals.Value = _functionRunner;
+            //CurrentWait.LocalsId = _oldMatchedWait.LocalsId;
+            CurrentWait.Locals = _oldMatchedWait.Locals;
+        }
+        else if (JsonConvert.SerializeObject(_functionRunner, ClosureContractResolver.Settings) != "{}")
+        {
+            CurrentWait.Locals = new PrivateData
+            {
+                Value = _functionRunner,
+                Type = PrivateDataType.Locals
+            };
+        }
+    }
+
+    private bool RunnerHasValue()
+    {
+        var json = JsonConvert.SerializeObject(_functionRunner, ClosureContractResolver.Settings);
+        return json != "{}";
+    }
 
     private void CreateRunner(Type functionRunnerType, PrivateData oldLocals = null)
     {
@@ -148,28 +174,26 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         thisField?.SetValue(_functionRunner, functionClassInstance);
     }
 
+    private List<FieldInfo> GetClosureFields() => _functionRunner.
+            GetType().
+            GetFields(BindingFlags.Instance | BindingFlags.NonPublic).
+            Where(x => x.FieldType.Name.StartsWith(Constants.CompilerClosurePrefix)).
+            ToList();
     private void SetRunnerClosureField(object closure)
     {
-        if (closure == null)
-            return;
-        _functionRunner.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
-            .Where(x => x.FieldType.Name.StartsWith(Constants.CompilerClosurePrefix))
-            .ToList()
-            .ForEach(closureField =>
+        var closureFields = GetClosureFields();
+        closureFields.ForEach(closureField =>
+        {
+            if (closure is null && closureFields.Count == 1)
+                closureField.SetValue(_functionRunner, Activator.CreateInstance(closureField.FieldType));
+            else if (closure is JObject jobject)
             {
-                try
-                {
-                    if (closure is JObject jobject)
-                    {
-                        var closureObject = jobject.ToObject(closureField.FieldType);
-                        closureField.SetValue(_functionRunner, closureObject ?? Activator.CreateInstance(closureField.FieldType));
-                    }
-                    else if (closure.GetType() == closureField.FieldType)
-                        closureField.SetValue(_functionRunner, closure);
-                }
-                catch
-                { }
-            });
+                var closureObject = jobject.ToObject(closureField.FieldType);
+                closureField.SetValue(_functionRunner, closureObject ?? Activator.CreateInstance(closureField.FieldType));
+            }
+            else if (closure != null && closure.GetType() == closureField.FieldType)
+                closureField.SetValue(_functionRunner, closure);
+        });
     }
 
     private int GetState()

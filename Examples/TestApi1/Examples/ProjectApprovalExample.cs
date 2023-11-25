@@ -23,7 +23,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
              .MatchIf(CurrentProject == null, (project, output) => output && !project.IsResubmit)//Point 3
              .MatchIf(CurrentProject != null, (project, output) => output && !project.IsResubmit)
              .AfterMatch((project, output) => CurrentProject = project);//Point 4
-        Log("###After Project Submitted");
+        AddInfoLog("###After Project Submitted");
         //throw new NotImplementedException("Exception after first wait match.");
         await AskManagerToApprove("Manager One", CurrentProject.Id);
         //throw new Exception("Critical exception aftrer AskManagerToApprove");
@@ -34,7 +34,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
 
         if (ManagerOneApproval is false)
         {
-            Log("Go back and ask applicant to resubmitt project.");
+            AddInfoLog("Go back and ask applicant to resubmitt project.");
             await AskApplicantToResubmittProject(CurrentProject.Id);
             goto Project_Submitted;
         }

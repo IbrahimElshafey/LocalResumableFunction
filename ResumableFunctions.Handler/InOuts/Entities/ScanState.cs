@@ -8,4 +8,5 @@ public class ScanState : IEntity<int>
     public int? ServiceId { get; set; }
 
     public string Name { get; set; }
+    public string ServiceName { get; set; }
 }

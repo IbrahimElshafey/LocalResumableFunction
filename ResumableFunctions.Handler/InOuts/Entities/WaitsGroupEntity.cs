@@ -40,15 +40,15 @@ public class WaitsGroupEntity : WaitEntity
 
     internal override void OnAddWait()
     {
-        var childHasClosure = ChildWaits.Any(x => x.RuntimeClosureId != null && CallerName == x.CallerName);
+        var childHasClosure = ChildWaits.Any(x => x.ClosureKey != null && CallerName == x.CallerName);
         if (childHasClosure)
         {
-            if (RuntimeClosureId == null)
-                RuntimeClosureId = Guid.NewGuid();
+            if (ClosureKey == null)
+                ClosureKey = Guid.NewGuid();
             ChildWaits.ForEach(childWait =>
             {
                 if (childWait.CallerName == CallerName)//todo:what if recursive calls??
-                    childWait.RuntimeClosureId = RuntimeClosureId;
+                    childWait.ClosureKey = ClosureKey;
             });
         }
         ActionOnChildrenTree(w => w.IsRoot = w.ParentWait == null && w.ParentWaitId == null);

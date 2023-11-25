@@ -14,7 +14,7 @@
             <span><b>Match Exprssion: </b><span>@(new ExpressionSerializer().Deserialize(Model.GroupMatchFuncName).ToCSharpString())</span></span>
         }*@
         @{
-            var locals = Model.LocalsDisplay();
+            var locals = Model.PrivateDataDisplay();
         }
         @if (locals is not null)
         {
