@@ -8,7 +8,6 @@ namespace ResumableFunctions.Handler.InOuts.Entities;
 
 public class WaitTemplate : IEntity<int>, IOnSaveEntity
 {
-
     public int Id { get; set; }
     public int FunctionId { get; set; }
     public int? MethodId { get; set; }

@@ -1,20 +1,18 @@
 ﻿# Todo
 * Wait processing review
-	* Wait creation time and pushed call time must be taken in consideration when get pending waits
 * Review Transinet services
 * Review first wait clone
-* Dynamic loaded dll 
-* Use UTC time in all system
+* Dynamic loaded dll
+
 
 * Provide an advanced API for tests that enable complex queries for DB
 
 * Suspend Hangfire old jobs
 
-* Review concurrency with [computer and paper]
+* Review concurrency with [pen and paper]
 	* Review function state update lock `ExecuteAfterMatchAction`
 
-* Wait template duplication review
-	* Must be linked to method id and group id
+
 * Time waits review
 * When instance completed update sub tree status
 * Complex local var in closure

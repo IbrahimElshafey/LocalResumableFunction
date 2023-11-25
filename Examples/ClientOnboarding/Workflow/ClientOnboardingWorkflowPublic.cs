@@ -25,7 +25,7 @@ namespace ClientOnboarding.Workflow
         internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
         {
             yield return WaitClientFillForm();
-
+            
             yield return AskOwnerToApprove();
 
             if (OwnerDecision is false)
