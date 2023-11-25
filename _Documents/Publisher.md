@@ -7,8 +7,6 @@
 		* From service
 		* To Service
 		* Processing behavior (Process Locally, or propagate in cluster)
-	* When more than one services share the db
-		* Should external call hits all services? No
 	* Should we define an external id for pushed call?
 
 * Retry policy for the failed requests

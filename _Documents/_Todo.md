@@ -13,8 +13,6 @@
 	* Review function state update lock `ExecuteAfterMatchAction`
 
 
-* Time waits review
-* When instance completed update sub tree status
 * Complex local var in closure
 	* What if type is not serializable??
 
