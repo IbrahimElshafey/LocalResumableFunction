@@ -62,13 +62,7 @@ internal partial class WaitsRepo
             .FirstOrDefaultAsync(x => x.Id == waitId);
     }
 
-    public async Task<MethodInfo> GetMethodInfoForRf(long waitId)
-    {
-        return (await _context.Waits
-            .Include(x => x.RequestedByFunction)
-            .FirstAsync(x => x.Id == waitId))
-            .RequestedByFunction.MethodInfo;
-    }
+
 
     private async Task SaveMethodWait(MethodWaitEntity methodWait)
     {

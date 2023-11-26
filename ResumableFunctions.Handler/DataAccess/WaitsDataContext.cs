@@ -312,6 +312,7 @@ internal sealed class WaitsDataContext : DbContext
                 .Where(x => x.Entity is WaitEntity { Path: null })
                 .Select(x => (WaitEntity)x.Entity)
                 .ToList();
+            
             foreach (var wait in waitsWithNoPath)
                 wait.Path = GetWaitPath(wait);
 

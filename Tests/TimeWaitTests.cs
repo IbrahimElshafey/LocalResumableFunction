@@ -47,9 +47,18 @@ namespace Tests
         [ResumableFunctionEntryPoint("TestTimeWait")]
         public async IAsyncEnumerable<Wait> TestTimeWaitAtStart()
         {
+            int localCounter = 10;
             yield return
                 WaitTime(TimeSpan.FromDays(2), "Wait Two Days")
-                .AfterMatch((x, _) => TimeWaitId = x.TimeMatchId);
+                .AfterMatch((x, _) =>
+                {
+                    TimeWaitId = x.TimeMatchId;
+                    if (localCounter != 10)
+                        throw new Exception("Local counter not get correct in  TimeWait.AfterMatch callback.");
+                    localCounter += 10;
+                });
+            if (localCounter != 20)
+                throw new Exception("Local counter not set correct in  TimeWait.AfterMatch callback.");
             Console.WriteLine("Time wait at start matched.");
         }
     }

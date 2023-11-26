@@ -1,11 +1,6 @@
 ﻿# Todo
-* Wait time closure test
-* Time waits review
-	* Add flags attribute for MethodWait booleans
-* ExtraData for wait remove
 * Wait processing review
 * Review Transinet services
-* Review first wait clone
 * Complex local var in closure
 	* What if type is not serializable??
 * Cleaning closures when delete old state `CleanCompletedFunctionInstances` method
