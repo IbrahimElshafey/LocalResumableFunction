@@ -13,6 +13,3 @@
 	* Match and SetData Expressions
 * Services registry is separate service
 
-# Questions
-* How to check that pushed call processed by all affected services?
-	* How to check that pushed call can be deleted?

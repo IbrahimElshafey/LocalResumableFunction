@@ -2,7 +2,7 @@
 * Review CanPublishFromExternal and IsLocalOnly
 	* Should it defined for method group or method idenetifier
 * Publish from client to multiple services
-	* Pushed call must have flag fields for:
+	* Pushed call may have flag fields for:
 		* Is from external
 		* From service
 		* To Service
@@ -11,7 +11,7 @@
 		* Should external call hits all services? No
 	* Should we define an external id for pushed call?
 
-* Retry policy for the failed requests
+* Retry policy for the failed requests before save to failed requests
 * When to stop/block pushing call to the RF service
 * RF Service and Client Coordination
 	* Must be from client to server and not reverse since client may be any type mobile,desktop, or web server.

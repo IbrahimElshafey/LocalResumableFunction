@@ -1,11 +1,13 @@
 ﻿# Todo
-* Wait processing review
-* Review Transinet services
+* Publisher Project TODOs
+* Cleaning closures when delete old state `CleanCompletedFunctionInstances` method
+* Reset function instance errors after it completed
 * Complex local var in closure
 	* What if type is not serializable??
-* Cleaning closures when delete old state `CleanCompletedFunctionInstances` method
-* Reset Errors after function complete background query
+* Review Transinet services
+* Use same dll in two different services must be allowed
 * Dynamic loaded dll
+* Build Nuget package to target multiple runtimes and versions
 
 
 * Provide an advanced API for tests that enable complex queries for DB
@@ -15,7 +17,6 @@
 * Review concurrency with [pen and paper]
 	* Review function state update lock `ExecuteAfterMatchAction`
 
-* Use same dll in two different services must be allowed
 
 * Parameter check lib use
 * Confirm One Transaction per bussiness unit
