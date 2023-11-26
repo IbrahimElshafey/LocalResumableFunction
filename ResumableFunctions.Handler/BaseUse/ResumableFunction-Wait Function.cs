@@ -21,7 +21,7 @@ public abstract partial class ResumableFunctionsContainer
         var functionInfo = GetType().GetMethod(functionName, CoreExtensions.DeclaredWithinTypeFlags());
         return new FunctionWaitEntity
         {
-            Name = name ?? $"# {functionName}",
+            Name = name ?? $"#Wait Function `{functionName}`",
             WaitType = WaitType.FunctionWait,
             FunctionInfo = functionInfo,
             CurrentFunction = this,

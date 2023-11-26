@@ -14,7 +14,7 @@ public abstract partial class ResumableFunctionsContainer
     {
         return new TimeWaitEntity(this)
         {
-            Name = name ?? $"#Time Wait for [{timeToWait.TotalHours}] hours in [{callerName}]",
+            Name = name ?? $"#Time Wait for `{timeToWait.TotalHours}` hours in `{callerName}`",
             TimeToWait = timeToWait,
             UniqueMatchId = Guid.NewGuid().ToString(),
             CurrentFunction = this,

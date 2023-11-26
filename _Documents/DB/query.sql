@@ -1,4 +1,4 @@
-﻿SELECT TOP (1000) [Id]
+﻿SELECT [Id]
       ,[Name]
       ,[CallerName]
       ,[StateAfterWait]

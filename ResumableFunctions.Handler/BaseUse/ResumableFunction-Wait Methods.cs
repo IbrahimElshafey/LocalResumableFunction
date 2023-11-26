@@ -17,7 +17,7 @@ public abstract partial class ResumableFunctionsContainer
     {
         return new MethodWaitEntity<TInput, TOutput>(method)
         {
-            Name = name ?? $"# {method.Method.Name}",
+            Name = name ?? $"#Wait Method `{method.Method.Name}`",
             WaitType = WaitType.MethodWait,
             CurrentFunction = this,
             InCodeLine = inCodeLine,
@@ -34,7 +34,7 @@ public abstract partial class ResumableFunctionsContainer
     {
         return new MethodWaitEntity<TInput, TOutput>(method)
         {
-            Name = name ?? $"# {method.Method.Name}",
+            Name = name ?? $"#Wait Method `{method.Method.Name}`",
             WaitType = WaitType.MethodWait,
             CurrentFunction = this,
             InCodeLine = inCodeLine,
@@ -55,7 +55,7 @@ public abstract partial class ResumableFunctionsContainer
         }
         var group = new WaitsGroupEntity
         {
-            Name = name ?? $"# Group Wait [{inCodeLine}] by [{callerName}]",
+            Name = name ?? $"#Wait Group `{inCodeLine}` by `{callerName}`",
             ChildWaits = waits.Select(x => x.WaitEntity).ToList(),
             WaitType = WaitType.GroupWaitAll,
             CurrentFunction = this,

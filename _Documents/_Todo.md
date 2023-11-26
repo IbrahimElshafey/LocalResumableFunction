@@ -1,5 +1,8 @@
 ﻿# Todo
+* Wait time closure test
 * Time waits review
+	* Add flags attribute for MethodWait booleans
+* ExtraData for wait remove
 * Wait processing review
 * Review Transinet services
 * Review first wait clone

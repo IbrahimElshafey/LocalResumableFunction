@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.DataAccess.InOuts;
+using ResumableFunctions.Handler.Expressions;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
@@ -134,10 +135,11 @@ internal partial class WaitsRepo : IWaitsRepo
                 foreach (var wait in firstWaitItems)
                 {
                     wait.IsDeleted = true;
-                    if (wait is MethodWaitEntity { Name: Constants.TimeWaitName })
+                    if (wait is MethodWaitEntity { MethodWaitType: MethodWaitType.TimeWaitMethod })
                     {
                         wait.LoadUnmappedProps();
-                        _backgroundJobClient.Delete(wait.ExtraData.JobId);
+                        var jobId = wait.ExtraData["JobId"];
+                        _backgroundJobClient.Delete(jobId);
                     }
                 }
                 //load entity to delete it , concurrency control token and FKs
@@ -145,6 +147,7 @@ internal partial class WaitsRepo : IWaitsRepo
                 {
                     var functionState = await _context
                     .FunctionStates
+                    .Select(x => new ResumableFunctionState { Id = x.Id, ConcurrencyToken = x.ConcurrencyToken })
                     .FirstAsync(x => x.Id == stateId);
                     _context.FunctionStates.Remove(functionState);
                 }
@@ -187,10 +190,11 @@ internal partial class WaitsRepo : IWaitsRepo
         wait.Cancel();
         wait.CallId = pushedCallId;
 
-        bool isTimeWait = wait is MethodWaitEntity mw && mw.Name == Constants.TimeWaitName;
+        bool isTimeWait = wait is MethodWaitEntity mw && mw.MethodWaitType == MethodWaitType.TimeWaitMethod;
         if (isTimeWait)
         {
-            _backgroundJobClient.Delete(wait.ExtraData.JobId);
+            var jobId = wait.ExtraData["JobId"];
+            _backgroundJobClient.Delete(jobId);
         }
     }
 

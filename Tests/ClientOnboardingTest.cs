@@ -10,10 +10,10 @@ namespace Tests
     public partial class ClientOnboardingTest
     {
         [Fact]
-        public async Task Test_ClientOnBoarding_NoSimulate()
+        public async Task ClientOnBoarding_NoSimulate_Test()
         {
             using var test = new TestShell(
-                nameof(Test_ClientOnBoarding_NoSimulate),
+                nameof(ClientOnBoarding_NoSimulate_Test),
                 typeof(ClientOnboardingService),
                 typeof(ClientOnboardingWorkflowPublic));
             test.RegisteredServices.AddScoped<IClientOnboardingService, ClientOnboardingService>();
