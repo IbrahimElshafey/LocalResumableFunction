@@ -12,13 +12,13 @@ public class ReplayGoBackBeforeNewMatchExample : ProjectApprovalExample
     Project_Submitted:
         WriteMessage("Before project submitted.");
         yield return
-            Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
+            WaitMethod<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf(CurrentProject == null, (input, output) => output == true && input.IsResubmit == false)
                 .MatchIf(CurrentProject != null, (input, output) => input.Id == CurrentProject.Id && input.IsResubmit == true)
                 .AfterMatch((input, output) => CurrentProject = input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
-        yield return Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
+        yield return WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
             .AfterMatch((input, output) => ManagerOneApproval = input.Decision);
 

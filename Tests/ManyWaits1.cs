@@ -50,15 +50,15 @@ namespace Tests
             {
                 int cancelCounter = 10;
                 int afterMatchCounter = 10;
-                yield return Wait(new[]
+                yield return WaitGroup(new[]
                     {
-                    Wait<string, string>(Method1, "Method 1")
+                    WaitMethod<string, string>(Method1, "Method 1")
                         .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
                         .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
-                    Wait<string, string>(Method2, "Method 2")
+                    WaitMethod<string, string>(Method2, "Method 2")
                         .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
                         .WhenCancel(() => { CancelCounter++; cancelCounter++; }),
-                    Wait<string, string>(Method3, "Method 3")
+                    WaitMethod<string, string>(Method3, "Method 3")
                         .AfterMatch((_, _) => { Counter++; afterMatchCounter++; })
                         .WhenCancel(() => { CancelCounter++; cancelCounter++; })
                     }

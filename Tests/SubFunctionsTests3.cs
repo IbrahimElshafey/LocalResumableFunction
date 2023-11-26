@@ -58,7 +58,7 @@ public partial class SubFunctionsTests
         public async IAsyncEnumerable<Wait> Test()
         {
             int x = 100;
-            yield return Wait(SubFunction1(), "Wait sub function1");
+            yield return WaitFunction(SubFunction1(), "Wait sub function1");
             await Task.Delay(100);
             if (x != 100)
                 throw new Exception("Locals continuation problem.");
@@ -68,7 +68,7 @@ public partial class SubFunctionsTests
         public async IAsyncEnumerable<Wait> SubFunction1()
         {
             int x = 10;
-            yield return Wait<string, string>(Method1, "M1")
+            yield return WaitMethod<string, string>(Method1, "M1")
                 .MatchAny()
                 .AfterMatch((_, _) =>
                 {
@@ -78,25 +78,25 @@ public partial class SubFunctionsTests
                 });
 
             x += 10;
-            yield return Wait<string, string>(Method4, "M4")
+            yield return WaitMethod<string, string>(Method4, "M4")
                 .MatchAny()
                 .AfterMatch((_, _) =>
                 {
                     if (x != 30)
                         throw new Exception("Closure restore in sub function problem.");
                 });
-            yield return Wait(SubFunction2(), "Wait sub function2");
+            yield return WaitFunction(SubFunction2(), "Wait sub function2");
         }
 
         [SubResumableFunction("SubFunction2")]
         public async IAsyncEnumerable<Wait> SubFunction2()
         {
             int x = 100;
-            yield return Wait<string, string>(Method2, "M2").MatchAny();
+            yield return WaitMethod<string, string>(Method2, "M2").MatchAny();
             if (x != 100)
                 throw new Exception("Locals continuation problem.");
             x += 100;
-            yield return Wait(SubFunction3(), "Wait sub function3");
+            yield return WaitFunction(SubFunction3(), "Wait sub function3");
             if (x != 200)
                 throw new Exception("Locals continuation problem.");
         }
@@ -105,7 +105,7 @@ public partial class SubFunctionsTests
         public async IAsyncEnumerable<Wait> SubFunction3()
         {
             int x = 1000;
-            yield return Wait<string, string>(Method3, "M2").MatchAny();
+            yield return WaitMethod<string, string>(Method3, "M2").MatchAny();
             if (x != 1000)
                 throw new Exception("Locals continuation problem.");
         }

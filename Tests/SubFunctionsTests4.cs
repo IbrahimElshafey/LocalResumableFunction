@@ -31,10 +31,10 @@ public partial class SubFunctionsTests
         public async IAsyncEnumerable<Wait> Test()
         {
             int x = 100;
-            yield return Wait(new[]
+            yield return WaitGroup(new[]
             {
-                Wait(SubFunction1("f1")),
-                Wait<string, string>(Method1, $"M1")
+                WaitFunction(SubFunction1("f1")),
+                WaitMethod<string, string>(Method1, $"M1")
             });
             await Task.Delay(100);
             if (x != 100)
@@ -45,7 +45,7 @@ public partial class SubFunctionsTests
         public async IAsyncEnumerable<Wait> SubFunction1(string functionInput)
         {
             int x = 10;
-            yield return Wait<string, string>(Method1, $"M1-{functionInput}")
+            yield return WaitMethod<string, string>(Method1, $"M1-{functionInput}")
                 .AfterMatch((_, _) =>
                 {
                     if (x != 10)
@@ -57,7 +57,7 @@ public partial class SubFunctionsTests
             //    .MatchIf((input, _) => input == functionInput);
 
             x += 10;
-            yield return Wait<string, string>(Method2, "M2")
+            yield return WaitMethod<string, string>(Method2, "M2")
                 .MatchIf((input, _) => input == functionInput)
                 .AfterMatch((_, _) =>
                 {

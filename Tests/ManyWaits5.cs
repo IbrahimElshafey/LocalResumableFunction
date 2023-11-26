@@ -30,15 +30,15 @@ namespace Tests
             [ResumableFunctionEntryPoint("MixedWaitsGroup")]
             public async IAsyncEnumerable<Wait> WaitThreeAtStart()
             {
-                yield return Wait(new[] {
-                    Wait(new Wait[] {
-                        Wait<string, string>(Method1, "Method 1"),
-                        Wait<string, string>(Method2, "Method 2"),
-                        Wait<string, string>(Method3, "Method 3")}
+                yield return WaitGroup(new[] {
+                    WaitGroup(new Wait[] {
+                        WaitMethod<string, string>(Method1, "Method 1"),
+                        WaitMethod<string, string>(Method2, "Method 2"),
+                        WaitMethod<string, string>(Method3, "Method 3")}
 ,
                     "Wait three methods in Group"                    ),
-                    Wait(SubFunction(), "Wait sub function"),
-                    Wait<string, string>(Method5, "Wait Method M5")}, "Wait Many Types Group");
+                    WaitFunction(SubFunction(), "Wait sub function"),
+                    WaitMethod<string, string>(Method5, "Wait Method M5")}, "Wait Many Types Group");
                 await Task.Delay(100);
                 Console.WriteLine("Three method done");
             }
@@ -46,7 +46,7 @@ namespace Tests
             [SubResumableFunction("SubFunction")]
             public async IAsyncEnumerable<Wait> SubFunction()
             {
-                yield return Wait<string, string>(Method4, "M4 in Sub Function").MatchAny();
+                yield return WaitMethod<string, string>(Method4, "M4 in Sub Function").MatchAny();
             }
 
             [PushCall("Method1")] public string Method1(string input) => "Method1 Call";

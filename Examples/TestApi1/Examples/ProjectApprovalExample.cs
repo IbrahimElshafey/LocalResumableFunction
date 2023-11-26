@@ -19,7 +19,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     {
     Project_Submitted:
         yield return
-          Wait<Project, bool>(ProjectSubmitted, "Project Submitted")//Point 2
+          WaitMethod<Project, bool>(ProjectSubmitted, "Project Submitted")//Point 2
              .MatchIf(CurrentProject == null, (project, output) => output && !project.IsResubmit)//Point 3
              .MatchIf(CurrentProject != null, (project, output) => output && !project.IsResubmit)
              .AfterMatch((project, output) => CurrentProject = project);//Point 4
@@ -28,7 +28,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
         await AskManagerToApprove("Manager One", CurrentProject.Id);
         //throw new Exception("Critical exception aftrer AskManagerToApprove");
         yield return
-               Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
+               WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
                    .MatchIf((approvalDecision, output) => approvalDecision.ProjectId == CurrentProject.Id)
                    .AfterMatch((approvalDecision, approvalResult) => ManagerOneApproval = approvalResult);
 
@@ -61,18 +61,18 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     public async IAsyncEnumerable<Wait> ExternalMethod()
     {
         await Task.Delay(1);
-        yield return Wait<string, string>
+        yield return WaitMethod<string, string>
                 (new ExternalServiceClass().SayHelloExport, "Wait say hello external")
                 .MatchIf((userName, helloMsg) => userName.StartsWith("M"))
                 .AfterMatch((userName, helloMsg) => ExternalMethodStatus = $"Say hello called and user name is: {userName}");
 
         yield return
-              Wait<object, int>(new ExternalServiceClass().ExternalMethodTest, "Wait external method 1")
+              WaitMethod<object, int>(new ExternalServiceClass().ExternalMethodTest, "Wait external method 1")
                   .MatchIf((input, output) => output % 2 == 0)
                   .AfterMatch((input, output) => ExternalMethodStatus = "ExternalMethodTest Matched.");
 
         yield return
-          Wait<string, int>(new ExternalServiceClass().ExternalMethodTest2, "Wait external method 2")
+          WaitMethod<string, int>(new ExternalServiceClass().ExternalMethodTest2, "Wait external method 2")
               .MatchIf((input, output) => input == "Ibrahim")
               .AfterMatch((input, output) => ExternalMethodStatus = "ExternalMethodTest2 Matched.");
 
@@ -83,7 +83,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     public async IAsyncEnumerable<Wait> ExternalMethodWaitGoodby()
     {
         await Task.Delay(1);
-        yield return Wait<string, string>
+        yield return WaitMethod<string, string>
                 (new ExternalServiceClass().SayGoodby, "Wait good by external")
                 .MatchIf((userName, helloMsg) => userName[0] == 'M')
                 .AfterMatch((userName, helloMsg) => ExternalMethodStatus = $"Say goodby called and user name is: {userName}");
@@ -95,12 +95,12 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     public async IAsyncEnumerable<Wait> InterfaceMethod()
     {
         yield return
-         Wait<Project, bool>(ProjectSubmitted, "Project Submitted")
+         WaitMethod<Project, bool>(ProjectSubmitted, "Project Submitted")
              .MatchIf((input, output) => output == true)
              .AfterMatch((input, output) => CurrentProject = input);
 
         yield return
-               Wait<ApprovalDecision, bool>(FiveApproveProject, "Manager Five Approve Project")
+               WaitMethod<ApprovalDecision, bool>(FiveApproveProject, "Manager Five Approve Project")
                    .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                    .AfterMatch((input, output) => ManagerFiveApproval = output);
         Success(nameof(InterfaceMethod));
@@ -108,19 +108,19 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     public async IAsyncEnumerable<Wait> SubFunctionTest()
     {
         yield return
-            Wait<Project, bool>(ProjectSubmitted, "Project Submitted")
+            WaitMethod<Project, bool>(ProjectSubmitted, "Project Submitted")
                 .MatchIf((input, output) => output == true)
                 .AfterMatch((input, output) => CurrentProject = input);
 
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         WriteMessage("Wait sub function");
-        yield return Wait(WaitTwoManagers(), "Wait sub function that waits two manager approval.");
+        yield return WaitFunction(WaitTwoManagers(), "Wait sub function that waits two manager approval.");
         WriteMessage("After sub function ended");
         if (ManagerOneApproval && ManagerTwoApproval)
         {
             WriteMessage("Manager 1 & 2 approved the project");
             yield return
-                Wait<ApprovalDecision, bool>(ManagerThreeApproveProject, "Manager Three Approve Project")
+                WaitMethod<ApprovalDecision, bool>(ManagerThreeApproveProject, "Manager Three Approve Project")
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((input, output) => ManagerThreeApproval = output);
 
@@ -137,13 +137,13 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     public async IAsyncEnumerable<Wait> WaitTwoManagers()
     {
         WriteMessage("WaitTwoManagers started");
-        yield return Wait(
+        yield return WaitGroup(
             new[]
             {
-            Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
+            WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerOneApproval = output),
-            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject, "Manager Two Approve Project")
+            WaitMethod<ApprovalDecision, bool>(ManagerTwoApproveProject, "Manager Two Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerTwoApproval = output)
             }
@@ -157,13 +157,13 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     public async IAsyncEnumerable<Wait> WaitFirst()
     {
         WriteMessage("First started");
-        yield return Wait(
+        yield return WaitGroup(
             new Wait[]
             {
-                Wait<Project, bool>(ProjectSubmitted, "Project Submitted")
+                WaitMethod<Project, bool>(ProjectSubmitted, "Project Submitted")
                     .MatchIf((input, output) => output == true)
                     .AfterMatch((input, output) => CurrentProject = input),
-                Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
+                WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject, "Manager One Approve Project")
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((input, output) => ManagerOneApproval = output)
             }

@@ -37,19 +37,19 @@ namespace ShowTestsUi.Controllers
         public async IAsyncEnumerable<Wait> ThreeMethodsSequence()
         {
             int x = 1;
-            yield return Wait<string, string>(Method1, "M1")
+            yield return WaitMethod<string, string>(Method1, "M1")
             //.AfterMatch((_, _) => x++);
             ;
             x++;
             if (x != 2)
                 throw new Exception("Closure not continue");
             x++;
-            yield return Wait<string, string>(Method2, "M2").MatchAny();
+            yield return WaitMethod<string, string>(Method2, "M2").MatchAny();
             x++;
             if (x != 4)
                 throw new Exception("Closure not continue");
             x++;
-            yield return Wait<string, string>(Method3, "M3").MatchAny();
+            yield return WaitMethod<string, string>(Method3, "M3").MatchAny();
             x++;
             if (x != 6)
                 throw new Exception("Closure not continue");

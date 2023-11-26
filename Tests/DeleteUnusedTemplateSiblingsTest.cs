@@ -51,7 +51,7 @@ namespace Tests
                 var x = 10;
                 var _dynamicProp = Random.Shared.Next(2, 100);
                 yield return
-                    Wait<string, string>(Method1, "M1")
+                    WaitMethod<string, string>(Method1, "M1")
                     .MatchIf((input, output) => _dynamicProp > 1 && x == 10);
                 //.MatchIf((input, output) => _dynamicProp > 1);
                 await Task.Delay(100);

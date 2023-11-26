@@ -35,7 +35,11 @@ public partial class SubFunctionsTests
         public async IAsyncEnumerable<Wait> Test()
         {
             int x = 100;
-            yield return Wait("Wait sub function1 twice", new[] { SubFunction1("f1"), SubFunction1("f2") });
+            yield return WaitGroup(new[] 
+            {
+                 WaitFunction(SubFunction1("f1")),
+                 WaitFunction(SubFunction1("f2")) 
+            }, "Wait sub function1 twice");
             await Task.Delay(100);
             if (x != 100)
                 throw new Exception("Locals continuation problem.");
@@ -45,7 +49,7 @@ public partial class SubFunctionsTests
         public async IAsyncEnumerable<Wait> SubFunction1(string functionInput)
         {
             int x = 10;
-            yield return Wait<string, string>(Method1, $"M1-{functionInput}")
+            yield return WaitMethod<string, string>(Method1, $"M1-{functionInput}")
                 .MatchIf((input, _) => input == functionInput)
                 .AfterMatch((_, _) =>
                 {
@@ -54,11 +58,11 @@ public partial class SubFunctionsTests
                     x += 10;
                 });
 
-            yield return Wait<string, string>(Method1, "M1")
+            yield return WaitMethod<string, string>(Method1, "M1")
                 .MatchIf((input, _) => input == functionInput);
 
             x += 10;
-            yield return Wait<string, string>(Method2, "M2")
+            yield return WaitMethod<string, string>(Method2, "M2")
                 .MatchIf((input, _) => input == functionInput)
                 .AfterMatch((_, _) =>
                 {

@@ -13,7 +13,7 @@ public class ClientOnboardingWorkflowPrivate : ResumableFunctionsContainer
         int localCounter = 10;
         var userId = -1;
         yield return
-            Wait<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, "Wait User Registration")
+            WaitMethod<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, "Wait User Registration")
             .MatchIf((_, regResult) => regResult.FormId > 0)
             .AfterMatch((regForm, regResult) =>
             {
@@ -29,7 +29,7 @@ public class ClientOnboardingWorkflowPrivate : ResumableFunctionsContainer
         var ownerDecision = false;
         localCounter += 10;
         yield return
-            Wait<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, "Wait Owner Approve Client")
+            WaitMethod<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, "Wait Owner Approve Client")
             .MatchIf((approveClientInput, _) => approveClientInput.TaskId == ownerTaskId)
             .AfterMatch((approveClientInput, _) =>
             {
@@ -51,7 +51,7 @@ public class ClientOnboardingWorkflowPrivate : ResumableFunctionsContainer
             var clientMeetingId = _service.SetupInitalMeetingAndAgenda(userId).MeetingId;
 
             yield return
-                Wait<int, MeetingResult>(_service.SendMeetingResult, "Wait Meeting Result")
+                WaitMethod<int, MeetingResult>(_service.SendMeetingResult, "Wait Meeting Result")
                .AfterMatch((_, _) =>
                {
                    Console.WriteLine("Closure level 2 and public method");

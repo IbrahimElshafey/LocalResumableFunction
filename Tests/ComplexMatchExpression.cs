@@ -37,7 +37,7 @@ public class ComplexMatchExpression
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return
-                Wait<string, string>(Method6, "M6")
+                WaitMethod<string, string>(Method6, "M6")
                 .MatchIf((input, output) =>
                     input == "Test" &&
                     InstanceCall(input, output) &&

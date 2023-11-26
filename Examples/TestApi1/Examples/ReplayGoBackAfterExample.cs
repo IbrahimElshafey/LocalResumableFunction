@@ -10,13 +10,13 @@ public class ReplayGoBackAfterExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> TestReplay_GoBackAfter()
     {
         yield return
-            Wait<Project, bool>(ProjectSubmitted, ProjectSumbitted)
+            WaitMethod<Project, bool>(ProjectSubmitted, ProjectSumbitted)
                 .MatchIf((input, output) => output == true)
                 .AfterMatch((input, output) => CurrentProject = input);
 
     AskManagerApprovalLabel:
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
-        yield return Wait<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
+        yield return WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject, "ManagerOneApproveProject")
             .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
             .AfterMatch((input, output) => ManagerOneApproval = input.Decision);
 

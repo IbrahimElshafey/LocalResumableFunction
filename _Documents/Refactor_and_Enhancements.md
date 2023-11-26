@@ -1,5 +1,5 @@
 ﻿# Refactor
 * Refactor long methods
+
+# Enhancements
 * Optimize wait table indexes to enable fast wait insertion
-	* Remove index 
-		* [ParentWaitId] in [dbo].[Waits]

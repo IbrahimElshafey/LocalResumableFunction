@@ -49,7 +49,7 @@ namespace RequestApproval.Controllers
         internal async IAsyncEnumerable<Wait> RequestApprovalFlow()
         {
             Wait_Submit_Request:
-             yield return Wait<Request, bool>(_service.UserSubmitRequest, WaitSubmitRequest)
+             yield return WaitMethod<Request, bool>(_service.UserSubmitRequest, WaitSubmitRequest)
                     .MatchIf(UserRequest == null, (request, result) => request.Id > 0)
                     .MatchIf(UserRequest != null, (request, result) => request.Id == UserRequest.Id)
                     .AfterMatch((request, result) => UserRequest = request);
@@ -58,7 +58,7 @@ namespace RequestApproval.Controllers
             ManagerApprovalTaskId = _service.AskManagerApproval(UserRequest.Id);
 
             //wait another new method
-            yield return Wait<ApproveRequestArgs, int>(_service.ManagerApproval, "Wait Manager Approval")
+            yield return WaitMethod<ApproveRequestArgs, int>(_service.ManagerApproval, "Wait Manager Approval")
                     .MatchIf((approveRequestArgs, approvalId) => approvalId > 0 && approveRequestArgs.TaskId == ManagerApprovalTaskId)
                     .AfterMatch((approveRequestArgs, approvalId) => ManagerApprovalResult = approveRequestArgs);
 

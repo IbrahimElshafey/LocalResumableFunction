@@ -9,20 +9,20 @@ public class TestTimeExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> TimeWaitTest()
     {
         yield return
-            Wait<Project, bool>(ProjectSubmitted, "Project Submitted in TimeWaitTest")
+            WaitMethod<Project, bool>(ProjectSubmitted, "Project Submitted in TimeWaitTest")
                 .MatchIf((input, output) => output == true)
                 .AfterMatch((project, outputResult) => CurrentProject = project);
 
         ask_manager_to_approve:
         await AskManagerToApprove("Manager 1", CurrentProject.Id);
         yield return
-        Wait(
+        WaitGroup(
             new[]
             {
-                Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
+                WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((input, output) => ManagerOneApproval = output),
-                Wait(TimeSpan.FromDays(2), "Two Days")
+                WaitTime(TimeSpan.FromDays(2), "Two Days")
                     .AfterMatch((_, _) => TimerMatched = true)
             }
 ,

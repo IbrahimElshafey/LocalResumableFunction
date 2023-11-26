@@ -48,7 +48,7 @@ namespace Tests
         public async IAsyncEnumerable<Wait> TestTimeWaitAtStart()
         {
             yield return
-                Wait(TimeSpan.FromDays(2), "Wait Two Days")
+                WaitTime(TimeSpan.FromDays(2), "Wait Two Days")
                 .AfterMatch((x, _) => TimeWaitId = x.TimeMatchId);
             Console.WriteLine("Time wait at start matched.");
         }

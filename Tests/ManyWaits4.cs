@@ -54,10 +54,10 @@ namespace Tests
             [ResumableFunctionEntryPoint("TwoMethodsAfterFirst")]
             public async IAsyncEnumerable<Wait> TwoMethodsAfterFirst()
             {
-                yield return Wait<string, string>(Method4, "Method 4");
-                yield return Wait(new[] {
-                        Wait<string, string>(Method5, "Method 5").MatchAny(),
-                        Wait<string, string>(Method6, "Method 6").MatchAny()}
+                yield return WaitMethod<string, string>(Method4, "Method 4");
+                yield return WaitGroup(new[] {
+                        WaitMethod<string, string>(Method5, "Method 5").MatchAny(),
+                        WaitMethod<string, string>(Method6, "Method 6").MatchAny()}
 ,
                     "Two Methods After First");
                 await Task.Delay(100);

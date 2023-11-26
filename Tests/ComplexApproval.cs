@@ -54,13 +54,13 @@ public class ComplexApproval
         public async IAsyncEnumerable<Wait> ComplexApproval()
         {
             yield return
-                Wait<string, int>(RequestAdded, "Request Added")
+                WaitMethod<string, int>(RequestAdded, "Request Added")
                     .AfterMatch((_, requestId) => RequestId = requestId);
 
             for (var currentTopicIndex = 0; currentTopicIndex < TopicsCount; currentTopicIndex++)
             {
                 yield return
-                    Wait(new[]
+                    WaitGroup(new[]
                     {
                         AllCommitteeApproveTopic(currentTopicIndex),
                         ChefSkipTopic(currentTopicIndex)
@@ -78,7 +78,7 @@ public class ComplexApproval
         {
             Console.WriteLine($"For rquest {requestId} and topic {topicIndex} we asked {currentRole} to approve.");
             return
-                Wait<RequestTopicIndex, string>(
+                WaitMethod<RequestTopicIndex, string>(
                     MemberApproveRequest, $"{currentRole} Topic {topicIndex} Approval")
                     .MatchIf((topicIndexObject, _) =>
                         topicIndexObject.RequestId == RequestId &&
@@ -98,7 +98,7 @@ public class ComplexApproval
         private async Task<Wait> FinalApproval()
         {
             await AskChefToApproveRequest(RequestId);
-            return Wait<int, bool>(ChefFinalApproval, "Chef Final Approval")
+            return WaitMethod<int, bool>(ChefFinalApproval, "Chef Final Approval")
                 .MatchIf((requestId, decision) => requestId == RequestId)
                 .AfterMatch((requestId, decision) => FinalDecision = decision);
         }
@@ -112,7 +112,7 @@ public class ComplexApproval
         private Wait ChefSkipTopic(int chefSkipTopicIndex)
         {
             var skipCounter = 10;
-            return Wait<RequestTopicIndex, string>
+            return WaitMethod<RequestTopicIndex, string>
                 (ChefSkipTopic, $"Chef Skip Topic {chefSkipTopicIndex} Approval")
                 .MatchIf((topicIndex, _) =>
                     topicIndex.RequestId == RequestId &&
@@ -132,7 +132,7 @@ public class ComplexApproval
             }
             Console.WriteLine(currentRole);
             return
-                Wait(committeeApproveTopicWaits, $"Wait All Committee to Approve Topic {membersTopicIndex}")
+                WaitGroup(committeeApproveTopicWaits, $"Wait All Committee to Approve Topic {membersTopicIndex}")
                 .MatchIf((group) =>
                 {
                     bool result = sharedCounter == 40;
