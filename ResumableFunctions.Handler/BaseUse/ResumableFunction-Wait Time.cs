@@ -6,7 +6,7 @@ namespace ResumableFunctions.Handler;
 
 public abstract partial class ResumableFunctionsContainer
 {
-    protected TimeWait Wait(
+    protected TimeWait WaitTime(
         TimeSpan timeToWait,
         string name = null,
         [CallerLineNumber] int inCodeLine = 0,
@@ -14,7 +14,7 @@ public abstract partial class ResumableFunctionsContainer
     {
         return new TimeWaitEntity(this)
         {
-            Name = name ?? $"#{nameof(TimeWaitEntity)}#",
+            Name = name ?? $"#Time Wait for `{timeToWait.TotalHours}` hours in `{callerName}`",
             TimeToWait = timeToWait,
             UniqueMatchId = Guid.NewGuid().ToString(),
             CurrentFunction = this,

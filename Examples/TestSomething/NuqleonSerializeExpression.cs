@@ -30,7 +30,7 @@ namespace TestSomething
 
         private void UseNuqleon()
         {
-            Expression<Func<InputComplex, WaitExtraData, string>> exp = (x, y) => (x.Id + y.JobId.Length * 10 - 30).ToString();
+            Expression<Func<InputComplex, TimeWaitExtraData, string>> exp = (x, y) => (x.Id + y.JobId.Length * 10 - 30).ToString();
             var obj = new ObjectSerializer();
             var serializer = new ExpressionSlimBonsaiSerializer(
                 obj.GetJsonSerializer,
@@ -47,9 +47,9 @@ namespace TestSomething
 
 
             var inputComplex = new InputComplex { Id = 1, Name = "kjkil" };
-            var extraData = new WaitExtraData { JobId = "jkkjmk" };
+            var extraData = new TimeWaitExtraData { JobId = "jkkjmk" };
             var exp1Compiled = exp.CompileFast();
-            var exp2Compiled = (Func<InputComplex, WaitExtraData, string>)exp2.CompileFast();
+            var exp2Compiled = (Func<InputComplex, TimeWaitExtraData, string>)exp2.CompileFast();
             var v1 = exp1Compiled(inputComplex, extraData);
             var v2 = exp2Compiled(inputComplex, extraData);
         }

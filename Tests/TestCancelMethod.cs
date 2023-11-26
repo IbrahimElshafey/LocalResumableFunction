@@ -30,9 +30,9 @@ namespace Tests
             {
                 var dateTime = DateTime.UtcNow;
                 int localCounter = 2;
-                yield return Wait(new[]
+                yield return WaitGroup(new[]
                     {
-                    Wait<string, string>(Method1, "Method 1")
+                    WaitMethod<string, string>(Method1, "Method 1")
                         .MatchIf((_, _) => dateTime < new DateTime(2025, 1, 1))
                         .WhenCancel(() =>
                             {
@@ -40,7 +40,7 @@ namespace Tests
                             localCounter++;
                             })
                         .AfterMatch(StaticAfterMatch),
-                    Wait<string, string>(Method2, "Method 2")
+                    WaitMethod<string, string>(Method2, "Method 2")
                         .MatchAny()
                         .WhenCancel(() =>
                         {
@@ -49,7 +49,7 @@ namespace Tests
                             ++localCounter;
                         })
                         ,
-                    Wait<string, string>(Method3, "Method 3")
+                    WaitMethod<string, string>(Method3, "Method 3")
                         .WhenCancel(IncrementCounter)}
 ,
                     "Wait three methods")
@@ -62,7 +62,7 @@ namespace Tests
 
                 var ran = new Random(10).Next(10, 50);
                 yield return
-                    Wait<string, string>(Method4, "Method 4")
+                    WaitMethod<string, string>(Method4, "Method 4")
                     .MatchIf((input, output) => input.Length > 1 && ran >= 10)
                     .AfterMatch((_, _) =>
                     {

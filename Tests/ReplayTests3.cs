@@ -52,7 +52,7 @@ public partial class ReplayTests
         {
             int counter = 20;
             return
-                Wait<string, string>(Method1, "M1").
+                WaitMethod<string, string>(Method1, "M1").
                 MatchIf((input, _) => input.StartsWith("M")).
                 WhenCancel(() => counter += 10);
         }
@@ -61,7 +61,7 @@ public partial class ReplayTests
         {
             var methodTwoCounter = 10;
             return
-                Wait<string, string>(Method2, $"M2_{Random.Shared.Next(1, 100)}")
+                WaitMethod<string, string>(Method2, $"M2_{Random.Shared.Next(1, 100)}")
                  .AfterMatch((_, _) =>
                  {
                      methodTwoCounter += 10;

@@ -25,7 +25,7 @@ namespace ClientOnboarding.Workflow
         internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
         {
             yield return WaitClientFillForm();
-            
+
             yield return AskOwnerToApprove();
 
             if (OwnerDecision is false)
@@ -44,7 +44,7 @@ namespace ClientOnboarding.Workflow
         {
             ClientMeetingId = _service.SetupInitalMeetingAndAgenda(UserId).MeetingId;
             return
-                Wait<int, MeetingResult>(_service.SendMeetingResult, "Wait Meeting Result")
+                WaitMethod<int, MeetingResult>(_service.SendMeetingResult, "Wait Meeting Result")
                .MatchIf((meetingId, meetingResult) => meetingId == ClientMeetingId)
                .AfterMatch((meetingId, meetingResult) => Console.WriteLine(ClientMeetingId));
         }
@@ -53,7 +53,7 @@ namespace ClientOnboarding.Workflow
         {
             OwnerTaskId = _service.AskOwnerToApproveClient(FormId).Id;
             return
-                Wait<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, "Wait Owner Approve Client")
+                WaitMethod<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, "Wait Owner Approve Client")
                 .MatchIf((approveClientInput, approveResult) => approveClientInput.TaskId == OwnerTaskId)
                 .AfterMatch((approveClientInput, approveResult) => OwnerDecision = approveClientInput.Decision);
         }
@@ -61,7 +61,7 @@ namespace ClientOnboarding.Workflow
         private Wait WaitClientFillForm()
         {
             return
-                Wait<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, "Wait User Registration")
+                WaitMethod<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, "Wait User Registration")
                 .MatchIf((regForm, regResult) => regResult.FormId > 0)
                 .AfterMatch((regForm, regResult) =>
                 {

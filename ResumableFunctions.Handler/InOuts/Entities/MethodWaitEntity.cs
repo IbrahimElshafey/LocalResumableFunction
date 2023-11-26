@@ -24,7 +24,7 @@ public class MethodWaitEntity : WaitEntity
 
     [NotMapped]
     public string CancelMethodAction { get; protected set; }
-
+    public MethodWaitType MethodWaitType { get; internal set; } = MethodWaitType.NormalMethod;
     public string MandatoryPart { get; set; }
 
     [NotMapped]
@@ -193,7 +193,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
                 $"You must add attribute [{nameof(PushCallAttribute)}] to method [{method.GetFullName()}]");
 
         MethodData = new MethodData(method);
-        Name = $"#{method.Name}#";
+        Name = $"#Wait Method `{method.Name}`";
     }
 
     internal MethodWaitEntity<TInput, TOutput> AfterMatch(Action<TInput, TOutput> afterMatchAction)

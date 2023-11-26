@@ -11,20 +11,20 @@ namespace ReferenceLibrary
         [ResumableFunctionEntryPoint("TestFunctionInDll")]
         public async IAsyncEnumerable<Wait> TestFunctionInDll()
         {
-            yield return Wait(
+            yield return WaitGroup(
                 new[]
                 {
-                    Wait<string, string>(SayHello, "Wait say hello")
+                    WaitMethod<string, string>(SayHello, "Wait say hello")
                     .AfterMatch((userName, helloMsg) => UserName = userName),
 
-                    Wait<string, string>(Method123, "Wait Method123")
+                    WaitMethod<string, string>(Method123, "Wait Method123")
                     .AfterMatch((input, output) => UserName = output)
                 }
 ,
                 "Wait first")
                 .MatchAny();
 
-            yield return Wait<string, string>
+            yield return WaitMethod<string, string>
                (SayGoodby, "Wait say goodby")
                .MatchIf((userName, helloMsg) => userName == UserName)
                .AfterMatch((userName, helloMsg) => UserName = userName)

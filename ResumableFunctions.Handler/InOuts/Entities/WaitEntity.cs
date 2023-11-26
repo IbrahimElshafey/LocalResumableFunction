@@ -4,6 +4,7 @@ using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Dynamic;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 
@@ -21,7 +22,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public int RootFunctionId { get; set; }
 
     [NotMapped]
-    public WaitExtraData ExtraData { get; set; }
+    public dynamic ExtraData { get; set; }
     public byte[] ExtraDataValue { get; set; }
 
     public int? ServiceId { get; set; }
@@ -355,7 +356,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     {
         var converter = new BinarySerializer();
         if (ExtraDataValue != null)
-            ExtraData = converter.ConvertToObject<WaitExtraData>(ExtraDataValue);
+            ExtraData = converter.ConvertToObject<dynamic>(ExtraDataValue);
         if (FunctionState?.StateObject != null && CurrentFunction == null)
             CurrentFunction = (ResumableFunctionsContainer)FunctionState.StateObject;
     }

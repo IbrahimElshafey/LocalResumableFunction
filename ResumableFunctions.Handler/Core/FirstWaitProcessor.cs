@@ -48,18 +48,14 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
     public async Task<MethodWaitEntity> CloneFirstWait(MethodWaitEntity firstMatchedMethodWait)
     {
-        var rootId = long.Parse(firstMatchedMethodWait.Path.Split('/', StringSplitOptions.RemoveEmptyEntries)[0]);
-        var resumableFunction =
-            rootId != firstMatchedMethodWait.Id ?
-            await _waitsRepository.GetMethodInfoForRf(rootId) :
-            firstMatchedMethodWait.RequestedByFunction.MethodInfo;
-
+        ResumableFunctionIdentifier resumableFunction = null;
         try
         {
-            var firstWaitClone = await GetFirstWait(resumableFunction, false);
-            firstWaitClone.Status = WaitStatus.Temp;
+            resumableFunction = await _methodIdentifierRepo.GetResumableFunction(firstMatchedMethodWait.RootFunctionId);
+            var firstWaitClone = await GetFirstWait(resumableFunction.MethodInfo, false);
             firstWaitClone.ActionOnChildrenTree(waitClone =>
             {
+                waitClone.Status = WaitStatus.Temp;
                 waitClone.IsFirst = false;
                 waitClone.WasFirst = true;
                 waitClone.FunctionState.StateObject = firstMatchedMethodWait?.FunctionState?.StateObject;
@@ -71,7 +67,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                         {
                             TimeMatchId = firstMatchedMethodWait.MandatoryPart,
                             RequestedByFunctionId = firstMatchedMethodWait.RequestedByFunctionId,
-                            Description = $"[{timeWait.Name}] in function [{firstMatchedMethodWait.RequestedByFunction.RF_MethodUrn}:{firstMatchedMethodWait.FunctionState.Id}]"//Todo:bug: not same description as old wait
+                            Description = $"[{timeWait.Name}] in function [{firstMatchedMethodWait.RequestedByFunction.RF_MethodUrn}:{firstMatchedMethodWait.FunctionState.Id}]"
                         }), timeWait.TimeToWait);
                     timeWait.TimeWaitMethod.MandatoryPart = firstMatchedMethodWait.MandatoryPart;
                     timeWait.IgnoreJobCreation = true;
@@ -88,7 +84,6 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
             //return method wait that 
             var currentMatchedMw = firstWaitClone.GetChildMethodWait(firstMatchedMethodWait.Name);
-            currentMatchedMw.Status = WaitStatus.Waiting;
             currentMatchedMw.Input = firstMatchedMethodWait.Input;
             currentMatchedMw.Output = firstMatchedMethodWait.Output;
             var waitTemplate = await _templatesRepo.GetWaitTemplateWithBasicMatch(firstMatchedMethodWait.TemplateId);
@@ -97,12 +92,12 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             currentMatchedMw.IsFirst = false;
             currentMatchedMw.LoadExpressions();
             await _context.CommitAsync();
-            firstWaitClone.Status = WaitStatus.Waiting;
+            firstWaitClone.ActionOnChildrenTree(waitClone => waitClone.Status = WaitStatus.Waiting);
             return currentMatchedMw;
         }
         catch (Exception ex)
         {
-            var error = $"Error when try to clone first wait for function [{resumableFunction.GetFullName()}]";
+            var error = $"Error when try to clone first wait for function [{resumableFunction?.RF_MethodUrn}]";
             await _serviceRepo.AddErrorLog(ex, error, StatusCodes.FirstWait);
             throw new Exception(error, ex);
         }
@@ -194,7 +189,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             if (firstWait == null)
             {
                 await _serviceRepo.AddErrorLog(
-                    null, 
+                    null,
                     $"Can't get first wait in function [{resumableFunction.GetFullName()}].",
                     StatusCodes.FirstWait);
                 return null;

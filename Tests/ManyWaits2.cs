@@ -53,12 +53,12 @@ namespace Tests
             public async IAsyncEnumerable<Wait> WaitManyWithExpression()
             {
                 int localCounter = 10;
-                yield return Wait(new[]
+                yield return WaitGroup(new[]
                     {
-                        Wait<string, string>(Method1, "Method 1")
+                        WaitMethod<string, string>(Method1, "Method 1")
                             .MatchIf((_,_) => localCounter == 10),
-                        Wait<string, string>(Method2, "Method 2"),
-                        Wait<string, string>(Method3, "Method 3")
+                        WaitMethod<string, string>(Method2, "Method 2"),
+                        WaitMethod<string, string>(Method3, "Method 3")
                     }
 ,
                     "Wait three methods")

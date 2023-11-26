@@ -8,28 +8,28 @@ public class ManyWaitsTypeInGroupExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> ManyWaitsTypeInGroup()
     {
         yield return
-            Wait<Project, bool>(ProjectSubmitted, "Project Submitted")
+            WaitMethod<Project, bool>(ProjectSubmitted, "Project Submitted")
                 .MatchIf((input, output) => output == true)
                 .AfterMatch((input, output) => CurrentProject = input);
         WriteMessage("Wait many types in same group");
         yield return
-            Wait(new[]
+            WaitGroup(new[]
                 {
-                    Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
+                    WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject)
                         .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                         .AfterMatch((input, output) => ManagerOneApproval = output),
-                    Wait(
+                    WaitGroup(
                         new []
                         {
-                            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+                            WaitMethod<ApprovalDecision, bool>(ManagerTwoApproveProject)
                                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                                 .AfterMatch((input, output) => ManagerTwoApproval = output),
-                            Wait<ApprovalDecision, bool>(ManagerFourApproveProject)
+                            WaitMethod<ApprovalDecision, bool>(ManagerFourApproveProject)
                                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                                 .AfterMatch((input, output) => ManagerFourApproval = output)
                         },
                         "Wait Manager Two and Four"),
-                     Wait(ManagerThreeSubFunction(), "Sub function Wait")
+                     WaitFunction(ManagerThreeSubFunction(), "Sub function Wait")
                 }
 ,
                 "Many waits types").MatchAll();
@@ -44,11 +44,11 @@ public class ManyWaitsTypeInGroupExample : ProjectApprovalExample
         WriteMessage("Start ManagerThreeSubFunction");
         await Task.Delay(10);
         yield return
-            Wait<ApprovalDecision, bool>(ManagerThreeApproveProject, "Manager Three Approve Project")
+            WaitMethod<ApprovalDecision, bool>(ManagerThreeApproveProject, "Manager Three Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output);
         yield return
-            Wait<ApprovalDecision, bool>(ManagerThreeApproveProject, "Manager Three Approve Project")
+            WaitMethod<ApprovalDecision, bool>(ManagerThreeApproveProject, "Manager Three Approve Project")
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output);
         WriteMessage("End ManagerThreeSubFunction");

@@ -56,15 +56,15 @@ namespace Tests
                 int cancelCounter = 10;
                 int afterMatchCounter = 10;
                 int sharedCounter = 10;
-                yield return Wait(new Wait[]
+                yield return WaitGroup(new Wait[]
                     {
-                        Wait<string, string>(Method7, "Method 7")
+                        WaitMethod<string, string>(Method7, "Method 7")
                             .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
                             .WhenCancel(() => { CancelCounter++; cancelCounter++;sharedCounter++; }),
-                        Wait<string, string>(Method8, "Method 8")
+                        WaitMethod<string, string>(Method8, "Method 8")
                             .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
                             .WhenCancel(() => { CancelCounter++; cancelCounter++;sharedCounter++; }),
-                        Wait<string, string>(Method9, "Method 9")
+                        WaitMethod<string, string>(Method9, "Method 9")
                             .AfterMatch((_, _) => { Counter++; afterMatchCounter++;sharedCounter++; })
                             .WhenCancel(() => { CancelCounter++; cancelCounter++;sharedCounter++; }),
                     }

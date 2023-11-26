@@ -9,10 +9,10 @@ namespace Tests
     public partial class ClientOnboardingTest
     {
         [Fact]
-        public async Task Test_ClientOnBoarding_SimulateCalls()
+        public async Task ClientOnBoarding_SimulateCalls_Test()
         {
             using var test = new TestShell(
-                nameof(Test_ClientOnBoarding_SimulateCalls),
+                nameof(ClientOnBoarding_SimulateCalls_Test),
                 typeof(ClientOnboardingService),
                 typeof(ClientOnboardingWorkflowPublic));
 

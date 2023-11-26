@@ -13,16 +13,16 @@ public class TestWaitManyExample : ProjectApprovalExample
             Id = 1005,
             Name = "WaitThreeMethodAtStart",
         };
-        yield return Wait(
+        yield return WaitGroup(
             new Wait[]
             {
-            Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
+            WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerOneApproval = output),
-            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+            WaitMethod<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerTwoApproval = output),
-            Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+            WaitMethod<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output)
             }
@@ -36,20 +36,20 @@ public class TestWaitManyExample : ProjectApprovalExample
     public async IAsyncEnumerable<Wait> WaitThreeMethod()
     {
         yield return
-            Wait<Project, bool>(ProjectSubmitted, "Project Submitted in WaitThreeMethod")
+            WaitMethod<Project, bool>(ProjectSubmitted, "Project Submitted in WaitThreeMethod")
                 .MatchIf((input, output) => output == true)
                 .AfterMatch((input, output) => CurrentProject = input);
         WriteMessage("Wait three managers to approve");
-        yield return Wait(
+        yield return WaitGroup(
             new Wait[]
             {
-            Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
+            WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerOneApproval = output),
-            Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+            WaitMethod<ApprovalDecision, bool>(ManagerTwoApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerTwoApproval = output),
-            Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+            WaitMethod<ApprovalDecision, bool>(ManagerThreeApproveProject)
                 .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                 .AfterMatch((input, output) => ManagerThreeApproval = output)
             }
@@ -64,20 +64,20 @@ public class TestWaitManyExample : ProjectApprovalExample
     {
         var localVarIngroupMatch = 10;
         yield return
-            Wait<Project, bool>(ProjectSubmitted, "Project Submitted in WaitManyAndGroupExpressionDefined")
+            WaitMethod<Project, bool>(ProjectSubmitted, "Project Submitted in WaitManyAndGroupExpressionDefined")
                 .MatchIf((input, output) => output == true)
                 .AfterMatch((input, output) => CurrentProject = input);
         WriteMessage("Wait two of three managers to approve");
-        yield return Wait(
+        yield return WaitGroup(
             new Wait[]
              {
-                Wait<ApprovalDecision, bool>(ManagerOneApproveProject)
+                WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .MatchIf((input, _) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((_, output) => ManagerOneApproval = output),
-                Wait<ApprovalDecision, bool>(ManagerTwoApproveProject)
+                WaitMethod<ApprovalDecision, bool>(ManagerTwoApproveProject)
                     .MatchIf((input, _) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((_, output) => ManagerTwoApproval = output),
-                Wait<ApprovalDecision, bool>(ManagerThreeApproveProject)
+                WaitMethod<ApprovalDecision, bool>(ManagerThreeApproveProject)
                     .MatchIf((input, _) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((_, output) => ManagerThreeApproval = output)
              }

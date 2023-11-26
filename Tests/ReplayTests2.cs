@@ -46,9 +46,13 @@ public partial class ReplayTests
         [ResumableFunctionEntryPoint("ReplayInSubFunctions")]
         public async IAsyncEnumerable<Wait> Test()
         {
-            yield return Wait<string, string>(Method6, "M6");
-            yield return Wait("Wait Two Paths", new[] { PathOneFunction("123"), PathTwoFunction() });//wait two sub functions
-            yield return Wait<string, string>(Method5, "M5").MatchAny();
+            yield return WaitMethod<string, string>(Method6, "M6");
+            yield return WaitGroup(new[]
+            {
+                WaitFunction(PathOneFunction("123")),
+                WaitFunction(PathTwoFunction())
+            }, "Wait Two Paths");//wait two sub functions
+            yield return WaitMethod<string, string>(Method5, "M5").MatchAny();
         }
         public int Counter1 { get; set; }
         public int Counter2 { get; set; }
@@ -58,7 +62,7 @@ public partial class ReplayTests
         {
             var x = 0;
             yield return
-                   Wait<string, string>(Method1, "M1")
+                   WaitMethod<string, string>(Method1, "M1")
                    .MatchAny()
                    .AfterMatch((_, _) =>
                    {
@@ -72,7 +76,7 @@ public partial class ReplayTests
             Counter1 += 10;
         M2_Wait:
             yield return
-                Wait<string, string>(Method2, "M2")
+                WaitMethod<string, string>(Method2, "M2")
                 .MatchAny(Counter1 == 10)
                 .MatchIf(Counter1 == 13, (input, output) => input == "Back")
                 .AfterMatch((_, _) =>
@@ -97,14 +101,14 @@ public partial class ReplayTests
         {
             var x = 100;
             yield return
-                  Wait<string, string>(Method3, "M3")
+                  WaitMethod<string, string>(Method3, "M3")
                   .MatchAny()
                   .AfterMatch((_, _) => SharedCounter += 10);
 
             Counter2 += 10;
         M4:
             yield return
-                Wait<string, string>(Method4, "M4")
+                WaitMethod<string, string>(Method4, "M4")
                 .MatchAny(Counter2 == 10)
                 .MatchIf(Counter2 == 13, (input, _) => input == "Back")
                 .AfterMatch((_, _) =>

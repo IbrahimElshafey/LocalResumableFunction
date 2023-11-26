@@ -8,7 +8,7 @@ namespace ResumableFunctions.Handler;
 public abstract partial class ResumableFunctionsContainer
 {
 
-    protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(
+    protected MethodWait<TInput, TOutput> WaitMethod<TInput, TOutput>(
         Func<TInput, TOutput> method,
         string name = null,
         [CallerLineNumber] int inCodeLine = 0,
@@ -17,7 +17,7 @@ public abstract partial class ResumableFunctionsContainer
     {
         return new MethodWaitEntity<TInput, TOutput>(method)
         {
-            Name = name ?? method.Method.Name,
+            Name = name ?? $"#Wait Method `{method.Method.Name}`",
             WaitType = WaitType.MethodWait,
             CurrentFunction = this,
             InCodeLine = inCodeLine,
@@ -26,7 +26,7 @@ public abstract partial class ResumableFunctionsContainer
         }.ToMethodWait();
     }
 
-    protected MethodWait<TInput, TOutput> Wait<TInput, TOutput>(
+    protected MethodWait<TInput, TOutput> WaitMethod<TInput, TOutput>(
         Func<TInput, Task<TOutput>> method,
         string name = null,
         [CallerLineNumber] int inCodeLine = 0,
@@ -34,7 +34,7 @@ public abstract partial class ResumableFunctionsContainer
     {
         return new MethodWaitEntity<TInput, TOutput>(method)
         {
-            Name = name ?? method.Method.Name,
+            Name = name ?? $"#Wait Method `{method.Method.Name}`",
             WaitType = WaitType.MethodWait,
             CurrentFunction = this,
             InCodeLine = inCodeLine,
@@ -43,7 +43,7 @@ public abstract partial class ResumableFunctionsContainer
         }.ToMethodWait();
     }
 
-    protected WaitsGroup Wait(
+    protected WaitsGroup WaitGroup(
         Wait[] waits,
         string name = null,
         [CallerLineNumber] int inCodeLine = 0,
@@ -55,14 +55,15 @@ public abstract partial class ResumableFunctionsContainer
         }
         var group = new WaitsGroupEntity
         {
-            Name = name ?? "Group Wait",
+            Name = name ?? $"#Wait Group `{inCodeLine}` by `{callerName}`",
             ChildWaits = waits.Select(x => x.WaitEntity).ToList(),
             WaitType = WaitType.GroupWaitAll,
             CurrentFunction = this,
             InCodeLine = inCodeLine,
             CallerName = callerName,
-            Created = DateTime.UtcNow
+            Created = DateTime.UtcNow,
         };
+        group.ChildWaits.ForEach(wait => wait.ParentWait = group);
         return group.ToWaitsGroup();
     }
 }

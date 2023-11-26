@@ -23,7 +23,8 @@ public class TimeWaitEntity : WaitEntity
     {
         get
         {
-            _timeMethodWait.Name = Constants.TimeWaitName;
+            _timeMethodWait.Name = Name ?? $"#Time Wait for `{TimeToWait.TotalHours}` hours in `{CallerName}`";
+            _timeMethodWait.MethodWaitType = MethodWaitType.TimeWaitMethod;
             _timeMethodWait.CurrentFunction = CurrentFunction;
             _timeMethodWait.IsFirst = IsFirst;
             _timeMethodWait.WasFirst = WasFirst;
@@ -37,7 +38,7 @@ public class TimeWaitEntity : WaitEntity
             _timeMethodWait.Created = Created;
             _timeMethodWait.InCodeLine = InCodeLine;
             _timeMethodWait.ExtraData =
-                new WaitExtraData
+                new TimeWaitExtraData
                 {
                     TimeToWait = TimeToWait,
                     UniqueMatchId = UniqueMatchId,

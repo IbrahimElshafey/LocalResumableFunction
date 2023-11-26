@@ -10,7 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)Articles\Article1.md" />
-    <None Include="$(MSBuildThisFileDirectory)Services And Clients Communication.md" />
+    <None Include="$(MSBuildThisFileDirectory)DB\delete_tests_dbs.sql" />
+    <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Services And Clients Communication.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\WIN_V1.0.10.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\What Help.md" />
     <None Include="$(MSBuildThisFileDirectory)GitHubDocs\Internals.md" />

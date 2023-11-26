@@ -87,20 +87,24 @@ public partial class SubFunctionsTests
         [ResumableFunctionEntryPoint("TwoFunctionsAtFirst")]
         public async IAsyncEnumerable<Wait> Test()
         {
-            yield return Wait("Wait two sub functions", new[] { SubFunction1(), SubFunction2() });
+            yield return WaitGroup(new[] 
+            {
+                 WaitFunction(SubFunction1()),
+                 WaitFunction(SubFunction2())
+            }, "Wait two sub functions");
             await Task.Delay(100);
         }
 
         [SubResumableFunction("SubFunction1")]
         public async IAsyncEnumerable<Wait> SubFunction1()
         {
-            yield return Wait<string, string>(Method1, "M1").MatchAny();
+            yield return WaitMethod<string, string>(Method1, "M1").MatchAny();
         }
 
         [SubResumableFunction("SubFunction2")]
         public async IAsyncEnumerable<Wait> SubFunction2()
         {
-            yield return Wait<string, string>(Method2, "M2").MatchAny();
+            yield return WaitMethod<string, string>(Method2, "M2").MatchAny();
         }
 
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
@@ -114,8 +118,8 @@ public partial class SubFunctionsTests
         [ResumableFunctionEntryPoint("FunctionAfterFirst")]
         public async IAsyncEnumerable<Wait> Test()
         {
-            yield return Wait<string, string>(Method2, "M2");
-            yield return Wait(SubFunction2(155), "Wait sub function2");
+            yield return WaitMethod<string, string>(Method2, "M2");
+            yield return WaitFunction(SubFunction2(155), "Wait sub function2");
             await Task.Delay(100);
         }
             
@@ -123,7 +127,7 @@ public partial class SubFunctionsTests
         public async IAsyncEnumerable<Wait> SubFunction2(int funcInput)
         {
             int x = 100;
-            yield return Wait<string, string>(Method3, "M3")
+            yield return WaitMethod<string, string>(Method3, "M3")
                 .MatchAny()
                 //.AfterMatch(InstanceCall)
                 //.AfterMatch(TestMethodClass.AfterMatchExternal)
@@ -157,14 +161,14 @@ public partial class SubFunctionsTests
         [ResumableFunctionEntryPoint("FunctionAtStart")]
         public async IAsyncEnumerable<Wait> FunctionAtStart()
         {
-            yield return Wait(SubFunction(), "Wait sub function");
+            yield return WaitFunction(SubFunction(), "Wait sub function");
             await Task.Delay(100);
         }
 
         [SubResumableFunction("SubFunction")]
         public async IAsyncEnumerable<Wait> SubFunction()
         {
-            yield return Wait<string, string>(Method1, "M1").MatchAny();
+            yield return WaitMethod<string, string>(Method1, "M1").MatchAny();
         }
 
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";

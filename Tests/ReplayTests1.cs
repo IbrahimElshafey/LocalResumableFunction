@@ -191,11 +191,11 @@ public partial class ReplayTests
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return
-                Wait<string, string>(Method1, "M1");
+                WaitMethod<string, string>(Method1, "M1");
         Before_M2:
             Counter += 10;
             yield return
-                Wait<string, string>(Method2, "M2").
+                WaitMethod<string, string>(Method2, "M2").
                 MatchAny(Counter == 10).
                 MatchIf(Counter == 20, (input, output) => input == "Back");
 
@@ -216,7 +216,7 @@ public partial class ReplayTests
         {
             int localCounter = 10;
             yield return
-                Wait<string, string>(Method1, "M1")
+                WaitMethod<string, string>(Method1, "M1")
                 .AfterMatch((_, _) => localCounter += 10);
         after_m1:
             Counter++;
@@ -239,13 +239,13 @@ public partial class ReplayTests
         {
             int localCounter = 10;
             yield return
-                Wait<string, string>(Method1, "M1");
+                WaitMethod<string, string>(Method1, "M1");
         
         before_m2:
             localCounter += 10;
             Counter += 10;
             yield return
-                Wait<string, string>(Method2, "M2")
+                WaitMethod<string, string>(Method2, "M2")
                 .MatchAny()
                 .AfterMatch((_, _) => localCounter += 10);
 
@@ -270,13 +270,13 @@ public partial class ReplayTests
         public async IAsyncEnumerable<Wait> Test()
         {
             yield return
-                Wait<string, string>(Method1, "M1");
+                WaitMethod<string, string>(Method1, "M1");
 
             Counter += 10;
             var x = 5;
         M2:
             yield return
-                Wait<string, string>(Method2, "M2")
+                WaitMethod<string, string>(Method2, "M2")
                 .MatchAny(x == 5)
                 .MatchIf(x == 10, (input, output) => input == "Back" && x == 10)
                 .AfterMatch((_, _) =>
@@ -305,13 +305,13 @@ public partial class ReplayTests
         {
             var localCounter = 10;
             yield return
-                Wait<string, string>(Method1, "M1")
+                WaitMethod<string, string>(Method1, "M1")
                 .AfterMatch((_, _) => localCounter += 10);
 
             Counter += 10;
         M2_Wait:
             yield return
-                Wait<string, string>(Method2, "M2")
+                WaitMethod<string, string>(Method2, "M2")
                 .AfterMatch((_, _) => localCounter += 10)
                 .MatchAny();
 
