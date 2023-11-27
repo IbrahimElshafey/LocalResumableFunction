@@ -71,8 +71,6 @@ public class MethodWaitEntity : WaitEntity
     internal override void OnAddWait()
     {
         IsRoot = ParentWait == null && ParentWaitId == null;
-        //var closureNotChange = AfterMatchAction == null && CancelMethodAction == null;
-        //if (closureNotChange) return;
 
         if (ClosureObject == default) return;
         if (ClosureKey == null)

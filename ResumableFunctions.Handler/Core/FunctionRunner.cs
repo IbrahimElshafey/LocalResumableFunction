@@ -93,12 +93,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
                 Select(x => x.GetValue(_functionRunner)).
                 FirstOrDefault(x => x != null);
             if (activeClosure != null)
-                CurrentWait.ClosureData = new PrivateData
-                {
-                    Value = activeClosure,
-                    Type = PrivateDataType.Closure,
-                    FunctionStateId = _oldMatchedWait?.FunctionStateId
-                };
+                CurrentWait.ClosureObject = activeClosure;
         }
     }
 

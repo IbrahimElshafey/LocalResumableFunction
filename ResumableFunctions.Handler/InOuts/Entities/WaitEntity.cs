@@ -70,12 +70,13 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
     [NotMapped]
     internal Guid? ClosureKey { get; set; }
+    [NotMapped]
+    public object ClosureObject { get; internal set; }
 
     [NotMapped]
     public WaitEntity OldCompletedSibling { get; set; }
 
-    [NotMapped]
-    public object ClosureObject { get; internal set; }
+
 
     public string Path { get; set; }
 
