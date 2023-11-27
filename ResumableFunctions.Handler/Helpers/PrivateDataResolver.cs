@@ -4,9 +4,9 @@ using System.Reflection;
 
 namespace ResumableFunctions.Handler.Helpers
 {
-    public class ClosureContractResolver : DefaultContractResolver
+    public class PrivateDataResolver : DefaultContractResolver
     {
-        static ClosureContractResolver contractResolver = new ClosureContractResolver();
+        static PrivateDataResolver contractResolver = new PrivateDataResolver();
         internal static JsonSerializerSettings Settings { get; } =
             new JsonSerializerSettings
             {
@@ -21,6 +21,7 @@ namespace ResumableFunctions.Handler.Helpers
                .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                .Where(member =>
                         member is FieldInfo &&
+                        member.MemberType.CanConvertToSimpleString() &&
                         !member.Name.StartsWith("<>") &&
                         !member.Name.StartsWith("<GroupMatchFuncName>")
                         )

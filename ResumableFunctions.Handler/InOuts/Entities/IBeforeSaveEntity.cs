@@ -1,6 +1,6 @@
 ﻿namespace ResumableFunctions.Handler.InOuts.Entities;
 
-public interface IOnSaveEntity
+public interface IBeforeSaveEntity
 {
-    void OnSave();
+    void BeforeSave();
 }

@@ -84,7 +84,6 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         var closureFields = GetClosureFields();
         if (closureContinuation)
         {
-            //CurrentWait.ClosureDataId = _oldMatchedWait.ClosureDataId;
             CurrentWait.ClosureData = _oldMatchedWait.ClosureData;
             CurrentWait.OldCompletedSibling = _oldMatchedWait;
         }
@@ -97,7 +96,8 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
                 CurrentWait.ClosureData = new PrivateData
                 {
                     Value = activeClosure,
-                    Type = PrivateDataType.Locals,
+                    Type = PrivateDataType.Closure,
+                    FunctionStateId = _oldMatchedWait?.FunctionStateId
                 };
         }
     }
@@ -110,22 +110,22 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         if (localContinuation)
         {
             _oldMatchedWait.Locals.Value = _functionRunner;
-            //CurrentWait.LocalsId = _oldMatchedWait.LocalsId;
             CurrentWait.Locals = _oldMatchedWait.Locals;
         }
-        else if (JsonConvert.SerializeObject(_functionRunner, ClosureContractResolver.Settings) != "{}")
+        else if (JsonConvert.SerializeObject(_functionRunner, PrivateDataResolver.Settings) != "{}")
         {
             CurrentWait.Locals = new PrivateData
             {
                 Value = _functionRunner,
                 Type = PrivateDataType.Locals,
+                FunctionStateId = _oldMatchedWait?.FunctionStateId
             };
         }
     }
 
     private bool RunnerHasValue()
     {
-        var json = JsonConvert.SerializeObject(_functionRunner, ClosureContractResolver.Settings);
+        var json = JsonConvert.SerializeObject(_functionRunner, PrivateDataResolver.Settings);
         return json != "{}";
     }
 

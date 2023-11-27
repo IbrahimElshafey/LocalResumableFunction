@@ -4,7 +4,7 @@ using ResumableFunctions.Handler.Helpers;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
-public class ResumableFunctionState : IEntity<int>, IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity, IObjectWithLog
+public class ResumableFunctionState : IEntity<int>, IEntityWithUpdate, IEntityWithDelete, IBeforeSaveEntity, IObjectWithLog
 {
 
     [IgnoreMember]
@@ -33,7 +33,7 @@ public class ResumableFunctionState : IEntity<int>, IEntityWithUpdate, IEntityWi
     public bool IsDeleted { get; set; }
     //public Closures Closures { get; set; } = new();
 
-    public void OnSave()
+    public void BeforeSave()
     {
         var converter = new BinarySerializer();
         StateObjectValue = converter.ConvertToBinary(StateObject);

@@ -1,10 +1,7 @@
 ﻿# Todo
-* Cleaning closures when delete old state `CleanCompletedFunctionInstances` method
-* Add tests for cleaning database
+* Excluse unused closures before save to db
 * Publisher Project TODOs
 * Reset function instance errors after it completed
-* Complex local var in closure
-	* What if type is not serializable??
 * Review Transinet services
 * Use same dll in two different services must be allowed
 * Dynamic loaded dll

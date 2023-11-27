@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
-public class PushedCall : IEntity<long>, IOnSaveEntity
+public class PushedCall : IEntity<long>, IBeforeSaveEntity
 {
     public long Id { get; set; }
     [NotMapped]
@@ -34,7 +34,7 @@ public class PushedCall : IEntity<long>, IOnSaveEntity
         return null;
     }
 
-    public void OnSave()
+    public void BeforeSave()
     {
         var converter = new BinarySerializer();
         DataValue = converter.ConvertToBinary(Data);

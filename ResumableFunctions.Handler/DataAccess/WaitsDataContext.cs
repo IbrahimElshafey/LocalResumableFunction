@@ -16,11 +16,11 @@ internal sealed class WaitsDataContext : DbContext
     private readonly IResumableFunctionsSettings _settings;
     private readonly ValueComparer<object> _closureComparer = new ValueComparer<object>(
            (o1, o2) =>
-               JsonConvert.SerializeObject(o1, ClosureContractResolver.Settings) == JsonConvert.SerializeObject(o2, ClosureContractResolver.Settings),
+               JsonConvert.SerializeObject(o1, PrivateDataResolver.Settings) == JsonConvert.SerializeObject(o2, PrivateDataResolver.Settings),
            oToHash =>
-               oToHash == null ? 0 : JsonConvert.SerializeObject(oToHash, ClosureContractResolver.Settings).GetHashCode(),
+               oToHash == null ? 0 : JsonConvert.SerializeObject(oToHash, PrivateDataResolver.Settings).GetHashCode(),
            oToSnapShot =>
-               JsonConvert.DeserializeObject<object>(JsonConvert.SerializeObject(oToSnapShot, ClosureContractResolver.Settings)));
+               JsonConvert.DeserializeObject<object>(JsonConvert.SerializeObject(oToSnapShot, PrivateDataResolver.Settings)));
     public WaitsDataContext(
         ILogger<WaitsDataContext> logger,
         IResumableFunctionsSettings settings,
@@ -116,7 +116,7 @@ internal sealed class WaitsDataContext : DbContext
         closureTable
             .Property(x => x.Value)
             .HasConversion(
-            x => JsonConvert.SerializeObject(x, ClosureContractResolver.Settings),
+            x => JsonConvert.SerializeObject(x, PrivateDataResolver.Settings),
             y => JsonConvert.DeserializeObject(y));
         closureTable
             .Property(x => x.Value).Metadata.SetValueComparer(_closureComparer);
@@ -234,10 +234,12 @@ internal sealed class WaitsDataContext : DbContext
     {
         try
         {
+            using var transaction = Database.BeginTransaction();
             BeforeSaveData();
             var result = await base.SaveChangesAsync(cancellationToken);
-            await SetWaitsPaths(cancellationToken);
             await SaveEntitiesLogs(cancellationToken);
+            await AfterChangesSaved(cancellationToken);
+            transaction.Commit();
             return result;
         }
         catch (Exception ex)
@@ -246,6 +248,21 @@ internal sealed class WaitsDataContext : DbContext
             throw;
         }
 
+    }
+
+    private async Task AfterChangesSaved(CancellationToken cancellationToken)
+    {
+        var entitiesWithAfterChanges =
+                ChangeTracker
+                .Entries()
+                .Where(x => x.Entity is IAfterChangesSaved)
+                .Select(x => (IAfterChangesSaved)x.Entity)
+                .ToList();
+        foreach (var item in entitiesWithAfterChanges)
+        {
+            item.AfterChangesSaved();
+        }
+        await base.SaveChangesAsync(cancellationToken);
     }
 
     private void BeforeSaveData()
@@ -276,9 +293,9 @@ internal sealed class WaitsDataContext : DbContext
 
     private void OnSaveEntity(EntityEntry entry)
     {
-        if (entry.Entity is IOnSaveEntity saveEntity)
+        if (entry.Entity is IBeforeSaveEntity saveEntity)
             if (entry.State == EntityState.Modified || entry.State == EntityState.Added)
-                saveEntity.OnSave();
+                saveEntity.BeforeSave();
 
     }
 
@@ -302,38 +319,7 @@ internal sealed class WaitsDataContext : DbContext
         }
     }
 
-    private async Task SetWaitsPaths(CancellationToken cancellationToken)
-    {
-        try
-        {
-            var waitsWithNoPath =
-                ChangeTracker
-                .Entries()
-                .Where(x => x.Entity is WaitEntity { Path: null })
-                .Select(x => (WaitEntity)x.Entity)
-                .ToList();
-            
-            foreach (var wait in waitsWithNoPath)
-                wait.Path = GetWaitPath(wait);
-
-            await base.SaveChangesAsync(cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error when set waits paths.");
-        }
-
-        string GetWaitPath(WaitEntity wait)
-        {
-            var path = $"/{wait.Id}";
-            while (wait?.ParentWait != null)
-            {
-                path = $"/{wait.ParentWaitId}" + path;
-                wait = wait.ParentWait;
-            }
-            return path;
-        }
-    }
+    
 
     private async Task SaveEntitiesLogs(CancellationToken cancellationToken)
     {

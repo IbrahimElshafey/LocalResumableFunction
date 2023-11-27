@@ -8,7 +8,7 @@ using System.Dynamic;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 
-public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWithDelete, IOnSaveEntity
+public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWithDelete, IBeforeSaveEntity, IAfterChangesSaved
 {
 
     public long Id { get; set; }
@@ -317,6 +317,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 {
                     Value = mw.ClosureObject,
                     Type = PrivateDataType.Closure,
+                    FunctionStateId = OldCompletedSibling?.FunctionStateId
                 };
             }
 
@@ -345,7 +346,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         return $"Name:{Name}, Type:{WaitType}, Id:{Id}, Status:{Status}";
     }
 
-    public void OnSave()
+    public void BeforeSave()
     {
         var converter = new BinarySerializer();
         if (ExtraData != null)
@@ -427,4 +428,16 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
 
 
     internal Wait ToWait() => new Wait(this);
+
+    public void AfterChangesSaved()
+    {
+        var wait = this;
+        var path = $"/{wait.Id}";
+        while (wait?.ParentWait != null)
+        {
+            path = $"/{wait.ParentWaitId}" + path;
+            wait = wait.ParentWait;
+        }
+        Path = path;
+    }
 }

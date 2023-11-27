@@ -7,10 +7,8 @@
 * Get matched waits for pushed call
 
 
-
 # Write Unit Tests for basic scenarios:
-
-
+* Add tests for cleaning database
 * Attributes test
 * Validation, errors, and exceptions is work fine
 * Scan results are correct

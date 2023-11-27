@@ -247,12 +247,11 @@ internal static class CoreExtensions
         var types = new[] { typeof(bool), typeof(byte), typeof(sbyte), typeof(char), typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(nint), typeof(nuint), typeof(int), typeof(uint), typeof(short), typeof(ushort), typeof(string) };
         return types.Contains(type);
     }
+    internal static bool CanConvertToSimpleString(this Type type) =>
+        type.IsConstantType() || type == typeof(DateTime) || type == typeof(Guid) || type.IsEnum;
 
-    internal static bool CanConvertToSimpleString(this object ob)
-    {
-        var type = ob.GetType();
-        return ob != null && (type.IsConstantType() || type == typeof(DateTime) || type == typeof(Guid) || type.IsEnum);
-    }
+    internal static bool CanConvertToSimpleString(this object ob) =>
+        ob != null && ob.GetType().CanConvertToSimpleString();
 
     internal static MethodInfo GetMethodInfo<T>(Expression<Func<T, object>> methodSelector) =>
         GetMethodInfoWithType(methodSelector).MethodInfo;
@@ -373,7 +372,7 @@ internal static class CoreExtensions
     {
         using (var sr = value.CreateReader())
         {
-            JsonSerializer.Create(ClosureContractResolver.Settings).Populate(sr, target);
+            JsonSerializer.Create(PrivateDataResolver.Settings).Populate(sr, target);
         }
     }
 

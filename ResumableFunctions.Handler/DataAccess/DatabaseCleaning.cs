@@ -36,7 +36,7 @@ namespace ResumableFunctions.Handler.DataAccess
             if (instanceIds.Any())
             {
                 var privateDataCount = _context.PrivateData
-                 .Where(privateData => instanceIds.Contains(privateData.FunctionStateId))
+                 .Where(privateData => instanceIds.Contains(privateData.FunctionStateId.Value))
                  .ExecuteDeleteAsync();
 
                 var waitsCount = _context.Waits

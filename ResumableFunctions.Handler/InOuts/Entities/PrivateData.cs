@@ -3,8 +3,12 @@ using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
-public class PrivateData : IEntity<long>, IEntityWithUpdate, IOnSaveEntity
+public class PrivateData : IEntity<long>, IEntityWithUpdate, IAfterChangesSaved, IBeforeSaveEntity
 {
+    public PrivateData()
+    {
+
+    }
     public long Id { get; set; }
     public object Value { get; set; }
     public PrivateDataType Type { get; set; }
@@ -18,7 +22,32 @@ public class PrivateData : IEntity<long>, IEntityWithUpdate, IOnSaveEntity
     public DateTime Modified { get; set; }
 
     public string ConcurrencyToken { get; set; }
-    public int FunctionStateId { get; internal set; }
+    public int? FunctionStateId { get; internal set; }
+
+    public void AfterChangesSaved()
+    {
+        SetFunctionStateId();
+    }
+
+    public void BeforeSave()
+    {
+        SetFunctionStateId();
+    }
+
+    private void SetFunctionStateId()
+    {
+        if (FunctionStateId != null && FunctionStateId != 0) return;
+        var stateId =
+           LocalsLinkedWaits?.FirstOrDefault()?.FunctionStateId ??
+           ClosureLinkedWaits?.FirstOrDefault()?.FunctionStateId;
+        if (stateId == null || stateId == 0)
+        {
+            stateId =
+            LocalsLinkedWaits?.FirstOrDefault()?.FunctionState?.Id ??
+            ClosureLinkedWaits?.FirstOrDefault()?.FunctionState?.Id;
+        }
+        FunctionStateId = stateId;
+    }
 
     public T GetProp<T>(string propName)
     {
@@ -30,14 +59,6 @@ public class PrivateData : IEntity<long>, IEntityWithUpdate, IOnSaveEntity
                 return (T)closureObject.GetType().GetField(propName).GetValue(closureObject);
             default: return default;
         }
-    }
-
-    public void OnSave()
-    {
-        FunctionStateId =
-            LocalsLinkedWaits?.FirstOrDefault()?.FunctionStateId ??
-            ClosureLinkedWaits?.FirstOrDefault()?.FunctionStateId ??
-            0;
     }
 
     internal object AsType(Type closureClass)

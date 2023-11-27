@@ -6,7 +6,7 @@ using System.Text;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 
-public class WaitTemplate : IEntity<int>, IOnSaveEntity
+public class WaitTemplate : IEntity<int>, IBeforeSaveEntity
 {
     public int Id { get; set; }
     public int FunctionId { get; set; }
@@ -81,7 +81,7 @@ public class WaitTemplate : IEntity<int>, IOnSaveEntity
         return md5.ComputeHash(mergedHash);
     }
 
-    public void OnSave()
+    public void BeforeSave()
     {
         var serializer = new ExpressionSerializer();
         if (MatchExpression != null)
