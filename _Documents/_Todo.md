@@ -1,6 +1,7 @@
 ﻿# Todo
-* Publisher Project TODOs
 * Cleaning closures when delete old state `CleanCompletedFunctionInstances` method
+* Add tests for cleaning database
+* Publisher Project TODOs
 * Reset function instance errors after it completed
 * Complex local var in closure
 	* What if type is not serializable??

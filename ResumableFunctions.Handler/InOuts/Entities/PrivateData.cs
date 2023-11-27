@@ -3,12 +3,8 @@ using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Helpers;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
-public class PrivateData : IEntity<long>, IEntityWithUpdate
+public class PrivateData : IEntity<long>, IEntityWithUpdate, IOnSaveEntity
 {
-    public PrivateData()
-    {
-
-    }
     public long Id { get; set; }
     public object Value { get; set; }
     public PrivateDataType Type { get; set; }
@@ -22,8 +18,8 @@ public class PrivateData : IEntity<long>, IEntityWithUpdate
     public DateTime Modified { get; set; }
 
     public string ConcurrencyToken { get; set; }
+    public int FunctionStateId { get; internal set; }
 
-   
     public T GetProp<T>(string propName)
     {
         switch (Value)
@@ -34,6 +30,14 @@ public class PrivateData : IEntity<long>, IEntityWithUpdate
                 return (T)closureObject.GetType().GetField(propName).GetValue(closureObject);
             default: return default;
         }
+    }
+
+    public void OnSave()
+    {
+        FunctionStateId =
+            LocalsLinkedWaits?.FirstOrDefault()?.FunctionStateId ??
+            ClosureLinkedWaits?.FirstOrDefault()?.FunctionStateId ??
+            0;
     }
 
     internal object AsType(Type closureClass)

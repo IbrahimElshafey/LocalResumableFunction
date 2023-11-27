@@ -316,7 +316,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 runtimeClosure = new PrivateData
                 {
                     Value = mw.ClosureObject,
-                    Type = PrivateDataType.Closure
+                    Type = PrivateDataType.Closure,
                 };
             }
 

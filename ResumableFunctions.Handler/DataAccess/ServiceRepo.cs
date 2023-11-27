@@ -79,7 +79,7 @@ internal class ServiceRepo : IServiceRepo
         return await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assemblyName);
     }
 
-    public async Task AddErrorLog(Exception ex, string errorMsg, int errorCode)
+    public async Task AddErrorLog(Exception ex, string errorMsg, int statusCode)
     {
         _logger.LogError(ex, errorMsg);
         _context.Logs.Add(new LogRecord
@@ -88,7 +88,7 @@ internal class ServiceRepo : IServiceRepo
             EntityType = nameof(ServiceData),
             Message = $"{errorMsg}\n{ex}",
             Type = LogType.Error,
-            StatusCode = errorCode
+            StatusCode = statusCode
         });
         await _context.SaveChangesAsync();
     }
@@ -108,7 +108,7 @@ internal class ServiceRepo : IServiceRepo
         return newServiceData;
     }
 
-    public async Task AddLog(string msg, LogType logType, int errorCode)
+    public async Task AddLog(string msg, LogType logType, int statusCode)
     {
         _context.Logs.Add(new LogRecord
         {
@@ -116,8 +116,24 @@ internal class ServiceRepo : IServiceRepo
             EntityType = nameof(ServiceData),
             Message = msg,
             Type = logType,
-            StatusCode = errorCode
+            StatusCode = statusCode
         });
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task AddLogs(LogType logType, int statusCode, params string[] msgs)
+    {
+        foreach (var msg in msgs)
+        {
+            _context.Logs.Add(new LogRecord
+            {
+                EntityId = _settings.CurrentServiceId,
+                EntityType = nameof(ServiceData),
+                Message = msg,
+                Type = logType,
+                StatusCode = statusCode
+            });
+        }
         await _context.SaveChangesAsync();
     }
 }

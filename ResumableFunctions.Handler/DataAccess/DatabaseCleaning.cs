@@ -33,30 +33,36 @@ namespace ResumableFunctions.Handler.DataAccess
                 .Where(instance => instance.Status == FunctionInstanceStatus.Completed && instance.Modified < dateThreshold)
                 .Select(x => x.Id)
                 .ToListAsync();
-            int count = 0;
             if (instanceIds.Any())
             {
-                count = await _context.Waits
+                var privateDataCount = _context.PrivateData
+                 .Where(privateData => instanceIds.Contains(privateData.FunctionStateId))
+                 .ExecuteDeleteAsync();
+
+                var waitsCount = _context.Waits
                   .Where(wait => instanceIds.Contains(wait.FunctionStateId))
                   .ExecuteDeleteAsync();
-                await AddLog($"Delete [{count}] waits related to completed functions instances done.");
 
-                count = await _context.FunctionStates
+                var instancesCount = _context.FunctionStates
                     .Where(functionState => instanceIds.Contains(functionState.Id))
                     .ExecuteDeleteAsync();
-                await AddLog($"Delete [{count}] compeleted functions instances done.");
 
-                count = await _context.Logs
+                var logsCount = _context.Logs
                     .Where(logItem => instanceIds.Contains((int)logItem.EntityId) && logItem.EntityType == nameof(ResumableFunctionState))
                     .ExecuteDeleteAsync();
-                await AddLog($"Delete [{count}] logs related to completed functions instances done.");
 
-                count = await _context.WaitProcessingRecords
+                var waitProcessingCount = _context.WaitProcessingRecords
                     .Where(waitProcessingRecord => instanceIds.Contains(waitProcessingRecord.StateId))
                     .ExecuteDeleteAsync();
+                await Task.WhenAll(waitsCount, instancesCount, logsCount, waitProcessingCount);
 
-                //todo:delete linked private data
-                await AddLog($"Delete [{count}] wait processing record related to completed functions instances done.");
+                await _serviceRepo.AddLogs(
+                    LogType.Info,
+                    StatusCodes.DataCleaning,
+                    $"Delete [{logsCount.Result}] logs related to completed functions instances done.",
+                    $"Delete [{instancesCount.Result}] compeleted functions instances done.",
+                    $"Delete [{waitsCount.Result}] waits related to completed functions instances done.",
+                    $"Delete [{waitProcessingCount.Result}] wait processing record related to completed functions instances done.");
             }
             await AddLog("Delete compeleted functions instances completed.");
         }

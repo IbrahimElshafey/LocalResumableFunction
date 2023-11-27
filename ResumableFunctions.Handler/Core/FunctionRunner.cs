@@ -97,7 +97,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
                 CurrentWait.ClosureData = new PrivateData
                 {
                     Value = activeClosure,
-                    Type = PrivateDataType.Locals
+                    Type = PrivateDataType.Locals,
                 };
         }
     }
@@ -118,7 +118,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             CurrentWait.Locals = new PrivateData
             {
                 Value = _functionRunner,
-                Type = PrivateDataType.Locals
+                Type = PrivateDataType.Locals,
             };
         }
     }
