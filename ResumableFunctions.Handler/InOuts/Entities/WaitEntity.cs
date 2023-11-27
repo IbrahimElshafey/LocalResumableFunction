@@ -69,13 +69,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public long? ClosureDataId { get; set; }
 
     [NotMapped]
-    internal Guid? ClosureKey { get; set; }
-    [NotMapped]
-    public object ClosureObject { get; internal set; }
-
-    [NotMapped]
-    public WaitEntity OldCompletedSibling { get; set; }
-
+    public object ClosureObject { get; private set; }
 
 
     public string Path { get; set; }
@@ -92,7 +86,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     //MethodWait.WhenCancel(Action cancelAction)
     //WaitsGroup.MatchIf(Func<WaitsGroup, bool>)
     //The method may update closure  
-    protected object CallMethodByName(string methodFullName, params object[] parameters)
+    protected object InvokeCallback(string methodFullName, params object[] parameters)
     {
         var parts = methodFullName.Split('#');
         var methodName = parts[1];
@@ -278,7 +272,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     internal virtual void OnAddWait()
     {
         if (!IsRoot) return;
-        SetRuntimeClosureIds();
+        SetRuntimeClosure();
         SetRootFunctionId();
     }
 
@@ -287,38 +281,24 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         ActionOnChildrenTree(x => x.RootFunctionId = RequestedByFunctionId);
     }
 
-    private void SetRuntimeClosureIds()
+    private void SetRuntimeClosure()
     {
         var waitsGroupedByClosure =
                     GetTreeItems().
-                    Where(x => x.ClosureKey != null).
-                    GroupBy(x => x.ClosureKey);
+                    Where(x => x.ClosureObject != null).
+                    GroupBy(x => x.ClosureObject);
         foreach (var group in waitsGroupedByClosure)
         {
-            var mw = (MethodWaitEntity)
-                group.FirstOrDefault(x => x is MethodWaitEntity mw && mw.ClosureObject != default);
-            if (mw == null)
-                break;
-
-            var useOldWaitClosure =
-                OldCompletedSibling != null &&
-                OldCompletedSibling.ClosureData != null &&
-                OldCompletedSibling.CallerName == group.First().CallerName;
-
-            PrivateData runtimeClosure = null;
-            if (useOldWaitClosure)
-            {
-                //closure vars may be changed so update it before assign old closure
-                OldCompletedSibling.ClosureData.Value = mw.ClosureObject;
-                runtimeClosure = OldCompletedSibling.ClosureData;
-            }
-            else
+            var runtimeClosure = group.
+                Where(x => x.ClosureData != null).
+                Select(x => x.ClosureData).
+                FirstOrDefault();
+            if (runtimeClosure == null)
             {
                 runtimeClosure = new PrivateData
                 {
-                    Value = mw.ClosureObject,
+                    Value = group.Key,
                     Type = PrivateDataType.Closure,
-                    FunctionStateId = OldCompletedSibling?.FunctionStateId
                 };
             }
 
@@ -390,16 +370,30 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
             throw new Exception(
                 $"For wait [{Name}] the [{methodName}:{method.Name}] must not be over-loaded.");
         if (declaringType.Name.StartsWith(Constants.CompilerClosurePrefix))
-            SetClosure(callback.Target);
+            SetClosureObject(callback.Target);
         return $"{method.DeclaringType.FullName}#{method.Name}";
     }
 
-    internal void SetClosure(object closure)
+    internal void SetClosureObject(object closure)
     {
-        if (closure == default) return;
-        if (ClosureObject != null && ClosureObject.GetType() != closure.GetType())
+        if (closure == null) return;
+        if (ClosureObject == null)
+        {
+            ClosureObject = closure;
+            return;
+        }
+
+        var currentClosureType = ClosureObject.GetType();
+        var incomingClosureType = closure.GetType();
+        var nestedClosure =
+            currentClosureType.Name.StartsWith(Constants.CompilerClosurePrefix) is true &&
+            incomingClosureType.Name.StartsWith(Constants.CompilerClosurePrefix);
+        var sameType = currentClosureType == incomingClosureType;
+        if(sameType is false && nestedClosure is false)
+        {
             throw new Exception(
                 $"For method wait [{Name}] the closure must be the same for AfterMatchAction, CancelAction, and MatchExpression.");
+        }
         ClosureObject = closure;
     }
     public object GetClosure(Type closureType)

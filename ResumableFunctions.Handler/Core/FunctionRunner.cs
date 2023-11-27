@@ -80,29 +80,35 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         var closureContinuation =
                         _oldMatchedWait != null &&
                         _oldMatchedWait.CallerName == CurrentWait.CallerName &&
-                        _oldMatchedWait.ClosureDataId != null;
+                        _oldMatchedWait.ClosureData != null;
+
         var closureFields = GetClosureFields();
+        var activeClosure = closureFields?.
+             Select(x => x.GetValue(_functionRunner)).
+             LastOrDefault(x => x != null);//we may have two closures like <>c__DisplayClass0_0,<>c__DisplayClass0_1
+
+        if (activeClosure == null) return;
+        var callerName = CurrentWait.CallerName;
+
         if (closureContinuation)
         {
+            _oldMatchedWait.ClosureData.Value = activeClosure;
             CurrentWait.ClosureData = _oldMatchedWait.ClosureData;
-            CurrentWait.OldCompletedSibling = _oldMatchedWait;
         }
-        else if (closureFields.Any())
+
+        CurrentWait.ActionOnChildrenTree(wait =>
         {
-            var activeClosure = closureFields.
-                Select(x => x.GetValue(_functionRunner)).
-                FirstOrDefault(x => x != null);
-            if (activeClosure != null)
-                CurrentWait.ClosureObject = activeClosure;
-        }
+            if (wait.CallerName == callerName)
+                wait.SetClosureObject(activeClosure);
+        });
     }
 
     private void SetLocalsForNewWait()
     {
-        var localContinuation =
+        var localsContinuation =
             _oldMatchedWait != null &&
             _oldMatchedWait.Locals != null;
-        if (localContinuation)
+        if (localsContinuation)
         {
             _oldMatchedWait.Locals.Value = _functionRunner;
             CurrentWait.Locals = _oldMatchedWait.Locals;

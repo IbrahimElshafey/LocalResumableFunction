@@ -27,7 +27,7 @@ public class WaitsGroupEntity : WaitEntity
                 break;
 
             case WaitType.GroupWaitWithExpression when GroupMatchFuncName != null:
-                var isCompleted = (bool)CallMethodByName(GroupMatchFuncName, ToWaitsGroup());
+                var isCompleted = (bool)InvokeCallback(GroupMatchFuncName, ToWaitsGroup());
                 Status = isCompleted ? WaitStatus.Completed : Status;
                 return isCompleted;
 
@@ -40,17 +40,6 @@ public class WaitsGroupEntity : WaitEntity
 
     internal override void OnAddWait()
     {
-        var childHasClosure = ChildWaits.Any(x => x.ClosureKey != null && CallerName == x.CallerName);
-        if (childHasClosure)
-        {
-            if (ClosureKey == null)
-                ClosureKey = Guid.NewGuid();
-            ChildWaits.ForEach(childWait =>
-            {
-                if (childWait.CallerName == CallerName)//todo:what if recursive calls??
-                    childWait.ClosureKey = ClosureKey;
-            });
-        }
         ActionOnChildrenTree(w => w.IsRoot = w.ParentWait == null && w.ParentWaitId == null);
         ValidateMethodNameDuplicationIfFirst();
         base.OnAddWait();

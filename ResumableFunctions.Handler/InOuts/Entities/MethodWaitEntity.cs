@@ -56,7 +56,7 @@ public class MethodWaitEntity : WaitEntity
         try
         {
             if (AfterMatchAction == null) return true;
-            CallMethodByName(AfterMatchAction, Input, Output);
+            InvokeCallback(AfterMatchAction, Input, Output);
             FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog($"After wait [{Name}] action executed.", LogType.Info, StatusCodes.WaitProcessing);
             return true;
@@ -73,8 +73,6 @@ public class MethodWaitEntity : WaitEntity
         IsRoot = ParentWait == null && ParentWaitId == null;
 
         if (ClosureObject == default) return;
-        if (ClosureKey == null)
-            ClosureKey = Guid.NewGuid();
         base.OnAddWait();
     }
 
@@ -109,7 +107,7 @@ public class MethodWaitEntity : WaitEntity
         {
             if (CancelMethodAction != null)
             {
-                CallMethodByName(CancelMethodAction);
+                InvokeCallback(CancelMethodAction);
                 CurrentFunction.AddLog($"Execute cancel method for wait [{Name}]", LogType.Info, StatusCodes.WaitProcessing);
             }
             base.Cancel();
@@ -209,7 +207,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
             ClosureObject.GetType() != MatchExpressionParts.Closure.GetType())
             throw new Exception(
                 $"For wait [{Name}] the closure must be same for AfterMatchAction,CancelAction and MatchExpression.");
-        SetClosure(MatchExpressionParts.Closure);
+        SetClosureObject(MatchExpressionParts.Closure);
         MandatoryPart = MatchExpressionParts.GetInstanceMandatoryPart(CurrentFunction);
         return this;
     }

@@ -1,6 +1,5 @@
 ﻿# Todo
-* Excluse unused closures before save to db
-* Remove ClosureKey and use closure object
+* Review Private data calls on save
 * Publisher Project TODOs
 * Reset function instance errors after it completed
 * Review Transinet services
