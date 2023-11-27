@@ -36,7 +36,7 @@ public class PrivateData : IEntity<long>, IEntityWithUpdate, IAfterChangesSaved,
 
     private void SetFunctionStateId()
     {
-        if (FunctionStateId != null && FunctionStateId != 0) return;
+        if (FunctionStateId != null && FunctionStateId > 0) return;
         var stateId =
            LocalsLinkedWaits?.FirstOrDefault()?.FunctionStateId ??
            ClosureLinkedWaits?.FirstOrDefault()?.FunctionStateId;
