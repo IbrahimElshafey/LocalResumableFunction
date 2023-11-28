@@ -53,7 +53,7 @@ namespace ResumableFunctions.Handler.UiService
                 .ToDictionaryAsync(x => x.ServiceId);
 
             var scanStatus =
-                await _context.ScanStates
+                await _context.Locks
                 .Select(x => x.ServiceId)
                 .Distinct()
                 .ToListAsync();

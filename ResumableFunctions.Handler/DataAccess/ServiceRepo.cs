@@ -8,7 +8,6 @@ using ResumableFunctions.Handler.InOuts.Entities;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.DataAccess;
-
 internal class ServiceRepo : IServiceRepo
 {
     private readonly WaitsDataContext _context;
@@ -79,19 +78,7 @@ internal class ServiceRepo : IServiceRepo
         return await _context.ServicesData.FirstOrDefaultAsync(x => x.AssemblyName == assemblyName);
     }
 
-    public async Task AddErrorLog(Exception ex, string errorMsg, int statusCode)
-    {
-        _logger.LogError(ex, errorMsg);
-        _context.Logs.Add(new LogRecord
-        {
-            EntityId = _settings.CurrentServiceId,
-            EntityType = nameof(ServiceData),
-            Message = $"{errorMsg}\n{ex}",
-            Type = LogType.Error,
-            StatusCode = statusCode
-        });
-        await _context.SaveChangesAsync();
-    }
+
 
     private async Task<ServiceData> AddNewServiceData(string currentAssemblyName)
     {
@@ -106,34 +93,5 @@ internal class ServiceRepo : IServiceRepo
         newServiceData.AddLog($"Assembly [{currentAssemblyName}] will be scanned.", LogType.Info, StatusCodes.Scanning);
         await _context.SaveChangesAsync();
         return newServiceData;
-    }
-
-    public async Task AddLog(string msg, LogType logType, int statusCode)
-    {
-        _context.Logs.Add(new LogRecord
-        {
-            EntityId = _settings.CurrentServiceId,
-            EntityType = nameof(ServiceData),
-            Message = msg,
-            Type = logType,
-            StatusCode = statusCode
-        });
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task AddLogs(LogType logType, int statusCode, params string[] msgs)
-    {
-        foreach (var msg in msgs)
-        {
-            _context.Logs.Add(new LogRecord
-            {
-                EntityId = _settings.CurrentServiceId,
-                EntityType = nameof(ServiceData),
-                Message = msg,
-                Type = logType,
-                StatusCode = statusCode
-            });
-        }
-        await _context.SaveChangesAsync();
     }
 }

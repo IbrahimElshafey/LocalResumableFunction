@@ -176,7 +176,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         }
         if (oldLocals != null && oldLocals.Value is JObject jobject)
         {
-            jobject.MergeIntoObject(_functionRunner);
+            _functionRunner = (IAsyncEnumerator<Wait>)jobject.ToObject(functionRunnerType);
         }
     }
 

@@ -144,7 +144,7 @@ internal partial class WaitsRepo
         }
         catch (Exception ex)
         {
-            await _serviceRepo.AddErrorLog(ex, "When save function wait", StatusCodes.WaitValidation);
+            await _logsRepo.AddErrorLog(ex, "When save function wait", StatusCodes.WaitValidation);
         }
     }
 

@@ -6,17 +6,19 @@ using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal class ScanStateRepo : IScanStateRepo
+internal class LockStateRepo : ILockStateRepo
 {
     private readonly string _scanStateLockName;
     private readonly WaitsDataContext _context;
     private readonly IDistributedLockProvider _lockProvider;
+    private readonly IBackgroundProcess _backgroundJobClient;
     private readonly IResumableFunctionsSettings _settings;
 
-    public ScanStateRepo(
+    public LockStateRepo(
         WaitsDataContext context,
         IDistributedLockProvider lockProvider,
-        IResumableFunctionsSettings settings)
+        IResumableFunctionsSettings settings,
+        IBackgroundProcess backgroundJobClient)
     {
         _context = context;
         _lockProvider = lockProvider;
@@ -24,32 +26,41 @@ internal class ScanStateRepo : IScanStateRepo
         //should not contain ServiceName
         //_scanStateLockName = $"{_settings.CurrentWaitsDbName}_{_settings.CurrentServiceName}_ScanStateLock";
         _scanStateLockName = $"{_settings.CurrentWaitsDbName}_ScanStateLock";
+        _backgroundJobClient = backgroundJobClient;
     }
-    public async Task<bool> IsScanFinished()
+    public async Task<bool> NoLocks()
     {
         await using var lockScanStat = await _lockProvider.AcquireLockAsync(_scanStateLockName);
-        return await _context.ScanStates.AnyAsync() is false;
+        return await _context.Locks.AnyAsync() is false;
     }
 
-    public async Task<int> AddScanState(string name)
+    public async Task<int> AddLockState(string name)
     {
-        var toAdd = new ScanState { Name = name, ServiceName = _settings.CurrentServiceName };
-        _context.ScanStates.Add(toAdd);
+        var toAdd = new LockState
+        {
+            Name = name,
+            ServiceName = _settings.CurrentServiceName
+        };
+        _context.Locks.Add(toAdd);
         await _context.SaveChangesAsync();
         return toAdd.Id;
     }
 
-    public async Task<bool> RemoveScanState(int id)
+    public async Task<bool> RemoveLockState(int id)
     {
         if (id == -1) return true;
         await using var lockScanStat = await _lockProvider.AcquireLockAsync(_scanStateLockName);
-        await _context.ScanStates.Where(x => x.Id == id).ExecuteDeleteAsync();
+        await _context.Locks.Where(x => x.Id == id).ExecuteDeleteAsync();
         return true;
     }
 
-    public async Task ResetServiceScanState()
+    public async Task ResetServiceLockStates()
     {
         await using var lockScanStat = await _lockProvider.AcquireLockAsync(_scanStateLockName);
-        await _context.ScanStates.Where(x => x.ServiceName == _settings.CurrentServiceName).ExecuteDeleteAsync();
+        var scanStates = _context.Locks.Where(x => x.ServiceName == _settings.CurrentServiceName);
+        //todo: reset old scan jobs for current service
+        //var jobsToCancel = await scanStates.Select(x => x.JobId).ToListAsync();
+        //jobsToCancel.ForEach(jobId => _backgroundJobClient.Delete(jobId));
+        await scanStates.ExecuteDeleteAsync();
     }
 }

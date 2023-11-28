@@ -19,8 +19,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private readonly IServiceProvider _serviceProvider;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IBackgroundProcess _backgroundJobClient;
-    private readonly IServiceRepo _serviceRepo;
-    private readonly IScanStateRepo _scanStateRepo;
+    private readonly ILogsRepo _logsRepo;
+    private readonly ILockStateRepo _scanStateRepo;
 
     public FirstWaitProcessor(
         ILogger<FirstWaitProcessor> logger,
@@ -30,9 +30,9 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor,
         IBackgroundProcess backgroundJobClient,
-        IServiceRepo serviceRepo,
+        ILogsRepo logsRepo,
         IWaitTemplatesRepo templatesRepo,
-        IScanStateRepo scanStateRepo)
+        ILockStateRepo scanStateRepo)
     {
         _logger = logger;
         _context = context;
@@ -41,7 +41,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         _waitsRepository = waitsRepository;
         _backgroundJobExecutor = backgroundJobExecutor;
         _backgroundJobClient = backgroundJobClient;
-        _serviceRepo = serviceRepo;
+        _logsRepo = logsRepo;
         _templatesRepo = templatesRepo;
         _scanStateRepo = scanStateRepo;
     }
@@ -98,7 +98,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         catch (Exception ex)
         {
             var error = $"Error when try to clone first wait for function [{resumableFunction?.RF_MethodUrn}]";
-            await _serviceRepo.AddErrorLog(ex, error, StatusCodes.FirstWait);
+            await _logsRepo.AddErrorLog(ex, error, StatusCodes.FirstWait);
             throw new Exception(error, ex);
         }
     }
@@ -110,10 +110,11 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         var functionName = "";
         string lockName = $"FirstWaitProcessor_RegisterFirstWait_{functionId}";
         int scanStateId = -1;
-        scanStateId = await _scanStateRepo.AddScanState(lockName);
+        scanStateId = await _scanStateRepo.AddLockState(lockName);
         try
         {
-            await _backgroundJobExecutor.ExecuteWithoutLock(
+            await _backgroundJobExecutor.ExecuteWithLock(
+            $"FirstWaitProcessor_RegisterFirstWait_{functionId}",//may many services instances
             async () =>
             {
                 try
@@ -126,7 +127,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
                     if (firstWait != null)
                     {
-                        await _serviceRepo.AddLog(
+                        await _logsRepo.AddLog(
                             $"[{resumableFunction.GetFullName()}] started and wait [{firstWait.Name}] to match.", LogType.Info, StatusCodes.FirstWait);
 
                         await _waitsRepository.SaveWait(firstWait);
@@ -138,7 +139,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 catch (Exception ex)
                 {
                     if (resumableFunction != null)
-                        await _serviceRepo.AddErrorLog(ex, ErrorMsg(), StatusCodes.FirstWait);
+                        await _logsRepo.AddErrorLog(ex, ErrorMsg(), StatusCodes.FirstWait);
 
                     await _waitsRepository.RemoveFirstWaitIfExist(functionId);
                     throw;
@@ -150,7 +151,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         finally
         {
             if (scanStateId > -1)
-                await _scanStateRepo.RemoveScanState(scanStateId);
+                await _scanStateRepo.RemoveLockState(scanStateId);
         }
         string ErrorMsg() => $"Error when try to register first wait for function [{functionName}:{functionId}]";
     }
@@ -166,7 +167,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             if (classInstance == null)
             {
                 var errorMsg = $"Can't initiate a new instance of [{resumableFunction.DeclaringType.FullName}]";
-                await _serviceRepo.AddErrorLog(null, errorMsg, StatusCodes.FirstWait);
+                await _logsRepo.AddErrorLog(null, errorMsg, StatusCodes.FirstWait);
 
                 throw new NullReferenceException(errorMsg);
             }
@@ -178,7 +179,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             {
                 var message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
                 _logger.LogWarning(message);
-                await _serviceRepo.AddErrorLog(null, message, StatusCodes.FirstWait);
+                await _logsRepo.AddErrorLog(null, message, StatusCodes.FirstWait);
 
                 throw new NullReferenceException(message);
             }
@@ -188,7 +189,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
 
             if (firstWait == null)
             {
-                await _serviceRepo.AddErrorLog(
+                await _logsRepo.AddErrorLog(
                     null,
                     $"Can't get first wait in function [{resumableFunction.GetFullName()}].",
                     StatusCodes.FirstWait);
@@ -219,7 +220,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
         catch (Exception ex)
         {
-            await _serviceRepo.AddErrorLog(ex, "Error when get first wait.", StatusCodes.FirstWait);
+            await _logsRepo.AddErrorLog(ex, "Error when get first wait.", StatusCodes.FirstWait);
             throw;
         }
     }

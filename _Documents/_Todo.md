@@ -1,13 +1,14 @@
 ﻿# Todo
-* Caller name may be repeated an cause a problem, add test for this
-* Test cleaning closures
+* Review SaveChanges use and may refactor
+* Why errors when try register first wait second time, close jobs when rescan
+* Cancel old scan jobs when rescan
 * Review user defined ID
 * Publisher Project TODOs
 * Reset function instance errors after it completed
-* Review Transinet services
 * Use same dll in two different services must be allowed
 * Dynamic loaded dll
 * Build Nuget package to target multiple runtimes and versions
+* Unify logging and make separate DB for logs
 
 
 * Provide an advanced API for tests that enable complex queries for DB

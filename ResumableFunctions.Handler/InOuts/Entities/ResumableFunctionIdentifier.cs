@@ -16,6 +16,7 @@ public class ResumableFunctionIdentifier : MethodIdentifier
     public Type InClassType =>
         _classType ??= Assembly.LoadFrom(AppContext.BaseDirectory + AssemblyName).GetType(ClassName);
 
+
     internal override void FillFromMethodData(MethodData methodData)
     {
         RF_MethodUrn = methodData.MethodUrn;

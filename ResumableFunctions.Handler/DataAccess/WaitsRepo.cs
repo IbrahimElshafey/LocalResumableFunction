@@ -18,7 +18,7 @@ internal partial class WaitsRepo : IWaitsRepo
     private readonly IMethodIdsRepo _methodIdsRepo;
     private readonly IResumableFunctionsSettings _settings;
     private readonly IWaitTemplatesRepo _waitTemplatesRepo;
-    private readonly IServiceRepo _serviceRepo;
+    private readonly ILogsRepo _logsRepo;
 
     public WaitsRepo(
         ILogger<WaitsRepo> logger,
@@ -27,7 +27,7 @@ internal partial class WaitsRepo : IWaitsRepo
         IMethodIdsRepo methodIdentifierRepo,
         IResumableFunctionsSettings settings,
         IWaitTemplatesRepo waitTemplatesRepo,
-        IServiceRepo serviceRepo)
+        ILogsRepo logsRepo)
     {
         _logger = logger;
         _context = context;
@@ -35,7 +35,7 @@ internal partial class WaitsRepo : IWaitsRepo
         _methodIdsRepo = methodIdentifierRepo;
         _settings = settings;
         _waitTemplatesRepo = waitTemplatesRepo;
-        _serviceRepo = serviceRepo;
+        _logsRepo = logsRepo;
     }
 
     public async Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn, DateTime puhsedCallDate)

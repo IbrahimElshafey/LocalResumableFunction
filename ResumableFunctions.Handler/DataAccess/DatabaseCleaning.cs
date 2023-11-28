@@ -10,16 +10,16 @@ namespace ResumableFunctions.Handler.DataAccess
     internal class DatabaseCleaning : IDatabaseCleaning
     {
         private readonly WaitsDataContext _context;
-        private readonly IServiceRepo _serviceRepo;
+        private readonly ILogsRepo _logsRepo;
         private readonly IResumableFunctionsSettings _setting;
 
         public DatabaseCleaning(
             WaitsDataContext context,
-            IServiceRepo serviceRepo,
+            ILogsRepo logsRepo,
             IResumableFunctionsSettings setting)
         {
             _context = context;
-            _serviceRepo = serviceRepo;
+            _logsRepo = logsRepo;
             _setting = setting;
         }
 
@@ -35,34 +35,36 @@ namespace ResumableFunctions.Handler.DataAccess
                 .ToListAsync();
             if (instanceIds.Any())
             {
-                var privateDataCount = _context.PrivateData
-                 .Where(privateData => instanceIds.Contains(privateData.FunctionStateId.Value))
-                 .ExecuteDeleteAsync();
-
-                var waitsCount = _context.Waits
+                using var transaction = _context.Database.BeginTransaction();
+                var waitsCount = await _context.Waits
                   .Where(wait => instanceIds.Contains(wait.FunctionStateId))
                   .ExecuteDeleteAsync();
 
-                var instancesCount = _context.FunctionStates
+                var privateDataCount = await _context.PrivateData
+                  .Where(privateData => instanceIds.Contains(privateData.FunctionStateId.Value))
+                  .ExecuteDeleteAsync();
+
+                var instancesCount = await _context.FunctionStates
                     .Where(functionState => instanceIds.Contains(functionState.Id))
                     .ExecuteDeleteAsync();
 
-                var logsCount = _context.Logs
+                var logsCount = await _context.Logs
                     .Where(logItem => instanceIds.Contains((int)logItem.EntityId) && logItem.EntityType == nameof(ResumableFunctionState))
                     .ExecuteDeleteAsync();
 
-                var waitProcessingCount = _context.WaitProcessingRecords
+                var waitProcessingCount = await _context.WaitProcessingRecords
                     .Where(waitProcessingRecord => instanceIds.Contains(waitProcessingRecord.StateId))
                     .ExecuteDeleteAsync();
-                await Task.WhenAll(waitsCount, instancesCount, logsCount, waitProcessingCount);
-
-                await _serviceRepo.AddLogs(
+                transaction.Commit();
+                
+                await _logsRepo.AddLog(
+                    $"* Delete [{privateDataCount}] private data record.\n"+
+                    $"* Delete [{logsCount}] logs related to completed functions instances done.\n"+
+                    $"* Delete [{instancesCount}] compeleted functions instances done.\n"+
+                    $"* Delete [{waitsCount}] waits related to completed functions instances done.\n"+
+                    $"* Delete [{waitProcessingCount}] wait processing record related to completed functions instances done.",
                     LogType.Info,
-                    StatusCodes.DataCleaning,
-                    $"Delete [{logsCount.Result}] logs related to completed functions instances done.",
-                    $"Delete [{instancesCount.Result}] compeleted functions instances done.",
-                    $"Delete [{waitsCount.Result}] waits related to completed functions instances done.",
-                    $"Delete [{waitProcessingCount.Result}] wait processing record related to completed functions instances done.");
+                    StatusCodes.DataCleaning);
             }
             await AddLog("Delete compeleted functions instances completed.");
         }
@@ -123,12 +125,12 @@ namespace ResumableFunctions.Handler.DataAccess
 
         private async Task AddLog(string message)
         {
-            await _serviceRepo.AddLog(message, LogType.Info, StatusCodes.DataCleaning);
+            await _logsRepo.AddLog(message, LogType.Info, StatusCodes.DataCleaning);
         }
 
         private async Task AddError(string message, Exception ex = null)
         {
-            await _serviceRepo.AddErrorLog(ex, message, StatusCodes.DataCleaning);
+            await _logsRepo.AddErrorLog(ex, message, StatusCodes.DataCleaning);
         }
     }
 }

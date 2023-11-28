@@ -17,6 +17,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     [ResumableFunctionEntryPoint("ProjectApprovalExample.ProjectApprovalFlow", isActive: true)]//Point 1
     public async IAsyncEnumerable<Wait> ProjectApprovalFlow()
     {
+        var x = Random.Shared.Next();
     Project_Submitted:
         yield return
           WaitMethod<Project, bool>(ProjectSubmitted, "Project Submitted")//Point 2
@@ -60,6 +61,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     [ResumableFunctionEntryPoint("ProjectApprovalExample.ExternalMethod")]
     public async IAsyncEnumerable<Wait> ExternalMethod()
     {
+        var x = Random.Shared.Next();
         await Task.Delay(1);
         yield return WaitMethod<string, string>
                 (new ExternalServiceClass().SayHelloExport, "Wait say hello external")
@@ -82,6 +84,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     [ResumableFunctionEntryPoint("ProjectApprovalExample.ExternalMethodWaitGoodby")]
     public async IAsyncEnumerable<Wait> ExternalMethodWaitGoodby()
     {
+        var x = Random.Shared.Next();
         await Task.Delay(1);
         yield return WaitMethod<string, string>
                 (new ExternalServiceClass().SayGoodby, "Wait good by external")
@@ -94,6 +97,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     [ResumableFunctionEntryPoint("PAE.InterfaceMethod")]
     public async IAsyncEnumerable<Wait> InterfaceMethod()
     {
+        var x = Random.Shared.Next();
         yield return
          WaitMethod<Project, bool>(ProjectSubmitted, "Project Submitted")
              .MatchIf((input, output) => output == true)
@@ -156,6 +160,7 @@ public class ProjectApprovalExample : ResumableFunctionsContainer, IManagerFiveA
     //[ResumableFunctionEntryPoint]
     public async IAsyncEnumerable<Wait> WaitFirst()
     {
+        var x = Random.Shared.Next();
         WriteMessage("First started");
         yield return WaitGroup(
             new Wait[]

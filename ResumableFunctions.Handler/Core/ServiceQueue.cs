@@ -16,7 +16,7 @@ internal class ServiceQueue : IServiceQueue
     private readonly IWaitsRepo _waitsRepository;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IResumableFunctionsSettings _settings;
-    private readonly IScanStateRepo _scanStateRepo;
+    private readonly ILockStateRepo _lockStateRepo;
     private readonly IHttpClientFactory _httpClientFactory;
 
     public ServiceQueue(
@@ -26,7 +26,7 @@ internal class ServiceQueue : IServiceQueue
         IBackgroundProcess backgroundJobClient,
         BackgroundJobExecutor backgroundJobExecutor,
         IResumableFunctionsSettings settings,
-        IScanStateRepo scanStateRepo,
+        ILockStateRepo lockStateRepo,
         IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
@@ -35,7 +35,7 @@ internal class ServiceQueue : IServiceQueue
         _backgroundJobClient = backgroundJobClient;
         _backgroundJobExecutor = backgroundJobExecutor;
         _settings = settings;
-        _scanStateRepo = scanStateRepo;
+        _lockStateRepo = lockStateRepo;
         _httpClientFactory = httpClientFactory;
     }
 
@@ -43,13 +43,14 @@ internal class ServiceQueue : IServiceQueue
     public async Task RouteCallToAffectedServices(long pushedCallId, DateTime puhsedCallDate, string methodUrn)
     {
         //if scan is running schedule it for later processing
-        if (!await _scanStateRepo.IsScanFinished())
+        if (!await _lockStateRepo.NoLocks())
         {
             _backgroundJobClient.Schedule(() => RouteCallToAffectedServices(pushedCallId, puhsedCallDate, methodUrn), TimeSpan.FromSeconds(3));
             return;
         }
 
-        //$"{nameof(RouteCallToAffectedServices)}_{pushedCallId}_{_settings.CurrentServiceId}",//todo:may no nedd for lock
+        //$"{nameof(RouteCallToAffectedServices)}_{pushedCallId}_{_settings.CurrentServiceId}",
+        //no chance to be called by two services in same time, lock removed
         await _backgroundJobExecutor.ExecuteWithoutLock(
             async () =>
             {
@@ -78,7 +79,7 @@ internal class ServiceQueue : IServiceQueue
     [DisplayName("Process call [Id: {0},MethodUrn: {1}] Locally.")]
     public async Task ProcessCallLocally(long pushedCallId, string methodUrn, DateTime puhsedCallDate)
     {
-        if (!await _scanStateRepo.IsScanFinished())
+        if (!await _lockStateRepo.NoLocks())
         {
             _backgroundJobClient.Schedule(() =>
             ProcessCallLocally(pushedCallId, methodUrn, puhsedCallDate), TimeSpan.FromSeconds(3));
@@ -86,6 +87,7 @@ internal class ServiceQueue : IServiceQueue
         }
 
         //$"{nameof(ProcessCallLocally)}_{pushedCallId}_{_settings.CurrentServiceId}",
+        //no chance to be called by two services at same time
         await _backgroundJobExecutor.ExecuteWithoutLock(
             async () =>
             {
@@ -96,7 +98,7 @@ internal class ServiceQueue : IServiceQueue
                     callEffection.CallId = pushedCallId;
                     callEffection.MethodUrn = methodUrn;
                     callEffection.CallDate = puhsedCallDate;
-                    await ServiceProcessPushedCall(callEffection);//todo:log if null
+                    await ServiceProcessPushedCall(callEffection);
                 }
                 else
                 {
@@ -110,7 +112,8 @@ internal class ServiceQueue : IServiceQueue
     public async Task ServiceProcessPushedCall(CallEffection callEffection)
     {
         var pushedCallId = callEffection.CallId;
-        //$"ServiceProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",//todo:lock if there are many service instances
+        //$"ServiceProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
+        //todo:lock if there are many service instances
         await _backgroundJobExecutor.ExecuteWithoutLock(
             () =>
             {

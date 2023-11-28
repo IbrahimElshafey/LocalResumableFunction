@@ -22,8 +22,9 @@ internal class Scanner
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly string _currentServiceName;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
+    private readonly ILogsRepo _logsRepo;
     private readonly IServiceRepo _serviceRepo;
-    private readonly IScanStateRepo _scanStateRepo;
+    private readonly ILockStateRepo _scanStateRepo;
     private HashSet<string> _functionsUrns = new HashSet<string>();
 
     public Scanner(
@@ -36,7 +37,8 @@ internal class Scanner
         IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor,
         IServiceRepo serviceRepo,
-        IScanStateRepo scanStateRepo)
+        ILockStateRepo scanStateRepo,
+        ILogsRepo logsRepo)
     {
         _logger = logger;
         _methodIdentifierRepo = methodIdentifierRepo;
@@ -49,6 +51,7 @@ internal class Scanner
         _backgroundJobExecutor = backgroundJobExecutor;
         _serviceRepo = serviceRepo;
         _scanStateRepo = scanStateRepo;
+        _logsRepo = logsRepo;
     }
 
     [DisplayName("Start Scanning Current Service")]
@@ -58,7 +61,7 @@ internal class Scanner
         int scanStateId = -1;
         try
         {
-            scanStateId = await _scanStateRepo.AddScanState(lockName);
+            scanStateId = await _scanStateRepo.AddLockState(lockName);
             await _backgroundJobExecutor.ExecuteWithLock(
                 lockName,
                 async () =>
@@ -74,7 +77,7 @@ internal class Scanner
         finally
         {
             if (scanStateId > -1)
-                await _scanStateRepo.RemoveScanState(scanStateId);
+                await _scanStateRepo.RemoveLockState(scanStateId);
         }
     }
 
@@ -100,12 +103,13 @@ internal class Scanner
         if (info.FunctionData is not null)
         {
             _functionsUrns.Add(info.FunctionData.MethodUrn);
-            var resumableFunctionIdentifier = await _methodIdentifierRepo.AddResumableFunctionIdentifier(info.FunctionData);
+            var resumableFunctionIdentifier =
+                await _methodIdentifierRepo.AddResumableFunctionIdentifier(info.FunctionData);
             await _context.CommitAsync();
 
             if (info.RegisterFirstWait)
                 _backgroundJobClient.Enqueue(
-                       () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
+                              () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
             if (info.RemoveFirstWait)
                 await _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id);
         }
@@ -124,7 +128,7 @@ internal class Scanner
         };
         if (_functionsUrns.Contains(functionData.MethodUrn))
         {
-            await _serviceRepo.AddErrorLog(null,
+            await _logsRepo.AddErrorLog(null,
                 $"Can't add method identifier for function [{resumableFunctionMInfo.GetFullName()}]" +
                 $" since same URN [{functionData.MethodUrn}] used for another function.", StatusCodes.MethodValidation);
             return (null, false, false);
@@ -147,7 +151,7 @@ internal class Scanner
                 var dateBeforeScan = DateTime.UtcNow;
                 if (await AssemblyNeedScan(assemblyPath) is false) continue;
 
-                await _scanStateRepo.ResetServiceScanState();
+                await _scanStateRepo.ResetServiceLockStates();
 
 
                 var assembly = Assembly.LoadFile(assemblyPath);

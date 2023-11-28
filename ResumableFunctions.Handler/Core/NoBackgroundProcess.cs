@@ -27,7 +27,7 @@ internal class NoBackgroundProcess : IBackgroundProcess
         {
             var compiled = methodCall.CompileFast();
             compiled.Invoke().Wait();
-            return default;
+            return Random.Shared.Next().ToString();
         }
         catch (Exception e)
         {
@@ -41,7 +41,7 @@ internal class NoBackgroundProcess : IBackgroundProcess
         try
         {
             Task.Delay(delay).ContinueWith(x => methodCall.CompileFast().Invoke().Wait());
-            return default;
+            return Random.Shared.Next().ToString();
         }
         catch (Exception e)
         {
@@ -55,7 +55,7 @@ internal class NoBackgroundProcess : IBackgroundProcess
         try
         {
             Task.Delay(delay).ContinueWith(x => methodCall.CompileFast().Invoke());
-            return default;
+            return Random.Shared.Next().ToString();
         }
         catch (Exception e)
         {

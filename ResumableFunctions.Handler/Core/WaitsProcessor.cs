@@ -26,7 +26,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IPrivateDataRepo _privateDataRepo;
         private readonly IWaitTemplatesRepo _templatesRepo;
         private readonly IPushedCallsRepo _pushedCallsRepo;
-        private readonly IServiceRepo _serviceRepo;
+        private readonly ILogsRepo _serviceRepo;
         private readonly IResumableFunctionsSettings _settings;
         private WaitProcessingRecord _waitCall;
         private MethodWaitEntity _methodWait;
@@ -45,7 +45,7 @@ namespace ResumableFunctions.Handler.Core
             IMethodIdsRepo methodIdsRepo,
             IWaitTemplatesRepo templatesRepo,
             IPushedCallsRepo pushedCallsRepo,
-            IServiceRepo serviceRepo,
+            ILogsRepo serviceRepo,
             IResumableFunctionsSettings settings,
             IPrivateDataRepo privateDataRepo)
         {

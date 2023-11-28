@@ -41,7 +41,7 @@ internal sealed class WaitsDataContext : DbContext
     }
 
     public DbSet<PrivateData> PrivateData { get; set; }
-    public DbSet<ScanState> ScanStates { get; set; }
+    public DbSet<LockState> Locks { get; set; }
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
 
     public DbSet<MethodIdentifier> MethodIdentifiers { get; set; }
@@ -230,6 +230,12 @@ internal sealed class WaitsDataContext : DbContext
     }
 
 
+    public async Task<int> SaveChangesdDirectly(
+        CancellationToken cancellationToken = new CancellationToken())
+    {
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
     {
         try
@@ -319,7 +325,7 @@ internal sealed class WaitsDataContext : DbContext
         }
     }
 
-    
+
 
     private async Task SaveEntitiesLogs(CancellationToken cancellationToken)
     {

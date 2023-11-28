@@ -16,7 +16,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly ILogger<CallPusher> _logger;
         private readonly IPushedCallsRepo _pushedCallsRepo;
         private readonly IMethodIdsRepo _methodIdsRepo;
-        private readonly IServiceRepo _serviceRepo;
+        private readonly ILogsRepo _serviceRepo;
 
         public CallPusher(
             IUnitOfWork context,
@@ -25,7 +25,7 @@ namespace ResumableFunctions.Handler.Core
             ILogger<CallPusher> logger,
             IPushedCallsRepo pushedCallsRepo,
             IMethodIdsRepo methodIdsRepo,
-            IServiceRepo serviceRepo)
+            ILogsRepo serviceRepo)
         {
             _context = context;
             _backgroundProcess = backgroundProcess;

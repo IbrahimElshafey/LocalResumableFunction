@@ -63,12 +63,14 @@ internal static class CoreExtensions
         services.AddScoped<IMethodIdsRepo, MethodIdsRepo>();
         services.AddScoped<IPrivateDataRepo, PrivateDataRepo>();
         services.AddScoped<IWaitsRepo, WaitsRepo>();
-        services.AddTransient<IServiceRepo, ServiceRepo>();//todo: why AddTransient?
+        services.AddScoped<IServiceRepo, ServiceRepo>();//todo: why AddTransient?
         services.AddScoped<IWaitTemplatesRepo, WaitTemplatesRepo>();
-        services.AddTransient<IScanStateRepo, ScanStateRepo>();//todo: why AddTransient?
         services.AddScoped<IPushedCallsRepo, PushedCallsRepo>();
         services.AddScoped<IDatabaseCleaning, DatabaseCleaning>();
         services.AddScoped<IWaitProcessingRecordsRepo, WaitProcessingRecordsRepo>();
+
+        services.AddTransient<ILogsRepo, LogsRepo>();//todo: why AddTransient?
+        services.AddTransient<ILockStateRepo, LockStateRepo>();//todo: why AddTransient?
     }
 
     internal static void UseResumableFunctions(this IHost app)
