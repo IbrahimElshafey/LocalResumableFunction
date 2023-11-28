@@ -12,7 +12,6 @@ public class ResumableFunctionState : IEntity<int>, IEntityWithUpdate, IEntityWi
     public List<LogRecord> Logs { get; set; } = new();
     public int Id { get; set; }
     public int? ServiceId { get; set; }
-    public string UserDefinedId { get; set; }
     public DateTime Created { get; set; }
     /// <summary>
     /// Serialized class instance that contain the resumable function instance data

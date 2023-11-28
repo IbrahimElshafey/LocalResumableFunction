@@ -25,12 +25,12 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
                 $"Can't find resumable function [{oldMatchedWait?.RequestedByFunction?.MethodName}] " +
                 $"in class [{oldMatchedWait?.CurrentFunction?.GetType().FullName}].");
 
+        _oldMatchedWait = oldMatchedWait;
         ResumeLocals(oldMatchedWait.Locals, functionRunnerType);
         CreateRunnerIfNull(functionRunnerType);
         SetRunnerCallerRfCalss(oldMatchedWait.CurrentFunction);
         ResumeClosure(oldMatchedWait.ClosureData);
         SetState(oldMatchedWait.StateAfterWait);
-        _oldMatchedWait = oldMatchedWait;
     }
 
     public FunctionRunner(
