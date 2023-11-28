@@ -5,13 +5,9 @@ using ResumableFunctions.Handler.Helpers;
 namespace ResumableFunctions.Handler.InOuts.Entities;
 public class PrivateData : IEntity<long>, IEntityWithUpdate, IAfterChangesSaved, IBeforeSaveEntity
 {
-    public PrivateData()
-    {
-
-    }
     public long Id { get; set; }
     public object Value { get; set; }
-    public PrivateDataType Type { get; set; }
+    public string TypeName { get; set; }
     public List<WaitEntity> ClosureLinkedWaits { get; set; }
     public List<WaitEntity> LocalsLinkedWaits { get; set; }
 
@@ -32,6 +28,7 @@ public class PrivateData : IEntity<long>, IEntityWithUpdate, IAfterChangesSaved,
     public void BeforeSave()
     {
         SetFunctionStateId();
+        TypeName = Value?.GetType().Name;
     }
 
     private void SetFunctionStateId()

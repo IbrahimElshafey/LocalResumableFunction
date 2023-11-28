@@ -25,13 +25,13 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
                 $"Can't find resumable function [{oldMatchedWait?.RequestedByFunction?.MethodName}] " +
                 $"in class [{oldMatchedWait?.CurrentFunction?.GetType().FullName}].");
 
-        CreateRunner(functionRunnerType, oldMatchedWait.Locals);
-        SetRunnerFunctionClass(oldMatchedWait.CurrentFunction);
+        ResumeLocals(oldMatchedWait.Locals, functionRunnerType);
+        CreateRunnerIfNull(functionRunnerType);
+        SetRunnerCallerRfCalss(oldMatchedWait.CurrentFunction);
+        ResumeClosure(oldMatchedWait.ClosureData);
         SetState(oldMatchedWait.StateAfterWait);
-        SetRunnerClosureField(oldMatchedWait.ClosureData?.Value);
         _oldMatchedWait = oldMatchedWait;
     }
-
 
     public FunctionRunner(
         ResumableFunctionsContainer classInstance,
@@ -40,8 +40,8 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         var functionRunnerType = classInstance.GetType()
             .GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.SuppressChangeType)
             .FirstOrDefault(x => x.Name.StartsWith($"<{resumableFunction.Name}>"));
-        CreateRunner(functionRunnerType);
-        SetRunnerFunctionClass(classInstance);
+        CreateRunnerIfNull(functionRunnerType);
+        SetRunnerCallerRfCalss(classInstance);
         SetState(int.MinValue);
     }
 
@@ -67,15 +67,15 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         {
             CurrentWait.StateAfterWait = GetState();
             //set locals for the new incoming wait
-            SetLocalsForNewWait();
+            SetLocalsForIncomingWait();
 
             //set closure
-            SetClosureForNewWait();
+            SetClosureForIncomingWait();
         }
         return hasNext;
     }
 
-    private void SetClosureForNewWait()
+    private void SetClosureForIncomingWait()
     {
         var closureContinuation =
                         _oldMatchedWait != null &&
@@ -103,7 +103,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         });
     }
 
-    private void SetLocalsForNewWait()
+    private void SetLocalsForIncomingWait()
     {
         var localsContinuation =
             _oldMatchedWait != null &&
@@ -113,12 +113,11 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             _oldMatchedWait.Locals.Value = _functionRunner;
             CurrentWait.Locals = _oldMatchedWait.Locals;
         }
-        else if (JsonConvert.SerializeObject(_functionRunner, PrivateDataResolver.Settings) != "{}")
+        else if (RunnerHasValue())
         {
             CurrentWait.Locals = new PrivateData
             {
                 Value = _functionRunner,
-                Type = PrivateDataType.Locals,
                 FunctionStateId = _oldMatchedWait?.FunctionStateId
             };
         }
@@ -130,20 +129,13 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         return json != "{}";
     }
 
-    private void CreateRunner(Type functionRunnerType, PrivateData oldLocals = null)
+    private void CreateRunnerIfNull(Type functionRunnerType)
     {
+        if (_functionRunner != null) return;
 
         const string error = "Can't create a function runner.";
         if (functionRunnerType == null)
             throw new Exception(error);
-
-        //use the old wait runner
-        if (oldLocals?.Value.GetType() == functionRunnerType)
-        {
-            _functionRunner = (IAsyncEnumerator<Wait>)oldLocals.Value;
-            return;
-        }
-
 
         var ctor = functionRunnerType.GetConstructor(
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance,
@@ -157,15 +149,9 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
 
         if (_functionRunner == null)
             throw new Exception(error);
-
-        if (oldLocals != null && oldLocals.Value is JObject jobject)
-        {
-            //Is same RF
-            jobject.MergeIntoObject(_functionRunner);
-        }
     }
 
-    private void SetRunnerFunctionClass(ResumableFunctionsContainer functionClassInstance)
+    private void SetRunnerCallerRfCalss(ResumableFunctionsContainer functionClassInstance)
     {
         //set caller class for current function runner
         var thisField = _functionRunner
@@ -180,21 +166,42 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             GetFields(BindingFlags.Instance | BindingFlags.NonPublic).
             Where(x => x.FieldType.Name.StartsWith(Constants.CompilerClosurePrefix)).
             ToList();
-    private void SetRunnerClosureField(object closure)
+    private void ResumeLocals(PrivateData oldLocals, Type functionRunnerType)
+    {
+        //use the old wait runner
+        if (oldLocals?.Value.GetType() == functionRunnerType)
+        {
+            _functionRunner = (IAsyncEnumerator<Wait>)oldLocals.Value;
+            return;
+        }
+        if (oldLocals != null && oldLocals.Value is JObject jobject)
+        {
+            jobject.MergeIntoObject(_functionRunner);
+        }
+    }
+
+    private void ResumeClosure(PrivateData closureData)
     {
         var closureFields = GetClosureFields();
-        closureFields.ForEach(closureField =>
+        if (closureFields is null || closureFields.Count == 0) return;
+
+        var closure = closureData?.Value;
+        if (closure is null)
         {
-            if (closure is null && closureFields.Count == 1)
-                closureField.SetValue(_functionRunner, Activator.CreateInstance(closureField.FieldType));
-            else if (closure is JObject jobject)
-            {
-                var closureObject = jobject.ToObject(closureField.FieldType);
-                closureField.SetValue(_functionRunner, closureObject ?? Activator.CreateInstance(closureField.FieldType));
-            }
-            else if (closure != null && closure.GetType() == closureField.FieldType)
-                closureField.SetValue(_functionRunner, closure);
-        });
+            closureFields.ForEach(
+                field => field.SetValue(_functionRunner, Activator.CreateInstance(field.FieldType)));
+            return;
+        }
+
+        var activeField = closureFields.FirstOrDefault(x => x.FieldType.Name == closureData.TypeName);
+        if (activeField is null) return;
+        if (closure is JObject jobject)
+        {
+            var closureObject = jobject.ToObject(activeField.FieldType);
+            activeField.SetValue(_functionRunner, closureObject ?? Activator.CreateInstance(activeField.FieldType));
+        }
+        else if (closure.GetType() == activeField.FieldType)
+            activeField.SetValue(_functionRunner, closure);
     }
 
     private int GetState()

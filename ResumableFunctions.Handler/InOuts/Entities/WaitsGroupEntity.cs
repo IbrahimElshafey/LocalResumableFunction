@@ -41,30 +41,9 @@ public class WaitsGroupEntity : WaitEntity
     internal override void OnAddWait()
     {
         ActionOnChildrenTree(w => w.IsRoot = w.ParentWait == null && w.ParentWaitId == null);
-        ValidateMethodNameDuplicationIfFirst();
         base.OnAddWait();
     }
-    void ValidateMethodNameDuplicationIfFirst()
-    {
-        if (!(IsFirst && IsRoot)) return;
-
-        var groups =
-            GetTreeItems().
-            Where(x => x is MethodWaitEntity).
-            GroupBy(x => x.Name);
-
-        foreach (var g in groups)
-        {
-            if (g.Count() > 1)
-            {
-
-                FunctionState.AddLog(
-                    $"The group wait named [{Name}] contains a duplicated method wait named [{g.Key}].",
-                    LogType.Error, StatusCodes.WaitValidation);
-            }
-        }
-
-    }
+    
     internal override bool ValidateWaitRequest()
     {
         if (ChildWaits == null || !ChildWaits.Any())

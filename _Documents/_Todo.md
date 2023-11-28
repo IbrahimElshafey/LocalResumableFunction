@@ -1,4 +1,7 @@
 ﻿# Todo
+* Caller name may be repeated an cause a problem, add test for this
+* Test cleaning closures
+* Review user defined ID
 * Publisher Project TODOs
 * Reset function instance errors after it completed
 * Review Transinet services

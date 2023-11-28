@@ -5,16 +5,16 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
-public class Sequence
+public class SameCallerName
 {
     [Fact]
-    public async Task SequenceFunction_Test()
+    public async Task SameCallerName_Test()
     {
-        using var test = new TestShell(nameof(SequenceFunction_Test), typeof(SequenceFunction));
+        using var test = new TestShell(nameof(SameCallerName_Test), typeof(Test));
         await test.ScanTypes();
         Assert.Empty(await test.RoundCheck(0, 0, 0));
 
-        var function = new SequenceFunction();
+        var function = new Test();
         function.Method1("in1");
         Assert.Empty(await test.RoundCheck(1, 2, 0));
 
@@ -25,30 +25,35 @@ public class Sequence
         Assert.Empty(await test.RoundCheck(3, 3, 1));
     }
 
-    public class SequenceFunction : ResumableFunctionsContainer
+
+    public class Test : ResumableFunctionsContainer
     {
         [ResumableFunctionEntryPoint("ThreeMethodsSequence")]
         public async IAsyncEnumerable<Wait> ThreeMethodsSequence()
         {
-            int x = 1;
-            yield return WaitMethod<string, string>(Method1, "M1")
-                .AfterMatch((_, _) => x++);
-            //x++;
-            if (x != 2)
-                throw new Exception("Closure not continue");
-            x++;
-            yield return WaitMethod<string, string>(Method2, "M2").MatchAny();
-            x++;
-            if (x != 4)
-                throw new Exception("Closure not continue");
-            x++;
+            yield return CallerSameName(8, 10);
+
+            yield return CallerSameName("string input");
+
             yield return WaitMethod<string, string>(Method3, "M3").MatchAny();
-            x++;
-            if (x != 6)
-                throw new Exception("Closure not continue");
+
             await Task.Delay(100);
         }
-
+        private Wait CallerSameName(int x, int y)
+        {
+            return WaitMethod<string, string>(Method1, "M1")
+                .AfterMatch((_, _) => x++);
+        }
+        private Wait CallerSameName(string input)
+        {
+            return WaitMethod<string, string>(Method2, "M2").
+                MatchAny().
+                AfterMatch((_, _) =>
+                {
+                    if (input != "string input")
+                        throw new Exception("closure restore failed.");
+                });
+        }
         [PushCall("RequestAdded")] public string Method1(string input) => input + "M1";
         [PushCall("Method2")] public string Method2(string input) => input + "M2";
         [PushCall("Method3")] public string Method3(string input) => input + "M3";

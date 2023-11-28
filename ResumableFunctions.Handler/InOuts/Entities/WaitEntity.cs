@@ -298,7 +298,6 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 runtimeClosure = new PrivateData
                 {
                     Value = group.Key,
-                    Type = PrivateDataType.Closure,
                 };
             }
 

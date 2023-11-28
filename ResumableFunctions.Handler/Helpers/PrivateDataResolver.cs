@@ -22,8 +22,8 @@ namespace ResumableFunctions.Handler.Helpers
                .Where(member =>
                         member is FieldInfo &&
                         member.MemberType.CanConvertToSimpleString() &&
-                        !member.Name.StartsWith("<>") &&
-                        !member.Name.StartsWith("<GroupMatchFuncName>")
+                        !member.Name.StartsWith("<>") &&//not a clsoure or compiler generated field
+                        !member.Name.StartsWith("<GroupMatchFuncName>")//
                         )
                .Select(parameter => base.CreateProperty(parameter, memberSerialization))
                .ToList();
