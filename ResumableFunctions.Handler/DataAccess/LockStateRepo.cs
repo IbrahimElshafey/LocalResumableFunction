@@ -39,10 +39,12 @@ internal class LockStateRepo : ILockStateRepo
         var toAdd = new LockState
         {
             Name = name,
-            ServiceName = _settings.CurrentServiceName
+            ServiceName = _settings.CurrentServiceName,
+            Created = DateTime.UtcNow,
+            ServiceId = _settings.CurrentServiceId,
         };
         _context.Locks.Add(toAdd);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesdDirectly();
         return toAdd.Id;
     }
 

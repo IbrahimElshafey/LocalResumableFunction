@@ -30,6 +30,7 @@ internal class LogsRepo : ILogsRepo
             EntityType = nameof(ServiceData),
             Message = $"{errorMsg}\n{ex}",
             Created = DateTime.UtcNow,
+            ServiceId = _settings.CurrentServiceId,
             Type = LogType.Error,
             StatusCode = statusCode
         });
@@ -43,6 +44,7 @@ internal class LogsRepo : ILogsRepo
             EntityId = _settings.CurrentServiceId,
             EntityType = nameof(ServiceData),
             Message = msg,
+            ServiceId = _settings.CurrentServiceId,
             Type = logType,
             Created = DateTime.UtcNow,
             StatusCode = statusCode
@@ -60,6 +62,7 @@ internal class LogsRepo : ILogsRepo
                 EntityType = nameof(ServiceData),
                 Message = msg,
                 Type = logType,
+                ServiceId = _settings.CurrentServiceId,
                 StatusCode = statusCode,
                 Created = DateTime.UtcNow,
             });

@@ -1,7 +1,7 @@
 ﻿# Todo
-* Review SaveChanges use and may refactor
-* Why errors when try register first wait second time, close jobs when rescan
 * Cancel old scan jobs when rescan
+* Remove SaveChangesAsync and,SaveChangesdDirectly from repo implementation
+* Why errors when try register first wait second time, close jobs when rescan
 * Review user defined ID
 * Publisher Project TODOs
 * Reset function instance errors after it completed
@@ -9,14 +9,13 @@
 * Dynamic loaded dll
 * Build Nuget package to target multiple runtimes and versions
 * Unify logging and make separate DB for logs
+* If found RF database with schema diffrence use new one and update appsettings
 
 
 * Provide an advanced API for tests that enable complex queries for DB
 
-* Suspend Hangfire old jobs
 
-* Review concurrency with [pen and paper]
-	* Review function state update lock `ExecuteAfterMatchAction`
+
 
 
 * Parameter check lib use

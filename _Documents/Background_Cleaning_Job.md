@@ -1,5 +1,4 @@
 ﻿# Tables that must be cleanded 
-* Delete unused private data rows when delete completed jobs
 * Delete unused Method Identifiers that do not exist in the code anymore
 	* How to know if method is not used and safe to be deleted?
 	* Method may be a 
