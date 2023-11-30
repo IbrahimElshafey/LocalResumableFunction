@@ -38,7 +38,7 @@ internal class ServiceRepo : IServiceRepo
             .Logs
             .Where(x =>
                 x.EntityId == _settings.CurrentServiceId &&
-                x.EntityType == nameof(ServiceData) &&
+                x.EntityType == EntityType.ServiceLog &&
                 x.Created < dateBeforeScan)
             .ExecuteDeleteAsync();
     }

@@ -19,6 +19,8 @@ public class ServiceData : IEntity<int>, IObjectWithLog, IEntityWithUpdate
     public int ParentId { get; set; }
     public string ConcurrencyToken { get; set; }
 
+    public EntityType EntityType => EntityType.ServiceLog;
+
     public void AddError(string message, int code, Exception ex = null)
     {
         (this as IObjectWithLog).AddError(message, code, ex);

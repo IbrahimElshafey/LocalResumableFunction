@@ -30,7 +30,7 @@ namespace ResumableFunctions.Handler.UiService
 
             var serviceErrors =
                 await _context.Logs
-               .Where(x => x.Type == LogType.Error)
+               .Where(x => x.LogType == LogType.Error)
                .GroupBy(x => x.ServiceId)
                .Select(x => new { ServiceId = x.Key, ErrorsCount = x.Count() })
                .ToDictionaryAsync(x => x.ServiceId);
@@ -94,7 +94,7 @@ namespace ResumableFunctions.Handler.UiService
                 query = query.Where(x => x.StatusCode == statusCode);
 
             if (serviceId == -1 && statusCode == -1)
-                query = _context.Logs.Where(x => x.Type != LogType.Info);
+                query = _context.Logs.Where(x => x.LogType != LogType.Info);
 
             return await
                 query
@@ -310,7 +310,7 @@ namespace ResumableFunctions.Handler.UiService
             var logs =
                 await _context
                 .Logs
-                .Where(x => x.EntityId == instanceId && x.EntityType == nameof(ResumableFunctionState))
+                .Where(x => x.EntityId == instanceId && x.EntityType == EntityType.FunctionInstanceLog)
                 .ToListAsync();
 
             var waits =
@@ -328,7 +328,7 @@ namespace ResumableFunctions.Handler.UiService
                 MessagePackSerializer.ConvertToJson(instance.StateObjectValue),
                 instance.Created,
                 instance.Modified,
-                logs.Count(x => x.Type == LogType.Error),
+                logs.Count(x => x.LogType == LogType.Error),
                 waitsNodes,
                 logs
                 );

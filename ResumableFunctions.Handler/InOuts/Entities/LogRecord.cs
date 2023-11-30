@@ -4,8 +4,8 @@ public class LogRecord : IEntity<long>
 {
     public long Id { get; set; }
     public long? EntityId { get; set; }
-    public string EntityType { get; set; }
-    public LogType Type { get; set; } = LogType.Info;
+    public EntityType EntityType { get; set; }
+    public LogType LogType { get; set; } = LogType.Info;
     public string Message { get; set; }
     public DateTime Created { get; set; }
     public int StatusCode { get; set; }
@@ -13,7 +13,7 @@ public class LogRecord : IEntity<long>
 
     public override string ToString()
     {
-        return $"Type: {Type},\n" +
+        return $"Type: {LogType},\n" +
                $"Message: {Message}\n" +
                $"EntityType: {EntityType}\n" +
                $"EntityId: {EntityId}\n" +
@@ -22,10 +22,12 @@ public class LogRecord : IEntity<long>
     }
     public (string Class, string Title) TypeClass()
     {
-        switch (Type)
+        switch (LogType)
         {
             case LogType.Info: return ("w3-pale-blue", "Info");
-            case LogType.Error: return ("w3-deep-orange", "Error");
+            case LogType.WasError:
+            case LogType.Error:
+                return ("w3-deep-orange", "Error");
             case LogType.Warning: return ("w3-amber", "Warning");
         }
         return ("w3-gray", "Undefined");

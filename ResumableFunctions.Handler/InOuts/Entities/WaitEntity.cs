@@ -194,7 +194,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         }
         finally
         {
-            CurrentFunction.Logs.ForEach(log => log.EntityType = nameof(ResumableFunctionState));
+            CurrentFunction.Logs.ForEach(log => log.EntityType = EntityType.FunctionInstanceLog);
             FunctionState.Logs.AddRange(CurrentFunction.Logs);
             FunctionState.Status =
               CurrentFunction.HasErrors() || FunctionState.HasErrors() ?

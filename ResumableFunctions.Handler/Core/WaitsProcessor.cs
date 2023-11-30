@@ -1,6 +1,7 @@
 ﻿using Medallion.Threading;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
@@ -26,7 +27,7 @@ namespace ResumableFunctions.Handler.Core
         private readonly IPrivateDataRepo _privateDataRepo;
         private readonly IWaitTemplatesRepo _templatesRepo;
         private readonly IPushedCallsRepo _pushedCallsRepo;
-        private readonly ILogsRepo _serviceRepo;
+        private readonly ILogsRepo _logsRepo;
         private readonly IResumableFunctionsSettings _settings;
         private WaitProcessingRecord _waitCall;
         private MethodWaitEntity _methodWait;
@@ -45,7 +46,7 @@ namespace ResumableFunctions.Handler.Core
             IMethodIdsRepo methodIdsRepo,
             IWaitTemplatesRepo templatesRepo,
             IPushedCallsRepo pushedCallsRepo,
-            ILogsRepo serviceRepo,
+            ILogsRepo logsRepo,
             IResumableFunctionsSettings settings,
             IPrivateDataRepo privateDataRepo)
         {
@@ -61,7 +62,7 @@ namespace ResumableFunctions.Handler.Core
             _methodIdsRepo = methodIdsRepo;
             _templatesRepo = templatesRepo;
             _pushedCallsRepo = pushedCallsRepo;
-            _serviceRepo = serviceRepo;
+            _logsRepo = logsRepo;
             _settings = settings;
             _privateDataRepo = privateDataRepo;
         }
@@ -167,7 +168,7 @@ namespace ResumableFunctions.Handler.Core
                       await _pushedCallsRepo.PushedCallMatchedForFunctionBefore(pushedCallId, _methodWait.RootFunctionId);
                     if (hasMatchBefore)
                     {
-                        await _serviceRepo.AddLog(
+                        await _logsRepo.AddLog(
                             $"Pushed call [{pushedCallId}] can't activate wait [{_methodWait.Name}]" +
                             $"because another wait for this instance activated before with same call ID.",
                             LogType.Warning,
@@ -180,7 +181,7 @@ namespace ResumableFunctions.Handler.Core
                         $"Wait [{_methodWait.Name}] matched in [{_methodWait.RequestedByFunction.RF_MethodUrn}].";
 
                     if (_methodWait.IsFirst)
-                        await _serviceRepo.AddLog(message, LogType.Info, StatusCodes.WaitProcessing);
+                        await _logsRepo.AddLog(message, LogType.Info, StatusCodes.WaitProcessing);
                     else
                         _methodWait.FunctionState.AddLog(message, LogType.Info, StatusCodes.WaitProcessing);
                     UpdateWaitRecord(x => x.MatchStatus = MatchStatus.Matched);
@@ -199,9 +200,16 @@ namespace ResumableFunctions.Handler.Core
                     $"Error occurred when evaluate match for [{_methodWait.Name}] " +
                     $"in [{_methodWait.RequestedByFunction.RF_MethodUrn}] when pushed call [{pushedCallId}].";
                 if (_methodWait.IsFirst)
-                    await _serviceRepo.AddErrorLog(ex, error, StatusCodes.WaitProcessing);
+                {
+                    _methodWait.FunctionState.Status = FunctionInstanceStatus.InError;
+                    await _logsRepo.AddErrorLog(ex, error, StatusCodes.WaitProcessing);
+                }
                 else
+                {
+                    _methodWait.Status = _settings.WaitStatusIfProcessingError;
+                    _methodWait.FunctionState.Status = FunctionInstanceStatus.InError;
                     _methodWait.FunctionState.AddError(error, StatusCodes.WaitProcessing, ex);
+                }
                 await _methodWait.CurrentFunction?.OnError(error, ex);
                 throw new Exception(error, ex);
             }
@@ -242,9 +250,9 @@ namespace ResumableFunctions.Handler.Core
                     else
                     {
                         _methodWait.Status = _settings.WaitStatusIfProcessingError;
+                        _methodWait.FunctionState.Status = FunctionInstanceStatus.InError;
                         UpdateWaitRecord(x => x.AfterMatchActionStatus = ExecutionStatus.ExecutionFailed);
-                        throw new Exception(
-                            $"Can't update function state [{_methodWait.FunctionStateId}] after method wait [{_methodWait}] matched.");
+                        return false;
                     }
                 }
                 _methodWait.CurrentFunction.InitializeDependencies(_serviceProvider);
@@ -316,7 +324,6 @@ namespace ResumableFunctions.Handler.Core
                 var errorMsg = $"Exception occurred when try to resume execution after [{_methodWait.Name}].";
                 _methodWait.FunctionState.AddError(errorMsg, StatusCodes.WaitProcessing, ex);
                 _methodWait.FunctionState.Status = FunctionInstanceStatus.InError;
-                _methodWait.Status = _settings.WaitStatusIfProcessingError;
                 UpdateWaitRecord(x => x.ExecutionStatus = ExecutionStatus.ExecutionFailed);
                 await _methodWait.CurrentFunction?.OnError(errorMsg, ex);
                 return false;
@@ -388,6 +395,7 @@ namespace ResumableFunctions.Handler.Core
             currentWait.FunctionState.AddLog("Function instance completed.", LogType.Info, StatusCodes.WaitProcessing);
             currentWait.FunctionState.Status = FunctionInstanceStatus.Completed;
             await _waitsRepo.CancelOpenedWaitsForState(currentWait.FunctionStateId);//for confirmation calls
+            await _logsRepo.ClearErrorsForFunctionInstance(currentWait.FunctionStateId);//for confirmation calls
             await currentWait.CurrentFunction?.OnCompleted();
         }
 

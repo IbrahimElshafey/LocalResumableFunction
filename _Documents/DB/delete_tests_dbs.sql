@@ -1,7 +1,7 @@
 ﻿DECLARE db_cursor CURSOR FOR
 SELECT name
 FROM master.dbo.sysdatabases
-WHERE name LIKE '%_test' or name like '%_HangfireDb' or name in ('ResumableFunctionsData')
+WHERE name LIKE '%_test' OR name LIKE '%_HangfireDb' OR name IN ('ResumableFunctionsData')
 
 DECLARE @dbname NVARCHAR(1000)
 
@@ -10,9 +10,15 @@ FETCH NEXT FROM db_cursor INTO @dbname
 
 WHILE @@FETCH_STATUS = 0
 BEGIN
-    DECLARE @sql NVARCHAR(1000)
-    SET @sql = 'DROP DATABASE ' + QUOTENAME(@dbname)
-    EXEC(@sql)
+    -- Set the database to single user mode to close existing connections
+    DECLARE @alterSql NVARCHAR(1000)
+    SET @alterSql = 'ALTER DATABASE ' + QUOTENAME(@dbname) + ' SET SINGLE_USER WITH ROLLBACK IMMEDIATE'
+    EXEC(@alterSql)
+
+    -- Drop the database
+    DECLARE @dropSql NVARCHAR(1000)
+    SET @dropSql = 'DROP DATABASE ' + QUOTENAME(@dbname)
+    EXEC(@dropSql)
 
     FETCH NEXT FROM db_cursor INTO @dbname
 END

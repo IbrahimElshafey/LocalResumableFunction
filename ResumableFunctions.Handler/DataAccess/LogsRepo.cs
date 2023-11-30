@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.InOuts;
@@ -27,11 +28,11 @@ internal class LogsRepo : ILogsRepo
         _context.Logs.Add(new LogRecord
         {
             EntityId = _settings.CurrentServiceId,
-            EntityType = nameof(ServiceData),
+            EntityType = EntityType.ServiceLog,
             Message = $"{errorMsg}\n{ex}",
             Created = DateTime.UtcNow,
             ServiceId = _settings.CurrentServiceId,
-            Type = LogType.Error,
+            LogType = LogType.Error,
             StatusCode = statusCode
         });
         await _context.SaveChangesdDirectly();
@@ -42,10 +43,10 @@ internal class LogsRepo : ILogsRepo
         _context.Logs.Add(new LogRecord
         {
             EntityId = _settings.CurrentServiceId,
-            EntityType = nameof(ServiceData),
+            EntityType = EntityType.ServiceLog,
             Message = msg,
             ServiceId = _settings.CurrentServiceId,
-            Type = logType,
+            LogType = logType,
             Created = DateTime.UtcNow,
             StatusCode = statusCode
         });
@@ -59,14 +60,24 @@ internal class LogsRepo : ILogsRepo
             _context.Logs.Add(new LogRecord
             {
                 EntityId = _settings.CurrentServiceId,
-                EntityType = nameof(ServiceData),
+                EntityType = EntityType.ServiceLog,
                 Message = msg,
-                Type = logType,
+                LogType = logType,
                 ServiceId = _settings.CurrentServiceId,
                 StatusCode = statusCode,
                 Created = DateTime.UtcNow,
             });
         }
         await _context.SaveChangesdDirectly();
+    }
+
+    public async Task ClearErrorsForFunctionInstance(int functionStateId)
+    {
+        await _context.Logs.
+            Where(x =>
+            x.EntityId == functionStateId &&
+            x.EntityType == EntityType.FunctionInstanceLog &&
+            x.LogType == LogType.Error).
+            ExecuteUpdateAsync(row => row.SetProperty(x => x.LogType, LogType.WasError));
     }
 }

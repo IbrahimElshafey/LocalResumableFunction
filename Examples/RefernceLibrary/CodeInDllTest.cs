@@ -14,20 +14,27 @@ namespace ReferenceLibrary
             yield return WaitGroup(
                 new[]
                 {
-                    WaitMethod<string, string>(SayHello, "Wait say hello")
-                    .AfterMatch((userName, helloMsg) => UserName = userName),
+                    WaitMethod<string, string>(SayHello, "Wait say hello").
+                    AfterMatch((userName, helloMsg) => UserName = userName),
 
-                    WaitMethod<string, string>(Method123, "Wait Method123")
-                    .AfterMatch((input, output) => UserName = output)
-                }
-,
+                    WaitMethod<string, string>(Method123, "Wait Method123").
+                    AfterMatch((input, output) => UserName = output)
+                },
                 "Wait first")
                 .MatchAny();
 
             yield return WaitMethod<string, string>
                (SayGoodby, "Wait say goodby")
-               .MatchIf((userName, helloMsg) => userName == UserName)
-               .AfterMatch((userName, helloMsg) => UserName = userName)
+               .MatchIf((userName, helloMsg) => userName == UserName|| userName=="Ibrahim")
+               .AfterMatch((userName, helloMsg) =>
+               {
+                   if (UserName == "Ebrahim")
+                   {
+                       UserName = "Ibrahim";
+                       throw new Exception("Ibrahim no Ebrahim");
+                   }
+                   UserName = userName;
+               })
                //.NoSetData()
                ;
             //yield return Wait<string, string>

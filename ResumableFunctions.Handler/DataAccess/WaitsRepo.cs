@@ -142,13 +142,12 @@ internal partial class WaitsRepo : IWaitsRepo
                         _backgroundJobClient.Delete(jobId);
                     }
                 }
-                //load entity to delete it , concurrency control token and FKs
+                //todo:[update] load entity to delete it , concurrency control token and FKs
                 if (firstWaitItems.FirstOrDefault()?.FunctionStateId is int stateId)
                 {
                     var functionState = await _context
-                    .FunctionStates
-                    .Select(x => new ResumableFunctionState { Id = x.Id, ConcurrencyToken = x.ConcurrencyToken })
-                    .FirstAsync(x => x.Id == stateId);
+                     .FunctionStates
+                     .FirstAsync(x => x.Id == stateId);
                     _context.FunctionStates.Remove(functionState);
                 }
                 await _context.SaveChangesAsync();

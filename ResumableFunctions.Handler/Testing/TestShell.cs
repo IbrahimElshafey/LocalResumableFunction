@@ -119,7 +119,7 @@ namespace ResumableFunctions.Handler.Testing
 
             if (await HasErrors())
             {
-                throw new Exception(Context.Logs.First(x => x.Type == LogType.Error).Message);
+                throw new Exception(Context.Logs.First(x => x.LogType == LogType.Error).Message);
             }
 
             int callsCount = await GetPushedCallsCount();
@@ -257,7 +257,7 @@ namespace ResumableFunctions.Handler.Testing
         {
             return
                 await Context.Logs
-                    .Where(x => x.Type == logType)
+                    .Where(x => x.LogType == logType)
                     .AsNoTracking()
                     .ToListAsync();
         }
@@ -266,7 +266,7 @@ namespace ResumableFunctions.Handler.Testing
         {
             return
                 await Context.Logs
-                    .Where(x => x.Type == LogType.Error)
+                    .Where(x => x.LogType == LogType.Error)
                     .AsNoTracking()
                     .AnyAsync();
         }

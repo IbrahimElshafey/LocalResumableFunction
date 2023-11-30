@@ -26,6 +26,9 @@ public abstract partial class ResumableFunctionsContainer : IObjectWithLog
     protected void AddErrorLog(string message, Exception ex = null) => this.AddError(message, Helpers.StatusCodes.Custom, ex);
 
     [IgnoreMember][NotMapped] public List<LogRecord> Logs { get; set; } = new();
+
+    public EntityType EntityType => EntityType.ServiceLog;
+
     //[IgnoreMember][NotMapped] internal Dictionary<string, object> Closures { get; } = new();
 
     private bool _dependenciesAreSet;

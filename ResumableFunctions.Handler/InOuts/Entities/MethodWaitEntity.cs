@@ -65,7 +65,8 @@ public class MethodWaitEntity : WaitEntity
         {
             var error = $"An error occurred when try to execute action after wait [{Name}] matched.";
             FunctionState.AddError(error, StatusCodes.WaitProcessing, ex);
-            throw new Exception(error, ex);
+            //throw new Exception(error, ex);
+            return false;
         }
     }
     internal override void OnAddWait()

@@ -77,12 +77,12 @@
             <div class="w3-col l2" style="width:300px">
                 <input style="accent-color: green;"
                        class="w3-check w3-indigo" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Warning')">
-                <label>Hide/Show @Model.Logs.Count(x=>x.Type==LogType.Warning) Warning</label>
+                <label>Hide/Show @Model.Logs.Count(x=>x.LogType==LogType.Warning) Warning</label>
             </div>
             <div class="w3-col l2" style="width:300px">
                 <input style="accent-color: green;"
                        class="w3-check w3-indigo" type="checkbox" checked="checked" onchange="toggleShow('.log-item-Info')">
-                <label>Hide/Show @Model.Logs.Count(x=>x.Type==LogType.Info) Info</label>
+                <label>Hide/Show @Model.Logs.Count(x=>x.LogType==LogType.Info) Info</label>
             </div>
         </div>
         @if (Model.Logs.Any())

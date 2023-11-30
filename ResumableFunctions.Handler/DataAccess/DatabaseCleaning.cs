@@ -49,7 +49,8 @@ namespace ResumableFunctions.Handler.DataAccess
                     .ExecuteDeleteAsync();
 
                 var logsCount = await _context.Logs
-                    .Where(logItem => instanceIds.Contains((int)logItem.EntityId) && logItem.EntityType == nameof(ResumableFunctionState))
+                    .Where(logItem => 
+                            instanceIds.Contains((int)logItem.EntityId) && logItem.EntityType == EntityType.FunctionInstanceLog)
                     .ExecuteDeleteAsync();
 
                 var waitProcessingCount = await _context.WaitProcessingRecords

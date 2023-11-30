@@ -6,7 +6,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ResumableFunctions.Handler.InOuts.Entities;
 public class ResumableFunctionState : IEntity<int>, IEntityWithUpdate, IEntityWithDelete, IBeforeSaveEntity, IObjectWithLog
 {
+    public ResumableFunctionState()
+    {
 
+    }
     [IgnoreMember]
     [NotMapped]
     public List<LogRecord> Logs { get; set; } = new();
@@ -30,6 +33,9 @@ public class ResumableFunctionState : IEntity<int>, IEntityWithUpdate, IEntityWi
     public string ConcurrencyToken { get; set; }
 
     public bool IsDeleted { get; set; }
+
+    public EntityType EntityType => EntityType.FunctionInstanceLog;
+
     //public Closures Closures { get; set; } = new();
 
     public void BeforeSave()
