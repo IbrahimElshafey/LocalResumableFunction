@@ -28,7 +28,7 @@ internal class LockStateRepo : ILockStateRepo
         _scanStateLockName = $"{_settings.CurrentWaitsDbName}_ScanStateLock";
         _backgroundJobClient = backgroundJobClient;
     }
-    public async Task<bool> NoLocks()
+    public async Task<bool> AreLocksExist()
     {
         await using var lockScanStat = await _lockProvider.AcquireLockAsync(_scanStateLockName);
         return await _context.Locks.AnyAsync() is false;

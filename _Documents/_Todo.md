@@ -1,18 +1,9 @@
 ﻿# Todo
-* Review wait processing pipline witn errors
-	var isSuccess = await Pipeline(
-        SetInputOutput,
-        CheckIfMatch,
-        CloneIfFirst,
-        ExecuteAfterMatchAction,
-        ResumeExecution);
-* Review error duplication
 * Composite primary key for log record (id,entity_id,entity_type)
 * Publisher Project TODOs
 * Reset function instance errors after it completed
 * Use same dll in two different services must be allowed
-* Remove SaveChangesAsync and,SaveChangesdDirectly from repo implementation
-* Why errors when try register first wait second time, close jobs when rescan
+* Remove SaveChangesAsync and,SaveChangesdDirectly from repo implementations
 * Dynamic loaded dll
 * Build Nuget package to target multiple runtimes and versions
 * Unify logging and make separate DB for logs

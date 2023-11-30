@@ -43,8 +43,9 @@ internal class ServiceQueue : IServiceQueue
     public async Task RouteCallToAffectedServices(long pushedCallId, DateTime puhsedCallDate, string methodUrn)
     {
         //if scan is running schedule it for later processing
-        if (!await _lockStateRepo.NoLocks())
+        if (!await _lockStateRepo.AreLocksExist())
         {
+            //get current job id?
             _backgroundJobClient.Schedule(() => RouteCallToAffectedServices(pushedCallId, puhsedCallDate, methodUrn), TimeSpan.FromSeconds(3));
             return;
         }
@@ -79,7 +80,7 @@ internal class ServiceQueue : IServiceQueue
     [DisplayName("Process call [Id: {0},MethodUrn: {1}] Locally.")]
     public async Task ProcessCallLocally(long pushedCallId, string methodUrn, DateTime puhsedCallDate)
     {
-        if (!await _lockStateRepo.NoLocks())
+        if (!await _lockStateRepo.AreLocksExist())
         {
             _backgroundJobClient.Schedule(() =>
             ProcessCallLocally(pushedCallId, methodUrn, puhsedCallDate), TimeSpan.FromSeconds(3));

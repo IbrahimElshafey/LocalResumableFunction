@@ -11,6 +11,7 @@ namespace ReferenceLibrary
         [ResumableFunctionEntryPoint("TestFunctionInDll")]
         public async IAsyncEnumerable<Wait> TestFunctionInDll()
         {
+            var x = 1;
             yield return WaitGroup(
                 new[]
                 {
@@ -22,16 +23,15 @@ namespace ReferenceLibrary
                 },
                 "Wait first")
                 .MatchAny();
-
             yield return WaitMethod<string, string>
                (SayGoodby, "Wait say goodby")
-               .MatchIf((userName, helloMsg) => userName == UserName|| userName=="Ibrahim")
+               .MatchIf((userName, helloMsg) => userName == UserName)
                .AfterMatch((userName, helloMsg) =>
                {
-                   if (UserName == "Ebrahim")
+                   if (x == 1)
                    {
-                       UserName = "Ibrahim";
-                       throw new Exception("Ibrahim no Ebrahim");
+                       x++;
+                       throw new Exception("Exception for test.");
                    }
                    UserName = userName;
                })
