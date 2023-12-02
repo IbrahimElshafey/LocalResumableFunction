@@ -11,8 +11,10 @@ namespace ResumableFunctions.Publisher.InOuts
             Created = DateTime.UtcNow;
         }
         public MethodData MethodData { get; set; }
+        
         [MessagePack.IgnoreMember]
         public string[] ToServices { get; set; }
+        public int MessageId { get; set; }
         public string ServiceName { get; set; }
         public object Input { get; set; }
         public object Output { get; set; }
