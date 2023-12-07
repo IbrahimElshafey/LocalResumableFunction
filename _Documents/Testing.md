@@ -1,7 +1,9 @@
-﻿* Enable change testshell settings
+﻿* WHY WE CAN'T RUN TESTS IN PARALLEL??
+* Enable change testshell settings
 	* Run unit tests in parallel and in memory
 * Speed tests => work in memory
 * Register(RfClass) //will get dependent types and register all related
+
 # Test Shell Todo
 * Get instances for pushed call
 * Get matched waits for pushed call
@@ -20,7 +22,6 @@
 * 500 active resumable function
 * 100 resumable function activated by one pushed call
 * 10000 pushed call per second test
-
 
 
 # Generate test code for resumable function

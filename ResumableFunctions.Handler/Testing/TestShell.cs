@@ -280,8 +280,34 @@ namespace ResumableFunctions.Handler.Testing
             Context?.Dispose();
             CurrentApp?.Dispose();
         }
+        public async Task<List<WaitEntity>> GetWaitsCanceledByCall(long callId, string waitName = null)
+        {
+            return await Context
+               .Waits
+               .Include(x => x.ClosureData)
+               .Include(x => x.Locals)
+               .Where(x =>
+                   x.Status == WaitStatus.Canceled &&
+                   x.CallId == callId &&
+                   (waitName == null || x.Name == waitName))
+               .AsNoTracking()
+               .ToListAsync();
+        }
+        public async Task<List<WaitEntity>> GetWaitsMatchedByCall(long callId, string waitName = null)
+        {
+            return await Context
+               .Waits
+               .Include(x => x.ClosureData)
+               .Include(x => x.Locals)
+               .Where(x =>
+                   x.Status == WaitStatus.Completed &&
+                   x.CallId == callId &&
+                   (waitName == null || x.Name == waitName))
+               .AsNoTracking()
+               .ToListAsync();
+        }
 
-        internal async Task<List<WaitEntity>> GetWaitsCreateAfterCall(long callId)
+        public async Task<List<WaitEntity>> GetWaitsCreateAfterCall(long callId, string waitName = null)
         {
             var callIdCreated = await Context
                 .PushedCalls
@@ -292,7 +318,11 @@ namespace ResumableFunctions.Handler.Testing
             return await Context
                 .Waits
                 .Include(x => x.ClosureData)
-                .Where(x => x.Created > callIdCreated && x.Status == WaitStatus.Waiting)
+                .Include(x => x.Locals)
+                .Where(x =>
+                    x.Created > callIdCreated &&
+                    x.Status == WaitStatus.Waiting &&
+                    (waitName == null || x.Name == waitName))
                 .AsNoTracking()
                 .ToListAsync();
         }

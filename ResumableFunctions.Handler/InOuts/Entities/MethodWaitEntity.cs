@@ -124,27 +124,26 @@ public class MethodWaitEntity : WaitEntity
 
     internal override bool ValidateWaitRequest()
     {
-        switch (WasFirst)
+        if (WasFirst is false && MatchExpression == null)
         {
-            case false when MatchExpression == null:
-                FunctionState.AddError(
-                    $"You didn't set the [{nameof(MatchExpression)}] for wait [{Name}] that is not a first wait," +
-                    $"This will lead to no match for all calls," +
+            FunctionState.AddError(
+                    $"You didn't set the [{nameof(MatchExpression)}] for wait [{Name}]," +
+                    $"This will lead to no match for any call," +
                     $"You can use method {nameof(MethodWait<int, int>.MatchIf)}(Expression<Func<TInput, TOutput, bool>> value) to pass the [{nameof(MatchExpression)}]," +
                     $"or use [{nameof(MethodWait<int, int>.MatchAny)}()] method.", StatusCodes.WaitValidation, null);
-                break;
-            case true when MatchExpression == null:
-                FunctionState.AddLog(
-                    $"You didn't set the [{nameof(MatchExpression)}] for first wait [{Name}]," +
-                    $"This will lead to all calls will be matched.",
-                    LogType.Warning, StatusCodes.WaitValidation);
-                break;
+        }
+        else if (WasFirst is true && MatchExpression == null)
+        {
+            FunctionState.AddLog(
+                            $"You didn't set the [{nameof(MatchExpression)}] for first wait [{Name}]," +
+                            $"This will lead to all calls will be matched.",
+                            LogType.Warning, StatusCodes.WaitValidation);
         }
 
         if (AfterMatchAction == null)
             FunctionState.AddLog(
                 $"You didn't called the method [{nameof(MethodWait<int, int>.AfterMatch)}] for wait [{Name}], " +
-                $"Please use [{nameof(MethodWait<int, int>.NothingAfterMatch)}()] if this is intended.", LogType.Warning, StatusCodes.WaitValidation);
+                $"Please use [{nameof(MethodWait<int, int>.NoActionAfterMatch)}()] if this is intended.", LogType.Warning, StatusCodes.WaitValidation);
 
         return base.ValidateWaitRequest();
     }
@@ -228,7 +227,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
         return this;
     }
 
-    internal MethodWaitEntity<TInput, TOutput> NothingAfterMatch()
+    internal MethodWaitEntity<TInput, TOutput> NoActionAfterMatch()
     {
         AfterMatchAction = null;
         return this;

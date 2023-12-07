@@ -4,6 +4,7 @@ using ClientOnboarding.Workflow;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Testing;
+using static ClientOnboarding.Workflow.ClientOnboardingWorkflowPrivate;
 
 namespace Tests;
 
@@ -30,7 +31,7 @@ public class ClientOnboardingPrivate
                 new RegistrationResult { FormId = 5000 });
         Assert.Empty(await testShell.RoundCheck(1, 2, 0));
 
-        var newWait = (await testShell.GetWaitsCreateAfterCall(callId)).FirstOrDefault();
+        var newWait = (await testShell.GetWaitsCreateAfterCall(callId, WaitNames.OwnerApprove)).FirstOrDefault();
         Assert.NotNull(newWait);
         var taskId = newWait.ClosureData.GetProp<int>("ownerTaskId");
         await testShell.SimulateMethodCall<ClientOnboardingService>(
@@ -39,7 +40,7 @@ public class ClientOnboardingPrivate
             new OwnerApproveClientResult { OwnerApprovalId = 9000 });
         Assert.Empty(await testShell.RoundCheck(2, 3, 0));
 
-        newWait = (await testShell.GetWaitsCreateAfterCall(callId)).FirstOrDefault();
+        newWait = (await testShell.GetWaitsCreateAfterCall(callId, WaitNames.MeetingResult)).FirstOrDefault();
         Assert.NotNull(newWait);
         var clientMeetingId = newWait.ClosureData.GetProp<int>("clientMeetingId");
         await testShell.SimulateMethodCall<ClientOnboardingService>(

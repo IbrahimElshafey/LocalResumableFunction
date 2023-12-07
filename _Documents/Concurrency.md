@@ -1,7 +1,10 @@
 ﻿# Concurrency Scenarios
 * Review unit of work blocks
 * Review concurrency with [pen and paper]
-	* Review function state update lock `ExecuteAfterMatchAction`
+	* Review function state update lock
+		* ExecuteAfterMatchAction
+		* CancelMethodAction
+		* GroupMatchFuncName
 * Update [dbo].[WaitProcessingRecord] row
 * [dbo].[MethodIdentifiers] is updatable
 * Different services may try to add same MethodGroup at same time 

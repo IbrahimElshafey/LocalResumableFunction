@@ -17,18 +17,22 @@
 
 # UI V2
 * Actions on Wait 
-	* Cancel (If Waiting)
-	* Replay Go To (If Completed/Canceled)
-	* Replay Go Before (If Completed/Canceled)
-	* Replay Go After (If Completed/Canceled)
-	* Set Matched (If Waiting)
+	* Cancel Wait
+	* Cancel all and re-wait specefic wait
+	* Set Wait Status
+* Simulate push call
 * Actions on service
 	* Find dead methods
-	* Verify start waits exist in db for each RF
-	* Instance in progress but not wait anything check
+	* Everything Okay Checks
+		* Verify start waits exist in db for each RF
+		* Wait methods in same method group must have the same signature and attribute props
+		* Instance in progress but not wait anything check
+		* No failed instancs
+		* Closures classes are serializable
+		* Instance classes are serializable
+		* Get Errors in current service
+		* Registerd Method Ids exist in code
 	* Validate URN duplication when scan if different method signature
-	* Wait methods in same method group must have the same signature
-	* Return failed instancs
 	* Stop resumable function creation of new instances
 * Date range filter for:
 	* Logs view
