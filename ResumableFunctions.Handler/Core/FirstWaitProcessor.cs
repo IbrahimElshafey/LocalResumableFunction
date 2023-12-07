@@ -224,36 +224,4 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             throw;
         }
     }
-
-
-    //public async Task DeactivateFirstWait(int functionId)
-    //{
-    //    await _backgroundJobExecutor.Execute(
-    //        $"DeactivateFirstWait_{functionId}",
-    //        async () =>
-    //        {
-    //            var firstWaits = await _context
-    //                    .Waits
-    //                    .Include(x => x.FunctionState)
-    //                    .Where(
-    //                        wait =>
-    //                        wait.RequestedByFunctionId == functionId &&
-    //                        wait.IsFirst &&
-    //                        wait.Status == WaitStatus.Waiting)
-    //                    .ToListAsync();
-
-    //            foreach (var firstWait in firstWaits)
-    //            {
-    //                if (firstWait != default)
-    //                {
-    //                    firstWait.IsFirst = false;
-    //                    firstWait.Cancel();
-    //                    _context.Waits.Remove(firstWait);
-    //                    _context.FunctionStates.Remove(firstWait.FunctionState);
-    //                }
-    //                await _context.SaveChangesAsync();
-    //            }
-    //        },
-    //        $"Error when try to deactivate first wait for function [{functionId}].", true);
-    //}
 }

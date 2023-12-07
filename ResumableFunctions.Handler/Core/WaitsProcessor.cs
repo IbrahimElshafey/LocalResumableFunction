@@ -454,7 +454,6 @@ namespace ResumableFunctions.Handler.Core
             try
             {
                 action(_waitCall);
-                //await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
