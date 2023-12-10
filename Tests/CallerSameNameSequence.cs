@@ -5,12 +5,12 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.Testing;
 
 namespace Tests;
-public class SameCallerName
+public class CallerSameNameSequence
 {
     [Fact]
-    public async Task SameCallerName_Test()
+    public async Task CallerSameNameSequence_Test()
     {
-        using var test = new TestShell(nameof(SameCallerName_Test), typeof(Test));
+        using var test = new TestShell(nameof(CallerSameNameSequence_Test), typeof(Test));
         await test.ScanTypes();
         Assert.Empty(await test.RoundCheck(0, 0, 0));
 
@@ -28,8 +28,8 @@ public class SameCallerName
 
     public class Test : ResumableFunctionsContainer
     {
-        [ResumableFunctionEntryPoint("ThreeMethodsSequence")]
-        public async IAsyncEnumerable<Wait> ThreeMethodsSequence()
+        [ResumableFunctionEntryPoint("CallerSameNameSequence")]
+        public async IAsyncEnumerable<Wait> CallerSameNameSequence()
         {
             yield return CallerSameName(8, 10);
 

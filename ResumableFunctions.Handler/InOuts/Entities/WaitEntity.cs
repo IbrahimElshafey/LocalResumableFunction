@@ -156,22 +156,22 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
         if (CurrentFunction == null)
             LoadUnmappedProps();
         var functionRunner = new FunctionRunner(this);
-        if (functionRunner.ResumableFunctionExistInCode is false)
-        {
-            var errorMsg = $"Resumable function ({RequestedByFunction.MethodName}) not exist in code";
-            FunctionState.AddError(errorMsg, StatusCodes.MethodValidation, null);
-            throw new Exception(errorMsg);
-        }
+        //if (functionRunner.ResumableFunctionExistInCode is false)
+        //{
+        //    var errorMsg = $"Resumable function ({RequestedByFunction.MethodName}) not exist in code";
+        //    FunctionState.AddError(errorMsg, StatusCodes.MethodValidation, null);
+        //    throw new Exception(errorMsg);
+        //}
 
         try
         {
             var waitExist = await functionRunner.MoveNextAsync();
             if (waitExist)
             {
-                var nextWait = functionRunner.CurrentWait;
+                var nextWait = functionRunner.CurrentWaitEntity;
 
                 FunctionState.AddLog(
-                    $"Get next wait [{functionRunner.CurrentWait.Name}] " +
+                    $"Get next wait [{functionRunner.CurrentWaitEntity.Name}] " +
                     $"after [{Name}]", LogType.Info, StatusCodes.WaitProcessing);
 
                 nextWait.ParentWaitId = ParentWaitId;
@@ -180,7 +180,7 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
                 nextWait.RequestedByFunctionId = RequestedByFunctionId;
                 nextWait.RootFunctionId = RootFunctionId;
 
-                return nextWait = functionRunner.CurrentWait;
+                return nextWait = functionRunner.CurrentWaitEntity;
             }
 
             return null;

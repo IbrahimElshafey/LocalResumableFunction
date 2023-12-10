@@ -1,4 +1,5 @@
 ﻿# Features
+* Find instances that failed when resume execution and re-run them
 * Build Nuget package to target multiple runtimes and versions
 * Security and IUserContext
 

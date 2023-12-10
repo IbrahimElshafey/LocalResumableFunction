@@ -10,6 +10,7 @@
 
         public const string CompilerClosurePrefix = "<>c__DisplayClass";
         public const string CompilerCallerSuffix = "__this";
+        public const string CompilerStateFieldName = "<>1__state";
         public const string CompilerStaticLambdas = "<>c";
     }
 }

@@ -175,17 +175,16 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             classInstance.InitializeDependencies(_serviceProvider);
             classInstance.CurrentResumableFunction = resumableFunction;
             var functionRunner = new FunctionRunner(classInstance, resumableFunction);
-            if (functionRunner.ResumableFunctionExistInCode is false)
-            {
-                var message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
-                _logger.LogWarning(message);
-                await _logsRepo.AddErrorLog(null, message, StatusCodes.FirstWait);
-
-                throw new NullReferenceException(message);
-            }
+            //if (functionRunner.ResumableFunctionExistInCode is false)
+            //{
+            //    var message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
+            //    _logger.LogWarning(message);
+            //    await _logsRepo.AddErrorLog(null, message, StatusCodes.FirstWait);
+            //    throw new NullReferenceException(message);
+            //}
 
             await functionRunner.MoveNextAsync();
-            var firstWait = functionRunner.CurrentWait;
+            var firstWait = functionRunner.CurrentWaitEntity;
 
             if (firstWait == null)
             {

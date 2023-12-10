@@ -28,6 +28,8 @@
 		* https://hazelcast.com/clients/dotnet/
 		* https://www.couchbase.com/
 		* https://github.com/DevrexLabs/memstate
+			* https://memstate.io/
+			* https://github.com/EventStore/EventStore
 ## Logs
 * Fast logging
 	* Separate data store for log

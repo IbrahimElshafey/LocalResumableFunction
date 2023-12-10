@@ -1,13 +1,14 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.BaseUse;
+using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts.Entities;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.Core;
 
-public class FunctionRunner : IAsyncEnumerator<Wait>
+public class FunctionRunner : IAsyncEnumerator<Wait>, IFunctionRunner
 {
     private IAsyncEnumerator<Wait> _functionRunner;
     private readonly WaitEntity _oldMatchedWait;
@@ -30,7 +31,9 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         CreateRunnerIfNull(functionRunnerType);
         SetRunnerCallerRfCalss(oldMatchedWait.CurrentFunction);
         ResumeClosure(oldMatchedWait.ClosureData);
-        SetState(oldMatchedWait.StateAfterWait);
+        State = oldMatchedWait.StateAfterWait;
+        if (_functionRunner == null)
+            throw new Exception($"Resumable function ({oldMatchedWait?.RequestedByFunction.MethodName}) not exist in code");
     }
 
     public FunctionRunner(
@@ -42,18 +45,20 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             .FirstOrDefault(x => x.Name.StartsWith($"<{resumableFunction.Name}>"));
         CreateRunnerIfNull(functionRunnerType);
         SetRunnerCallerRfCalss(classInstance);
-        SetState(int.MinValue);
+        State = int.MinValue;
+        if (_functionRunner == null)
+            throw new Exception($"Can't initiate runner.");
     }
 
     public FunctionRunner(IAsyncEnumerator<Wait> runner)
     {
         _functionRunner = runner;
+        if (_functionRunner == null)
+            throw new Exception($"Can't initiate runner.");
     }
 
-    public bool ResumableFunctionExistInCode => _functionRunner != null;
-
     public Wait Current => _functionRunner.Current;
-    public WaitEntity CurrentWait => _functionRunner.Current.WaitEntity;
+    public WaitEntity CurrentWaitEntity => _functionRunner.Current.WaitEntity;
 
     public ValueTask DisposeAsync()
     {
@@ -65,7 +70,7 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         var hasNext = await _functionRunner.MoveNextAsync();
         if (hasNext)
         {
-            CurrentWait.StateAfterWait = GetState();
+            CurrentWaitEntity.StateAfterWait = State;
             //set locals for the new incoming wait
             SetLocalsForIncomingWait();
 
@@ -79,24 +84,26 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
     {
         var closureContinuation =
                         _oldMatchedWait != null &&
-                        _oldMatchedWait.CallerName == CurrentWait.CallerName &&
+                        _oldMatchedWait.CallerName == CurrentWaitEntity.CallerName &&
                         _oldMatchedWait.ClosureData != null;
 
         var closureFields = GetClosureFields();
         var activeClosure = closureFields?.
              Select(x => x.GetValue(_functionRunner)).
-             LastOrDefault(x => x != null);//we may have two closures like <>c__DisplayClass0_0,<>c__DisplayClass0_1
+             LastOrDefault(x => x != null);
+        //we may have two closures like <>c__DisplayClass0_0,<>c__DisplayClass0_1
+        //but this code is based on one closure will be active and not equal to one
 
         if (activeClosure == null) return;
-        var callerName = CurrentWait.CallerName;
+        var callerName = CurrentWaitEntity.CallerName;
 
         if (closureContinuation)
         {
             _oldMatchedWait.ClosureData.Value = activeClosure;
-            CurrentWait.ClosureData = _oldMatchedWait.ClosureData;
+            CurrentWaitEntity.ClosureData = _oldMatchedWait.ClosureData;
         }
 
-        CurrentWait.ActionOnChildrenTree(wait =>
+        CurrentWaitEntity.ActionOnChildrenTree(wait =>
         {
             if (wait.CallerName == callerName)
                 wait.SetClosureObject(activeClosure);
@@ -111,11 +118,11 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
         if (localsContinuation)
         {
             _oldMatchedWait.Locals.Value = _functionRunner;
-            CurrentWait.Locals = _oldMatchedWait.Locals;
+            CurrentWaitEntity.Locals = _oldMatchedWait.Locals;
         }
         else if (RunnerHasValue())
         {
-            CurrentWait.Locals = new PrivateData
+            CurrentWaitEntity.Locals = new PrivateData
             {
                 Value = _functionRunner,
                 FunctionStateId = _oldMatchedWait?.FunctionStateId
@@ -204,21 +211,19 @@ public class FunctionRunner : IAsyncEnumerator<Wait>
             activeField.SetValue(_functionRunner, closure);
     }
 
-    private int GetState()
+    public int State
     {
-        if (_functionRunner == null) return int.MinValue;
-        var stateField = _functionRunner?.GetType().GetField("<>1__state");
-        if (stateField != null) return (int)stateField.GetValue(_functionRunner);
-
-        return int.MinValue;
-    }
-
-    private void SetState(int state)
-    {
-        if (_functionRunner != null)
+        get
         {
-            var stateField = _functionRunner?.GetType().GetField("<>1__state");
-            if (stateField != null) stateField.SetValue(_functionRunner, state);
+            if (_functionRunner == null) return int.MinValue;
+            var stateField = _functionRunner?.GetType().GetField(Constants.CompilerStateFieldName);
+            return stateField != null ? (int)stateField.GetValue(_functionRunner) : int.MinValue;
+        }
+        set
+        {
+            if (_functionRunner == null) return;
+            var stateField = _functionRunner?.GetType().GetField(Constants.CompilerStateFieldName);
+            stateField?.SetValue(_functionRunner, value);
         }
     }
 }
