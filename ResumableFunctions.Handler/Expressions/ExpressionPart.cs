@@ -18,7 +18,7 @@ public partial class MatchExpressionWriter
         public Expression InputOutputPart { get; }
         public Expression ValuePart { get; }
         public BinaryExpression Expression { get; }
-        public bool IsMandatory { get; set; }
+        public bool IsMandatory { get; internal set; }
     }
 
 }

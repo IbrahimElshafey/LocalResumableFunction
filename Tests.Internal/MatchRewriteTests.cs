@@ -4,7 +4,7 @@ using ResumableFunctions.Handler.InOuts.Entities;
 using System.Linq.Expressions;
 using System.Reflection.Emit;
 
-namespace Tests
+namespace Tests.Internal
 {
     public class MatchRewriteTests
     {

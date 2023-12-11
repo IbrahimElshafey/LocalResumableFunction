@@ -1,6 +1,7 @@
-# What are resumable functions and how?
-Envision having a capability that enables us to wait for a method to execute over extended periods, spanning hours, days, or even months, all without burdening the CPU or causing excessive memory consumption. Such a feature would represent a profound leap forward in the way we approach software development.
+# What are resumable functions?
+Resumable functions are functions or methods endowed with the capability to be paused or suspended during execution when encountering a "wait" method execution request. These functions remain in a suspended state until the corresponding "wait" method is executed, at which point they seamlessly resume execution from the exact point where they were previously halted. This unique feature allows developers to efficiently manage long-running or asynchronous tasks within their code, offering enhanced readability, maintainability, and flexibility in software development.
 
+# How Resuamble Function looks like?
 As an example, if we were designing a method to handle a vacation request workflow, it might look something like this:
 ```
 wait VacationRequestSubmitted()
@@ -61,3 +62,29 @@ This article gives you a broad perspective on what resumable functions are and h
 7. **What's Next?**: To wrap it up, I'll offer some guidance on your next steps. Whether you're eager to explore further, dig into documentation, work on sample projects, or tap into community support resources, I'll point you in the right direction.
 
 So, let's roll up our sleeves and get started on this journey into the world of resumable functions!
+
+
+# What are some applications that will benefit form resumable functions?
+Resumable functions can be beneficial in various scenarios, especially where long-running or asynchronous tasks need to be efficiently managed. Some applications that can benefit from resumable functions include:
+
+1. **Workflow Orchestration Systems**: Resumable functions can simplify the orchestration of complex workflows, allowing developers to express the flow of a process more intuitively.
+
+2. **Distributed Systems**: In distributed systems where processes may span across multiple services or nodes, resumable functions can help manage and coordinate asynchronous tasks, enhancing fault tolerance and system robustness.
+
+3. **Asynchronous Web Applications**: Resumable functions can streamline the handling of asynchronous events in web applications, making it easier to manage user interactions, background tasks, and communication with external services.
+
+4. **Task Automation**: Applications that involve automation of tasks, such as batch processing, data pipelines, or scheduled jobs, can benefit from the ability to pause and resume functions at specific points in their execution.
+
+5. **Stateful Conversational Agents**: In the development of chatbots or conversational agents, resumable functions can aid in managing state across multiple user interactions, creating more natural and context-aware conversations.
+
+6. **Event-Driven Architectures**: Systems relying on event-driven architectures, where actions are triggered by specific events, can use resumable functions to handle event-driven workflows more effectively.
+
+7. **Resource Management in Cloud Environments**: Resumable functions can be valuable in managing cloud resources, allowing for more efficient handling of long-running operations, such as provisioning or deprovisioning resources.
+
+8. **Game Development**: In game development, especially for games with complex interactions and asynchronous events, resumable functions can help manage game logic and events more gracefully.
+
+9. **Finance and Trading Systems**: Applications dealing with financial transactions and trading often involve asynchronous processes. Resumable functions can help manage and coordinate these processes in a more structured way.
+
+10. **Parallel Processing and Concurrent Programming**: Resumable functions can be applied in scenarios where parallel processing or concurrent programming is used, making it easier to synchronize and manage multiple tasks.
+
+In essence, any application with asynchronous or long-running processes that require a more intuitive and readable way of expressing their logic can benefit from the use of resumable functions.

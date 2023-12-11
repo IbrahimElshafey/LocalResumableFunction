@@ -8,17 +8,17 @@ using System.Reflection;
 namespace ResumableFunctions.Handler.InOuts.Entities;
 public class PushedCall : IEntity<long>, IBeforeSaveEntity
 {
-    public long Id { get; set; }
+    public long Id { get; internal set; }
     [NotMapped]
-    public MethodData MethodData { get; set; }
-    public byte[] MethodDataValue { get; set; }
+    public MethodData MethodData { get; internal set; }
+    public byte[] MethodDataValue { get; internal set; }
     [NotMapped]
-    public InputOutput Data { get; set; } = new();
-    public byte[] DataValue { get; set; }
-    public int? ServiceId { get; set; }
+    public InputOutput Data { get; internal set; } = new();
+    public byte[] DataValue { get; internal set; }
+    public int? ServiceId { get; internal set; }
 
-    public DateTime Created { get; set; }
-    public string MethodUrn { get; set; }
+    public DateTime Created { get; internal set; }
+    public string MethodUrn { get; internal set; }
 
     internal string GetMandatoryPart(LambdaExpression CallMandatoryPartExpression)
     {

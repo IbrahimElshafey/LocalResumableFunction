@@ -2,14 +2,14 @@
 
 public class LogRecord : IEntity<long>
 {
-    public long Id { get; set; }
-    public long? EntityId { get; set; }
-    public EntityType EntityType { get; set; }
-    public LogType LogType { get; set; } = LogType.Info;
-    public string Message { get; set; }
-    public DateTime Created { get; set; }
-    public int StatusCode { get; set; }
-    public int? ServiceId { get; set; }
+    public long Id { get; internal set; }
+    public long? EntityId { get; internal set; }
+    public EntityType EntityType { get; internal set; }
+    public LogType LogType { get; internal set; } = LogType.Info;
+    public string Message { get; internal set; }
+    public DateTime Created { get; internal set; }
+    public int StatusCode { get; internal set; }
+    public int? ServiceId { get; internal set; }
 
     public override string ToString()
     {

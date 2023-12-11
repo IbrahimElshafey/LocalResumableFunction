@@ -13,30 +13,30 @@ public class ResumableFunctionState : IEntity<int>, IEntityWithUpdate, IEntityWi
     [IgnoreMember]
     [NotMapped]
     public List<LogRecord> Logs { get; set; } = new();
-    public int Id { get; set; }
-    public int? ServiceId { get; set; }
-    public DateTime Created { get; set; }
+    public int Id { get; internal set; }
+    public int? ServiceId { get; internal set; }
+    public DateTime Created { get; internal set; }
     /// <summary>
     /// Serialized class instance that contain the resumable function instance data
     /// </summary>
     [NotMapped]
-    public object StateObject { get; set; }
-    public byte[] StateObjectValue { get; set; }
+    public object StateObject { get; internal set; }
+    public byte[] StateObjectValue { get; internal set; }
 
-    public List<WaitEntity> Waits { get; set; } = new();
+    public List<WaitEntity> Waits { get; internal set; } = new();
 
 
-    public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; set; }
-    public int ResumableFunctionIdentifierId { get; set; }
-    public FunctionInstanceStatus Status { get; set; }
-    public DateTime Modified { get; set; }
-    public string ConcurrencyToken { get; set; }
+    public ResumableFunctionIdentifier ResumableFunctionIdentifier { get; internal set; }
+    public int ResumableFunctionIdentifierId { get; internal set; }
+    public FunctionInstanceStatus Status { get; internal set; }
+    public DateTime Modified { get; internal set; }
+    public string ConcurrencyToken { get; internal set; }
 
-    public bool IsDeleted { get; set; }
+    public bool IsDeleted { get; internal set; }
 
     public EntityType EntityType => EntityType.FunctionInstanceLog;
 
-    //public Closures Closures { get; set; } = new();
+    //public Closures Closures { get; internal set; } = new();
 
     public void BeforeSave()
     {

@@ -2,15 +2,15 @@
 public class CallEffection
 {
 
-    public int AffectedServiceId { get; set; }
-    public string AffectedServiceName { get; set; }
-    public string AffectedServiceUrl { get; set; }
-    public List<int> AffectedFunctionsIds { get; set; }
+    public int AffectedServiceId { get; internal set; }
+    public string AffectedServiceName { get; internal set; }
+    public string AffectedServiceUrl { get; internal set; }
+    public List<int> AffectedFunctionsIds { get; internal set; }
 
-    public long CallId { get; set; }
-    public string MethodUrn { get; set; }
-    public int MethodGroupId { get; set; }
-    public DateTime CallDate { get; set; }
+    public long CallId { get; internal set; }
+    public string MethodUrn { get; internal set; }
+    public int MethodGroupId { get; internal set; }
+    public DateTime CallDate { get; internal set; }
 
 
     public override string ToString()

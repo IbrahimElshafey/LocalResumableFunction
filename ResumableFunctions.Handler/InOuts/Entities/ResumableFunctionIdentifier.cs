@@ -4,10 +4,10 @@ namespace ResumableFunctions.Handler.InOuts.Entities;
 
 public class ResumableFunctionIdentifier : MethodIdentifier
 {
-    public string RF_MethodUrn { get; set; }
-    public List<WaitEntity> WaitsCreatedByFunction { get; set; }
-    public List<ResumableFunctionState> ActiveFunctionsStates { get; set; }
-    public bool IsActive { get; set; } = true;
+    public string RF_MethodUrn { get; internal set; }
+    public List<WaitEntity> WaitsCreatedByFunction { get; internal set; }
+    public List<ResumableFunctionState> ActiveFunctionsStates { get; internal set; }
+    public bool IsActive { get; internal set; } = true;
 
 
     public bool IsEntryPoint => Type == MethodType.ResumableFunctionEntryPoint;

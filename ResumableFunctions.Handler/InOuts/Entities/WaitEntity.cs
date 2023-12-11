@@ -11,26 +11,26 @@ namespace ResumableFunctions.Handler.InOuts.Entities;
 public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWithDelete, IBeforeSaveEntity, IAfterChangesSaved
 {
 
-    public long Id { get; set; }
-    public DateTime Created { get; set; }
-    public string Name { get; set; }
-    public WaitStatus Status { get; set; } = WaitStatus.Waiting;
-    public bool IsFirst { get; set; }
-    public bool WasFirst { get; set; }
-    public int StateAfterWait { get; set; }
-    public bool IsRoot { get; set; }
-    public int RootFunctionId { get; set; }
+    public long Id { get; internal set; }
+    public DateTime Created { get; internal set; }
+    public string Name { get; internal set; }
+    public WaitStatus Status { get; internal set; } = WaitStatus.Waiting;
+    public bool IsFirst { get; internal set; }
+    public bool WasFirst { get; internal set; }
+    public int StateAfterWait { get; internal set; }
+    public bool IsRoot { get; internal set; }
+    public int RootFunctionId { get; internal set; }
 
     [NotMapped]
-    public dynamic ExtraData { get; set; }
-    public byte[] ExtraDataValue { get; set; }
+    public dynamic ExtraData { get; internal set; }
+    public byte[] ExtraDataValue { get; internal set; }
 
-    public int? ServiceId { get; set; }
+    public int? ServiceId { get; internal set; }
 
-    public WaitType WaitType { get; set; }
-    public DateTime Modified { get; set; }
-    public string ConcurrencyToken { get; set; }
-    public bool IsDeleted { get; set; }
+    public WaitType WaitType { get; internal set; }
+    public DateTime Modified { get; internal set; }
+    public string ConcurrencyToken { get; internal set; }
+    public bool IsDeleted { get; internal set; }
 
     /// <summary>
     /// The state object of current resumable function container.
@@ -65,22 +65,22 @@ public abstract class WaitEntity : IEntity<long>, IEntityWithUpdate, IEntityWith
     public long? LocalsId { get; internal set; }
 
 
-    public PrivateData ClosureData { get; set; }
-    public long? ClosureDataId { get; set; }
+    public PrivateData ClosureData { get; internal set; }
+    public long? ClosureDataId { get; internal set; }
 
     [NotMapped]
     public object ClosureObject { get; private set; }
 
 
-    public string Path { get; set; }
+    public string Path { get; internal set; }
 
     [NotMapped]
     internal ResumableFunctionsContainer CurrentFunction { get; set; }
 
     internal bool CanBeParent => this is FunctionWaitEntity || this is WaitsGroupEntity;
     internal long? CallId { get; set; }
-    public int InCodeLine { get; set; }
-    public string CallerName { get; set; }
+    public int InCodeLine { get; internal set; }
+    public string CallerName { get; internal set; }
 
     //MethodWait.AfterMatch(Action<TInput, TOutput>)
     //MethodWait.WhenCancel(Action cancelAction)

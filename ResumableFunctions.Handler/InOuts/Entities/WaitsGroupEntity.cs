@@ -11,7 +11,7 @@ public class WaitsGroupEntity : WaitEntity
         WaitType = WaitType.GroupWaitAll;
     }
 
-    public string GroupMatchFuncName { get; set; }
+    public string GroupMatchFuncName { get; internal set; }
 
     internal override bool IsCompleted()
     {

@@ -25,11 +25,11 @@ public class MethodWaitEntity : WaitEntity
     [NotMapped]
     public string CancelMethodAction { get; protected set; }
     public MethodWaitType MethodWaitType { get; internal set; } = MethodWaitType.NormalMethod;
-    public string MandatoryPart { get; set; }
+    public string MandatoryPart { get; internal set; }
 
     [NotMapped]
     internal WaitTemplate Template { get; set; }
-    public int TemplateId { get; set; }
+    public int TemplateId { get; internal set; }
 
     [NotMapped]
     internal WaitMethodIdentifier MethodToWait { get; set; }
@@ -43,10 +43,10 @@ public class MethodWaitEntity : WaitEntity
     internal MethodData MethodData { get; set; }
 
     [NotMapped]
-    public object Input { get; set; }
+    public object Input { get; internal set; }
 
     [NotMapped]
-    public object Output { get; set; }
+    public object Output { get; internal set; }
 
     [NotMapped]
     public MatchExpressionParts MatchExpressionParts { get; protected set; }
@@ -55,7 +55,7 @@ public class MethodWaitEntity : WaitEntity
     {
         try
         {
-            if (AfterMatchAction == null) return true;
+            if (string.IsNullOrWhiteSpace(AfterMatchAction)) return true;
             InvokeCallback(AfterMatchAction, Input, Output);
             FunctionState.StateObject = CurrentFunction;
             FunctionState.AddLog($"After wait [{Name}] action executed.", LogType.Info, StatusCodes.WaitProcessing);
@@ -229,7 +229,7 @@ public class MethodWaitEntity<TInput, TOutput> : MethodWaitEntity
 
     internal MethodWaitEntity<TInput, TOutput> NoActionAfterMatch()
     {
-        AfterMatchAction = null;
+        AfterMatchAction = string.Empty;
         return this;
     }
 

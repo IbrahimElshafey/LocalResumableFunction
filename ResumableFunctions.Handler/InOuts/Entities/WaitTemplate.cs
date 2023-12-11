@@ -8,40 +8,40 @@ namespace ResumableFunctions.Handler.InOuts.Entities;
 
 public class WaitTemplate : IEntity<int>, IBeforeSaveEntity
 {
-    public int Id { get; set; }
-    public int FunctionId { get; set; }
-    public int? MethodId { get; set; }
-    public int MethodGroupId { get; set; }
-    public MethodsGroup MethodGroup { get; set; }
-    public byte[] Hash { get; set; }
-    public DateTime Created { get; set; }
-    public DateTime DeactivationDate { get; set; }
-    public bool IsMandatoryPartFullMatch { get; set; }
+    public int Id { get; internal set; }
+    public int FunctionId { get; internal set; }
+    public int? MethodId { get; internal set; }
+    public int MethodGroupId { get; internal set; }
+    public MethodsGroup MethodGroup { get; internal set; }
+    public byte[] Hash { get; internal set; }
+    public DateTime Created { get; internal set; }
+    public DateTime DeactivationDate { get; internal set; }
+    public bool IsMandatoryPartFullMatch { get; internal set; }
 
     internal string MatchExpressionValue { get; set; }
     internal string CallMandatoryPartExpressionValue { get; set; }
 
     internal string InstanceMandatoryPartExpressionValue { get; set; }
 
-    public string CancelMethodAction { get; set; }
+    public string CancelMethodAction { get; internal set; }
 
     [NotMapped]
-    public LambdaExpression MatchExpression { get; set; }
+    public LambdaExpression MatchExpression { get; internal set; }
 
     [NotMapped]
-    public LambdaExpression CallMandatoryPartExpression { get; set; }
+    public LambdaExpression CallMandatoryPartExpression { get; internal set; }
 
     [NotMapped]
-    public LambdaExpression InstanceMandatoryPartExpression { get; set; }
+    public LambdaExpression InstanceMandatoryPartExpression { get; internal set; }
 
 
 
-    public string AfterMatchAction { get; set; }
+    public string AfterMatchAction { get; internal set; }
 
 
-    public int? ServiceId { get; set; }
-    public int InCodeLine { get; set; }
-    public int IsActive { get; set; } = 1;
+    public int? ServiceId { get; internal set; }
+    public int InCodeLine { get; internal set; }
+    public int IsActive { get; internal set; } = 1;
     //public List<MethodWaitEntity> Waits { get; internal set; }
 
     bool expressionsLoaded;

@@ -7,14 +7,14 @@ public abstract class MethodIdentifier : IEntity<int>, IEntityWithUpdate
 {
     private MethodInfo _methodInfo;
 
-    public int Id { get; set; }
-    public string AssemblyName { get; set; }
-    public DateTime Created { get; set; }
-    public string ClassName { get; set; }
-    public string MethodName { get; set; }
-    public string MethodSignature { get; set; }
-    public byte[] MethodHash { get; set; }
-    public MethodType Type { get; set; }
+    public int Id { get; internal set; }
+    public string AssemblyName { get; internal set; }
+    public DateTime Created { get; internal set; }
+    public string ClassName { get; internal set; }
+    public string MethodName { get; internal set; }
+    public string MethodSignature { get; internal set; }
+    public byte[] MethodHash { get; internal set; }
+    public MethodType Type { get; internal set; }
     internal MethodInfo MethodInfo
     {
         get
@@ -24,10 +24,10 @@ public abstract class MethodIdentifier : IEntity<int>, IEntityWithUpdate
             return _methodInfo;
         }
     }
-    public int? ServiceId { get; set; }
+    public int? ServiceId { get; internal set; }
 
-    public DateTime Modified { get; set; }
-    public string ConcurrencyToken { get; set; }
+    public DateTime Modified { get; internal set; }
+    public string ConcurrencyToken { get; internal set; }
 
     public override string ToString()
     {
