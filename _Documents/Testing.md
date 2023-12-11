@@ -1,7 +1,7 @@
 ﻿* WHY WE CAN'T RUN TESTS IN PARALLEL??
 * Enable change testshell settings
 	* Run unit tests in parallel and in memory
-* Speed tests => work in memory
+	* Speed tests => work in memory
 * Register(RfClass) //will get dependent types and register all related
 
 # Test Shell Todo

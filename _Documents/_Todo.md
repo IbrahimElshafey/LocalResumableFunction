@@ -23,6 +23,7 @@
 
 
 # Big Todos
+* Reliable communication between services with each others and with clients
 * Publisher Project TODOs
 * Side by Side Versions
 * Analyzer
