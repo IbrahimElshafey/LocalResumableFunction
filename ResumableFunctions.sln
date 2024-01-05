@@ -36,6 +36,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResumableFunctions.Publishe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RequestApproval", "Examples\RequestApproval\RequestApproval.csproj", "{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FakeOrderManagmentRequest", "FakeOrderManagmentRequest\FakeOrderManagmentRequest.csproj", "{27654352-A1DE-4061-9F92-130D4C555792}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,6 +92,10 @@ Global
 		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27654352-A1DE-4061-9F92-130D4C555792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27654352-A1DE-4061-9F92-130D4C555792}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27654352-A1DE-4061-9F92-130D4C555792}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27654352-A1DE-4061-9F92-130D4C555792}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -103,6 +109,7 @@ Global
 		{47154E1A-44E0-4016-89E4-42A79B16E87F} = {8AF132E9-5C5A-4D6C-B0FC-82FFCA700BA8}
 		{53A463A6-A5EA-42DC-8BBE-64D215274DFC} = {8AF132E9-5C5A-4D6C-B0FC-82FFCA700BA8}
 		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215} = {8AF132E9-5C5A-4D6C-B0FC-82FFCA700BA8}
+		{27654352-A1DE-4061-9F92-130D4C555792} = {8AF132E9-5C5A-4D6C-B0FC-82FFCA700BA8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AE5D3544-A75E-4511-ADAF-BEE3DA168EE9}
