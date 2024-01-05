@@ -5,19 +5,19 @@ using ResumableFunctions.Handler.Helpers;
 namespace ResumableFunctions.Handler.InOuts.Entities;
 public class PrivateData : IEntity<long>, IEntityWithUpdate, IAfterChangesSaved, IBeforeSaveEntity
 {
-    public long Id { get; set; }
-    public object Value { get; set; }
-    public string TypeName { get; set; }
-    public List<WaitEntity> ClosureLinkedWaits { get; set; }
-    public List<WaitEntity> LocalsLinkedWaits { get; set; }
+    public long Id { get; internal set; }
+    public object Value { get; internal set; }
+    public string TypeName { get; internal set; }
+    public List<WaitEntity> ClosureLinkedWaits { get; internal set; }
+    public List<WaitEntity> LocalsLinkedWaits { get; internal set; }
 
-    public DateTime Created { get; set; }
+    public DateTime Created { get; internal set; }
 
-    public int? ServiceId { get; set; }
+    public int? ServiceId { get; internal set; }
 
-    public DateTime Modified { get; set; }
+    public DateTime Modified { get; internal set; }
 
-    public string ConcurrencyToken { get; set; }
+    public string ConcurrencyToken { get; internal set; }
     public int? FunctionStateId { get; internal set; }
 
     public void AfterChangesSaved()

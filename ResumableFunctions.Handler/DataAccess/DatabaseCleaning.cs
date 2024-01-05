@@ -128,10 +128,5 @@ namespace ResumableFunctions.Handler.DataAccess
         {
             await _logsRepo.AddLog(message, LogType.Info, StatusCodes.DataCleaning);
         }
-
-        private async Task AddError(string message, Exception ex = null)
-        {
-            await _logsRepo.AddErrorLog(ex, message, StatusCodes.DataCleaning);
-        }
     }
 }

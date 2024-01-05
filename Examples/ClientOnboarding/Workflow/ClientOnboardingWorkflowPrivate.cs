@@ -5,7 +5,7 @@ using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.BaseUse;
 
 namespace ClientOnboarding.Workflow;
-public class ClientOnboardingWorkflowPrivate : ResumableFunctionsContainer
+public partial class ClientOnboardingWorkflowPrivate : ResumableFunctionsContainer
 {
     [ResumableFunctionEntryPoint("ClientOnboardingWorkflowPrivate.Start")]
     internal async IAsyncEnumerable<Wait> StartClientOnboardingWorkflow()
@@ -13,7 +13,7 @@ public class ClientOnboardingWorkflowPrivate : ResumableFunctionsContainer
         int localCounter = 10;
         var userId = -1;
         yield return
-            WaitMethod<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, "Wait User Registration")
+            WaitMethod<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, WaitNames.UserRegistration)
             .MatchIf((_, regResult) => regResult.FormId > 0)
             .AfterMatch((regForm, regResult) =>
             {
@@ -29,7 +29,7 @@ public class ClientOnboardingWorkflowPrivate : ResumableFunctionsContainer
         var ownerDecision = false;
         localCounter += 10;
         yield return
-            WaitMethod<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, "Wait Owner Approve Client")
+            WaitMethod<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, WaitNames.OwnerApprove)
             .MatchIf((approveClientInput, _) => approveClientInput.TaskId == ownerTaskId)
             .AfterMatch((approveClientInput, _) =>
             {
@@ -51,7 +51,7 @@ public class ClientOnboardingWorkflowPrivate : ResumableFunctionsContainer
             var clientMeetingId = _service.SetupInitalMeetingAndAgenda(userId).MeetingId;
 
             yield return
-                WaitMethod<int, MeetingResult>(_service.SendMeetingResult, "Wait Meeting Result")
+                WaitMethod<int, MeetingResult>(_service.SendMeetingResult, WaitNames.MeetingResult)
                .AfterMatch((_, _) =>
                {
                    Console.WriteLine("Closure level 2 and public method");

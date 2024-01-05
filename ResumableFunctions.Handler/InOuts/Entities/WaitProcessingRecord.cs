@@ -2,20 +2,20 @@
 
 public class WaitProcessingRecord : IEntity<long>, IEntityWithUpdate
 {
-    public long Id { get; set; }
-    public long PushedCallId { get; set; }
-    public long WaitId { get; set; }
-    public int? ServiceId { get; set; }
-    public int FunctionId { get; set; }
-    public int StateId { get; set; }
-    public int TemplateId { get; set; }
-    public MatchStatus MatchStatus { get; set; } = MatchStatus.ExpectedMatch;
-    public ExecutionStatus AfterMatchActionStatus { get; set; } = ExecutionStatus.NotStartedYet;
-    public ExecutionStatus ExecutionStatus { get; set; } = ExecutionStatus.NotStartedYet;
-    public DateTime Created { get; set; }
+    public long Id { get; internal set; }
+    public long PushedCallId { get; internal set; }
+    public long WaitId { get; internal set; }
+    public int? ServiceId { get; internal set; }
+    public int FunctionId { get; internal set; }
+    public int StateId { get; internal set; }
+    public int TemplateId { get; internal set; }
+    public MatchStatus MatchStatus { get; internal set; } = MatchStatus.ExpectedMatch;
+    public ExecutionStatus AfterMatchActionStatus { get; internal set; } = ExecutionStatus.NotStartedYet;
+    public ExecutionStatus ExecutionStatus { get; internal set; } = ExecutionStatus.NotStartedYet;
+    public DateTime Created { get; internal set; }
 
-    public DateTime Modified { get; set; }
-    public string ConcurrencyToken { get; set; }
+    public DateTime Modified { get; internal set; }
+    public string ConcurrencyToken { get; internal set; }
 
     public override bool Equals(object obj)
     {

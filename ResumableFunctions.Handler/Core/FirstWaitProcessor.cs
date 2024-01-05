@@ -175,17 +175,16 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             classInstance.InitializeDependencies(_serviceProvider);
             classInstance.CurrentResumableFunction = resumableFunction;
             var functionRunner = new FunctionRunner(classInstance, resumableFunction);
-            if (functionRunner.ResumableFunctionExistInCode is false)
-            {
-                var message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
-                _logger.LogWarning(message);
-                await _logsRepo.AddErrorLog(null, message, StatusCodes.FirstWait);
-
-                throw new NullReferenceException(message);
-            }
+            //if (functionRunner.ResumableFunctionExistInCode is false)
+            //{
+            //    var message = $"Resumable function ({resumableFunction.GetFullName()}) not exist in code.";
+            //    _logger.LogWarning(message);
+            //    await _logsRepo.AddErrorLog(null, message, StatusCodes.FirstWait);
+            //    throw new NullReferenceException(message);
+            //}
 
             await functionRunner.MoveNextAsync();
-            var firstWait = functionRunner.CurrentWait;
+            var firstWait = functionRunner.CurrentWaitEntity;
 
             if (firstWait == null)
             {
@@ -224,36 +223,4 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
             throw;
         }
     }
-
-
-    //public async Task DeactivateFirstWait(int functionId)
-    //{
-    //    await _backgroundJobExecutor.Execute(
-    //        $"DeactivateFirstWait_{functionId}",
-    //        async () =>
-    //        {
-    //            var firstWaits = await _context
-    //                    .Waits
-    //                    .Include(x => x.FunctionState)
-    //                    .Where(
-    //                        wait =>
-    //                        wait.RequestedByFunctionId == functionId &&
-    //                        wait.IsFirst &&
-    //                        wait.Status == WaitStatus.Waiting)
-    //                    .ToListAsync();
-
-    //            foreach (var firstWait in firstWaits)
-    //            {
-    //                if (firstWait != default)
-    //                {
-    //                    firstWait.IsFirst = false;
-    //                    firstWait.Cancel();
-    //                    _context.Waits.Remove(firstWait);
-    //                    _context.FunctionStates.Remove(firstWait.FunctionState);
-    //                }
-    //                await _context.SaveChangesAsync();
-    //            }
-    //        },
-    //        $"Error when try to deactivate first wait for function [{functionId}].", true);
-    //}
 }

@@ -38,6 +38,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RequestApproval", "Examples
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakeOrderManagmentRequest", "FakeOrderManagmentRequest\FakeOrderManagmentRequest.csproj", "{27654352-A1DE-4061-9F92-130D4C555792}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests.Internal", "Tests.Internal\Tests.Internal.csproj", "{7E5BCFD6-C262-4191-8406-BFB6FCC37C4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -94,10 +96,6 @@ Global
 		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1930BFC3-7AE7-489A-A17A-E5B2BA70F215}.Release|Any CPU.Build.0 = Release|Any CPU
-		{27654352-A1DE-4061-9F92-130D4C555792}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{27654352-A1DE-4061-9F92-130D4C555792}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{27654352-A1DE-4061-9F92-130D4C555792}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{27654352-A1DE-4061-9F92-130D4C555792}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

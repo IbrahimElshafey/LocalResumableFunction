@@ -7,17 +7,17 @@ public class ServiceData : IEntity<int>, IObjectWithLog, IEntityWithUpdate
     [IgnoreMember]
     [NotMapped]
     public List<LogRecord> Logs { get; set; } = new();
-    public int Id { get; set; }
-    public DateTime Created { get; set; }
-    public int? ServiceId { get; set; }
-    public string AssemblyName { get; set; }
-    public string Url { get; set; }
+    public int Id { get; internal set; }
+    public DateTime Created { get; internal set; }
+    public int? ServiceId { get; internal set; }
+    public string AssemblyName { get; internal set; }
+    public string Url { get; internal set; }
 
     [NotMapped]
-    public string[] ReferencedDlls { get; set; }
-    public DateTime Modified { get; set; }
-    public int ParentId { get; set; }
-    public string ConcurrencyToken { get; set; }
+    public string[] ReferencedDlls { get; internal set; }
+    public DateTime Modified { get; internal set; }
+    public int ParentId { get; internal set; }
+    public string ConcurrencyToken { get; internal set; }
 
     public EntityType EntityType => EntityType.ServiceLog;
 

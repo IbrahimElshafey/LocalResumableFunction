@@ -43,9 +43,18 @@ public class MatchExpressionUseCases
         {
             yield return
                 WaitMethod<string, string>(Method6, "M6")
-                .MatchIf((input, output) => input == "Test" && InstanceCall(input, output) && dep1.MethodIndep(input) > 0);
+                .MatchIf((input, output) => 
+                input == "Test" && //normal expression
+                InstanceCall(input, output) && //instance call in current class
+                dep1.MethodIndep(input) > 0 && //instance method in dependacies
+                TestClass.StaticMethod(input) //Static method in current class
+                );
         }
 
+        public static bool StaticMethod(string input)
+        {
+            return input.Length == 4;
+        }
         private bool InstanceCall(string input, string output)
         {
             return output == "TestM6" && input.Length == 4;

@@ -16,7 +16,7 @@
 * [How it works internally](#how-it-works-internally)
 
 # Resumable Function Example
-A resumable function is a function that can be suspended and resumed at a later point in time. This is in contrast to traditional functions, which must be executed to completion before they can return.
+Resumable functions are functions or methods endowed with the capability to be paused or suspended during execution when encountering a "wait" method execution request. These functions remain in a suspended state until the corresponding "wait" method is executed, at which point they seamlessly resume execution from the exact point where they were previously halted. This unique feature allows developers to efficiently manage long-running or asynchronous tasks within their code, offering enhanced readability, maintainability, and flexibility in software development.
 
 **Example**
 ![ResumableFunctionExample.png](/_Documents/GitHubDocs/IMG/ResumableFunctionExample.png)

@@ -31,6 +31,8 @@
     <None Include="$(MSBuildThisFileDirectory)Testing.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\MVC_Use.md" />
     <None Include="$(MSBuildThisFileDirectory)Background_Cleaning_Job.md" />
+    <None Include="$(MSBuildThisFileDirectory)ThinkHow\Why not message queues.md" />
+    <None Include="$(MSBuildThisFileDirectory)ThinkHow\RF Calls a Service.md" />
     <None Include="$(MSBuildThisFileDirectory)ThinkHow\اتصال متحقق.md" />
     <None Include="$(MSBuildThisFileDirectory)UsefulSnippet\AddEnternalProps.csx" />
     <None Include="$(MSBuildThisFileDirectory)Versioning-Migration.md" />

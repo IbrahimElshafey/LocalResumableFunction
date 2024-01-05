@@ -44,9 +44,9 @@ namespace ResumableFunctions.Handler.BaseUse
             return this;
         }
 
-        public MethodWait<TInput, TOutput> NothingAfterMatch()
+        public MethodWait<TInput, TOutput> NoActionAfterMatch()
         {
-            MethodWaitEnitity.NothingAfterMatch();
+            MethodWaitEnitity.NoActionAfterMatch();
             return this;
         }
 

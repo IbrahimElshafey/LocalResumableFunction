@@ -6,10 +6,7 @@ namespace ResumableFunctions.Handler.Expressions;
 
 public class ExpressionsHashCalculator : ExpressionVisitor
 {
-    private readonly LambdaExpression _matchExpression;
-    private readonly string _afterMatchAction;
-    private readonly string _cancelMethodAction;
-
+    public byte[] HashValue { get; }
     public ExpressionsHashCalculator(
         LambdaExpression matchExpression,
         string afterMatchAction,
@@ -17,9 +14,7 @@ public class ExpressionsHashCalculator : ExpressionVisitor
     {
         try
         {
-            _matchExpression = matchExpression;
-            _afterMatchAction = afterMatchAction;
-            _cancelMethodAction = cancelAction;
+            HashValue = GetHash(matchExpression, afterMatchAction, cancelAction);
         }
         catch (Exception e)
         {
@@ -28,17 +23,17 @@ public class ExpressionsHashCalculator : ExpressionVisitor
         }
     }
 
-    public byte[] GetHash()
+    private byte[] GetHash(LambdaExpression matchExpression, string afterMatchAction, string cancelAction)
     {
         var sb = new StringBuilder();
-        if (_matchExpression != null)
-            sb.Append(_matchExpression.ToString());
+        if (matchExpression != null)
+            sb.Append(matchExpression.ToString());
 
-        if (_afterMatchAction != null)
-            sb.Append(_afterMatchAction);
+        if (afterMatchAction != null)
+            sb.Append(afterMatchAction);
 
-        if (_cancelMethodAction != null)
-            sb.Append(_cancelMethodAction);
+        if (cancelAction != null)
+            sb.Append(cancelAction);
 
         return MD5.HashData(Encoding.Unicode.GetBytes(sb.ToString()));
     }

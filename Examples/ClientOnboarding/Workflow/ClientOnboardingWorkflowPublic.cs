@@ -3,6 +3,7 @@ using ClientOnboarding.Services;
 using ResumableFunctions.Handler;
 using ResumableFunctions.Handler.Attributes;
 using ResumableFunctions.Handler.BaseUse;
+using static ClientOnboarding.Workflow.ClientOnboardingWorkflowPrivate;
 
 namespace ClientOnboarding.Workflow
 {
@@ -44,7 +45,7 @@ namespace ClientOnboarding.Workflow
         {
             ClientMeetingId = _service.SetupInitalMeetingAndAgenda(UserId).MeetingId;
             return
-                WaitMethod<int, MeetingResult>(_service.SendMeetingResult, "Wait Meeting Result")
+                WaitMethod<int, MeetingResult>(_service.SendMeetingResult, WaitNames.MeetingResult)
                .MatchIf((meetingId, meetingResult) => meetingId == ClientMeetingId)
                .AfterMatch((meetingId, meetingResult) => Console.WriteLine(ClientMeetingId));
         }
@@ -53,7 +54,7 @@ namespace ClientOnboarding.Workflow
         {
             OwnerTaskId = _service.AskOwnerToApproveClient(FormId).Id;
             return
-                WaitMethod<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, "Wait Owner Approve Client")
+                WaitMethod<OwnerApproveClientInput, OwnerApproveClientResult>(_service.OwnerApproveClient, WaitNames.OwnerApprove)
                 .MatchIf((approveClientInput, approveResult) => approveClientInput.TaskId == OwnerTaskId)
                 .AfterMatch((approveClientInput, approveResult) => OwnerDecision = approveClientInput.Decision);
         }
@@ -61,7 +62,7 @@ namespace ClientOnboarding.Workflow
         private Wait WaitClientFillForm()
         {
             return
-                WaitMethod<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, "Wait User Registration")
+                WaitMethod<RegistrationForm, RegistrationResult>(_service.ClientFillsForm, WaitNames.UserRegistration)
                 .MatchIf((regForm, regResult) => regResult.FormId > 0)
                 .AfterMatch((regForm, regResult) =>
                 {

@@ -18,6 +18,7 @@
 		* Faster from Microsoft
 		* A fast store and forward message queue for .NET. (aka not a broker or server)
 			* https://github.com/LightningQueues/LightningQueues
+			* https://github.com/zeromq/netmq
 ## Waits
 * Store waits in different store that support:
 	* Fast queries
@@ -27,6 +28,8 @@
 		* https://hazelcast.com/clients/dotnet/
 		* https://www.couchbase.com/
 		* https://github.com/DevrexLabs/memstate
+			* https://memstate.io/
+			* https://github.com/EventStore/EventStore
 ## Logs
 * Fast logging
 	* Separate data store for log

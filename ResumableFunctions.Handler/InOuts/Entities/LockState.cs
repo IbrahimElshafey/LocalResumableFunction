@@ -1,12 +1,12 @@
 ﻿namespace ResumableFunctions.Handler.InOuts.Entities;
 public class LockState : IEntity<int>
 {
-    public int Id { get; set; }
+    public int Id { get; internal set; }
 
-    public DateTime Created { get; set; }
+    public DateTime Created { get; internal set; }
 
-    public int? ServiceId { get; set; }
+    public int? ServiceId { get; internal set; }
 
-    public string Name { get; set; }
-    public string ServiceName { get; set; }
+    public string Name { get; internal set; }
+    public string ServiceName { get; internal set; }
 }

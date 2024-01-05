@@ -16,8 +16,8 @@ public class TimeWaitEntity : WaitEntity
             new MethodWaitEntity<TimeWaitInput, bool>(timeWaitMethod) { CurrentFunction = currentFunction };
     }
 
-    public TimeSpan TimeToWait { get; set; }
-    public bool IgnoreJobCreation { get; set; }
+    public TimeSpan TimeToWait { get; internal set; }
+    public bool IgnoreJobCreation { get; internal set; }
     internal string UniqueMatchId { get; set; }
     internal MethodWaitEntity TimeWaitMethod
     {

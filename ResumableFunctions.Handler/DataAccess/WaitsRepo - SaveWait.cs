@@ -68,7 +68,7 @@ internal partial class WaitsRepo
     {
         var methodId = await _methodIdsRepo.GetId(methodWait);
         var funcId = methodWait.RequestedByFunctionId;
-        var expressionsHash = new ExpressionsHashCalculator(methodWait.MatchExpression, methodWait.AfterMatchAction, methodWait.CancelMethodAction).GetHash();
+        var expressionsHash = new ExpressionsHashCalculator(methodWait.MatchExpression, methodWait.AfterMatchAction, methodWait.CancelMethodAction).HashValue;
         methodWait.MethodToWaitId = methodId.MethodId;
         methodWait.MethodGroupToWaitId = methodId.GroupId;
 
@@ -121,14 +121,14 @@ internal partial class WaitsRepo
                 new FunctionRunner(functionWait.Runner) :
                 new FunctionRunner(functionWait.CurrentFunction, functionWait.FunctionInfo);
             var hasNext = await functionRunner.MoveNextAsync();
-            functionWait.FirstWait = functionRunner.CurrentWait;
+            functionWait.FirstWait = functionRunner.CurrentWaitEntity;
             if (hasNext is false)
             {
                 _logger.LogWarning($"No waits exist in sub function ({functionWait.FunctionInfo.GetFullName()})");
                 return;
             }
 
-            functionWait.FirstWait = functionRunner.CurrentWait;
+            functionWait.FirstWait = functionRunner.CurrentWaitEntity;
             functionWait.FirstWait.FunctionState = functionWait.FunctionState;
             functionWait.FirstWait.FunctionStateId = functionWait.FunctionState.Id;
             functionWait.FirstWait.ParentWait = functionWait;
