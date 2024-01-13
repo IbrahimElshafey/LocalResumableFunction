@@ -45,7 +45,7 @@ namespace FakeOrderManagmentRequest.Workflow
                .AfterMatch((orderReviewTask, result) =>
                {
                    reviewTask = orderReviewTask;
-                   throw new Exception("Something wrong happened.");
+                   //throw new Exception("Something wrong happened.");
                });
 
             if (reviewTask.IsApproved)

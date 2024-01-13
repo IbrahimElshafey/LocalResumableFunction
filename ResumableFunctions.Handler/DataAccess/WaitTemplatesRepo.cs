@@ -7,17 +7,15 @@ using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
 
-internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
+internal class WaitTemplatesRepo : IWaitTemplatesRepo
 {
     private readonly WaitsDataContext _context;
-    private readonly IServiceScope _scope;
     private readonly IResumableFunctionsSettings _settings;
 
-    public WaitTemplatesRepo(IServiceProvider provider, IResumableFunctionsSettings settings)
+    public WaitTemplatesRepo(WaitsDataContext context, IResumableFunctionsSettings settings)
     {
         _settings = settings;
-        _scope = provider.CreateScope();
-        _context = _scope.ServiceProvider.GetService<WaitsDataContext>();
+        _context = context;
     }
 
     public async Task<WaitTemplate> AddNewTemplate(byte[] hashResult, MethodWaitEntity methodWait)
@@ -39,19 +37,6 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
     {
         var waitTemplate = (await
             _context.WaitTemplates
-            .Select(waitTemplate =>
-                    new WaitTemplate
-                    {
-                        InstanceMandatoryPartExpressionValue = waitTemplate.InstanceMandatoryPartExpressionValue,
-                        Id = waitTemplate.Id,
-                        FunctionId = waitTemplate.FunctionId,
-                        MethodId = waitTemplate.MethodId,
-                        MethodGroupId = waitTemplate.MethodGroupId,
-                        IsMandatoryPartFullMatch = waitTemplate.IsMandatoryPartFullMatch,
-                        ServiceId = waitTemplate.ServiceId,
-                        Hash = waitTemplate.Hash,
-                        IsActive = waitTemplate.IsActive,
-                    })
             .Where(x =>
                 x.MethodGroupId == groupId &&
                 x.FunctionId == funcId &&
@@ -64,7 +49,7 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             if (waitTemplate.IsActive == -1)
             {
                 waitTemplate.IsActive = 1;
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesDirectly();
             }
         }
         return waitTemplate;
@@ -120,12 +105,6 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo, IDisposable
             .FirstAsync(x => x.Id == methodWaitTemplateId);
         template.LoadUnmappedProps();
         return template;
-    }
-
-    public void Dispose()
-    {
-        _context?.Dispose();
-        _scope?.Dispose();
     }
 
     public async Task<WaitTemplate> AddNewTemplate(

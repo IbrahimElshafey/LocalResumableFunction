@@ -230,7 +230,7 @@ internal sealed class WaitsDataContext : DbContext
     }
 
 
-    public async Task<int> SaveChangesdDirectly(
+    public async Task<int> SaveChangesDirectly(
         CancellationToken cancellationToken = new CancellationToken())
     {
         return await base.SaveChangesAsync(cancellationToken);

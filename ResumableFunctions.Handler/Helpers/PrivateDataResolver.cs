@@ -23,6 +23,7 @@ namespace ResumableFunctions.Handler.Helpers
                         member is FieldInfo &&
                         member.MemberType.CanConvertToSimpleString() &&
                         !member.Name.StartsWith("<>") &&//not a clsoure or compiler generated field
+                        //!member.Name.EndsWith("__BackingField") &&//Backing Field
                         !member.Name.StartsWith("<GroupMatchFuncName>")//
                         )
                .Select(parameter => base.CreateProperty(parameter, memberSerialization))

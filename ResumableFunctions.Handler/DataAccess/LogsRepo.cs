@@ -35,7 +35,7 @@ internal class LogsRepo : ILogsRepo
             LogType = LogType.Error,
             StatusCode = statusCode
         });
-        await _context.SaveChangesdDirectly();
+        await _context.SaveChangesDirectly();
     }
 
     public async Task AddLog(string msg, LogType logType, int statusCode)
@@ -50,7 +50,7 @@ internal class LogsRepo : ILogsRepo
             Created = DateTime.UtcNow,
             StatusCode = statusCode
         });
-        await _context.SaveChangesdDirectly();
+        await _context.SaveChangesDirectly();
     }
 
     public async Task AddLogs(LogType logType, int statusCode, params string[] msgs)
@@ -68,7 +68,7 @@ internal class LogsRepo : ILogsRepo
                 Created = DateTime.UtcNow,
             });
         }
-        await _context.SaveChangesdDirectly();
+        await _context.SaveChangesDirectly();
     }
 
     public async Task ClearErrorsForFunctionInstance(int functionStateId)

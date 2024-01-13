@@ -29,7 +29,7 @@ internal class ServiceRepo : IServiceRepo
         await _context.Entry(dll).ReloadAsync();
         dll.AddLog($"Update last scan date for service [{dll.AssemblyName}] to [{DateTime.UtcNow}].", LogType.Info, StatusCodes.Scanning);
         dll.Modified = DateTime.UtcNow;
-        await _context.SaveChangesdDirectly();
+        await _context.SaveChangesDirectly();
     }
 
     public async Task DeleteOldScanData(DateTime dateBeforeScan)

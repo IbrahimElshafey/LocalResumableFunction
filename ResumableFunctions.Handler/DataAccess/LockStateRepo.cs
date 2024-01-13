@@ -44,7 +44,7 @@ internal class LockStateRepo : ILockStateRepo
             ServiceId = _settings.CurrentServiceId,
         };
         _context.Locks.Add(toAdd);
-        await _context.SaveChangesdDirectly();
+        await _context.SaveChangesDirectly();
         return toAdd.Id;
     }
 
