@@ -40,6 +40,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakeOrderManagmentRequest",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests.Internal", "Tests.Internal\Tests.Internal.csproj", "{7E5BCFD6-C262-4191-8406-BFB6FCC37C4C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResumableFunctions.Data.Abstraction", "ResumableFunctions.Data.Abstraction\ResumableFunctions.Data.Abstraction.csproj", "{B120F609-506F-49A2-8AA9-619E7926354A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +104,10 @@ Global
 		{7E5BCFD6-C262-4191-8406-BFB6FCC37C4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E5BCFD6-C262-4191-8406-BFB6FCC37C4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E5BCFD6-C262-4191-8406-BFB6FCC37C4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B120F609-506F-49A2-8AA9-619E7926354A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B120F609-506F-49A2-8AA9-619E7926354A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B120F609-506F-49A2-8AA9-619E7926354A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B120F609-506F-49A2-8AA9-619E7926354A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

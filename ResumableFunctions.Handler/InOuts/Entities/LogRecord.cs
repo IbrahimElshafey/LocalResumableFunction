@@ -1,4 +1,6 @@
-﻿namespace ResumableFunctions.Handler.InOuts.Entities;
+﻿using ResumableFunctions.Handler.InOuts.Entities.EntityBehaviour;
+
+namespace ResumableFunctions.Handler.InOuts.Entities;
 
 public class LogRecord : IEntity<long>
 {

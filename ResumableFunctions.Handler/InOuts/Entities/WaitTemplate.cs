@@ -1,4 +1,5 @@
 ﻿using ResumableFunctions.Handler.Expressions;
+using ResumableFunctions.Handler.InOuts.Entities.EntityBehaviour;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
 using System.Security.Cryptography;

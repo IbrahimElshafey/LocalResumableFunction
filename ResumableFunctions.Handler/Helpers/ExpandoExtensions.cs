@@ -2,13 +2,13 @@
 using MessagePack.Resolvers;
 using System.Dynamic;
 
-namespace ResumableFunctions.Handler.Expressions
+namespace ResumableFunctions.Handler.Helpers
 {
     internal static class ExpandoExtensions
     {
         internal static T Get<T>(this ExpandoObject _this, string path)
         {
-            var result = Get(_this, path);
+            var result = _this.Get(path);
             return (T)Convert.ChangeType(result, typeof(T));
         }
         internal static object Get(this ExpandoObject _this, string path)

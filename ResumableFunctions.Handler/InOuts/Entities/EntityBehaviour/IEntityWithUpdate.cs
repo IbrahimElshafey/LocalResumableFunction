@@ -1,4 +1,4 @@
-﻿namespace ResumableFunctions.Handler.InOuts.Entities;
+﻿namespace ResumableFunctions.Handler.InOuts.Entities.EntityBehaviour;
 public interface IEntityWithUpdate
 {
     DateTime Modified { get; }

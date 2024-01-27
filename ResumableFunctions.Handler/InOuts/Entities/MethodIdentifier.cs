@@ -1,4 +1,5 @@
 ﻿using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts.Entities.EntityBehaviour;
 using System.Reflection;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;

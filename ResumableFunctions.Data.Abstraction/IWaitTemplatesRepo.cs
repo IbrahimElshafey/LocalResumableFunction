@@ -1,7 +1,8 @@
-﻿using ResumableFunctions.Handler.InOuts;
-using ResumableFunctions.Handler.InOuts.Entities;
+﻿using ResumableFunctions.Data.Abstraction.Entities;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-namespace ResumableFunctions.Handler.DataAccess.Abstraction
+namespace ResumableFunctions.Data.Abstraction
 {
     public interface IWaitTemplatesRepo
     {

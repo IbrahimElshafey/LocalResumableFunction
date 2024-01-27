@@ -1,4 +1,6 @@
-﻿namespace ResumableFunctions.Handler.InOuts.Entities;
+﻿using ResumableFunctions.Handler.InOuts.Entities.EntityBehaviour;
+
+namespace ResumableFunctions.Handler.InOuts.Entities;
 public class LockState : IEntity<int>
 {
     public int Id { get; internal set; }

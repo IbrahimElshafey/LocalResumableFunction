@@ -8,6 +8,7 @@ using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
+using ResumableFunctions.Handler.InOuts.Entities.EntityBehaviour;
 
 namespace ResumableFunctions.Handler.DataAccess;
 internal sealed class WaitsDataContext : DbContext

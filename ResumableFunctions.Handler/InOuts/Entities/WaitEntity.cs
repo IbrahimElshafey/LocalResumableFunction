@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.BaseUse;
 using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts.Entities.EntityBehaviour;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Dynamic;
 
