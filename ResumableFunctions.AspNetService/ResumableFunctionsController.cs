@@ -11,7 +11,7 @@ namespace ResumableFunctions.AspNetService
     [ApiController]
     [Route(Constants.ResumableFunctionsControllerUrl)]
     //[ApiExplorerSettings(IgnoreApi = true)]
-    public class ResumableFunctionsController : ControllerBase
+    public class ResumableFunctionsController : ControllerBase, IExternalCallReceiver
     {
         public readonly ICallPusher _callPusher;
         public readonly IServiceQueue _serviceQueue;
@@ -51,7 +51,12 @@ namespace ResumableFunctions.AspNetService
         }
 
         [HttpPost(Constants.ExternalCallAction + "Json")]
-        public async Task<int> ExternalCallJson(ExternalCallArgs externalCall)
+        public Task<int> ExternalCallJson(ExternalCallArgs externalCall)
+        {
+            return ReceiveExternalCall(externalCall);
+        }
+
+        public async Task<int> ReceiveExternalCall(ExternalCallArgs externalCall)
         {
             try
             {

@@ -23,7 +23,13 @@
 
 
 # Big Todos
+* Use source generator for fast scan (no scan)
+	* https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview
 * Reliable communication between services with each others and with clients
 * Publisher Project TODOs
 * Side by Side Versions
 * Analyzer
+* Brighter is a framework for building messaging app with .NET and C# 
+	* https://github.com/BrighterCommand/Brighter
+* In-memory fast match for waits very fast matched
+* Side by Side diffrent state store options (SqlDb, In-Memory Cache)

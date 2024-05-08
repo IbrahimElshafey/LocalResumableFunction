@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
     .AddControllers()
-    .AddResumableFunctions(
+    .AddResumableFunctionsUi(
         new SqlServerResumableFunctionsSettings()
         .SetCurrentServiceUrl("https://localhost:7262"));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -19,7 +19,7 @@ builder.Services.AddScoped<IClientOnboardingService, ClientOnboardingService>();
 //builder.Services.AddScoped<ClientOnboardingWorkflow>();
 
 var app = builder.Build();
-app.UseResumableFunctions();
+app.UseResumableFunctionsUi();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

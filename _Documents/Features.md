@@ -14,3 +14,8 @@
 	* Match and SetData Expressions
 * Services registry is separate service
 
+* ResumableFunctionsController must be relay on abstraction for IExternalCallHandler
+	* IExternalCallHandler may relay as http service
+	* IExternalCallHandler may relay as gRPC service
+	* We need to use RF in any service or process
+

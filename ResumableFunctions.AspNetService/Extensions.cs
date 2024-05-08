@@ -7,7 +7,7 @@ namespace ResumableFunctions.AspNetService
 {
     public static class Extensions
     {
-        public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, IResumableFunctionsSettings settings)
+        public static void AddResumableFunctionsUi(this IMvcBuilder mvcBuilder, IResumableFunctionsSettings settings)
         {
             mvcBuilder
                 .AddApplicationPart(typeof(ResumableFunctionsController).Assembly)
@@ -17,7 +17,7 @@ namespace ResumableFunctions.AspNetService
         }
 
 
-        public static void UseResumableFunctions(this WebApplication app)
+        public static void UseResumableFunctionsUi(this WebApplication app)
         {
 
             CoreExtensions.UseResumableFunctions(app);

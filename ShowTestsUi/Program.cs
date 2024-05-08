@@ -12,14 +12,14 @@ var settings =
 //settings.CleanDbSettings.PushedCallRetention = TimeSpan.FromSeconds(3);
 builder.Services
     .AddControllers()
-    .AddResumableFunctions(settings);
+    .AddResumableFunctionsUi(settings);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.UseResumableFunctions();
+app.UseResumableFunctionsUi();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

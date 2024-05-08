@@ -2,6 +2,7 @@
 
 namespace ResumableFunctions.Handler.DataAccess.Abstraction;
 
+//Todo:Must be moved to diffrent DB
 public interface ILogsRepo
 {
     Task AddErrorLog(Exception ex, string errorMsg, int statusCode);

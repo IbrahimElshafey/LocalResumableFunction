@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers()
-    .AddResumableFunctions(
+    .AddResumableFunctionsUi(
     new SqlServerResumableFunctionsSettings(null, "FakeOrderManagmentRequest3")
     .SetCurrentServiceUrl("https://localhost:7003"));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -15,7 +15,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IOrderProcessingService, OrderProcessingService>();
 var app = builder.Build();
-app.UseResumableFunctions();
+app.UseResumableFunctionsUi();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
