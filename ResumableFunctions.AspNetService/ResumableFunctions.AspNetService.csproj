@@ -27,7 +27,6 @@ A library that provides a way for waiting the execution of a method in days or m
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ResumableFunctions.Data.Abstraction\ResumableFunctions.Data.Abstraction.csproj" />
     <ProjectReference Include="..\ResumableFunctions.Handler\ResumableFunctions.Handler.csproj" />
   </ItemGroup>
 </Project>
