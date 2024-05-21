@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApi1", "Examples\TestAp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestApi2", "Examples\TestApi2\TestApi2.csproj", "{E07E1400-AA21-4C32-BF22-BB31F400EA54}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResumableFunctions.AspNetService", "ResumableFunctions.AspNetService\ResumableFunctions.AspNetService.csproj", "{846B343E-AF4E-4428-AB66-50894CE0B390}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResumableFunctions.MvcUi", "ResumableFunctions.AspNetService\ResumableFunctions.MvcUi.csproj", "{846B343E-AF4E-4428-AB66-50894CE0B390}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResumableFunctions.Handler", "ResumableFunctions.Handler\ResumableFunctions.Handler.csproj", "{9CCD18EA-C0D9-48EB-96B2-3198B5D7C227}"
 EndProject

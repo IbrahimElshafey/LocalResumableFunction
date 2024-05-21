@@ -1,4 +1,4 @@
-namespace ResumableFunctions.AspNetService.DisplayObject
+namespace ResumableFunctions.MvcUi.DisplayObject
 {
     public class HomePageModel
     {

@@ -8,6 +8,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
             string name,
             long id,
             WaitStatus status,
+            int functionId,
             string functionName,
             int instanceId,
             DateTime created,
@@ -20,6 +21,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
             Name = name;
             Id = id;
             Status = status;
+            FunctionId = functionId;
             FunctionName = functionName;
             InstanceId = instanceId;
             MatchExpression = templateDisplay.MatchExpression;
@@ -32,6 +34,7 @@ namespace ResumableFunctions.Handler.UiService.InOuts
         }
         public DateTime Created { get; }
         public ExecutionStatus ExecutionStatus { get; }
+        public int FunctionId { get; }
         public string FunctionName { get; }
         public int InstanceId { get; }
         public ExecutionStatus InstanceUpdateStatus { get; }

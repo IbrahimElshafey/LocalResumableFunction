@@ -18,10 +18,10 @@ using static System.Linq.Expressions.Expression;
 
 namespace ResumableFunctions.Handler.Helpers;
 
-internal static class CoreExtensions
+public static class CoreExtensions
 {
     //internal static IServiceProvider GetServiceProvider() => _ServiceProvider;
-    internal static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
+    public static void AddResumableFunctionsCore(this IServiceCollection services, IResumableFunctionsSettings settings)
     {
 
 
@@ -73,16 +73,16 @@ internal static class CoreExtensions
         services.AddTransient<ILockStateRepo, LockStateRepo>();//todo: why AddTransient?
     }
 
-    internal static void UseResumableFunctions(this IHost app)
+    public static void UseResumableFunctions(this IServiceProvider services)
     {
-        GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(app.Services));
-        CreateScanAndCleanBackgroundTasks(app);
+        GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(services));
+        CreateScanAndCleanBackgroundTasks(services);
     }
 
 
-    private static void CreateScanAndCleanBackgroundTasks(IHost app)
+    private static void CreateScanAndCleanBackgroundTasks(IServiceProvider services)
     {
-        using var scope = app.Services.CreateScope();
+        using var scope = services.CreateScope();
         var backgroundJobClient = scope.ServiceProvider.GetService<IBackgroundProcess>();
 
         var scanner = scope.ServiceProvider.GetService<Scanner>();

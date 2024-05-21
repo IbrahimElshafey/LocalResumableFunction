@@ -6,11 +6,11 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
 using System.Buffers;
 
-namespace ResumableFunctions.AspNetService
+namespace ResumableFunctions.MvcUi
 {
     [ApiController]
     [Route(Constants.ResumableFunctionsControllerUrl)]
-    //[ApiExplorerSettings(IgnoreApi = true)]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionsController : ControllerBase, IExternalCallReceiver
     {
         public readonly ICallPusher _callPusher;

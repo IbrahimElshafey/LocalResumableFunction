@@ -202,7 +202,7 @@ internal class Scanner
                 assembly.GetReferencedAssemblies().Any(x => new[]
                 {
                 "ResumableFunctions.Handler",
-                "ResumableFunctions.AspNetService"
+                "ResumableFunctions.MvcUi"
                 }.Contains(x.Name));
 
             if (isReferenceResumableFunction is false)

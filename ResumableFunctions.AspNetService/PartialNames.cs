@@ -1,4 +1,4 @@
-﻿namespace ResumableFunctions.AspNetService
+﻿namespace ResumableFunctions.MvcUi
 {
     internal static class PartialNames
     {

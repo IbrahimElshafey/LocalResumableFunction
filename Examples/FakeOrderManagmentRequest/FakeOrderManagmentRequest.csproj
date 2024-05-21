@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ResumableFunctions.AspNetService\ResumableFunctions.AspNetService.csproj" />
+    <ProjectReference Include="..\..\ResumableFunctions.AspNetService\ResumableFunctions.MvcUi.csproj" />
   </ItemGroup>
 
 </Project>

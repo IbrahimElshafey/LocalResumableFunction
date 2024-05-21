@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.AspNetService.DisplayObject;
 using ResumableFunctions.Handler.UiService;
+using ResumableFunctions.MvcUi.DisplayObject;
 
-namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
+namespace ResumableFunctions.MvcUi.Areas.RF.Controllers
 {
     [Area("RF")]
     public class HomeController : Controller
