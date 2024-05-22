@@ -272,6 +272,7 @@ namespace ResumableFunctions.Handler.Core
             catch (Exception ex)
             {
                 await _methodWait.CurrentFunction?.OnError("Error when execute after match action.", ex);
+                return false;
             }
 
             return true;

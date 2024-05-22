@@ -5,6 +5,7 @@ using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
 using System.Buffers;
+using System.Text;
 
 namespace ResumableFunctions.MvcUi
 {
@@ -32,10 +33,22 @@ namespace ResumableFunctions.MvcUi
 
 
 
-
+        //todo:error in get reponse
         [HttpPost(Constants.ServiceProcessPushedCallAction)]
-        public int ServiceProcessPushedCall(CallEffection callEffection)
+        public async Task<int> ServiceProcessPushedCallAsync(CallImpaction callEffection)
         {
+            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string requestBody = await reader.ReadToEndAsync();
+                // Now you have the request body as a string
+                // You can log it, parse it, or process it as needed
+
+                // Example: log the request body
+                Console.WriteLine(requestBody);
+
+                // Process the requestBody here as needed
+            }
+            //todo:validate object
             _serviceQueue.ServiceProcessPushedCall(callEffection);
             return 1;
         }

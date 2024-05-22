@@ -104,15 +104,17 @@ namespace ResumableFunctions.Handler.UiService
                 .ToListAsync();
         }
 
-        public async Task<List<FunctionInfo>> GetFunctionsSummary(int serviceId = -1, string functionName = null)
+        public async Task<List<FunctionInfo>> GetFunctionsSummary(int serviceId = -1, string searchTerm = null)
         {
             var query = _context.ResumableFunctionIdentifiers.AsNoTracking();
 
             if (serviceId != -1)
                 query = query.Where(x => x.ServiceId == serviceId);
 
-            if (functionName != null)
-                query = query.Where(x => x.RF_MethodUrn.Contains(functionName));
+            if (int.TryParse(searchTerm, out var id))
+                query = query.Where(x => x.Id == id);
+            else if (searchTerm != null)
+                query = query.Where(x => x.RF_MethodUrn.Contains(searchTerm));
 
             return await query
               .Include(x => x.ActiveFunctionsStates)
@@ -162,7 +164,10 @@ namespace ResumableFunctions.Handler.UiService
                 methodGroupsQuery =
                     methodGroupsQuery.Where(x => methodGroupsToInclude.Contains(x.Group.Id));
             }
-            if (searchTerm != null)
+
+            if(int.TryParse(searchTerm, out var id))
+                methodGroupsQuery = methodGroupsQuery.Where(x => x.Group.Id == id);
+            else if (searchTerm != null)
                 methodGroupsQuery = methodGroupsQuery.Where(x => x.Group.MethodGroupUrn.Contains(searchTerm));
 
             var join =

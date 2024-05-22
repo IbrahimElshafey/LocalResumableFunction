@@ -38,7 +38,7 @@ internal partial class WaitsRepo : IWaitsRepo
         _logsRepo = logsRepo;
     }
 
-    public async Task<CallEffection> GetCallEffectionInCurrentService(string methodUrn, DateTime puhsedCallDate)
+    public async Task<CallImpaction> GetCallEffectionInCurrentService(string methodUrn, DateTime puhsedCallDate)
     {
         var methodGroup = await GetMethodGroup(methodUrn);
         var affectedFunctions =
@@ -53,7 +53,7 @@ internal partial class WaitsRepo : IWaitsRepo
             .Distinct()
             .ToListAsync();
         return affectedFunctions.Any() ?
-            new CallEffection
+            new CallImpaction
             {
                 AffectedServiceId = _settings.CurrentServiceId,
                 AffectedServiceUrl = string.Empty,
@@ -64,7 +64,7 @@ internal partial class WaitsRepo : IWaitsRepo
             : null;
     }
 
-    public async Task<List<CallEffection>> GetAffectedServicesAndFunctions(string methodUrn, DateTime puhsedCallDate)
+    public async Task<List<CallImpaction>> GetAffectedServicesAndFunctions(string methodUrn, DateTime puhsedCallDate)
     {
         var methodGroup = await GetMethodGroup(methodUrn);
 
@@ -91,7 +91,7 @@ internal partial class WaitsRepo : IWaitsRepo
               from service in await _context.ServicesData.Where(x => x.ParentId == -1).ToListAsync()
               from affectedFunction in affectedFunctionsGroupedByService
               where service.Id == affectedFunction.Key
-              select new CallEffection
+              select new CallImpaction
               {
                   AffectedServiceId = service.Id,
                   AffectedServiceUrl = service.Url,

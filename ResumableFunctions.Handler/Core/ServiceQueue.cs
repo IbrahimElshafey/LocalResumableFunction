@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using System.ComponentModel;
+using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 
 namespace ResumableFunctions.Handler.Core;
 internal class ServiceQueue : IServiceQueue
@@ -110,7 +111,7 @@ internal class ServiceQueue : IServiceQueue
     }
 
     [DisplayName("{0}")]
-    public async Task ServiceProcessPushedCall(CallEffection callEffection)
+    public async Task ServiceProcessPushedCall(CallImpaction callEffection)
     {
         var pushedCallId = callEffection.CallId;
         //$"ServiceProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
@@ -130,24 +131,25 @@ internal class ServiceQueue : IServiceQueue
     }
 
     [DisplayName("[{0}]")]
-    public async Task EnqueueCallEffection(CallEffection callEffection)
+    public async Task EnqueueCallEffection(CallImpaction callImpaction)
     {
         try
         {
-            var actionUrl = $"{callEffection.AffectedServiceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ServiceProcessPushedCallAction}";
-            await DirectHttpPost(actionUrl, callEffection);// will got to ResumableFunctionsController.ServiceProcessPushedCall
+            var actionUrl = $"{callImpaction.AffectedServiceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ServiceProcessPushedCallAction}";
+            await DirectHttpPost(actionUrl, callImpaction);// will got to ResumableFunctionsController.ServiceProcessPushedCall
         }
         catch (Exception)
         {
-            _backgroundJobClient.Schedule(() => EnqueueCallEffection(callEffection), TimeSpan.FromSeconds(3));
+            _backgroundJobClient.Schedule(() => EnqueueCallEffection(callImpaction), TimeSpan.FromSeconds(3));
         }
     }
 
-    private async Task DirectHttpPost(string actionUrl, object callImapction)
+    private async Task DirectHttpPost(string actionUrl, CallImpaction callImapction)
     {
         var client = _httpClientFactory.CreateClient();
-        var content = new StringContent(JsonConvert.SerializeObject(callImapction), Encoding.UTF8, "application/json");
-        var response = await client.PostAsync(actionUrl, content);
+        var json = JsonSerializer.Serialize(callImapction);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var response = await client.PostAsJsonAsync(actionUrl, content);
         response.EnsureSuccessStatusCode();
         var result = await response.Content.ReadAsStringAsync();
         if (!(result == "1" || result == "-1"))
