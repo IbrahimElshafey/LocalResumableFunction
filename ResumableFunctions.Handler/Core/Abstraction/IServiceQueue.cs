@@ -2,6 +2,7 @@
 
 namespace ResumableFunctions.Handler.Core.Abstraction
 {
+    //todo:cadidate for MassTransit
     public interface IServiceQueue
     {
         Task RouteCallToAffectedServices(long pushedCallId, DateTime puhsedCallDate, string methodUrn);

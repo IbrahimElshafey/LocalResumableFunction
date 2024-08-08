@@ -47,7 +47,10 @@ internal class ServiceQueue : IServiceQueue
         if (!await _lockStateRepo.AreLocksExist())
         {
             //get current job id?
-            _backgroundJobClient.Schedule(() => RouteCallToAffectedServices(pushedCallId, puhsedCallDate, methodUrn), TimeSpan.FromSeconds(3));
+            _backgroundJobClient.Schedule(() => RouteCallToAffectedServices(
+                pushedCallId,
+                puhsedCallDate,
+                methodUrn), TimeSpan.FromSeconds(3));
             return;
         }
 

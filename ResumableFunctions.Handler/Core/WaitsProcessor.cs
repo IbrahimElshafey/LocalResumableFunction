@@ -93,7 +93,7 @@ namespace ResumableFunctions.Handler.Core
                         foreach (var wait in waits)
                         {
                             await LoadWaitProps(wait);
-                            wait.Template = template;
+                            wait.Template = template;//why this line???
                             _waitCall =
                                  _waitProcessingRecordsRepo.Add(
                                     new WaitProcessingRecord

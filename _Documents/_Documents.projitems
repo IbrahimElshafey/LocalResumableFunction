@@ -43,6 +43,7 @@
     <None Include="$(MSBuildThisFileDirectory)ThinkHow\Other_Wait_Types.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md" />
     <None Include="$(MSBuildThisFileDirectory)Data Store Options.md" />
+    <None Include="$(MSBuildThisFileDirectory)How_It_works.md" />
     <None Include="$(MSBuildThisFileDirectory)_Todo.md" />
   </ItemGroup>
   <ItemGroup>
