@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Version>1.0.6</Version>
     <PackageOutputPath>D:\Nuget</PackageOutputPath>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Description>A library that allows you to publish methods to a resumable function service by decorating them with the [PublishMethod] attribute.</Description>
     <!--<Nullable>enable</Nullable>-->
 	 

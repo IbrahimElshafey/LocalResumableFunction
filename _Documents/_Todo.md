@@ -1,4 +1,5 @@
 ﻿# Short and Mid Todos
+* Use mass transit for reliable messaging between service 
 * Use same dll in two different services must be allowed
 * Remove SaveChangesAsync and,SaveChangesdDirectly from repo implementations
 	* Use transactions
@@ -26,6 +27,7 @@
 * Use source generator for fast scan (no scan)
 	* https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview
 * Reliable communication between services with each others and with clients
+	* I will use MassTransit
 * Publisher Project TODOs
 * Side by Side Versions
 * Analyzer

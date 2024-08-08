@@ -10,8 +10,16 @@ namespace ResumableFunctions.Handler.InOuts.Entities;
 public class PushedCall : IEntity<long>, IBeforeSaveEntity
 {
     public long Id { get; internal set; }
+    /// <summary>
+    /// MethodInfo of the method that was called and also some RF attribtes like
+    ///  CanPublishFromExternal, IsLocalOnly, IsActive
+    /// </summary>
     [NotMapped]
     public MethodData MethodData { get; internal set; }
+    /// <summary>
+    /// Same as MethodData but in binary format
+    /// </summary>
+    //Todo: Replace with MethodDataId because it's large and is same for all calls form the same method
     public byte[] MethodDataValue { get; internal set; }
     [NotMapped]
     public InputOutput Data { get; internal set; } = new();

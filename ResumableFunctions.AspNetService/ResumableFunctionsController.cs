@@ -12,7 +12,7 @@ namespace ResumableFunctions.MvcUi
     [ApiController]
     [Route(Constants.ResumableFunctionsControllerUrl)]
     [ApiExplorerSettings(IgnoreApi = true)]
-    public class ResumableFunctionsController : ControllerBase, IExternalCallReceiver
+    public class ResumableFunctionsController : ControllerBase
     {
         public readonly ICallPusher _callPusher;
         public readonly IServiceQueue _serviceQueue;
@@ -49,7 +49,7 @@ namespace ResumableFunctions.MvcUi
                 // Process the requestBody here as needed
             }
             //todo:validate object
-            _serviceQueue.ServiceProcessPushedCall(callEffection);
+            await _serviceQueue.ServiceProcessPushedCall(callEffection);
             return 1;
         }
 

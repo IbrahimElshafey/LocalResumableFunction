@@ -10,26 +10,18 @@
 * Used 
 	* When method executed and call pushed
 	* When clean database to delete old pushed calls
-	* 
 * Store pushed calls in different store that support:
 	* Fast insertion
-	* Fast query by key (No other queries)
-	* May I use:
-		* Faster from Microsoft
-		* A fast store and forward message queue for .NET. (aka not a broker or server)
-			* https://github.com/LightningQueues/LightningQueues
-			* https://github.com/zeromq/netmq
+	* Fast query by 
+		* ID
+		* Service ID
+		* Creation Date
+		* Method URN
 ## Waits
-* Store waits in different store that support:
+* Store waits in store that support:
 	* Fast queries
 	* Fast wait insertion
-	* InMemory DBs May be an option
-		* May I use https://ignite.apache.org/docs/latest/ which is a distributed database for high-performance computing with in-memory speed.
-		* https://hazelcast.com/clients/dotnet/
-		* https://www.couchbase.com/
-		* https://github.com/DevrexLabs/memstate
-			* https://memstate.io/
-			* https://github.com/EventStore/EventStore
+	
 ## Logs
 * Fast logging
 	* Separate data store for log
@@ -38,13 +30,14 @@
 		* Service Id
 		* EntityName, EntityId
 		* Status
-	* Custom implementation for logging (IResumableFunctionLogging)
+	* No Custom implementation for logging (IResumableFunctionLogging)
 	* May I use InfluxDB,RocksDB or Faster
+
 ## States and private data
 	* 
 
 
-# We need In-Memory DB that:
+# We may need In-Memory DB that:
 * Can be used with EF
 * Can be used with Hangfire
 * Support Snapshoting and clustering

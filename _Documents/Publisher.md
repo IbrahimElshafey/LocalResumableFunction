@@ -1,4 +1,5 @@
 ﻿# Publisher Project
+* This project must be cancled and replaced with mass transit or other reliable messaging system
 * Review CanPublishFromExternal and IsLocalOnly
 	* Should it defined for method group or method idenetifier
 * Pushed call may have flag fields for:
