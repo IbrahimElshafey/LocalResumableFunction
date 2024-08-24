@@ -35,7 +35,7 @@ namespace ResumableFunctions.MvcUi
 
         //todo:error in get reponse
         [HttpPost(Constants.ServiceProcessPushedCallAction)]
-        public async Task<int> ServiceProcessPushedCallAsync(CallImpaction callEffection)
+        public async Task<int> ServiceProcessPushedCallAsync(ImpactedFunctionsIds callEffection)
         {
             using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
             {
@@ -49,7 +49,7 @@ namespace ResumableFunctions.MvcUi
                 // Process the requestBody here as needed
             }
             //todo:validate object
-            await _serviceQueue.ServiceProcessPushedCall(callEffection);
+            await _serviceQueue.ProcessPushedCall(callEffection);
             return 1;
         }
 

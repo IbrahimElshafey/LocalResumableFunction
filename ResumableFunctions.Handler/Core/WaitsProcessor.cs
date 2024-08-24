@@ -67,8 +67,12 @@ namespace ResumableFunctions.Handler.Core
             _privateDataRepo = privateDataRepo;
         }
 
-        [DisplayName("Process Function Expected Matches where [FunctionId:{0}], [PushedCallId:{1}], [MethodGroupId:{2}]")]
-        public async Task ProcessFunctionExpectedWaits(int functionId, long pushedCallId, int methodGroupId, DateTime pushedCallDate)
+        [DisplayName("Find Function Matched Waits [Function ID: {0}], [Pushed Call ID: {1}], [Method Group ID: {2}]")]
+        public async Task FindFunctionMatchedWaits(
+            int functionId,
+            long pushedCallId,
+            int methodGroupId,
+            DateTime pushedCallDate)
         {
             await _backgroundJobExecutor.ExecuteWithLock(
                 $"ProcessFunctionExpectedMatchedWaits_{functionId}_{pushedCallId}",
@@ -265,7 +269,7 @@ namespace ResumableFunctions.Handler.Core
                     StatusCodes.WaitProcessing, ex);
 
                 _backgroundJobClient.Schedule(() =>
-                        ProcessFunctionExpectedWaits(_methodWait.RequestedByFunctionId, pushedCallId, _methodWait.MethodGroupToWaitId, _pushedCall.Created),
+                        FindFunctionMatchedWaits(_methodWait.RequestedByFunctionId, pushedCallId, _methodWait.MethodGroupToWaitId, _pushedCall.Created),
                     TimeSpan.FromSeconds(10));
                 return false;
             }

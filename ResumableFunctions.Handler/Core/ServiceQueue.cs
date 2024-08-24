@@ -17,7 +17,7 @@ internal class ServiceQueue : IServiceQueue
     private readonly IWaitsRepo _waitsRepository;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IResumableFunctionsSettings _settings;
-    private readonly ILockStateRepo _lockStateRepo;
+    private readonly IScanLocksRepo _lockStateRepo;
     private readonly IHttpClientFactory _httpClientFactory;
 
     public ServiceQueue(
@@ -27,7 +27,7 @@ internal class ServiceQueue : IServiceQueue
         IBackgroundProcess backgroundJobClient,
         BackgroundJobExecutor backgroundJobExecutor,
         IResumableFunctionsSettings settings,
-        ILockStateRepo lockStateRepo,
+        IScanLocksRepo lockStateRepo,
         IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
@@ -40,54 +40,53 @@ internal class ServiceQueue : IServiceQueue
         _httpClientFactory = httpClientFactory;
     }
 
-    [DisplayName("Route call [Id: {0},MethodUrn: {1}] to services that may be affected.")]
-    public async Task RouteCallToAffectedServices(long pushedCallId, DateTime puhsedCallDate, string methodUrn)
+    [DisplayName("Identify Impacted Services [PushedCallId: {0},MethodUrn: {2}]")]
+    public async Task IdentifyAffectedServices(long pushedCallId, DateTime puhsedCallDate, string methodUrn)
     {
         //if scan is running schedule it for later processing
         if (!await _lockStateRepo.AreLocksExist())
         {
             //get current job id?
-            _backgroundJobClient.Schedule(() => RouteCallToAffectedServices(
+            _backgroundJobClient.Schedule(() => IdentifyAffectedServices(
                 pushedCallId,
                 puhsedCallDate,
                 methodUrn), TimeSpan.FromSeconds(3));
             return;
         }
 
-        //$"{nameof(RouteCallToAffectedServices)}_{pushedCallId}_{_settings.CurrentServiceId}",
         //no chance to be called by two services in same time, lock removed
         await _backgroundJobExecutor.ExecuteWithoutLock(
             async () =>
             {
-                var callEffections = await _waitsRepository.GetAffectedServicesAndFunctions(methodUrn, puhsedCallDate);
-                if (callEffections == null || callEffections.Any() is false)
+                var impactedFunctionsIds = await _waitsRepository.GetImpactedFunctions(methodUrn, puhsedCallDate);
+                if (impactedFunctionsIds == null || impactedFunctionsIds.Any() is false)
                 {
                     _logger.LogWarning($"There are no services affected by pushed call [{methodUrn}:{pushedCallId}]");
                     return;
                 }
 
-                foreach (var callEffection in callEffections)
+                foreach (var callEffection in impactedFunctionsIds)
                 {
                     callEffection.CallId = pushedCallId;
                     callEffection.MethodUrn = methodUrn;
                     callEffection.CallDate = puhsedCallDate;
                     var isLocal = callEffection.AffectedServiceId == _settings.CurrentServiceId;
                     if (isLocal)
-                        await ServiceProcessPushedCall(callEffection);
+                        await ProcessPushedCall(callEffection);
                     else
-                        await EnqueueCallEffection(callEffection);
+                        await RoutePushedCallForProcessing(callEffection);
                 }
             },
-            $"Error when call [{nameof(RouteCallToAffectedServices)}(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})] in service [{_settings.CurrentServiceId}]");
+            $"Error when call [{nameof(IdentifyAffectedServices)}(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})] in service [{_settings.CurrentServiceId}]");
     }
 
     [DisplayName("Process call [Id: {0},MethodUrn: {1}] Locally.")]
-    public async Task ProcessCallLocally(long pushedCallId, string methodUrn, DateTime puhsedCallDate)
+    public async Task ProcessPushedCallLocally(long pushedCallId, string methodUrn, DateTime puhsedCallDate)
     {
         if (!await _lockStateRepo.AreLocksExist())
         {
             _backgroundJobClient.Schedule(() =>
-            ProcessCallLocally(pushedCallId, methodUrn, puhsedCallDate), TimeSpan.FromSeconds(3));
+            ProcessPushedCallLocally(pushedCallId, methodUrn, puhsedCallDate), TimeSpan.FromSeconds(3));
             return;
         }
 
@@ -103,18 +102,18 @@ internal class ServiceQueue : IServiceQueue
                     callEffection.CallId = pushedCallId;
                     callEffection.MethodUrn = methodUrn;
                     callEffection.CallDate = puhsedCallDate;
-                    await ServiceProcessPushedCall(callEffection);
+                    await ProcessPushedCall(callEffection);
                 }
                 else
                 {
                     _logger.LogWarning($"There are no functions affected in current service by pushed call [{methodUrn}:{pushedCallId}]");
                 }
             },
-            $"Error when call [{nameof(ProcessCallLocally)}(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})] in service [{_settings.CurrentServiceId}]");
+            $"Error when call [{nameof(ProcessPushedCallLocally)}(pushedCallId:{pushedCallId}, methodUrn:{methodUrn})] in service [{_settings.CurrentServiceId}]");
     }
 
     [DisplayName("{0}")]
-    public async Task ServiceProcessPushedCall(CallImpaction callEffection)
+    public async Task ProcessPushedCall(ImpactedFunctionsIds callEffection)
     {
         var pushedCallId = callEffection.CallId;
         //$"ServiceProcessPushedCall_{pushedCallId}_{_settings.CurrentServiceId}",
@@ -125,7 +124,7 @@ internal class ServiceQueue : IServiceQueue
                 foreach (var functionId in callEffection.AffectedFunctionsIds)
                 {
                     _backgroundJobClient.Enqueue(
-                        () => _waitsProcessor.ProcessFunctionExpectedWaits(
+                        () => _waitsProcessor.FindFunctionMatchedWaits(
                             functionId, pushedCallId, callEffection.MethodGroupId, callEffection.CallDate));
                 }
                 return Task.CompletedTask;
@@ -134,20 +133,20 @@ internal class ServiceQueue : IServiceQueue
     }
 
     [DisplayName("[{0}]")]
-    public async Task EnqueueCallEffection(CallImpaction callImpaction)
+    public async Task RoutePushedCallForProcessing(ImpactedFunctionsIds callImpaction)
     {
         try
         {
             var actionUrl = $"{callImpaction.AffectedServiceUrl}{Constants.ResumableFunctionsControllerUrl}/{Constants.ServiceProcessPushedCallAction}";
-            await DirectHttpPost(actionUrl, callImpaction);// will got to ResumableFunctionsController.ServiceProcessPushedCall
+            await DirectHttpPost(actionUrl, callImpaction);// will go to ResumableFunctionsController.ServiceProcessPushedCall action
         }
         catch (Exception)
         {
-            _backgroundJobClient.Schedule(() => EnqueueCallEffection(callImpaction), TimeSpan.FromSeconds(3));
+            _backgroundJobClient.Schedule(() => RoutePushedCallForProcessing(callImpaction), TimeSpan.FromSeconds(3));
         }
     }
 
-    private async Task DirectHttpPost(string actionUrl, CallImpaction callImapction)
+    private async Task DirectHttpPost(string actionUrl, ImpactedFunctionsIds callImapction)
     {
         var client = _httpClientFactory.CreateClient();
         var json = JsonSerializer.Serialize(callImapction);

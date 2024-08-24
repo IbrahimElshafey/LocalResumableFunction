@@ -30,7 +30,7 @@
 		* Service Id
 		* EntityName, EntityId
 		* Status
-	* I need structured logging
+	* I need structured logging 
 	* No Custom implementation for logging (IResumableFunctionLogging)
 	* May I use InfluxDB,RocksDB or Faster
 

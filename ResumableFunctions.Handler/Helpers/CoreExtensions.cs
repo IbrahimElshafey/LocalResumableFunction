@@ -12,6 +12,7 @@ using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime;
 using System.Runtime.CompilerServices;
 using System.Text;
 using static System.Linq.Expressions.Expression;
@@ -70,7 +71,7 @@ public static class CoreExtensions
         services.AddScoped<IWaitProcessingRecordsRepo, WaitProcessingRecordsRepo>();
 
         services.AddTransient<ILogsRepo, LogsRepo>();//todo: why AddTransient?
-        services.AddTransient<ILockStateRepo, LockStateRepo>();//todo: why AddTransient?
+        services.AddTransient<IScanLocksRepo, ScanLocksRepo>();//todo: why AddTransient?
     }
 
     public static void UseResumableFunctions(this IServiceProvider services)

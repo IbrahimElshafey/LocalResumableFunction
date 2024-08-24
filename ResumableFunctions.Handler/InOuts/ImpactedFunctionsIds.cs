@@ -1,5 +1,5 @@
 ﻿namespace ResumableFunctions.Handler.InOuts;
-public class CallImpaction
+public class ImpactedFunctionsIds
 {
 
     public int AffectedServiceId { get; internal set; }

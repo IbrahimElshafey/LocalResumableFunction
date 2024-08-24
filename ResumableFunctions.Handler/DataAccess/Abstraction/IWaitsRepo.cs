@@ -12,8 +12,8 @@ public interface IWaitsRepo
     Task CancelOpenedWaitsForState(int stateId);
     Task CancelSubWaits(long parentId, long pushedCallId);
     Task<WaitEntity> GetWaitParent(WaitEntity wait);
-    Task<List<CallImpaction>> GetAffectedServicesAndFunctions(string methodUrn, DateTime puhsedCallDate);
-    Task<CallImpaction> GetCallEffectionInCurrentService(string methodUrn, DateTime puhsedCallDate);
+    Task<List<ImpactedFunctionsIds>> GetImpactedFunctions(string methodUrn, DateTime puhsedCallDate);
+    Task<ImpactedFunctionsIds> GetCallEffectionInCurrentService(string methodUrn, DateTime puhsedCallDate);
     Task RemoveFirstWaitIfExist(int methodIdentifierId);
     Task<bool> SaveWait(WaitEntity newWait);
     Task<MethodWaitEntity> GetMethodWait(long waitId, params Expression<Func<MethodWaitEntity, object>>[] includes);

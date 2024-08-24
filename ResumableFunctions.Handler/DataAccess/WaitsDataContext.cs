@@ -42,7 +42,7 @@ internal sealed class WaitsDataContext : DbContext
     }
 
     public DbSet<PrivateData> PrivateData { get; set; }
-    public DbSet<LockState> Locks { get; set; }
+    public DbSet<LockState> ScanLocks { get; set; }
     public DbSet<ResumableFunctionState> FunctionStates { get; set; }
 
     public DbSet<MethodIdentifier> MethodIdentifiers { get; set; }
@@ -387,6 +387,11 @@ internal sealed class WaitsDataContext : DbContext
         switch (entityEntry.State)
         {
             case EntityState.Modified when entityEntry.Entity is IEntityWithUpdate:
+                //to be deleted
+                var creationDateProp1 = entityEntry.Property(nameof(IEntity.Created));
+                if (DateTime.Compare((DateTime)creationDateProp1.CurrentValue, default) == 0)
+                    creationDateProp1.CurrentValue = DateTime.UtcNow;
+
                 entityEntry.Property(nameof(IEntityWithUpdate.Modified)).CurrentValue = DateTime.UtcNow;
                 entityEntry.Property(nameof(IEntityWithUpdate.ConcurrencyToken)).CurrentValue = Guid.NewGuid().ToString();
                 break;

@@ -5,9 +5,9 @@ namespace ResumableFunctions.Handler.Core.Abstraction
     //todo:cadidate for MassTransit
     public interface IServiceQueue
     {
-        Task RouteCallToAffectedServices(long pushedCallId, DateTime puhsedCallDate, string methodUrn);
-        Task ServiceProcessPushedCall(CallImpaction callImapction);
-        Task ProcessCallLocally(long pushedCallId, string methodUrn, DateTime puhsedCallDate);
-        Task EnqueueCallEffection(CallImpaction callImapction);
+        Task IdentifyAffectedServices(long pushedCallId, DateTime puhsedCallDate, string methodUrn);
+        Task ProcessPushedCall(ImpactedFunctionsIds callImapction);
+        Task ProcessPushedCallLocally(long pushedCallId, string methodUrn, DateTime puhsedCallDate);
+        Task RoutePushedCallForProcessing(ImpactedFunctionsIds callImapction);
     }
 }
