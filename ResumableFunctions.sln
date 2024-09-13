@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{8AF132E9-5C5A-4D6C-B0FC-82FFCA700BA8}"
+	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ReferenceLibrary", "Examples\RefernceLibrary\ReferenceLibrary.csproj", "{177A1762-A63A-4696-9EDE-863F200EA34E}"
 EndProject
@@ -39,6 +42,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests.Internal", "Tests.Internal\Tests.Internal.csproj", "{7E5BCFD6-C262-4191-8406-BFB6FCC37C4C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakeOrderManagmentRequest", "Examples\FakeOrderManagmentRequest\FakeOrderManagmentRequest.csproj", "{CECBB3CE-C209-4960-B003-3019C27A5DD5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResumableFunctions.CodeGeneration", "ResumableFunctions.CodeGeneration\ResumableFunctions.CodeGeneration.csproj", "{6A93CB93-4B25-4D27-8D75-4F3C85C08894}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -102,6 +107,10 @@ Global
 		{CECBB3CE-C209-4960-B003-3019C27A5DD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CECBB3CE-C209-4960-B003-3019C27A5DD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CECBB3CE-C209-4960-B003-3019C27A5DD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A93CB93-4B25-4D27-8D75-4F3C85C08894}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A93CB93-4B25-4D27-8D75-4F3C85C08894}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A93CB93-4B25-4D27-8D75-4F3C85C08894}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A93CB93-4B25-4D27-8D75-4F3C85C08894}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

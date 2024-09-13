@@ -1,11 +1,8 @@
 ﻿# Short and Mid Todos
-* Use mass transit for reliable messaging between service 
 * Use same dll in two different services must be allowed
 * Remove SaveChangesAsync and,SaveChangesdDirectly from repo implementations
 	* Use transactions
 * Dynamic loaded dll
-* Build Nuget package to target multiple runtimes and versions
-* Unify logging and make separate DB for logs
 
 * If found RF database with schema diffrence use new one and update appsettings
 
@@ -24,10 +21,11 @@
 
 
 # Big Todos
+* Use mass transit for reliable messaging between service 
+* Unify logging and make separate DB for logs
 * Use source generator for fast scan (no scan)
 	* https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview
-* Reliable communication between services with each others and with clients
-	* I will use MassTransit
+* Build Nuget package to target multiple runtimes and versions
 * Publisher Project TODOs
 * Side by Side Versions
 * Analyzer

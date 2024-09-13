@@ -1,6 +1,7 @@
 ﻿using ResumableFunctions.Handler.Core;
 using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.MvcUi;
+using Test;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,3 +39,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+TestClass.HelloFrom("World");

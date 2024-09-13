@@ -40,7 +40,7 @@
 
 # Future Plan 
 * Hou to publish new service version with modified resumable functions?
-* Why not use service bus?
+* Plan to use service bus?
 * Background processing and Hangfire
 * 
 
