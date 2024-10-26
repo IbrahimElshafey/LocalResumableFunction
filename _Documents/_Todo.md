@@ -79,3 +79,10 @@
 	* 
 * Use Data access abstraction to support changing DB
 * Optimize wait table indexes to enable fast wait insertion
+
+* Support to stop/pause pushing calls for specific method
+* Support to push to multiple providers/services
+	* Pushing direct (to RF database)
+	* Pushing via HTTP/TCP
+	* Pushing to queues (RabbitMQ, Azure Service Bus, Mass Transit)
+	* Pushing to Kafka
