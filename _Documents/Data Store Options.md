@@ -1,6 +1,4 @@
 ﻿# Data Store Enhancements for (Pushed Calls,Waits, Logging, and States)
-* We should not use SQL servers or any commercial DB
-	* With current implementation we can use PostgreSQL, MySQL, MariaDB, Firebird but I didn't test them yet
 * I need database that
 	* Support EF
 	* Keeps hot data in memory
