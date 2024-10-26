@@ -42,6 +42,7 @@ public class MethodWaitEntity : WaitEntity
     [NotMapped]
     internal MethodData MethodData { get; set; }
 
+    //todo:remove unmapped props
     [NotMapped]
     public object Input { get; internal set; }
 

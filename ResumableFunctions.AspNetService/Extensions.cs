@@ -3,24 +3,22 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.Helpers;
-namespace ResumableFunctions.AspNetService
+namespace ResumableFunctions.MvcUi
 {
     public static class Extensions
     {
-        public static void AddResumableFunctions(this IMvcBuilder mvcBuilder, IResumableFunctionsSettings settings)
+        public static IMvcBuilder AddResumableFunctionsMvcUi(this IMvcBuilder mvcBuilder)
         {
             mvcBuilder
                 .AddApplicationPart(typeof(ResumableFunctionsController).Assembly)
                 .AddControllersAsServices();
             mvcBuilder.Services.AddRazorPages();
-            mvcBuilder.Services.AddResumableFunctionsCore(settings);
+            return mvcBuilder;
         }
 
 
-        public static void UseResumableFunctions(this WebApplication app)
+        public static void UseResumableFunctionsUi(this WebApplication app)
         {
-
-            CoreExtensions.UseResumableFunctions(app);
             app.UseHangfireDashboard();
             app.MapRazorPages();
             app.UseStaticFiles();

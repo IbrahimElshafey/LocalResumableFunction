@@ -25,27 +25,29 @@
     <None Include="$(MSBuildThisFileDirectory)Articles\Documentation_Plan.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\External Reading.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Aggregate Column Idea.md" />
-    <None Include="$(MSBuildThisFileDirectory)Publisher.md" />
-    <None Include="$(MSBuildThisFileDirectory)Features.md" />
+    <None Include="$(MSBuildThisFileDirectory)~Old\Publisher.md" />
+    <None Include="$(MSBuildThisFileDirectory)~Old\Features.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\Service Fabric.md" />
     <None Include="$(MSBuildThisFileDirectory)Testing.md" />
     <None Include="$(MSBuildThisFileDirectory)Reading and Ideas\MVC_Use.md" />
-    <None Include="$(MSBuildThisFileDirectory)Background_Cleaning_Job.md" />
+    <None Include="$(MSBuildThisFileDirectory)~Old\Background_Cleaning_Job.md" />
     <None Include="$(MSBuildThisFileDirectory)ThinkHow\Why not message queues.md" />
     <None Include="$(MSBuildThisFileDirectory)ThinkHow\RF Calls a Service.md" />
     <None Include="$(MSBuildThisFileDirectory)ThinkHow\اتصال متحقق.md" />
     <None Include="$(MSBuildThisFileDirectory)UsefulSnippet\AddEnternalProps.csx" />
     <None Include="$(MSBuildThisFileDirectory)Versioning-Migration.md" />
-    <None Include="$(MSBuildThisFileDirectory)Concurrency.md" />
+    <None Include="$(MSBuildThisFileDirectory)~Old\Concurrency.md" />
     <None Include="$(MSBuildThisFileDirectory)UI.md" />
     <None Include="$(MSBuildThisFileDirectory)Roslyn_Analyzer.md" />
-    <None Include="$(MSBuildThisFileDirectory)Refactor_and_Enhancements.md" />
+    <None Include="$(MSBuildThisFileDirectory)~Old\Refactor_and_Enhancements.md" />
     <None Include="$(MSBuildThisFileDirectory)ThinkHow\Other_Wait_Types.md" />
     <None Include="$(MSBuildThisFileDirectory)README.md" />
     <None Include="$(MSBuildThisFileDirectory)Data Store Options.md" />
+    <None Include="$(MSBuildThisFileDirectory)~Old\How_It_works.md" />
     <None Include="$(MSBuildThisFileDirectory)_Todo.md" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="$(MSBuildThisFileDirectory)GitHubDocs\IMG\" />
+    <Folder Include="$(MSBuildThisFileDirectory)~Old\" />
   </ItemGroup>
 </Project>

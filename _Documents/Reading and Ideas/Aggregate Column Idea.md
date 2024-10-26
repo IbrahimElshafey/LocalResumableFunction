@@ -1,4 +1,5 @@
-﻿# Aggregate Column Feature
+﻿I think same can be handled by other alredy existing solutions.
+# Aggregate Column Feature
 * Create table [AggregateDefinition] with columns
 	* EntityName (sush as Orders)
 	* AggregateName (such as FailedOrdersCount,TotalPayments)

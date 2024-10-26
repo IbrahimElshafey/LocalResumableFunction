@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 namespace ResumableFunctions.Handler.Helpers
 {
     //todo: make this as aspect [BackgroundJob(errorMsg)] [BackgroundJobWithDistributedLock(lockName,errorMsg)]
+    //todo: refactor this to be interface that can be injected
     public class BackgroundJobExecutor
     {
         private readonly IDistributedLockProvider _lockProvider;

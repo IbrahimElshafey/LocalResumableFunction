@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using ResumableFunctions.AspNetService.DisplayObject;
 using ResumableFunctions.Handler.UiService;
+using ResumableFunctions.MvcUi.DisplayObject;
 
-namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
+namespace ResumableFunctions.MvcUi.Areas.RF.Controllers
 {
     [Area("RF")]
     public class HomeController : Controller
@@ -60,15 +60,17 @@ namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
         }
 
         [ActionName(PartialNames.ResumableFunctions)]
-        public async Task<IActionResult> GetResumableFunctions(int serviceId = -1, string functionName = null)
+        public async Task<IActionResult> GetResumableFunctions(
+            int serviceId = -1, 
+            string searchTerm = null)
         {
             return PartialView(
                 PartialNames.ResumableFunctions,
                 new FunctionsViewModel
                 {
-                    Functions = await _uiService.GetFunctionsSummary(serviceId, functionName),
+                    Functions = await _uiService.GetFunctionsSummary(serviceId, searchTerm),
                     SelectedService = serviceId,
-                    SearchTerm = functionName,
+                    SearchTerm = searchTerm,
                     Services = await _uiService.GetServices(),
                 });
         }

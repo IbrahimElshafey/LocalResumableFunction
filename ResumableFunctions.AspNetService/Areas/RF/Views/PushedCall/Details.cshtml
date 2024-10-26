@@ -45,8 +45,14 @@
                         <li>
                             <b>In Function Instance: </b>
                             <a target="_blank" href="~/RF/FunctionInstances/FunctionInstance?instanceId=@wait.InstanceId" class="w3-text-blue">
-                                @wait.FunctionName #@wait.InstanceId
+                                @wait.FunctionName 
                             </a>
+                        </li>
+                        <li>
+                            <b>ID: </b>
+                            <span>
+                                InstanceId:@wait.InstanceId ,FunctionId:@wait.FunctionId
+                            </span>
                         </li>
                         <li><b>Match If: </b>@wait.MatchExpression</li>
                     </ul>

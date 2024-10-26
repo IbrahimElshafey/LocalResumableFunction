@@ -1,7 +1,7 @@
 ﻿using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.UiService.InOuts;
 
-namespace ResumableFunctions.AspNetService.DisplayObject
+namespace ResumableFunctions.MvcUi.DisplayObject
 {
     public class FunctionInstancesModel
     {

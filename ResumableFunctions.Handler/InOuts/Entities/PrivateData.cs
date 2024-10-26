@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.Handler.InOuts.Entities.EntityBehaviour;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;
 public class PrivateData : IEntity<long>, IEntityWithUpdate, IAfterChangesSaved, IBeforeSaveEntity

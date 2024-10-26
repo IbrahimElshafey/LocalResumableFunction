@@ -1,7 +1,7 @@
 ﻿using FastExpressionCompiler;
 using System.Linq.Expressions;
 
-namespace ResumableFunctions.Handler.Expressions;
+namespace ResumableFunctions.Handler.InOuts;
 
 public class MatchExpressionParts
 {

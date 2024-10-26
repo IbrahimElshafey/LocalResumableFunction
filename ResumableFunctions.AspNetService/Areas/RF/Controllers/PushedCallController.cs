@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ResumableFunctions.Handler.UiService;
 
-namespace ResumableFunctions.AspNetService.Areas.RF.Controllers
+namespace ResumableFunctions.MvcUi.Areas.RF.Controllers
 {
     [Area("RF")]
     public class PushedCallController : Controller

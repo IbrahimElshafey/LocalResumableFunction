@@ -1,5 +1,6 @@
-using ResumableFunctions.AspNetService;
 using ResumableFunctions.Handler.Core;
+using ResumableFunctions.Handler.Helpers;
+using ResumableFunctions.MvcUi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,16 +11,17 @@ var settings =
 //settings.CleanDbSettings.CompletedInstanceRetention = TimeSpan.FromSeconds(3);
 //settings.CleanDbSettings.DeactivatedWaitTemplateRetention = TimeSpan.FromSeconds(3);
 //settings.CleanDbSettings.PushedCallRetention = TimeSpan.FromSeconds(3);
+builder.Services.AddResumableFunctionsCore(settings);
 builder.Services
     .AddControllers()
-    .AddResumableFunctions(settings);
+    .AddResumableFunctionsMvcUi();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
-app.UseResumableFunctions();
+app.Services.UseResumableFunctions();
+app.UseResumableFunctionsUi();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

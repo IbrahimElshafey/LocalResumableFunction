@@ -16,6 +16,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="DataAccess\Entities\**" />
+	  <EmbeddedResource Remove="DataAccess\Entities\**" />
+	  <None Remove="DataAccess\Entities\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Remove="FodyWeavers.xml" />
 	</ItemGroup>
 
@@ -46,10 +52,6 @@
 		<PackageReference Include="Hangfire.SqlServer" Version="1.8.*" />
 		<PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
 		<PackageReference Include="Nuqleon.Linq.Expressions.Bonsai.Serialization" Version="1.0.0-beta.24" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="DataAccess\Entities\" />
 	</ItemGroup>
 
 </Project>

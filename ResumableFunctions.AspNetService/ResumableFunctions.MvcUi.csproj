@@ -5,7 +5,7 @@
     <!--<Nullable>enable</Nullable>-->
     <ImplicitUsings>enable</ImplicitUsings>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Title>$(AssemblyName)</Title>
     <Authors>ibrahim.ragab.net</Authors>
     <RepositoryUrl>https://github.com/IbrahimElshafey/ResumableFunctions</RepositoryUrl>

@@ -1,4 +1,5 @@
 ﻿using MessagePack;
+using ResumableFunctions.Handler.InOuts.Entities.EntityBehaviour;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ResumableFunctions.Handler.InOuts.Entities;

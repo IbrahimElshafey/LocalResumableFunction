@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using ResumableFunctions.Handler.Core.Abstraction;
 using ResumableFunctions.Handler.DataAccess.Abstraction;
-using ResumableFunctions.Handler.Expressions;
+using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
 
 namespace ResumableFunctions.Handler.DataAccess;
@@ -11,11 +11,14 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo
 {
     private readonly WaitsDataContext _context;
     private readonly IResumableFunctionsSettings _settings;
+    private IServiceProvider _serviceProvider;
 
-    public WaitTemplatesRepo(WaitsDataContext context, IResumableFunctionsSettings settings)
+    public WaitTemplatesRepo(IServiceProvider serviceProvider, WaitsDataContext context, IResumableFunctionsSettings settings)
     {
         _settings = settings;
         _context = context;
+        _serviceProvider = serviceProvider;
+        _serviceProvider.GetService<WaitsDataContext>();
     }
 
     public async Task<WaitTemplate> AddNewTemplate(byte[] hashResult, MethodWaitEntity methodWait)
@@ -119,6 +122,8 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo
         MatchExpressionParts matchExpressionParts
         )
     {
+        var scope = _serviceProvider.CreateScope();
+        var tempContext = scope.ServiceProvider.GetService<WaitsDataContext>();
         var waitTemplate = new WaitTemplate
         {
             MethodId = methodId,
@@ -139,9 +144,11 @@ internal class WaitTemplatesRepo : IWaitTemplatesRepo
             waitTemplate.IsMandatoryPartFullMatch = matchExpressionParts.IsMandatoryPartFullMatch;
         }
 
-        _context.WaitTemplates.Add(waitTemplate);
+        tempContext.WaitTemplates.Add(waitTemplate);
 
-        await _context.SaveChangesAsync();
+        await tempContext.SaveChangesAsync();
+        //reattach to current context
+        _context.Attach(waitTemplate);
         return waitTemplate;
     }
 }

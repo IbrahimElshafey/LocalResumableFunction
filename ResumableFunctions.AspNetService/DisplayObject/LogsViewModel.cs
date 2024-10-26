@@ -1,6 +1,6 @@
 ﻿using ResumableFunctions.Handler.InOuts.Entities;
 
-namespace ResumableFunctions.AspNetService.DisplayObject
+namespace ResumableFunctions.MvcUi.DisplayObject
 {
     public class LogsViewModel
     {

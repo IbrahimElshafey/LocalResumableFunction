@@ -21,9 +21,9 @@ function searchFunctions() {
     var serviceId = document.getElementById("selectedService").value;
     var functionSearchTerm = document.getElementById("functionSearchTerm").value;
     setMainPageView(
-        `/RF/Home/_ResumableFunctionsList?serviceId=${serviceId}&functionName=${functionSearchTerm}`, title(1));
+        `/RF/Home/_ResumableFunctionsList?serviceId=${serviceId}&searchTerm=${functionSearchTerm}`, title(1));
     setOrUpdateHashParameter('serviceId', serviceId);
-    setOrUpdateHashParameter('functionName', functionSearchTerm);
+    setOrUpdateHashParameter('searchTerm', functionSearchTerm);
 }
 
 function resetFunctionsView() {
@@ -69,3 +69,5 @@ function resetLogs() {
     setMainPageView(`/RF/Home/_LatestLogs`, title(4));
     window.location.hash = `#view=4`;
 }
+
+

@@ -1914,8 +1914,24 @@
             if (isMenuElement && isMenuElement.value)
                 openViewPart(hashParts().view);
             JsonObjectRender();
+            // bindEnterToSearch();
         });
 
+        // function bindEnterToSearch() {
+        //     // Get the input field
+        //     var input = document.getElementById("myInput");
+
+        //     // Execute a function when the user presses a key on the keyboard
+        //     input.addEventListener("keypress", function (event) {
+        //         // If the user presses the "Enter" key on the keyboard
+        //         if (event.key === "Enter") {
+        //             // Cancel the default action, if needed
+        //             event.preventDefault();
+        //             // Trigger the button element with a click
+        //             document.getElementById("myBtn").click();
+        //         }
+        //     });
+        // }
         function setMainPageView(viewUrl,title){
             document.title = title;
             fetch(viewUrl)
@@ -1990,7 +2006,7 @@
           }
         }
     </script>
-    <script src="/_content/ResumableFunctions.AspNetService/rf_js/rf.js"></script>
+    <script src="/_content/ResumableFunctions.MvcUi/rf_js/rf.js"></script>
 </head>
 <body class="w3-light-grey">
 

@@ -53,7 +53,7 @@ namespace ResumableFunctions.Handler.UiService
                 .ToDictionaryAsync(x => x.ServiceId);
 
             var scanStatus =
-                await _context.Locks
+                await _context.ScanLocks
                 .Select(x => x.ServiceId)
                 .Distinct()
                 .ToListAsync();
@@ -104,15 +104,17 @@ namespace ResumableFunctions.Handler.UiService
                 .ToListAsync();
         }
 
-        public async Task<List<FunctionInfo>> GetFunctionsSummary(int serviceId = -1, string functionName = null)
+        public async Task<List<FunctionInfo>> GetFunctionsSummary(int serviceId = -1, string searchTerm = null)
         {
             var query = _context.ResumableFunctionIdentifiers.AsNoTracking();
 
             if (serviceId != -1)
                 query = query.Where(x => x.ServiceId == serviceId);
 
-            if (functionName != null)
-                query = query.Where(x => x.RF_MethodUrn.Contains(functionName));
+            if (int.TryParse(searchTerm, out var id))
+                query = query.Where(x => x.Id == id);
+            else if (searchTerm != null)
+                query = query.Where(x => x.RF_MethodUrn.Contains(searchTerm));
 
             return await query
               .Include(x => x.ActiveFunctionsStates)
@@ -162,7 +164,10 @@ namespace ResumableFunctions.Handler.UiService
                 methodGroupsQuery =
                     methodGroupsQuery.Where(x => methodGroupsToInclude.Contains(x.Group.Id));
             }
-            if (searchTerm != null)
+
+            if(int.TryParse(searchTerm, out var id))
+                methodGroupsQuery = methodGroupsQuery.Where(x => x.Group.Id == id);
+            else if (searchTerm != null)
                 methodGroupsQuery = methodGroupsQuery.Where(x => x.Group.MethodGroupUrn.Contains(searchTerm));
 
             var join =
@@ -268,6 +273,7 @@ namespace ResumableFunctions.Handler.UiService
                     wait.Name,
                     wait.Status,
                     wait.RequestedByFunction.RF_MethodUrn,
+                    wait.RequestedByFunctionId,
                     wait.FunctionStateId,
                     template.MatchExpressionValue,
                     template.AfterMatchAction,
@@ -284,6 +290,7 @@ namespace ResumableFunctions.Handler.UiService
                     wait.Name,
                     wait.Id,
                     wait.Status,
+                    wait.RequestedByFunctionId,
                     wait.RF_MethodUrn,
                     wait.FunctionStateId,
                     callMatch.Created,
@@ -384,6 +391,7 @@ namespace ResumableFunctions.Handler.UiService
                         x.methodWait.Name,
                         x.methodWait.Id,
                         x.methodWait.Status,
+                        x.methodWait.RequestedByFunctionId,
                         x.RF_MethodUrn,
                         x.methodWait.FunctionStateId,
                         x.methodWait.Created,

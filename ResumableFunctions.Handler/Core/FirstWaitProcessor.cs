@@ -20,7 +20,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly IBackgroundProcess _backgroundJobClient;
     private readonly ILogsRepo _logsRepo;
-    private readonly ILockStateRepo _scanStateRepo;
+    private readonly IScanLocksRepo _scanStateRepo;
 
     public FirstWaitProcessor(
         ILogger<FirstWaitProcessor> logger,
@@ -32,7 +32,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         IBackgroundProcess backgroundJobClient,
         ILogsRepo logsRepo,
         IWaitTemplatesRepo templatesRepo,
-        ILockStateRepo scanStateRepo)
+        IScanLocksRepo scanStateRepo)
     {
         _logger = logger;
         _context = context;
@@ -103,14 +103,14 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
     }
 
-    [DisplayName("Register First Wait for Function [{0}]")]
-    public async Task RegisterFirstWait(int functionId)
+    [DisplayName("Register First Wait for Function [{0},{1}]")]
+    public async Task RegisterFirstWait(int functionId, string methodUrn)
     {
         MethodInfo resumableFunction = null;
         var functionName = "";
-        string lockName = $"FirstWaitProcessor_RegisterFirstWait_{functionId}";
-        int scanStateId = -1;
-        scanStateId = await _scanStateRepo.AddLockState(lockName);
+        string firstWaitLock = $"FirstWaitProcessor_RegisterFirstWait_{functionId}";
+        int firstWaitLockId = -1;
+        firstWaitLockId = await _scanStateRepo.AddLock(firstWaitLock);
         try
         {
             await _backgroundJobExecutor.ExecuteWithLock(
@@ -120,6 +120,7 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
                 try
                 {
                     var resumableFunctionId = await _methodIdentifierRepo.GetResumableFunction(functionId);
+                    methodUrn = resumableFunctionId.RF_MethodUrn;
                     resumableFunction = resumableFunctionId.MethodInfo;
                     functionName = resumableFunction.Name;
                     _logger.LogInformation($"Trying Start Resumable Function [{resumableFunctionId.RF_MethodUrn}] And Register First Wait");
@@ -150,8 +151,8 @@ internal class FirstWaitProcessor : IFirstWaitProcessor
         }
         finally
         {
-            if (scanStateId > -1)
-                await _scanStateRepo.RemoveLockState(scanStateId);
+            if (firstWaitLockId > -1)
+                await _scanStateRepo.RemoveLock(firstWaitLockId);
         }
         string ErrorMsg() => $"Error when try to register first wait for function [{functionName}:{functionId}]";
     }

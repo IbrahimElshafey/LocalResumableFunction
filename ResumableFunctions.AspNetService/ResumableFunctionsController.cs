@@ -5,12 +5,13 @@ using ResumableFunctions.Handler.Helpers;
 using ResumableFunctions.Handler.InOuts;
 using ResumableFunctions.Handler.InOuts.Entities;
 using System.Buffers;
+using System.Text;
 
-namespace ResumableFunctions.AspNetService
+namespace ResumableFunctions.MvcUi
 {
     [ApiController]
     [Route(Constants.ResumableFunctionsControllerUrl)]
-    //[ApiExplorerSettings(IgnoreApi = true)]
+    [ApiExplorerSettings(IgnoreApi = true)]
     public class ResumableFunctionsController : ControllerBase
     {
         public readonly ICallPusher _callPusher;
@@ -32,11 +33,23 @@ namespace ResumableFunctions.AspNetService
 
 
 
-
+        //todo:error in get reponse
         [HttpPost(Constants.ServiceProcessPushedCallAction)]
-        public int ServiceProcessPushedCall(CallEffection callEffection)
+        public async Task<int> ServiceProcessPushedCallAsync(ImpactedFunctionsIds callEffection)
         {
-            _serviceQueue.ServiceProcessPushedCall(callEffection);
+            using (StreamReader reader = new StreamReader(Request.Body, Encoding.UTF8))
+            {
+                string requestBody = await reader.ReadToEndAsync();
+                // Now you have the request body as a string
+                // You can log it, parse it, or process it as needed
+
+                // Example: log the request body
+                Console.WriteLine(requestBody);
+
+                // Process the requestBody here as needed
+            }
+            //todo:validate object
+            await _serviceQueue.ProcessPushedCall(callEffection);
             return 1;
         }
 
@@ -51,7 +64,12 @@ namespace ResumableFunctions.AspNetService
         }
 
         [HttpPost(Constants.ExternalCallAction + "Json")]
-        public async Task<int> ExternalCallJson(ExternalCallArgs externalCall)
+        public Task<int> ExternalCallJson(ExternalCallArgs externalCall)
+        {
+            return ReceiveExternalCall(externalCall);
+        }
+
+        public async Task<int> ReceiveExternalCall(ExternalCallArgs externalCall)
         {
             try
             {

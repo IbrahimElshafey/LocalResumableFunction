@@ -1,3 +1,3 @@
-﻿namespace ResumableFunctions.AspNetService.DisplayObject;
+﻿namespace ResumableFunctions.MvcUi.DisplayObject;
 
 public record MainMenuItem(string DisplayName, string PartialViewUrl);

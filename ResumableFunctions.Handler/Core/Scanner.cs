@@ -20,11 +20,10 @@ internal class Scanner
     private readonly IWaitsRepo _waitsRepository;
     private readonly IFirstWaitProcessor _firstWaitProcessor;
     private readonly IBackgroundProcess _backgroundJobClient;
-    private readonly string _currentServiceName;
     private readonly BackgroundJobExecutor _backgroundJobExecutor;
     private readonly ILogsRepo _logsRepo;
     private readonly IServiceRepo _serviceRepo;
-    private readonly ILockStateRepo _scanStateRepo;
+    private readonly IScanLocksRepo _scanStateRepo;
     private HashSet<string> _functionsUrns = new HashSet<string>();
 
     public Scanner(
@@ -37,7 +36,7 @@ internal class Scanner
         IWaitsRepo waitsRepository,
         BackgroundJobExecutor backgroundJobExecutor,
         IServiceRepo serviceRepo,
-        ILockStateRepo scanStateRepo,
+        IScanLocksRepo scanStateRepo,
         ILogsRepo logsRepo)
     {
         _logger = logger;
@@ -47,7 +46,6 @@ internal class Scanner
         _context = context;
         _backgroundJobClient = backgroundJobClient;
         _waitsRepository = waitsRepository;
-        _currentServiceName = Assembly.GetEntryAssembly().GetName().Name;
         _backgroundJobExecutor = backgroundJobExecutor;
         _serviceRepo = serviceRepo;
         _scanStateRepo = scanStateRepo;
@@ -57,13 +55,13 @@ internal class Scanner
     [DisplayName("Start Scanning Current Service")]
     public async Task Start()
     {
-        string lockName = $"ScanningService_{_currentServiceName}";
+        string scanningServiceLock = $"ScanningService_{_settings.CurrentServiceName}";
         int scanStateId = -1;
         try
         {
-            scanStateId = await _scanStateRepo.AddLockState(lockName);
+            scanStateId = await _scanStateRepo.AddLock(scanningServiceLock);
             await _backgroundJobExecutor.ExecuteWithLock(
-                lockName,
+                scanningServiceLock,
                 async () =>
                 {
                     await RegisterMethods(GetAssembliesToScan());
@@ -72,12 +70,12 @@ internal class Scanner
 
                     await _context.CommitAsync();
                 },
-                $"Error when scan [{_currentServiceName}]");
+                $"Error when scan [{_settings.CurrentServiceName}]");
         }
         finally
         {
             if (scanStateId > -1)
-                await _scanStateRepo.RemoveLockState(scanStateId);
+                await _scanStateRepo.RemoveLock(scanStateId);
         }
     }
 
@@ -87,7 +85,7 @@ internal class Scanner
         _logger.LogInformation($"Get assemblies to scan in directory [{currentFolder}].");
         var assemblyPaths = new List<string>
             {
-                $"{currentFolder}{_currentServiceName}.dll"
+                $"{currentFolder}{_settings.CurrentServiceName}.dll"
             };
         if (_settings.DllsToScan != null)
             assemblyPaths.AddRange(_settings.DllsToScan.Select(x => $"{currentFolder}{x}.dll"));
@@ -109,7 +107,7 @@ internal class Scanner
 
             if (info.RegisterFirstWait)
                 _backgroundJobClient.Enqueue(
-                              () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id));
+                              () => _firstWaitProcessor.RegisterFirstWait(resumableFunctionIdentifier.Id, resumableFunctionIdentifier.RF_MethodUrn));
             if (info.RemoveFirstWait)
                 await _waitsRepository.RemoveFirstWaitIfExist(resumableFunctionIdentifier.Id);
         }
@@ -151,7 +149,7 @@ internal class Scanner
                 var dateBeforeScan = DateTime.UtcNow;
                 if (await AssemblyNeedScan(assemblyPath) is false) continue;
 
-                await _scanStateRepo.ResetServiceLockStates();
+                await _scanStateRepo.ResetServiceLocks();
 
 
                 var assembly = Assembly.LoadFile(assemblyPath);
@@ -202,7 +200,7 @@ internal class Scanner
                 assembly.GetReferencedAssemblies().Any(x => new[]
                 {
                 "ResumableFunctions.Handler",
-                "ResumableFunctions.AspNetService"
+                "ResumableFunctions.MvcUi"
                 }.Contains(x.Name));
 
             if (isReferenceResumableFunction is false)
