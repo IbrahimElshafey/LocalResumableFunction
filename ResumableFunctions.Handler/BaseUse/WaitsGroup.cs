@@ -41,6 +41,7 @@ namespace ResumableFunctions.Handler.BaseUse
             return this;
         }
 
+        public Wait MatchFirst() => MatchAny();
         public Wait MatchAny()
         {
             WaitsGroupEntity.WaitType = WaitType.GroupWaitFirst;

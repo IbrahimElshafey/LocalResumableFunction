@@ -49,7 +49,7 @@ namespace Tests
         {
             int localCounter = 10;
             yield return
-                WaitTime(TimeSpan.FromDays(2), "Wait Two Days")
+                WaitDelay(TimeSpan.FromDays(2), "Wait Two Days")
                 .AfterMatch((x, _) =>
                 {
                     TimeWaitId = x.TimeMatchId;

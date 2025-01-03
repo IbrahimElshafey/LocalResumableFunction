@@ -22,7 +22,7 @@ public class TestTimeExample : ProjectApprovalExample
                 WaitMethod<ApprovalDecision, bool>(ManagerOneApproveProject)
                     .MatchIf((input, output) => input.ProjectId == CurrentProject.Id)
                     .AfterMatch((input, output) => ManagerOneApproval = output),
-                WaitTime(TimeSpan.FromDays(2), "Two Days")
+                WaitDelay(TimeSpan.FromDays(2), "Two Days")
                     .AfterMatch((_, _) => TimerMatched = true)
             }
 ,

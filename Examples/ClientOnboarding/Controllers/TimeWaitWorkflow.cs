@@ -10,7 +10,7 @@ public class TimeWaitWorkflow : ResumableFunctionsContainer
     public async IAsyncEnumerable<Wait> TestTimeWaitAtStart()
     {
 
-        yield return WaitTime(TimeSpan.FromDays(1), "one day");
+        yield return WaitDelay(TimeSpan.FromDays(1), "one day");
         Console.WriteLine("Time wait at start matched.");
     }
 

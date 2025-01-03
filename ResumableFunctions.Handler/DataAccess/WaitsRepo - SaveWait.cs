@@ -17,41 +17,43 @@ internal partial class WaitsRepo
     /// </summary>
     public async Task<bool> SaveWait(WaitEntity newWait)
     {
+        _logger.LogInformation($"Starting SaveWait for {newWait.Name} requested by {newWait.RequestedByFunction}");
+
         if (newWait.ValidateWaitRequest() is false)
         {
             var message =
                 $"Error when validate the requested wait [{newWait.Name}] " +
                 $"that requested by function [{newWait.RequestedByFunction}].";
             _logger.LogError(message);
-            //todo: why continue and not stop here??
-            //if (!newWait.IsFirst)
-            //{
-            //    await _context.SaveChangesAsync();
-            //    return false;
-            //}
         }
 
         switch (newWait)
         {
             case MethodWaitEntity methodWait:
+                _logger.LogInformation($"Saving MethodWaitEntity for {newWait.Name}");
                 await SaveMethodWait(methodWait);
                 break;
             case WaitsGroupEntity manyWaits:
+                _logger.LogInformation($"Saving WaitsGroupEntity for {newWait.Name}");
                 await SaveWaitsGroup(manyWaits);
                 break;
             case FunctionWaitEntity functionWait:
+                _logger.LogInformation($"Saving FunctionWaitEntity for {newWait.Name}");
                 await SaveFunctionWait(functionWait);
                 break;
             case TimeWaitEntity timeWait:
+                _logger.LogInformation($"Handling TimeWaitEntity for {newWait.Name}");
                 await HandleTimeWaitRequest(timeWait);
                 break;
         }
 
+        _logger.LogInformation($"Finished SaveWait for {newWait.Name}");
         return false;
     }
 
     public async Task<MethodWaitEntity> GetMethodWait(long waitId, params Expression<Func<MethodWaitEntity, object>>[] includes)
     {
+        _logger.LogInformation($"Getting MethodWaitEntity with ID {waitId}");
         var query = _context.MethodWaits.AsQueryable();
         foreach (var include in includes)
         {
@@ -62,10 +64,9 @@ internal partial class WaitsRepo
             .FirstOrDefaultAsync(x => x.Id == waitId);
     }
 
-
-
     private async Task SaveMethodWait(MethodWaitEntity methodWait)
     {
+        _logger.LogInformation($"Saving MethodWaitEntity for {methodWait.Name}");
         var methodId = await _methodIdsRepo.GetId(methodWait);
         var funcId = methodWait.RequestedByFunctionId;
         var expressionsHash = new ExpressionsHashCalculator(methodWait.MatchExpression, methodWait.AfterMatchAction, methodWait.CancelMethodAction).HashValue;
@@ -93,10 +94,9 @@ internal partial class WaitsRepo
         }
     }
 
-
-
     private async Task SaveWaitsGroup(WaitsGroupEntity waitsGroup)
     {
+        _logger.LogInformation($"Saving WaitsGroupEntity for {waitsGroup.Name}");
         for (var index = 0; index < waitsGroup.ChildWaits.Count; index++)
         {
             var childWait = waitsGroup.ChildWaits[index];
@@ -114,6 +114,7 @@ internal partial class WaitsRepo
 
     private async Task SaveFunctionWait(FunctionWaitEntity functionWait)
     {
+        _logger.LogInformation($"Saving FunctionWaitEntity for {functionWait.Name}");
         try
         {
             var functionRunner =
@@ -144,12 +145,14 @@ internal partial class WaitsRepo
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, $"Error when saving function wait for {functionWait.Name}");
             await _logsRepo.AddErrorLog(ex, "When save function wait", StatusCodes.WaitValidation);
         }
     }
 
     private async Task HandleTimeWaitRequest(TimeWaitEntity timeWait)
     {
+        _logger.LogInformation($"Handling TimeWaitEntity for {timeWait.Name}");
         var timeWaitCallbackMethod = timeWait.TimeWaitMethod;
 
         var methodId = await _methodIdsRepo.GetId(timeWaitCallbackMethod);
@@ -172,12 +175,12 @@ internal partial class WaitsRepo
         _context.Entry(timeWait).State = EntityState.Detached;
     }
 
-
     /// <summary>
     /// Add waits from leefs to roots
     /// </summary>
     public Task AddWait(WaitEntity wait)
     {
+        _logger.LogInformation($"Adding WaitEntity for {wait.Name}");
         var isTracked = _context.Waits.Local.Contains(wait);
         var isAddStatus = _context.Entry(wait).State == EntityState.Added;
         wait.OnAddWait();
@@ -191,7 +194,6 @@ internal partial class WaitsRepo
                 waitGroup.ChildWaits.RemoveAll(x => x is TimeWaitEntity);
                 break;
             case MethodWaitEntity { MethodToWaitId: > 0 } methodWait:
-                //Bug:I forgot why I added this??!!
                 methodWait.MethodToWait = null;
                 break;
         }
@@ -199,6 +201,4 @@ internal partial class WaitsRepo
         _context.Waits.Add(wait);
         return Task.CompletedTask;
     }
-
-
 }

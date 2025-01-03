@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ResumableFunctions.Handler.Expressions;
 
-public class ExpressionsHashCalculator : ExpressionVisitor
+public class ExpressionsHashCalculator
 {
     public byte[] HashValue { get; }
     public ExpressionsHashCalculator(
